@@ -1,9 +1,13 @@
 package model;
 
 public class Coupon {
+    private int id;
     private String title;
     private String description;
     private String validity;
+    private int restaurantId;
+    private boolean isActive;
+    private String createdAt;
 
     public Coupon() {}
 
@@ -35,5 +39,37 @@ public class Coupon {
 
     public void setValidity(String validity) {
         this.validity = validity;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(int restaurantId) {
+        this.restaurantId = restaurantId;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 }
