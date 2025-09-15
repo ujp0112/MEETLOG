@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+	id="WebApp_ID" version="4.0">
+
+	<display-name>MeetLog</display-name>
+
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+	<filter>
+        <filter-name>EncodingFilter</filter-name>
+        <filter-class>filter.EncodingFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>EncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+	<filter>
+        <filter-name>LoginFilter</filter-name>
+        <filter-class>filter.LoginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>LoginFilter</filter-name>
+        <url-pattern>/mypage/*</url-pattern>
+        <url-pattern>/column/write</url-pattern>
+        <url-pattern>/review/write</url-pattern>
+        </filter-mapping>
+
+	<servlet>
+		<servlet-name>mainController</servlet-name>
+		<servlet-class>controller.MainServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mainController</servlet-name>
+		<url-pattern>/main</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>loginController</servlet-name>
+		<servlet-class>controller.LoginServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>loginController</servlet-name>
+		<url-pattern>/login</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>logoutController</servlet-name>
+		<servlet-class>controller.LogoutServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>logoutController</servlet-name>
+		<url-pattern>/logout</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>restaurantController</servlet-name>
+		<servlet-class>controller.RestaurantServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>restaurantController</servlet-name>
+		<url-pattern>/restaurant/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>reviewController</servlet-name>
+		<servlet-class>controller.ReviewServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>reviewController</servlet-name>
+		<url-pattern>/review/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>columnController</servlet-name>
+		<servlet-class>controller.ColumnServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>columnController</servlet-name>
+		<url-pattern>/column/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>mypageController</servlet-name>
+		<servlet-class>controller.MypageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>mypageController</servlet-name>
+		<url-pattern>/mypage/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>eventController</servlet-name>
+		<servlet-class>controller.EventServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>eventController</servlet-name>
+		<url-pattern>/event/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>courseController</servlet-name>
+		<servlet-class>controller.CourseServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>courseController</servlet-name>
+		<url-pattern>/course/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>eventManagementController</servlet-name>
+		<servlet-class>controller.admin.EventManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>eventManagementController</servlet-name>
+		<url-pattern>/admin/event-management</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>courseManagementController</servlet-name>
+		<servlet-class>controller.admin.CourseManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>courseManagementController</servlet-name>
+		<url-pattern>/admin/course-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>courseReservationManagementController</servlet-name>
+		<servlet-class>controller.admin.CourseReservationManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>courseReservationManagementController</servlet-name>
+		<url-pattern>/admin/course-reservation-management</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>courseReviewManagementController</servlet-name>
+		<servlet-class>controller.admin.CourseReviewManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>courseReviewManagementController</servlet-name>
+		<url-pattern>/admin/course-review-management</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>courseStatisticsController</servlet-name>
+		<servlet-class>controller.admin.CourseStatisticsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>courseStatisticsController</servlet-name>
+		<url-pattern>/admin/course-statistics</url-pattern>
+	</servlet-mapping>
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/WEB-INF/views/error/404.jsp</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/WEB-INF/views/error/500.jsp</location>
+	</error-page>
+
+</web-app>
