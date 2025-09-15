@@ -16,7 +16,7 @@ import service.ColumnService;
 import service.RestaurantService;
 import service.ReviewService;
 
-//@WebServlet("/main")
+@WebServlet("/main")
 public class MainServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RestaurantService restaurantService = new RestaurantService();

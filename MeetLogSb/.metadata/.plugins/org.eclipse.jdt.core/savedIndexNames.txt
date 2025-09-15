@@ -1,1 +1,0 @@
-INDEX VERSION 1.132+C:\Users\ujp01\aaaaaaaaaaa\MeetLogSb\.metadata\.plugins\org.eclipse.jdt.core

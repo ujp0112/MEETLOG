@@ -119,7 +119,7 @@
                                                     </div>
                                                     <p class="text-slate-700">${review.content}</p>
                                                     <div class="flex items-center justify-between mt-3">
-                                                        <span class="text-sm text-slate-500"><fmt:formatDate value="${review.createdAt}" pattern="yyyy.MM.dd" /></span>
+                                                        <span class="text-sm text-slate-500">${review.createdAt}</span>
                                                         <button class="text-sky-600 hover:text-sky-700 text-sm">❤️ ${review.likes}</button>
                                                     </div>
                                                 </div>
@@ -127,6 +127,69 @@
                                         </c:when>
                                         <c:otherwise>
                                             <div class="text-center text-slate-500 py-8">아직 리뷰가 없습니다.</div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </section>
+
+                                <!-- 쿠폰 섹션 -->
+                                <section class="bg-white p-6 rounded-2xl shadow-lg">
+                                    <h2 class="text-2xl font-bold mb-4">🎫 쿠폰</h2>
+                                    <c:choose>
+                                        <c:when test="${not empty coupons}">
+                                            <div class="space-y-4">
+                                                <c:forEach var="coupon" items="${coupons}">
+                                                    <div class="border border-sky-200 rounded-lg p-4 bg-sky-50">
+                                                        <div class="flex items-center justify-between">
+                                                            <div>
+                                                                <h3 class="font-semibold text-slate-800">${coupon.title}</h3>
+                                                                <p class="text-sm text-slate-600">${coupon.description}</p>
+                                                                <p class="text-xs text-slate-500 mt-1">유효기간: ${coupon.expiryDate}</p>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <div class="text-lg font-bold text-sky-600">${coupon.discountValue}${coupon.discountType == 'PERCENTAGE' ? '%' : '원'}</div>
+                                                                <button class="mt-2 bg-sky-600 text-white px-3 py-1 rounded text-sm hover:bg-sky-700">
+                                                                    쿠폰 받기
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="text-center text-slate-500 py-8">사용 가능한 쿠폰이 없습니다.</div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </section>
+
+                                <!-- Q&A 섹션 -->
+                                <section class="bg-white p-6 rounded-2xl shadow-lg">
+                                    <h2 class="text-2xl font-bold mb-4">❓ Q&A</h2>
+                                    <c:choose>
+                                        <c:when test="${not empty qnas}">
+                                            <div class="space-y-4">
+                                                <c:forEach var="qna" items="${qnas}">
+                                                    <div class="border border-slate-200 rounded-lg p-4">
+                                                        <div class="mb-3">
+                                                            <div class="flex items-center mb-2">
+                                                                <span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-sm">Q</span>
+                                                                <span class="ml-2 text-sm text-slate-500">${qna.isOwner ? '사장님' : '고객'}</span>
+                                                            </div>
+                                                            <p class="text-slate-800">${qna.question}</p>
+                                                        </div>
+                                                        <div class="border-t border-slate-100 pt-3">
+                                                            <div class="flex items-center mb-2">
+                                                                <span class="bg-sky-100 text-sky-700 px-2 py-1 rounded text-sm">A</span>
+                                                                <span class="ml-2 text-sm text-slate-500">사장님</span>
+                                                            </div>
+                                                            <p class="text-slate-800">${qna.answer}</p>
+                                                        </div>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="text-center text-slate-500 py-8">등록된 Q&A가 없습니다.</div>
                                         </c:otherwise>
                                     </c:choose>
                                 </section>

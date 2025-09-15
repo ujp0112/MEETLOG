@@ -84,7 +84,7 @@ to {
 			<section class="bg-white p-6 rounded-xl my-12 shadow-md">
 				<h2 class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기
 					🔎</h2>
-				<form "${pageContext.request.contextPath}.do/search" method="get"
+				<form action="${pageContext.request.contextPath}/restaurant/search" method="get"
 					class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 items-end">
 					<div class="col-span-2 lg:col-span-2">
 						<label class="block text-sm font-medium text-slate-700">키워드</label>
@@ -179,8 +179,7 @@ to {
 										<div>
 											<h4 class="font-semibold">${column.author}</h4>
 											<p class="text-sm text-slate-500">
-												<fmt:formatDate value="${column.createdAt}"
-													pattern="yyyy.MM.dd" />
+												${column.createdAt}
 											</p>
 										</div>
 									</div>

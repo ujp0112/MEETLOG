@@ -26,6 +26,13 @@
 		<typeAlias type="model.CourseStatisticsData" alias="CourseStatisticsData" />
 		<typeAlias type="model.PopularCourse" alias="PopularCourse" />
 		<typeAlias type="model.MonthlyReservation" alias="MonthlyReservation" />
+		
+		<!-- 새로운 모델 클래스들 -->
+		<typeAlias type="model.Coupon" alias="Coupon" />
+		<typeAlias type="model.News" alias="News" />
+		<typeAlias type="model.QnA" alias="QnA" />
+		<typeAlias type="model.DetailedRatings" alias="DetailedRatings" />
+		<typeAlias type="model.RatingDistribution" alias="RatingDistribution" />
 	</typeAliases>
 
 	<typeHandlers>
@@ -39,7 +46,7 @@
 				<property name="driver" value="org.mariadb.jdbc.Driver" />
 				<property name="url" value="jdbc:mariadb://localhost:3306/meetlog?characterEncoding=UTF-8" />
 				<property name="username" value="root" />
-				<property name="password" value="7564" />
+				<property name="password" value="789456" />
 			</dataSource>
 		</environment>
 	</environments>
@@ -59,5 +66,11 @@
         <mapper resource="mappers/CourseReservationManagementMapper.xml" />
         <mapper resource="mappers/CourseReviewManagementMapper.xml" />
 		<mapper resource="mappers/CourseStatisticsMapper.xml" />
+		
+		<!-- 새로운 매퍼들 -->
+		<mapper resource="mappers/CouponMapper.xml" />
+		<mapper resource="mappers/NewsMapper.xml" />
+		<mapper resource="mappers/QnAMapper.xml" />
+		<mapper resource="mappers/RatingMapper.xml" />
 	</mappers>
 </configuration>
