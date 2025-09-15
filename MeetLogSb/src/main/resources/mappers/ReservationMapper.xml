@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ReservationDAO">
+    <resultMap id="reservationResultMap" type="Reservation" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="restaurantName" column="restaurant_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="reservationTime" column="reservation_time"/>
+        <result property="partySize" column="party_size"/>
+        <result property="specialRequests" column="special_requests"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findById" parameterType="int" resultMap="reservationResultMap">
+        SELECT * FROM reservations WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="int" resultMap="reservationResultMap">
+        SELECT * FROM reservations WHERE user_id = #{userId} ORDER BY reservation_time DESC
+    </select>
+
+    <select id="findByRestaurantId" parameterType="int" resultMap="reservationResultMap">
+        SELECT * FROM reservations WHERE restaurant_id = #{restaurantId} ORDER BY reservation_time ASC
+    </select>
+
+    <insert id="insert" parameterType="Reservation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservations (restaurant_id, user_id, restaurant_name, user_name, reservation_time, 
+        party_size, status, special_requests, contact_phone, created_at, updated_at)
+        VALUES (#{restaurantId}, #{userId}, #{restaurantName}, #{userName}, #{reservationTime}, 
+        #{partySize}, #{status}, #{specialRequests}, #{contactPhone}, NOW(), NOW())
+    </insert>
+
+    <update id="update" parameterType="Reservation">
+        UPDATE reservations SET 
+            reservation_time = #{reservationTime}, 
+            party_size = #{partySize}, 
+            status = #{status}, 
+            special_requests = #{specialRequests}, 
+            contact_phone = #{contactPhone}, 
+            updated_at = NOW() 
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE reservations SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+</mapper>
