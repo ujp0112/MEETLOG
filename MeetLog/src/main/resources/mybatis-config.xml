@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+
+	<typeAliases>
+		<typeAlias type="model.User" alias="User" />
+		<typeAlias type="model.Restaurant" alias="Restaurant" />
+		<typeAlias type="model.Review" alias="Review" />
+		<typeAlias type="model.Column" alias="Column" />
+		<typeAlias type="model.Reservation" alias="Reservation" />
+		<typeAlias type="model.Menu" alias="Menu" />
+
+        <typeAlias type="model.Event" alias="Event" />
+
+        <typeAlias type="model.AdminEvent" alias="AdminEvent" />
+        <typeAlias type="model.AdminCourse" alias="AdminCourse" />
+        <typeAlias type="model.AdminCourseReservation" alias="AdminCourseReservation" />
+        <typeAlias type="model.AdminCourseReview" alias="AdminCourseReview" />
+
+		<typeAlias type="model.Course" alias="Course" />
+		<typeAlias type="model.CourseStatisticsData" alias="CourseStatisticsData" />
+		<typeAlias type="model.PopularCourse" alias="PopularCourse" />
+		<typeAlias type="model.MonthlyReservation" alias="MonthlyReservation" />
+		
+		<!-- 새로운 모델 클래스들 -->
+		<typeAlias type="model.Coupon" alias="Coupon" />
+		<typeAlias type="model.News" alias="News" />
+		<typeAlias type="model.QnA" alias="QnA" />
+		<typeAlias type="model.DetailedRatings" alias="DetailedRatings" />
+		<typeAlias type="model.RatingDistribution" alias="RatingDistribution" />
+		
+		<typeAlias type="model.Paging" alias="Paging" />
+		<typeAlias type="model.CourseStep" alias="CourseStep" />
+		<typeAlias type="model.CommunityCourse" alias="CommunityCourse" />
+		<typeAlias type="model.OfficialCourse" alias="OfficialCourse" />
+	</typeAliases>
+
+	<typeHandlers>
+		<typeHandler handler="typehandler.JsonArrayTypeHandler" />
+	</typeHandlers>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="org.mariadb.jdbc.Driver" />
+				<property name="url" value="jdbc:mariadb://localhost:3306/meetlog?characterEncoding=UTF-8" />
+				<property name="username" value="root" />
+				<property name="password" value="7564" />
+			</dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+        <mapper resource="mappers/UserMapper.xml" />
+		<mapper resource="mappers/RestaurantMapper.xml" />
+		<mapper resource="mappers/ReviewMapper.xml" />
+		<mapper resource="mappers/ColumnMapper.xml" />
+		<mapper resource="mappers/ReservationMapper.xml" />
+		<mapper resource="mappers/MenuMapper.xml" />
+
+        <mapper resource="mappers/EventMapper.xml" />
+
+		<mapper resource="mappers/EventManagementMapper.xml" />
+        <mapper resource="mappers/CourseMapper.xml" />
+        <mapper resource="mappers/CommunityCourseMapper.xml"/> 
+        <mapper resource="mappers/OfficialCourseMapper.xml"/>
+        <mapper resource="mappers/CourseManagementMapper.xml" />
+        <mapper resource="mappers/CourseReservationManagementMapper.xml" />
+        <mapper resource="mappers/CourseReviewManagementMapper.xml" />
+		<mapper resource="mappers/CourseStatisticsMapper.xml" />
+		
+		<!-- 새로운 매퍼들 -->
+		<mapper resource="mappers/CouponMapper.xml" />
+		<mapper resource="mappers/NewsMapper.xml" />
+		<mapper resource="mappers/QnAMapper.xml" />
+		<mapper resource="mappers/RatingMapper.xml" />
+	</mappers>
+</configuration>

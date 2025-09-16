@@ -1,0 +1,113 @@
+<!-- =============================================================== -->
+<!-- File: /webapp/WEB-INF/jspf/header.jspf                       -->
+<!-- Purpose: Sticky top header + global theme tokens               -->
+<!-- =============================================================== -->
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<c:set var="uri" value="${pageContext.request.requestURI}" />
+
+
+<style>
+  :root{
+    --brand-50:#f1f7f3;--brand-100:#e5efe8;--brand-600:#2f6b45;--brand-700:#285a3b;--brand-800:#204a31;
+    --bg:#f6faf8;--surface:#ffffff;--text:#0f172a;--muted:#64748b;--border:#e5e7eb;--ring:rgba(47,107,69,.25);
+  }
+  /* Base */
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+  *,*::before,*::after{box-sizing:border-box}
+  a{color:inherit}
+  .container{max-width:1200px;margin:0 auto;padding:0 20px}
+
+  /* Header */
+  .app-header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(10px);border-bottom:1px solid var(--border)}
+  .app-header .row{display:flex;align-items:center;height:64px;gap:16px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--brand-700);text-decoration:none}
+  .brand .badge{font-size:10px;padding:4px 8px;border-radius:999px;background:var(--brand-50);border:1px solid var(--brand-100);color:var(--brand-700)}
+  .topnav{display:flex;gap:6px;margin-left:16px}
+  .topnav a{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid transparent;border-radius:999px;text-decoration:none;color:#111827}
+  .topnav a:hover{background:#fff;border-color:var(--border)}
+  .topnav a.active{background:var(--brand-700);border-color:var(--brand-700);color:#fff}
+  .spacer{flex:1 1 auto}
+  .utils{display:flex;align-items:center;gap:8px}
+  .search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+  .search input{border:0;outline:0;min-width:160px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:999px;background:#fff;text-decoration:none;color:#111827}
+  .btn.primary{background:var(--brand-700);border-color:var(--brand-700);color:#fff}
+
+  /* App shell (shared with sidebar include) */
+  .app-shell{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;min-height:calc(100vh - 64px);padding:20px}
+  .sidebar{background:var(--brand-700);color:#fff;border-radius:16px;padding:18px 14px;height:fit-content;align-self:start;position:sticky;top:84px}
+  .side-title{font-weight:700;letter-spacing:.2px;margin:2px 10px 12px;color:#eaf3ed}
+  .side-nav{display:flex;flex-direction:column;gap:4px}
+  .side-nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;text-decoration:none;color:#eaf3ed}
+  .side-nav a .ico{width:22px;text-align:center;opacity:.9}
+  .side-nav a:hover{background:rgba(255,255,255,.08)}
+  .side-nav a.active{background:#fff;color:var(--brand-800);font-weight:700}
+
+  /* Content card */
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .panel .hd{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--border)}
+  .panel .bd{padding:18px 20px}
+
+  /* Utilities */
+  .pill{padding:6px 10px;border-radius:999px;background:var(--brand-50);border:1px solid var(--brand-100);color:var(--brand-700);font-weight:600}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+  .field{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+  .field>select,.field>input{border:0;outline:0;min-width:160px}
+  .ghost{background:#fff}
+  .ghost:hover{border-color:#d1d5db}
+  .danger{background:#fff;color:#b91c1c;border-color:#fecaca}
+  .danger:hover{background:#fff1f2;border-color:#fca5a5}
+
+  /* Tables */
+  .table{width:100%;border-collapse:separate;border-spacing:0}
+  .table thead th{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);font-weight:700;font-size:13px;text-align:left;padding:12px}
+  .table tbody td{padding:12px;border-bottom:1px solid #f1f5f9}
+  .table tr:hover td{background:#fafafa}
+  .row-actions{display:flex;gap:6px}
+  .btn-sm{padding:6px 8px;border:1px solid var(--border);background:#fff;border-radius:8px;text-decoration:none;color:#111827}
+  .btn-sm.primary{background:var(--brand-700);border-color:var(--brand-700);color:#fff}
+
+  /* Responsive */
+  @media (max-width: 960px){
+    .app-shell{grid-template-columns:1fr}
+    .sidebar{position:static}
+  }
+</style>
+
+<header class="app-header">
+  <div class="container row">
+    <a class="brand" href="#">
+      <span>Meetlog</span>
+      <span class="badge">HQ</span>
+    </a>
+
+    <div class="topnav">
+<a href="./branch-management.jsp" class="${fn:contains(uri, '/hq/branches') ? 'act' : ''}">지점</a>
+<a href="./material-management.jsp" class="${fn:contains(uri, '/hq/materials') ? 'act' : ''}">재료</a>
+<a href="./menu-register.jsp" class="${fn:contains(uri, '/hq/menus') ? 'act' : ''}">메뉴</a>
+<a href="./sales-orders.jsp" class="${fn:contains(uri, '/hq/orders') ? 'act' : ''}">수주</a>
+</div>
+
+    <div class="spacer"></div>
+
+        <span>
+  <c:choose>
+    <c:when test="${not empty sessionScope.authUser}">
+      <span style="margin-right:8px;"><c:out value="${sessionScope.authUser.name}" /></span>
+      <a class="btn" href="${contextPath}/auth/logout">로그아웃</a>
+    </c:when>
+    <c:otherwise>
+      <a class="btn primary" href="${contextPath}/login.jsp">로그인</a>
+      &nbsp;|&nbsp;
+      <a class="btn primary" href="${contextPath}/register-hq.jsp">회원가입</a>
+    </c:otherwise>
+  </c:choose>
+</span>
+  </div>
+</header>
