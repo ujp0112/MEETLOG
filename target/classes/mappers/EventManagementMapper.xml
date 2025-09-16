@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.EventManagementMapper">
+    <resultMap id="adminEventResult" type="model.AdminEvent">
+        <id property="id" column="event_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="participantCount" column="participant_count"/>
+    </resultMap>
+
+    <select id="selectAllEventsForAdmin" resultMap="adminEventResult">
+        SELECT * FROM events ORDER BY created_at DESC
+    </select>
+    
+    <insert id="insertEvent" parameterType="model.AdminEvent">
+        INSERT INTO events (title, description, start_date, end_date, status, created_at)
+        VALUES (#{title}, #{description}, #{startDate}, #{endDate}, 'PENDING', NOW())
+    </insert>
+    
+    <update id="updateEvent" parameterType="model.AdminEvent">
+        UPDATE events
+        SET 
+            title = #{title},
+            description = #{description},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            status = #{status}
+        WHERE event_id = #{id}
+    </update>
+    
+    <delete id="deleteEvent" parameterType="int">
+        DELETE FROM events WHERE event_id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.EventMapper">
+    <resultMap id="eventResult" type="model.Event">
+        <id property="id" column="event_id"/>
+        <result property="title" column="title"/>
+        <result property="summary" column="summary"/>
+        <result property="content" column="content"/>
+        <result property="image" column="image_path"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+    </resultMap>
+
+    <select id="selectAllEvents" resultMap="eventResult">
+        SELECT * FROM events ORDER BY start_date DESC
+    </select>
+    
+    <select id="selectEventById" parameterType="int" resultMap="eventResult">
+        SELECT * FROM events WHERE event_id = #{id}
+    </select>
+</mapper>

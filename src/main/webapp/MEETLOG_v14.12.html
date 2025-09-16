@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEET LOG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=e03c6239551c6c52a0a3822198007b27&libraries=services"></script>
+    
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .page-content { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content {
+            display: none; position: absolute; background-color: #ffffff; min-width: 220px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1); z-index: 50; border-radius: 0.5rem;
+            padding: 0.5rem; margin-top: 0.5rem; opacity: 0;
+            transform: translateY(-10px); transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+            right: 0;
+        }
+        .dropdown-trigger { padding-bottom: 0.75rem; margin-bottom: -0.75rem; }
+        .dropdown:hover .dropdown-content { display: block; opacity: 1; transform: translateY(0); }
+        .dropdown-content a { color: #334155; padding: 0.75rem 1rem; text-decoration: none; display: block; border-radius: 0.375rem; font-size: 0.9rem; white-space: nowrap; }
+        .dropdown-content a:hover { background-color: #f1f5f9; }
+        .dropdown-header { padding: 0.5rem 1rem; font-weight: bold; color: #0284c7; font-size: 0.8rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 0.5rem; }
+
+        .horizontal-scroll::-webkit-scrollbar { height: 6px; }
+        .horizontal-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .horizontal-scroll::-webkit-scrollbar-thumb { background-color: #94a3b8; border-radius: 10px; }
+        .tab-active { border-bottom-color: #0ea5e9; color: #0284c7; font-weight: 700; }
+        .star-rating .star { color: #d1d5db; cursor: pointer; transition: color 0.2s; }
+        .star-rating .star:hover, .star-rating .star.selected { color: #f59e0b; }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        [contenteditable]:empty:before { content: attr(placeholder); color: #a1a1aa; pointer-events: none; display: block; }
+        .modal-backdrop { animation: fadeIn 0.2s ease-out; }
+        .prose { max-width: 100%; }
+        .prose h1, .prose h2, .prose h3 { margin-bottom: 1rem; font-weight: 900; }
+        .prose p { margin-bottom: 1rem; line-height: 1.75; }
+        .prose img { border-radius: 0.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem; }
+
+        .toggle-checkbox:checked { right: 0; border-color: #0ea5e9; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #0ea5e9; }
+    </style>
+</head>
+<body class="bg-slate-100">
+
+    <div id="app" class="h-screen w-full flex flex-col bg-slate-100">
+        <header id="global-header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-20"></header>
+        <main id="main-content" class="flex-grow overflow-y-auto"></main>
+        <footer id="global-footer" class="bg-white py-8 border-t"></footer>
+    </div>
+    
+    <template id="header-main">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="#" onclick="router.navigateTo('main')"><h1 class="text-3xl font-bold text-sky-600">MEET LOG</h1></a>
+            <nav class="hidden md:flex items-center space-x-2">
+                <a href="#" onclick="router.navigateTo('main')" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">홈</a>
+                <a href="#" onclick="router.navigateTo('sector')" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">맛집찾기</a>
+                <a href="#" onclick="router.navigateTo('columns')" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">칼럼</a>
+                <a href="#" onclick="router.navigateTo('course-recommendation')" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">추천코스</a>
+                <a href="#" onclick="router.navigateTo('events')" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">이벤트</a>
+                <div class="dropdown">
+                    <a href="#" onclick="router.navigateTo('mypage')" class="dropdown-trigger text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">마이페이지 ▼</a>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">사용자 메뉴</div>
+                        <a href="#" onclick="router.navigateTo('mypage')">👤 내 프로필</a>
+                        <a href="#" onclick="router.navigateTo('my-reviews')">✨ 내 리뷰 관리</a>
+                        <a href="#" onclick="router.navigateTo('write-column')">✍️ 새 칼럼 작성</a>
+                        <a href="#" onclick="router.navigateTo('follow-feed')">❤️ 팔로우 피드</a>
+                        <a href="#" onclick="router.navigateTo('setting')">🔧 환경설정</a>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <a href="#" onclick="router.navigateTo('business-dashboard')" class="dropdown-trigger text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">비즈니스 ▼</a>
+                    <div class="dropdown-content">
+                         <div class="dropdown-header">사업자 메뉴</div>
+                        <a href="#" onclick="router.navigateTo('statistics-dashboard')">📊 통계/분석</a>
+                        <a href="#" onclick="router.navigateTo('menu-management')">🍽️ 메뉴 관리</a>
+                        <a href="#" onclick="router.navigateTo('coupon-management')">🎟️ 쿠폰 관리</a>
+                        <a href="#" onclick="router.navigateTo('business-info-edit')">📝 가게 정보 수정</a>
+                        <a href="#" onclick="router.navigateTo('review-management')">💬 고객 리뷰 관리</a>
+                        <a href="#" onclick="router.navigateTo('reservation-requests')">📥 예약 요청 관리</a>
+                        <a href="#" onclick="router.navigateTo('reservation-calendar')">🗓️ 예약 캘린더</a>
+                        <a href="#" onclick="router.navigateTo('reservation-settings')">⚙️ 예약 설정</a>
+                    </div>
+                </div>
+                 <div class="dropdown">
+                    <button class="relative text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center dropdown-trigger">
+                        <span>🔔</span>
+                        <span class="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <div class="dropdown-content w-72">
+                        <div class="dropdown-header">새 알림</div>
+                        <a href="#" onclick="router.navigateTo('alert')" class="text-sm"><strong>미스터노포</strong>님이 회원님을 팔로우했습니다.</a>
+                        <a href="#" onclick="router.navigateTo('alert')" class="text-sm"><strong>[공지]</strong> 개인정보처리방침 개정 안내</a>
+                        <div class="p-2 mt-2 border-t text-center">
+                            <a href="#" onclick="router.navigateTo('alert')" class="text-sky-600 font-semibold text-sm">모든 알림 보기</a>
+                        </div>
+                    </div>
+                </div>
+                <a href="#" onclick="router.navigateTo('login')" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600 text-sm ml-4">로그인</a>
+            </nav>
+        </div>
+    </template>
+    <template id="footer-main">
+        <div class="container mx-auto px-4 text-center text-slate-500">
+            <div class="flex justify-center gap-6 mb-4">
+                <a href="#" onclick="router.navigateTo('notice')" class="hover:underline">공지사항</a> |
+                <a href="#" onclick="router.navigateTo('faq')" class="hover:underline">FAQ</a> |
+                <a href="#" onclick="router.navigateTo('inquiry')" class="hover:underline">1:1 문의</a> |
+
+                <a href="#" onclick="router.navigateTo('admin-company-management')" class="hover:underline">관리자</a> | 
+                <a href="#" onclick="router.navigateTo('hq-dashboard')" class="hover:underline">HQ</a> | 
+                <a href="#" onclick="router.navigateTo('branch-dashboard')" class="hover:underline">지점장</a>
+            </div>
+            <p>&copy; 2025 MEET LOG. All Rights Reserved.</p>
+            <div class="text-sm mt-2"><a href="#" onclick="router.navigateTo('admin-login')" class="hover:underline">관리자 페이지</a></div>
+        </div>
+    </template>
+    <template id="footer-info"><div class="container mx-auto px-4 text-center text-slate-400"><p>&copy; 2025 MEET LOG. All Rights Reserved.</p><div class="mt-4 space-x-4 text-sm"><a href="#" onclick="router.navigateTo('service')" class="hover:text-white">이용약관</a><a href="#" onclick="router.navigateTo('service')" class="hover:text-white">개인정보처리방침</a></div></div></template>
+    
+    <template id="page-main">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <div id="default-main-content">
+                <section class="mb-12"><h2 class="text-2xl md:text-3xl font-bold mb-6">🏆 실시간 맛집 랭킹 TOP 10</h2><div id="top-10-list" class="flex space-x-4 overflow-x-auto pb-4 -mx-4 px-4 horizontal-scroll"></div></section>
+            </div>
+            
+            <section class="bg-white p-6 rounded-xl my-12 shadow-md">
+                <h2 class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기 🔎</h2>
+                <form id="main-search-form" class="grid grid-cols-2 md:grid-cols-6 gap-4 items-end">
+                    <div class="md:col-span-2"><label class="block text-sm">만나는 장소</label><input name="location" type="text" class="mt-1 block w-full rounded-md border-slate-300" placeholder="예: 강남역"></div>
+                    <div><label class="block text-sm">만나는 유형</label><select name="meet_type" class="mt-1 block w-full rounded-md border-slate-300"><option value="">전체</option><option>❤️ 연인과</option><option>🍻 친구들과</option><option>👨‍👩‍👧‍👦 가족과 함께</option></select></div>
+                    <div><label class="block text-sm">음식 종류</label><select name="category" class="mt-1 block w-full rounded-md border-slate-300"><option value="">전체</option><option>한식</option><option>양식</option><option>일식</option><option>중식</option></select></div>
+                    <div>
+                        <label class="block text-sm">가격대 (1인)</label>
+                        <select name="price_range" class="mt-1 block w-full rounded-md border-slate-300">
+                            <option value="">전체</option>
+                            <option value="1">~ 1만원</option>
+                            <option value="2">1만원 ~ 2만원</option>
+                            <option value="3">2만원 ~ 4만원</option>
+                            <option value="4">4만원 ~</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm">주차 여부</label>
+                        <select name="parking" class="mt-1 block w-full rounded-md border-slate-300">
+                            <option value="">전체</option>
+                            <option value="true">가능</option>
+                            <option value="false">불가</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="col-span-full bg-sky-600 text-white font-bold py-2.5 px-4 rounded-md hover:bg-sky-700">맛집 찾기</button>
+                </form>
+            </section>
+
+            <section id="search-result-section" class="mt-12 hidden">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6">'강남역' 검색 결과 (5건)</h2>
+                <div id="search-result-list" class="space-y-6">
+                </div>
+            </section>
+
+            <div id="default-main-content-bottom">
+                <section class="mt-12"><h2 class="text-2xl md:text-3xl font-bold mb-6">🔥 지금 뜨는 후기</h2><div id="review-list" class="grid grid-cols-1 lg:grid-cols-3 gap-6"></div></section>
+                <section class="mt-12"><h2 class="text-2xl md:text-3xl font-bold mb-6">🏆 TOP 맛 칼럼니스트</h2><div id="top-columnists-list" class="flex space-x-4 overflow-x-auto pb-4 -mx-4 px-4 horizontal-scroll"></div></section>
+            </div>
+        </div>
+    </template>
+    <template id="page-info">
+        <div class="page-content">
+            <section class="relative bg-sky-600 text-white text-center py-20 md:py-32">
+                <div class="absolute inset-0"><img src="https://placehold.co/1920x800/0284c7/38bdf8?text=Delicious+Moments" class="w-full h-full object-cover opacity-30" alt="Food background"></div>
+                <div class="relative container mx-auto px-4"><h2 class="text-4xl md:text-6xl font-black">나에게 꼭 맞는 맛집,<br>가장 확실한 방법으로.</h2><p class="mt-4 text-lg max-w-2xl mx-auto">MEET LOG는 빅데이터와 진짜 사용자들의 리뷰로 당신의 완벽한 식사를 찾아드립니다.</p><button onclick="router.navigateTo('main')" class="mt-8 bg-white text-sky-600 font-bold py-3 px-8 rounded-full hover:bg-slate-100">MEET LOG 시작하기</button></div>
+            </section>
+            <section class="py-16 md:py-24 bg-slate-50"><div class="container mx-auto px-4"><div class="text-center mb-12"><h3 class="text-3xl md:text-4xl font-bold">MEET LOG의 특별한 기능</h3><p class="text-slate-500 mt-2">당신의 미식 생활을 업그레이드하세요.</p></div><div class="grid md:grid-cols-3 gap-8 text-center"><div class="bg-white p-8 rounded-xl shadow-lg"> <h4 class="text-xl font-bold mb-2">AI 기반 맞춤 추천</h4><p class="text-slate-600 text-sm">나의 취향, 날씨, 동행인 유형까지 고려한 스마트한 추천을 받아보세요.</p></div><div class="bg-white p-8 rounded-xl shadow-lg"><h4 class="text-xl font-bold mb-2">영수증 인증, 클린 리뷰</h4><p class="text-slate-600 text-sm">광고와 가짜 리뷰는 이제 그만. 영수증 인증으로 믿을 수 있는 진짜 후기만 확인하세요.</p></div><div class="bg-white p-8 rounded-xl shadow-lg"><h4 class="text-xl font-bold mb-2">나만의 맛 칼럼니스트</h4><p class="text-slate-600 text-sm">나와 입맛이 비슷한 사용자를 팔로우하고, 그들만의 맛집 지도를 공유받으세요.</p></div></div></div></section>
+            <section class="bg-white py-16"><div class="container mx-auto px-4 text-center"><h3 class="text-3xl md:text-4xl font-bold">실패 없는 맛집 탐색을 시작해볼까요?</h3><button onclick="router.navigateTo('register')" class="mt-8 bg-sky-600 text-white font-bold py-4 px-10 rounded-full hover:bg-sky-700">무료로 시작하기</button></div></section>
+        </div>
+    </template>
+    
+    <template id="page-login">
+        <div class="page-content flex items-center justify-center min-h-full bg-slate-50 p-4">
+            <div class="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
+                
+                <div class="hidden md:flex flex-col justify-center p-12 bg-sky-500 text-white">
+                    <a href="#" onclick="router.navigateTo('main')"><h1 class="text-4xl font-bold">MEET LOG</h1></a>
+                    <p class="mt-4 text-lg text-sky-100">
+                        로그인하고 나만의 맛집 지도와 미식 여정을 기록해보세요!
+                    </p>
+                    <div class="mt-8">
+                        <img src="https://placehold.co/400x300/ffffff/0284c7?text=MEET+LOG+Illustration" class="rounded-lg opacity-80" alt="Meet Log Illustration">
+                    </div>
+                </div>
+
+                <div class="p-8 md:p-12">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-6">로그인</h2>
+
+                    <div class="border-b border-slate-200 mb-6">
+                        <nav class="-mb-px flex space-x-6" id="login-tabs">
+                            <button data-tab="personal" class="tab-active py-3 px-1 border-b-2 font-semibold text-sm">
+                                개인회원
+                            </button>
+                            <button data-tab="business" class="py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-sm">
+                                기업회원
+                            </button>
+                        </nav>
+                    </div>
+
+                    <div id="login-personal-content">
+                        <form class="space-y-5">
+                            <div>
+                                <label for="personal-id" class="block text-sm font-medium text-slate-700">아이디</label>
+                                <input type="text" id="personal-id" class="mt-1 block w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            </div>
+                            <div>
+                                <label for="personal-password" class="block text-sm font-medium text-slate-700">비밀번호</label>
+                                <input type="password" id="personal-password" class="mt-1 block w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center">
+                                    <input id="remember-me" type="checkbox" class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded">
+                                    <label for="remember-me" class="ml-2 block text-slate-900">로그인 상태 유지</label>
+                                </div>
+                                <a href="#" onclick="router.navigateTo('idpwsearch')" class="font-medium text-sky-600 hover:text-sky-500">
+                                    아이디/비밀번호 찾기
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-bold text-white bg-sky-600 hover:bg-sky-700">
+                                    로그인
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="login-business-content" class="hidden">
+                        <form class="space-y-5">
+                            <div>
+                                <label for="business-id" class="block text-sm font-medium text-slate-700">사업자 아이디</label>
+                                <input type="text" id="business-id" class="mt-1 block w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="business-password" class="block text-sm font-medium text-slate-700">비밀번호</label>
+                                <input type="password" id="business-password" class="mt-1 block w-full px-3 py-3 border border-slate-300 rounded-md shadow-sm">
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <a href="#" class="font-medium text-sky-600 hover:text-sky-500">
+                                    기업회원 가입
+                                </a>
+                                <a href="#" onclick="router.navigateTo('idpwsearch')" class="font-medium text-sky-600 hover:text-sky-500">
+                                    아이디/비밀번호 찾기
+                                </a>
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-bold text-white bg-slate-800 hover:bg-slate-900">
+                                    기업 로그인
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-slate-300"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-white text-slate-500">소셜 계정으로 간편 로그인</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex justify-center gap-4">
+                            <a href="#" class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-yellow-400 hover:bg-yellow-500">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 22"><use xlink:href="#svg-kakao-logo"></use></svg>
+                            </a>
+                            <a href="#" class="w-12 h-12 inline-flex items-center justify-center rounded-full bg-green-500 hover:bg-green-600">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20"><use xlink:href="#svg-naver-logo"></use></svg>
+                            </a>
+                            <a href="#" class="w-12 h-12 inline-flex items-center justify-center rounded-full border border-slate-300 hover:bg-slate-50">
+                                <svg class="w-6 h-6" viewBox="0 0 22 22"><use xlink:href="#svg-google-logo"></use></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="text-center text-sm text-slate-500 mt-8">
+                        <p>아직 회원이 아니신가요? <a href="#" onclick="router.navigateTo('register')" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
+                    </div>
+                </div>
+                    
+                </div>
+
+            </div>
+        </div>
+    </template>
+    <template id="page-register"><div class="page-content flex items-center justify-center py-12"><div class="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-lg"><div><a href="#" onclick="router.navigateTo('main')" class="block text-center text-4xl font-bold text-sky-600 mb-2">MEET LOG</a><h2 class="text-center text-2xl font-bold text-slate-900">회원가입</h2></div><form class="mt-8 space-y-6"><div class="space-y-4"><div><label class="text-sm font-medium text-slate-700">이메일 주소</label><input required class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" placeholder="example@email.com"></div><div><label class="text-sm font-medium text-slate-700">닉네임</label><input required class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" placeholder="멋진 닉네임을 입력하세요"></div><div><label class="text-sm font-medium text-slate-700">비밀번호</label><input type="password" required class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" placeholder="영문, 숫자 포함 8자 이상"></div><div><label class="text-sm font-medium text-slate-700">비밀번호 확인</label><input type="password" required class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" placeholder="비밀번호를 한번 더 입력해주세요"></div></div><div class="space-y-3"><div class="flex items-start"><div class="flex items-center h-5"><input type="checkbox" class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded"></div><div class="ml-3 text-sm"><label class="font-bold text-slate-800">전체 약관에 동의합니다.</label></div></div><hr><div class="flex items-start"><div class="flex items-center h-5"><input required type="checkbox" class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded"></div><div class="ml-3 text-sm"><label class="text-slate-600">[필수] <a href="#" onclick="router.navigateTo('service')" class="font-medium text-sky-600 hover:underline">서비스 이용약관</a></label></div></div></div><div><button type="submit" class="w-full flex justify-center py-3 px-4 border-transparent text-sm font-bold rounded-md text-white bg-sky-600 hover:bg-sky-700">가입하기</button></div></form><div class="text-center text-sm"><p>이미 계정이 있으신가요? <a href="#" onclick="router.navigateTo('login')" class="font-bold text-sky-600 hover:text-sky-500">로그인</a></p></div></div></div></template>
+    <template id="page-idpwsearch"><div class="page-content flex items-center justify-center min-h-full"><div class="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-lg"><div><a href="#" onclick="router.navigateTo('main')" class="block text-center text-4xl font-bold text-sky-600 mb-2">MEET LOG</a><h2 class="text-center text-2xl font-bold text-slate-900">아이디 / 비밀번호 찾기</h2></div><div class="border-b border-slate-200"><nav class="flex -mb-px"><button id="tab-find-id" class="tab-active w-1/2 py-4 text-center font-medium text-sm border-b-2">아이디 찾기</button><button id="tab-reset-pw" class="w-1/2 py-4 text-center font-medium text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-700 hover:border-slate-300">비밀번호 재설정</button></nav></div><div id="content-find-id"><p class="text-center text-sm text-slate-600 mb-6">가입 시 등록한 이름과 휴대폰 번호를 입력해주세요.</p><form class="space-y-4"><div><input required class="relative block w-full px-3 py-3 border rounded-md" placeholder="이름"></div><div><input required class="relative block w-full px-3 py-3 border rounded-md" placeholder="휴대폰 번호 ('-' 제외)"></div><div><button type="submit" class="w-full flex justify-center py-3 px-4 text-sm font-bold rounded-md text-white bg-sky-600 hover:bg-sky-700">아이디 찾기</button></div></form></div><div id="content-reset-pw" class="hidden"><p class="text-center text-sm text-slate-600 mb-6">가입 시 등록한 이메일 주소를 입력하시면<br>비밀번호 재설정 링크를 보내드립니다.</p><form class="space-y-4"><div><input required class="relative block w-full px-3 py-3 border rounded-md" placeholder="이메일 주소"></div><div><button type="submit" class="w-full flex justify-center py-3 px-4 text-sm font-bold rounded-md text-white bg-sky-600 hover:bg-sky-700">인증메일 발송</button></div></form></div><div class="text-center text-sm"><a href="#" onclick="router.navigateTo('login')" class="font-medium text-slate-600 hover:text-sky-500">로그인 페이지로 돌아가기</a></div></div></div></template>
+    
+    <template id="page-shop-detail"><div class="page-content container mx-auto p-4 md:p-8"><section class="grid grid-cols-4 grid-rows-2 gap-2 mb-8 h-96"><div class="col-span-4 md:col-span-2 row-span-2 rounded-lg overflow-hidden"><img src="https://placehold.co/800x600/f87171/ffffff?text=Pasta+Main" class="w-full h-full object-cover"></div><div class="hidden md:block rounded-lg overflow-hidden"><img src="https://placehold.co/400x300/fca5a5/ffffff?text=Food+1" class="w-full h-full object-cover"></div><div class="hidden md:block rounded-lg overflow-hidden"><img src="https://placehold.co/400x300/fca5a5/ffffff?text=Interior" class="w-full h-full object-cover"></div></section><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="lg:col-span-2"><section class="bg-white p-6 rounded-2xl shadow-lg"><div class="flex justify-between items-start"><div><span class="text-sm text-sky-600 font-semibold">양식</span><h2 class="text-4xl font-bold mt-1">파스타 팩토리</h2><p class="text-slate-500 mt-2">서울 마포구 와우산로29길 14-12</p></div><div class="text-center"><p class="text-4xl font-bold text-yellow-500">4.6</p><p class="text-sm text-slate-500">(리뷰 258개)</p></div></div><div class="flex space-x-2 mt-6"><button class="flex-1 bg-sky-500 text-white font-bold py-3 px-5 rounded-full hover:bg-sky-600">❤️ 저장</button><button onclick="router.navigateTo('write-review')" class="flex-1 bg-slate-800 text-white font-bold py-3 px-5 rounded-full hover:bg-slate-900">✏️ 리뷰쓰기</button><button class="bg-slate-200 text-slate-800 font-bold py-3 px-5 rounded-full hover:bg-slate-300">🔗 공유</button></div></section><section class="mt-8"><h3 class="text-2xl font-bold mb-4">사용자 리뷰 (258)</h3><div class="space-y-6"><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><img src="https://placehold.co/100x100/e879f9/ffffff?text=U1" class="w-12 h-12 rounded-full mr-4"><div><a href="#" onclick="router.navigateTo('user-profile', { name: '데이트장인' })" class="font-bold">데이트장인</a><p class="text-sm text-yellow-500">★★★★★ <span class="text-slate-400 ml-2">2025.08.15</span></p></div></div><p class="text-slate-700">여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.</p></div><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><img src="https://placehold.co/100x100/22d3ee/ffffff?text=U2" class="w-12 h-12 rounded-full mr-4"><div><p class="font-bold">홍대생</p><p class="text-sm text-yellow-500">★★★★☆ <span class="text-slate-400 ml-2">2025.08.12</span></p></div></div><p class="text-slate-700">학교 근처에서 이만한 파스타집 찾기 힘들어요. 가격은 좀 있지만 맛은 보장됩니다. 트러플 파스타 강추!</p></div><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><img src="https://placehold.co/100x100/f87171/ffffff?text=U3" class="w-12 h-12 rounded-full mr-4"><div><p class="font-bold">효녀딸</p><p class="text-sm text-yellow-500">★★★★★ <span class="text-slate-400 ml-2">2025.08.01</span></p></div></div><p class="text-slate-700">엄마랑 홍대 데이트 갔다가 방문했어요. 양도 많고 직원분들도 친절해서 기분 좋은 식사였습니다.</p></div></div></section></div><div class="space-y-8"><section class="bg-white p-6 rounded-2xl shadow-lg"><h3 class="text-xl font-bold border-b pb-3 mb-4">상세 정보</h3><div class="space-y-3 text-sm"><div class="flex"><span class="w-20 font-semibold text-slate-500">주소</span><span>서울 마포구 와우산로29길 14-12</span></div><div class="flex"><span class="w-20 font-semibold text-slate-500">영업시간</span><span>매일 11:30 - 22:00</span></div><div class="flex"><span class="w-20 font-semibold text-slate-500">전화번호</span><span>02-1234-5678</span></div></div></section><section class="bg-white p-6 rounded-2xl shadow-lg"><h3 class="text-xl font-bold border-b pb-3 mb-4">메뉴</h3><div class="space-y-3 text-sm"><div class="flex justify-between"><p>트러플 크림 파스타</p><p class="font-semibold">18,000원</p></div><div class="flex justify-between"><p>봉골레 파스타</p><p class="font-semibold">16,000원</p></div><div class="flex justify-between"><p>마르게리타 피자</p><p class="font-semibold">20,000원</p></div></div></section><section class="bg-white rounded-2xl shadow-lg overflow-hidden"><div id="detail-map" class="w-full h-64"></div></section></div></div></div></template>
+    <template id="page-shop-detail-2">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <section class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex justify-between items-start">
+                            <div><h1 class="text-4xl font-bold">우부래도</h1><p class="text-slate-500 mt-2">상도역 베이커리, 비건</p></div>
+                            <div class="text-center flex-shrink-0 ml-4"><p class="text-4xl font-bold text-sky-600">77<span class="text-lg font-medium text-slate-500">점</span></p><div class="flex items-center justify-center mt-1"><span class="text-yellow-500">★★★★☆</span><span class="text-sm text-slate-500 ml-2">4.2 (6)</span></div></div>
+                        </div>
+                        <div class="mt-6 border-t pt-6 flex space-x-2"><button class="flex-1 bg-sky-500 text-white font-bold py-3 px-5 rounded-full hover:bg-sky-600 transition">❤️ 저장</button><button class="flex-1 bg-slate-800 text-white font-bold py-3 px-5 rounded-full hover:bg-slate-900 transition" onclick="router.navigateTo('write-review')">✏️ 리뷰쓰기</button><button class="bg-slate-200 text-slate-800 font-bold py-3 px-5 rounded-full hover:bg-slate-300 transition">🔗 공유</button></div>
+                    </section>
+                    
+                    <section id="coupon-section" class="hidden">
+                        <h3 class="text-2xl font-bold mb-4">MEET LOG 단독 쿠폰 🎟️</h3>
+                        <div id="coupon-content">
+                            </div>
+                    </section>
+
+                    <section class="bg-white p-6 rounded-2xl shadow-lg">
+                        <ul class="space-y-4 text-slate-700"><li class="flex items-start"><span class="w-20 font-bold text-slate-500">주소</span><div><p>서울특별시 동작구 상도로37길 3</p><p id="jibun-addr" class="text-sm text-slate-400 hidden">(지번) 상도1동 666-3</p></div><button onclick="document.getElementById('jibun-addr').classList.toggle('hidden')" class="ml-auto text-sm text-sky-600 font-semibold">지번</button></li><li class="flex items-start"><span class="w-20 font-bold text-slate-500">전화번호</span><p>0507-1428-0599</p></li><li class="flex items-start"><span class="w-20 font-bold text-slate-500">영업시간</span><p>매일 10:00 - 22:00</p></li><li class="flex items-start"><span class="w-20 font-bold text-slate-500">메뉴</span><div class="flex flex-wrap gap-x-4 gap-y-1"><p>단호박 머핀(4,000원)</p><p>쌀바게트(4,500원)</p><p>홍국단팥빵(4,000원)</p></div></li></ul>
+                    </section>
+                    <section class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-2xl font-bold">방문자 평가</h3>
+                        <div class="mt-4 flex items-center gap-8"><div class="text-center"><p class="text-5xl font-bold">4.2</p><div class="text-yellow-500 text-xl mt-1">★★★★☆</div><p class="text-sm text-slate-500 mt-1">(6개)</p></div><div class="flex-1"><ul class="space-y-1 text-sm"><li class="flex items-center gap-2"><div class="w-10 text-slate-500">5점</div><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-sky-500 h-2.5 rounded-full" style="width: 50%"></div></div><div class="w-10 text-right text-slate-500">3</div></li><li class="flex items-center gap-2"><div class="w-10 text-slate-500">4점</div><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-sky-500 h-2.5 rounded-full" style="width: 17%"></div></div><div class="w-10 text-right text-slate-500">1</div></li><li class="flex items-center gap-2"><div class="w-10 text-slate-500">3점</div><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-sky-500 h-2.5 rounded-full" style="width: 34%"></div></div><div class="w-10 text-right text-slate-500">2</div></li><li class="flex items-center gap-2"><div class="w-10 text-slate-500">2점</div><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-slate-300 h-2.5 rounded-full" style="width: 0%"></div></div><div class="w-10 text-right text-slate-500">0</div></li><li class="flex items-center gap-2"><div class="w-10 text-slate-500">1점</div><div class="w-full bg-slate-200 rounded-full h-2.5"><div class="bg-slate-300 h-2.5 rounded-full" style="width: 0%"></div></div><div class="w-10 text-right text-slate-500">0</div></li></ul></div></div>
+                        <div class="mt-6 grid grid-cols-3 gap-4 border-t pt-6 text-center"><div><p class="text-slate-500">맛</p><p class="font-bold text-lg">4.0</p></div><div><p class="text-slate-500">가격</p><p class="font-bold text-lg">3.3</p></div><div><p class="text-slate-500">응대</p><p class="font-bold text-lg">3.3</p></div></div>
+                    </section>
+                    
+                    <section id="store-news-section" class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4">가게 최신 소식</h3>
+                        <div id="store-news-content" class="space-y-4">
+                        </div>
+                    </section>
+                    
+                    <section>
+                        <h3 class="text-2xl font-bold mb-4">방문자 리뷰 (6)</h3><div class="space-y-6"><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><div class="w-12 h-12 rounded-full mr-4 bg-slate-200"></div><div><p class="font-bold">이시국먹방러</p><p class="text-sm text-yellow-500">★★★☆☆ <span class="text-slate-400 ml-2">2025.08.16</span></p></div></div><p class="text-slate-700">채식 빵, 우리쌀 빵 등의 메뉴를 판매하는 베이커리입니다. 빵에따라 조금씩 들어가는 범위가 다르나 표기가 잘 되어 있습니다. 빵 맛은 한정적인 재료를 사용한 것 치고 맛이 꽤 있지만 모든 빵 종류가 맛이 좋다는것은 아닙니다.</p></div><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><div class="w-12 h-12 rounded-full mr-4 bg-slate-200"></div><div><p class="font-bold">둥편</p><p class="text-sm text-yellow-500">★★★★★ <span class="text-slate-400 ml-2">2024.12.17</span></p></div></div><p class="text-slate-700">비건베이커리이고 빵이 대체적으로 맛있어서 재방문하는 곳이에요. 카페형이라 내부에서 먹고갈 수도 있고 식사빵부터 간식 디저트 모두 맛이 평타이상이에요.</p></div></div>
+                    </section>
+                    <section>
+                        <h3 class="text-2xl font-bold mb-4">맛집 Q&A</h3><div class="bg-white p-5 rounded-xl shadow-lg"><textarea rows="3" class="block w-full rounded-md border-slate-300" placeholder="맛집에 대한 궁금한 점을 질문해보세요!"></textarea><div class="text-right mt-2"><button class="bg-sky-500 text-white text-sm font-bold py-2 px-4 rounded-md">질문 등록</button></div><div class="mt-6 space-y-4"><div class="border-t pt-4"><p class="font-semibold">Q. 주차는 가능한가요?</p><div class="mt-2 ml-4 p-3 bg-slate-50 rounded-lg"><p class="font-semibold text-sky-700">A. (사장님)</p><p class="text-sm text-slate-600 mt-1">네, 가게 앞에 2대 정도 주차 가능합니다.</p></div></div></div></div>
+                    </section>
+                </div>
+                <div class="space-y-8">
+                    <section class="bg-white rounded-2xl shadow-lg overflow-hidden"><div id="detail-map-2" class="w-full h-64"></div></section>
+                    <section class="bg-white p-6 rounded-2xl shadow-lg"><h3 class="text-xl font-bold mb-4">근처 추천 맛집</h3><div class="space-y-4"><a href="#" class="flex items-center gap-4 hover:bg-slate-50 p-2 rounded-lg"><img src="https://placehold.co/100x100/a78bfa/ffffff?text=포차" class="w-16 h-16 rounded-md object-cover"><div class="flex-1"><h4>상도실내포장마차</h4><p class="text-sm text-slate-500">오징어통찜 · 82점</p></div></a><a href="#" class="flex items-center gap-4 hover:bg-slate-50 p-2 rounded-lg"><img src="https://placehold.co/100x100/f87171/ffffff?text=참치" class="w-16 h-16 rounded-md object-cover"><div class="flex-1"><h4>고우마구로</h4><p class="text-sm text-slate-500">스시,참치 · 73점</p></div></a></div></section>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="page-mappage"><div class="page-content flex-grow flex h-full"><aside class="w-full md:w-1/3 lg:w-1/4 h-full overflow-y-auto bg-white p-4 shadow-lg z-10"><h2 class="text-xl font-bold mb-4">현재 지역 맛집</h2><div id="map-restaurant-list" class="space-y-3"><div class="p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition"><h3 class="font-bold text-lg">파스타 팩토리</h3><p class="text-sm text-slate-500">양식 · 홍대</p><div class="text-sm mt-2"><span class="font-bold text-sky-600">92점</span><span class="text-slate-400 ml-2">(리뷰 258)</span></div></div><div class="p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition"><h3 class="font-bold text-lg">스시 마에</h3><p class="text-sm text-slate-500">일식 · 여의도</p><div class="text-sm mt-2"><span class="font-bold text-sky-600">98점</span><span class="text-slate-400 ml-2">(리뷰 189)</span></div></div><div class="p-4 border rounded-lg cursor-pointer hover:bg-slate-50 transition"><h3 class="font-bold text-lg">평양면옥</h3><p class="text-sm text-slate-500">한식 · 을지로</p><div class="text-sm mt-2"><span class="font-bold text-sky-600">96점</span><span class="text-slate-400 ml-2">(리뷰 176)</span></div></div></div></aside><section class="flex-grow h-full"><div id="map-canvas" class="w-full h-full"></div></section></div></template>
+    <template id="page-sector"><div class="page-content container mx-auto p-4 md:p-8"><section class="text-center mb-8"><h2 class="text-4xl font-bold">강남역 맛집</h2><p class="text-slate-500 mt-2">강남역 주변의 인기 맛집들을 확인해보세요.</p></section><section class="bg-white p-4 rounded-xl shadow-md mb-8 sticky top-0 z-10"><div class="flex justify-between items-center gap-4"><div id="category-filters" class="flex flex-wrap gap-2"><button data-filter="all" class="filter-btn bg-sky-500 text-white font-semibold py-2 px-4 rounded-full text-sm">전체</button><button data-filter="한식" class="filter-btn bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-full text-sm">한식</button></div><select id="sort-select" class="rounded-md border-slate-300"><option value="rating">평점순</option><option value="likes">인기순</option></select></div></section><section><div id="sector-restaurant-list" class="space-y-6"><div class="bg-white p-4 rounded-xl shadow-lg flex gap-4 items-center hover:shadow-xl transition"><img src="https://placehold.co/600x400/a78bfa/ffffff?text=한정식" class="w-32 h-32 rounded-md object-cover flex-shrink-0"><div class="flex-1"><div><div class="flex justify-between items-start"><div><h3 class="text-xl font-bold">고미정</h3><p class="text-sm text-slate-500 mt-1">강남 · 한식</p></div><span class="text-2xl font-bold text-sky-600">95<span class="text-base">점</span></span></div><div class="flex items-center text-sm my-2"><p class="text-slate-600">❤️ 1,203명이 저장했어요</p></div><div class="mt-3 text-xs flex flex-wrap gap-2"><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#상견례</span><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#분위기좋은</span><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#가족외식</span></div></div></div></div><div class="bg-white p-4 rounded-xl shadow-lg flex gap-4 items-center hover:shadow-xl transition"><img src="https://placehold.co/600x400/fb923c/ffffff?text=버거" class="w-32 h-32 rounded-md object-cover flex-shrink-0"><div class="flex-1"><div><div class="flex justify-between items-start"><div><h3 class="text-xl font-bold">브루클린 버거</h3><p class="text-sm text-slate-500 mt-1">이태원 · 양식 (예시)</p></div><span class="text-2xl font-bold text-sky-600">90<span class="text-base">점</span></span></div><div class="flex items-center text-sm my-2"><p class="text-slate-600">❤️ 2,543명이 저장했어요</p></div><div class="mt-3 text-xs flex flex-wrap gap-2"><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#수제버거</span><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#치즈폭탄</span><span class="font-semibold bg-slate-100 px-2 py-1 rounded">#데이트</span></div></div></div></div></div></section></div></template>
+    
+    <template id="page-mypage">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <section class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                <div class="flex flex-col md:flex-row items-center">
+                    <img src="https://placehold.co/128x128/e879f9/ffffff?text=Me" class="w-32 h-32 rounded-full shadow-md flex-shrink-0">
+                    <div class="md:ml-8 mt-4 md:mt-0 text-center md:text-left w-full">
+                        <div class="flex items-center justify-center md:justify-start gap-4">
+                            <h2 class="text-3xl font-bold">데이트장인</h2>
+                            <span class="bg-sky-100 text-sky-700 font-bold text-sm px-3 py-1 rounded-full">Lv. 5 미식가</span>
+                        </div>
+                        <div class="flex justify-center md:justify-start space-x-6 mt-4 text-center">
+                            <div><span class="font-bold text-lg">1,205</span><p class="text-sm text-slate-500">팔로워</p></div>
+                            <div><span class="font-bold text-lg">150</span><p class="text-sm text-slate-500">팔로잉</p></div>
+                        </div>
+                        <div id="my-badges" class="mt-4 pt-4 border-t border-slate-200 flex justify-center md:justify-start items-center gap-3 flex-wrap">
+                        </div>
+                    </div>
+                    <div class="ml-auto mt-4 md:mt-0 flex-shrink-0">
+                        <button onclick="router.navigateTo('setting')" class="bg-slate-200 font-bold py-2 px-5 rounded-full hover:bg-slate-300 text-sm">프로필 편집</button>
+                    </div>
+                </div>
+            </section>
+            <div class="border-b mb-8">
+                <nav id="mypage-tabs" class="-mb-px flex space-x-6">
+                    <a href="#" data-tab="reviews" class="tab-active py-4 px-1 border-b-2 font-medium text-sm">내 리뷰</a>
+                    <a href="#" data-tab="columns" class="py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-sm">내 칼럼</a>
+                </nav>
+            </div>
+            <div>
+                <div id="my-reviews-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="https://placehold.co/600x400/f87171/ffffff?text=파스타" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="text-xl font-bold">파스타 팩토리</h3>
+                            <p class="text-slate-600 text-sm my-2 text-yellow-500">★★★★★</p>
+                            <p class="text-slate-700 text-sm">"여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다."</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="my-columns-content" class="grid grid-cols-1 md:grid-cols-3 gap-6 hidden">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <img src="https://placehold.co/600x400/f87171/ffffff?text=파스타" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="text-xl font-bold">홍대 최고의 파스타, 데이트 성공 보장!</h3>
+                            <p class="text-slate-600 text-sm mt-2 h-10 overflow-hidden text-ellipsis">홍대에서 데이트 약속이 잡혔다면 고민하지 말고 '파스타 팩토리'로 가세요. 분위기, 맛, 서비스 뭐 하나 빠지는 게 없는 곳입니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="page-user-profile">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <section id="user-profile-header" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            </section>
+            <div class="border-b mb-8">
+                <nav id="user-profile-tabs" class="-mb-px flex space-x-6">
+                    <a href="#" data-tab="reviews" class="tab-active py-4 px-1 border-b-2 font-medium text-sm">리뷰</a>
+                    <a href="#" data-tab="columns" class="py-4 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-medium text-sm">칼럼</a>
+                </nav>
+            </div>
+            <div>
+                <div id="user-reviews-content">
+                    </div>
+                <div id="user-columns-content" class="hidden">
+                    </div>
+            </div>
+        </div>
+    </template>
+    <template id="page-setting">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-2xl">
+            <h2 class="text-3xl font-bold mb-8">환경설정</h2>
+    
+            <section class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                <h3 class="text-xl font-bold border-b pb-4 mb-6">프로필 설정</h3>
+                <div class="flex flex-col items-center space-y-3 mb-6">
+                    <img src="https://placehold.co/128x128/e879f9/ffffff?text=Me" class="w-24 h-24 rounded-full">
+                    <button type="button" class="text-sm font-semibold text-sky-600 hover:underline">프로필 사진 변경</button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block font-medium text-sm text-slate-700">닉네임</label>
+                        <input type="text" value="데이트장인" class="mt-1 w-full p-2 border rounded-md bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block font-medium text-sm text-slate-700">한줄 소개</label>
+                        <input type="text" placeholder="자신을 소개해보세요." class="mt-1 w-full p-2 border rounded-md bg-slate-50">
+                    </div>
+                </div>
+            </section>
+    
+            <section class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                <h3 class="text-xl font-bold border-b pb-4 mb-6">계정 정보</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm text-slate-700">이메일 주소</span>
+                        <span class="text-slate-500">user@example.com</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium text-sm text-slate-700">비밀번호</span>
+                        <div>
+                            <span class="text-slate-500 mr-4">********</span>
+                            <button class="font-semibold text-sky-600 text-sm hover:underline">변경</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+    
+            <section class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                <h3 class="text-xl font-bold border-b pb-4 mb-6">알림 설정</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium">새로운 팔로워 알림</p>
+                            <p class="text-sm text-slate-500">다른 사용자가 나를 팔로우했을 때 알림을 받습니다.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                        </label>
+                    </div>
+                     <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium">리뷰 반응 알림</p>
+                            <p class="text-sm text-slate-500">내 리뷰에 댓글이 달리거나 좋아요를 받을 때 알림을 받습니다.</p>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" checked>
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                        </label>
+                    </div>
+                     <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-medium">마케팅 정보 수신</p>
+                            <p class="text-sm text-slate-500">이벤트 및 프로모션 정보를 받습니다.</p>
+                        </div>
+                         <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+    
+            <section class="bg-white p-6 rounded-2xl shadow-lg">
+                 <h3 class="text-xl font-bold border-b pb-4 mb-6">기타</h3>
+                 <div class="flex items-center justify-between py-2">
+                     <button onclick="router.navigateTo('notice')" class="hover:text-sky-600">공지사항</button>
+                 </div>
+                 <div class="flex items-center justify-between py-2">
+                     <button onclick="router.navigateTo('inquiry')" class="hover:text-sky-600">서비스 문의</button>
+                 </div>
+                 <div class="flex items-center justify-between py-2 mt-4 border-t">
+                     <button class="text-sm text-red-500 hover:underline">회원 탈퇴</button>
+                 </div>
+            </section>
+        </div>
+    </template>
+    
+    <template id="page-follow-feed">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-xl">
+            <h2 class="text-3xl font-bold mb-8 text-center">❤️ 팔로우 피드</h2>
+            <div id="feed-container" class="space-y-8">
+                </div>
+        </div>
+    </template>
+
+    <template id="page-my-storage"><div class="page-content container mx-auto p-4 md:p-8"><div class="flex justify-between items-center mb-8"><h2 class="text-3xl font-bold">🗂️ 내 저장소</h2><button id="add-folder-btn" class="bg-white text-slate-700 font-semibold py-2 px-4 rounded-md text-sm border hover:bg-slate-50">＋ 새 폴더 만들기</button></div><div id="folder-list-view" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"><div class="bg-white p-4 rounded-lg shadow text-center hover:shadow-lg transition cursor-pointer"><div class="text-5xl">📁</div><p class="font-bold mt-2">강남역 데이트</p><p class="text-sm text-slate-500">12개</p></div><div class="bg-white p-4 rounded-lg shadow text-center hover:shadow-lg transition cursor-pointer"><div class="text-5xl">📁</div><p class="font-bold mt-2">혼밥하기 좋은 곳</p><p class="text-sm text-slate-500">5개</p></div></div></div><div id="add-folder-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"><div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm"><h3 class="text-xl font-bold mb-4">새 폴더 만들기</h3><input id="folder-name-input" type="text" placeholder="폴더 이름을 입력하세요" class="w-full p-2 border rounded-md"><div class="mt-6 flex justify-end gap-3"><button id="cancel-folder-btn" class="bg-slate-200 text-slate-800 font-bold py-2 px-4 rounded-md hover:bg-slate-300">취소</button><button id="create-folder-btn" class="bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700">만들기</button></div></div></div></template>
+    <template id="page-my-reservations"><div class="page-content container mx-auto p-4 md:p-8 max-w-3xl"><h2 class="text-3xl font-bold mb-8">✅ 내 예약 현황</h2><div class="bg-white p-6 rounded-lg shadow-lg space-y-4"><div class="grid grid-cols-4 items-center p-4 border-b"><div><h3 class="font-bold">우부래도</h3><p class="text-sm text-slate-500">오늘 19:00 / 2명</p></div><div class="text-center"><span class="bg-green-100 text-green-700 font-bold py-1 px-3 rounded-full text-sm">예약 확정</span></div><div class="text-center text-slate-500">도착 30분 전</div><div class="text-right"><button class="bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-slate-300">예약 취소</button></div></div><div class="grid grid-cols-4 items-center p-4 border-b"><div><h3 class="font-bold">파스타 팩토리</h3><p class="text-sm text-slate-500">어제 20:00 / 4명</p></div><div class="text-center"><span class="bg-slate-100 text-slate-600 font-bold py-1 px-3 rounded-full text-sm">방문 완료</span></div><div class="text-center"></div><div class="text-right"><button class="bg-sky-500 text-white font-semibold py-2 px-4 rounded-md text-sm hover:bg-sky-600" onclick="router.navigateTo('write-review')">리뷰 작성</button></div></div><div class="grid grid-cols-4 items-center p-4"><div><h3 class="font-bold text-slate-400">툭툭누들타이</h3><p class="text-sm text-slate-400">2025-08-15 / 2명</p></div><div class="text-center"><span class="bg-red-100 text-red-700 font-bold py-1 px-3 rounded-full text-sm">예약 취소</span></div></div></div></div></template>
+    <template id="page-my-reviews"><div class="page-content container mx-auto p-6 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-6">✨ 내 리뷰 관리</h2><div class="space-y-4"><div class="border p-4 rounded-lg"><div class="flex justify-between items-start"><div><h3 class="font-bold text-lg">툭툭누들타이</h3><p class="text-yellow-500 text-lg my-1">★★★★☆</p><p class="text-sm text-slate-600 mt-2">언제 가도 맛있는 곳! 똠얌꿍이 정말 최고예요. 양도 많고 분위기도 좋습니다.</p></div><div class="flex space-x-2"><button class="text-sm hover:text-sky-600" onclick="router.navigateTo('edit-review')">수정</button><button class="text-sm hover:text-red-600">삭제</button></div></div></div></div></div></template>
+    <template id="page-write-review"><div class="page-content container mx-auto p-4 md:p-8 max-w-2xl"><div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-2">"우부래도" 리뷰 작성</h2><p class="text-slate-500 mb-8">맛집에서의 경험은 어떠셨나요? 솔직한 리뷰를 남겨주세요.</p><form class="space-y-6"><div><label class="block text-lg font-semibold text-slate-800 mb-2">별점을 선택해주세요.</label><div class="star-rating flex text-4xl"><span class="star" data-value="1">★</span><span class="star" data-value="2">★</span><span class="star" data-value="3">★</span><span class="star" data-value="4">★</span><span class="star" data-value="5">★</span></div></div><div><label for="review-text" class="block text-lg font-semibold text-slate-800 mb-2">리뷰를 작성해주세요.</label><textarea id="review-text" rows="10" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500" placeholder="음식 맛, 분위기, 서비스 등 상세한 리뷰는 다른 사용자에게 큰 도움이 됩니다."></textarea></div><div class="flex justify-end gap-4 pt-4"><button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 transition">취소</button><button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">리뷰 등록</button></div></form></div></div></template>
+    <template id="page-edit-review"><div class="page-content container mx-auto p-4 md:p-8 max-w-2xl"><div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-2">"툭툭누들타이" 리뷰 수정</h2><p class="text-slate-500 mb-8">작성했던 리뷰를 수정합니다.</p><form class="space-y-6"><div><label class="block text-lg font-semibold text-slate-800 mb-2">별점을 선택해주세요.</label><div class="star-rating flex text-4xl"><span class="star selected" data-value="1">★</span><span class="star selected" data-value="2">★</span><span class="star selected" data-value="3">★</span><span class="star selected" data-value="4">★</span><span class="star" data-value="5">☆</span></div></div><div><label for="review-text-edit" class="block text-lg font-semibold text-slate-800 mb-2">리뷰를 수정해주세요.</label><textarea id="review-text-edit" rows="10" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-sky-500 focus:ring-sky-500">언제 가도 맛있는 곳! 똠얌꿍이 정말 최고예요. 양도 많고 분위기도 좋습니다.</textarea></div><div class="flex justify-end gap-4 pt-4"><button type="button" class="bg-red-500 text-white font-bold py-3 px-6 rounded-full hover:bg-red-600 transition">삭제</button><button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 transition">취소</button><button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">수정 완료</button></div></form></div></div></template>
+    <template id="page-write-column"><div class="page-content container mx-auto p-4 md:p-8 max-w-4xl"><div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-8">새 칼럼 작성</h2><form class="space-y-6"><div><input type="text" id="column-title" class="block w-full rounded-md border-slate-300 shadow-sm text-2xl p-4 focus:border-sky-500 focus:ring-sky-500" placeholder="멋진 제목을 입력하세요"></div><div class="border rounded-md"><div class="flex items-center p-2 border-b bg-slate-50 rounded-t-md"><button type="button" onclick="alert('음식점 검색 모달이 열립니다.')" class="bg-sky-100 text-sky-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-sky-200 transition">➕ 음식점 추가</button><button type="button" onclick="alert('내 리뷰 목록 모달이 열립니다.')" class="ml-2 bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-slate-200 transition">📄 내 리뷰 첨부</button></div><div id="column-content" class="prose max-w-none p-4 h-[500px] overflow-y-auto border-0 focus:ring-0" contenteditable="true" placeholder="칼럼 내용을 작성해주세요..."></div></div><div class="flex justify-end gap-4 pt-4"><button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 transition">취소</button><button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">발행하기</button></div></form></div></div></template>
+    <template id="page-edit-column"><div class="page-content container mx-auto p-4 md:p-8 max-w-4xl"><div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-8">칼럼 수정</h2><form class="space-y-6"><div><input type="text" id="column-title-edit" class="block w-full rounded-md border-slate-300 shadow-sm text-2xl p-4 focus:border-sky-500 focus:ring-sky-500" value="상도동 비건 빵집 순례기"></div><div class="border rounded-md"><div class="flex items-center p-2 border-b bg-slate-50 rounded-t-md"><button type="button" onclick="alert('음식점 검색 모달이 열립니다.')" class="bg-sky-100 text-sky-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-sky-200 transition">➕ 음식점 추가</button><button type="button" onclick="alert('내 리뷰 목록 모달이 열립니다.')" class="ml-2 bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm hover:bg-slate-200 transition">📄 내 리뷰 첨부</button></div><div id="column-content-edit" class="prose max-w-none p-4 h-[500px] overflow-y-auto border-0 focus:ring-0" contenteditable="true" placeholder="칼럼 내용을 작성해주세요..."><p>상도동에는 숨겨진 비건 빵 맛집들이 많습니다. 그 중에서도 제가 가장 사랑하는 곳은 바로 '우부래도'입니다.</p><div class="my-6 p-4 border rounded-lg flex items-center gap-4 not-prose bg-white" contenteditable="false"><img src="https://d12zq4w4guyljn.cloudfront.net/300_300_20250816061123690_photo_7a77fcde6cd2.webp" class="w-24 h-24 rounded-md object-cover flex-shrink-0"><div class="flex-grow"><h4 class="font-bold text-lg">우부래도</h4><p class="text-sm text-slate-500">상도역 베이커리, 비건</p><p class="text-sm mt-1 text-yellow-500">★★★★☆ 4.2</p></div><button onclick="this.parentElement.remove()" class="ml-auto text-slate-400 hover:text-red-500 self-start text-2xl font-bold">×</button></div><p>특히 이곳의 쌀바게트는 정말 일품입니다. 겉은 바삭하고 속은 쫀득한 식감이 살아있죠. 제가 남겼던 리뷰를 첨부해봅니다.</p><div class="my-6 p-4 border-l-4 border-sky-500 bg-sky-50 rounded-lg not-prose" contenteditable="false"><div class="flex justify-between items-start"><div><p class="font-bold">"비건베이커리이고 빵이 대체적으로 맛있어서 재방문하는 곳이에요..."</p><p class="text-sm text-slate-500 mt-2">- '우부래도'에 남긴 내 리뷰</p></div><button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-slate-400 hover:text-red-500 flex-shrink-0 text-2xl font-bold">×</button></div></div><p>여러분도 상도동에 가시면 꼭 들러보세요!</p></div></div><div class="flex justify-end gap-4 pt-4"><button type="button" class="bg-red-500 text-white font-bold py-3 px-6 rounded-full hover:bg-red-600 transition">삭제</button><button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300 transition">취소</button><button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">수정 완료</button></div></form></div></div></template>
+    
+    <template id="page-events">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <h2 class="text-3xl font-bold mb-8">🎉 이벤트 & 프로모션</h2>
+            <div class="space-y-12">
+                <section>
+                    <h3 class="text-xl font-bold mb-4">진행 중인 이벤트</h3>
+                    <div id="ongoing-events-list" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        </div>
+                </section>
+                <section>
+                    <h3 class="text-xl font-bold mb-4 text-slate-400">종료된 이벤트</h3>
+                    <div id="ended-events-list" class="grid grid-cols-1 md:grid-cols-2 gap-8 opacity-60">
+                         </div>
+                </section>
+            </div>
+        </div>
+    </template>
+    <template id="page-event-detail">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-3xl">
+            <div id="event-detail-content" class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                </div>
+        </div>
+    </template>
+    <template id="page-alert"><div class="page-content container mx-auto p-4 md:p-8 max-w-2xl"><div class="bg-white p-6 rounded-2xl shadow-lg"><div class="flex justify-between items-center mb-8"><h2 class="text-3xl font-bold">알림</h2><button id="mark-all-read" class="text-sm font-semibold text-sky-600 hover:underline">모두 읽음으로 표시</button></div><div class="space-y-2"><div class="p-4 rounded-lg flex items-start gap-4 hover:bg-slate-50 bg-sky-50"><div class="flex-grow"><p><span class="font-bold">미스터노포</span>님이 회원님을 팔로우하기 시작했습니다.</p><p class="text-xs text-slate-500 mt-1">15분 전</p></div></div></div></div></div></template>
+    <template id="page-notice"><div class="page-content container mx-auto p-4 md:p-8 max-w-3xl"><div class="bg-white p-6 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-2">공지사항</h2><div class="border-t mt-8"><div class="accordion-item border-b"><button class="accordion-header w-full text-left p-4"><div class="flex justify-between items-center"><span class="font-medium">개인정보처리방침 개정 안내</span></div></button><div class="accordion-content bg-slate-50"><div class="p-5 text-sm">안녕하세요, MEET LOG입니다.</div></div></div></div></div></div></template>
+    <template id="page-service"><div class="page-content container mx-auto p-4 md:p-8 max-w-3xl"><div class="bg-white p-6 rounded-2xl shadow-lg"><h2 class="text-3xl font-bold mb-8">약관 및 정책</h2><div class="border-b"><nav class="flex -mb-px"><button id="tab-terms" class="tab-active w-1/2 py-4 text-center font-medium text-sm border-b-2">이용약관</button><button id="tab-privacy" class="w-1/2 py-4 text-center font-medium text-sm border-b-2 border-transparent">개인정보처리방침</button></nav></div><div id="content-terms" class="mt-6"><h3>제1조 (목적)</h3></div><div id="content-privacy" class="mt-6 hidden"><h3>1. 개인정보의 처리 목적</h3></div></div></div></template>
+    
+    <template id="page-faq">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-3xl">
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold mb-8 text-center">자주 묻는 질문 (FAQ)</h2>
+                <div id="faq-list" class="space-y-2">
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>Q. 리뷰는 어떻게 작성하나요?</span>
+                            <span class="text-sky-500 text-xl">▼</span>
+                        </button>
+                        <div class="accordion-content bg-slate-50">
+                            <div class="p-5 text-sm text-slate-600 leading-relaxed">
+                                A. 리뷰는 실제 방문한 맛집에 대해서만 작성할 수 있습니다. 가게 상세 페이지의 '리뷰쓰기' 버튼을 클릭하거나, [마이페이지 > 내 예약 현황] 메뉴에서 '방문 완료' 상태의 예약 건에 대해 리뷰를 작성하실 수 있습니다.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>Q. 영수증 인증은 무엇인가요?</span>
+                             <span class="text-sky-500 text-xl">▼</span>
+                        </button>
+                        <div class="accordion-content bg-slate-50">
+                            <div class="p-5 text-sm text-slate-600 leading-relaxed">
+                                A. 영수증 인증은 광고나 허위 리뷰를 방지하고, 실제 방문객의 신뢰도 높은 리뷰 문화를 만들기 위한 기능입니다. 리뷰 작성 시 해당 가게에서 결제한 영수증 사진을 첨부하면 '영수증 인증' 뱃지가 리뷰에 표시됩니다.
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>Q. 예약은 어떻게 하나요?</span>
+                             <span class="text-sky-500 text-xl">▼</span>
+                        </button>
+                        <div class="accordion-content bg-slate-50">
+                            <div class="p-5 text-sm text-slate-600 leading-relaxed">
+                                A. 가게 상세 정보에 예약 기능이 활성화된 경우, '예약' 버튼을 통해 원하는 날짜, 시간, 인원을 선택하여 예약을 요청할 수 있습니다. 예약 요청은 가게 주인이 확인 후 '자동 승인' 또는 '수동 승인' 방식으로 처리됩니다.
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item border rounded-lg">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>Q. 비즈니스(사업자) 회원은 어떻게 신청하나요?</span>
+                            <span class="text-sky-500 text-xl">▼</span>
+                        </button>
+                        <div class="accordion-content bg-slate-50">
+                            <div class="p-5 text-sm text-slate-600 leading-relaxed">
+                                A. 가게를 운영하시는 사장님들을 위한 비즈니스 회원 가입은 별도의 입점 심사를 통해 진행됩니다. 홈페이지 우측 상단의 '비즈니스' 메뉴를 통해 입점 문의를 남겨주시거나, 고객센터(1:1 문의)를 통해 문의해주시면 담당자가 확인 후 연락드립니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    
+    <template id="page-inquiry">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-2xl">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                <h2 class="text-3xl font-bold mb-2 text-center">1:1 문의하기</h2>
+                <p class="text-center text-slate-500 mb-8">MEET LOG 이용 중 궁금하거나 불편한 점이 있으신가요?<br>언제든지 문의 남겨주시면 신속하게 답변드리겠습니다.</p>
+                <form class="space-y-6">
+                    <div>
+                        <label for="inquiry-type" class="block font-medium mb-1">문의 유형</label>
+                        <select id="inquiry-type" class="w-full p-3 border rounded-md bg-white border-slate-300">
+                            <option>문의 유형을 선택해주세요.</option>
+                            <option>계정 관련</option>
+                            <option>리뷰/칼럼 관련</option>
+                            <option>예약/결제 관련</option>
+                            <option>오류/개선 제안</option>
+                            <option>입점/비즈니스 문의</option>
+                            <option>기타</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="inquiry-email" class="block font-medium mb-1">답변받을 이메일</label>
+                        <input id="inquiry-email" type="email" placeholder="example@email.com" class="w-full p-3 border rounded-md border-slate-300">
+                    </div>
+                     <div>
+                        <label for="inquiry-title" class="block font-medium mb-1">제목</label>
+                        <input id="inquiry-title" type="text" placeholder="제목을 입력해주세요." class="w-full p-3 border rounded-md border-slate-300">
+                    </div>
+                    <div>
+                        <label for="inquiry-content" class="block font-medium mb-1">문의 내용</label>
+                        <textarea id="inquiry-content" rows="8" class="w-full p-3 border rounded-md border-slate-300" placeholder="문의하실 내용을 자세하게 적어주세요."></textarea>
+                    </div>
+                    <div>
+                         <label for="inquiry-file" class="block font-medium mb-1">파일 첨부 (선택)</label>
+                         <input id="inquiry-file" type="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"/>
+                    </div>
+                    <div class="flex items-center">
+                        <input required type="checkbox" id="privacy-agree" class="h-4 w-4 text-sky-600 focus:ring-sky-500 border-slate-300 rounded">
+                        <label for="privacy-agree" class="ml-2 text-sm text-slate-600">개인정보 수집 및 이용에 동의합니다.</label>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">문의 접수하기</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </template>
+
+
+    <template id="page-columns">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <h2 class="text-3xl font-bold mb-8 text-center">✍️ 맛집 칼럼</h2>
+            <div id="columns-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        </div>
+    </template>
+    <template id="page-column-detail">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-3xl">
+            <div id="column-detail-content" class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                </div>
+        </div>
+    </template>
+    <template id="page-course-recommendation">
+        <div class="page-content container mx-auto p-4 md:p-8">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-center">🗺️ MEET LOG 추천 코스</h2>
+                    <p class="text-center text-slate-500 mt-2">미식과 즐거움이 함께하는 완벽한 하루를 만나보세요.</p>
+                </div>
+                <button onclick="router.navigateTo('create-course')" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600 whitespace-nowrap">➕ 나만의 코스 만들기</button>
+            </div>
+            <div id="course-list" class="space-y-12"></div>
+        </div>
+    </template>
+    <template id="page-create-course">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-3xl">
+            <h2 class="text-3xl font-bold mb-8">🗺️ 나만의 코스 만들기</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-lg space-y-6">
+                <div>
+                    <label class="block font-medium">코스 제목</label>
+                    <input type="text" placeholder="예: 연인과 함께하는 홍대 데이트 코스" class="w-full p-2 border rounded-md mt-1">
+                </div>
+                <div>
+                    <label class="block font-medium">태그</label>
+                    <input type="text" placeholder="예: #홍대 #데이트 #분위기맛집" class="w-full p-2 border rounded-md mt-1">
+                </div>
+                <div class="border-t pt-6">
+                    <h3 class="text-xl font-bold mb-4">코스 단계</h3>
+                    <div id="course-steps-container" class="space-y-4">
+                        </div>
+                    <div class="flex gap-2 mt-4">
+                        <button id="add-restaurant-step" type="button" class="bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm border hover:bg-slate-200">🍝 맛집 추가</button>
+                        <button id="add-cafe-step" type="button" class="bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm border hover:bg-slate-200">☕ 카페 추가</button>
+                        <button id="add-activity-step" type="button" class="bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm border hover:bg-slate-200">🎈 즐길거리 추가</button>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4 pt-6 border-t">
+                    <button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">취소</button>
+                    <button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700">코스 저장하기</button>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="page-share-course">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-2xl">
+            <div id="share-course-content" class="bg-white p-6 rounded-2xl shadow-xl">
+                 </div>
+        </div>
+    </template>
+    
+    <template id="page-business-dashboard">
+        <div class="page-content container mx-auto p-6">
+            <h2 class="text-3xl font-bold mb-8">📊 대시보드</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <button onclick="router.navigateTo('reservation-requests')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                    <p class="text-5xl mb-3">📥</p><p class="font-bold text-lg">예약 요청</p><p class="mt-2 text-lg text-red-500 font-bold">3건</p>
+                </button>
+                <button onclick="router.navigateTo('review-management')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                    <p class="text-5xl mb-3">💬</p><p class="font-bold text-lg">새 리뷰</p><p class="mt-2 text-lg text-red-500 font-bold">5건</p>
+                </button>
+                <button onclick="router.navigateTo('coupon-management')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                    <p class="text-5xl mb-3">🎟️</p><p class="font-bold text-lg">쿠폰 관리</p>
+                </button>
+                <button onclick="router.navigateTo('statistics-dashboard')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                    <p class="text-5xl mb-3">📈</p><p class="font-bold text-lg">통계/분석</p>
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <template id="page-coupon-management">
+        <div class="page-content container mx-auto p-4 md:p-8 max-w-4xl">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">🎟️ 쿠폰 관리</h2>
+                <button onclick="alert('새 쿠폰 만들기 페이지로 이동합니다.')" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600">＋ 새 쿠폰 만들기</button>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="font-bold text-xl mb-4">발행된 쿠폰 목록</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center border p-4 rounded-lg">
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">진행중</span>
+                                <h4 class="font-bold">모든 빵 10% 할인 쿠폰</h4>
+                            </div>
+                            <p class="text-sm text-slate-500 mt-1">유효기간: ~ 2025.10.31</p>
+                        </div>
+                        <div class="space-x-2">
+                            <button class="text-sm hover:text-sky-600">수정</button>
+                            <button class="text-sm hover:text-red-600">삭제</button>
+                        </div>
+                    </div>
+                    <div class="flex items-center border p-4 rounded-lg opacity-60">
+                         <div class="flex-grow">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded-full">만료됨</span>
+                                <h4 class="font-bold text-slate-500">단호박 머핀 1+1</h4>
+                            </div>
+                            <p class="text-sm text-slate-400 mt-1">유효기간: ~ 2025.07.31</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="page-statistics-dashboard"><div class="page-content container mx-auto p-4 md:p-8"><h2 class="text-3xl font-bold mb-8">📊 '우부래도' 통계 분석</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"><div class="bg-white p-6 rounded-lg shadow-lg text-center"><p class="text-slate-500">이번 주 방문자</p><p class="text-3xl font-bold mt-2">566명</p></div><div class="bg-white p-6 rounded-lg shadow-lg text-center"><p class="text-slate-500">이번 주 저장 수</p><p class="text-3xl font-bold mt-2">102회</p></div><div class="bg-white p-6 rounded-lg shadow-lg text-center"><p class="text-slate-500">새 리뷰</p><p class="text-3xl font-bold mt-2">12개</p></div></div><div class="grid grid-cols-1 lg:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl mb-4">주간 방문자 & 저장 수</h3><canvas id="visit-save-chart"></canvas></div><div class="bg-white p-6 rounded-lg shadow-lg"><h3 class="font-bold text-xl mb-4">리뷰 긍정/부정 키워드</h3><canvas id="review-keyword-chart"></canvas></div></div></div></template>
+    <template id="page-menu-management"><div class="page-content container mx-auto p-4 md:p-8 max-w-4xl"><div class="flex justify-between items-center mb-8"><h2 class="text-3xl font-bold">🍽️ 메뉴 관리</h2><button onclick="router.navigateTo('add-menu-item')" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600">➕ 새 메뉴 추가</button></div><div class="bg-white p-6 rounded-lg shadow-lg"><div class="space-y-4"><div class="flex items-center border p-4 rounded-lg"><img src="https://placehold.co/100x100/fde047/ffffff?text=쌀바게트" class="w-20 h-20 rounded-md mr-4 object-cover"><div class="flex-grow"><h4>쌀바게트</h4><p class="text-sm text-slate-500">4,500원</p><p class="text-xs mt-1">100% 우리쌀로 만든 건강한 바게트</p></div><div class="space-x-2"><button class="text-sm">수정</button><button class="text-sm text-red-500">삭제</button></div></div><div class="flex items-center border p-4 rounded-lg"><img src="https://placehold.co/100x100/f9a8d4/ffffff?text=단호박머핀" class="w-20 h-20 rounded-md mr-4 object-cover"><div class="flex-grow"><h4>단호박 머핀 <span class="text-xs bg-yellow-200 text-yellow-800 font-bold px-2 py-1 rounded-full">추천</span></h4><p class="text-sm text-slate-500">4,000원</p><p class="text-xs mt-1">달콤한 단호박이 듬뿍 들어간 비건 머핀</p></div><div class="space-x-2"><button class="text-sm">수정</button><button class="text-sm text-red-500">삭제</button></div></div></div></div></div></template>
+    <template id="page-add-menu-item">
+        <div class="page-content container mx-auto p-8 max-w-2xl">
+            <h2 class="text-3xl font-bold mb-8">➕ 새 메뉴 추가</h2>
+            <form class="bg-white p-6 rounded-lg shadow space-y-6">
+                <div><label class="block font-medium mb-1">메뉴 사진</label><div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-md"><div class="space-y-1 text-center"><svg class="mx-auto h-12 w-12 text-slate-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg><div class="flex text-sm text-slate-600"><label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-sky-600 hover:text-sky-500 focus-within:outline-none"><span>사진 업로드</span><input id="file-upload" name="file-upload" type="file" class="sr-only"></label></div></div></div></div>
+                <div><label class="block font-medium">메뉴 이름</label><input type="text" placeholder="예: 쌀바게트" class="w-full p-2 border rounded-md"></div>
+                <div><label class="block font-medium">가격</label><input type="number" placeholder="숫자만 입력 (예: 4500)" class="w-full p-2 border rounded-md"></div>
+                <div><label class="block font-medium">메뉴 설명</label><textarea rows="3" class="w-full p-2 border rounded-md" placeholder="메뉴에 대한 설명을 입력해주세요. (최대 100자)"></textarea></div>
+                <div class="text-right flex justify-end gap-4"><button type="button" onclick="history.back()" class="bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-full hover:bg-slate-300">취소</button><button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full">메뉴 등록하기</button></div>
+            </form>
+        </div>
+    </template>
+    <template id="page-business-info-edit"><div class="page-content container mx-auto p-8 max-w-3xl"><h2 class="text-3xl font-bold mb-8">📝 내 가게 정보 수정</h2><form class="bg-white p-6 rounded-lg shadow space-y-6"><div><label class="block font-medium">가게 이름</label><input type="text" value="우부래도" class="w-full p-2 border rounded-md"></div><div><label class="block font-medium">가게 소개</label><textarea rows="3" class="w-full p-2 border rounded-md">채식 빵, 우리쌀 빵 등의 메뉴를 판매하는 베이커리입니다.</textarea></div><div><label class="block font-medium">카테고리</label><select class="w-full p-2 border rounded-md mt-1"><option>카페</option><option>한식</option><option>양식</option><option>일식</option><option>중식</option><option>기타</option></select></div><div><label class="block font-medium">대표 키워드 (최대 3개)</label><input type="text" placeholder="예: #비건베이커리, #상도역맛집, #쌀빵" class="w-full p-2 border rounded-md mt-1"></div><div class="text-right"><button type="button" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full">저장하기</button></div></form></div></template>
+    <template id="page-review-management"><div class="page-content container mx-auto p-4 md:p-8 max-w-3xl"><h2 class="text-3xl font-bold mb-8">💬 고객 리뷰 관리</h2><div class="space-y-6"><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><div><p class="font-bold">이시국먹방러</p><p class="text-sm text-yellow-500">★★★☆☆</p></div></div><p class="text-slate-700">빵 맛은 한정적인 재료를 사용한 것 치고 맛이 꽤 있지만 모든 빵 종류가 맛이 좋다는것은 아닙니다.</p><div class="mt-4 pt-4 border-t"><textarea rows="2" class="block w-full rounded-md border-slate-300" placeholder="답글을 작성하세요..."></textarea><div class="text-right mt-2"><button class="bg-sky-500 text-white text-sm font-bold py-2 px-4 rounded-md">답글 등록</button></div></div></div><div class="bg-white p-5 rounded-xl shadow-lg"><div class="flex items-center mb-3"><div><p class="font-bold">둥편</p><p class="text-sm text-yellow-500">★★★★★</p></div></div><p class="text-slate-700">비건베이커리이고 빵이 대체적으로 맛있어서 재방문하는 곳이에요.</p><div class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg"><p class="font-bold text-sm text-sky-700">사장님 댓글</p><p class="text-sm text-slate-600 mt-1">항상 찾아주셔서 감사합니다! 더 맛있는 빵으로 보답하겠습니다 😊</p></div></div></div></div></template>
+    <template id="page-reservation-requests"><div class="page-content container mx-auto p-6 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-6">📥 예약 요청 관리</h2><div class="space-y-4"><div class="flex justify-between items-center border p-4 rounded-lg"><div><p class="font-bold">김*민 님</p><p class="text-sm text-gray-600">오늘 19:00 / 3명</p></div><div class="space-x-2"><button class="bg-sky-500 text-white px-4 py-2 rounded-md text-sm hover:bg-sky-600">승인</button><button class="bg-gray-200 px-4 py-2 rounded-md text-sm hover:bg-gray-300">거절</button></div></div></div></div></template>
+    <template id="page-reservation-calendar"><div class="page-content container mx-auto p-6 bg-white rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-6">🗓️ 예약 캘린더</h2><div class="grid grid-cols-1 divide-y border rounded-lg"><div class="grid grid-cols-4 p-3 items-center"><span class="font-bold">18:00</span> <span class="col-span-2">박*준 님 (4명)</span><span class="text-sm text-green-600">확정</span></div></div></div></template>
+    <template id="page-reservation-settings"><div class="page-content container mx-auto p-8 bg-white rounded-lg shadow-lg max-w-2xl"><h2 class="text-3xl font-bold mb-8">⚙️ 예약 설정</h2><div class="space-y-8"><div><h3 class="font-bold text-lg mb-2">예약 승인 방식</h3><div class="flex space-x-4 bg-gray-100 p-2 rounded-lg"><label class="flex-1 text-center p-2 rounded-md cursor-pointer has-[:checked]:bg-white"><input type="radio" name="approval" class="sr-only" checked> 자동 승인</label><label class="flex-1 text-center p-2 rounded-md cursor-pointer has-[:checked]:bg-white"><input type="radio" name="approval" class="sr-only"> 수동 승인</label></div></div></div></div></template>
+    
+    <template id="page-admin-login"><div class="page-content flex items-center justify-center min-h-full bg-slate-800"><div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-2xl shadow-lg"><div><h1 class="text-center text-3xl font-bold text-sky-600">MEET LOG Admin</h1></div><form class="space-y-6"><div><label for="admin-id" class="sr-only">아이디</label><input required placeholder="관리자 아이디" class="w-full px-3 py-3 border rounded-md"></div><div><label for="admin-pw" class="sr-only">비밀번호</label><input type="password" required placeholder="비밀번호" class="w-full px-3 py-3 border rounded-md"></div><button type="button" onclick="router.navigateTo('admin-dashboard')" class="w-full flex justify-center py-3 text-white bg-sky-600 rounded-md font-bold">로그인</button></form></div></div></template>
+    <template id="page-admin-dashboard"><div class="page-content container mx-auto p-8"><h2 class="text-3xl font-bold mb-8">🖥️ 관리자 대시보드</h2><div class="grid grid-cols-1 md:grid-cols-4 gap-6"><div class="bg-white p-6 rounded-lg shadow"><p>신규 가입자 (오늘)</p><p class="text-3xl font-bold">128</p></div><div class="bg-white p-6 rounded-lg shadow"><p>입점 대기</p><p class="text-3xl font-bold">15</p></div><div class="bg-white p-6 rounded-lg shadow"><p>신고 접수</p><p class="text-3xl font-bold">3</p></div><div class="bg-white p-6 rounded-lg shadow"><p>전체 회원</p><p class="text-3xl font-bold">102,453</p></div></div><div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8"><div class="bg-white p-6 rounded-lg shadow"><h3 class="font-bold text-xl mb-4">바로가기</h3><div class="space-y-2"><a href="#" onclick="router.navigateTo('admin-member-management')" class="block p-2 hover:bg-slate-100 rounded">👥 회원 관리</a><a href="#" onclick="router.navigateTo('admin-business-management')" class="block p-2 hover:bg-slate-100 rounded">🏪 입점 업체 관리</a><a href="#" onclick="router.navigateTo('admin-report-management')" class="block p-2 hover:bg-slate-100 rounded">🗑️ 신고 관리</a><a href="#" onclick="router.navigateTo('admin-cs-management')" class="block p-2 hover:bg-slate-100 rounded">📢 고객센터 관리</a></div></div></div></div></template>
+    <template id="page-admin-member-management"><div class="page-content container mx-auto p-8"><h2 class="text-3xl font-bold mb-8">👥 회원 관리</h2><div class="bg-white p-6 rounded-lg shadow"><table class="w-full text-left"><thead><tr><th class="p-2 border-b">닉네임</th><th class="p-2 border-b">이메일</th><th class="p-2 border-b">가입일</th><th class="p-2 border-b">관리</th></tr></thead><tbody><tr><td class="p-2 border-b">데이트장인</td><td class="p-2 border-b">user1@example.com</td><td class="p-2 border-b">2025-01-15</td><td class="p-2 border-b"><button class="text-red-500">정지</button></td></tr><tr><td class="p-2 border-b">미스터노포</td><td class="p-2 border-b">user2@example.com</td><td class="p-2 border-b">2025-02-01</td><td class="p-2 border-b"><button class="text-red-500">정지</button></td></tr></tbody></table></div></div></template>
+    <template id="page-admin-business-management"><div class="page-content container mx-auto p-8"><h2 class="text-3xl font-bold mb-8">🏪 입점 업체 관리</h2><div class="bg-white p-6 rounded-lg shadow"><h3 class="font-bold text-xl mb-4">입점 대기 목록</h3><div class="space-y-2"><div class="flex justify-between items-center p-2 border rounded-md"><span>새로운 파스타집</span><div class="space-x-2"><button class="bg-sky-500 text-white text-sm py-1 px-3 rounded">승인</button><button class="bg-slate-200 text-sm py-1 px-3 rounded">거절</button></div></div></div></div></div></template>
+    <template id="page-admin-report-management"><div class="page-content container mx-auto p-8"><h2 class="text-3xl font-bold mb-8">🗑️ 신고 관리</h2><div class="bg-white p-6 rounded-lg shadow"><div class="flex justify-between items-center p-2 border-b"><div><p class="font-semibold">'파스타 팩토리' 리뷰</p><p class="text-sm text-slate-500">신고 사유: 부적절한 언어 사용</p></div><div class="space-x-2"><button class="text-sm">리뷰 확인</button><button class="text-sm text-red-500">삭제</button></div></div></div></div></template>
+    <template id="page-admin-cs-management"><div class="page-content container mx-auto p-8"><h2 class="text-3xl font-bold mb-8">📢 고객센터 관리</h2><div class="bg-white p-6 rounded-lg shadow"><h3 class="font-bold text-xl mb-2">공지사항 작성</h3><form class="space-y-2"><input type="text" placeholder="제목" class="w-full p-2 border rounded"><textarea placeholder="내용" rows="5" class="w-full p-2 border rounded"></textarea><button class="bg-sky-500 text-white py-2 px-4 rounded">등록</button></form></div></div></template>
+    <template id="page-admin-company-management">
+    <div class="page-content container mx-auto p-8">
+        <h2 class="text-3xl font-bold mb-8">🏢 회사 계정 승인 관리</h2>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold text-xl mb-4">가입 승인 대기 목록</h3>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center p-3 border rounded-md hover:bg-slate-50">
+                    <div>
+                        <span class="font-bold">우부래도 컴퍼니</span>
+                        <span class="text-sm text-slate-500 ml-2">사업자번호: 123-45-67890</span>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="bg-sky-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-sky-600">승인</button>
+                        <button class="bg-red-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-red-600">거절</button>
+                    </div>
+                </div>
+                 <div class="flex justify-between items-center p-3 border rounded-md hover:bg-slate-50">
+                    <div>
+                        <span class="font-bold">파스타 팩토리 INC</span>
+                        <span class="text-sm text-slate-500 ml-2">사업자번호: 111-22-33333</span>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="bg-sky-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-sky-600">승인</button>
+                        <button class="bg-red-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-red-600">거절</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </template>
+
+
+    <template id="page-hq-dashboard">
+    <div class="page-content container mx-auto p-6">
+        <h2 class="text-3xl font-bold mb-8">'우부래도 컴퍼니' HQ 대시보드</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button onclick="router.navigateTo('hq-branch-management')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">🏪</p><p class="font-bold text-lg">지점 승인 요청</p>
+            </button>
+            <button onclick="router.navigateTo('hq-sales-orders')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">📦</p><p class="font-bold text-lg">수주 관리</p>
+            </button>
+            <button onclick="router.navigateTo('hq-menu-register')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">🎂</p><p class="font-bold text-lg">메뉴등록</p>
+            </button>
+            <button onclick="router.navigateTo('hq-material-settings')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">🥕</p><p class="font-bold text-lg">재료 설정</p>
+            </button>
+        </div>
+    </div>
+    </template>
+
+    <template id="page-hq-branch-management">
+    <div class="page-content container mx-auto p-8">
+        <h2 class="text-3xl font-bold mb-8">🏪 지점 관리</h2>
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h3 class="font-bold text-xl mb-4">신규 지점 추가 요청</h3>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center p-3 border rounded-md">
+                    <div>
+                        <p class="font-bold">우부래도 강남점</p>
+                        <p class="text-sm text-slate-500">주소: 서울시 강남구 테헤란로 123</p>
+                    </div>
+                    <div class="space-x-2">
+                        <button class="bg-sky-500 text-white text-sm font-bold py-1 px-3 rounded-md">승인</button>
+                        <button class="bg-red-500 text-white text-sm font-bold py-1 px-3 rounded-md">거절</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </template>
+
+    <template id="page-hq-purchase-orders">
+    <div class="page-content container mx-auto p-8">
+        <h2 class="text-3xl font-bold mb-8">📦 발주 신청 목록</h2>
+        <div class="bg-white p-6 rounded-lg shadow space-y-4">
+            <div class="p-4 border rounded-lg">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold">상도점 발주 요청</h3>
+                        <p class="text-sm text-slate-500">2025-09-10</p>
+                    </div>
+                    <span class="bg-amber-100 text-amber-700 font-bold py-1 px-3 rounded-full text-sm">확인 대기</span>
+                </div>
+                <div class="mt-4 pt-4 border-t text-sm">
+                    <p> - 우리쌀가루: 20kg</p>
+                    <p> - 단호박: 10box</p>
+                </div>
+                 <div class="text-right mt-4 space-x-2">
+                    <button class="bg-sky-500 text-white text-sm font-bold py-2 px-4 rounded-md">발주 승인</button>
+                    <button class="bg-slate-200 text-sm font-bold py-2 px-4 rounded-md">거절</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </template>
+
+
+    <template id="page-branch-dashboard">
+    <div class="page-content container mx-auto p-6">
+        <h2 class="text-3xl font-bold mb-8">🏪 '우부래도 상도점' 관리</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <button onclick="router.navigateTo('branch-menu')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">🍽️</p><p class="font-bold text-lg">메뉴 관리</p>
+            </button>
+            <button onclick="router.navigateTo('branch-orders-history')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">📋</p><p class="font-bold text-lg">발주 기록</p>
+            </button>
+            <button onclick="router.navigateTo('branch-order')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">📦</p><p class="font-bold text-lg">발주 신청</p>
+            </button>
+             <button onclick="router.navigateTo('review-management')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+                <p class="text-5xl mb-3">💬</p><p class="font-bold text-lg">고객 리뷰</p><p class="mt-2 text-lg text-red-500 font-bold">2건</p>
+            </button>
+        </div>
+    </div>
+    </template>
+
+    <template id="page-branch-inventory">
+        <div class="page-content container mx-auto p-8">
+            <h2 class="text-3xl font-bold mb-8">📋 재고 관리</h2>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th class="p-2 border-b">품목</th>
+                            <th class="p-2 border-b">현재고</th>
+                            <th class="p-2 border-b">단위</th>
+                            <th class="p-2 border-b">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="p-2 border-b">우리쌀가루</td>
+                            <td class="p-2 border-b">5</td>
+                            <td class="p-2 border-b">kg</td>
+                            <td class="p-2 border-b"><button class="text-sky-600 text-sm">수량조정</button></td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 border-b">단호박</td>
+                            <td class="p-2 border-b">2</td>
+                            <td class="p-2 border-b">box</td>
+                            <td class="p-2 border-b"><button class="text-sky-600 text-sm">수량조정</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </template>
+
+    <template id="page-branch-purchase-order">
+     <div class="page-content container mx-auto p-8 max-w-2xl">
+        <h2 class="text-3xl font-bold mb-8">📦 본사 발주 신청</h2>
+        <form class="bg-white p-6 rounded-lg shadow space-y-4">
+            <div id="order-items-container">
+                <div class="flex items-end gap-2">
+                    <div class="flex-grow"><label class="block text-sm">품목</label><input type="text" value="우리쌀가루" class="w-full p-2 border rounded-md"></div>
+                    <div class="w-24"><label class="block text-sm">수량</label><input type="number" value="20" class="w-full p-2 border rounded-md"></div>
+                    <div class="w-24"><label class="block text-sm">단위</label><input type="text" value="kg" class="w-full p-2 border rounded-md bg-slate-100" readonly></div>
+                </div>
+            </div>
+            <button type="button" class="text-sm text-sky-600 font-semibold">+ 품목 추가</button>
+            <div class="text-right pt-4 border-t">
+                <button type="submit" class="bg-sky-600 text-white font-bold py-3 px-8 rounded-full">발주 신청하기</button>
+            </div>
+        </form>
+    </div>
+    </template>
+
+
+
+
+    <script>
+        /**
+         * 목업(Mockup)용 샘플 데이터
+         */
+        const mockData = {
+            restaurants: [ { id: 1, name: '고미정', category: '한식', location: '강남', rating: 95, likes: 1203, image: 'https://placehold.co/600x400/a78bfa/ffffff?text=한정식' }, { id: 2, name: '파스타 팩토리', category: '양식', location: '홍대', rating: 92, likes: 2341, image: 'https://placehold.co/600x400/f87171/ffffff?text=파스타' }, { id: 3, name: '스시 마에', category: '일식', location: '여의도', rating: 98, likes: 1890, image: 'https://placehold.co/600x400/60a5fa/ffffff?text=오마카세' }, { id: 4, name: '치맥 하우스', category: '한식', location: '종로', rating: 88, likes: 3104, image: 'https://placehold.co/600x400/fbbf24/ffffff?text=치킨' }, { id: 5, name: '카페 클라우드', category: '카페', location: '성수', rating: 91, likes: 2880, image: 'https://placehold.co/600x400/34d399/ffffff?text=카페' }, { id: 6, name: '북경 오리', category: '중식', location: '명동', rating: 94, likes: 1550, image: 'https://placehold.co/600x400/f472b6/ffffff?text=중식' }, { id: 7, name: '브루클린 버거', category: '양식', location: '이태원', rating: 90, likes: 2543, image: 'https://placehold.co/600x400/fb923c/ffffff?text=버거' }, { id: 8, name: '소담길', category: '한식', location: '인사동', rating: 93, likes: 980, image: 'https://placehold.co/600x400/c084fc/ffffff?text=보쌈' }, { id: 9, name: '인도 커리 왕', category: '기타', location: '혜화', rating: 89, likes: 2130, image: 'https://placehold.co/600x400/facc15/ffffff?text=커리' }, { id: 10, name: '평양면옥', category: '한식', location: '을지로', rating: 96, likes: 1760, image: 'https://placehold.co/600x400/a3a3a3/ffffff?text=냉면' }, { id: 11, name: '우부래도', category: '베이커리', location: '상도', rating: 77, likes: 850, image: 'https://d12zq4w4guyljn.cloudfront.net/300_300_20250816061123690_photo_7a77fcde6cd2.webp' } ],
+            reviews: [ { id: 1, restaurantId: 2, author: '데이트장인', authorImg: 'https://placehold.co/100x100/e879f9/ffffff?text=U1', rating: 5, content: '여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.' }, { id: 2, restaurantId: 4, author: '퇴근후한잔', authorImg: 'https://placehold.co/100x100/22d3ee/ffffff?text=U2', rating: 4, content: '일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.' }, { id: 3, restaurantId: 1, author: '효녀딸', authorImg: 'https://placehold.co/100x100/f87171/ffffff?text=U3', rating: 5, content: '부모님 생신이라 모시고 갔는데 정말 좋아하셨어요. 음식 하나하나 정성이 느껴져요.' }, { id: 4, restaurantId: 10, author: '미스터노포', authorImg: 'https://placehold.co/100x100/93c5fd/ffffff?text=C2', rating: 5, content: '역시 여름엔 평양냉면이죠. 이 집 육수는 정말 최고입니다.'} ],
+            columnists: [ { id: 1, name: '김맛잘알', image: 'https://placehold.co/150x150/fca5a5/ffffff?text=C1', tagline: '한식 전문가', followers: '12.5K' }, { id: 2, name: '미스터노포', image: 'https://placehold.co/150x150/93c5fd/ffffff?text=C2', tagline: '숨겨진 노포 탐험가', followers: '8.2K' }, { id: 3, name: '빵순이', image: 'https://placehold.co/150x150/fcd34d/ffffff?text=C3', tagline: '디저트/베이커리 전문', followers: '25.1K' }, { id: 4, name: '데이트장인', image: 'https://placehold.co/150x150/e879f9/ffffff?text=Me', tagline: '분위기 맛집 전문', followers: '1.2K' } ],
+            columns: [ 
+                { id: 1, title: "상도동 비건 빵집 '우부래도' 솔직 리뷰", author: "빵순이", image: "https://d12zq4w4guyljn.cloudfront.net/300_300_20250816061123690_photo_7a77fcde6cd2.webp", content: "상도동에는 숨겨진 비건 빵 맛집들이 많습니다. 그 중에서도 제가 가장 사랑하는 곳은 바로 '우부래도'입니다. 특히 이곳의 쌀바게트는 정말 일품입니다. 겉은 바삭하고 속은 쫀득한 식감이 살아있죠. 제가 남겼던 리뷰를 첨부해봅니다. 여러분도 상도동에 가시면 꼭 들러보세요!" }, 
+                { id: 2, title: "을지로 직장인들을 위한 최고의 평양냉면", author: "미스터노포", image: "https://placehold.co/600x400/a3a3a3/ffffff?text=냉면", content: "여름이면 어김없이 생각나는 평양냉면. 을지로의 수많은 노포 중에서도 '평양면옥'은 단연 최고라고 할 수 있습니다. 슴슴하면서도 깊은 육수 맛이 일품입니다. 점심시간에는 웨이팅이 길 수 있으니 조금 서두르는 것을 추천합니다." }, 
+                { id: 3, title: "한식 다이닝의 정수, 강남 '고미정' 방문기", author: "김맛잘알", image: "https://placehold.co/600x400/a78bfa/ffffff?text=한정식", content: "특별한 날, 소중한 사람과 함께할 장소를 찾는다면 강남의 '고미정'을 추천합니다. 정갈한 상차림과 깊은 맛의 한정식 코스는 먹는 내내 감탄을 자아냅니다. 특히 부모님을 모시고 가기에 최고의 장소입니다." },
+                { id: 4, title: "홍대 최고의 파스타, 데이트 성공 보장!", author: "데이트장인", image: "https://placehold.co/600x400/f87171/ffffff?text=파스타", content: "홍대에서 데이트 약속이 잡혔다면 고민하지 말고 '파스타 팩토리'로 가세요. 분위기, 맛, 서비스 뭐 하나 빠지는 게 없는 곳입니다. 특히 트러플 크림 파스타는 꼭 먹어봐야 할 메뉴입니다." }
+            ],
+            courses: [ { title: "홍대 연인들을 위한 감성 데이트 코스", tags: ["#홍대", "#데이트", "#분위기맛집"], steps: [ { type: "맛집", name: "파스타 팩토리", emoji: "🍝", description: "분위기 좋은 곳에서 맛있는 파스타로 데이트 시작!", image: "https://placehold.co/200x200/f87171/ffffff?text=Pasta" }, { type: "카페", name: "카페 클라우드", emoji: "☕", description: "성수동 유명 카페의 홍대 분점! 맛있는 커피는 필수 코스죠.", image: "https://placehold.co/200x200/34d399/ffffff?text=Cafe" }, { type: "볼거리", name: "경의선 책거리", emoji: "📚", description: "소화도 시킬 겸, 책거리를 산책하며 여유를 즐겨보세요.", image: "https://placehold.co/200x200/fbbf24/ffffff?text=Street" }, { type: "즐길거리", name: "방탈출 카페", emoji: "🗝️", description: "함께 머리를 맞대고 문제를 풀며 짜릿한 추억을!", image: "https://placehold.co/200x200/818cf8/ffffff?text=Escape" } ] }, { title: "인사동에서 즐기는 한국의 맛과 멋", tags: ["#인사동", "#가족나들이", "#전통"], steps: [ { type: "맛집", name: "소담길", emoji: "🍖", description: "부드러운 보쌈 정식으로 든든하게 식사하세요.", image: "https://placehold.co/200x200/c084fc/ffffff?text=보쌈" }, { type: "카페", name: "전통 찻집", emoji: "🍵", description: "고즈넉한 한옥에서 향긋한 전통차 한 잔의 여유.", image: "https://placehold.co/200x200/6ee7b7/ffffff?text=Tea" }, { type: "볼거리", name: "쌈지길", emoji: "🛍️", description: "아기자기한 공예품과 상점들을 구경하는 재미가 쏠쏠해요.", image: "https://placehold.co/200x200/fde047/ffffff?text=Shop" } ] } ],
+            events: [
+                { id: 1, status: 'ongoing', title: "여름맞이 리뷰 이벤트", period: "~ 8월 31일까지", image: "https://placehold.co/800x400/fca5a5/ffffff?text=EVENT+1", short_description: "최애 냉면 맛집 리뷰를 남겨주시면 추첨을 통해 포인트를 드려요!", long_description: "무더운 여름, 시원한 냉면 한 그릇만큼 좋은 게 없죠! 여러분이 가장 사랑하는 냉면 맛집을 알려주세요. 정성스러운 리뷰를 작성해주신 분들 중 추첨을 통해 10분께 MEET LOG에서 현금처럼 사용 가능한 10,000 포인트를 드립니다. 지금 바로 참여해보세요!" },
+                { id: 2, status: 'ongoing', title: "'파스타 팩토리' 10% 할인", period: "~ 9월 30일까지", image: "https://placehold.co/800x400/818cf8/ffffff?text=PROMOTION", short_description: "MEET LOG 회원이라면 누구나! '파스타 팩토리'에서 10% 할인 혜택을 받으세요.", long_description: "홍대의 분위기 깡패, '파스타 팩토리'와 MEET LOG가 특별한 제휴를 맺었습니다. 이벤트 기간 동안 MEET LOG 회원임을 인증하시면(마이페이지 제시) 전체 금액의 10%를 할인해드립니다. 맛있는 파스타와 함께 즐거운 시간을 보내세요. (주류 제외, 타 쿠폰 중복 할인 불가)" },
+                { id: 3, status: 'ended', title: "새해 다짐 공유 이벤트", period: "~ 1월 31일까지", image: "https://placehold.co/800x400/a3a3a3/ffffff?text=CLOSED+EVENT", short_description: "새해 맛집 탐방 계획을 공유하고 상품 받아가세요.", long_description: "2025년, 여러분의 맛집 탐방 계획은 무엇인가요? 올해 꼭 가보고 싶은 맛집 리스트나, 나만의 맛집 관련 다짐을 공유해주세요. 재치있는 계획을 세워주신 분들께 선물을 드렸던 이벤트입니다." }
+            ],
+            badges: [
+                { icon: '🏆', name: '첫 리뷰', description: '첫 리뷰를 작성하여 획득' },
+                { icon: '✍️', name: '칼럼니스트 데뷔', description: '첫 칼럼을 발행하여 획득' },
+                { icon: '📸', name: '포토그래퍼', description: '리뷰에 사진 10장 첨부하여 획득' }
+            ],
+            storeNews: [
+                { restaurantId: 11, type: '이벤트', title: '여름 한정! 단호박 빙수 출시!', content: '무더운 여름을 날려버릴 시원하고 달콤한 우부래도표 비건 단호박 빙수가 출시되었습니다. 많은 관심 부탁드립니다!', date: '2025.08.05' }
+            ],
+            coupons: [
+                { restaurantId: 11, title: '모든 빵 10% 할인', description: '평일 점심(12~14시) 방문 시 적용', validity: '~ 2025.10.31', status: 'active' }
+            ],
+
+            feedItems: [
+                { type: 'column', author: '빵순이', columnId: 1, timestamp: '2시간 전' },
+                { type: 'review', author: '미스터노포', reviewId: 4, timestamp: '어제' }
+            ],
+            storages: [
+                { id: 1, name: "강남역 데이트", count: 3, restaurants: [1, 7, 3] },
+                { id: 2, name: "혼밥하기 좋은 곳", count: 2, restaurants: [10, 8] }
+            ],
+            alerts: [
+                { read: false, type: 'follow', from: '미스터노포', content: '회원님을 팔로우하기 시작했습니다.', timestamp: '15분 전' },
+                { read: true, type: 'comment', from: '홍대생', content: '회원님의 [홍대 최고의 파스타...] 칼럼에 댓글을 남겼습니다.', timestamp: '1시간 전' },
+                { read: true, type: 'notice', content: '[공지] 개인정보처리방침 개정 안내', timestamp: '3일 전' }
+            ],
+            notices: [
+                { id: 1, title: '개인정보처리방침 개정 안내', date: '2025-09-01', content: '안녕하세요, MEET LOG입니다. 2025년 9월 1일부터 개인정보처리방침이 개정되어 안내드립니다. 주요 개정 내용은...' },
+                { id: 2, title: '서버 점검 안내 (09/15 02:00 ~ 04:00)', date: '2025-09-08', content: '보다 안정적인 서비스 제공을 위해 서버 점검을 실시할 예정입니다. 점검 시간에는 서비스 이용이 원활하지 않을 수 있으니 양해 부탁드립니다.' }
+            ],
+            reservations: [
+                { id: 1, restaurantId: 11, name: "우부래도", user: "김*민", datetime: "오늘 19:00", party: 3, status: 'pending' },
+                { id: 2, restaurantId: 2, name: "파스타 팩토리", user: "이*영", datetime: "오늘 20:00", party: 2, status: 'confirmed' },
+                { id: 3, restaurantId: 1, name: "고미정", user: "박*준", datetime: "어제 18:30", party: 4, status: 'declined' }
+            ],
+            purchaseOrders: [
+                { id: 1, branch: "상도점", date: "2025-09-10", status: 'requested', items: [{name: '우리쌀가루', qty: 20, unit: 'kg'}, {name: '단호박', qty: 10, unit: 'box'}] },
+                { id: 2, branch: "강남점", date: "2025-09-09", status: 'shipped', items: [{name: '우리쌀가루', qty: 30, unit: 'kg'}] },
+                { id: 3, branch: "홍대점", date: "2025-09-09", status: 'completed', items: [{name: '홍국쌀', qty: 15, unit: 'kg'}] }
+            ],
+            inquiries: [
+                { id: 1, type: '예약/결제 관련', title: '예약 취소가 안돼요', status: 'completed', date: '2025-09-05' },
+                { id: 2, type: '계정 관련', title: '닉네임 변경 문의', status: 'pending', date: '2025-09-08' }
+            ]
+        };
+
+        const router = {
+            routes: {
+                'info': { layout: 'main', footer: 'info', title: '소개' },
+                'main': { layout: 'main', footer: 'main', title: '홈' },
+                'login': { layout: 'fullscreen', title: '로그인' }, 
+                'register': { layout: 'fullscreen', title: '회원가입' }, 
+                'idpwsearch': { layout: 'fullscreen', title: '아이디/비밀번호 찾기' },
+                'shop-detail': { layout: 'main', footer: 'main', title: '맛집 상세' }, 
+                'shop-detail-2': { layout: 'main', footer: 'main', title: '맛집 상세' },
+                'mappage': { layout: 'main', footer: 'main', title: '지도' }, 
+                'sector': { layout: 'main', footer: 'main', title: '맛집 찾기' },
+                'columns': { layout: 'main', footer: 'main', title: '칼럼' },
+                'column-detail': { layout: 'main', footer: 'main', title: '칼럼 상세' },
+                'create-course': { layout: 'main', footer: 'main', title: '나만의 코스 만들기' },
+                'share-course': { layout: 'main', footer: 'main', title: '코스 공유' },
+                'mypage': { layout: 'main', footer: 'main', title: '마이페이지' }, 
+                'user-profile': { layout: 'main', footer: 'main', title: '사용자 프로필' }, 
+                'setting': { layout: 'main', footer: 'main', title: '환경설정' },
+                'follow-feed': { layout: 'main', footer: 'main', title: '팔로우 피드' }, 
+                'my-storage': { layout: 'main', footer: 'main', title: '내 저장소' },
+                'my-reservations': { layout: 'main', footer: 'main', title: '내 예약 현황' }, 
+                'my-reviews': { layout: 'main', footer: 'main', title: '내 리뷰 관리' },
+                'write-review': { layout: 'main', footer: 'main', title: '리뷰 작성' }, 
+                'edit-review': { layout: 'main', footer: 'main', title: '리뷰 수정' },
+                'write-column': { layout: 'main', footer: 'main', title: '새 칼럼 작성' }, 
+                'edit-column': { layout: 'main', footer: 'main', title: '칼럼 수정' },
+                'course-recommendation': { layout: 'main', footer: 'main', title: '추천 코스' },
+                'events': { layout: 'main', footer: 'main', title: '이벤트' },
+                'event-detail': { layout: 'main', footer: 'main', title: '이벤트 상세' }, 
+                'alert': { layout: 'main', footer: 'main', title: '알림' },
+                'notice': { layout: 'main', footer: 'main', title: '공지사항' }, 
+                'service': { layout: 'main', footer: 'main', title: '약관 및 정책' },
+                'faq': { layout: 'main', footer: 'main', title: 'FAQ' },
+                'inquiry': { layout: 'main', footer: 'main', title: '1:1 문의' },
+                'business-dashboard': { layout: 'main', footer: 'main', title: '비즈니스 대시보드' },
+                'statistics-dashboard': { layout: 'main', footer: 'main', title: '통계 분석' },
+                'menu-management': { layout: 'main', footer: 'main', title: '메뉴 관리' },
+                'coupon-management': { layout: 'main', footer: 'main', title: '쿠폰 관리' }, // 신규 라우트 추가
+                'add-menu-item': { layout: 'main', footer: 'main', title: '새 메뉴 추가' },
+                'business-info-edit': { layout: 'main', footer: 'main', title: '가게 정보 수정' },
+                'review-management': { layout: 'main', footer: 'main', title: '고객 리뷰 관리' },
+                'reservation-requests': { layout: 'main', footer: 'main', title: '예약 요청 관리' },
+                'reservation-calendar': { layout: 'main', footer: 'main', title: '예약 캘린더' },
+                'reservation-settings': { layout: 'main', footer: 'main', title: '예약 설정' },
+                'admin-login': { layout: 'fullscreen', title: '관리자 로그인' },
+                'admin-dashboard': { layout: 'main', footer: 'main', title: '관리자 대시보드' },
+                'admin-member-management': { layout: 'main', footer: 'main', title: '회원 관리' },
+                'admin-business-management': { layout: 'main', footer: 'main', title: '입점 업체 관리' },
+                'admin-report-management': { layout: 'main', footer: 'main', title: '신고 관리' },
+                'admin-cs-management': { layout: 'main', footer: 'main', title: '고객센터 관리' },
+
+                'admin-company-management': { layout: 'main', footer: 'main', title: '회사 계정 관리' },
+                'hq-dashboard': { layout: 'main', footer: 'main', title: 'HQ 대시보드' },
+                'hq-branch-management': { layout: 'main', footer: 'main', title: '지점 관리' },
+                'hq-purchase-orders': { layout: 'main', footer: 'main', title: '발주 관리' },
+                'branch-dashboard': { layout: 'main', footer: 'main', title: '지점 대시보드' },
+                'branch-inventory': { layout: 'main', footer: 'main', title: '재고 관리' },
+                'branch-purchase-order': { layout: 'main', footer: 'main', title: '발주 신청' },
+
+            },
+            currentPage: '',
+            navigateTo(pageId, params = {}) {
+                this.currentPage = this.routes[pageId] ? pageId : 'info';
+                const config = this.routes[this.currentPage];
+                
+                document.title = `MEET LOG - ${config.title || '맛집로그'}`;
+                
+                const header = document.getElementById('global-header');
+                const footer = document.getElementById('global-footer');
+                const mainContent = document.getElementById('main-content');
+                
+                if (config.layout === 'fullscreen') {
+                    header.style.display = 'none';
+                    footer.style.display = 'none';
+                } else {
+                    header.style.display = 'block';
+                    footer.style.display = 'block';
+                    header.innerHTML = document.getElementById('header-main').innerHTML;
+                    footer.innerHTML = document.getElementById(config.footer === 'info' ? 'footer-info' : 'footer-main').innerHTML;
+                    footer.className = config.footer === 'info' ? 'bg-slate-800 text-slate-400 py-12' : 'bg-white py-8 border-t';
+                }
+
+                const template = document.getElementById(`page-${this.currentPage}`);
+                mainContent.innerHTML = '';
+                if(template) {
+                   mainContent.appendChild(template.content.cloneNode(true));
+                }
+                
+                if (typeof pageInitializers[this.currentPage] === 'function') {
+                    pageInitializers[this.currentPage](params);
+                }
+                window.scrollTo(0, 0);
+            }
+        };
+
+        function initializeStarRating(containerSelector) {
+            const container = document.querySelector(containerSelector);
+            if (!container) return;
+            const stars = container.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    let value = star.dataset.value;
+                    stars.forEach(s => {
+                        s.classList.toggle('selected', s.dataset.value <= value);
+                    });
+                });
+            });
+        }
+        
+        const pageInitializers = {
+            main: function() {
+                document.getElementById('top-10-list').innerHTML = mockData.restaurants.slice(0, 10).map((r, index) => `<div class="flex-shrink-0 w-60 md:w-64 bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition duration-300 group cursor-pointer" onclick="router.navigateTo('shop-detail-2')"><div class="relative"><img src="${r.image}" alt="${r.name}" class="w-full h-32 object-cover"><div class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full">${index + 1}</div><div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent"><h3 class="text-white text-lg font-bold truncate">${r.name}</h3><p class="text-white text-sm">${r.location}</p></div></div><div class="p-3"><p class="text-sm text-slate-600 truncate">❤️ ${r.likes.toLocaleString()}</p><div class="text-sm font-bold text-sky-600 mt-2">${r.rating}점</div></div></div>`).join('');
+                document.getElementById('review-list').innerHTML = mockData.reviews.map(review => { const restaurant = mockData.restaurants.find(r => r.id === review.restaurantId); return `<div class="bg-white p-5 rounded-xl shadow-lg transform hover:scale-105 transition"><div class="flex items-center mb-3"><img src="${review.authorImg}" class="w-12 h-12 rounded-full mr-4"><div><p class="font-bold">${review.author}</p><p class="text-sm text-yellow-500">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</p></div></div><p class="text-slate-700 h-16 overflow-hidden text-ellipsis">${review.content}</p><div class="mt-3 pt-3 border-t text-sm font-semibold text-sky-700">${restaurant.name}</div></div>`; }).join('');
+                document.getElementById('top-columnists-list').innerHTML = mockData.columnists.map(c => `<div class="flex-shrink-0 w-48 bg-white rounded-lg shadow-md text-center p-4 cursor-pointer transform hover:-translate-y-1 transition" onclick="router.navigateTo('user-profile', { name: '${c.name}' })"><img src="${c.image}" class="w-24 h-24 rounded-full mx-auto shadow-lg"><h4 class="font-bold text-lg mt-3">${c.name}</h4><p class="text-sm text-slate-500">${c.tagline}</p><p class="text-xs mt-2">팔로워 ${c.followers}</p></div>`).join('');
+                const searchForm = document.getElementById('main-search-form');
+                if (searchForm) {
+                    searchForm.addEventListener('submit', function(event) {
+                        event.preventDefault();
+                        document.getElementById('default-main-content').classList.add('hidden');
+                        document.getElementById('default-main-content-bottom').classList.add('hidden');
+                        const resultSection = document.getElementById('search-result-section');
+                        resultSection.classList.remove('hidden');
+                        const resultList = document.getElementById('search-result-list');
+                        const searchResults = mockData.restaurants.filter(r => ['강남', '종로', '인사동'].includes(r.location)); 
+                        resultList.innerHTML = searchResults.map(r => `<div class="bg-white p-4 rounded-xl shadow-lg flex gap-4 items-center hover:shadow-xl transition cursor-pointer" onclick="router.navigateTo('shop-detail-2')"><img src="${r.image}" class="w-32 h-32 rounded-md object-cover flex-shrink-0"><div class="flex-1"><div><div class="flex justify-between items-start"><div><h3 class="text-xl font-bold">${r.name}</h3><p class="text-sm text-slate-500 mt-1">${r.location} · ${r.category}</p></div><span class="text-2xl font-bold text-sky-600">${r.rating}<span class="text-base">점</span></span></div><div class="flex items-center text-sm my-2"><p class="text-slate-600">❤️ ${r.likes.toLocaleString()}명이 저장했어요</p></div></div></div></div>`).join('');
+                    });
+                }
+            },
+            'follow-feed': function() {
+                const container = document.getElementById('feed-container');
+                if (!container) return;
+                const feedContent = mockData.feedItems.map(item => {
+                    if (item.type === 'column') {
+                        const column = mockData.columns.find(c => c.id === item.columnId);
+                        const author = mockData.columnists.find(c => c.name === column.author);
+                        return `<div class="bg-white rounded-2xl shadow-lg overflow-hidden"><div class="p-4 flex items-center"><img src="${author.image}" class="w-10 h-10 rounded-full mr-3"><div><p class="font-bold">${author.name}</p><p class="text-xs text-slate-500">${item.timestamp}</p></div></div><img src="${column.image}" class="w-full h-auto object-cover"><div class="p-4"><p class="text-slate-800"><b class="font-bold">${author.name}</b>님이 새로운 칼럼 <b>'${column.title}'</b>을 발행했습니다.</p></div></div>`;
+                    }
+                    if (item.type === 'review') {
+                        const review = mockData.reviews.find(r => r.id === item.reviewId);
+                        const restaurant = mockData.restaurants.find(r => r.id === review.restaurantId);
+                        return `<div class="bg-white rounded-2xl shadow-lg overflow-hidden"><div class="p-4 flex items-center"><img src="${review.authorImg}" class="w-10 h-10 rounded-full mr-3"><div><p class="font-bold">${review.author}</p><p class="text-xs text-slate-500">${item.timestamp}</p></div></div><div class="p-4"><p class="text-slate-800"><b class="font-bold">${review.author}</b>님이 <b>${restaurant.name}</b>에 새로운 리뷰를 남겼습니다: <span class="bg-slate-100 p-2 rounded-md block mt-2">"${review.content}"</span></p></div></div>`;
+                    }
+                }).join('');
+                container.innerHTML = feedContent || '<p class="text-center text-slate-500">팔로우하는 사용자의 게시물이 없습니다.</p>';
+            },
+            login: function() {
+                const tabsContainer = document.getElementById('login-tabs');
+                if (!tabsContainer) return;
+
+                const tabs = tabsContainer.querySelectorAll('button');
+                const personalContent = document.getElementById('login-personal-content');
+                const businessContent = document.getElementById('login-business-content');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        // 모든 탭 스타일 초기화
+                        tabs.forEach(t => t.classList.remove('tab-active'));
+                        // 클릭된 탭에 활성 스타일 적용
+                        tab.classList.add('tab-active');
+
+                        // 탭에 따라 컨텐츠 표시/숨김
+                        if (tab.dataset.tab === 'personal') {
+                            personalContent.classList.remove('hidden');
+                            businessContent.classList.add('hidden');
+                        } else {
+                            personalContent.classList.add('hidden');
+                            businessContent.classList.remove('hidden');
+                        }
+                    });
+                });
+            },
+            columns: function() {
+                const listEl = document.getElementById('columns-list');
+                listEl.innerHTML = mockData.columns.map(col => `
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer" onclick="router.navigateTo('column-detail', { id: ${col.id} })">
+                        <img src="${col.image}" class="w-full h-48 object-cover">
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold mb-2">${col.title}</h3>
+                            <p class="text-slate-600 text-sm mb-4">by ${col.author}</p>
+                            <p class="text-slate-700 text-sm leading-relaxed h-20 overflow-hidden text-ellipsis">${col.content}</p>
+                            <span class="text-sky-600 font-semibold text-sm mt-4 inline-block">더 읽어보기 &rarr;</span>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            'column-detail': function(params) {
+                const contentEl = document.getElementById('column-detail-content');
+                const column = mockData.columns.find(c => c.id === params.id);
+                if (column) {
+                    const authorInfo = mockData.columnists.find(c => c.name === column.author);
+                    
+                    // --- ▼ 기존 innerHTML에 좋아요/공유, 댓글 섹션 구조 추가 ▼ ---
+                    contentEl.innerHTML = `
+                        <img src="${column.image}" alt="${column.title}" class="w-full h-72 object-cover">
+                        <div class="p-6 md:p-10">
+                            <h1 class="text-4xl font-black mb-4">${column.title}</h1>
+                            <div class="flex items-center mb-8">
+                                <a href="#" onclick="router.navigateTo('user-profile', { name: '${column.author}' })">
+                                    <img src="${authorInfo.image}" class="w-12 h-12 rounded-full mr-4">
+                                </a>
+                                <div>
+                                    <a href="#" onclick="router.navigateTo('user-profile', { name: '${column.author}' })" class="font-bold">${column.author}</a>
+                                    <p class="text-sm text-slate-500">${authorInfo.tagline}</p>
+                                </div>
+                                <button class="ml-auto bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600 text-sm">＋ 팔로우</button>
+                            </div>
+                            <div class="prose max-w-none text-slate-800">
+                                <p>${column.content.replace(/\n/g, '</p><p>')}</p>
+                            </div>
+
+                            <div class="flex items-center justify-between py-6 my-6 border-t border-b">
+                                <button onclick="alert('좋아요를 눌렀습니다!')" class="flex items-center gap-2 text-slate-600 hover:text-red-500 transition font-semibold">
+                                    <span class="text-xl">❤️</span>
+                                    <span>좋아요 <span class="font-bold">${Math.floor(Math.random() * 200) + 50}</span></span>
+                                </button>
+                                <button onclick="alert('공유 링크가 복사되었습니다!')" class="flex items-center gap-2 text-slate-600 hover:text-sky-600 transition font-semibold">
+                                    <span class="text-xl">🔗</span>
+                                    <span>공유하기</span>
+                                </button>
+                            </div>
+                            
+                            <section id="comments-section" class="mt-8">
+                                <h3 class="text-2xl font-bold mb-4">댓글 <span id="comment-count">0</span></h3>
+                                <form class="mb-6">
+                                    <textarea rows="3" class="w-full p-3 border rounded-md focus:ring-sky-500 focus:border-sky-500" placeholder="따뜻한 댓글을 남겨주세요..."></textarea>
+                                    <div class="text-right mt-2">
+                                        <button type="button" onclick="alert('댓글이 등록되었습니다!')" class="bg-slate-800 text-white font-bold py-2 px-5 rounded-md hover:bg-slate-900 transition-colors">등록</button>
+                                    </div>
+                                </form>
+                                <div id="comment-list" class="space-y-6 border-t pt-6">
+                                    </div>
+                            </section>
+                            </div>
+                    `;
+
+                    // --- ▼ 댓글 목록을 동적으로 생성하는 로직 추가 ▼ ---
+                    const commentListEl = document.getElementById('comment-list');
+                    const commentCountEl = document.getElementById('comment-count');
+                    const commentsForColumn = mockData.comments.filter(c => c.columnId === column.id);
+
+                    if (commentListEl && commentCountEl && commentsForColumn.length > 0) {
+                        commentCountEl.textContent = commentsForColumn.length;
+                        commentListEl.innerHTML = commentsForColumn.map(comment => `
+                            <div class="flex items-start space-x-3">
+                                <img src="${comment.authorImg}" class="w-10 h-10 rounded-full flex-shrink-0">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-2">
+                                        <p class="font-bold text-sm">${comment.author}</p>
+                                        <p class="text-xs text-slate-400">2025.08.20</p>
+                                    </div>
+                                    <p class="text-slate-700 mt-1">${comment.content}</p>
+                                </div>
+                            </div>
+                        `).join('');
+                    } else if(commentListEl) {
+                        commentListEl.innerHTML = `<p class="text-center text-slate-500 py-4">아직 등록된 댓글이 없습니다.</p>`;
+                    }
+                    
+                } else {
+                    contentEl.innerHTML = `<p class="p-8 text-center">칼럼 정보를 찾을 수 없습니다.</p>`;
+                }
+            },
+            events: function() {
+                const ongoingListEl = document.getElementById('ongoing-events-list');
+                const endedListEl = document.getElementById('ended-events-list');
+                const renderEventItem = (event) => `<div class="bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform hover:-translate-y-1 transition-transform duration-300" onclick="router.navigateTo('event-detail', { id: ${event.id} })"><img src="${event.image}" class="w-full h-48 object-cover"><div class="p-6"><h3>${event.title}</h3><p class="text-sm text-slate-500">기간: ${event.period}</p><p class="mt-2">${event.short_description}</p></div></div>`;
+                ongoingListEl.innerHTML = mockData.events.filter(e => e.status === 'ongoing').map(renderEventItem).join('');
+                endedListEl.innerHTML = mockData.events.filter(e => e.status === 'ended').map(renderEventItem).join('');
+            },
+            'event-detail': function(params) {
+                const contentEl = document.getElementById('event-detail-content');
+                const event = mockData.events.find(e => e.id === params.id);
+                if (event) {
+                    contentEl.innerHTML = `<img src="${event.image}" alt="${event.title}" class="w-full h-72 object-cover"><div class="p-6 md:p-10"><h1 class="text-3xl font-bold mb-2">${event.title}</h1><p class="text-slate-500 font-medium mb-6">이벤트 기간: ${event.period}</p><div class="prose max-w-none text-slate-800"><p>${event.long_description.replace(/\n/g, '</p><p>')}</p></div>${event.status === 'ongoing' ? '<div class="mt-8 pt-6 border-t"><button class="w-full bg-sky-600 text-white font-bold py-3 px-8 rounded-full hover:bg-sky-700 transition">이벤트 참여하기</button></div>' : ''}</div>`;
+                } else {
+                    contentEl.innerHTML = `<p class="p-8 text-center">이벤트 정보를 찾을 수 없습니다.</p>`;
+                }
+            },
+            'course-recommendation': function() {
+                const listEl = document.getElementById('course-list');
+                listEl.innerHTML = mockData.courses.map((course, index) => `<section class="bg-white p-6 rounded-2xl shadow-xl"><div class="flex justify-between items-start"><div><h3 class="text-2xl font-bold">${course.title}</h3><div class="flex flex-wrap gap-2 mt-2 mb-6">${course.tags.map(tag => `<span class="text-xs font-semibold bg-sky-100 text-sky-700 px-2 py-1 rounded-full">${tag}</span>`).join('')}</div></div><button onclick="router.navigateTo('share-course', { id: ${index} })" class="bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-md text-sm border hover:bg-slate-200">🔗 공유</button></div><div class="relative border-l-2 border-sky-200 pl-8 space-y-8">${course.steps.map((step, stepIndex) => `<div class="relative"><div class="absolute -left-10 top-2 w-4 h-4 bg-sky-500 rounded-full border-2 border-white"></div><div class="flex items-start gap-4"><img src="${step.image}" class="w-24 h-24 rounded-lg object-cover shadow-md"><div><p class="text-sm text-slate-500">${stepIndex+1}. ${step.type}</p><h4 class="text-lg font-bold">${step.emoji} ${step.name}</h4><p class="text-sm text-slate-600 mt-1">${step.description}</p></div></div></div>`).join('')}</div></section>`).join('');
+            },
+            'create-course': function() {
+                const container = document.getElementById('course-steps-container');
+                let stepCount = 0;
+                function addStep(type, emoji, placeholder) {
+                    stepCount++;
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'flex items-start gap-3 p-4 border rounded-lg bg-slate-50 relative';
+                    stepEl.innerHTML = `<div class="flex-shrink-0 text-xl">${emoji}</div><div class="flex-grow"><p class="font-bold text-slate-700">Step ${stepCount}. ${type}</p><input type="text" placeholder="${placeholder}" class="w-full p-1 border-b bg-transparent mt-1 focus:outline-none focus:border-sky-500"></div><button class="remove-step-btn absolute top-2 right-2 text-slate-400 hover:text-red-500 font-bold text-lg">×</button>`;
+                    container.appendChild(stepEl);
+                    stepEl.querySelector('.remove-step-btn').addEventListener('click', () => { stepEl.remove(); });
+                }
+                document.getElementById('add-restaurant-step').addEventListener('click', () => addStep('맛집', '🍝', '맛집 이름을 검색하여 추가하세요'));
+                document.getElementById('add-cafe-step').addEventListener('click', () => addStep('카페', '☕', '카페 이름을 검색하여 추가하세요'));
+                document.getElementById('add-activity-step').addEventListener('click', () => addStep('즐길거리', '🎈', '즐길거리 내용을 입력하세요'));
+                addStep('맛집', '🍝', '맛집 이름을 검색하여 추가하세요');
+                addStep('카페', '☕', '카페 이름을 검색하여 추가하세요');
+            },
+            'share-course': function(params) {
+                const contentEl = document.getElementById('share-course-content');
+                const course = mockData.courses[params.id];
+                if (course) {
+                    contentEl.innerHTML = `<div class="text-center"><p class="text-sm font-semibold text-sky-600">MEET LOG 추천 코스</p><h2 class="text-3xl font-bold mt-2">${course.title}</h2><div class="flex flex-wrap gap-2 justify-center mt-4">${course.tags.map(tag => `<span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded-full">${tag}</span>`).join('')}</div></div><div class="mt-8 space-y-6">${course.steps.map((step, index) => `<div class="flex items-center gap-4"><div class="flex-shrink-0 w-12 h-12 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-lg">${index+1}</div><div><h4 class="font-bold">${step.emoji} ${step.name}</h4><p class="text-sm text-slate-600">${step.description}</p></div></div>`).join('')}</div><div class="mt-8 pt-6 border-t flex flex-col items-center gap-3"><button class="w-full max-w-xs bg-yellow-400 text-black font-bold py-3 rounded-full hover:bg-yellow-500">카카오톡으로 공유하기</button><button id="copy-url-btn" class="w-full max-w-xs bg-slate-700 text-white font-bold py-3 rounded-full hover:bg-slate-800">URL 복사하기</button></div>`;
+                    document.getElementById('copy-url-btn').addEventListener('click', (e) => {
+                        navigator.clipboard.writeText(window.location.href).then(() => { e.target.textContent = '✅ 복사 완료!'; setTimeout(() => { e.target.textContent = 'URL 복사하기'; }, 2000); });
+                    });
+                } else {
+                     contentEl.innerHTML = `<p class="p-8 text-center">코스 정보를 찾을 수 없습니다.</p>`;
+                }
+            },
+            'my-storage': function() {
+                const modal = document.getElementById('add-folder-modal');
+                const addBtn = document.getElementById('add-folder-btn');
+                const cancelBtn = document.getElementById('cancel-folder-btn');
+                const createBtn = document.getElementById('create-folder-btn');
+                const input = document.getElementById('folder-name-input');
+                addBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+                cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+                modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+                createBtn.addEventListener('click', () => {
+                    if (input.value.trim() === '') { alert('폴더 이름을 입력해주세요.'); return; }
+                    alert(`'${input.value}' 폴더가 생성되었습니다.`);
+                    input.value = '';
+                    modal.classList.add('hidden');
+                });
+            },
+            'mypage': function() {
+                const badgesContainer = document.getElementById('my-badges');
+                if (badgesContainer) {
+                    badgesContainer.innerHTML = mockData.badges.map(badge => `<div class="text-center" title="${badge.description}"><span class="text-2xl">${badge.icon}</span><p class="text-xs font-semibold text-slate-600">${badge.name}</p></div>`).join('');
+                }
+                const tabs = document.querySelectorAll('#mypage-tabs a');
+                const reviewContent = document.getElementById('my-reviews-content');
+                const columnContent = document.getElementById('my-columns-content');
+                const myColumns = mockData.columns.filter(c => c.author === '데이트장인'); 
+                if (myColumns.length > 0) { columnContent.innerHTML = myColumns.map(col => `<div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform"><img src="${col.image}" class="w-full h-48 object-cover"><div class="p-4"><h3 class="text-xl font-bold">${col.title}</h3><p class="text-slate-600 text-sm mt-2 h-10 overflow-hidden text-ellipsis">${col.content}</p></div></div>`).join(''); } else { columnContent.innerHTML = `<div class="text-center text-slate-500 col-span-full py-8">작성한 칼럼이 없습니다.</div>`; }
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        tabs.forEach(t => t.classList.remove('tab-active'));
+                        e.currentTarget.classList.add('tab-active');
+                        if (e.currentTarget.dataset.tab === 'reviews') {
+                            reviewContent.classList.remove('hidden');
+                            columnContent.classList.add('hidden');
+                        } else {
+                            reviewContent.classList.add('hidden');
+                            columnContent.classList.remove('hidden');
+                        }
+                    });
+                });
+            },
+            'user-profile': function(params) {
+                if (!params.name) return;
+                const columnist = mockData.columnists.find(c => c.name === params.name);
+                if (!columnist) { document.getElementById('main-content').innerHTML = '<p class="text-center p-8">사용자를 찾을 수 없습니다.</p>'; return; }
+                document.getElementById('user-profile-header').innerHTML = `<div class="flex flex-col md:flex-row items-center"><img src="${columnist.image}" class="w-32 h-32 rounded-full shadow-md flex-shrink-0"><div class="md:ml-8 mt-4 md:mt-0 text-center md:text-left w-full"><div class="flex items-center justify-center md:justify-start gap-4"><h2 class="text-3xl font-bold">${columnist.name}</h2><span class="bg-green-100 text-green-700 font-bold text-sm px-3 py-1 rounded-full">Lv. 8 프로탐방러</span></div><p class="text-slate-500 mt-1">${columnist.tagline}</p>
+                                        <div class="flex justify-center md:justify-start space-x-6 mt-4 text-center">
+                            <div><span class="font-bold text-lg">${columnist.followers}</span><p class="text-sm text-slate-500">팔로워</p></div>
+                            <div><span class="font-bold text-lg">${Math.floor(Math.random() * 200)}</span><p class="text-sm text-slate-500">팔로잉</p></div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-200 flex justify-center md:justify-start items-center gap-3 flex-wrap">${mockData.badges.slice(0, 2).map(badge => `<div class="text-center" title="${badge.description}"><span class="text-2xl">${badge.icon}</span><p class="text-xs font-semibold text-slate-600">${badge.name}</p></div>`).join('')}</div>
+                    </div>
+                    <div class="ml-auto mt-4 md:mt-0 flex-shrink-0">
+                        <button class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full hover:bg-sky-600 text-sm">＋ 팔로우</button>
+                    </div>
+                </div>`;
+                const reviewsContent = document.getElementById('user-reviews-content');
+                const userReviews = mockData.reviews.filter(r => r.author === columnist.name);
+                if (userReviews.length > 0) { reviewsContent.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${userReviews.map(review => { const restaurant = mockData.restaurants.find(r => r.id === review.restaurantId); return `<div class="bg-white rounded-lg shadow-md overflow-hidden"><img src="${restaurant.image}" class="w-full h-48 object-cover"><div class="p-4"><h3 class="text-xl font-bold">${restaurant.name}</h3><p class="text-slate-600 text-sm my-2 text-yellow-500">${'★'.repeat(review.rating)}${'☆'.repeat(5-review.rating)}</p><p class="text-slate-700 text-sm">"${review.content}"</p></div></div>`; }).join('')}</div>`; } else { reviewsContent.innerHTML = `<div class="text-center text-slate-500 col-span-full py-8">작성한 리뷰가 없습니다.</div>`; }
+                const columnsContent = document.getElementById('user-columns-content');
+                const userColumns = mockData.columns.filter(c => c.author === columnist.name);
+                if (userColumns.length > 0) { columnsContent.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6">${userColumns.map(col => `<div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform"><img src="${col.image}" class="w-full h-48 object-cover"><div class="p-4"><h3 class="text-xl font-bold">${col.title}</h3><p class="text-slate-600 text-sm mt-2 h-10 overflow-hidden text-ellipsis">${col.content}</p></div></div>`).join('')}</div>`; } else { columnsContent.innerHTML = `<div class="text-center text-slate-500 col-span-full py-8">작성한 칼럼이 없습니다.</div>`; }
+                const tabs = document.querySelectorAll('#user-profile-tabs a');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        tabs.forEach(t => t.classList.remove('tab-active'));
+                        e.currentTarget.classList.add('tab-active');
+                        if (e.currentTarget.dataset.tab === 'reviews') { reviewsContent.classList.remove('hidden'); columnsContent.classList.add('hidden'); } else { reviewsContent.classList.add('hidden'); columnsContent.classList.remove('hidden'); }
+                    });
+                });
+            },
+            'follow-feed': function() {
+                const container = document.getElementById('feed-container');
+                if (!container) return;
+                const followingAuthors = ["미스터노포", "빵순이", "김맛잘알"];
+                const feedItems = mockData.columns.filter(column => followingAuthors.includes(column.author)).map(column => { const author = mockData.columnists.find(c => c.name === column.author); if (!author) return ''; return `<div class="bg-white rounded-2xl shadow-lg overflow-hidden"><div class="p-4 flex items-center"><img src="${author.image}" class="w-10 h-10 rounded-full mr-3"><div><p class="font-bold">${author.name}</p><p class="text-xs text-slate-500">2시간 전</p></div></div><img src="${column.image}" class="w-full h-auto object-cover"><div class="p-4"><p class="text-slate-800"><span class="font-bold">${author.name}</span> ${column.content}</p></div></div>`; }).join('');
+                container.innerHTML = feedItems || '<p class="text-center text-slate-500">팔로우하는 사용자의 게시물이 없습니다.</p>';
+            },
+            'shop-detail': function() { 
+                 if (typeof kakao !== 'undefined' && kakao.maps) {
+                    kakao.maps.load(() => {
+                        const container = document.getElementById('detail-map');
+                        if(!container) return;
+                        const position = new kakao.maps.LatLng(37.5559, 126.9238);
+                        const map = new kakao.maps.Map(container, { center: position, level: 3 });
+                        new kakao.maps.Marker({ map: map, position: position });
+                    });
+                }
+            },
+            'shop-detail-2': function() {
+                // 가게 소식 로드 로직
+                const newsContent = document.getElementById('store-news-content');
+                const newsSection = document.getElementById('store-news-section');
+                if (newsContent && newsSection) {
+                    const currentRestaurantId = 11; // '우부래도' ID
+                    const news = mockData.storeNews.find(n => n.restaurantId === currentRestaurantId);
+                    if (news) {
+                        newsSection.classList.remove('hidden');
+                        newsContent.innerHTML = `<div class="border border-amber-300 bg-amber-50 rounded-lg p-4"><div class="flex items-center mb-2"><span class="bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">${news.type}</span><h4 class="font-bold ml-2 text-amber-800">${news.title}</h4><p class="text-xs text-slate-500 ml-auto">${news.date}</p></div><p class="text-sm text-slate-700">${news.content}</p></div>`;
+                    } else {
+                        newsSection.classList.add('hidden');
+                    }
+                }
+                
+                // 쿠폰 로드 로직 (신규 추가)
+                const couponSection = document.getElementById('coupon-section');
+                const couponContent = document.getElementById('coupon-content');
+                if (couponSection && couponContent) {
+                    const currentRestaurantId = 11; // '우부래도' ID
+                    const coupon = mockData.coupons.find(c => c.restaurantId === currentRestaurantId && c.status === 'active');
+                    if (coupon) {
+                        couponSection.classList.remove('hidden');
+                        couponContent.innerHTML = `
+                            <div class="bg-gradient-to-r from-sky-500 to-indigo-500 text-white p-5 rounded-lg shadow-lg flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-lg font-bold">${coupon.title}</h4>
+                                    <p class="text-sm">${coupon.description}</p>
+                                    <p class="text-xs mt-1 opacity-80">유효기간: ${coupon.validity}</p>
+                                </div>
+                                <button onclick="alert('쿠폰을 받았습니다!')" class="bg-white text-sky-600 font-bold py-2 px-5 rounded-full hover:bg-slate-100 transition whitespace-nowrap">쿠폰받기</button>
+                            </div>
+                        `;
+                    } else {
+                        couponSection.classList.add('hidden');
+                    }
+                }
+
+                // 카카오 지도 로드 로직
+                if (typeof kakao !== 'undefined' && kakao.maps) {
+                    kakao.maps.load(() => {
+                        const container = document.getElementById('detail-map-2');
+                        if(!container) return;
+                        const position = new kakao.maps.LatLng(37.4953, 126.9448);
+                        const map = new kakao.maps.Map(container, { center: position, level: 4 });
+                        new kakao.maps.Marker({ map: map, position: position });
+                    });
+                }
+            },
+            alert: function() {
+                const container = document.querySelector('#page-alert .space-y-2');
+                if(!container) return;
+                container.innerHTML = mockData.alerts.map(alert => `
+                    <div class="p-4 rounded-lg flex items-start gap-4 hover:bg-slate-50 ${!alert.read ? 'bg-sky-50' : ''}">
+                        <div class="flex-grow">
+                            <p>${alert.from ? `<span class="font-bold">${alert.from}</span>` : ''} ${alert.content}</p>
+                            <p class="text-xs text-slate-500 mt-1">${alert.timestamp}</p>
+                        </div>
+                    </div>
+                `).join('');
+            },
+            notice: function() {
+                const container = document.querySelector('#page-notice .border-t');
+                if(!container) return;
+                container.innerHTML = mockData.notices.map(notice => `
+                    <div class="accordion-item border-b">
+                        <button class="accordion-header w-full text-left p-4">
+                            <div class="flex justify-between items-center">
+                                <span class="font-medium">${notice.title}</span>
+                                <span class="text-sm text-slate-400">${notice.date}</span>
+                            </div>
+                        </button>
+                        <div class="accordion-content bg-slate-50">
+                            <div class="p-5 text-sm">${notice.content}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // 아코디언 기능 재활성화
+                document.querySelectorAll('#page-notice .accordion-item').forEach(item => {
+                    item.querySelector('.accordion-header').addEventListener('click', () => {
+                        const content = item.querySelector('.accordion-content');
+                        const isOpened = content.style.maxHeight;
+                        // 모든 아코디언 닫기
+                        document.querySelectorAll('#page-notice .accordion-content').forEach(c => c.style.maxHeight = null);
+                        // 클릭한 것만 열기 (이미 열려있었다면 닫힌 상태 유지)
+                        if (!isOpened) {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        }
+                    });
+                });
+            },
+            'reservation-requests': function() {
+                const container = document.querySelector('#page-reservation-requests .space-y-4');
+                if(!container) return;
+                const statusMap = {
+                    pending: '<span class="text-amber-600 font-bold">확인 대기중</span>',
+                    confirmed: '<span class="text-green-600 font-bold">예약 확정</span>',
+                    declined: '<span class="text-red-600 font-bold">예약 거절</span>'
+                };
+                container.innerHTML = mockData.reservations.map(r => `
+                    <div class="flex justify-between items-center border p-4 rounded-lg">
+                        <div>
+                            <p class="font-bold">${r.user} 님</p>
+                            <p class="text-sm text-gray-600">${r.datetime} / ${r.party}명</p>
+                        </div>
+                        <div>
+                        ${r.status === 'pending' ? `
+                            <div class="space-x-2">
+                                <button class="bg-sky-500 text-white px-4 py-2 rounded-md text-sm hover:bg-sky-600">승인</button>
+                                <button class="bg-gray-200 px-4 py-2 rounded-md text-sm hover:bg-gray-300">거절</button>
+                            </div>
+                        ` : statusMap[r.status]
+                        }
+                        </div>
+                    </div>
+                `).join('');
+            },
+            'hq-purchase-orders': function() {
+                const container = document.querySelector('#page-hq-purchase-orders .space-y-4');
+                if(!container) return;
+                const statusMap = {
+                    requested: { text: '확인 대기', class: 'bg-amber-100 text-amber-700' },
+                    shipped: { text: '배송중', class: 'bg-blue-100 text-blue-700' },
+                    completed: { text: '완료', class: 'bg-green-100 text-green-700' }
+                };
+                container.innerHTML = mockData.purchaseOrders.map(order => `
+                    <div class="p-4 border rounded-lg">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold">${order.branch} 발주 요청</h3>
+                                <p class="text-sm text-slate-500">${order.date}</p>
+                            </div>
+                            <span class="${statusMap[order.status].class} font-bold py-1 px-3 rounded-full text-sm">${statusMap[order.status].text}</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t text-sm">
+                            ${order.items.map(item => `<p> - ${item.name}: ${item.qty}${item.unit}</p>`).join('')}
+                        </div>
+                        ${order.status === 'requested' ? `
+                        <div class="text-right mt-4 space-x-2">
+                            <button class="bg-sky-500 text-white text-sm font-bold py-2 px-4 rounded-md">발주 승인</button>
+                            <button class="bg-slate-200 text-sm font-bold py-2 px-4 rounded-md">거절</button>
+                        </div>` : ''}
+                    </div>
+                `).join('');
+            },
+            faq: function() {
+                 document.querySelectorAll('#page-faq .accordion-item').forEach(item => {
+                    const header = item.querySelector('.accordion-header');
+                    const content = item.querySelector('.accordion-content');
+                    header.addEventListener('click', () => {
+                        document.querySelectorAll('#page-faq .accordion-item').forEach(otherItem => {
+                            if (otherItem !== item) { otherItem.querySelector('.accordion-content').style.maxHeight = null; }
+                        });
+                        content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px";
+                    });
+                });
+            },
+            idpwsearch: function() {
+                const tabFindId = document.getElementById('tab-find-id'), tabResetPw = document.getElementById('tab-reset-pw');
+                const contentFindId = document.getElementById('content-find-id'), contentResetPw = document.getElementById('content-reset-pw');
+                tabFindId.addEventListener('click', () => {
+                    tabFindId.classList.add('tab-active'); tabResetPw.classList.remove('tab-active');
+                    contentFindId.classList.remove('hidden'); contentResetPw.classList.add('hidden');
+                });
+                tabResetPw.addEventListener('click', () => {
+                    tabResetPw.classList.add('tab-active'); tabFindId.classList.remove('tab-active');
+                    contentResetPw.classList.remove('hidden'); contentFindId.add('hidden');
+                });
+            },
+            service: function() {
+                const tabTerms = document.getElementById('tab-terms'), tabPrivacy = document.getElementById('tab-privacy');
+                const contentTerms = document.getElementById('content-terms'), contentPrivacy = document.getElementById('content-privacy');
+                tabTerms.addEventListener('click', () => {
+                    tabTerms.classList.add('tab-active'); tabPrivacy.classList.remove('tab-active');
+                    contentTerms.classList.remove('hidden'); contentPrivacy.classList.add('hidden');
+                });
+                tabPrivacy.addEventListener('click', () => {
+                    tabPrivacy.classList.add('tab-active'); tabTerms.classList.remove('tab-active');
+                    contentPrivacy.classList.remove('hidden'); contentTerms.classList.add('hidden');
+                });
+            },
+            'write-review': function() { initializeStarRating('#page-write-review .star-rating'); },
+            'edit-review': function() { initializeStarRating('#page-edit-review .star-rating'); },
+            'statistics-dashboard': function() {
+                const visitCtx = document.getElementById('visit-save-chart');
+                if (visitCtx) new Chart(visitCtx, { type: 'line', data: { labels: ['월', '화', '수', '목', '금', '토', '일'], datasets: [{ label: '방문자 수', data: [65, 59, 80, 81, 56, 120, 150], borderColor: 'rgb(59, 130, 246)', tension: 0.1 }, { label: '저장 수', data: [5, 9, 10, 15, 8, 25, 30], borderColor: 'rgb(239, 68, 68)', tension: 0.1 }] } });
+                const keywordCtx = document.getElementById('review-keyword-chart');
+                if (keywordCtx) new Chart(keywordCtx, { type: 'doughnut', data: { labels: [ '맛있어요', '분위기', '친절해요', '재료가 신선', '가성비' ], datasets: [{ label: '긍정 키워드', data: [300, 50, 100, 40, 120], backgroundColor: ['rgb(59, 130, 246)','rgb(239, 68, 68)','rgb(22, 163, 74)','rgb(245, 158, 11)','rgb(139, 92, 246)'], hoverOffset: 4 }] } });
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            router.navigateTo('info');
+        });
+    </script>
+    <!-- why: 중앙에서 라우팅을 JSP로 넘겨 기존 onclick들을 광범위하게 바꾸지 않기 위해 사용 -->
+<script>
+  // 1) SPA → JSP 라우팅 테이블 (필요 시 경로 조정)
+  const jspRouteMap = Object.freeze({
+    // Branch(지점)
+    'branch-order': '/branch/order.jsp',                // 매장 발주 페이지
+    'branch-orders-history': '/branch/orders-history.jsp',
+    'branch-menu': '/branch/menu.jsp',                  // 메뉴 페이지 (리스트 on/off 포함)
+
+    // HQ(본사)
+    'hq-sales-orders': 'MeetLog/hq/sales-orders.jsp',          // 본사 수주 페이지
+    'hq-menu-register': 'MeetLog/hq/menu-register.jsp',        // 본사 메뉴등록
+    'hq-branch-management': 'MeetLog/hq/branch-management.jsp', // 본사 지점관리 (기존 SPA 경로 유지 가능)
+    'hq-material-settings': 'MeetLog/hq/material-settings.jsp' // 재료설정(추가/삭제/수정)
+  });
+
+  // 2) 기존 router.navigateTo 보존 후 JSP handoff 로직 주입
+  const _origNavigateTo = router.navigateTo.bind(router);
+  router.navigateTo = function(pageId, params = {}) {
+    const jsp = jspRouteMap[pageId];
+    if (jsp) {
+      const url = new URL(jsp, window.location.origin);
+      // params를 쿼리스트링으로 전달 (필요 시 백엔드에서 활용)
+      if (params && typeof params === 'object') {
+        for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+      }
+      window.location.href = url.toString();
+      return; // SPA 렌더링 우회
+    }
+    _origNavigateTo(pageId, params); // 기존 SPA 경로 유지
+  };
+
+  // 3) 새 JSP용 라우트 키를 routes에 최소 정의(문서 title 등 부작용 방지).
+  //    이미 존재하는 키는 덮어쓰지 않음.
+  function defineIfAbsent(key, cfg) { if (!router.routes[key]) router.routes[key] = cfg; }
+  defineIfAbsent('branch-store',          { layout: 'main', footer: 'main', title: '매장' });
+  defineIfAbsent('branch-order',          { layout: 'main', footer: 'main', title: '발주' });
+  defineIfAbsent('branch-orders-history', { layout: 'main', footer: 'main', title: '발주 기록' });
+  defineIfAbsent('branch-menu',           { layout: 'main', footer: 'main', title: '메뉴' });
+  defineIfAbsent('branch-management',     { layout: 'main', footer: 'main', title: '매장관리' });
+
+  defineIfAbsent('hq-sales-orders',       { layout: 'main', footer: 'main', title: '본사 수주' });
+  defineIfAbsent('hq-menu-register',      { layout: 'main', footer: 'main', title: '메뉴 등록' });
+  // 'hq-branch-management' 는 기존 SPA 키가 있을 수 있으므로 생략 또는 유지
+  defineIfAbsent('hq-branch-stats',       { layout: 'main', footer: 'main', title: '지점 통계' });
+  defineIfAbsent('hq-material-settings',  { layout: 'main', footer: 'main', title: '재료 설정' });
+</script>
+    <!-- why: 기존 템플릿을 건드리지 않고 대시보드 진입 시 버튼을 주입해 신규 JSP 경로로 쉽게 이동 -->
+<script>
+(function() {
+  if (!window.router || !window.pageInitializers) return; // 안전장치
+
+  function addButton(gridEl, label, emoji, routeKey, sublabel) {
+    if (!gridEl) return;
+    const html = `
+      <button onclick="router.navigateTo('${routeKey}')" class="bg-white p-6 rounded-lg text-center hover:shadow-xl border">
+        <p class="text-5xl mb-3">${emoji}</p>
+        <p class="font-bold text-lg">${label}</p>
+        ${sublabel ? `<p class="text-sm text-slate-500 mt-1">${sublabel}</p>` : ''}
+      </button>`;
+    gridEl.insertAdjacentHTML('beforeend', html);
+  }
+
+  function findDashboardGrid() {
+    const main = document.getElementById('main-content');
+    if (!main) return null;
+    return main.querySelector('.page-content .grid');
+  }
+
+  // HQ 대시보드 확장
+  const _origHQ = pageInitializers['hq-dashboard'];
+  pageInitializers['hq-dashboard'] = function(params) {
+    if (typeof _origHQ === 'function') _origHQ(params);
+    const grid = findDashboardGrid();
+    if (!grid || grid.dataset.augHq === '1') return; // 중복 방지
+    grid.dataset.augHq = '1';
+
+    addButton(grid, '메뉴 등록', '🧾', 'hq-menu-register');
+    addButton(grid, '지점 통계', '📈', 'hq-branch-stats');
+    addButton(grid, '재료 설정', '⚙️', 'hq-material-settings');
+  };
+
+  // 지점 대시보드 확장
+  const _origBranch = pageInitializers['branch-dashboard'];
+  pageInitializers['branch-dashboard'] = function(params) {
+    if (typeof _origBranch === 'function') _origBranch(params);
+    const grid = findDashboardGrid();
+    if (!grid || grid.dataset.augBranch === '1') return; // 중복 방지
+    grid.dataset.augBranch = '1';
+
+    addButton(grid, '발주 기록', '📜', 'branch-orders-history');
+    addButton(grid, '메뉴 (신)', '🍽️', 'branch-menu', '리스트 on/off');
+    addButton(grid, '매장 홈', '🏠', 'branch-store');
+  };
+})();
+</script>
+    
+</body>
+</html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.CourseReviewManagementMapper">
+    <resultMap id="adminReviewResult" type="model.AdminCourseReview">
+        <id property="id" column="review_id"/>
+        <result property="courseTitle" column="course_title"/>
+        <result property="participantName" column="participant_name"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="isResponded" column="is_responded"/>
+        <result property="responseContent" column="response_content"/>
+    </resultMap>
+
+    <select id="selectAllReviewsForAdmin" resultMap="adminReviewResult">
+        SELECT 
+            r.review_id,
+            c.title AS course_title,
+            u.nickname AS participant_name,
+            r.rating,
+            r.content,
+            r.created_at,
+            r.response_content IS NOT NULL AS is_responded,
+            r.response_content
+        FROM 
+            course_reviews r
+        JOIN 
+            users u ON r.user_id = u.user_id
+        JOIN
+            courses c ON r.course_id = c.course_id
+        ORDER BY 
+            r.created_at DESC
+    </select>
+    
+    <update id="updateReviewResponse" parameterType="map">
+        UPDATE course_reviews
+        SET response_content = #{responseContent}
+        WHERE review_id = #{id}
+    </update>
+    
+    <delete id="deleteReview" parameterType="int">
+        DELETE FROM course_reviews WHERE review_id = #{id}
+    </delete>
+</mapper>
