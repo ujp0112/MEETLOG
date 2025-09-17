@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.BranchMenuMapper">
+	<resultMap id="MenuMap" type="dto.BranchMenu">
+		<id property="id" column="id" />
+		<result property="companyId" column="company_id" />
+		<result property="name" column="name" />
+		<result property="price" column="price" />
+		<result property="imgPath" column="img_path" />
+		<result property="activeYn" column="active_yn" />
+		<result property="deletedYn" column="deleted_yn" />
+	</resultMap>
+	<resultMap id="MenuIngredientMap" type="dto.MenuIngredient">
+		<result property="companyId" column="company_id" />
+		<result property="menuId" column="menu_id" />
+		<result property="materialId" column="material_id" />
+		<result property="qty" column="qty" />
+		<result property="materialName" column="material_name" />
+		<result property="unit" column="unit" />
+		<result property="unitPrice" column="unit_price" />
+		
+	</resultMap>
+	<select id="listMenus" parameterType="map" resultMap="MenuMap"> SELECT id,
+		company_id, name, price, img_path, active_yn, deleted_yn FROM menu
+		WHERE company_id=#{companyId} AND deleted_yn='N' ORDER BY name LIMIT
+		#{limit} OFFSET #{offset} </select>
+	<select id="selectMenu" parameterType="map" resultMap="MenuMap"> SELECT
+		id, company_id, name, price, img_path, active_yn, deleted_yn FROM menu
+		WHERE company_id=#{companyId} AND id=#{id} AND deleted_yn='N' </select>
+	<insert id="insertMenu" useGeneratedKeys="true" keyProperty="id"
+		parameterType="dto.BranchMenu"> INSERT INTO menu (company_id, name, price, img_path,
+		active_yn, deleted_yn) VALUES (#{companyId}, #{name},
+		#{price}, #{imgPath}, #{activeYn}, #{deletedYn})
+	</insert>
+	<update id="updateMenu" parameterType="dto.BranchMenu"> UPDATE menu SET
+		name=#{name}, price=#{price}, img_path=#{imgPath},
+		active_yn=#{activeYn}, updated_at=CURRENT_TIMESTAMP WHERE id=#{id} AND
+		company_id=#{companyId} </update>
+	<update id="softDeleteMenu" parameterType="map"> UPDATE menu SET
+		deleted_yn='Y', updated_at=CURRENT_TIMESTAMP WHERE id=#{id} AND
+		company_id=#{companyId} </update>
+	<delete id="deleteMenuIngredients" parameterType="map"> DELETE FROM
+		menu_ingredient WHERE company_id=#{companyId} AND menu_id=#{menuId}
+	</delete>
+	<insert id="insertMenuIngredient"
+		parameterType="dto.MenuIngredient"> INSERT INTO menu_ingredient (company_id, menu_id,
+		material_id, qty) VALUES (#{companyId}, #{menuId},
+		#{materialId}, #{qty}) </insert>
+	<select id="listIngredientsOfMenu" parameterType="map"
+		resultMap="MenuIngredientMap">
+	SELECT
+    mi.material_id          AS material_id,
+    m.name                  AS material_name,
+    m.unit                  AS unit,
+    m.unit_price            AS unit_price,
+    mi.qty                  AS qty
+  FROM menu_ingredient mi
+  JOIN material m
+    ON m.id = mi.material_id
+   AND m.company_id = mi.company_id
+  WHERE mi.company_id = #{companyId}
+    AND mi.menu_id   = #{menuId}
+  ORDER BY m.name
+  </select>
+</mapper>

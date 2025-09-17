@@ -1,0 +1,4 @@
+<%-- 헤더 우측 영역에 추가할 로그인 상태 표시 (CSS 변경 없음) --%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
