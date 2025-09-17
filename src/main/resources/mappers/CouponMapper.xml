@@ -12,8 +12,7 @@
             validity,
             restaurant_id as restaurantId,
             is_active as isActive,
-            created_at as createdAt,
-            updated_at as updatedAt
+            created_at as createdAt
         FROM coupons 
         WHERE restaurant_id = #{restaurantId} 
         AND is_active = true 
@@ -29,8 +28,7 @@
             validity,
             restaurant_id as restaurantId,
             is_active as isActive,
-            created_at as createdAt,
-            updated_at as updatedAt
+            created_at as createdAt
         FROM coupons 
         WHERE is_active = true 
         ORDER BY created_at DESC
@@ -44,15 +42,13 @@
             validity,
             restaurant_id,
             is_active,
-            created_at,
-            updated_at
+            created_at
         ) VALUES (
             #{title},
             #{description},
             #{validity},
             #{restaurantId},
             true,
-            NOW(),
             NOW()
         )
     </insert>
@@ -63,8 +59,7 @@
         SET 
             title = #{title},
             description = #{description},
-            validity = #{validity},
-            updated_at = NOW()
+            validity = #{validity}
         WHERE id = #{id}
     </update>
     
@@ -72,8 +67,7 @@
     <update id="deleteCoupon" parameterType="int">
         UPDATE coupons 
         SET 
-            is_active = false,
-            updated_at = NOW()
+            is_active = false
         WHERE id = #{couponId}
     </update>
     

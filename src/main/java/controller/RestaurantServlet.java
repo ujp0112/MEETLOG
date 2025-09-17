@@ -92,10 +92,10 @@ public class RestaurantServlet extends HttpServlet {
             List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
             List<QnA> qnas = qnaService.getQnAByRestaurantId(restaurantId);
 
-            restaurant.setReviews(reviews);       // Restaurant 모델에 setReviews 추가 필요
-            restaurant.setMenuList(menus);      // Restaurant 모델에 setMenuList 추가 필요
-            restaurant.setCoupons(coupons);       // Restaurant 모델에 setCoupons 추가 필요 (이전 에러 해결)
-            restaurant.setQna(qnas);            // Restaurant 모델에 setQna 추가 필요
+            restaurant.setReviews(reviews);
+            restaurant.setMenuList(menus);
+            restaurant.setCoupons(coupons);
+            restaurant.setQna(qnas);
             
             // JSP에는 모든 정보가 담긴 'restaurant' 객체 하나만 전달
             request.setAttribute("restaurant", restaurant);
