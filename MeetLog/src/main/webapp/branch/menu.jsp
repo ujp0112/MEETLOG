@@ -149,6 +149,7 @@ async function fetchList(q){
 
 async function saveToggle(menuId, enabled){
   const body = new URLSearchParams();
+  console.log(CTX);
   body.set('enabled', enabled ? 'Y' : 'N');
   const res = await fetch(CTX + '/branch/menus/' + encodeURIComponent(String(menuId)) + '/toggle', {
     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body
