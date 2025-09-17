@@ -8,6 +8,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>이벤트 - MEET LOG</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link href="${pageContext.request.contextPath}/css/style.css" rel="stylesheet">
+    
 </head>
 <body class="bg-slate-50">
     <div class="flex flex-col min-h-screen">
@@ -30,7 +35,9 @@
                         <c:forEach var="event" items="${ongoingEvents}">
                             <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
                                 <a href="${pageContext.request.contextPath}/event/detail?id=${event.id}">
-                                    <img src="${pageContext.request.contextPath}${event.image}" alt="${event.title}" class="w-full h-48 object-cover">
+                                    
+                                    <img src="${event.image}" alt="${event.title}" class="w-full h-48 object-cover">
+
                                 </a>
                                 <div class="p-6">
                                     <h4 class="text-xl font-bold mb-2 truncate">${event.title}</h4>

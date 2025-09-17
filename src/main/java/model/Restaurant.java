@@ -25,9 +25,6 @@ public class Restaurant {
 	private boolean isActive;
 
 	private List<Menu> menuList;
-	private List<Coupon> coupons;
-	private List<Review> reviews; 
-	private List<QnA> qna;    
 
 	public Restaurant() {
 	}
@@ -200,31 +197,4 @@ public class Restaurant {
 	public void setMenuList(List<Menu> menuList) {
 		this.menuList = menuList;
 	}
-	
-    // 추가된 coupons 필드에 대한 getter와 setter
-    public List<Coupon> getCoupons() {
-        return coupons;
-    }
-
-    public void setCoupons(List<Coupon> coupons) {
-        this.coupons = coupons;
-    }
-    // [추가] Review 리스트에 대한 Getter와 Setter
-    public List<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<Review> reviews) {
-        this.reviews = reviews;
-    }
-
-    // [추가] QnA 리스트에 대한 Getter와 Setter
-    public List<QnA> getQna() {
-        return qna;
-    }
-
-    public void setQna(List<QnA> qna) {
-        this.qna = qna;
-    }
-    
 }

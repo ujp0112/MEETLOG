@@ -14,15 +14,17 @@
             <a href="${pageContext.request.contextPath}/main" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">홈</a>
             <a href="${pageContext.request.contextPath}/restaurant" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">맛집찾기</a>
             <a href="${pageContext.request.contextPath}/column" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">칼럼</a>
-            <a href="#" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">추천코스</a>
-            <a href="#" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">이벤트</a>
+            
+            <a href="${pageContext.request.contextPath}/course" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">추천코스</a>
+            
+            <a href="${pageContext.request.contextPath}/event/list" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">이벤트</a>
 
             <c:choose>
                 <%-- 1. 로그인 상태일 때의 메뉴 --%>
                 <c:when test="${not empty sessionScope.user}">
-                    <div class="dropdown">
+                    <div class="dropdown group">
                         <a href="${pageContext.request.contextPath}/mypage" class="dropdown-trigger text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">마이페이지 ▼</a>
-                        <div class="dropdown-content">
+                        <div class="dropdown-content hidden group-hover:block">
                             <div class="dropdown-header">사용자 메뉴</div>
                             <a href="${pageContext.request.contextPath}/mypage">👤 내 프로필</a>
                             <a href="${pageContext.request.contextPath}/mypage/reviews">✨ 내 리뷰 관리</a>
@@ -33,9 +35,9 @@
                     </div>
                     
                     <c:if test="${sessionScope.user.userType == 'BUSINESS'}">
-                        <div class="dropdown">
+                        <div class="dropdown group">
                             <a href="#" class="dropdown-trigger text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">비즈니스 ▼</a>
-                            <div class="dropdown-content">
+                            <div class="dropdown-content hidden group-hover:block">
                                 <div class="dropdown-header">사업자 메뉴</div>
                                 <a href="#">📊 통계/분석</a>
                                 <a href="#">🍽️ 메뉴 관리</a>

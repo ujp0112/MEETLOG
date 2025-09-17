@@ -4,21 +4,26 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="mapper.EventMapper">
+
     <resultMap id="eventResult" type="model.Event">
-        <id property="id" column="event_id"/>
-        <result property="title" column="title"/>
-        <result property="summary" column="summary"/>
-        <result property="content" column="content"/>
-        <result property="image" column="image_path"/>
-        <result property="startDate" column="start_date"/>
-        <result property="endDate" column="end_date"/>
+        <id property="id" column="ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="summary" column="SUMMARY"/>
+        <result property="content" column="CONTENT"/>
+        <result property="image" column="IMAGE"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
     </resultMap>
 
     <select id="selectAllEvents" resultMap="eventResult">
-        SELECT * FROM events ORDER BY start_date DESC
+        SELECT ID, TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE 
+        FROM events 
+        ORDER BY START_DATE DESC
     </select>
     
     <select id="selectEventById" parameterType="int" resultMap="eventResult">
-        SELECT * FROM events WHERE event_id = #{id}
+        SELECT ID, TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE 
+        FROM events 
+        WHERE ID = #{id}
     </select>
 </mapper>

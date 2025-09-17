@@ -1,13 +1,9 @@
 package model;
 
 public class QnA {
-    private int id;
     private String question;
     private String answer;
     private boolean isOwner;
-    private int restaurantId;
-    private boolean isActive;
-    private String createdAt;
 
     public QnA() {}
 
@@ -39,37 +35,5 @@ public class QnA {
 
     public void setOwner(boolean owner) {
         isOwner = owner;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getRestaurantId() {
-        return restaurantId;
-    }
-
-    public void setRestaurantId(int restaurantId) {
-        this.restaurantId = restaurantId;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
     }
 }
