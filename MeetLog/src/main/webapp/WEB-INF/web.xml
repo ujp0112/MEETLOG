@@ -22,7 +22,8 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>HqMenusServlet</servlet-name>
-		<url-pattern>/hq/*</url-pattern>
+		<url-pattern>/hq/menus</url-pattern>
+		<url-pattern>/hq/menus/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -31,7 +32,18 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>BranchMenuServlet</servlet-name>
+		<url-pattern>/branch/menus</url-pattern>
 		<url-pattern>/branch/menus/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>BranchOrderPageServlet</servlet-name>
+		<servlet-class>controller.BranchOrderPageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BranchOrderPageServlet</servlet-name>
+		<url-pattern>/branch/order</url-pattern>
+		<url-pattern>/branch/order/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -81,6 +93,24 @@
 		<url-pattern>/hq/materials/*</url-pattern>
 	</servlet-mapping>
 
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/uploads/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/img/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/css/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>default</servlet-name>
+		<url-pattern>/js/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>LogoutServlet</servlet-name>
 		<servlet-class>controller.LogoutServlet</servlet-class>
@@ -115,7 +145,7 @@
 	<servlet-mapping>
 		<servlet-name>CourseServlet</servlet-name>
 		<url-pattern>/course</url-pattern>
-        <url-pattern>/course/*</url-pattern> 
+        <url-pattern>/course/*</url-pattern> 
 	</servlet-mapping>
 
 	<servlet>
@@ -155,5 +185,5 @@
 		<servlet-name>CourseStatisticsServlet</servlet-name>
 		<url-pattern>/admin/course-statistics</url-pattern>
 	</servlet-mapping>
-    
+    
 </web-app>
