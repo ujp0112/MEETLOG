@@ -93,13 +93,11 @@
 		<url-pattern>/hq/materials/*</url-pattern>
 	</servlet-mapping>
 
-	<!-- Tomcat DefaultServlet으로 /uploads/* 정적 파일 제공 -->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/uploads/*</url-pattern>
 	</servlet-mapping>
 
-	<!-- (권장) 정적 리소스 전반을 보장 -->
 	<servlet-mapping>
 		<servlet-name>default</servlet-name>
 		<url-pattern>/img/*</url-pattern>
@@ -147,7 +145,7 @@
 	<servlet-mapping>
 		<servlet-name>CourseServlet</servlet-name>
 		<url-pattern>/course</url-pattern>
-        <url-pattern>/course/*</url-pattern> 
+        <url-pattern>/course/*</url-pattern> 
 	</servlet-mapping>
 
 	<servlet>
@@ -187,5 +185,5 @@
 		<servlet-name>CourseStatisticsServlet</servlet-name>
 		<url-pattern>/admin/course-statistics</url-pattern>
 	</servlet-mapping>
-    
+    
 </web-app>
