@@ -354,7 +354,7 @@ a {
 		</a>
 
 		<div class="topnav">
-			<a href="./menu.jsp"
+			<a href="${ctx }/branch/menus"
    class="${fn:contains(uri, '/branch/menu') ? 'act' : ''}">메뉴관리</a>
 
 <a href="./order.jsp"

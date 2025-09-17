@@ -1,9 +1,10 @@
 <!-- File: webapp/hq/material-management.jsp -->
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -47,14 +48,14 @@
     .sheet thead th{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);font-weight:800;text-align:left;padding:12px 10px;font-size:13px}
     .sheet tbody td{padding:12px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
     .sheet tbody tr:hover td{background:#fafafa}
-    .cell-num{text-align:left}
+    .cell-id{text-align:left}
 
     .thumb{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);object-fit:cover;background:#fafafa;display:block}
     .row-actions{display:flex;gap:6px}
 
     .empty{color:var(--muted);text-align:center;padding:24px}
 
-    /* Modal (edit form) */
+    /* Modal (edit/append form) */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);z-index:100}
     .modal.show{display:flex}
     .dialog{width:100%;max-width:720px;background:#fff;border-radius:20px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.12)}
@@ -78,168 +79,88 @@
   </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jspf/header.jspf" %><!--   <div class="shell"> -->
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
 
-    <main>
-      <section class="panel" aria-labelledby="pageTitle">
-    <%-- <jsp:include page="/WEB-INF/jspf/sidebar-materials.jspf" /> --%>
-        <div class="hd">
-          <h1 id="pageTitle" class="title">재료 관리</h1>
-          <span class="pill">HQ</span>
-          <div style="flex:1 1 auto"></div>
-          <button class="btn primary" data-action="append">+ 재료 추가</button>
-        </div>
-        <div class="bd">
-          <!-- optional toolbar: wire up as needed -->
-          <form method="get" class="toolbar" style="margin-bottom:12px">
-            <div class="field"><span style="color:var(--muted)">검색</span><input name="q" value="${fn:escapeXml(param.q)}" placeholder="재료명/단위/브랜드"/></div>
-            <button class="btn" type="submit">검색</button>
-            <a class="btn" href="${contextPath}/hq/material-management.jsp">초기화</a>
-          </form>
+  <main>
+    <section class="panel" aria-labelledby="pageTitle">
+      <div class="hd">
+        <h1 id="pageTitle" class="title">재료 관리</h1>
+        <span class="pill">HQ</span>
+        <div style="flex:1 1 auto"></div>
+        <button class="btn primary" data-action="append">+ 재료 추가</button>
+      </div>
+      <div class="bd">
+        <!-- toolbar -->
+        <form method="get" class="toolbar" style="margin-bottom:12px">
+          <div class="field"><span style="color:var(--muted)">검색</span><input name="q" value="${fn:escapeXml(param.q)}" placeholder="재료명/단위/브랜드"/></div>
+          <button class="btn" type="submit">검색</button>
+          <!-- 초기화는 서블릿 경유로 -->
+          <a class="btn" href="${contextPath}/hq/materials">초기화</a>
+        </form>
 
-          <div class="table-wrap" role="region" aria-label="재료 목록">
-            <table class="sheet" role="grid">
-              <thead>
-                <tr>
-                  <th style="width:56px">이미지</th>
-                  <th>재료명</th>
-                  <th style="width:120px">단위</th>
-                  <th style="width:120px">단가</th>
-                  <th style="width:120px">보유량</th>
-                  <th style="width:120px">주문단위</th>
-                  <th style="width:140px">가격</th>
-                  <th style="width:132px">관리</th>
+        <div class="table-wrap" role="region" aria-label="재료 목록">
+          <table class="sheet" role="grid">
+            <thead>
+              <tr>
+                <th style="width:56px">이미지</th>
+                <th>재료명</th>
+                <th style="width:120px">단위</th>
+                <th style="width:120px">단가</th>
+                <th style="width:120px">주문단위</th>
+                <th style="width:140px">가격</th>
+                <th style="width:132px">관리</th>
+              </tr>
+            </thead>
+            <tbody>
+              <c:forEach var="m" items="${materials}">
+                <tr id="row-${m.id}"
+                    data-id="${m.id}"
+                    data-name="${fn:escapeXml(m.name)}"
+                    data-unit="${fn:escapeXml(m.unit)}"
+                    data-unitprice="${m.unitPrice}"
+                    data-step="${m.step}"
+                    data-img="${contextPath}${m.imgPath}"
+                    data-img-path="${m.imgPath}">
+                  <td>
+                    <c:choose>
+                      <c:when test="${not empty m.imgPath}">
+                        <img class="thumb" src="${contextPath}${m.imgPath}" alt="${fn:escapeXml(m.name)}"/>
+                      </c:when>
+                      <c:otherwise>
+                        <span class="thumb" style="display:grid;place-items:center">🥬</span>
+                      </c:otherwise>
+                    </c:choose>
+                  </td>
+                  <td>${m.name}</td>
+                  <td>${m.unit}</td>
+                  <td class="cell-id"><fmt:formatNumber value="${m.unitPrice}" /></td>
+                  <td class="cell-id"><fmt:formatNumber value="${m.step}" /></td>
+                  <td class="cell-id"><fmt:formatNumber value="${(m.unitPrice) * (m.step)}" /></td>
+                  <td>
+                    <div class="row-actions">
+                      <button type="button" class="btn-sm" data-action="edit">수정</button>
+                      <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="${contextPath}/hq/materials/${m.id}/delete">삭제</button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                <c:forEach var="m" items="${materials}">
-                  <tr id="row-${m.num}"
-                      data-id="${m.num}"
-                      data-name="${fn:escapeXml(m.name)}"
-                      data-unit="${fn:escapeXml(m.unit)}"
-                      data-unitprice="${m.unitPrice}"
-                      data-step="${m.step}"
-                      data-qty="${empty m.stockQty ? (empty m.quantity ? 0 : m.quantity) : m.stockQty}"
-                      data-img="${m.imgfilename}">
-                    <td>
-                      <c:choose>
-                        <c:when test="${not empty m.imgfilename}">
-                          <img class="thumb" src="${contextPath}/imageView?filename=${m.imgfilename}" alt="${fn:escapeXml(m.name)}"/>
-                        </c:when>
-                        <c:otherwise>
-                          <span class="thumb" style="display:grid;place-items:center">🥬</span>
-                        </c:otherwise>
-                      </c:choose>
-                    </td>
-                    <td>${m.name}</td>
-                    <td>${m.unit}</td>
-                    <td class="cell-num"><fmt:formatNumber value="${m.unitPrice}" /></td>
-                    <td class="cell-num">
-                      <c:choose>
-                        <c:when test="${not empty m.stockQty}"><fmt:formatNumber value="${m.stockQty}"/></c:when>
-                        <c:when test="${not empty m.quantity}"><fmt:formatNumber value="${m.quantity}"/></c:when>
-                        <c:otherwise>0</c:otherwise>
-                      </c:choose>
-                    </td>
-                    <td class="cell-num"><fmt:formatNumber value="${m.step}" /></td>
-                    <td class="cell-num">
-                      <fmt:formatNumber value="${(m.unitPrice) * (m.step)}" />
-                    </td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="${contextPath}/hq/materials/${m.num}/delete">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                </c:forEach>
-                <c:if test="${empty materials}">
-                  <!-- MOCK: 서버 데이터가 없을 때 예시 행 표시 -->
-                  <tr id="row-m1" data-id="m1" data-name="로메인" data-unit="kg" data-unitprice="4500" data-step="5" data-qty="20" data-img="">
-                    <td><span class="thumb" style="display:grid;place-items:center">🥬</span></td>
-                    <td>로메인</td>
-                    <td>kg</td>
-                    <td class="cell-num">4,500</td>
-                    <td class="cell-num">20</td>
-                    <td class="cell-num">5</td>
-                    <td class="cell-num">22,500</td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr id="row-m2" data-id="m2" data-name="방울토마토" data-unit="팩" data-unitprice="3200" data-step="10" data-qty="150" data-img="">
-                    <td><span class="thumb" style="display:grid;place-items:center">🍅</span></td>
-                    <td>방울토마토</td>
-                    <td>팩</td>
-                    <td class="cell-num">3,200</td>
-                    <td class="cell-num">150</td>
-                    <td class="cell-num">10</td>
-                    <td class="cell-num">32,000</td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr id="row-m3" data-id="m3" data-name="닭가슴살" data-unit="kg" data-unitprice="8700" data-step="4" data-qty="60" data-img="">
-                    <td><span class="thumb" style="display:grid;place-items:center">🍗</span></td>
-                    <td>닭가슴살</td>
-                    <td>kg</td>
-                    <td class="cell-num">8,700</td>
-                    <td class="cell-num">60</td>
-                    <td class="cell-num">4</td>
-                    <td class="cell-num">34,800</td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr id="row-m4" data-id="m4" data-name="아보카도" data-unit="개" data-unitprice="2500" data-step="12" data-qty="30" data-img="">
-                    <td><span class="thumb" style="display:grid;place-items:center">🥑</span></td>
-                    <td>아보카도</td>
-                    <td>개</td>
-                    <td class="cell-num">2,500</td>
-                    <td class="cell-num">30</td>
-                    <td class="cell-num">12</td>
-                    <td class="cell-num">30,000</td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr id="row-m5" data-id="m5" data-name="올리브오일" data-unit="L" data-unitprice="9800" data-step="1" data-qty="8" data-img="">
-                    <td><span class="thumb" style="display:grid;place-items:center">🫒</span></td>
-                    <td>올리브오일</td>
-                    <td>L</td>
-                    <td class="cell-num">9,800</td>
-                    <td class="cell-num">8</td>
-                    <td class="cell-num">1</td>
-                    <td class="cell-num">9,800</td>
-                    <td>
-                      <div class="row-actions">
-                        <button type="button" class="btn-sm" data-action="edit">수정</button>
-                        <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                      </div>
-                    </td>
-                  </tr>
-                </c:if>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-<!--   </div> -->
+              </c:forEach>
 
-  <!-- Edit Modal: material-settings.jsp의 폼을 재사용 -->
+              <c:if test="${empty materials}">
+                <!-- MOCK 예시(서버 데이터 없을 때만 노출) -->
+                <tr id="row-m1" data-id="m1" data-name="로메인" data-unit="kg" data-unitprice="4500" data-step="5" data-img="">
+                  <td><span class="thumb" style="display:grid;place-items:center">🥬</span></td>
+                  <td>로메인</td><td>kg</td><td class="cell-id">4,500</td><td class="cell-id">5</td><td class="cell-id">22,500</td>
+                  <td><div class="row-actions"><button type="button" class="btn-sm" data-action="edit">수정</button><button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button></div></td>
+                </tr>
+              </c:if>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Edit Modal -->
   <div id="editModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="dialog">
       <div class="hd">
@@ -247,12 +168,14 @@
         <button class="close-x" type="button" aria-label="닫기" onclick="closeEditModal()">×</button>
       </div>
       <div class="bd">
-        <form id="editForm" class="form" action="${contextPath}/materialSetting" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="num" id="f-num" />
+        <!-- 수정: action은 JS에서 /hq/materials/{id}/edit 로 세팅 -->
+        <form id="editForm" class="form" method="post" enctype="multipart/form-data">
+          <input type="hidden" name="id"            id="f-id" />
+          <input type="hidden" name="prev_img_path" id="f-prev" />
           <div class="row">
             <label class="label">재료 사진</label>
             <div class="image-field">
-              <label class="preview-circle" for="f-ifile" title="이미지 선택">
+              <label class="preview-circle" for="f-image" title="이미지 선택">
                 <img id="f-preview" src="${contextPath}/img/plus.png" alt="preview" />
               </label>
               <div>
@@ -271,13 +194,20 @@
           </div>
           <div class="row">
             <label class="label" for="f-unitPrice">단가</label>
-            <input class="input" type="number" name="unitPrice" id="f-unitPrice" step="100" min="0" />
+            <input class="input" type="number" name="unit_price" id="f-unitPrice" step="0.01" min="0" />
           </div>
           <div class="row">
             <label class="label" for="f-step">주문단위(팩당 단위수)</label>
-            <input class="input" type="number" name="step" id="f-step" step="1" min="1" />
+            <input class="input" type="number" name="step" id="f-step" step="0.01" min="0" />
           </div>
-          <input type="file" name="ifile" id="f-ifile" accept="image/*" style="display:none" />
+
+          <!-- 이미지 URL(텍스트 우선) + 파일 업로드(대체) -->
+          <div class="row">
+            <label class="label" for="f-imgPath">이미지 URL</label>
+            <input class="input" type="text" name="img_path" id="f-imgPath" placeholder="/uploads/materials/xxx.jpg" />
+          </div>
+          <input type="file" name="image" id="f-image" accept="image/*" style="display:none" />
+
           <div class="actions">
             <button class="btn primary" type="submit">저장</button>
             <button class="btn" type="button" onclick="closeEditModal()">취소</button>
@@ -286,46 +216,53 @@
       </div>
     </div>
   </div>
-  
-  <!-- Append Modal: material-settings.jsp의 폼을 재사용 -->
+
+  <!-- Append Modal -->
   <div id="appendModal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="dialog">
       <div class="hd">
-        <strong>재료 수정</strong>
+        <strong>재료 추가</strong>
         <button class="close-x" type="button" aria-label="닫기" onclick="closeAppendModal()">×</button>
       </div>
       <div class="bd">
-        <form id="appendForm" class="form" action="${contextPath}/materialSetting" method="post" enctype="multipart/form-data">
-          <input type="hidden" name="num" id="f-num" />
+        <!-- 생성: POST /hq/materials -->
+        <form id="appendForm" class="form" action="${contextPath}/hq/materials" method="post" enctype="multipart/form-data">
           <div class="row">
             <label class="label">재료 사진</label>
             <div class="image-field">
-              <label class="preview-circle" for="f-ifile" title="이미지 선택">
-                <img id="f-preview" src="${contextPath}/img/plus.png" alt="preview" />
+              <label class="preview-circle" for="a-image" title="이미지 선택">
+                <img id="a-preview" src="${contextPath}/img/plus.png" alt="preview" />
               </label>
               <div>
-                <input class="input" type="text" id="f-selectFile" placeholder="선택된 파일 없음" readonly />
+                <input class="input" type="text" id="a-selectFile" placeholder="선택된 파일 없음" readonly />
                 <div class="hint">정사각형 이미지를 권장합니다. (JPG/PNG)</div>
               </div>
             </div>
           </div>
           <div class="row">
-            <label class="label" for="f-name">재료명<span style="color:#ef4444"> *</span></label>
-            <input class="input" type="text" name="name" id="f-name" required />
+            <label class="label" for="a-name">재료명<span style="color:#ef4444"> *</span></label>
+            <input class="input" type="text" name="name" id="a-name" required />
           </div>
           <div class="row">
-            <label class="label" for="f-unit">단위<span style="color:#ef4444"> *</span></label>
-            <input class="input" type="text" name="unit" id="f-unit" placeholder="kg / L / 개" required />
+            <label class="label" for="a-unit">단위<span style="color:#ef4444"> *</span></label>
+            <input class="input" type="text" name="unit" id="a-unit" placeholder="kg / L / 개" required />
           </div>
           <div class="row">
-            <label class="label" for="f-unitPrice">단가</label>
-            <input class="input" type="number" name="unitPrice" id="f-unitPrice" step="100" min="0" />
+            <label class="label" for="a-unitPrice">단가</label>
+            <input class="input" type="number" name="unit_price" id="a-unitPrice" step="0.01" min="0" />
           </div>
           <div class="row">
-            <label class="label" for="f-step">주문단위(팩당 단위수)</label>
-            <input class="input" type="number" name="step" id="f-step" step="1" min="1" />
+            <label class="label" for="a-step">주문단위(팩당 단위수)</label>
+            <input class="input" type="number" name="step" id="a-step" step="0.01" min="0" />
           </div>
-          <input type="file" name="ifile" id="f-ifile" accept="image/*" style="display:none" />
+
+          <!-- 이미지 URL(텍스트) + 파일 -->
+          <div class="row">
+            <label class="label" for="a-imgPath">이미지 URL</label>
+            <input class="input" type="text" name="img_path" id="a-imgPath" placeholder="/uploads/materials/xxx.jpg" />
+          </div>
+          <input type="file" name="image" id="a-image" accept="image/*" style="display:none" />
+
           <div class="actions">
             <button class="btn primary" type="submit">저장</button>
             <button class="btn" type="button" onclick="closeAppendModal()">취소</button>
@@ -339,87 +276,113 @@
   <form id="fallbackDeleteForm" method="post" style="display:none"></form>
 
   <script>
-    const $ = (sel, el=document) => el.querySelector(sel);
+    const $  = (sel, el=document) => el.querySelector(sel);
     const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
 
-    // Table action handlers
+    // Table action handlers (edit / delete / append)
     document.addEventListener('click', (e) => {
-      const btn = e.target.closest('button');
-      if(!btn) return;
-      const tr = e.target.closest('tr');
+      const btn = e.target.closest('button'); if(!btn) return;
       const action = btn.dataset.action;
+
       if(action === 'edit'){
-        openEdit(tr);
+        const tr = btn.closest('tr'); openEdit(tr);
       }else if(action === 'delete'){
+        const tr = btn.closest('tr');
         const url = btn.dataset.deleteUrl;
         if(url === '#mock'){ tr.remove(); return; }
         if(!url) return;
         if(!confirm('삭제하시겠어요?')) return;
         btn.disabled = true;
-        fetch(url, { method: 'POST' }) // 서버에 맞게 변경하세요
+        fetch(url, { method: 'POST' })
           .then(res => { if(!res.ok) throw new Error('서버 오류'); return res.text(); })
-          .then(() => { tr.parentNode.removeChild(tr); })
-          .catch(err => { alert('삭제 실패: ' + err.message); btn.disabled = false; })
+          .then(()  => { tr.parentNode.removeChild(tr); })
+          .catch(err => { alert('삭제 실패: ' + err.message); btn.disabled = false; });
       }else if(action === 'append'){
-    	  openAppend();
+        openAppend();
       }
     });
 
-    // Modal open/close
+    // ===== Edit Modal =====
     const editModal = $('#editModal');
-    const appendModal = $('#appendModal');
+    const editForm  = $('#editForm');
+
     function openEdit(tr){
-    	//console.log(tr);
       if(!tr) return;
-      // Fill form with row dataset
-      $('#f-num').value = tr.dataset.id || '';
-      $('#f-name').value = tr.dataset.name || '';
-      $('#f-unit').value = tr.dataset.unit || '';
+      const id = tr.dataset.id || '';
+      editForm.action = '${contextPath}/hq/materials/' + id + '/edit'; // POST {id}/edit
+
+      // 채우기
+      $('#f-id').value        = id;
+      $('#f-name').value      = tr.dataset.name || '';
+      $('#f-unit').value      = tr.dataset.unit || '';
       $('#f-unitPrice').value = tr.dataset.unitprice || '';
-      $('#f-step').value = tr.dataset.step || '';
-      const img = tr.dataset.img;
-      //if(img){ $('#f-preview').src = `${'${contextPath}'}/imageView?filename=${'${'}img${'}'}`; }
-      //else{ $('#f-preview').src = `${'${contextPath}'}/img/plus.png`; }
+      $('#f-step').value      = tr.dataset.step || '';
+
+      // 이미지 보존/미리보기
+      const absImg  = tr.dataset.img || '';       // 화면용(절대)
+      const relPath = tr.dataset.imgPath || '';   // 서버 저장용(상대: /uploads/..)
+      $('#f-preview').src = absImg || '${contextPath}/img/plus.png';
+      $('#f-prev').value  = relPath;
+      $('#f-imgPath').value = relPath;
+
       $('#f-selectFile').value = '';
       editModal.classList.add('show');
       editModal.setAttribute('aria-hidden', 'false');
       setTimeout(()=>{ $('#f-name').focus(); }, 0);
     }
     function closeEditModal(){
-      modal.classList.remove('show');
-      modal.setAttribute('aria-hidden', 'true');
-      $('#editForm').reset();
+      editModal.classList.remove('show');
+      editModal.setAttribute('aria-hidden', 'true');
+      editForm.reset();
+      $('#f-preview').src = '${contextPath}/img/plus.png';
     }
-    editModal.addEventListener('click', (e)=>{ if(e.target === modal) closeEditModal(); });
+    editModal.addEventListener('click', (e)=>{ if(e.target === editModal) closeEditModal(); });
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && editModal.classList.contains('show')) closeEditModal(); });
 
+    // 파일 미리보기 (Edit)
+    const fImage = $('#f-image'), fPreview = $('#f-preview'), fSelectFile = $('#f-selectFile');
+    $('.preview-circle[for="f-image"]').addEventListener('click', ()=> fImage.click());
+    fImage.addEventListener('change', function(){
+      if(this.files && this.files[0]){
+        const f = this.files[0];
+        fSelectFile.value = f.name;
+        const reader = new FileReader();
+        reader.onload = e => fPreview.src = e.target.result;
+        reader.readAsDataURL(f);
+      }
+    });
+
+    // ===== Append Modal =====
+    const appendModal = $('#appendModal');
+    const appendForm  = $('#appendForm');
+
     function openAppend(){
-    	//console.log(tr);
-      // Fill form with row dataset
-      $('#f-selectFile').value = '';
+      appendForm.reset();
+      // 초기 상태
+      $('#a-preview').src = '${contextPath}/img/plus.png';
+      $('#a-selectFile').value = '';
       appendModal.classList.add('show');
       appendModal.setAttribute('aria-hidden', 'false');
-      setTimeout(()=>{ $('#f-name').focus(); }, 0);
+      setTimeout(()=>{ $('#a-name').focus(); }, 0);
     }
     function closeAppendModal(){
       appendModal.classList.remove('show');
       appendModal.setAttribute('aria-hidden', 'true');
-      $('#editForm').reset();
+      appendForm.reset();
+      $('#a-preview').src = '${contextPath}/img/plus.png';
     }
-    appendModal.addEventListener('click', (e)=>{ if(e.target === modal) closeAppendModal(); });
+    appendModal.addEventListener('click', (e)=>{ if(e.target === appendModal) closeAppendModal(); });
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && appendModal.classList.contains('show')) closeAppendModal(); });
 
-    // Image preview (reuse from material-settings)
-    const ifile = $('#f-ifile');
-    const preview = $('#f-preview');
-    const selectFile = $('#f-selectFile');
-    $('.preview-circle').addEventListener('click', ()=> ifile.click());
-    ifile.addEventListener('change', function(){
+    // 파일 미리보기 (Append)
+    const aImage = $('#a-image'), aPreview = $('#a-preview'), aSelectFile = $('#a-selectFile');
+    $('.preview-circle[for="a-image"]').addEventListener('click', ()=> aImage.click());
+    aImage.addEventListener('change', function(){
       if(this.files && this.files[0]){
         const f = this.files[0];
-        selectFile.value = f.name;
+        aSelectFile.value = f.name;
         const reader = new FileReader();
-        reader.onload = e => preview.src = e.target.result;
+        reader.onload = e => aPreview.src = e.target.result;
         reader.readAsDataURL(f);
       }
     });
