@@ -16,23 +16,6 @@
 		<url-pattern>/auth/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>HqMenusServlet</servlet-name>
-		<servlet-class>controller.HqMenusServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>HqMenusServlet</servlet-name>
-		<url-pattern>/hq/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>BranchMenuServlet</servlet-name>
-		<servlet-class>controller.BranchMenuServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>BranchMenuServlet</servlet-name>
-		<url-pattern>/branch/menus/*</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>OrderServlet</servlet-name>
@@ -71,15 +54,6 @@
 		<url-pattern>/imageView</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>HqMaterialsServlet</servlet-name>
-		<servlet-class>controller.HqMaterialsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>HqMaterialsServlet</servlet-name>
-		<url-pattern>/hq/materials</url-pattern>
-		<url-pattern>/hq/materials/*</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>LoginServlet</servlet-name>
@@ -99,14 +73,6 @@
 		<url-pattern>/logout</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>MainServlet</servlet-name>
-		<servlet-class>controller.MainServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MainServlet</servlet-name>
-		<url-pattern>/main</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>EventServlet</servlet-name>
