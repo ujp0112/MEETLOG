@@ -2,3 +2,6 @@
 
 # API Key
 /src/main/webapp/WEB-INF/api.properties
+
+# Eclipse settings
+/.settings/
