@@ -25,6 +25,13 @@
         SELECT * FROM reservations WHERE user_id = #{userId} ORDER BY reservation_time DESC
     </select>
 
+    <select id="findRecentByUserId" parameterType="map" resultMap="reservationResultMap">
+        SELECT * FROM reservations 
+        WHERE user_id = #{userId} 
+        ORDER BY reservation_time DESC
+        LIMIT #{limit}
+    </select>
+
     <select id="findByRestaurantId" parameterType="int" resultMap="reservationResultMap">
         SELECT * FROM reservations WHERE restaurant_id = #{restaurantId} ORDER BY reservation_time ASC
     </select>

@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%-- [추가] LocalDateTime 포맷을 위한 import --%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -13,7 +15,6 @@
 </head>
 <body class="bg-slate-100">
     <div id="app" class="flex flex-col min-h-screen">
-        <%-- Standardized header include path --%>
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
         <main class="flex-grow">
@@ -43,17 +44,18 @@
                                             </div>
                                         </c:if>
 
-                                        <form "${pageContext.request.contextPath}.do/mypage/settings" method="post" class="space-y-4">
+                                        <form action="${pageContext.request.contextPath}/mypage/settings" method="post" class="space-y-4">
                                             <input type="hidden" name="action" value="updateProfile">
                                             
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">프로필 이미지</label>
                                                 <div class="flex items-center space-x-4">
-                                                    <img src="${not empty sessionScope.user.profileImage ? sessionScope.user.profileImage : 'https://placehold.co/100x100/94a3b8/ffffff?text=U'}" 
+                                                    <img src="${not empty sessionScope.user.profileImage ?
+ sessionScope.user.profileImage : 'https://placehold.co/100x100/94a3b8/ffffff?text=U'}"
                                                          class="w-16 h-16 rounded-full" alt="프로필">
                                                     <input type="url" name="profileImage" 
                                                            value="${sessionScope.user.profileImage}"
-                                                           class="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
+                                                           class="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
                                                            placeholder="이미지 URL을 입력하세요">
                                                 </div>
                                             </div>
@@ -86,7 +88,7 @@
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-xl font-bold text-slate-800 mb-4">비밀번호 변경</h3>
                                         
-                                        <form "${pageContext.request.contextPath}.do/mypage/settings" method="post" class="space-y-4">
+                                        <form action="${pageContext.request.contextPath}/mypage/settings" method="post" class="space-y-4">
                                             <input type="hidden" name="action" value="changePassword">
                                             
                                             <div>
@@ -123,7 +125,8 @@
                                                 <span class="text-slate-800">
                                                     <c:choose>
                                                         <c:when test="${not empty sessionScope.user.createdAt}">
-                                                            <fmt:formatDate value="${sessionScope.user.createdAt}" pattern="yyyy.MM.dd" />
+                                                            <%-- [수정] fmt:formatDate -> EL 표현식으로 변경 --%>
+                                                            ${sessionScope.user.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))}
                                                         </c:when>
                                                         <c:otherwise>정보 없음</c:otherwise>
                                                     </c:choose>
@@ -166,12 +169,10 @@
             </div>
         </main>
         
-        <%-- Replaced inline footer with a reusable component --%>
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
 
     <script>
-        // This client-side script remains the same as it contains no JSP code.
         function exportData() {
             alert('데이터 내보내기 기능은 준비 중입니다.');
         }
@@ -184,13 +185,12 @@
             }
         }
 
-        // Password confirmation validation
         document.addEventListener('DOMContentLoaded', function() {
             const newPasswordInput = document.querySelector('input[name="newPassword"]');
             const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]');
 
             if (confirmPasswordInput) {
-                confirmPasswordInput.addEventListener('input', function() {
+                 confirmPasswordInput.addEventListener('input', function() {
                     if (newPasswordInput.value !== this.value) {
                         this.setCustomValidity('비밀번호가 일치하지 않습니다.');
                     } else {

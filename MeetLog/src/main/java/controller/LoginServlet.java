@@ -10,55 +10,74 @@ import javax.servlet.http.HttpSession;
 import model.User;
 import service.UserService;
 
-//@WebServlet({"/login"})
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-   private UserService userService = new UserService();
+    private static final long serialVersionUID = 1L;
+    private UserService userService = new UserService();
 
-   public LoginServlet() {
-   }
+    public LoginServlet() {
+        super();
+    }
 
-   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-   }
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+    }
 
-   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-      request.setCharacterEncoding("UTF-8");
-      String email = request.getParameter("email");
-      String password = request.getParameter("password");
-      String userType = request.getParameter("userType"); // "PERSONAL"로 고정되어 들어옴
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String userType = request.getParameter("userType"); // PERSONAL 또는 BUSINESS
+        
+        // [수정] 폼에서 넘어온 돌아갈 URL을 가져옵니다.
+        String redirectUrl = request.getParameter("redirectUrl");
 
-      try {
-         // 1. JSP가 요청한 "PERSONAL" 타입으로 우선 인증 시도
-         User user = this.userService.authenticateUser(email, password, userType);
+        try {
+            User user = this.userService.authenticateUser(email, password, userType);
 
-         // [논리 오류 수정] 
-         // 2. 만약 PERSONAL 인증이 실패했다면, 관리자(ADMIN)일 가능성이 있으므로 ADMIN으로 재시도합니다.
-         if (user == null) {
-            user = this.userService.authenticateUser(email, password, "ADMIN");
-         }
-
-         if (user != null) {
-            // 인증 성공
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            session.setAttribute("userId", user.getId());
-            session.setAttribute("userType", user.getUserType()); // 실제 DB의 userType (ADMIN 또는 PERSONAL)
-            
-            // 관리자인 경우 관리자 대시보드로, 일반 사용자는 메인으로 리다이렉트
-            if ("ADMIN".equals(user.getUserType())) {
-                response.sendRedirect(request.getContextPath() + "/admin");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/main");
+            // [추가] userType으로 인증 실패 시, 혹시 모를 관리자(ADMIN) 계정인지 한 번 더 확인
+            if (user == null && "PERSONAL".equals(userType)) {
+                 user = this.userService.authenticateUser(email, password, "ADMIN");
             }
-         } else {
-            // PERSONAL, ADMIN 모두 인증 실패
-            request.setAttribute("errorMessage", "아이디 또는 비밀번호가 올바르지 않습니다.");
+
+            if (user != null) {
+                // ============== 인증 성공 ==============
+                HttpSession session = request.getSession();
+                session.setAttribute("user", user);
+                session.setAttribute("userId", user.getId());
+                session.setAttribute("userType", user.getUserType());
+
+                // [수정] 세션에 저장된 redirectUrl은 이제 사용했으므로 제거합니다.
+                session.removeAttribute("redirectUrl");
+                
+                // [수정] 리다이렉트 우선순위 로직
+                if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
+                    // 1순위: 돌아갈 URL이 있으면 그곳으로 보냅니다.
+                    response.sendRedirect(redirectUrl);
+                } else {
+                    // 2순위: 돌아갈 URL이 없으면 역할(Role)에 따라 기본 페이지로 보냅니다.
+                    if ("ADMIN".equals(user.getUserType())) {
+                        response.sendRedirect(request.getContextPath() + "/admin");
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/main");
+                    }
+                }
+            } else {
+                // ============== 인증 실패 ==============
+                request.setAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
+                
+                // [수정] 로그인 실패 시에도 redirectUrl 정보를 뷰(JSP)로 다시 전달해야 합니다.
+                // 이렇게 해야 로그인 재시도 시에도 원래 목적지 정보를 잃지 않습니다.
+                request.setAttribute("redirectUrl", redirectUrl); 
+                
+                request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "로그인 처리 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-         }
-      } catch (Exception var8) {
-         var8.printStackTrace();
-         request.setAttribute("errorMessage", "로그인 중 오류가 발생했습니다.");
-         request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-      }
-   }
+        }
+    }
 }

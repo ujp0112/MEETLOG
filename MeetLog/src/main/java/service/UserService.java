@@ -19,10 +19,42 @@ public class UserService {
         return null;
     }
 
+    // [추가] MypageServlet의 '프로필 수정'을 위한 메서드
+    public boolean updateProfile(int userId, String nickname, String profileImage) {
+        User user = userDAO.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        user.setNickname(nickname);
+        user.setProfileImage(profileImage);
+        // userDAO.update()는 UserMapper.xml의 <update id="update">를 호출
+        return userDAO.update(user) > 0; 
+    }
+    
+    // [추가] MypageServlet의 '비밀번호 변경'을 위한 메서드
+    public boolean changePassword(int userId, String currentPassword, String newPassword) {
+        User user = userDAO.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        
+        // 현재 비밀번호 확인
+        if (!PasswordUtil.verifyPassword(currentPassword, user.getPassword())) {
+            return false; // 현재 비밀번호 불일치
+        }
+        
+        // 새 비밀번호 해시
+        String newHashedPassword = PasswordUtil.hashPassword(newPassword);
+        
+        // userDAO.updatePassword()는 UserMapper.xml의 <update id="updatePassword">를 호출
+        return userDAO.updatePassword(userId, newHashedPassword) > 0;
+    }
+
+    // --- 이하 기존 메서드들 ---
+
     public boolean registerUser(User user) {
         String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.insert(user) > 0;
     }
 
@@ -39,12 +71,10 @@ public class UserService {
     }
 
     public boolean updateUser(User user) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.update(user) > 0;
     }
 
     public boolean deleteUser(int userId) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.delete(userId) > 0;
     }
 
@@ -63,7 +93,6 @@ public class UserService {
             String tempPassword = PasswordUtil.generateTempPassword();
             String hashedPassword = PasswordUtil.hashPassword(tempPassword);
             
-            // (핵심 수정!) int 결과를 boolean으로 변환
             boolean updated = userDAO.updatePassword(user.getId(), hashedPassword) > 0;
             
             if (updated) {

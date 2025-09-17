@@ -2,26 +2,29 @@ package service;
 
 import dao.ReviewDAO;
 import model.Review;
-import model.ReviewInfo; // ReviewInfo 모델을 import 합니다.
+import model.ReviewInfo; 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ReviewService {
     private ReviewDAO reviewDAO = new ReviewDAO();
 
-    // --- 여기에 추가될 새로운 메소드 ---
-    /**
-     * 최신 리뷰 목록을 맛집 이름 정보와 함께 가져옵니다. (MainServlet용)
-     * @param limit 가져올 리뷰 개수
-     * @return ReviewInfo 객체의 리스트
-     */
     public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
-        // DAO에 있는 새로운 메소드를 그대로 호출해줍니다.
         return reviewDAO.getRecentReviewsWithInfo(limit);
     }
     
-    // --- 기존 메소드들 (변경 없음) ---
+    // [복원] ReviewServlet을 위한 메서드 (사이트 전체 최신 리뷰)
     public List<Review> getRecentReviews(int limit) {
         return reviewDAO.findRecentReviews(limit);
+    }
+    
+    // [유지] MypageServlet을 위한 메서드 (특정 사용자의 최신 리뷰)
+    public List<Review> getRecentReviews(int userId, int limit) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("limit", limit);
+        return reviewDAO.findRecentByUserId(params); 
     }
 
     public List<Review> getReviewsByRestaurantId(int restaurantId) {
