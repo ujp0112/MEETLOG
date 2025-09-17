@@ -89,8 +89,8 @@
 
     <div class="topnav">
 <a href="./branch-management.jsp" class="${fn:contains(uri, '/hq/branches') ? 'act' : ''}">지점</a>
-<a href="./material-management.jsp" class="${fn:contains(uri, '/hq/materials') ? 'act' : ''}">재료</a>
-<a href="./menu-register.jsp" class="${fn:contains(uri, '/hq/menus') ? 'act' : ''}">메뉴</a>
+<a href="${ctx }/hq/materials" class="${fn:contains(uri, '/hq/materials') ? 'act' : ''}">재료</a>
+<a href="${ctx }/hq/menus" class="${fn:contains(uri, '/hq/menus') ? 'act' : ''}">메뉴</a>
 <a href="./sales-orders.jsp" class="${fn:contains(uri, '/hq/orders') ? 'act' : ''}">수주</a>
 </div>
 

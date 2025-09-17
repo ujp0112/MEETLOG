@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper.OrderMapper">
+  <resultMap id="PurchaseOrderMap" type="dto.PurchaseOrder">
+    <id property="id" column="id"/>
+    <result property="companyId" column="company_id"/>
+    <result property="branchId" column="branch_id"/>
+    <result property="status" column="status"/>
+    <result property="totalPrice" column="total_price"/>
+    <result property="orderedAt" column="ordered_at"/>
+    <result property="branchName" column="branch_name"/>
+  </resultMap>
+
+  <resultMap id="PurchaseOrderLineMap" type="dto.PurchaseOrderLine">
+    <result property="companyId" column="company_id"/>
+    <result property="orderId" column="order_id"/>
+    <result property="lineNo" column="line_no"/>
+    <result property="materialId" column="material_id"/>
+    <result property="qty" column="qty"/>
+    <result property="unitPrice" column="unit_price"/>
+    <result property="materialName" column="material_name"/>
+    <result property="unit" column="unit"/>
+  </resultMap>
+
+  <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" parameterType="dto.PurchaseOrder">
+    INSERT INTO purchase_order (company_id, branch_id, status, total_price, ordered_at)
+    VALUES (#{companyId}, #{branchId}, #{status}, #{totalPrice}, NOW())
+  </insert>
+
+  <insert id="insertOrderLine" parameterType="dto.PurchaseOrderLine">
+    INSERT INTO purchase_order_line (company_id, order_id, line_no, material_id, qty, unit_price)
+    VALUES (#{companyId}, #{orderId}, #{lineNo}, #{materialId}, #{qty}, #{unitPrice})
+  </insert>
+
+  <select id="getOrderWithLines" parameterType="map" resultMap="PurchaseOrderMap">
+    SELECT po.*, b.name AS branch_name
+    FROM purchase_order po
+    JOIN branch b ON b.company_id=po.company_id AND b.id=po.branch_id
+    WHERE po.company_id=#{companyId} AND po.id=#{orderId}
+  </select>
+
+  <select id="listOrderLines" parameterType="map" resultMap="PurchaseOrderLineMap">
+    SELECT pol.*, m.name AS material_name, m.unit
+    FROM purchase_order_line pol
+    JOIN material m ON m.company_id=pol.company_id AND m.id=pol.material_id
+    WHERE pol.company_id=#{companyId} AND pol.order_id=#{orderId}
+    ORDER BY pol.line_no
+  </select>
+
+  <select id="listOrdersForBranch" parameterType="map" resultMap="PurchaseOrderMap">
+    SELECT po.*, b.name AS branch_name
+    FROM purchase_order po
+    JOIN branch b ON b.company_id=po.company_id AND b.id=po.branch_id
+    WHERE po.company_id=#{companyId} AND po.branch_id=#{branchId}
+    ORDER BY po.id DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <select id="listOrdersForCompany" parameterType="map" resultMap="PurchaseOrderMap">
+    SELECT po.*, b.name AS branch_name
+    FROM purchase_order po
+    JOIN branch b ON b.company_id=po.company_id AND b.id=po.branch_id
+    WHERE po.company_id=#{companyId}
+    <if test="status != null and status != ''">
+      AND po.status = #{status}
+    </if>
+    ORDER BY po.id DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <update id="updateOrderStatus" parameterType="map">
+    UPDATE purchase_order SET status=#{status}, updated_at=NOW()
+    WHERE company_id=#{companyId} AND id=#{orderId}
+  </update>
+
+  <!-- 입고시 재고 가산 -->
+  <insert id="increaseInventory" parameterType="map">
+    INSERT INTO branch_inventory (company_id, branch_id, material_id, qty, updated_at)
+    VALUES (#{companyId}, #{branchId}, #{materialId}, #{qty}, NOW())
+    ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at=NOW()
+  </insert>
+</mapper>
