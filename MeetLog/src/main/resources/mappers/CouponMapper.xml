@@ -3,7 +3,6 @@
 
 <mapper namespace="CouponMapper">
     
-    <!-- 맛집별 쿠폰 조회 -->
     <select id="findByRestaurantId" parameterType="int" resultType="Coupon">
         SELECT 
             id,
@@ -12,15 +11,13 @@
             validity,
             restaurant_id as restaurantId,
             is_active as isActive,
-            created_at as createdAt,
-            updated_at as updatedAt
+            created_at as createdAt
         FROM coupons 
         WHERE restaurant_id = #{restaurantId} 
         AND is_active = true 
         ORDER BY created_at DESC
     </select>
     
-    <!-- 모든 활성 쿠폰 조회 -->
     <select id="findAllActive" resultType="Coupon">
         SELECT 
             id,
@@ -29,14 +26,12 @@
             validity,
             restaurant_id as restaurantId,
             is_active as isActive,
-            created_at as createdAt,
-            updated_at as updatedAt
+            created_at as createdAt
         FROM coupons 
         WHERE is_active = true 
         ORDER BY created_at DESC
     </select>
     
-    <!-- 쿠폰 추가 -->
     <insert id="insertCoupon" parameterType="Coupon" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO coupons (
             title,
@@ -44,36 +39,30 @@
             validity,
             restaurant_id,
             is_active,
-            created_at,
-            updated_at
+            created_at
         ) VALUES (
             #{title},
             #{description},
             #{validity},
             #{restaurantId},
             true,
-            NOW(),
             NOW()
         )
     </insert>
     
-    <!-- 쿠폰 수정 -->
     <update id="updateCoupon" parameterType="Coupon">
         UPDATE coupons 
         SET 
             title = #{title},
             description = #{description},
-            validity = #{validity},
-            updated_at = NOW()
+            validity = #{validity}
         WHERE id = #{id}
     </update>
     
-    <!-- 쿠폰 삭제 (비활성화) -->
     <update id="deleteCoupon" parameterType="int">
         UPDATE coupons 
         SET 
-            is_active = false,
-            updated_at = NOW()
+            is_active = false
         WHERE id = #{couponId}
     </update>
     

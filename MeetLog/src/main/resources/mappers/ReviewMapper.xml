@@ -85,4 +85,10 @@
 		UPDATE reviews SET likes =
 		likes + 1, updated_at = NOW() WHERE id = #{id}
 	</update>
+	<select id="findRecentByUserId" parameterType="map" resultMap="reviewResultMap">
+        SELECT * FROM reviews 
+        WHERE user_id = #{userId} AND is_active = true 
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
 </mapper>

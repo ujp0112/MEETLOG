@@ -1,14 +1,20 @@
 package dao;
 
 import model.Review;
-import model.ReviewInfo; // ReviewInfo 모델 import
+import model.ReviewInfo;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
+import java.util.Map;
 
 public class ReviewDAO {
-    // DAO와 Mapper XML을 연결하는 고유한 이름
     private static final String NAMESPACE = "dao.ReviewDAO";
+
+    public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".getRecentReviewsWithInfo", limit);
+        }
+    }
 
     public List<Review> findRecentReviews(int limit) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
@@ -28,42 +34,40 @@ public class ReviewDAO {
         }
     }
 
+    // [추가] MypageServlet을 위한 메서드
+    public List<Review> findRecentByUserId(Map<String, Object> params) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findRecentByUserId", params);
+        }
+    }
+
     public int insert(Review review) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             int result = sqlSession.insert(NAMESPACE + ".insert", review);
-            sqlSession.commit(); // 데이터 변경이 있으므로 commit() 호출
+            if (result > 0) {
+                sqlSession.commit();
+            }
             return result;
         }
     }
 
-    public int delete(int reviewId) {
+    public int delete(int id) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".delete", reviewId);
-            sqlSession.commit();
+            int result = sqlSession.update(NAMESPACE + ".delete", id);
+            if (result > 0) {
+                sqlSession.commit();
+            }
             return result;
         }
     }
 
-    public int likeReview(int reviewId) {
+    public int likeReview(int id) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".likeReview", reviewId);
-            sqlSession.commit();
+            int result = sqlSession.update(NAMESPACE + ".likeReview", id);
+            if (result > 0) {
+                sqlSession.commit();
+            }
             return result;
         }
-    }
-    
-    // --- 여기에 추가된 새로운 메소드 (수정 완료) ---
-    /**
-     * 최신 리뷰를 맛집 이름과 함께 가져옵니다. (MyBatis 버전)
-     * @param limit 가져올 리뷰 개수
-     * @return ReviewInfo 객체 리스트
-     */
-    public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
-        // 1. MyBatis 세션을 엽니다.
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            // 2. Mapper XML의 쿼리를 호출합니다.
-            return sqlSession.selectList(NAMESPACE + ".getRecentReviewsWithInfo", limit);
-        }
-        // 3. try-with-resources 구문이 자동으로 세션을 닫아줍니다.
     }
 }

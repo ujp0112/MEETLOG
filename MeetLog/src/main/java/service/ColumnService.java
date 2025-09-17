@@ -3,33 +3,34 @@ package service;
 import dao.ColumnDAO;
 import model.Column;
 import java.util.List;
+import java.util.Map; // [추가]
+import java.util.HashMap; // [추가]
 
 public class ColumnService {
 	private ColumnDAO columnDAO = new ColumnDAO();
 
-    /**
-     * [신규] 서블릿이 호출할 모든 칼럼 조회 서비스
-     */
     public List<Column> getAllColumns() {
         return columnDAO.findAll();
     }
 
-    /**
-     * [신규] 서블릿이 호출할 칼럼 생성 서비스
-     */
     public boolean createColumn(Column column) {
-        // 기존 addColumn을 호출하도록 연결
         return this.addColumn(column);
     }
 	
-    // --- 기존 코드는 그대로 유지 ---
 	public List<Column> getTopColumns(int limit) {
 		return columnDAO.findTopColumns(limit);
 	}
 
-	public List<Column> getRecentColumns(int limit) {
-		return columnDAO.findRecentColumns(limit);
+    // --- [수정된 메서드] ---
+    // MypageServlet이 (userId, limit) 2개를 보내므로, 파라미터를 2개 받도록 수정
+	public List<Column> getRecentColumns(int userId, int limit) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("limit", limit);
+        // 새로 추가한 DAO 메서드 호출
+		return columnDAO.findRecentByUserId(params);
 	}
+    // --- [수정 끝] ---
 
 	public List<Column> getColumnsByUserId(int userId) {
 		return columnDAO.findByUserId(userId);

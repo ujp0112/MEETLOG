@@ -13,12 +13,21 @@ public class ReservationService {
         return reservationDAO.findByUserId(userId);
     }
 
+    // [추가] MypageServlet의 '최근 예약'을 위한 메서드
+    public List<Reservation> getRecentReservations(int userId, int limit) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("limit", limit);
+        // ReservationMapper.xml에 새로 추가한 쿼리(findRecentByUserId)를 호출합니다.
+        // (ReservationDAO 인터페이스에도 이 메서드 선언이 필요합니다)
+        return reservationDAO.findRecentByUserId(params); 
+    }
+
     public Reservation getReservationById(int reservationId) {
         return reservationDAO.findById(reservationId);
     }
 
     public boolean createReservation(Reservation reservation) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return reservationDAO.insert(reservation) > 0;
     }
 
@@ -26,7 +35,6 @@ public class ReservationService {
         Map<String, Object> params = new HashMap<>();
         params.put("id", reservationId);
         params.put("status", "CANCELLED");
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return reservationDAO.updateStatus(params) > 0;
     }
 
@@ -34,7 +42,6 @@ public class ReservationService {
         Map<String, Object> params = new HashMap<>();
         params.put("id", reservationId);
         params.put("status", status);
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return reservationDAO.updateStatus(params) > 0;
     }
 }

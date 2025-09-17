@@ -5,29 +5,37 @@
 
 <mapper namespace="mapper.OfficialCourseMapper">
 
-    <resultMap id="officialCourseResult" type="model.OfficialCourse">
+    <resultMap id="officialCourseWithStepsResult" type="model.OfficialCourse">
         <id property="id" column="course_id"/>
-        <result property="title" column="title"/>
+        <result property="title" column="course_title"/>
+        
         <collection property="tags" javaType="java.util.ArrayList"
                     select="selectTagsForCourse" column="course_id"/>
-        <collection property="steps" javaType="java.util.ArrayList"
-                    ofType="model.CourseStep"
-                    select="selectStepsForCourse" column="course_id"/>
-    </resultMap>
-    
-    <resultMap id="stepResult" type="model.CourseStep">
-        <result property="type" column="step_type"/>
-        <result property="emoji" column="emoji"/>
-        <result property="name" column="name"/>
-        <result property="description" column="description"/>
-        <result property="image" column="image"/>
+        
+        <collection property="steps" ofType="model.CourseStep">
+            <id property="id" column="step_id"/>
+            <result property="type" column="step_type"/>
+            <result property="emoji" column="step_emoji"/>
+            <result property="name" column="step_name"/>
+            <result property="description" column="step_description"/>
+            <result property="image" column="step_image"/>
+        </collection>
     </resultMap>
 
-    <select id="selectOfficialCourses" resultMap="officialCourseResult">
-        SELECT course_id, title 
-        FROM courses
-        WHERE type = 'OFFICIAL'
-        ORDER BY created_at DESC
+    <select id="selectOfficialCourses" resultMap="officialCourseWithStepsResult">
+        SELECT 
+            c.course_id, 
+            c.title AS course_title,
+            cs.step_id,
+            cs.step_type,
+            cs.emoji AS step_emoji,
+            cs.name AS step_name,
+            cs.description AS step_description,
+            cs.image AS step_image
+        FROM courses c
+        LEFT JOIN course_steps cs ON c.course_id = cs.course_id
+        WHERE c.type = 'OFFICIAL'
+        ORDER BY c.created_at DESC, cs.step_order ASC
     </select>
     
     <select id="selectTagsForCourse" parameterType="int" resultType="java.lang.String">
@@ -36,10 +44,4 @@
         WHERE ct.course_id = #{course_id}
     </select>
     
-    <select id="selectStepsForCourse" parameterType="int" resultMap="stepResult">
-        SELECT step_type, emoji, name, description, image
-        FROM course_steps
-        WHERE course_id = #{course_id}
-        ORDER BY step_order ASC
-    </select>
-</mapper>
+    </mapper>

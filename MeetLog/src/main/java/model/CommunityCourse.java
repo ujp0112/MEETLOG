@@ -2,7 +2,6 @@ package model;
 
 import java.util.List;
 
-// JSP의 "모두의 코스" 섹션에 필요한 데이터를 담는 모델
 public class CommunityCourse {
 	private int id;
 	private String title;
@@ -10,10 +9,13 @@ public class CommunityCourse {
 	private String authorName;
 	private String authorImage;
 	private int likes;
-	private List<String> tags; // Nested 쿼리 결과
+	private List<String> tags;
+	
+	// [추가] 코스를 작성한 사용자의 ID를 저장할 필드
+	private int userId;
 
-	// --- (모든 필드에 대한 Getter/Setter가 필요합니다) ---
-	// (Getter/Setter를 모두 생성해주세요)
+	// --- 모든 필드에 대한 Getter/Setter ---
+	
 	public int getId() {
 		return id;
 	}
@@ -68,5 +70,14 @@ public class CommunityCourse {
 
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+
+	// [추가] userId 필드의 Getter/Setter
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 }
