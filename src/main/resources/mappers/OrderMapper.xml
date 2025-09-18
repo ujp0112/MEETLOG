@@ -80,4 +80,10 @@
     VALUES (#{companyId}, #{branchId}, #{materialId}, #{qty}, NOW())
     ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty), updated_at=NOW()
   </insert>
+
+  <select id="getTotalOrderCountForBranch" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM purchase_order po
+    WHERE po.company_id=#{companyId} AND po.branch_id=#{branchId}
+  </select>
 </mapper>

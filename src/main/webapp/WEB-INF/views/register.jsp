@@ -30,7 +30,7 @@
                 </div>
             </c:if>
 
-            <form "${pageContext.request.contextPath}.do/register" method="post" class="mt-8 space-y-6">
+            <form action="${pageContext.request.contextPath}/register" method="post" class="mt-8 space-y-6">
                 <input type="hidden" name="userType" value="PERSONAL">
                 <div class="space-y-4">
                     <div>

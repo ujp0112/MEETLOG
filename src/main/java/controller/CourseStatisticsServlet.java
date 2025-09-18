@@ -13,7 +13,7 @@ import model.User;
 import model.CourseStatisticsData;
 import service.CourseStatisticsService;
 
-// [수정] @WebServlet 어노테이션 삭제 (web.xml에서 관리)
+// [수정] 
 public class CourseStatisticsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     

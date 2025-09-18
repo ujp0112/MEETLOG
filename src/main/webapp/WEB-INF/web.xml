@@ -190,4 +190,241 @@
 		<url-pattern>/admin/course-statistics</url-pattern>
 	</servlet-mapping>
 
+	<!-- 회원가입 관련 서블릿 -->
+	<servlet>
+		<servlet-name>RegisterServlet</servlet-name>
+		<servlet-class>controller.RegisterServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RegisterServlet</servlet-name>
+		<url-pattern>/register</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>BusinessRegisterServlet</servlet-name>
+		<servlet-class>controller.BusinessRegisterServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BusinessRegisterServlet</servlet-name>
+		<url-pattern>/business/register</url-pattern>
+	</servlet-mapping>
+
+	<!-- 메인 페이지 서블릿 -->
+	<servlet>
+		<servlet-name>MainServlet</servlet-name>
+		<servlet-class>controller.MainServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MainServlet</servlet-name>
+		<url-pattern>/main</url-pattern>
+	</servlet-mapping>
+
+	<!-- 인덱스 서블릿 -->
+	<servlet>
+		<servlet-name>IndexServlet</servlet-name>
+		<servlet-class>controller.IndexServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>IndexServlet</servlet-name>
+		<url-pattern>/index</url-pattern>
+	</servlet-mapping>
+
+	<!-- 맛집 관련 서블릿 -->
+	<servlet>
+		<servlet-name>RestaurantServlet</servlet-name>
+		<servlet-class>controller.RestaurantServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RestaurantServlet</servlet-name>
+		<url-pattern>/restaurant/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 리뷰 관련 서블릿 -->
+	<servlet>
+		<servlet-name>ReviewServlet</servlet-name>
+		<servlet-class>controller.ReviewServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReviewServlet</servlet-name>
+		<url-pattern>/review/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 예약 관련 서블릿 -->
+	<servlet>
+		<servlet-name>ReservationServlet</servlet-name>
+		<servlet-class>controller.ReservationServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReservationServlet</servlet-name>
+		<url-pattern>/reservation/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 마이페이지 서블릿 -->
+	<servlet>
+		<servlet-name>MypageServlet</servlet-name>
+		<servlet-class>controller.MypageServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MypageServlet</servlet-name>
+		<url-pattern>/mypage/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 추천 서블릿 -->
+	<servlet>
+		<servlet-name>RecommendationServlet</servlet-name>
+		<servlet-class>controller.RecommendationServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RecommendationServlet</servlet-name>
+		<url-pattern>/recommendation/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 컬럼 서블릿 -->
+	<servlet>
+		<servlet-name>ColumnServlet</servlet-name>
+		<servlet-class>controller.ColumnServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ColumnServlet</servlet-name>
+		<url-pattern>/column/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 관리자 관련 서블릿들 -->
+	<servlet>
+		<servlet-name>AdminServlet</servlet-name>
+		<servlet-class>controller.AdminServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminServlet</servlet-name>
+		<url-pattern>/admin/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AdminLoginServlet</servlet-name>
+		<servlet-class>controller.AdminLoginServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminLoginServlet</servlet-name>
+		<url-pattern>/admin/login</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AdminDashboardServlet</servlet-name>
+		<servlet-class>controller.AdminDashboardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AdminDashboardServlet</servlet-name>
+		<url-pattern>/admin/dashboard</url-pattern>
+	</servlet-mapping>
+
+	<!-- 비즈니스 관련 서블릿들 -->
+	<servlet>
+		<servlet-name>BusinessDashboardServlet</servlet-name>
+		<servlet-class>controller.BusinessDashboardServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BusinessDashboardServlet</servlet-name>
+		<url-pattern>/business/dashboard</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>BusinessInfoEditServlet</servlet-name>
+		<servlet-class>controller.BusinessInfoEditServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BusinessInfoEditServlet</servlet-name>
+		<url-pattern>/business/edit/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 기타 서블릿들 -->
+	<servlet>
+		<servlet-name>IdPwSearchServlet</servlet-name>
+		<servlet-class>controller.IdPwSearchServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>IdPwSearchServlet</servlet-name>
+		<url-pattern>/idpwsearch</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>InquiryServlet</servlet-name>
+		<servlet-class>controller.InquiryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>InquiryServlet</servlet-name>
+		<url-pattern>/inquiry/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>NoticeServlet</servlet-name>
+		<servlet-class>controller.NoticeServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>NoticeServlet</servlet-name>
+		<url-pattern>/notice/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>FaqServlet</servlet-name>
+		<servlet-class>controller.FaqServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>FaqServlet</servlet-name>
+		<url-pattern>/faq</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>PrivacyServlet</servlet-name>
+		<servlet-class>controller.PrivacyServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>PrivacyServlet</servlet-name>
+		<url-pattern>/privacy</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ServiceServlet</servlet-name>
+		<servlet-class>controller.ServiceServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ServiceServlet</servlet-name>
+		<url-pattern>/service</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AlertServlet</servlet-name>
+		<servlet-class>controller.AlertServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AlertServlet</servlet-name>
+		<url-pattern>/alert</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>StaticServlet</servlet-name>
+		<servlet-class>controller.StaticServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>StaticServlet</servlet-name>
+		<url-pattern>/static/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>TestServlet</servlet-name>
+		<servlet-class>controller.TestServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>TestServlet</servlet-name>
+		<url-pattern>/test</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>DebugServlet</servlet-name>
+		<servlet-class>controller.DebugServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>DebugServlet</servlet-name>
+		<url-pattern>/debug</url-pattern>
+	</servlet-mapping>
+
 </web-app>

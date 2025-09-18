@@ -61,8 +61,7 @@
                                                         </span>
                                                     </div>
                                                     <p class="text-slate-600 text-sm mb-2">맛집 ID: ${reservation.restaurantId}</p>
-                                                    <p class="text-slate-700 mb-2">예약 날짜: <fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy-MM-dd" /></p>
-                                                    <p class="text-slate-700 mb-2">예약 시간: ${reservation.reservationTimeString}</p>
+                                                    <p class="text-slate-700 mb-2">예약 날짜: ${reservation.formattedReservationTime}</p>
                                                     <p class="text-slate-700">인원: ${reservation.partySize}명</p>
                                                     <c:if test="${not empty reservation.specialRequests}">
                                                         <p class="text-slate-600 text-sm mt-2">특별 요청: ${reservation.specialRequests}</p>

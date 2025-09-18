@@ -3,7 +3,6 @@ package controller;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,7 +15,7 @@ import service.RecommendationService;
  * 개인화 추천 시스템을 위한 서블릿
  * 다양한 추천 알고리즘을 제공합니다.
  */
-@WebServlet("/recommendation/*")
+
 public class RecommendationServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     

@@ -123,7 +123,7 @@
                                                 <span class="text-slate-800">
                                                     <c:choose>
                                                         <c:when test="${not empty sessionScope.user.createdAt}">
-                                                            <fmt:formatDate value="${sessionScope.user.createdAt}" pattern="yyyy.MM.dd" />
+                                                            ${sessionScope.user.createdAt}
                                                         </c:when>
                                                         <c:otherwise>정보 없음</c:otherwise>
                                                     </c:choose>

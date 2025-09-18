@@ -5,14 +5,13 @@ import dto.MenuToggle;
 import service.BranchService;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.*;
 
-@WebServlet(name="BranchMenuServlet", urlPatterns={"/branch/menus","/branch/menus/*"})
+
 public class BranchMenuServlet extends HttpServlet {
 
   private BranchService branchService;

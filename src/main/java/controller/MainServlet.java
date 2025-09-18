@@ -1,10 +1,10 @@
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,7 +20,6 @@ import service.RestaurantService;
 import service.ReviewService;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/main")
 public class MainServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RestaurantService restaurantService = new RestaurantService();
@@ -67,28 +66,9 @@ public class MainServlet extends HttpServlet {
             HttpSession session = request.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
             
-            if (user != null) {
-                String cacheKey = "personalizedRecommendations_" + user.getId();
-                personalizedRecommendations = (List<RestaurantRecommendation>) application.getAttribute(cacheKey);
-                Long lastUpdatePersonalized = (Long) application.getAttribute(cacheKey + "_time");
-                
-                if (personalizedRecommendations == null || lastUpdatePersonalized == null || 
-                    (currentTime - lastUpdatePersonalized > 30 * 60 * 1000)) {
-                    try {
-                        // 사용자 취향 분석 (백그라운드에서 실행)
-                        recommendationService.analyzeUserPreferences(user.getId());
-                        
-                        // 개인화 추천 실행
-                        personalizedRecommendations = recommendationService.getHybridRecommendations(user.getId(), 6);
-                        application.setAttribute(cacheKey, personalizedRecommendations);
-                        application.setAttribute(cacheKey + "_time", currentTime);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        // 추천 실패 시 인기 맛집으로 대체
-                        personalizedRecommendations = recommendationService.getFallbackRecommendations(6);
-                    }
-                }
-            }
+            // 개인화 추천 (임시로 비활성화)
+            personalizedRecommendations = new ArrayList<>();
+            System.out.println("추천 시스템이 임시로 비활성화되었습니다.");
 
             // JSP로 데이터 전달 (JSP에서 사용할 이름과 정확히 일치시킴)
             request.setAttribute("topRankedRestaurants", topRestaurants);
