@@ -5,6 +5,7 @@ import javax.servlet.http.*;
 import java.io.*;
 import java.util.*;
 import service.OrderService;
+import dto.AppUser;
 import dto.PurchaseOrderLine;
 
 public class OrderServlet extends HttpServlet {
@@ -14,9 +15,17 @@ public class OrderServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		long companyId = (Long) req.getAttribute("companyId");
-		Long branchIdObj = (Long) req.getAttribute("branchId");
-		if (branchIdObj == null) {
+		HttpSession session = req.getSession(false);
+        AppUser user = (session != null) ? (AppUser) session.getAttribute("authUser") : null;
+
+        if (user == null || user.getBranchId() == null) {
+            resp.sendRedirect(req.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        long companyId = user.getCompanyId();
+        long branchIdObj = user.getBranchId();
+		if (user.getBranchId() == null) {
 			resp.sendError(403);
 			return;
 		}
