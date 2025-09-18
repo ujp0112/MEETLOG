@@ -14,9 +14,11 @@ CREATE TABLE users (
     level INT DEFAULT 1,
     follower_count INT DEFAULT 0,
     following_count INT DEFAULT 0,
+    restaurant_id INT NULL, -- BUSINESS 사용자의 경우 연결된 음식점 ID
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE SET NULL
 );
 
 -- 맛집 테이블

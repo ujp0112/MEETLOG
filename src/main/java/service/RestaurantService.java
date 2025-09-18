@@ -32,6 +32,11 @@ public class RestaurantService {
 		return restaurantDAO.insert(restaurant) > 0;
 	}
 
+	public int createRestaurant(Restaurant restaurant) {
+		restaurantDAO.insert(restaurant);
+		return restaurant.getId(); // 생성된 ID 반환
+	}
+
 	public boolean updateRestaurant(Restaurant restaurant) {
 		return restaurantDAO.update(restaurant) > 0;
 	}

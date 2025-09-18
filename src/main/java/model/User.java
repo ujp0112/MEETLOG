@@ -12,6 +12,7 @@ public class User {
 	private int level;
 	private int followerCount;
 	private int followingCount;
+	private Integer restaurantId; // BUSINESS 사용자의 경우 연결된 음식점 ID
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private boolean isActive;
@@ -98,6 +99,14 @@ public class User {
 
 	public void setFollowingCount(int followingCount) {
 		this.followingCount = followingCount;
+	}
+
+	public Integer getRestaurantId() {
+		return restaurantId;
+	}
+
+	public void setRestaurantId(Integer restaurantId) {
+		this.restaurantId = restaurantId;
 	}
 
 	public LocalDateTime getCreatedAt() {

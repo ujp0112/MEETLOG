@@ -336,6 +336,28 @@
 	<servlet-mapping>
 		<servlet-name>BusinessInfoEditServlet</servlet-name>
 		<url-pattern>/business/edit/*</url-pattern>
+		<url-pattern>/business/info-edit</url-pattern>
+		<url-pattern>/business/info-edit/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ReservationManagementServlet</servlet-name>
+		<servlet-class>controller.ReservationManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReservationManagementServlet</servlet-name>
+		<url-pattern>/business/reservation-management</url-pattern>
+		<url-pattern>/business/reservation-management/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>ReviewManagementServlet</servlet-name>
+		<servlet-class>controller.ReviewManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ReviewManagementServlet</servlet-name>
+		<url-pattern>/business/review-management</url-pattern>
+		<url-pattern>/business/review-management/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- 기타 서블릿들 -->

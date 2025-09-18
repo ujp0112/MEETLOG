@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import model.User;
 
 public class BusinessDashboardServlet extends HttpServlet {
     
@@ -16,11 +17,16 @@ public class BusinessDashboardServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             HttpSession session = request.getSession();
-            Integer userId = (Integer) session.getAttribute("userId");
-            String userType = (String) session.getAttribute("userType");
+            User user = (User) session.getAttribute("user");
             
-            if (userId == null || !"BUSINESS".equals(userType)) {
-                response.sendRedirect(request.getContextPath() + "/login");
+            if (user == null || !"BUSINESS".equals(user.getUserType())) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }
+            
+            // 비즈니스 사용자가 음식점과 연결되어 있는지 확인
+            if (user.getRestaurantId() == null) {
+                response.sendRedirect(request.getContextPath() + "/business/register");
                 return;
             }
             

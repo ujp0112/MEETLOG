@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import model.User;
 
 
 public class ReservationManagementServlet extends HttpServlet {
@@ -17,17 +18,23 @@ public class ReservationManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
+            User user = (User) session.getAttribute("user");
             
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (user == null || !"BUSINESS".equals(user.getUserType())) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }
+            
+            // 비즈니스 사용자가 음식점과 연결되어 있는지 확인
+            if (user.getRestaurantId() == null) {
+                response.sendRedirect(request.getContextPath() + "/business/register");
                 return;
             }
             
             List<Reservation> reservations = createSampleReservations();
             request.setAttribute("reservations", reservations);
             
-            request.getRequestDispatcher("/WEB-INF/views/admin-reservation-management.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/business-reservation-management.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "예약 목록을 불러오는 중 오류가 발생했습니다.");
@@ -42,11 +49,28 @@ public class ReservationManagementServlet extends HttpServlet {
         reservation1.setId(1);
         reservation1.setCustomerName("김예약");
         reservation1.setRestaurantName("고미정");
-        reservation1.setReservationDate("2025-09-15");
-        reservation1.setReservationTime("19:00");
+        reservation1.setReservationTime("2025-09-15 19:00");
         reservation1.setPartySize(4);
         reservation1.setStatus("CONFIRMED");
         reservations.add(reservation1);
+        
+        Reservation reservation2 = new Reservation();
+        reservation2.setId(2);
+        reservation2.setCustomerName("이고객");
+        reservation2.setRestaurantName("고미정");
+        reservation2.setReservationTime("2025-09-16 18:30");
+        reservation2.setPartySize(2);
+        reservation2.setStatus("PENDING");
+        reservations.add(reservation2);
+        
+        Reservation reservation3 = new Reservation();
+        reservation3.setId(3);
+        reservation3.setCustomerName("박손님");
+        reservation3.setRestaurantName("고미정");
+        reservation3.setReservationTime("2025-09-17 20:00");
+        reservation3.setPartySize(6);
+        reservation3.setStatus("COMPLETED");
+        reservations.add(reservation3);
         
         return reservations;
     }
