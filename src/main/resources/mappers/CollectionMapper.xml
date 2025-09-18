@@ -6,7 +6,7 @@
 <mapper namespace="dao.CollectionDAO">
 
     <!-- 컬렉션 생성 -->
-    <insert id="createCollection" parameterType="model.Collection" useGeneratedKeys="true" keyProperty="id">
+    <insert id="createCollection" parameterType="RestaurantCollection" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO collections (user_id, name, description, cover_image, is_public, 
                                 restaurant_count, like_count, created_at, updated_at, is_active)
         VALUES (#{userId}, #{name}, #{description}, #{coverImage}, #{isPublic},
@@ -14,7 +14,7 @@
     </insert>
 
     <!-- 컬렉션 수정 -->
-    <update id="updateCollection" parameterType="model.Collection">
+    <update id="updateCollection" parameterType="RestaurantCollection">
         UPDATE collections
         <set>
             <if test="name != null">name = #{name},</if>
@@ -36,7 +36,7 @@
     </update>
 
     <!-- 사용자의 컬렉션 목록 조회 -->
-    <select id="getUserCollections" parameterType="map" resultType="model.Collection">
+    <select id="getUserCollections" parameterType="map" resultType="RestaurantCollection">
         SELECT * FROM collections
         WHERE user_id = #{userId}
         AND is_active = true
@@ -45,7 +45,7 @@
     </select>
 
     <!-- 공개 컬렉션 목록 조회 -->
-    <select id="getPublicCollections" parameterType="map" resultType="model.Collection">
+    <select id="getPublicCollections" parameterType="map" resultType="RestaurantCollection">
         SELECT c.*, u.nickname as user_nickname
         FROM collections c
         JOIN users u ON c.user_id = u.id
@@ -57,7 +57,7 @@
     </select>
 
     <!-- 컬렉션 상세 조회 -->
-    <select id="getCollectionById" parameterType="int" resultType="model.Collection">
+    <select id="getCollectionById" parameterType="int" resultType="RestaurantCollection">
         SELECT c.*, u.nickname as user_nickname
         FROM collections c
         JOIN users u ON c.user_id = u.id
@@ -112,7 +112,7 @@
     </select>
 
     <!-- 인기 컬렉션 조회 -->
-    <select id="getPopularCollections" parameterType="int" resultType="model.Collection">
+    <select id="getPopularCollections" parameterType="int" resultType="RestaurantCollection">
         SELECT c.*, u.nickname as user_nickname
         FROM collections c
         JOIN users u ON c.user_id = u.id

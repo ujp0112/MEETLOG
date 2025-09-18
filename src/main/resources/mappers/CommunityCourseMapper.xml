@@ -32,7 +32,7 @@
         FROM courses c
         JOIN users u ON c.author_id = u.id 
         <where>
-            AND c.type = 'COMMUNITY'
+            c.type = 'COMMUNITY'
             <if test="query != null and query != ''">
                 AND (c.title LIKE CONCAT('%', #{query}, '%') OR c.description LIKE CONCAT('%', #{query}, '%'))
             </if>
@@ -50,7 +50,7 @@
         FROM courses c
         JOIN users u ON c.author_id = u.id
         <where>
-            AND c.type = 'COMMUNITY'
+            c.type = 'COMMUNITY'
             <if test="query != null and query != ''">
                 AND (c.title LIKE CONCAT('%', #{query}, '%') OR c.description LIKE CONCAT('%', #{query}, '%'))
             </if>

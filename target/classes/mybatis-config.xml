@@ -33,6 +33,17 @@
 		<typeAlias type="model.QnA" alias="QnA" />
 		<typeAlias type="model.DetailedRatings" alias="DetailedRatings" />
 		<typeAlias type="model.RatingDistribution" alias="RatingDistribution" />
+		<typeAlias type="model.CommunityCourse" alias="CommunityCourse" />
+		<typeAlias type="model.OfficialCourse" alias="OfficialCourse" />
+		<typeAlias type="model.CourseStep" alias="CourseStep" />
+		<typeAlias type="model.RestaurantRecommendation" alias="RestaurantRecommendation" />
+		<typeAlias type="model.UserPreference" alias="UserPreference" />
+		<typeAlias type="model.SimilarUser" alias="SimilarUser" />
+		<typeAlias type="model.Follow" alias="Follow" />
+		<typeAlias type="model.FeedItem" alias="FeedItem" />
+		<typeAlias type="model.Collection" alias="RestaurantCollection" />
+		<typeAlias type="model.ReviewComment" alias="ReviewComment" />
+		<typeAlias type="model.Notification" alias="Notification" />
 	</typeAliases>
 
 	<typeHandlers>
@@ -72,5 +83,7 @@
 		<mapper resource="mappers/NewsMapper.xml" />
 		<mapper resource="mappers/QnAMapper.xml" />
 		<mapper resource="mappers/RatingMapper.xml" />
+		<mapper resource="mappers/CommunityCourseMapper.xml" />
+		<mapper resource="mappers/OfficialCourseMapper.xml" />
 	</mappers>
 </configuration>
