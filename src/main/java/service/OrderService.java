@@ -90,4 +90,25 @@ public class OrderService {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public List<PurchaseOrder> listOrdersForBranch(long companyId, long branchId, int limit, int offset) {
+		try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> p = new HashMap<>();
+			p.put("companyId", companyId);
+			p.put("branchId", branchId);
+			p.put("limit", limit);
+			p.put("offset", offset);
+			return s.selectList("mapper.OrderMapper.listOrdersForBranch", p);
+		}
+	}
+
+	public int getTotalOrderCountForBranch(long companyId, long branchId) {
+		try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> p = new HashMap<>();
+			p.put("companyId", companyId);
+			p.put("branchId", branchId);
+			Integer count = s.selectOne("mapper.OrderMapper.getTotalOrderCountForBranch", p);
+			return count != null ? count : 0;
+		}
+	}
 }
