@@ -68,6 +68,27 @@ public class BusinessDashboardServlet extends HttpServlet {
         
         data.setRecentReservations(recentReservations);
         
+        // 최근 리뷰 목록
+        List<Review> recentReviews = new ArrayList<>();
+        
+        Review review1 = new Review();
+        review1.setId(1);
+        review1.setCustomerName("김고객");
+        review1.setRating(5);
+        review1.setContent("정말 맛있었어요! 서비스도 친절하고 분위기도 좋았습니다.");
+        review1.setCreatedAt("2025.09.18 20:30");
+        recentReviews.add(review1);
+        
+        Review review2 = new Review();
+        review2.setId(2);
+        review2.setCustomerName("이고객");
+        review2.setRating(4);
+        review2.setContent("가격 대비 훌륭한 맛이었습니다. 다음에 또 방문하고 싶어요.");
+        review2.setCreatedAt("2025.09.17 18:45");
+        recentReviews.add(review2);
+        
+        data.setRecentReviews(recentReviews);
+        
         return data;
     }
     
@@ -80,6 +101,7 @@ public class BusinessDashboardServlet extends HttpServlet {
         private double averageRating;
         private int monthlyRevenue;
         private List<Reservation> recentReservations;
+        private List<Review> recentReviews;
         
         // Getters and Setters
         public String getRestaurantName() { return restaurantName; }
@@ -96,6 +118,8 @@ public class BusinessDashboardServlet extends HttpServlet {
         public void setMonthlyRevenue(int monthlyRevenue) { this.monthlyRevenue = monthlyRevenue; }
         public List<Reservation> getRecentReservations() { return recentReservations; }
         public void setRecentReservations(List<Reservation> recentReservations) { this.recentReservations = recentReservations; }
+        public List<Review> getRecentReviews() { return recentReviews; }
+        public void setRecentReviews(List<Review> recentReviews) { this.recentReviews = recentReviews; }
     }
     
     // 예약 클래스
@@ -117,5 +141,26 @@ public class BusinessDashboardServlet extends HttpServlet {
         public void setPartySize(int partySize) { this.partySize = partySize; }
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
+    }
+    
+    // 리뷰 클래스
+    public static class Review {
+        private int id;
+        private String customerName;
+        private int rating;
+        private String content;
+        private String createdAt;
+        
+        // Getters and Setters
+        public int getId() { return id; }
+        public void setId(int id) { this.id = id; }
+        public String getCustomerName() { return customerName; }
+        public void setCustomerName(String customerName) { this.customerName = customerName; }
+        public int getRating() { return rating; }
+        public void setRating(int rating) { this.rating = rating; }
+        public String getContent() { return content; }
+        public void setContent(String content) { this.content = content; }
+        public String getCreatedAt() { return createdAt; }
+        public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     }
 }

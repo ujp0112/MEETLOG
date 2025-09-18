@@ -83,6 +83,8 @@
 		<servlet-name>BranchMenuServlet</servlet-name>
 		<url-pattern>/branch/menus</url-pattern>
 		<url-pattern>/branch/menus/*</url-pattern>
+		<url-pattern>/business/menu-management</url-pattern>
+		<url-pattern>/business/menu-management/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

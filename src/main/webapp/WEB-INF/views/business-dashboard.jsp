@@ -51,7 +51,7 @@
                                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div>
                                             <p class="text-sm font-medium text-gray-900">${reservation.customerName}</p>
-                                            <p class="text-sm text-gray-500">${reservation.reservationDate} ${reservation.reservationTime} (${reservation.partySize}명)</p>
+                                            <p class="text-sm text-gray-500">${reservation.reservationTime} (${reservation.partySize}명)</p>
                                         </div>
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${reservation.status == 'CONFIRMED' ? 'bg-green-100 text-green-800' : reservation.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
                                             ${reservation.status == 'CONFIRMED' ? '확정' : reservation.status == 'PENDING' ? '대기' : '완료'}
@@ -77,7 +77,7 @@
                                             </div>
                                         </div>
                                         <p class="text-sm text-gray-600">${review.content}</p>
-                                        <p class="text-xs text-gray-500 mt-1"><fmt:formatDate value="${review.createdAt}" pattern="yyyy.MM.dd HH:mm"/></p>
+                                        <p class="text-xs text-gray-500 mt-1">${review.createdAt}</p>
                                     </div>
                                 </c:forEach>
                             </div>
