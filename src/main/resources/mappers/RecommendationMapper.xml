@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.RecommendationDAO">
+
+    <!-- 사용자 취향 분석 결과 저장/업데이트 -->
+    <insert id="upsertUserPreference" parameterType="model.UserPreference">
+        INSERT INTO user_preferences (user_id, category, price_range, atmosphere, preference_score, review_count, created_at, updated_at)
+        VALUES (#{userId}, #{category}, #{priceRange}, #{atmosphere}, #{preferenceScore}, #{reviewCount}, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+            preference_score = VALUES(preference_score),
+            review_count = VALUES(review_count),
+            updated_at = NOW()
+    </insert>
+
+    <!-- 사용자 취향 분석 데이터 조회 -->
+    <select id="getUserPreferences" parameterType="int" resultType="model.UserPreference">
+        SELECT * FROM user_preferences 
+        WHERE user_id = #{userId}
+        ORDER BY preference_score DESC
+    </select>
+
+    <!-- 비슷한 취향의 사용자들 찾기 (협업 필터링) -->
+    <select id="findSimilarUsers" parameterType="map" resultType="model.SimilarUser">
+        SELECT 
+            u.id as userId,
+            u.nickname,
+            (
+                SELECT COUNT(*) 
+                FROM reviews r1 
+                JOIN reviews r2 ON r1.restaurant_id = r2.restaurant_id 
+                WHERE r1.user_id = #{userId} 
+                AND r2.user_id = u.id 
+                AND r1.is_active = true 
+                AND r2.is_active = true
+            ) as commonReviews,
+            (
+                SELECT AVG(ABS(r1.rating - r2.rating))
+                FROM reviews r1 
+                JOIN reviews r2 ON r1.restaurant_id = r2.restaurant_id 
+                WHERE r1.user_id = #{userId} 
+                AND r2.user_id = u.id 
+                AND r1.is_active = true 
+                AND r2.is_active = true
+            ) as averageRatingDifference
+        FROM users u
+        WHERE u.id != #{userId}
+        AND u.is_active = true
+        HAVING commonReviews > 0
+        ORDER BY commonReviews DESC, averageRatingDifference ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 비슷한 사용자들이 좋아한 맛집들 조회 -->
+    <select id="getRestaurantsLikedBySimilarUsers" parameterType="map" resultType="model.Restaurant">
+        SELECT DISTINCT r.*
+        FROM restaurants r
+        JOIN reviews rev ON r.id = rev.restaurant_id
+        WHERE rev.user_id IN 
+        <foreach item="userId" collection="similarUserIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND rev.rating >= 4
+        AND rev.is_active = true
+        AND r.is_active = true
+        AND r.id NOT IN (
+            SELECT restaurant_id 
+            FROM reviews 
+            WHERE user_id = #{currentUserId} 
+            AND is_active = true
+        )
+        ORDER BY AVG(rev.rating) DESC, COUNT(rev.id) DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 콘텐츠 기반 필터링: 비슷한 특성을 가진 맛집들 찾기 -->
+    <select id="findSimilarRestaurants" parameterType="map" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        WHERE r.id != #{restaurantId}
+        AND r.is_active = true
+        AND (
+            r.category = (SELECT category FROM restaurants WHERE id = #{restaurantId})
+            OR r.price_range = (SELECT price_range FROM restaurants WHERE id = #{restaurantId})
+            OR r.atmosphere = (SELECT atmosphere FROM restaurants WHERE id = #{restaurantId})
+        )
+        ORDER BY 
+            CASE WHEN r.category = (SELECT category FROM restaurants WHERE id = #{restaurantId}) THEN 3 ELSE 0 END +
+            CASE WHEN r.price_range = (SELECT price_range FROM restaurants WHERE id = #{restaurantId}) THEN 2 ELSE 0 END +
+            CASE WHEN r.atmosphere = (SELECT atmosphere FROM restaurants WHERE id = #{restaurantId}) THEN 1 ELSE 0 END DESC,
+            r.rating DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 사용자가 아직 방문하지 않은 맛집들 조회 -->
+    <select id="getUnvisitedRestaurants" parameterType="map" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        WHERE r.is_active = true
+        AND r.id NOT IN (
+            SELECT restaurant_id 
+            FROM reviews 
+            WHERE user_id = #{userId} 
+            AND is_active = true
+        )
+        ORDER BY r.rating DESC, r.review_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 사용자 취향에 맞는 맛집들 조회 -->
+    <select id="getRestaurantsByPreferences" parameterType="map" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        WHERE r.is_active = true
+        <if test="category != null and category != ''">
+            AND r.category = #{category}
+        </if>
+        <if test="priceRange != null and priceRange > 0">
+            AND r.price_range = #{priceRange}
+        </if>
+        <if test="atmosphere != null and atmosphere != ''">
+            AND r.atmosphere = #{atmosphere}
+        </if>
+        ORDER BY r.rating DESC, r.review_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 인기 맛집 조회 -->
+    <select id="getPopularRestaurants" parameterType="int" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        WHERE r.is_active = true
+        ORDER BY r.rating DESC, r.review_count DESC, r.likes DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 최신 맛집 조회 -->
+    <select id="getRecentRestaurants" parameterType="int" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        WHERE r.is_active = true
+        ORDER BY r.created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 사용자의 리뷰 패턴 분석을 위한 데이터 조회 -->
+    <select id="getUserReviewPatterns" parameterType="int" resultType="map">
+        SELECT 
+            r.category,
+            r.price_range,
+            r.atmosphere,
+            AVG(rev.rating) as avg_rating,
+            COUNT(rev.id) as review_count,
+            AVG(rev.taste_rating) as avg_taste,
+            AVG(rev.service_rating) as avg_service,
+            AVG(rev.atmosphere_rating) as avg_atmosphere_rating,
+            AVG(rev.price_rating) as avg_price
+        FROM reviews rev
+        JOIN restaurants r ON rev.restaurant_id = r.id
+        WHERE rev.user_id = #{userId}
+        AND rev.is_active = true
+        AND r.is_active = true
+        GROUP BY r.category, r.price_range, r.atmosphere
+        ORDER BY review_count DESC, avg_rating DESC
+    </select>
+
+    <!-- 맛집 유사도 계산을 위한 데이터 조회 -->
+    <select id="getRestaurantSimilarityData" parameterType="int" resultType="map">
+        SELECT 
+            r.category,
+            r.price_range,
+            r.atmosphere,
+            r.rating,
+            r.review_count,
+            AVG(rev.taste_rating) as avg_taste,
+            AVG(rev.service_rating) as avg_service,
+            AVG(rev.atmosphere_rating) as avg_atmosphere_rating,
+            AVG(rev.price_rating) as avg_price
+        FROM restaurants r
+        LEFT JOIN reviews rev ON r.id = rev.restaurant_id AND rev.is_active = true
+        WHERE r.id = #{restaurantId}
+        AND r.is_active = true
+        GROUP BY r.id, r.category, r.price_range, r.atmosphere, r.rating, r.review_count
+    </select>
+
+</mapper>

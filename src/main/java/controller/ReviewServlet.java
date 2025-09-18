@@ -101,6 +101,15 @@ public class ReviewServlet extends HttpServlet {
             String content = request.getParameter("content");
             String keywordsInput = request.getParameter("keywords");
 
+            // 상세 평점 파라미터 처리
+            int tasteRating = Integer.parseInt(request.getParameter("tasteRating"));
+            int serviceRating = Integer.parseInt(request.getParameter("serviceRating"));
+            int atmosphereRating = Integer.parseInt(request.getParameter("atmosphereRating"));
+            int priceRating = Integer.parseInt(request.getParameter("priceRating"));
+            String visitDate = request.getParameter("visitDate");
+            int partySize = Integer.parseInt(request.getParameter("partySize"));
+            String visitPurpose = request.getParameter("visitPurpose");
+
             List<String> keywordsList = null;
             if (keywordsInput != null && !keywordsInput.trim().isEmpty()) {
                  keywordsList = Arrays.stream(keywordsInput.split(","))
@@ -117,6 +126,15 @@ public class ReviewServlet extends HttpServlet {
             review.setRating(rating);
             review.setContent(content);
             review.setKeywords(keywordsList); // 키워드 리스트 설정
+            
+            // 상세 평점 설정
+            review.setTasteRating(tasteRating);
+            review.setServiceRating(serviceRating);
+            review.setAtmosphereRating(atmosphereRating);
+            review.setPriceRating(priceRating);
+            review.setVisitDate(visitDate);
+            review.setPartySize(partySize);
+            review.setVisitPurpose(visitPurpose);
 
             if (reviewService.addReview(review)) {
                 // 리뷰 등록 성공 시, 해당 맛집 상세 페이지로 리다이렉트

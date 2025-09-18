@@ -18,6 +18,15 @@ public class Review {
 	private LocalDateTime updatedAt;
 	private boolean isActive;
 
+	// 상세 평점 필드들 추가
+	private int tasteRating; // 맛 평점 (1-5)
+	private int serviceRating; // 서비스 평점 (1-5)
+	private int atmosphereRating; // 분위기 평점 (1-5)
+	private int priceRating; // 가격 평점 (1-5)
+	private String visitDate; // 방문 날짜
+	private int partySize; // 인원수
+	private String visitPurpose; // 방문 목적 ("데이트", "비즈니스", "가족모임", "친구모임", "혼밥")
+
 	public Review() {
 	}
 
@@ -132,5 +141,62 @@ public class Review {
 
 	public void setActive(boolean active) {
 		isActive = active;
+	}
+
+	// 상세 평점 필드들의 Getter/Setter
+	public int getTasteRating() {
+		return tasteRating;
+	}
+
+	public void setTasteRating(int tasteRating) {
+		this.tasteRating = tasteRating;
+	}
+
+	public int getServiceRating() {
+		return serviceRating;
+	}
+
+	public void setServiceRating(int serviceRating) {
+		this.serviceRating = serviceRating;
+	}
+
+	public int getAtmosphereRating() {
+		return atmosphereRating;
+	}
+
+	public void setAtmosphereRating(int atmosphereRating) {
+		this.atmosphereRating = atmosphereRating;
+	}
+
+	public int getPriceRating() {
+		return priceRating;
+	}
+
+	public void setPriceRating(int priceRating) {
+		this.priceRating = priceRating;
+	}
+
+	public String getVisitDate() {
+		return visitDate;
+	}
+
+	public void setVisitDate(String visitDate) {
+		this.visitDate = visitDate;
+	}
+
+	public int getPartySize() {
+		return partySize;
+	}
+
+	public void setPartySize(int partySize) {
+		this.partySize = partySize;
+	}
+
+	public String getVisitPurpose() {
+		return visitPurpose;
+	}
+
+	public void setVisitPurpose(String visitPurpose) {
+		this.visitPurpose = visitPurpose;
 	}
 }

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.NotificationDAO">
+
+    <!-- 알림 생성 -->
+    <insert id="createNotification" parameterType="model.Notification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notifications (user_id, type, title, content, action_url, is_read, created_at)
+        VALUES (#{userId}, #{type}, #{title}, #{content}, #{actionUrl}, #{isRead}, NOW())
+    </insert>
+
+    <!-- 사용자의 알림 목록 조회 -->
+    <select id="getUserNotifications" parameterType="map" resultType="model.Notification">
+        SELECT * FROM notifications
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 읽지 않은 알림 수 조회 -->
+    <select id="getUnreadNotificationCount" parameterType="int" resultType="int">
+        SELECT COUNT(*) 
+        FROM notifications 
+        WHERE user_id = #{userId}
+        AND is_read = false
+    </select>
+
+    <!-- 알림 읽음 처리 -->
+    <update id="markAsRead" parameterType="int">
+        UPDATE notifications 
+        SET is_read = true, read_at = NOW()
+        WHERE id = #{notificationId}
+    </update>
+
+    <!-- 사용자의 모든 알림 읽음 처리 -->
+    <update id="markAllAsRead" parameterType="int">
+        UPDATE notifications 
+        SET is_read = true, read_at = NOW()
+        WHERE user_id = #{userId}
+        AND is_read = false
+    </update>
+
+    <!-- 알림 삭제 -->
+    <delete id="deleteNotification" parameterType="int">
+        DELETE FROM notifications 
+        WHERE id = #{notificationId}
+    </delete>
+
+    <!-- 오래된 알림 삭제 -->
+    <delete id="deleteOldNotifications" parameterType="int">
+        DELETE FROM notifications 
+        WHERE created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+</mapper>

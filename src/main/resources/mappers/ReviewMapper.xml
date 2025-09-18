@@ -17,6 +17,13 @@
 		<result property="isActive" column="is_active" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
+		<result property="tasteRating" column="taste_rating" />
+		<result property="serviceRating" column="service_rating" />
+		<result property="atmosphereRating" column="atmosphere_rating" />
+		<result property="priceRating" column="price_rating" />
+		<result property="visitDate" column="visit_date" />
+		<result property="partySize" column="party_size" />
+		<result property="visitPurpose" column="visit_purpose" />
 	</resultMap>
 
 	<select id="getRecentReviewsWithInfo" parameterType="int"
@@ -65,15 +72,17 @@
 		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO reviews
 		(restaurant_id, user_id, author, author_image, rating,
-		content, images,
-		keywords, created_at, updated_at)
+		content, images, keywords, taste_rating, service_rating, 
+		atmosphere_rating, price_rating, visit_date, party_size, 
+		visit_purpose, created_at, updated_at)
 		VALUES (#{restaurantId}, #{userId},
 		#{author}, #{authorImage}, #{rating},
 		#{content},
-		#{images,
-		typeHandler=typehandler.JsonArrayTypeHandler},
-		#{keywords,
-		typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
+		#{images, typeHandler=typehandler.JsonArrayTypeHandler},
+		#{keywords, typeHandler=typehandler.JsonArrayTypeHandler}, 
+		#{tasteRating}, #{serviceRating}, #{atmosphereRating}, 
+		#{priceRating}, #{visitDate}, #{partySize}, #{visitPurpose}, 
+		NOW(), NOW())
 	</insert>
 
 	<update id="delete" parameterType="int">

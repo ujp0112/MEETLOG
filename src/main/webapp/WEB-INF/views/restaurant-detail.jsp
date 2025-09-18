@@ -521,18 +521,88 @@
                                                                 ${review.author.charAt(0)}
                                                             </div>
                                                             <div class="flex-1">
-                                                                <div class="flex items-center space-x-2">
-                                                                    <span class="font-bold text-slate-800">${review.author}</span>
-                                                                    <div class="flex space-x-1">
-                                                                        <c:forEach begin="1" end="${review.rating}">
-                                                                            <span class="text-yellow-400 text-lg rating-stars">★</span>
-                                                                        </c:forEach>
-                                                                        <c:forEach begin="${review.rating + 1}" end="5">
-                                                                            <span class="text-slate-300 text-lg">☆</span>
-                                                                        </c:forEach>
+                                                        <div class="flex items-center space-x-2">
+                                                            <span class="font-bold text-slate-800">${review.author}</span>
+                                                            <div class="flex space-x-1">
+                                                                <c:forEach begin="1" end="${review.rating}">
+                                                                    <span class="text-yellow-400 text-lg rating-stars">★</span>
+                                                                </c:forEach>
+                                                                <c:forEach begin="${review.rating + 1}" end="5">
+                                                                    <span class="text-slate-300 text-lg">☆</span>
+                                                                </c:forEach>
+                                                            </div>
+                                                        </div>
+                                                        <span class="text-sm text-slate-500">${review.createdAt}</span>
+                                                        
+                                                        <!-- 상세 평점 표시 -->
+                                                        <c:if test="${review.tasteRating > 0}">
+                                                            <div class="mt-3 p-3 bg-slate-50 rounded-lg">
+                                                                <h5 class="text-sm font-semibold text-slate-700 mb-2">상세 평점</h5>
+                                                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                                                    <div class="flex items-center space-x-1">
+                                                                        <span class="text-slate-600">맛:</span>
+                                                                        <div class="flex space-x-1">
+                                                                            <c:forEach begin="1" end="${review.tasteRating}">
+                                                                                <span class="text-yellow-400">★</span>
+                                                                            </c:forEach>
+                                                                            <c:forEach begin="${review.tasteRating + 1}" end="5">
+                                                                                <span class="text-slate-300">☆</span>
+                                                                            </c:forEach>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center space-x-1">
+                                                                        <span class="text-slate-600">서비스:</span>
+                                                                        <div class="flex space-x-1">
+                                                                            <c:forEach begin="1" end="${review.serviceRating}">
+                                                                                <span class="text-yellow-400">★</span>
+                                                                            </c:forEach>
+                                                                            <c:forEach begin="${review.serviceRating + 1}" end="5">
+                                                                                <span class="text-slate-300">☆</span>
+                                                                            </c:forEach>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center space-x-1">
+                                                                        <span class="text-slate-600">분위기:</span>
+                                                                        <div class="flex space-x-1">
+                                                                            <c:forEach begin="1" end="${review.atmosphereRating}">
+                                                                                <span class="text-yellow-400">★</span>
+                                                                            </c:forEach>
+                                                                            <c:forEach begin="${review.atmosphereRating + 1}" end="5">
+                                                                                <span class="text-slate-300">☆</span>
+                                                                            </c:forEach>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center space-x-1">
+                                                                        <span class="text-slate-600">가격:</span>
+                                                                        <div class="flex space-x-1">
+                                                                            <c:forEach begin="1" end="${review.priceRating}">
+                                                                                <span class="text-yellow-400">★</span>
+                                                                            </c:forEach>
+                                                                            <c:forEach begin="${review.priceRating + 1}" end="5">
+                                                                                <span class="text-slate-300">☆</span>
+                                                                            </c:forEach>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                                <span class="text-sm text-slate-500">${review.createdAt}</span>
+                                                                
+                                                                <!-- 방문 정보 표시 -->
+                                                                <c:if test="${not empty review.visitDate || review.partySize > 0 || not empty review.visitPurpose}">
+                                                                    <div class="mt-2 pt-2 border-t border-slate-200">
+                                                                        <div class="flex flex-wrap gap-4 text-xs text-slate-500">
+                                                                            <c:if test="${not empty review.visitDate}">
+                                                                                <span>📅 ${review.visitDate}</span>
+                                                                            </c:if>
+                                                                            <c:if test="${review.partySize > 0}">
+                                                                                <span>👥 ${review.partySize}명</span>
+                                                                            </c:if>
+                                                                            <c:if test="${not empty review.visitPurpose}">
+                                                                                <span>🎯 ${review.visitPurpose}</span>
+                                                                            </c:if>
+                                                                        </div>
+                                                                    </div>
+                                                                </c:if>
+                                                            </div>
+                                                        </c:if>
                                                             </div>
                                                         </div>
                                                         <p class="text-slate-700 leading-relaxed mb-4">${review.content}</p>

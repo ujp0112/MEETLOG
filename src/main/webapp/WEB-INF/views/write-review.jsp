@@ -48,7 +48,7 @@
                                             <input type="hidden" name="author" value="${sessionScope.user.nickname}">
 
                                             <div>
-                                                <label class="block text-sm font-medium text-slate-700 mb-3">평점</label>
+                                                <label class="block text-sm font-medium text-slate-700 mb-3">전체 평점</label>
                                                 <div class="flex items-center space-x-2" id="rating-container">
                                                     <input type="hidden" name="rating" id="rating" value="5" required>
                                                     <button type="button" class="text-3xl text-yellow-400 hover:text-yellow-500 rating-star" data-rating="1">★</button>
@@ -57,6 +57,110 @@
                                                     <button type="button" class="text-3xl text-yellow-400 hover:text-yellow-500 rating-star" data-rating="4">★</button>
                                                     <button type="button" class="text-3xl text-yellow-400 hover:text-yellow-500 rating-star" data-rating="5">★</button>
                                                     <span class="ml-2 text-slate-600" id="rating-text">5점</span>
+                                                </div>
+                                            </div>
+
+                                            <!-- 상세 평점 섹션 -->
+                                            <div class="bg-slate-50 p-4 rounded-lg">
+                                                <h4 class="text-lg font-semibold text-slate-800 mb-4">상세 평점</h4>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <!-- 맛 평점 -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-slate-700 mb-2">맛</label>
+                                                        <div class="flex items-center space-x-1" id="taste-rating-container">
+                                                            <input type="hidden" name="tasteRating" id="tasteRating" value="5" required>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 taste-star" data-rating="1">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 taste-star" data-rating="2">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 taste-star" data-rating="3">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 taste-star" data-rating="4">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 taste-star" data-rating="5">★</button>
+                                                            <span class="ml-2 text-sm text-slate-600" id="taste-rating-text">5점</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 서비스 평점 -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-slate-700 mb-2">서비스</label>
+                                                        <div class="flex items-center space-x-1" id="service-rating-container">
+                                                            <input type="hidden" name="serviceRating" id="serviceRating" value="5" required>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 service-star" data-rating="1">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 service-star" data-rating="2">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 service-star" data-rating="3">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 service-star" data-rating="4">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 service-star" data-rating="5">★</button>
+                                                            <span class="ml-2 text-sm text-slate-600" id="service-rating-text">5점</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 분위기 평점 -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-slate-700 mb-2">분위기</label>
+                                                        <div class="flex items-center space-x-1" id="atmosphere-rating-container">
+                                                            <input type="hidden" name="atmosphereRating" id="atmosphereRating" value="5" required>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 atmosphere-star" data-rating="1">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 atmosphere-star" data-rating="2">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 atmosphere-star" data-rating="3">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 atmosphere-star" data-rating="4">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 atmosphere-star" data-rating="5">★</button>
+                                                            <span class="ml-2 text-sm text-slate-600" id="atmosphere-rating-text">5점</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- 가격 평점 -->
+                                                    <div>
+                                                        <label class="block text-sm font-medium text-slate-700 mb-2">가격</label>
+                                                        <div class="flex items-center space-x-1" id="price-rating-container">
+                                                            <input type="hidden" name="priceRating" id="priceRating" value="5" required>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 price-star" data-rating="1">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 price-star" data-rating="2">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 price-star" data-rating="3">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 price-star" data-rating="4">★</button>
+                                                            <button type="button" class="text-2xl text-yellow-400 hover:text-yellow-500 price-star" data-rating="5">★</button>
+                                                            <span class="ml-2 text-sm text-slate-600" id="price-rating-text">5점</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- 방문 정보 섹션 -->
+                                            <div class="bg-blue-50 p-4 rounded-lg">
+                                                <h4 class="text-lg font-semibold text-slate-800 mb-4">방문 정보</h4>
+                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <!-- 방문 날짜 -->
+                                                    <div>
+                                                        <label for="visitDate" class="block text-sm font-medium text-slate-700 mb-2">방문 날짜</label>
+                                                        <input type="date" id="visitDate" name="visitDate" 
+                                                               class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                                                               value="${today}">
+                                                    </div>
+
+                                                    <!-- 인원수 -->
+                                                    <div>
+                                                        <label for="partySize" class="block text-sm font-medium text-slate-700 mb-2">인원수</label>
+                                                        <select id="partySize" name="partySize" 
+                                                                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                                                            <option value="1">1명</option>
+                                                            <option value="2" selected>2명</option>
+                                                            <option value="3">3명</option>
+                                                            <option value="4">4명</option>
+                                                            <option value="5">5명</option>
+                                                            <option value="6">6명 이상</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- 방문 목적 -->
+                                                    <div>
+                                                        <label for="visitPurpose" class="block text-sm font-medium text-slate-700 mb-2">방문 목적</label>
+                                                        <select id="visitPurpose" name="visitPurpose" 
+                                                                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                                                            <option value="일반">일반</option>
+                                                            <option value="데이트">데이트</option>
+                                                            <option value="비즈니스">비즈니스</option>
+                                                            <option value="가족모임">가족모임</option>
+                                                            <option value="친구모임">친구모임</option>
+                                                            <option value="혼밥">혼밥</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -127,8 +231,12 @@
     </div>
 
     <script>
-        // This client-side script remains the same as it contains no JSP code.
         document.addEventListener('DOMContentLoaded', function() {
+            // 오늘 날짜를 기본값으로 설정
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('visitDate').value = today;
+
+            // 전체 평점 처리
             const ratingStars = document.querySelectorAll('.rating-star');
             const ratingInput = document.getElementById('rating');
             const ratingText = document.getElementById('rating-text');
@@ -154,12 +262,58 @@
                 });
             });
 
+            // 상세 평점 처리 함수
+            function setupDetailedRating(starClass, inputId, textId) {
+                const stars = document.querySelectorAll('.' + starClass);
+                const input = document.getElementById(inputId);
+                const text = document.getElementById(textId);
+
+                stars.forEach((star, index) => {
+                    star.addEventListener('click', () => {
+                        const rating = index + 1;
+                        input.value = rating;
+                        text.textContent = rating + '점';
+                        
+                        stars.forEach((s, i) => {
+                            s.classList.toggle('text-yellow-400', i < rating);
+                            s.classList.toggle('text-gray-300', i >= rating);
+                        });
+                    });
+
+                    star.addEventListener('mouseenter', () => {
+                        const rating = index + 1;
+                        stars.forEach((s, i) => {
+                            s.classList.toggle('text-yellow-400', i < rating);
+                            s.classList.toggle('text-gray-300', i >= rating);
+                        });
+                    });
+                });
+            }
+
+            // 각 상세 평점 설정
+            setupDetailedRating('taste-star', 'tasteRating', 'taste-rating-text');
+            setupDetailedRating('service-star', 'serviceRating', 'service-rating-text');
+            setupDetailedRating('atmosphere-star', 'atmosphereRating', 'atmosphere-rating-text');
+            setupDetailedRating('price-star', 'priceRating', 'price-rating-text');
+
             // Form validation on submit
             document.querySelector('form').addEventListener('submit', function(e) {
                 const content = document.getElementById('content').value.trim();
                 if (content.length < 10) {
                     e.preventDefault();
                     alert('리뷰 내용을 10자 이상 작성해주세요.');
+                    return false;
+                }
+
+                // 상세 평점 검증
+                const tasteRating = document.getElementById('tasteRating').value;
+                const serviceRating = document.getElementById('serviceRating').value;
+                const atmosphereRating = document.getElementById('atmosphereRating').value;
+                const priceRating = document.getElementById('priceRating').value;
+
+                if (!tasteRating || !serviceRating || !atmosphereRating || !priceRating) {
+                    e.preventDefault();
+                    alert('모든 상세 평점을 선택해주세요.');
                     return false;
                 }
             });

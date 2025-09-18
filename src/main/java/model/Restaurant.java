@@ -24,6 +24,13 @@ public class Restaurant {
 	private LocalDateTime updatedAt;
 	private boolean isActive;
 
+	// 상세 정보 필드들 추가
+	private int priceRange; // 1: ~1만원, 2: 1-2만원, 3: 2-4만원, 4: 4만원+
+	private String atmosphere; // "데이트", "비즈니스", "가족", "혼밥", "친구모임"
+	private List<String> dietaryOptions; // ["채식", "할랄", "글루텐프리", "비건"]
+	private List<String> paymentMethods; // ["현금", "카드", "모바일결제", "QR결제"]
+	private DetailedRatings detailedRatings; // 맛, 서비스, 분위기, 가격별 평균 평점
+
 	private List<Menu> menuList;
 	private List<Review> reviews;
 	private List<Coupon> coupons;
@@ -223,5 +230,46 @@ public class Restaurant {
 
 	public void setQna(List<QnA> qna) {
 		this.qna = qna;
+	}
+
+	// 상세 정보 필드들의 Getter/Setter
+	public int getPriceRange() {
+		return priceRange;
+	}
+
+	public void setPriceRange(int priceRange) {
+		this.priceRange = priceRange;
+	}
+
+	public String getAtmosphere() {
+		return atmosphere;
+	}
+
+	public void setAtmosphere(String atmosphere) {
+		this.atmosphere = atmosphere;
+	}
+
+	public List<String> getDietaryOptions() {
+		return dietaryOptions;
+	}
+
+	public void setDietaryOptions(List<String> dietaryOptions) {
+		this.dietaryOptions = dietaryOptions;
+	}
+
+	public List<String> getPaymentMethods() {
+		return paymentMethods;
+	}
+
+	public void setPaymentMethods(List<String> paymentMethods) {
+		this.paymentMethods = paymentMethods;
+	}
+
+	public DetailedRatings getDetailedRatings() {
+		return detailedRatings;
+	}
+
+	public void setDetailedRatings(DetailedRatings detailedRatings) {
+		this.detailedRatings = detailedRatings;
 	}
 }

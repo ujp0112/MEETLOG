@@ -11,10 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import model.Column;
 import model.Restaurant;
+import model.RestaurantRecommendation;
 import model.ReviewInfo;
+import model.User;
 import service.ColumnService;
+import service.RecommendationService;
 import service.RestaurantService;
 import service.ReviewService;
+import javax.servlet.http.HttpSession;
 
 @WebServlet("/main")
 public class MainServlet extends HttpServlet {
@@ -22,6 +26,7 @@ public class MainServlet extends HttpServlet {
     private RestaurantService restaurantService = new RestaurantService();
     private ReviewService reviewService = new ReviewService();
     private ColumnService columnService = new ColumnService();
+    private RecommendationService recommendationService = new RecommendationService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -57,10 +62,40 @@ public class MainServlet extends HttpServlet {
                 application.setAttribute("lastUpdateTopColumns", currentTime);
             }
 
+            // 4. 개인화 추천 (로그인한 사용자만, 30분 캐시)
+            List<RestaurantRecommendation> personalizedRecommendations = null;
+            HttpSession session = request.getSession(false);
+            User user = (session != null) ? (User) session.getAttribute("user") : null;
+            
+            if (user != null) {
+                String cacheKey = "personalizedRecommendations_" + user.getId();
+                personalizedRecommendations = (List<RestaurantRecommendation>) application.getAttribute(cacheKey);
+                Long lastUpdatePersonalized = (Long) application.getAttribute(cacheKey + "_time");
+                
+                if (personalizedRecommendations == null || lastUpdatePersonalized == null || 
+                    (currentTime - lastUpdatePersonalized > 30 * 60 * 1000)) {
+                    try {
+                        // 사용자 취향 분석 (백그라운드에서 실행)
+                        recommendationService.analyzeUserPreferences(user.getId());
+                        
+                        // 개인화 추천 실행
+                        personalizedRecommendations = recommendationService.getHybridRecommendations(user.getId(), 6);
+                        application.setAttribute(cacheKey, personalizedRecommendations);
+                        application.setAttribute(cacheKey + "_time", currentTime);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        // 추천 실패 시 인기 맛집으로 대체
+                        personalizedRecommendations = recommendationService.getFallbackRecommendations(6);
+                    }
+                }
+            }
+
             // JSP로 데이터 전달 (JSP에서 사용할 이름과 정확히 일치시킴)
             request.setAttribute("topRankedRestaurants", topRestaurants);
             request.setAttribute("hotReviews", recentReviews);
             request.setAttribute("latestColumns", topColumns);
+            request.setAttribute("personalizedRecommendations", personalizedRecommendations);
+            request.setAttribute("user", user);
 
             request.getRequestDispatcher("/WEB-INF/views/main.jsp").forward(request, response);
         } catch (Exception e) {
