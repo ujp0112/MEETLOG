@@ -83,8 +83,8 @@
 		<servlet-name>BranchMenuServlet</servlet-name>
 		<url-pattern>/branch/menus</url-pattern>
 		<url-pattern>/branch/menus/*</url-pattern>
-		<url-pattern>/business/menu-management</url-pattern>
-		<url-pattern>/business/menu-management/*</url-pattern>
+		<url-pattern>/admin/menu-management</url-pattern>
+		<url-pattern>/admin/menu-management/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -346,8 +346,8 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReservationManagementServlet</servlet-name>
-		<url-pattern>/business/reservation-management</url-pattern>
-		<url-pattern>/business/reservation-management/*</url-pattern>
+		<url-pattern>/admin/reservation-management</url-pattern>
+		<url-pattern>/admin/reservation-management/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -356,8 +356,8 @@
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>ReviewManagementServlet</servlet-name>
-		<url-pattern>/business/review-management</url-pattern>
-		<url-pattern>/business/review-management/*</url-pattern>
+		<url-pattern>/admin/review-management</url-pattern>
+		<url-pattern>/admin/review-management/*</url-pattern>
 	</servlet-mapping>
 
 	<!-- 기타 서블릿들 -->

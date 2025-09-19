@@ -4,7 +4,9 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
 import service.AuthService;
-import dto.*;
+import dto.AppUser;
+import dto.Branch;
+import dto.Company;
 
 public class AuthServlet extends HttpServlet {
   private final AuthService service = new AuthService();

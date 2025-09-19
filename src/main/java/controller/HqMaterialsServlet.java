@@ -6,13 +6,14 @@ import service.MaterialService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.*;
 
-
+@WebServlet(name = "HqMaterialsServlet", urlPatterns = {"/hq/materials/*"})
 @MultipartConfig
 public class HqMaterialsServlet extends HttpServlet {
 

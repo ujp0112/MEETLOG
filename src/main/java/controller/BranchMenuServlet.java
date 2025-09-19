@@ -5,13 +5,14 @@ import dto.MenuToggle;
 import service.BranchService;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.*;
 
-
+@WebServlet(name="BranchMenuServlet", urlPatterns={"/branch/menus","/branch/menus/*"})
 public class BranchMenuServlet extends HttpServlet {
 
   private BranchService branchService;
@@ -23,19 +24,9 @@ public class BranchMenuServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    // ✅ 로그인 세션 키는 authUser (ERP 시스템용)
+    // ✅ 로그인 세션 키는 authUser
     AppUser user = (AppUser) req.getSession().getAttribute("authUser");
-    if (user == null) { 
-        resp.sendRedirect(req.getContextPath() + "/login.jsp");
-        return; 
-    }
-    
-    // ERP 시스템: BRANCH 역할만 접근 가능
-    if (!"BRANCH".equals(user.getRole())) {
-        resp.sendRedirect(req.getContextPath() + "/login.jsp");
-        return;
-    }
-    
+    if (user == null) { resp.sendError(401); return; }
     long companyId = user.getCompanyId();
     long branchId  = user.getBranchId();
 
@@ -95,17 +86,7 @@ public class BranchMenuServlet extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     AppUser user = (AppUser) req.getSession().getAttribute("authUser");
-    if (user == null) { 
-        resp.sendRedirect(req.getContextPath() + "/login.jsp");
-        return; 
-    }
-    
-    // ERP 시스템: BRANCH 역할만 접근 가능
-    if (!"BRANCH".equals(user.getRole())) {
-        resp.sendRedirect(req.getContextPath() + "/login.jsp");
-        return;
-    }
-    
+    if (user == null) { resp.sendError(401); return; }
     long companyId = user.getCompanyId();
     long branchId  = user.getBranchId();
 
