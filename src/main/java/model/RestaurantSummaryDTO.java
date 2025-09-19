@@ -8,6 +8,8 @@ public class RestaurantSummaryDTO {
 	private String location;
 	private String address;
 	private String image;
+	private double rating;
+	private int reviewCount;
 
 	// Getters and Setters
 	public int getId() {
@@ -56,5 +58,21 @@ public class RestaurantSummaryDTO {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public double getRating() {
+		return rating;
+	}
+
+	public void setRating(double rating) {
+		this.rating = rating;
+	}
+
+	public int getReviewCount() {
+		return reviewCount;
+	}
+
+	public void setReviewCount(int reviewCount) {
+		this.reviewCount = reviewCount;
 	}
 }

@@ -102,9 +102,9 @@
                         <div class="text-3xl mb-2">🍽️</div>
                         <div class="font-semibold">내 음식점 관리</div>
                     </a>
-                    <a href="${pageContext.request.contextPath}/business/menu-management" class="btn-primary text-white p-6 rounded-2xl text-center card-hover" style="transform: translateY(0px); box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 32px;">
-                        <div class="text-3xl mb-2">📋</div>
-                        <div class="font-semibold">메뉴 관리</div>
+                    <a href="${pageContext.request.contextPath}/business/restaurants/add" class="btn-primary text-white p-6 rounded-2xl text-center card-hover" style="transform: translateY(0px); box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 32px;">
+                        <div class="text-3xl mb-2">➕</div>
+                        <div class="font-semibold">새 음식점 등록</div>
                     </a>
                     <a href="${pageContext.request.contextPath}/business/reservation-management" class="btn-secondary text-white p-6 rounded-2xl text-center card-hover" style="transform: translateY(0px); box-shadow: rgba(0, 0, 0, 0.1) 0px 8px 32px;">
                         <div class="text-3xl mb-2">📅</div>

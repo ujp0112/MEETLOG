@@ -20,6 +20,10 @@ public class RestaurantService {
 		return restaurantDAO.findById(restaurantId);
 	}
 
+	public Restaurant findById(int restaurantId) {
+		return restaurantDAO.findById(restaurantId);
+	}
+
 	public List<Restaurant> searchRestaurants(String keyword, String category, String location, String priceRange,
 			String parking) {
 		Map<String, Object> params = new HashMap<>();
@@ -55,9 +59,21 @@ public class RestaurantService {
 
 	// 사업자별 레스토랑 요약 정보 조회 (경량 DTO 사용)
 	public List<RestaurantSummaryDTO> getRestaurantSummariesByOwnerId(int ownerId) {
-		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-			return sqlSession.selectList("restaurant.findSummariesByOwnerId", ownerId);
-		}
+		List<Restaurant> restaurants = restaurantDAO.findByOwnerId(ownerId);
+		return restaurants.stream()
+			.map(restaurant -> {
+				RestaurantSummaryDTO dto = new RestaurantSummaryDTO();
+				dto.setId(restaurant.getId());
+				dto.setName(restaurant.getName());
+				dto.setCategory(restaurant.getCategory());
+				dto.setLocation(restaurant.getLocation());
+				dto.setAddress(restaurant.getAddress());
+				dto.setImage(restaurant.getImage());
+				dto.setRating(restaurant.getRating());
+				dto.setReviewCount(restaurant.getReviewCount());
+				return dto;
+			})
+			.collect(java.util.stream.Collectors.toList());
 	}
 
 	// SqlSession을 받는 addRestaurant 메서드 추가

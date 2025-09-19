@@ -97,6 +97,43 @@
 		<url-pattern>/hq/sales-orders</url-pattern>
 	</servlet-mapping>
 
+	<!-- 메뉴 관리 서블릿들 -->
+	<servlet>
+		<servlet-name>MenuManagementServlet</servlet-name>
+		<servlet-class>controller.MenuManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MenuManagementServlet</servlet-name>
+		<url-pattern>/business/restaurants/*/menus</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>AddMenuServlet</servlet-name>
+		<servlet-class>controller.AddMenuServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AddMenuServlet</servlet-name>
+		<url-pattern>/business/restaurants/*/menus/add</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>EditMenuServlet</servlet-name>
+		<servlet-class>controller.EditMenuServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EditMenuServlet</servlet-name>
+		<url-pattern>/business/restaurants/*/menus/edit/*</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>RestaurantDetailServlet</servlet-name>
+		<servlet-class>controller.RestaurantDetailServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RestaurantDetailServlet</servlet-name>
+		<url-pattern>/restaurant/detail/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>HqMaterialsServlet</servlet-name>
 		<servlet-class>controller.HqMaterialsServlet</servlet-class>

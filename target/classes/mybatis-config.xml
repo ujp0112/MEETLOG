@@ -46,6 +46,7 @@
 		<typeAlias type="model.Notification" alias="Notification" />
 		
 		<!-- DTO 클래스들 -->
+		<typeAlias type="model.RestaurantSummaryDTO" alias="RestaurantSummaryDTO" />
 		<typeAlias type="dto.BranchMenu" alias="BranchMenu" />
 		<typeAlias type="dto.MenuIngredient" alias="MenuIngredient" />
 		<typeAlias type="dto.MenuToggle" alias="MenuToggle" />

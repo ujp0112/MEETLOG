@@ -19,4 +19,22 @@ public class MenuDAO {
             return sqlSession.insert(NAMESPACE + ".insert", menu);
         }
     }
+
+    public Menu findById(int menuId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".findById", menuId);
+        }
+    }
+
+    public int update(Menu menu) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.update(NAMESPACE + ".update", menu);
+        }
+    }
+
+    public int delete(int menuId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.delete(NAMESPACE + ".delete", menuId);
+        }
+    }
 }

@@ -67,9 +67,9 @@
                                        class="flex-1 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-center text-sm font-semibold hover:bg-blue-100 transition-colors">
                                         상세보기
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/business/restaurants/edit/${restaurant.id}" 
+                                    <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus" 
                                        class="flex-1 bg-green-50 text-green-600 px-4 py-2 rounded-lg text-center text-sm font-semibold hover:bg-green-100 transition-colors">
-                                        수정
+                                        메뉴 관리
                                     </a>
                                     <button onclick="deleteRestaurant(${restaurant.id})" 
                                             class="flex-1 bg-red-50 text-red-600 px-4 py-2 rounded-lg text-center text-sm font-semibold hover:bg-red-100 transition-colors">

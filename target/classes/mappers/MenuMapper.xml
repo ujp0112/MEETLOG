@@ -15,6 +15,10 @@
 		is_popular DESC, name ASC
 	</select>
 
+	<select id="findById" parameterType="int" resultMap="menuResultMap">
+		SELECT * FROM menus WHERE id = #{id}
+	</select>
+
 	<insert id="insert" parameterType="Menu" useGeneratedKeys="true"
 		keyProperty="id">
 		INSERT INTO menus (restaurant_id, name, price, description, image,

@@ -37,7 +37,8 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                             <div class="dropdown-content hidden group-hover:block absolute z-50 top-full right-0 min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
                                 <a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊 통계/분석</a>
-                                <a href="${pageContext.request.contextPath}/branch/menus" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 메뉴 관리</a>
+                                <a href="${pageContext.request.contextPath}/business/restaurants" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 내 음식점 관리</a>
+                                <a href="${pageContext.request.contextPath}/business/restaurants/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 새 음식점 등록</a>
                                 <a href="${pageContext.request.contextPath}/coupon-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🎟️ 쿠폰 관리</a>
                                 <a href="${pageContext.request.contextPath}/business/review-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">💬 고객 리뷰 관리</a>
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">고급 기능</div>

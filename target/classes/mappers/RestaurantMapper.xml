@@ -13,10 +13,7 @@
 		<result property="isActive" column="is_active" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
-		<result property="priceRange" column="price_range" />
 		<result property="ownerId" column="owner_id" />
-		<result property="dietaryOptions" column="dietary_options" typeHandler="typehandler.JsonArrayTypeHandler" />
-		<result property="paymentMethods" column="payment_methods" typeHandler="typehandler.JsonArrayTypeHandler" />
 	</resultMap>
 
 	<select id="findTopRestaurants" parameterType="int"
@@ -60,14 +57,10 @@
 	<insert id="insert" parameterType="Restaurant"
 		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO restaurants (name, category, location, address, jibun_address,
-		phone, hours, description, image, parking, price_range, atmosphere, 
-		dietary_options, payment_methods, owner_id, created_at, updated_at)
+		phone, hours, description, image, parking, owner_id, created_at, updated_at)
 		VALUES (#{name}, #{category}, #{location}, #{address},
 		#{jibunAddress}, #{phone}, #{hours}, #{description}, #{image},
-		#{parking}, #{priceRange}, #{atmosphere}, 
-		#{dietaryOptions, typeHandler=typehandler.JsonArrayTypeHandler}, 
-		#{paymentMethods, typeHandler=typehandler.JsonArrayTypeHandler}, 
-		#{ownerId}, NOW(), NOW())
+		#{parking}, #{ownerId}, NOW(), NOW())
 	</insert>
 
 	<update id="update" parameterType="Restaurant">
@@ -83,10 +76,6 @@
 			<if test="description != null">description = #{description},</if>
 			<if test="image != null">image = #{image},</if>
 			<if test="parking != null">parking = #{parking},</if>
-			<if test="priceRange != null">price_range = #{priceRange},</if>
-			<if test="atmosphere != null">atmosphere = #{atmosphere},</if>
-			<if test="dietaryOptions != null">dietary_options = #{dietaryOptions, typeHandler=typehandler.JsonArrayTypeHandler},</if>
-			<if test="paymentMethods != null">payment_methods = #{paymentMethods, typeHandler=typehandler.JsonArrayTypeHandler},</if>
 			<if test="ownerId != null">owner_id = #{ownerId},</if>
 			updated_at = NOW()
 		</set>

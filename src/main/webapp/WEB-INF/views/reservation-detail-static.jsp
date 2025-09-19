@@ -81,7 +81,7 @@
                                     <span class="font-semibold">메뉴:</span>
                                     <div class="mt-2 space-y-1">
                                         <c:forEach var="menu" items="${restaurant.menuItems}">
-                                            <div>${menu.name} - <fmt:formatNumber value="${menu.price}" type="currency" currencySymbol="₩"/></div>
+                                            <div>${menu.name} - ${menu.price}</div>
                                         </c:forEach>
                                     </div>
                                 </div>
