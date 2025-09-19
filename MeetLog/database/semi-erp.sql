@@ -142,7 +142,10 @@ CREATE TABLE IF NOT EXISTS purchase_order_line (
   KEY idx_pol_material (material_id),
   CONSTRAINT fk_pol_order FOREIGN KEY (company_id, order_id) REFERENCES purchase_order(company_id, id) ON DELETE CASCADE,
   CONSTRAINT fk_pol_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+ALTER TABLE purchase_order_line
+ADD COLUMN STATUS ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED';
 
 -- View-like helper query for inventory page (LEFT JOIN to show 0 qty)
 -- Example SELECT:
