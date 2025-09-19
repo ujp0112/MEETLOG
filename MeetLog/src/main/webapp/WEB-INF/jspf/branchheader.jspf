@@ -375,7 +375,7 @@ a {
 				<c:when test="${not empty sessionScope.authUser}">
 					<span style="margin-right: 8px;"><c:out
 							value="${sessionScope.authUser.name}" /></span>
-					<a class="btn" href="${contextPath}/auth/logout">로그아웃</a>
+					<a class="btn" href="${pageContext.request.contextPath}/logout">로그아웃</a>
 				</c:when>
 				<c:otherwise>
 					<a class="btn primary" href="${contextPath}/login.jsp">로그인</a>

@@ -36,10 +36,6 @@
             <input type="text" name="branchName" required />
           </label>
 
-          <label>지점 코드(지점 고유코드)<br/>
-            <input type="text" name="branchCode" required />
-          </label>
-
           <hr/>
 
           <label>지점 사용자 이메일(로그인용)<br/>
