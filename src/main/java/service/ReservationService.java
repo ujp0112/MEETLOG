@@ -1,40 +1,130 @@
 package service;
 
-import dao.ReservationDAO;
-import model.Reservation;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import model.Reservation;
+import dao.ReservationDAO;
+import util.MyBatisSqlSessionFactory;
+import org.apache.ibatis.session.SqlSession;
 
 public class ReservationService {
+    // IDE Cache Refresh - v2.0
     private ReservationDAO reservationDAO = new ReservationDAO();
-
-    public List<Reservation> getReservationsByUserId(int userId) {
-        return reservationDAO.findByUserId(userId);
+    
+    /**
+     * 음식점별 예약 목록 조회
+     */
+    public List<Reservation> getReservationsByRestaurantId(int restaurantId) {
+        return reservationDAO.findByRestaurantId(restaurantId);
     }
-
+    
+    /**
+     * 예약 상세 조회
+     */
     public Reservation getReservationById(int reservationId) {
         return reservationDAO.findById(reservationId);
     }
-
-    public boolean createReservation(Reservation reservation) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
-        return reservationDAO.insert(reservation) > 0;
+    
+    /**
+     * 예약 상태 변경 (트랜잭션 포함)
+     */
+    public boolean updateReservationStatus(int reservationId, String status, SqlSession sqlSession) {
+        try {
+            return reservationDAO.updateStatus(reservationId, status, sqlSession) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
-
-    public boolean cancelReservation(int reservationId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", reservationId);
-        params.put("status", "CANCELLED");
-        // (핵심 수정!) int 결과를 boolean으로 변환
-        return reservationDAO.updateStatus(params) > 0;
-    }
-
+    
+    /**
+     * 예약 상태 변경 (자동 트랜잭션)
+     */
     public boolean updateReservationStatus(int reservationId, String status) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("id", reservationId);
-        params.put("status", status);
-        // (핵심 수정!) int 결과를 boolean으로 변환
-        return reservationDAO.updateStatus(params) > 0;
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reservationDAO.updateStatus(reservationId, status, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 예약 삭제 (트랜잭션 포함)
+     */
+    public boolean deleteReservation(int reservationId, SqlSession sqlSession) {
+        try {
+            return reservationDAO.delete(reservationId, sqlSession) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 예약 삭제 (자동 트랜잭션)
+     */
+    public boolean deleteReservation(int reservationId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reservationDAO.delete(reservationId, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 오늘 예약 목록 조회
+     */
+    public List<Reservation> getTodayReservations(int restaurantId) {
+        return reservationDAO.findTodayReservations(restaurantId);
+    }
+    
+    /**
+     * 예약 통계 조회
+     */
+    public ReservationStats getReservationStats(int restaurantId) {
+        return reservationDAO.getReservationStats(restaurantId);
+    }
+    
+    /**
+     * 예약 통계 클래스
+     */
+    public static class ReservationStats {
+        private int totalReservations;
+        private int pendingReservations;
+        private int confirmedReservations;
+        private int cancelledReservations;
+        private int completedReservations;
+        
+        // Getters and Setters
+        public int getTotalReservations() { return totalReservations; }
+        public void setTotalReservations(int totalReservations) { this.totalReservations = totalReservations; }
+        public int getPendingReservations() { return pendingReservations; }
+        public void setPendingReservations(int pendingReservations) { this.pendingReservations = pendingReservations; }
+        public int getConfirmedReservations() { return confirmedReservations; }
+        public void setConfirmedReservations(int confirmedReservations) { this.confirmedReservations = confirmedReservations; }
+        public int getCancelledReservations() { return cancelledReservations; }
+        public void setCancelledReservations(int cancelledReservations) { this.cancelledReservations = cancelledReservations; }
+        public int getCompletedReservations() { return completedReservations; }
+        public void setCompletedReservations(int completedReservations) { this.completedReservations = completedReservations; }
+    }
+    
+    /**
+     * 고급 검색을 위한 예약 검색
+     */
+    public List<Reservation> searchReservations(java.util.Map<String, Object> searchParams) {
+        return reservationDAO.searchReservations(searchParams);
     }
 }

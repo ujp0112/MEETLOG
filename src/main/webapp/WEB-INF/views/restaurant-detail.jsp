@@ -473,6 +473,21 @@
                                     </c:if>
                                 </section>
 
+                                <!-- 🕒 운영 시간 섹션 -->
+                                <c:if test="${not empty operatingHours}">
+                                    <section class="glass-card p-8 rounded-3xl slide-up">
+                                        <h3 class="text-2xl font-bold gradient-text mb-6">🕒 운영 시간</h3>
+                                        <div class="space-y-2">
+                                            <c:forEach var="hour" items="${operatingHours}">
+                                                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                                    <span class="font-semibold">${hour.dayOfWeek}</span>
+                                                    <span class="text-slate-600">${hour.openingTime} - ${hour.closingTime}</span>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </section>
+                                </c:if>
+
                                 <!-- 🍽️ 메뉴 섹션 -->
                                 <c:if test="${not empty restaurant.menuList}">
                                     <section class="glass-card p-8 rounded-3xl slide-up">

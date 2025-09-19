@@ -24,6 +24,7 @@
 		<result property="visitDate" column="visit_date" />
 		<result property="partySize" column="party_size" />
 		<result property="visitPurpose" column="visit_purpose" />
+		<result property="restaurantName" column="restaurant_name" />
 	</resultMap>
 
 	<select id="getRecentReviewsWithInfo" parameterType="int"
@@ -94,4 +95,39 @@
 		UPDATE reviews SET likes =
 		likes + 1, updated_at = NOW() WHERE id = #{id}
 	</update>
+	
+	<select id="findRecentReviewsByOwnerId" parameterType="map" resultMap="reviewResultMap">
+		SELECT r.*, res.name as restaurant_name FROM reviews r
+		JOIN restaurants res ON r.restaurant_id = res.id
+		WHERE res.owner_id = #{ownerId} AND r.is_active = true
+		ORDER BY r.created_at DESC
+		LIMIT #{limit}
+	</select>
+	
+	<select id="searchReviews" parameterType="map" resultMap="reviewResultMap">
+		SELECT r.*, res.name as restaurant_name FROM reviews r
+		JOIN restaurants res ON r.restaurant_id = res.id
+		WHERE res.owner_id = #{userId} AND r.is_active = true
+		<if test="keyword != null and keyword != ''">
+			AND (r.content LIKE CONCAT('%', #{keyword}, '%') 
+				OR r.author LIKE CONCAT('%', #{keyword}, '%')
+				OR res.name LIKE CONCAT('%', #{keyword}, '%'))
+		</if>
+		<if test="minRating != null and minRating != ''">
+			AND r.rating >= #{minRating}
+		</if>
+		<if test="maxRating != null and maxRating != ''">
+			AND r.rating <= #{maxRating}
+		</if>
+		<if test="restaurantId != null and restaurantId != ''">
+			AND r.restaurant_id = #{restaurantId}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			AND r.created_at >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND r.created_at <= #{endDate}
+		</if>
+		ORDER BY r.created_at DESC
+	</select>
 </mapper>

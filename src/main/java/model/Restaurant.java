@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Restaurant {
+	// IDE Cache Refresh - v2.0
 	private int id;
 	private String name;
 	private String category;
@@ -14,6 +15,7 @@ public class Restaurant {
 	private String hours;
 	private String description;
 	private String image;
+	private String imagePath;
 	private double rating;
 	private int reviewCount;
 	private int likes;
@@ -36,8 +38,10 @@ public class Restaurant {
 	private List<Review> reviews;
 	private List<Coupon> coupons;
 	private List<QnA> qna;
+	private List<Reservation> reservationList;
 
 	public Restaurant() {
+		// Default constructor
 	}
 
 	public Restaurant(String name, String category, String location, String address, String phone) {
@@ -127,6 +131,14 @@ public class Restaurant {
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public String getImagePath() {
+		return imagePath;
+	}
+
+	public void setImagePath(String imagePath) {
+		this.imagePath = imagePath;
 	}
 
 	public double getRating() {
@@ -239,6 +251,14 @@ public class Restaurant {
 
 	public void setQna(List<QnA> qna) {
 		this.qna = qna;
+	}
+
+	public List<Reservation> getReservationList() {
+		return reservationList;
+	}
+
+	public void setReservationList(List<Reservation> reservationList) {
+		this.reservationList = reservationList;
 	}
 
 	// 상세 정보 필드들의 Getter/Setter

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class RestaurantService {
+	// IDE Cache Refresh - v2.0
 	private RestaurantDAO restaurantDAO = new RestaurantDAO();
 
 	public List<Restaurant> getTopRestaurants(int limit) {
@@ -48,5 +49,12 @@ public class RestaurantService {
 	// 사업자별 레스토랑 조회 메서드 추가
 	public List<Restaurant> getRestaurantsByOwnerId(int ownerId) {
 		return restaurantDAO.findByOwnerId(ownerId);
+	}
+	
+	/**
+	 * 고급 검색을 위한 음식점 검색
+	 */
+	public List<Restaurant> searchRestaurants(java.util.Map<String, Object> searchParams) {
+		return restaurantDAO.searchRestaurants(searchParams);
 	}
 }

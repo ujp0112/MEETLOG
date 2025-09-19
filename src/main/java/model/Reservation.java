@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class Reservation {
+	// IDE Cache Refresh - v2.0
 	private int id;
 	private int restaurantId;
 	private int userId;
@@ -14,10 +15,15 @@ public class Reservation {
 	private String status; // PENDING, CONFIRMED, COMPLETED, CANCELLED
 	private String specialRequests;
 	private String contactPhone;
+	private String customerName;
+	private String customerPhone;
+	private String reservationDate;
+	private String reservationTimeStr;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 
 	public Reservation() {
+		// Default constructor - IDE cache refresh
 	}
 
 	public Reservation(int restaurantId, int userId, String restaurantName, String userName,
@@ -73,14 +79,6 @@ public class Reservation {
 		this.userName = userName;
 	}
 
-	public LocalDateTime getReservationTime() {
-		return reservationTime;
-	}
-
-	public void setReservationTime(LocalDateTime reservationTime) {
-		this.reservationTime = reservationTime;
-	}
-
 	public int getPartySize() {
 		return partySize;
 	}
@@ -127,6 +125,38 @@ public class Reservation {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	public String getCustomerPhone() {
+		return customerPhone;
+	}
+
+	public void setCustomerPhone(String customerPhone) {
+		this.customerPhone = customerPhone;
+	}
+
+	public String getReservationDate() {
+		return reservationDate;
+	}
+
+	public void setReservationDate(String reservationDate) {
+		this.reservationDate = reservationDate;
+	}
+
+	public String getReservationTime() {
+		return reservationTimeStr;
+	}
+
+	public void setReservationTime(String reservationTime) {
+		this.reservationTimeStr = reservationTime;
 	}
 
 	// 편의 메서드

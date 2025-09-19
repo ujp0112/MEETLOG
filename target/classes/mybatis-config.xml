@@ -44,6 +44,10 @@
 		<typeAlias type="model.Collection" alias="RestaurantCollection" />
 		<typeAlias type="model.ReviewComment" alias="ReviewComment" />
 		<typeAlias type="model.Notification" alias="Notification" />
+    <typeAlias type="model.OperatingHour" alias="OperatingHour" />
+    <typeAlias type="model.BusinessUser" alias="BusinessUser" />
+    <typeAlias type="model.Reservation" alias="Reservation" />
+    <typeAlias type="model.ReviewComment" alias="ReviewComment" />
 		
 		<!-- DTO 클래스들 -->
 		<typeAlias type="dto.BranchMenu" alias="BranchMenu" />
@@ -97,5 +101,9 @@
 		<mapper resource="mappers/RatingMapper.xml" />
 		<mapper resource="mappers/CommunityCourseMapper.xml" />
 		<mapper resource="mappers/OfficialCourseMapper.xml" />
+    <mapper resource="mappers/OperatingHourMapper.xml" />
+    <mapper resource="mappers/BusinessUserMapper.xml" />
+    <mapper resource="mappers/ReservationMapper.xml" />
+    <mapper resource="mappers/ReviewCommentMapper.xml" />
 	</mappers>
 </configuration>

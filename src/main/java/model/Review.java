@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Review {
+	// IDE Cache Refresh - v2.0
 	private int id;
 	private int restaurantId;
 	private int userId;
 	private String author;
+	private String restaurantName;
 	private String authorImage;
 	private int rating;
 	private String content;
@@ -28,6 +30,7 @@ public class Review {
 	private String visitPurpose; // 방문 목적 ("데이트", "비즈니스", "가족모임", "친구모임", "혼밥")
 
 	public Review() {
+		// Default constructor
 	}
 
 	public Review(int restaurantId, int userId, String author, int rating, String content) {
@@ -69,6 +72,14 @@ public class Review {
 
 	public void setAuthor(String author) {
 		this.author = author;
+	}
+
+	public String getRestaurantName() {
+		return restaurantName;
+	}
+
+	public void setRestaurantName(String restaurantName) {
+		this.restaurantName = restaurantName;
 	}
 
 	public String getAuthorImage() {

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
  * 리뷰 댓글을 나타내는 모델 클래스
  */
 public class ReviewComment {
+    // IDE Cache Refresh - v2.0
     private int id;
     private int reviewId;
     private int userId;
@@ -17,8 +18,10 @@ public class ReviewComment {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private boolean isActive;
+    private boolean isOwnerReply;
 
     public ReviewComment() {
+        // Default constructor
     }
 
     public ReviewComment(int reviewId, int userId, String author, String content) {
@@ -116,5 +119,13 @@ public class ReviewComment {
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public boolean isOwnerReply() {
+        return isOwnerReply;
+    }
+
+    public void setIsOwnerReply(boolean isOwnerReply) {
+        this.isOwnerReply = isOwnerReply;
     }
 }

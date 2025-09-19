@@ -83,8 +83,6 @@
 		<servlet-name>BranchMenuServlet</servlet-name>
 		<url-pattern>/branch/menus</url-pattern>
 		<url-pattern>/branch/menus/*</url-pattern>
-		<url-pattern>/business/menu-management</url-pattern>
-		<url-pattern>/business/menu-management/*</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -231,15 +229,9 @@
 		<url-pattern>/index</url-pattern>
 	</servlet-mapping>
 
-	<!-- 맛집 관련 서블릿 -->
-	<servlet>
-		<servlet-name>RestaurantServlet</servlet-name>
-		<servlet-class>controller.RestaurantServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RestaurantServlet</servlet-name>
-		<url-pattern>/restaurant/*</url-pattern>
-	</servlet-mapping>
+	<!-- 맛집 관련 서블릿 - @WebServlet 어노테이션으로 매핑됨 -->
+	
+	<!-- 음식점 관련 서블릿들 - @WebServlet 어노테이션으로 매핑됨 -->
 
 	<!-- 리뷰 관련 서블릿 -->
 	<servlet>
@@ -320,14 +312,7 @@
 	</servlet-mapping>
 
 	<!-- 비즈니스 관련 서블릿들 -->
-	<servlet>
-		<servlet-name>BusinessDashboardServlet</servlet-name>
-		<servlet-class>controller.BusinessDashboardServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>BusinessDashboardServlet</servlet-name>
-		<url-pattern>/business/dashboard</url-pattern>
-	</servlet-mapping>
+	<!-- BusinessDashboardServlet - @WebServlet 어노테이션으로 매핑됨 -->
 
 	<servlet>
 		<servlet-name>BusinessInfoEditServlet</servlet-name>
@@ -340,25 +325,8 @@
 		<url-pattern>/business/info-edit/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>ReservationManagementServlet</servlet-name>
-		<servlet-class>controller.ReservationManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ReservationManagementServlet</servlet-name>
-		<url-pattern>/business/reservation-management</url-pattern>
-		<url-pattern>/business/reservation-management/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>ReviewManagementServlet</servlet-name>
-		<servlet-class>controller.ReviewManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>ReviewManagementServlet</servlet-name>
-		<url-pattern>/business/review-management</url-pattern>
-		<url-pattern>/business/review-management/*</url-pattern>
-	</servlet-mapping>
+	<!-- ReservationManagementServlet - @WebServlet 어노테이션으로 매핑됨 -->
+	<!-- ReviewManagementServlet - @WebServlet 어노테이션으로 매핑됨 -->
 
 	<!-- 기타 서블릿들 -->
 	<servlet>

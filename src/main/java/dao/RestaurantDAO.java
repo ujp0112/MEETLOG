@@ -4,7 +4,6 @@ import model.Restaurant;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
-import java.util.Map;
 
 public class RestaurantDAO {
     private static final String NAMESPACE = "dao.RestaurantDAO";
@@ -21,11 +20,6 @@ public class RestaurantDAO {
         }
     }
 
-    public List<Restaurant> searchRestaurants(Map<String, Object> params) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".searchRestaurants", params);
-        }
-    }
 
     public int insert(Restaurant restaurant) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
@@ -49,6 +43,15 @@ public class RestaurantDAO {
 	public List<Restaurant> findByOwnerId(int ownerId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".findByOwnerId", ownerId);
+		}
+	}
+	
+	/**
+	 * 고급 검색을 위한 음식점 검색
+	 */
+	public List<Restaurant> searchRestaurants(java.util.Map<String, Object> searchParams) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".searchRestaurants", searchParams);
 		}
 	}
 }

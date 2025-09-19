@@ -2,56 +2,44 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-
 <mapper namespace="dao.NotificationDAO">
+    <resultMap id="notificationResultMap" type="Notification" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="isRead" column="is_read" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
 
-    <!-- 알림 생성 -->
-    <insert id="createNotification" parameterType="model.Notification" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO notifications (user_id, type, title, content, action_url, is_read, created_at)
-        VALUES (#{userId}, #{type}, #{title}, #{content}, #{actionUrl}, #{isRead}, NOW())
-    </insert>
-
-    <!-- 사용자의 알림 목록 조회 -->
-    <select id="getUserNotifications" parameterType="map" resultType="model.Notification">
-        SELECT * FROM notifications
+    <select id="findByUserId" parameterType="int" resultMap="notificationResultMap">
+        SELECT * FROM notifications 
         WHERE user_id = #{userId}
         ORDER BY created_at DESC
-        LIMIT #{limit} OFFSET #{offset}
     </select>
-
-    <!-- 읽지 않은 알림 수 조회 -->
-    <select id="getUnreadNotificationCount" parameterType="int" resultType="int">
-        SELECT COUNT(*) 
-        FROM notifications 
-        WHERE user_id = #{userId}
-        AND is_read = false
-    </select>
-
-    <!-- 알림 읽음 처리 -->
-    <update id="markAsRead" parameterType="int">
+    
+    <update id="markAsRead" parameterType="map">
         UPDATE notifications 
-        SET is_read = true, read_at = NOW()
-        WHERE id = #{notificationId}
+        SET is_read = true, updated_at = NOW()
+        WHERE id = #{id} AND user_id = #{userId}
     </update>
-
-    <!-- 사용자의 모든 알림 읽음 처리 -->
+    
     <update id="markAllAsRead" parameterType="int">
         UPDATE notifications 
-        SET is_read = true, read_at = NOW()
-        WHERE user_id = #{userId}
-        AND is_read = false
+        SET is_read = true, updated_at = NOW()
+        WHERE user_id = #{userId} AND is_read = false
     </update>
-
-    <!-- 알림 삭제 -->
-    <delete id="deleteNotification" parameterType="int">
+    
+    <delete id="delete" parameterType="map">
         DELETE FROM notifications 
-        WHERE id = #{notificationId}
+        WHERE id = #{id} AND user_id = #{userId}
     </delete>
-
-    <!-- 오래된 알림 삭제 -->
-    <delete id="deleteOldNotifications" parameterType="int">
-        DELETE FROM notifications 
-        WHERE created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
-    </delete>
-
+    
+    <insert id="insert" parameterType="Notification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notifications (user_id, title, content, type, is_read, created_at, updated_at)
+        VALUES (#{userId}, #{title}, #{content}, #{type}, #{isRead}, NOW(), NOW())
+    </insert>
+    
+    <select id="getUnreadCount" parameterType="int" resultType="long">
+        SELECT COUNT(*) FROM notifications 
+        WHERE user_id = #{userId} AND is_read = false
+    </select>
 </mapper>

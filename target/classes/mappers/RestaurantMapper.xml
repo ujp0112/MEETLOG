@@ -104,4 +104,34 @@
 		WHERE owner_id = #{ownerId} AND is_active = true
 		ORDER BY created_at DESC
 	</select>
+	
+	<select id="searchRestaurants" parameterType="map" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants 
+		WHERE owner_id = #{userId} AND is_active = true
+		<if test="keyword != null and keyword != ''">
+			AND (name LIKE CONCAT('%', #{keyword}, '%') 
+				OR category LIKE CONCAT('%', #{keyword}, '%')
+				OR location LIKE CONCAT('%', #{keyword}, '%')
+				OR description LIKE CONCAT('%', #{keyword}, '%'))
+		</if>
+		<if test="category != null and category != ''">
+			AND category = #{category}
+		</if>
+		<if test="location != null and location != ''">
+			AND location LIKE CONCAT('%', #{location}, '%')
+		</if>
+		<if test="minRating != null and minRating != ''">
+			AND rating >= #{minRating}
+		</if>
+		<if test="maxRating != null and maxRating != ''">
+			AND rating <= #{maxRating}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			AND created_at >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND created_at <= #{endDate}
+		</if>
+		ORDER BY created_at DESC
+	</select>
 </mapper>
