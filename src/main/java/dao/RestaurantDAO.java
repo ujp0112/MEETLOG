@@ -39,9 +39,16 @@ public class RestaurantDAO {
         }
     }
 
-    public int delete(int id) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.update(NAMESPACE + ".delete", id);
-        }
-    }
+	public int delete(int id) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.update(NAMESPACE + ".delete", id);
+		}
+	}
+
+	// 사업자별 레스토랑 조회 메서드 추가
+	public List<Restaurant> findByOwnerId(int ownerId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findByOwnerId", ownerId);
+		}
+	}
 }

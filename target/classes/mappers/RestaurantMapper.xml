@@ -14,6 +14,7 @@
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
 		<result property="priceRange" column="price_range" />
+		<result property="ownerId" column="owner_id" />
 		<result property="dietaryOptions" column="dietary_options" typeHandler="typehandler.JsonArrayTypeHandler" />
 		<result property="paymentMethods" column="payment_methods" typeHandler="typehandler.JsonArrayTypeHandler" />
 	</resultMap>
@@ -60,13 +61,13 @@
 		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO restaurants (name, category, location, address, jibun_address,
 		phone, hours, description, image, parking, price_range, atmosphere, 
-		dietary_options, payment_methods, created_at, updated_at)
+		dietary_options, payment_methods, owner_id, created_at, updated_at)
 		VALUES (#{name}, #{category}, #{location}, #{address},
 		#{jibunAddress}, #{phone}, #{hours}, #{description}, #{image},
 		#{parking}, #{priceRange}, #{atmosphere}, 
 		#{dietaryOptions, typeHandler=typehandler.JsonArrayTypeHandler}, 
 		#{paymentMethods, typeHandler=typehandler.JsonArrayTypeHandler}, 
-		NOW(), NOW())
+		#{ownerId}, NOW(), NOW())
 	</insert>
 
 	<update id="update" parameterType="Restaurant">
@@ -86,6 +87,7 @@
 			<if test="atmosphere != null">atmosphere = #{atmosphere},</if>
 			<if test="dietaryOptions != null">dietary_options = #{dietaryOptions, typeHandler=typehandler.JsonArrayTypeHandler},</if>
 			<if test="paymentMethods != null">payment_methods = #{paymentMethods, typeHandler=typehandler.JsonArrayTypeHandler},</if>
+			<if test="ownerId != null">owner_id = #{ownerId},</if>
 			updated_at = NOW()
 		</set>
 		WHERE id = #{id}
@@ -95,4 +97,11 @@
 		UPDATE restaurants SET is_active = false, updated_at = NOW() WHERE id =
 		#{id}
 	</update>
+
+	<!-- 사업자별 레스토랑 조회 쿼리 추가 -->
+	<select id="findByOwnerId" parameterType="int" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants 
+		WHERE owner_id = #{ownerId} AND is_active = true
+		ORDER BY created_at DESC
+	</select>
 </mapper>

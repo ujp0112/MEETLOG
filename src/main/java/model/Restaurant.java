@@ -23,6 +23,7 @@ public class Restaurant {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private boolean isActive;
+	private int ownerId; // 사업자 ID 추가
 
 	// 상세 정보 필드들 추가
 	private int priceRange; // 1: ~1만원, 2: 1-2만원, 3: 2-4만원, 4: 4만원+
@@ -198,6 +199,14 @@ public class Restaurant {
 
 	public void setActive(boolean active) {
 		this.isActive = active;
+	}
+
+	public int getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(int ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	public List<Menu> getMenuList() {

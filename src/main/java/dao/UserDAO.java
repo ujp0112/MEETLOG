@@ -60,4 +60,17 @@ public class UserDAO {
             return sqlSession.selectList(NAMESPACE + ".findAll");
         }
     }
+
+    // 트랜잭션을 지원하는 메서드들 (외부에서 SqlSession을 받음)
+    public int insert(User user, SqlSession sqlSession) {
+        return sqlSession.insert(NAMESPACE + ".insert", user);
+    }
+
+    public int update(User user, SqlSession sqlSession) {
+        return sqlSession.update(NAMESPACE + ".update", user);
+    }
+
+    public int delete(int id, SqlSession sqlSession) {
+        return sqlSession.update(NAMESPACE + ".delete", id);
+    }
 }

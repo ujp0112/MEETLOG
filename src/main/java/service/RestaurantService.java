@@ -44,4 +44,9 @@ public class RestaurantService {
 	public boolean deleteRestaurant(int restaurantId) {
 		return restaurantDAO.delete(restaurantId) > 0;
 	}
+
+	// 사업자별 레스토랑 조회 메서드 추가
+	public List<Restaurant> getRestaurantsByOwnerId(int ownerId) {
+		return restaurantDAO.findByOwnerId(ownerId);
+	}
 }
