@@ -2,74 +2,108 @@ package controller;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import dto.AppUser;
 import dto.PurchaseOrder;
+import dto.PurchaseOrderLine;
 import service.OrderService;
 
 public class HqSalesOrdersServlet extends HttpServlet {
 	private final OrderService orderService = new OrderService();
+	private final Gson gson = new Gson();
 
-	// GET /hq/sales-orders?page=&size=&status=
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		req.setCharacterEncoding("UTF-8");
+
 		String path = req.getPathInfo();
-		if ("/sales-orders".equals(path)) {
-			long companyId = (Long) req.getAttribute("companyId");
+	    HttpSession session = req.getSession(false);
+	    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+	    if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
+	    long companyId = user.getCompanyId();
+
+		// 1. JSP 페이지 로딩 처리 (e.g., /hq/sales-orders)
+		if (path == null || path.equals("/") || path.equals("/sales-orders")) {
 			int page = parseInt(req.getParameter("page"), 1);
 			int size = parseInt(req.getParameter("size"), 20);
 			String status = req.getParameter("status");
 			int offset = (page - 1) * size;
 
-			java.util.List<PurchaseOrder> list = orderService.listOrdersForCompany(companyId, status, size, offset);
-
-			resp.setContentType("application/json; charset=UTF-8");
-			StringBuilder sb = new StringBuilder("[");
-			SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-			for (int i = 0; i < list.size(); i++) {
-				PurchaseOrder po = list.get(i);
-				if (i > 0)
-					sb.append(',');
-				String orderedAt = (po.getOrderedAt() == null) ? "" : fmt.format(po.getOrderedAt());
-				sb.append("{\"id\":").append(po.getId()).append(",\"branchName\":\"").append(esc(po.getBranchName()))
-						.append("\"").append(",\"totalPrice\":")
-						.append(po.getTotalPrice() == null ? 0 : po.getTotalPrice()).append(",\"status\":\"")
-						.append(esc(po.getStatus())).append("\"").append(",\"orderedAt\":\"").append(orderedAt)
-						.append("\"}");
-			}
-			sb.append("]");
-			resp.getWriter().write(sb.toString());
+			List<PurchaseOrder> list = orderService.listOrdersForCompany(companyId, status, size, offset);
+			req.setAttribute("orders", list);
+			req.getRequestDispatcher("/hq/sales-orders.jsp").forward(req, resp);
 			return;
 		}
+
+		// 2. 모달 상세 품목 데이터 조회 API (e.g., /hq/sales-orders/{orderId}/details)
+		String[] pathParts = path.split("/");
+		System.out.println(path.toString());
+		if (pathParts.length == 3 && "details".equals(pathParts[2])) {
+			try {
+				long orderId = Long.parseLong(pathParts[1]);
+				List<PurchaseOrderLine> lines = orderService.listOrderLines(companyId, orderId);
+				System.out.println(lines);
+				resp.setContentType("application/json; charset=UTF-8");
+				resp.getWriter().write(gson.toJson(lines));
+			} catch (NumberFormatException e) {
+				resp.sendError(400, "Invalid order ID");
+			}
+			return;
+		}
+
 		resp.sendError(404);
 	}
 
-	// POST /hq/sales-orders/{orderId}/inspect (status=APPROVED|REJECTED|RECEIVED)
+	// POST /hq/sales-orders/{orderId}/inspect
+	// HqSalesOrdersServlet.java의 doPost 메소드
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-		String path = req.getPathInfo();
-		if (path != null && path.startsWith("/sales-orders/") && path.endsWith("/inspect")) {
-			long companyId = (Long) req.getAttribute("companyId");
-			String sid = path.substring("/sales-orders/".length(), path.length() - "/inspect".length());
-			long orderId = Long.parseLong(sid);
-			String status = req.getParameter("status");
-			if (status == null || status.isEmpty())
-				status = "APPROVED";
+	    String path = req.getPathInfo();
+	    String[] pathParts = (path != null) ? path.split("/") : new String[0];
 
-			if ("RECEIVED".equalsIgnoreCase(status)) {
-				orderService.markReceivedAndIncreaseInventory(companyId, orderId);
-			} else {
-				orderService.updateStatus(companyId, orderId, status.toUpperCase());
-			}
-			resp.setContentType("text/plain; charset=UTF-8");
-			resp.getWriter().write("OK");
-			return;
-		}
-		resp.sendError(404);
+	    // 경로가 /_ORDER_ID_/inspect 형태인지 확인 (e.g., /101/inspect)
+	    if (pathParts.length == 3 && "inspect".equals(pathParts[2])) {
+	        HttpSession session = req.getSession(false);
+	        AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+	        if (user == null) {
+	            resp.sendError(403, "Authentication required");
+	            return;
+	        }
+	        long companyId = user.getCompanyId(); // <- 세션에서 companyId를 가져옵니다.
+
+	        try {
+	            long orderId = Long.parseLong(pathParts[1]); // orderId를 경로에서 추출합니다.
+
+	            String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+	            java.lang.reflect.Type listType = new TypeToken<List<PurchaseOrderLine>>(){}.getType();
+	            List<PurchaseOrderLine> linesToUpdate = gson.fromJson(body, listType);
+
+	            if (linesToUpdate != null && !linesToUpdate.isEmpty()) {
+	                // companyId를 서비스 메소드로 전달해야 할 수 있습니다. (OrderService 구현에 따라 다름)
+	                orderService.updateOrderLineStatuses(companyId, orderId, linesToUpdate);
+	            }
+
+	            resp.setContentType("application/json; charset=UTF-8");
+	            resp.getWriter().write("{\"status\":\"OK\"}");
+	            return; // <- 처리 후 반드시 return
+
+	        } catch (NumberFormatException e) {
+	            resp.sendError(400, "Invalid order ID format");
+	            return;
+	        }
+	    }
+	    resp.sendError(404);
 	}
 
 	private static int parseInt(String s, int d) {
@@ -78,11 +112,5 @@ public class HqSalesOrdersServlet extends HttpServlet {
 		} catch (Exception e) {
 			return d;
 		}
-	}
-
-	private static String esc(String s) {
-		if (s == null)
-			return "";
-		return s.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 }

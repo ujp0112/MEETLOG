@@ -10,6 +10,24 @@ public class PurchaseOrder {
 	private Date orderedAt;
 	private List<PurchaseOrderLine> lines;
 	private String branchName;
+	private Integer itemCount;
+    private String mainItemName;
+
+    public Integer getItemCount() {
+        return itemCount;
+    }
+
+    public void setItemCount(Integer itemCount) {
+        this.itemCount = itemCount;
+    }
+
+    public String getMainItemName() {
+        return mainItemName;
+    }
+
+    public void setMainItemName(String mainItemName) {
+        this.mainItemName = mainItemName;
+    }
 
 	public Long getId() {
 		return id;

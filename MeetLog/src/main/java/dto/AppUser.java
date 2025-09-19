@@ -68,4 +68,12 @@ public class AppUser {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	@Override
+	public String toString() {
+		return "AppUser [id=" + id + ", companyId=" + companyId + ", branchId=" + branchId + ", role=" + role
+				+ ", email=" + email + ", pwHash=" + pwHash + ", activeYn=" + activeYn + ", name=" + name + "]";
+	}
+	
+	
 }

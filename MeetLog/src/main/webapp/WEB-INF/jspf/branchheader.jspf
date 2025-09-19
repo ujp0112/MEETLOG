@@ -357,13 +357,13 @@ a {
 			<a href="${ctx }/branch/menus"
    class="${fn:contains(uri, '/branch/menu') ? 'act' : ''}">메뉴관리</a>
 
-<a href="./order.jsp"
+<a href="${pageContext.request.contextPath}/branch/order"
    class="${fn:contains(uri, '/branch/order') ? 'act' : ''}">발주</a>
 
-<a href="./orders-history.jsp"
+<a href="${ctx }/branch/orders-history"
    class="${fn:contains(uri, '/branch/orders-history') ? 'act' : ''}">발주기록</a>
 
-<a href="./inventory.jsp"
+<a href="${ctx }/branch/inventory"
    class="${fn:contains(uri, '/branch/inventory') ? 'act' : ''}">재고</a>
 </div>
 

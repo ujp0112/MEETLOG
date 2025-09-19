@@ -6,6 +6,24 @@ public class PurchaseOrderLine {
 	private Integer lineNo;
 	private Double qty, unitPrice;
 	private String materialName, unit;
+	private String status;
+	private String imgPath;
+	
+	public String getImgPath() {
+        return imgPath;
+    }
+
+    public void setImgPath(String imgPath) {
+        this.imgPath = imgPath;
+    }
+	
+	public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
 	public Long getCompanyId() {
 		return companyId;
