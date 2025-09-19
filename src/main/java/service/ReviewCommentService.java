@@ -1,164 +1,115 @@
 package service;
 
-import dao.ReviewCommentDAO;
-import model.ReviewComment;
 import java.util.List;
+import model.ReviewComment;
+import dao.ReviewCommentDAO;
+import util.MyBatisSqlSessionFactory;
+import org.apache.ibatis.session.SqlSession;
 
-/**
- * 리뷰 댓글 시스템을 위한 서비스 클래스
- */
 public class ReviewCommentService {
-    
     private ReviewCommentDAO reviewCommentDAO = new ReviewCommentDAO();
-
+    
     /**
-     * 댓글 생성
+     * 리뷰 답글 추가 (트랜잭션 포함)
      */
-    public boolean createComment(ReviewComment comment) {
+    public boolean addReviewComment(ReviewComment comment, SqlSession sqlSession) {
         try {
-            int result = reviewCommentDAO.createComment(comment);
-            return result > 0;
+            return reviewCommentDAO.insert(comment, sqlSession) > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-
+    
     /**
-     * 댓글 수정
+     * 리뷰 답글 추가 (자동 트랜잭션)
      */
-    public boolean updateComment(ReviewComment comment) {
-        try {
-            int result = reviewCommentDAO.updateComment(comment);
-            return result > 0;
+    public boolean addReviewComment(ReviewComment comment) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reviewCommentDAO.insert(comment, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-
+    
     /**
-     * 댓글 삭제
+     * 리뷰 답글 수정 (트랜잭션 포함)
      */
-    public boolean deleteComment(int commentId) {
+    public boolean updateReviewComment(ReviewComment comment, SqlSession sqlSession) {
         try {
-            int result = reviewCommentDAO.deleteComment(commentId);
-            return result > 0;
+            return reviewCommentDAO.update(comment, sqlSession) > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-
+    
     /**
-     * 리뷰의 댓글 목록 조회
+     * 리뷰 답글 수정 (자동 트랜잭션)
+     */
+    public boolean updateReviewComment(ReviewComment comment) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reviewCommentDAO.update(comment, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 리뷰 답글 삭제 (트랜잭션 포함)
+     */
+    public boolean deleteReviewComment(int commentId, SqlSession sqlSession) {
+        try {
+            return reviewCommentDAO.delete(commentId, sqlSession) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 리뷰 답글 삭제 (자동 트랜잭션)
+     */
+    public boolean deleteReviewComment(int commentId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reviewCommentDAO.delete(commentId, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 리뷰별 답글 목록 조회
      */
     public List<ReviewComment> getCommentsByReviewId(int reviewId) {
-        try {
-            return reviewCommentDAO.getCommentsByReviewId(reviewId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
-        }
+        return reviewCommentDAO.findByReviewId(reviewId);
     }
-
+    
     /**
-     * 사용자의 댓글 목록 조회
-     */
-    public List<ReviewComment> getCommentsByUserId(int userId, int limit, int offset) {
-        try {
-            return reviewCommentDAO.getCommentsByUserId(userId, limit, offset);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return List.of();
-        }
-    }
-
-    /**
-     * 댓글 상세 조회
+     * 리뷰 답글 상세 조회
      */
     public ReviewComment getCommentById(int commentId) {
-        try {
-            return reviewCommentDAO.getCommentById(commentId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * 댓글 좋아요
-     */
-    public boolean likeComment(int commentId, int userId) {
-        try {
-            int result = reviewCommentDAO.likeComment(commentId, userId);
-            
-            if (result > 0) {
-                // 댓글의 좋아요 수 업데이트
-                updateCommentLikeCount(commentId);
-                return true;
-            }
-            
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 댓글 좋아요 취소
-     */
-    public boolean unlikeComment(int commentId, int userId) {
-        try {
-            int result = reviewCommentDAO.unlikeComment(commentId, userId);
-            
-            if (result > 0) {
-                // 댓글의 좋아요 수 업데이트
-                updateCommentLikeCount(commentId);
-                return true;
-            }
-            
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 댓글 좋아요 여부 확인
-     */
-    public boolean isCommentLiked(int commentId, int userId) {
-        try {
-            return reviewCommentDAO.isCommentLiked(commentId, userId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * 댓글 수 조회
-     */
-    public int getCommentCount(int reviewId) {
-        try {
-            return reviewCommentDAO.getCommentCount(reviewId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    /**
-     * 댓글의 좋아요 수 업데이트
-     */
-    private void updateCommentLikeCount(int commentId) {
-        try {
-            // TODO: 실제 좋아요 수를 계산하여 업데이트
-            // 현재는 간단히 구현
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        return reviewCommentDAO.findById(commentId);
     }
 }

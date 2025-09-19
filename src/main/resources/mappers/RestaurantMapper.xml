@@ -93,12 +93,43 @@
 		WHERE owner_id = #{ownerId} AND is_active = true
 		ORDER BY created_at DESC
 	</select>
+<<<<<<< HEAD
 
 	<!-- 사업자별 레스토랑 요약 정보 조회 (경량 DTO) -->
 	<select id="findSummariesByOwnerId" parameterType="int" resultType="model.RestaurantSummaryDTO">
 		SELECT id, name, category, location, address, image
 		FROM restaurants 
 		WHERE owner_id = #{ownerId} AND is_active = true
+=======
+	
+	<select id="searchRestaurants" parameterType="map" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants 
+		WHERE owner_id = #{userId} AND is_active = true
+		<if test="keyword != null and keyword != ''">
+			AND (name LIKE CONCAT('%', #{keyword}, '%') 
+				OR category LIKE CONCAT('%', #{keyword}, '%')
+				OR location LIKE CONCAT('%', #{keyword}, '%')
+				OR description LIKE CONCAT('%', #{keyword}, '%'))
+		</if>
+		<if test="category != null and category != ''">
+			AND category = #{category}
+		</if>
+		<if test="location != null and location != ''">
+			AND location LIKE CONCAT('%', #{location}, '%')
+		</if>
+		<if test="minRating != null and minRating != ''">
+			AND rating >= #{minRating}
+		</if>
+		<if test="maxRating != null and maxRating != ''">
+			AND rating <= #{maxRating}
+		</if>
+		<if test="startDate != null and startDate != ''">
+			AND created_at >= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND created_at <= #{endDate}
+		</if>
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 		ORDER BY created_at DESC
 	</select>
 </mapper>

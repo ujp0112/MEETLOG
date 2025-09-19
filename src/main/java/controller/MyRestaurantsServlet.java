@@ -14,7 +14,7 @@ import model.RestaurantSummaryDTO;
 import model.User;
 import service.RestaurantService;
 
-@WebServlet("/business/restaurants")
+@WebServlet("/restaurant/my")
 public class MyRestaurantsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RestaurantService restaurantService = new RestaurantService();

@@ -66,6 +66,7 @@ public class ReviewDAO {
         }
         // 3. try-with-resources 구문이 자동으로 세션을 닫아줍니다.
     }
+<<<<<<< HEAD
 
     // 사업자별 최근 리뷰 조회
     public List<Review> findRecentReviewsByOwnerId(int ownerId, int limit) {
@@ -76,4 +77,31 @@ public class ReviewDAO {
             return sqlSession.selectList(NAMESPACE + ".findRecentReviewsByOwnerId", params);
         }
     }
+=======
+    
+    /**
+     * 특정 사업자의 음식점들에 대한 최근 리뷰를 가져옵니다.
+     * @param ownerId 사업자 ID
+     * @param limit 가져올 리뷰 개수
+     * @return Review 객체의 리스트
+     */
+	public List<Review> findRecentReviewsByOwnerId(int ownerId, int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findRecentReviewsByOwnerId", 
+				new java.util.HashMap<String, Object>() {{
+					put("ownerId", ownerId);
+					put("limit", limit);
+				}});
+		}
+	}
+	
+	/**
+	 * 고급 검색을 위한 리뷰 검색
+	 */
+	public List<Review> searchReviews(java.util.Map<String, Object> searchParams) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".searchReviews", searchParams);
+		}
+	}
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 }

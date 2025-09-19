@@ -1,6 +1,5 @@
 package model;
 
-import java.util.Date;
 
 /**
  * course-recommendation.jsp (사용자 화면)에서 사용할 코스 모델 클래스입니다.

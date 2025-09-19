@@ -1,0 +1,94 @@
+package controller;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import model.User;
+import service.ReservationService;
+import util.MyBatisSqlSessionFactory;
+import org.apache.ibatis.session.SqlSession;
+
+@WebServlet("/business/reservation/update-status")
+public class UpdateReservationStatusServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        SqlSession sqlSession = null;
+        try {
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+            
+            if (user == null || !"BUSINESS".equals(user.getUserType())) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }
+            
+            // 폼 데이터 받기
+            String reservationIdStr = request.getParameter("reservationId");
+            String status = request.getParameter("status");
+            
+            // 유효성 검사
+            if (reservationIdStr == null || reservationIdStr.trim().isEmpty() ||
+                status == null || status.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "필수 정보를 모두 입력해주세요.");
+                request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
+                return;
+            }
+            
+            try {
+                int reservationId = Integer.parseInt(reservationIdStr);
+                
+                // 유효한 상태인지 확인
+                if (!isValidStatus(status)) {
+                    request.setAttribute("errorMessage", "유효하지 않은 예약 상태입니다.");
+                    request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
+                    return;
+                }
+                
+                sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+                ReservationService reservationService = new ReservationService();
+                
+                // 예약 상태 변경
+                boolean success = reservationService.updateReservationStatus(reservationId, status, sqlSession);
+                
+                if (success) {
+                    sqlSession.commit();
+                    response.sendRedirect(request.getContextPath() + "/business/reservation-management?success=updated");
+                } else {
+                    sqlSession.rollback();
+                    request.setAttribute("errorMessage", "예약 상태 변경에 실패했습니다.");
+                    request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
+                }
+                
+            } catch (NumberFormatException e) {
+                request.setAttribute("errorMessage", "예약 ID는 숫자여야 합니다.");
+                request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (sqlSession != null) {
+                sqlSession.rollback();
+            }
+            request.setAttribute("errorMessage", "예약 상태 변경 중 오류가 발생했습니다.");
+            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+        } finally {
+            if (sqlSession != null) {
+                sqlSession.close();
+            }
+        }
+    }
+    
+    private boolean isValidStatus(String status) {
+        return "PENDING".equals(status) || 
+               "CONFIRMED".equals(status) || 
+               "CANCELLED".equals(status) || 
+               "COMPLETED".equals(status);
+    }
+}

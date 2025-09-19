@@ -6,7 +6,8 @@ import model.ReviewInfo; // ReviewInfo 모델을 import 합니다.
 import java.util.List;
 
 public class ReviewService {
-    private ReviewDAO reviewDAO = new ReviewDAO();
+	// IDE Cache Refresh - v2.0
+	private ReviewDAO reviewDAO = new ReviewDAO();
 
     // --- 여기에 추가될 새로운 메소드 ---
     /**
@@ -43,9 +44,29 @@ public class ReviewService {
     public boolean likeReview(int reviewId) {
         return reviewDAO.likeReview(reviewId) > 0;
     }
+<<<<<<< HEAD
 
     // 사업자별 최근 리뷰 조회
     public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
         return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
     }
+=======
+    
+    /**
+     * 특정 사업자의 음식점들에 대한 최근 리뷰를 가져옵니다.
+     * @param ownerId 사업자 ID
+     * @param limit 가져올 리뷰 개수
+     * @return Review 객체의 리스트
+     */
+	public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
+		return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
+	}
+	
+	/**
+	 * 고급 검색을 위한 리뷰 검색
+	 */
+	public List<Review> searchReviews(java.util.Map<String, Object> searchParams) {
+		return reviewDAO.searchReviews(searchParams);
+	}
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 }

@@ -40,4 +40,12 @@
 	<delete id="delete" parameterType="int">
 		DELETE FROM menus WHERE id = #{id}
 	</delete>
+	
+	<select id="findById" parameterType="int" resultMap="menuResultMap">
+		SELECT * FROM menus WHERE id = #{id}
+	</select>
+	
+	<select id="findPopularMenus" resultMap="menuResultMap">
+		SELECT * FROM menus WHERE is_popular = true ORDER BY name ASC
+	</select>
 </mapper>

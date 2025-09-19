@@ -36,6 +36,7 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                             <%-- (mt-2 삭제됨) --%>
                             <div class="dropdown-content hidden group-hover:block absolute z-50 top-full right-0 min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
+<<<<<<< HEAD
                                 <a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊 통계/분석</a>
                                 <a href="${pageContext.request.contextPath}/business/restaurants" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 내 음식점 관리</a>
                                 <a href="${pageContext.request.contextPath}/business/restaurants/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 새 음식점 등록</a>
@@ -44,6 +45,22 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">고급 기능</div>
                                 <a href="${pageContext.request.contextPath}/advanced-search" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔍 고급 검색</a>
                                 <a href="${pageContext.request.contextPath}/notifications" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔔 알림</a>
+=======
+                                <a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏠 대시보드</a>
+                                <a href="${pageContext.request.contextPath}/restaurant/my" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 내 음식점 관리</a>
+                                <a href="${pageContext.request.contextPath}/restaurant/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 음식점 등록</a>
+                                <a href="${pageContext.request.contextPath}/business/menu-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 메뉴 관리</a>
+                                <a href="${pageContext.request.contextPath}/business/reservation-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📅 예약 관리</a>
+                                <a href="${pageContext.request.contextPath}/business/review-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">💬 리뷰 관리</a>
+                                <div class="border-t border-slate-200 my-2"></div>
+                                <a href="${pageContext.request.contextPath}/search" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔍 고급 검색</a>
+                                <a href="${pageContext.request.contextPath}/notifications" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">
+                                    🔔 알림
+                                    <c:if test="${not empty unreadCount && unreadCount > 0}">
+                                        <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">${unreadCount}</span>
+                                    </c:if>
+                                </a>
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
                             </div>
                         </div>
                     </c:if>

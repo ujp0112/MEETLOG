@@ -83,8 +83,11 @@
 		<servlet-name>BranchMenuServlet</servlet-name>
 		<url-pattern>/branch/menus</url-pattern>
 		<url-pattern>/branch/menus/*</url-pattern>
+<<<<<<< HEAD
 		<url-pattern>/admin/menu-management</url-pattern>
 		<url-pattern>/admin/menu-management/*</url-pattern>
+=======
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 	</servlet-mapping>
 
 	<servlet>
@@ -268,15 +271,9 @@
 		<url-pattern>/index</url-pattern>
 	</servlet-mapping>
 
-	<!-- 맛집 관련 서블릿 -->
-	<servlet>
-		<servlet-name>RestaurantServlet</servlet-name>
-		<servlet-class>controller.RestaurantServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>RestaurantServlet</servlet-name>
-		<url-pattern>/restaurant/*</url-pattern>
-	</servlet-mapping>
+	<!-- 맛집 관련 서블릿 - @WebServlet 어노테이션으로 매핑됨 -->
+	
+	<!-- 음식점 관련 서블릿들 - @WebServlet 어노테이션으로 매핑됨 -->
 
 	<!-- 리뷰 관련 서블릿 -->
 	<servlet>
@@ -357,6 +354,10 @@
 	</servlet-mapping>
 
 	<!-- 비즈니스 관련 서블릿들 -->
+<<<<<<< HEAD
+=======
+	<!-- BusinessDashboardServlet - @WebServlet 어노테이션으로 매핑됨 -->
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 
 	<servlet>
 		<servlet-name>BusinessInfoEditServlet</servlet-name>
@@ -369,6 +370,7 @@
 		<url-pattern>/business/info-edit/*</url-pattern>
 	</servlet-mapping>
 
+<<<<<<< HEAD
 	<servlet>
 		<servlet-name>ReservationManagementServlet</servlet-name>
 		<servlet-class>controller.ReservationManagementServlet</servlet-class>
@@ -388,6 +390,10 @@
 		<url-pattern>/admin/review-management</url-pattern>
 		<url-pattern>/admin/review-management/*</url-pattern>
 	</servlet-mapping>
+=======
+	<!-- ReservationManagementServlet - @WebServlet 어노테이션으로 매핑됨 -->
+	<!-- ReviewManagementServlet - @WebServlet 어노테이션으로 매핑됨 -->
+>>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 
 	<!-- 기타 서블릿들 -->
 	<servlet>

@@ -4,116 +4,46 @@ import model.ReviewComment;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
-import java.util.Map;
 
-/**
- * 리뷰 댓글 시스템을 위한 DAO 클래스
- */
 public class ReviewCommentDAO {
     private static final String NAMESPACE = "dao.ReviewCommentDAO";
-
+    
     /**
-     * 댓글 생성
+     * 리뷰별 답글 목록 조회
      */
-    public int createComment(ReviewComment comment) {
+    public List<ReviewComment> findByReviewId(int reviewId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.insert(NAMESPACE + ".createComment", comment);
-            sqlSession.commit();
-            return result;
+            return sqlSession.selectList(NAMESPACE + ".findByReviewId", reviewId);
         }
     }
-
+    
     /**
-     * 댓글 수정
+     * 리뷰 답글 상세 조회
      */
-    public int updateComment(ReviewComment comment) {
+    public ReviewComment findById(int commentId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".updateComment", comment);
-            sqlSession.commit();
-            return result;
+            return sqlSession.selectOne(NAMESPACE + ".findById", commentId);
         }
     }
-
+    
     /**
-     * 댓글 삭제
+     * 리뷰 답글 추가 (트랜잭션 포함)
      */
-    public int deleteComment(int commentId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".deleteComment", commentId);
-            sqlSession.commit();
-            return result;
-        }
+    public int insert(ReviewComment comment, SqlSession sqlSession) {
+        return sqlSession.insert(NAMESPACE + ".insert", comment);
     }
-
+    
     /**
-     * 리뷰의 댓글 목록 조회 (계층 구조)
+     * 리뷰 답글 수정 (트랜잭션 포함)
      */
-    public List<ReviewComment> getCommentsByReviewId(int reviewId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".getCommentsByReviewId", reviewId);
-        }
+    public int update(ReviewComment comment, SqlSession sqlSession) {
+        return sqlSession.update(NAMESPACE + ".update", comment);
     }
-
+    
     /**
-     * 사용자의 댓글 목록 조회
+     * 리뷰 답글 삭제 (트랜잭션 포함)
      */
-    public List<ReviewComment> getCommentsByUserId(int userId, int limit, int offset) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
-            return sqlSession.selectList(NAMESPACE + ".getCommentsByUserId", params);
-        }
-    }
-
-    /**
-     * 댓글 상세 조회
-     */
-    public ReviewComment getCommentById(int commentId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectOne(NAMESPACE + ".getCommentById", commentId);
-        }
-    }
-
-    /**
-     * 댓글 좋아요
-     */
-    public int likeComment(int commentId, int userId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("commentId", commentId, "userId", userId);
-            int result = sqlSession.insert(NAMESPACE + ".likeComment", params);
-            sqlSession.commit();
-            return result;
-        }
-    }
-
-    /**
-     * 댓글 좋아요 취소
-     */
-    public int unlikeComment(int commentId, int userId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("commentId", commentId, "userId", userId);
-            int result = sqlSession.delete(NAMESPACE + ".unlikeComment", params);
-            sqlSession.commit();
-            return result;
-        }
-    }
-
-    /**
-     * 댓글 좋아요 여부 확인
-     */
-    public boolean isCommentLiked(int commentId, int userId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("commentId", commentId, "userId", userId);
-            Integer count = sqlSession.selectOne(NAMESPACE + ".isCommentLiked", params);
-            return count != null && count > 0;
-        }
-    }
-
-    /**
-     * 댓글 수 조회
-     */
-    public int getCommentCount(int reviewId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectOne(NAMESPACE + ".getCommentCount", reviewId);
-        }
+    public int delete(int commentId, SqlSession sqlSession) {
+        return sqlSession.delete(NAMESPACE + ".delete", commentId);
     }
 }
