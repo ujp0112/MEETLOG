@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mapper.BranchMapper">
-  <resultMap id="InventoryMap" type="dto.InventoryItem">
+  <resultMap id="InventoryMap" type="InventoryItem">
     <result property="materialId" column="material_id"/>
     <result property="name" column="name"/>
     <result property="unit" column="unit"/>
@@ -25,7 +25,7 @@
     LIMIT #{limit} OFFSET #{offset}
   </select>
 
-  <select id="getMenuIngredientsForBranch" parameterType="map" resultType="dto.MenuIngredient">
+  <select id="getMenuIngredientsForBranch" parameterType="map" resultType="MenuIngredient">
     SELECT mi.company_id, mi.menu_id, mi.material_id, mi.qty,
            m.name AS material_name, m.unit, m.unit_price
     FROM menu_ingredient mi
@@ -60,7 +60,7 @@
   ORDER BY me.name
 </select>
 
-  <insert id="upsertBranchMenuToggle" parameterType="dto.MenuToggle">
+  <insert id="upsertBranchMenuToggle" parameterType="MenuToggle">
     INSERT INTO branch_menu_toggle (company_id, branch_id, menu_id, enabled, updated_at)
     VALUES (#{companyId}, #{branchId}, #{menuId}, #{enabled}, NOW())
     ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), updated_at=NOW()

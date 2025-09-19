@@ -44,6 +44,18 @@
 		<typeAlias type="model.Collection" alias="RestaurantCollection" />
 		<typeAlias type="model.ReviewComment" alias="ReviewComment" />
 		<typeAlias type="model.Notification" alias="Notification" />
+		
+		<!-- DTO 클래스들 -->
+		<typeAlias type="dto.BranchMenu" alias="BranchMenu" />
+		<typeAlias type="dto.MenuIngredient" alias="MenuIngredient" />
+		<typeAlias type="dto.MenuToggle" alias="MenuToggle" />
+		<typeAlias type="dto.Branch" alias="Branch" />
+		<typeAlias type="dto.Company" alias="Company" />
+		<typeAlias type="dto.InventoryItem" alias="InventoryItem" />
+		<typeAlias type="dto.Material" alias="Material" />
+		<typeAlias type="dto.PurchaseOrder" alias="PurchaseOrder" />
+		<typeAlias type="dto.PurchaseOrderLine" alias="PurchaseOrderLine" />
+		<typeAlias type="dto.AppUser" alias="AppUser" />
 	</typeAliases>
 
 	<typeHandlers>

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mapper.OrderMapper">
-  <resultMap id="PurchaseOrderMap" type="dto.PurchaseOrder">
+  <resultMap id="PurchaseOrderMap" type="PurchaseOrder">
     <id property="id" column="id"/>
     <result property="companyId" column="company_id"/>
     <result property="branchId" column="branch_id"/>
@@ -12,7 +12,7 @@
     <result property="branchName" column="branch_name"/>
   </resultMap>
 
-  <resultMap id="PurchaseOrderLineMap" type="dto.PurchaseOrderLine">
+  <resultMap id="PurchaseOrderLineMap" type="PurchaseOrderLine">
     <result property="companyId" column="company_id"/>
     <result property="orderId" column="order_id"/>
     <result property="lineNo" column="line_no"/>
@@ -23,12 +23,12 @@
     <result property="unit" column="unit"/>
   </resultMap>
 
-  <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" parameterType="dto.PurchaseOrder">
+  <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" parameterType="PurchaseOrder">
     INSERT INTO purchase_order (company_id, branch_id, status, total_price, ordered_at)
     VALUES (#{companyId}, #{branchId}, #{status}, #{totalPrice}, NOW())
   </insert>
 
-  <insert id="insertOrderLine" parameterType="dto.PurchaseOrderLine">
+  <insert id="insertOrderLine" parameterType="PurchaseOrderLine">
     INSERT INTO purchase_order_line (company_id, order_id, line_no, material_id, qty, unit_price)
     VALUES (#{companyId}, #{orderId}, #{lineNo}, #{materialId}, #{qty}, #{unitPrice})
   </insert>
