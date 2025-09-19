@@ -43,4 +43,9 @@ public class ReviewService {
     public boolean likeReview(int reviewId) {
         return reviewDAO.likeReview(reviewId) > 0;
     }
+
+    // 사업자별 최근 리뷰 조회
+    public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
+        return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
+    }
 }

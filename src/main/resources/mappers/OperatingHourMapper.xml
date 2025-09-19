@@ -18,4 +18,9 @@
 		WHERE restaurant_id = #{restaurantId}
 		ORDER BY day_of_week, opening_time
 	</select>
+
+	<insert id="insert" parameterType="OperatingHour">
+		INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time, closing_time)
+		VALUES (#{restaurantId}, #{dayOfWeek}, #{openingTime}, #{closingTime})
+	</insert>
 </mapper>

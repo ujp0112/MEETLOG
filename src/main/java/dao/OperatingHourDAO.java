@@ -13,4 +13,10 @@ public class OperatingHourDAO {
 			return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", restaurantId);
 		}
 	}
+
+	public void insertBatch(SqlSession sqlSession, List<OperatingHour> hours) {
+		for (OperatingHour hour : hours) {
+			sqlSession.insert(NAMESPACE + ".insert", hour);
+		}
+	}
 }

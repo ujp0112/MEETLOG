@@ -8,7 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.Restaurant;
+
+// Restaurant 대신 가벼운 RestaurantSummaryDTO를 사용하도록 import 수정
+import model.RestaurantSummaryDTO; 
 import model.User;
 import service.RestaurantService;
 
@@ -34,13 +36,13 @@ public class MyRestaurantsServlet extends HttpServlet {
         }
 
         // ▼▼▼ 수정된 부분 ▼▼▼
-        // 1. 현재 로그인한 사용자의 가게 목록을 가져옵니다.
-        List<Restaurant> myRestaurants = restaurantService.getRestaurantsByOwnerId(user.getId());
+        // 1. 전체 Restaurant 정보 대신, 목록에 필요한 요약 정보(DTO)만 가져옵니다.
+        List<RestaurantSummaryDTO> myRestaurants = restaurantService.getRestaurantSummariesByOwnerId(user.getId());
         
         // 2. 가게 목록이 비어있더라도, JSP로 데이터를 전달합니다.
         request.setAttribute("myRestaurants", myRestaurants);
         
-        // 3. 항상 '내 가게 목록' 페이지로 포워딩합니다.
+        // 3. '내 가게 목록' 페이지로 포워딩합니다.
         request.getRequestDispatcher("/WEB-INF/views/my-restaurants.jsp").forward(request, response);
         // ▲▲▲ 수정 완료 ▲▲▲
     }

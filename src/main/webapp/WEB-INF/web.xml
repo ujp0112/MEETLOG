@@ -320,14 +320,6 @@
 	</servlet-mapping>
 
 	<!-- 비즈니스 관련 서블릿들 -->
-	<servlet>
-		<servlet-name>BusinessDashboardServlet</servlet-name>
-		<servlet-class>controller.BusinessDashboardServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>BusinessDashboardServlet</servlet-name>
-		<url-pattern>/business/dashboard</url-pattern>
-	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>BusinessInfoEditServlet</servlet-name>

@@ -1,6 +1,7 @@
 package dao;
 
 import model.Restaurant;
+import model.RestaurantSummaryDTO;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
@@ -50,5 +51,10 @@ public class RestaurantDAO {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".findByOwnerId", ownerId);
 		}
+	}
+
+	// SqlSession을 받는 insert 메서드 추가
+	public int insert(Restaurant restaurant, SqlSession sqlSession) {
+		return sqlSession.insert(NAMESPACE + ".insert", restaurant);
 	}
 }

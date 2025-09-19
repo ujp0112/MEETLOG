@@ -1,172 +1,79 @@
 package controller;
 
+import java.io.IOException;
+import java.util.List;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
-import model.User;
 
+import model.Restaurant;
+import model.Review;
+import model.User;
+import service.RestaurantService;
+import service.ReviewService;
+import service.ReservationService;
+
+@WebServlet("/business/dashboard")
 public class BusinessDashboardServlet extends HttpServlet {
-    
+    private static final long serialVersionUID = 1L;
+    private RestaurantService restaurantService = new RestaurantService();
+    private ReviewService reviewService = new ReviewService();
+    private ReservationService reservationService = new ReservationService();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        if (!"BUSINESS".equals(user.getUserType())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "접근 권한이 없습니다.");
+            return;
+        }
+
         try {
-            HttpSession session = request.getSession();
-            User user = (User) session.getAttribute("user");
+            // 사업자의 음식점 목록 가져오기
+            List<Restaurant> myRestaurants = restaurantService.getRestaurantsByOwnerId(user.getId());
             
-            if (user == null || !"BUSINESS".equals(user.getUserType())) {
-                response.sendRedirect(request.getContextPath() + "/login.jsp");
-                return;
+            // 통계 데이터 계산
+            int restaurantCount = myRestaurants.size();
+            int totalReviews = 0;
+            int totalReservations = 0;
+            double totalRating = 0.0;
+            
+            for (Restaurant restaurant : myRestaurants) {
+                totalReviews += restaurant.getReviewCount();
+                totalRating += restaurant.getRating() * restaurant.getReviewCount();
             }
             
-            // 비즈니스 사용자가 음식점과 연결되어 있는지 확인
-            if (user.getRestaurantId() == null) {
-                response.sendRedirect(request.getContextPath() + "/business/register");
-                return;
-            }
+            double averageRating = totalReviews > 0 ? totalRating / totalReviews : 0.0;
             
-            // 비즈니스 대시보드 데이터
-            BusinessDashboardData dashboardData = createBusinessDashboardData();
-            request.setAttribute("dashboardData", dashboardData);
+            // 최근 리뷰 가져오기 (최대 5개)
+            List<Review> recentReviews = reviewService.getRecentReviewsByOwnerId(user.getId(), 5);
             
+            // 데이터를 JSP로 전달
+            request.setAttribute("myRestaurants", myRestaurants);
+            request.setAttribute("restaurantCount", restaurantCount);
+            request.setAttribute("reviewCount", totalReviews);
+            request.setAttribute("averageRating", String.format("%.1f", averageRating));
+            request.setAttribute("reservationCount", totalReservations);
+            request.setAttribute("recentReviews", recentReviews);
+            
+            // 비즈니스 대시보드 페이지로 포워딩
             request.getRequestDispatcher("/WEB-INF/views/business-dashboard.jsp").forward(request, response);
+            
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "대시보드를 불러오는 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+            request.setAttribute("errorMessage", "대시보드 데이터를 불러오는 중 오류가 발생했습니다.");
+            request.getRequestDispatcher("/WEB-INF/views/business-dashboard.jsp").forward(request, response);
         }
-    }
-    
-    private BusinessDashboardData createBusinessDashboardData() {
-        BusinessDashboardData data = new BusinessDashboardData();
-        
-        // 비즈니스 통계 데이터
-        data.setRestaurantName("고미정");
-        data.setTotalReservations(45);
-        data.setTodayReservations(8);
-        data.setTotalReviews(25);
-        data.setAverageRating(4.5);
-        data.setMonthlyRevenue(2500000);
-        
-        // 최근 예약 목록
-        List<Reservation> recentReservations = new ArrayList<>();
-        
-        Reservation reservation1 = new Reservation();
-        reservation1.setId(1);
-        reservation1.setCustomerName("김고객");
-        reservation1.setReservationTime("2025-09-15 19:00");
-        reservation1.setPartySize(4);
-        reservation1.setStatus("CONFIRMED");
-        recentReservations.add(reservation1);
-        
-        Reservation reservation2 = new Reservation();
-        reservation2.setId(2);
-        reservation2.setCustomerName("이고객");
-        reservation2.setReservationTime("2025-09-15 20:30");
-        reservation2.setPartySize(2);
-        reservation2.setStatus("PENDING");
-        recentReservations.add(reservation2);
-        
-        data.setRecentReservations(recentReservations);
-        
-        // 최근 리뷰 목록
-        List<Review> recentReviews = new ArrayList<>();
-        
-        Review review1 = new Review();
-        review1.setId(1);
-        review1.setCustomerName("김고객");
-        review1.setRating(5);
-        review1.setContent("정말 맛있었어요! 서비스도 친절하고 분위기도 좋았습니다.");
-        review1.setCreatedAt("2025.09.18 20:30");
-        recentReviews.add(review1);
-        
-        Review review2 = new Review();
-        review2.setId(2);
-        review2.setCustomerName("이고객");
-        review2.setRating(4);
-        review2.setContent("가격 대비 훌륭한 맛이었습니다. 다음에 또 방문하고 싶어요.");
-        review2.setCreatedAt("2025.09.17 18:45");
-        recentReviews.add(review2);
-        
-        data.setRecentReviews(recentReviews);
-        
-        return data;
-    }
-    
-    // 비즈니스 대시보드 데이터 클래스
-    public static class BusinessDashboardData {
-        private String restaurantName;
-        private int totalReservations;
-        private int todayReservations;
-        private int totalReviews;
-        private double averageRating;
-        private int monthlyRevenue;
-        private List<Reservation> recentReservations;
-        private List<Review> recentReviews;
-        
-        // Getters and Setters
-        public String getRestaurantName() { return restaurantName; }
-        public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
-        public int getTotalReservations() { return totalReservations; }
-        public void setTotalReservations(int totalReservations) { this.totalReservations = totalReservations; }
-        public int getTodayReservations() { return todayReservations; }
-        public void setTodayReservations(int todayReservations) { this.todayReservations = todayReservations; }
-        public int getTotalReviews() { return totalReviews; }
-        public void setTotalReviews(int totalReviews) { this.totalReviews = totalReviews; }
-        public double getAverageRating() { return averageRating; }
-        public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
-        public int getMonthlyRevenue() { return monthlyRevenue; }
-        public void setMonthlyRevenue(int monthlyRevenue) { this.monthlyRevenue = monthlyRevenue; }
-        public List<Reservation> getRecentReservations() { return recentReservations; }
-        public void setRecentReservations(List<Reservation> recentReservations) { this.recentReservations = recentReservations; }
-        public List<Review> getRecentReviews() { return recentReviews; }
-        public void setRecentReviews(List<Review> recentReviews) { this.recentReviews = recentReviews; }
-    }
-    
-    // 예약 클래스
-    public static class Reservation {
-        private int id;
-        private String customerName;
-        private String reservationTime;
-        private int partySize;
-        private String status;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getCustomerName() { return customerName; }
-        public void setCustomerName(String customerName) { this.customerName = customerName; }
-        public String getReservationTime() { return reservationTime; }
-        public void setReservationTime(String reservationTime) { this.reservationTime = reservationTime; }
-        public int getPartySize() { return partySize; }
-        public void setPartySize(int partySize) { this.partySize = partySize; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-    }
-    
-    // 리뷰 클래스
-    public static class Review {
-        private int id;
-        private String customerName;
-        private int rating;
-        private String content;
-        private String createdAt;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getCustomerName() { return customerName; }
-        public void setCustomerName(String customerName) { this.customerName = customerName; }
-        public int getRating() { return rating; }
-        public void setRating(int rating) { this.rating = rating; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
-        public String getCreatedAt() { return createdAt; }
-        public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
     }
 }

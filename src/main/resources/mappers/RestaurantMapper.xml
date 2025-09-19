@@ -104,4 +104,12 @@
 		WHERE owner_id = #{ownerId} AND is_active = true
 		ORDER BY created_at DESC
 	</select>
+
+	<!-- 사업자별 레스토랑 요약 정보 조회 (경량 DTO) -->
+	<select id="findSummariesByOwnerId" parameterType="int" resultType="model.RestaurantSummaryDTO">
+		SELECT id, name, category, location, address, image
+		FROM restaurants 
+		WHERE owner_id = #{ownerId} AND is_active = true
+		ORDER BY created_at DESC
+	</select>
 </mapper>
