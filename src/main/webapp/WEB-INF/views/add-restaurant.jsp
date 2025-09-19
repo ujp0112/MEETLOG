@@ -197,7 +197,7 @@
         $(document).ready(function() {
             const kakaoApiKey = "002cda6a5f1ab9f97f163f26a0af6e66";
             if (kakaoApiKey) {
-                const scriptUrl = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoApiKey}&libraries=services&autoload=false`;
+                const scriptUrl = `//dapi.kakao.com/v2/maps/sdk.js?appkey=\${kakaoApiKey}&libraries=services&autoload=false`;
                 $.getScript(scriptUrl, function() {
                     kakao.maps.load(() => console.log("Kakao Maps API 로드 성공."));
                 });
@@ -209,8 +209,8 @@
                 const $slot = $select.closest('.time-slot');
                 const name = $select.attr('name').replace('_ampm', '').replace('_time', '');
                 
-                const ampm = $slot.find(`select[name='${name}_ampm']`).val();
-                const time = $slot.find(`select[name='${name}_time']`).val();
+                const ampm = $slot.find(`select[name='\${name}_ampm']`).val();
+                const time = $slot.find(`select[name='\${name}_time']`).val();
                 
                 // time이 undefined이거나 빈 문자열인 경우 처리
                 if (!time || time === '') {
@@ -223,7 +223,7 @@
                 if (ampm === 'am' && hour === 12) hour = 0;
                 
                 // [수정] JSP EL 충돌을 피하기 위해 \${...}로 이스케이프 처리
-                $slot.find(`input[name='${name}']`).val(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+                $slot.find(`input[name='\${name}']`).val(`\${String(hour).padStart(2, '0')}:\${String(minute).padStart(2, '0')}`);
             }
 
             $('#searchAddressBtn').on('click', function() {
@@ -263,7 +263,7 @@
                 
                 const newIndex = $slotsContainer.children().length + 1;
                 $newSlot.find('select, input').each(function() {
-                    this.name = this.name.replace(/_1$/, `_${newIndex}`);
+                    this.name = this.name.replace(/_1$/, `_\${newIndex}`);
                 });
                 $newSlot.find('button').text('삭제').removeClass('add-slot-btn text-blue-600').addClass('remove-slot-btn text-red-600');
                 
@@ -308,7 +308,7 @@
                                 const newIndex = index + 1;
 
                                 $newSlot.find('select, input').each(function() {
-                                    this.name = this.name.replace(/day_1/g, `day_${dayIndex}`).replace(/_1$/, `_${newIndex}`);
+                                    this.name = this.name.replace(/day_1/g, `day_\${dayIndex}`).replace(/_1$/, `_\${newIndex}`);
                                 });
 
                                 if (index > 0) {
@@ -346,7 +346,7 @@
                 const phone2 = $('#phone2').val();
                 const phone3 = $('#phone3').val();
                 if (phone1 && phone2 && phone3) {
-                    $('#phone').val(`${phone1}-${phone2}-${phone3}`);
+                    $('#phone').val(`\${phone1}-\${phone2}-\${phone3}`);
                 }
                 $(this).attr('action', '/MeetLog/business/restaurants/add');
                 $(this).attr('method', 'post');

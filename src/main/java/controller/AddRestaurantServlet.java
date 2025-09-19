@@ -110,6 +110,7 @@ public class AddRestaurantServlet extends HttpServlet {
             restaurant.setOwnerId(user.getId());
             if (savedFilePath != null) {
                 restaurant.setImage(savedFilePath);
+                restaurant.setImageUrl(savedFilePath);
             }
 
             // 음식점 저장

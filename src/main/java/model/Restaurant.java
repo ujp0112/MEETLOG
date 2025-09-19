@@ -16,6 +16,7 @@ public class Restaurant {
 	private String description;
 	private String image;
 	private String imagePath;
+	private String imageUrl;
 	private double rating;
 	private int reviewCount;
 	private int likes;
@@ -139,6 +140,14 @@ public class Restaurant {
 
 	public void setImagePath(String imagePath) {
 		this.imagePath = imagePath;
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
 
 	public double getRating() {

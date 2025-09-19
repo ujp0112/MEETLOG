@@ -12,7 +12,8 @@
         <result property="address" column="address" />
         <result property="phone" column="phone" />
         <result property="description" column="description" />
-        <result property="imageUrl" column="image_url" />
+        <result property="image" column="image" />
+        <result property="imageUrl" column="image" />
         <result property="isActive" column="is_active" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
@@ -75,7 +76,7 @@
     <insert id="insert" parameterType="Restaurant" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO restaurants (
             owner_id, name, category, location, address, phone, 
-            description, image_url, is_active, created_at, updated_at
+            description, image, is_active, created_at, updated_at
         ) VALUES (
             #{ownerId}, #{name}, #{category}, #{location}, #{address}, #{phone},
             #{description}, #{imageUrl}, #{isActive}, NOW(), NOW()
@@ -91,7 +92,7 @@
             address = #{address},
             phone = #{phone},
             description = #{description},
-            image_url = #{imageUrl},
+            image = #{imageUrl},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
