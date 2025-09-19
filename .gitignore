@@ -1,3 +1,7 @@
+/build/
+/.apt_generated/
+/.apt_generated_tests/
+/target/
 /.metadata/
 
 # API Key
