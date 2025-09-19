@@ -30,8 +30,8 @@
   </insert>
 
   <insert id="insertBranch" useGeneratedKeys="true" keyProperty="id" parameterType="dto.Branch">
-    INSERT INTO branch (company_id, name, code, active_yn)
-    VALUES (#{companyId}, #{name}, #{code}, #{activeYn})
+    INSERT INTO branch (company_id, name, active_yn)
+    VALUES (#{companyId}, #{name}, #{activeYn})
   </insert>
 
   <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="dto.AppUser">

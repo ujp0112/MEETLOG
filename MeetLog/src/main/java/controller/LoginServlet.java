@@ -1,20 +1,26 @@
 package controller;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import controller.AuthServlet.PasswordUtil;
+import dto.AppUser;
 import model.User;
+import service.AuthService;
 import service.UserService;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private UserService userService = new UserService();
-
+  //semi-erp.sql을 실행해주세요.
+    private AuthService authService = new AuthService();
     public LoginServlet() {
         super();
     }
@@ -31,7 +37,10 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
         String userType = request.getParameter("userType"); // "PERSONAL" 또는 "BUSINESS"
         String redirectUrl = request.getParameter("redirectUrl");
-
+        
+        //semi-erp.sql을 실행해주세요.
+        AppUser u = authService.findByEmail(email);
+        
         try {
             User user = this.userService.authenticateUser(email, password, userType);
 
@@ -46,7 +55,7 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("userId", user.getId());
                 session.setAttribute("userType", user.getUserType());
                 session.removeAttribute("redirectUrl");
-
+                
                 if (redirectUrl != null && !redirectUrl.trim().isEmpty()) {
                     response.sendRedirect(redirectUrl);
                 } else {
@@ -54,7 +63,9 @@ public class LoginServlet extends HttpServlet {
                     if ("ADMIN".equals(userRole)) {
                         response.sendRedirect(request.getContextPath() + "/admin");
                     } else if ("BUSINESS".equals(userRole)) {
-                        // 기업회원(BUSINESS)은 '내 가게 목록' 페이지로 이동
+                    	// authUser로 기업회원 상태 세션에 등록
+                    	session.setAttribute("authUser", u);
+                    	// 기업회원(BUSINESS)은 '내 가게 목록' 페이지로 이동
                         response.sendRedirect(request.getContextPath() + "/business/restaurants");
                     } else {
                         response.sendRedirect(request.getContextPath() + "/main");

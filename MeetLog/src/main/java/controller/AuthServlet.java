@@ -55,7 +55,6 @@ public class AuthServlet extends HttpServlet {
   private void registerBranch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
     String hqIdentifier = req.getParameter("hqIdentifier");
     String branchName = req.getParameter("branchName");
-    String branchCode = req.getParameter("branchCode");
     String email = req.getParameter("email");
     String password = req.getParameter("password");
 
@@ -65,7 +64,7 @@ public class AuthServlet extends HttpServlet {
       resp.sendRedirect(req.getContextPath() + "/register-branch.jsp"); return;
     }
     Branch b = new Branch();
-    b.setCompanyId(hq.getCompanyId()); b.setName(branchName); b.setCode(branchCode); b.setActiveYn("Y");
+    b.setCompanyId(hq.getCompanyId()); b.setName(branchName); b.setActiveYn("Y");
     long branchId = service.createBranch(b);
 
     AppUser u = new AppUser();

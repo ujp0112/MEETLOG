@@ -15,11 +15,10 @@ CREATE TABLE IF NOT EXISTS branch (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   company_id BIGINT NOT NULL,
   name VARCHAR(100) NOT NULL,
-  code VARCHAR(50) NOT NULL,
   active_yn CHAR(1) DEFAULT 'Y',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NULL,
-  UNIQUE KEY uq_branch_company_code (company_id, code),
+  UNIQUE KEY uq_branch_company_code (company_id),
   KEY idx_branch_company (company_id),
   CONSTRAINT fk_branch_company FOREIGN KEY (company_id) REFERENCES company(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

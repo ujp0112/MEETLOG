@@ -64,6 +64,16 @@
 		<url-pattern>/hq/sales-orders/*</url-pattern>
 		<url-pattern>/hq/sales-orders</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>HqBranchManagementServlet</servlet-name>
+		<servlet-class>controller.HqBranchManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>HqBranchManagementServlet</servlet-name>
+		<url-pattern>/hq/branch-management/*</url-pattern>
+		<url-pattern>/hq/branch-management</url-pattern>
+	</servlet-mapping>
 
 	<servlet>
 		<servlet-name>ImageViewServlet</servlet-name>
