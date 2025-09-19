@@ -14,7 +14,6 @@ public class AuthServlet extends HttpServlet {
     if (path == null) { resp.sendError(404); return; }
     try {
       switch (path) {
-        case "/login": genericLogin(req, resp); return;
         case "/hq/login": roleLogin(req, resp, "HQ"); return;
         case "/branch/login": roleLogin(req, resp, "BRANCH"); return;
         case "/hq/register": registerHq(req, resp); return;
@@ -24,11 +23,6 @@ public class AuthServlet extends HttpServlet {
     } catch (Exception e) {
       e.printStackTrace(); resp.sendError(500);
     }
-  }
-
-  private void genericLogin(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-    String role = req.getParameter("role"); if (role == null) role = "BRANCH";
-    roleLogin(req, resp, role.toUpperCase());
   }
 
   private void roleLogin(HttpServletRequest req, HttpServletResponse resp, String role) throws IOException {
