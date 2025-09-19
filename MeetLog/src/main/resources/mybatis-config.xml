@@ -20,8 +20,9 @@
 		<typeAlias alias="PurchaseOrderLine"
 			type="dto.PurchaseOrderLine" />
 		<typeAlias alias="MenuToggle" type="dto.MenuToggle" />
-		
+
 		<typeAlias type="model.User" alias="User" />
+		<typeAlias type="model.BusinessUser" alias="BusinessUser" />
 		<typeAlias type="model.Restaurant" alias="Restaurant" />
 		<typeAlias type="model.Review" alias="Review" />
 		<typeAlias type="model.Column" alias="Column" />
@@ -48,6 +49,7 @@
 		<typeAlias type="model.Coupon" alias="Coupon" />
 		<typeAlias type="model.News" alias="News" />
 		<typeAlias type="model.QnA" alias="QnA" />
+		<typeAlias type="model.OperatingHour" alias="OperatingHour" />
 		<typeAlias type="model.DetailedRatings"
 			alias="DetailedRatings" />
 		<typeAlias type="model.RatingDistribution"
@@ -80,6 +82,7 @@
 
 	<mappers>
 		<mapper resource="mappers/UserMapper.xml" />
+		<mapper resource="mappers/BusinessUserMapper.xml"/>
 		<mapper resource="mappers/RestaurantMapper.xml" />
 		<mapper resource="mappers/ReviewMapper.xml" />
 		<mapper resource="mappers/ColumnMapper.xml" />
@@ -102,9 +105,10 @@
 		<mapper resource="mappers/CouponMapper.xml" />
 		<mapper resource="mappers/NewsMapper.xml" />
 		<mapper resource="mappers/QnAMapper.xml" />
+		<mapper resource="mappers/OperatingHourMapper.xml" />
 		<mapper resource="mappers/RatingMapper.xml" />
 		<mapper resource="mappers/AuthMapper.xml" />
-		
+
 		<mapper resource="mappers/MaterialMapper.xml" />
 		<mapper resource="mappers/BranchMenuMapper.xml" />
 		<mapper resource="mappers/BranchMapper.xml" />

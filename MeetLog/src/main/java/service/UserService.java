@@ -1,14 +1,61 @@
 package service;
 
 import dao.UserDAO;
+import dao.BusinessUserDAO;
 import model.User;
+import model.BusinessUser;
 import util.PasswordUtil;
+import util.MyBatisSqlSessionFactory;
+import org.apache.ibatis.session.SqlSession;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class UserService {
     private UserDAO userDAO = new UserDAO();
+    private BusinessUserDAO businessUserDAO = new BusinessUserDAO();
+
+    /**
+     * 사업자 회원가입 (User 정보와 BusinessUser 정보를 하나의 트랜잭션으로 처리)
+     */
+    public boolean registerBusinessUser(User user, BusinessUser businessUser) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. users 테이블에 사용자 정보 삽입
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+            user.setUserType("BUSINESS");
+            userDAO.insert(user, sqlSession); // SqlSession을 전달하여 트랜잭션에 참여
+
+            // 2. 방금 생성된 user의 id를 businessUser 객체에 설정
+            businessUser.setUserId(user.getId());
+
+            // 3. business_users 테이블에 사업자 정보 삽입
+            businessUserDAO.insert(businessUser, sqlSession);
+
+            // 4. 모든 작업이 성공하면 최종적으로 commit
+            sqlSession.commit();
+            return true;
+        } catch (Exception e) {
+            // 중간에 하나라도 오류가 발생하면 모든 작업을 취소 (rollback)
+            e.printStackTrace();
+            sqlSession.rollback();
+            return false;
+        } finally {
+            // 작업이 끝나면 항상 SqlSession을 닫아줍니다.
+            sqlSession.close();
+        }
+    }
+    
+    /**
+     * 개인 회원가입
+     */
+    public boolean registerUser(User user) {
+        // 이 메소드는 단독 트랜잭션으로 동작합니다.
+        String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+        return userDAO.insert(user) > 0;
+    }
+
+    // --- 이하 다른 서비스 메소드들 (기존과 동일) ---
 
     public User authenticateUser(String email, String password, String userType) {
         User user = userDAO.findByEmail(email);
@@ -19,7 +66,6 @@ public class UserService {
         return null;
     }
 
-    // [추가] MypageServlet의 '프로필 수정'을 위한 메서드
     public boolean updateProfile(int userId, String nickname, String profileImage) {
         User user = userDAO.findById(userId);
         if (user == null) {
@@ -27,35 +73,21 @@ public class UserService {
         }
         user.setNickname(nickname);
         user.setProfileImage(profileImage);
-        // userDAO.update()는 UserMapper.xml의 <update id="update">를 호출
         return userDAO.update(user) > 0; 
     }
     
-    // [추가] MypageServlet의 '비밀번호 변경'을 위한 메서드
     public boolean changePassword(int userId, String currentPassword, String newPassword) {
         User user = userDAO.findById(userId);
         if (user == null) {
             return false;
         }
         
-        // 현재 비밀번호 확인
         if (!PasswordUtil.verifyPassword(currentPassword, user.getPassword())) {
-            return false; // 현재 비밀번호 불일치
+            return false;
         }
         
-        // 새 비밀번호 해시
         String newHashedPassword = PasswordUtil.hashPassword(newPassword);
-        
-        // userDAO.updatePassword()는 UserMapper.xml의 <update id="updatePassword">를 호출
         return userDAO.updatePassword(userId, newHashedPassword) > 0;
-    }
-
-    // --- 이하 기존 메서드들 ---
-
-    public boolean registerUser(User user) {
-        String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
-        user.setPassword(hashedPassword);
-        return userDAO.insert(user) > 0;
     }
 
     public boolean isEmailExists(String email) {
@@ -93,10 +125,7 @@ public class UserService {
             String tempPassword = PasswordUtil.generateTempPassword();
             String hashedPassword = PasswordUtil.hashPassword(tempPassword);
             
-            boolean updated = userDAO.updatePassword(user.getId(), hashedPassword) > 0;
-            
-            if (updated) {
-                // TODO: 이메일 발송 로직 구현
+            if (userDAO.updatePassword(user.getId(), hashedPassword) > 0) {
                 System.out.println("임시 비밀번호 발급 [" + email + ": " + tempPassword + "]");
                 return true;
             }

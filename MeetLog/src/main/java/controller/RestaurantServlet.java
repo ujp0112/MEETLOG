@@ -7,144 +7,132 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+// 필요한 모든 모델과 서비스를 import 합니다.
 import model.Restaurant;
 import model.Review;
 import model.Menu;
 import model.Coupon;
 import model.QnA;
+import model.OperatingHour;
 import service.RestaurantService;
 import service.ReviewService;
 import service.MenuService;
 import service.CouponService;
 import service.QnAService;
+import service.OperatingHourService;
 
-// [아키텍처 오류 수정] 기존 JDBC 서블릿을 삭제하고 Service 계층을 사용하는 컨트롤러로 변경합니다.
-// ColumnServlet처럼 와일드카드 매핑을 사용하도록 수정합니다.
-@WebServlet("/restaurant/*") 
+@WebServlet("/restaurant/*")
 public class RestaurantServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    
-    private RestaurantService restaurantService = new RestaurantService();
-    private ReviewService reviewService = new ReviewService();
-    private MenuService menuService = new MenuService();
-    private CouponService couponService = new CouponService();
-    private QnAService qnaService = new QnAService();
+	private static final long serialVersionUID = 1L;
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        String pathInfo = request.getPathInfo();
+	// 사용하는 모든 서비스 객체를 초기화합니다.
+	private RestaurantService restaurantService = new RestaurantService();
+	private ReviewService reviewService = new ReviewService();
+	private MenuService menuService = new MenuService();
+	private CouponService couponService = new CouponService();
+	private QnAService qnaService = new QnAService();
+	private OperatingHourService operatingHourService = new OperatingHourService(); // 새로 추가된 서비스
 
-        try {
-            if (pathInfo != null && pathInfo.startsWith("/detail/")) {
-                // 맛집 상세 페이지 요청 (예: /restaurant/detail/1)
-                handleRestaurantDetail(request, response, pathInfo);
-            } else if ("/detail".equals(pathInfo)) {
-                // 맛집 상세 페이지 요청 (예: /restaurant/detail?id=1)
-                handleRestaurantDetailById(request, response);
-            } else if ("/search".equals(pathInfo)) {
-                 // 맛집 검색 결과 요청
-                 handleRestaurantSearch(request, response);
-            } else {
-                // 기본 맛집 목록 페이지 요청 (예: /restaurant 또는 /restaurant/)
-                handleRestaurantList(request, response);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "맛집 페이지 처리 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
-        }
-    }
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String pathInfo = request.getPathInfo();
 
-    private void handleRestaurantDetail(HttpServletRequest request, HttpServletResponse response, String pathInfo) 
-            throws ServletException, IOException {
-        try {
-            int restaurantId = Integer.parseInt(pathInfo.substring("/detail/".length()));
-            
-            Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
-            
-            if (restaurant == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "맛집 정보를 찾을 수 없습니다.");
-                return;
-            }
+		try {
+			if (pathInfo != null && pathInfo.startsWith("/detail/")) {
+				handleRestaurantDetail(request, response, pathInfo);
+			} else if ("/detail".equals(pathInfo)) {
+				handleRestaurantDetailById(request, response);
+			} else if ("/search".equals(pathInfo)) {
+				handleRestaurantSearch(request, response);
+			} else {
+				handleRestaurantList(request, response);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			request.setAttribute("errorMessage", "맛집 페이지 처리 중 오류가 발생했습니다.");
+			request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+		}
+	}
 
-            // 상세 페이지에서 맛집 정보, 리뷰 목록, 메뉴 목록, 쿠폰, Q&A를 함께 표시
-            List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId);
-            List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
-            List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
-            List<QnA> qnas = qnaService.getQnAByRestaurantId(restaurantId);
+	/**
+	 * 중복 로직을 처리하기 위한 공통 메소드입니다. ID를 기반으로 맛집 상세 페이지에 필요한 모든 데이터를 조회하고 JSP로 전달합니다.
+	 */
+	private void fetchDetailDataAndForward(HttpServletRequest request, HttpServletResponse response, int restaurantId)
+			throws ServletException, IOException {
 
-            request.setAttribute("restaurant", restaurant);
-            request.setAttribute("reviews", reviews);
-            request.setAttribute("menus", menus);
-            request.setAttribute("coupons", coupons);
-            request.setAttribute("qnas", qnas);
-            
-            request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
+		Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+		if (restaurant == null) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "맛집 정보를 찾을 수 없습니다.");
+			return;
+		}
 
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 맛집 ID입니다.");
-        }
-    }
-    
-    private void handleRestaurantDetailById(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        try {
-            String idParam = request.getParameter("id");
-            if (idParam == null || idParam.trim().isEmpty()) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "맛집 ID가 필요합니다.");
-                return;
-            }
-            
-            int restaurantId = Integer.parseInt(idParam);
-            
-            Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
-            
-            if (restaurant == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "맛집 정보를 찾을 수 없습니다.");
-                return;
-            }
+		// 맛집 상세 페이지에 필요한 모든 정보를 각 서비스에서 가져옵니다.
+		List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId);
+		List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
+		List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
+		List<QnA> qnas = qnaService.getQnAByRestaurantId(restaurantId);
+		// [핵심] 해당 맛집의 모든 운영 시간 정보를 가져옵니다.
+		List<OperatingHour> operatingHours = operatingHourService.getOperatingHoursByRestaurantId(restaurantId);
 
-            // 상세 페이지에서 맛집 정보, 리뷰 목록, 메뉴 목록, 쿠폰, Q&A를 함께 표시
-            List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId);
-            List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
-            List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
-            List<QnA> qnas = qnaService.getQnAByRestaurantId(restaurantId);
+		// 조회된 모든 정보를 request 객체에 담습니다.
+		request.setAttribute("restaurant", restaurant);
+		request.setAttribute("reviews", reviews);
+		request.setAttribute("menus", menus);
+		request.setAttribute("coupons", coupons);
+		request.setAttribute("qnas", qnas);
+		// [핵심] 운영 시간 정보도 request에 담아 JSP로 전달합니다.
+		request.setAttribute("operatingHours", operatingHours);
 
-            request.setAttribute("restaurant", restaurant);
-            request.setAttribute("reviews", reviews);
-            request.setAttribute("menus", menus);
-            request.setAttribute("coupons", coupons);
-            request.setAttribute("qnas", qnas);
-            
-            request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
+		// 최종적으로 JSP 페이지로 포워딩합니다.
+		request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
+	}
 
-        } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 맛집 ID입니다.");
-        }
-    }
-    
-    private void handleRestaurantSearch(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        // 검색 파라미터 수집
-        String keyword = request.getParameter("keyword");
-        String category = request.getParameter("category");
-        String location = request.getParameter("location");
-        String priceRange = request.getParameter("priceRange");
-        String parking = request.getParameter("parking");
+	private void handleRestaurantDetail(HttpServletRequest request, HttpServletResponse response, String pathInfo)
+			throws ServletException, IOException {
+		try {
+			// URL 경로에서 ID를 추출합니다. (예: /restaurant/detail/71 -> 71)
+			int restaurantId = Integer.parseInt(pathInfo.substring("/detail/".length()));
+			fetchDetailDataAndForward(request, response, restaurantId);
+		} catch (NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 맛집 ID 형식입니다.");
+		}
+	}
 
-        // Service를 통해 검색
-        List<Restaurant> results = restaurantService.searchRestaurants(keyword, category, location, priceRange, parking);
+	private void handleRestaurantDetailById(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		try {
+			// URL 파라미터에서 ID를 추출합니다. (예: /restaurant/detail?id=71 -> 71)
+			String idParam = request.getParameter("id");
+			if (idParam == null || idParam.trim().isEmpty()) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "맛집 ID가 필요합니다.");
+				return;
+			}
+			int restaurantId = Integer.parseInt(idParam);
+			fetchDetailDataAndForward(request, response, restaurantId);
+		} catch (NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 맛집 ID 형식입니다.");
+		}
+	}
 
-        request.setAttribute("searchResults", results); // JSP에서 사용할 이름
-        request.getRequestDispatcher("/WEB-INF/views/search-results.jsp").forward(request, response);
-    }
+	private void handleRestaurantSearch(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String keyword = request.getParameter("keyword");
+		String category = request.getParameter("category");
+		String location = request.getParameter("location");
+		String priceRange = request.getParameter("priceRange");
+		String parking = request.getParameter("parking");
+		List<Restaurant> results = restaurantService.searchRestaurants(keyword, category, location, priceRange,
+				parking);
+		request.setAttribute("searchResults", results);
+		request.getRequestDispatcher("/WEB-INF/views/search-results.jsp").forward(request, response);
+	}
 
-    private void handleRestaurantList(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        // 기본 목록: Top 20 (혹은 페이징 로직이 적용된 전체 목록)
-        List<Restaurant> restaurants = restaurantService.getTopRestaurants(20); 
-        request.setAttribute("restaurants", restaurants);
-        request.getRequestDispatcher("/WEB-INF/views/restaurant-list.jsp").forward(request, response);
-    }
+	private void handleRestaurantList(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		List<Restaurant> restaurants = restaurantService.getTopRestaurants(20);
+		request.setAttribute("restaurants", restaurants);
+		request.getRequestDispatcher("/WEB-INF/views/restaurant-list.jsp").forward(request, response);
+	}
 }

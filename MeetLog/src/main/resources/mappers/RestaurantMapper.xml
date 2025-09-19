@@ -5,9 +5,9 @@
 
 <mapper namespace="dao.RestaurantDAO">
 
-	<resultMap id="restaurantResultMap" type="Restaurant"
-		autoMapping="true">
+	<resultMap id="restaurantResultMap" type="Restaurant" autoMapping="true">
 		<id property="id" column="id" />
+		<result property="ownerId" column="owner_id" />
 		<result property="jibunAddress" column="jibun_address" />
 		<result property="reviewCount" column="review_count" />
 		<result property="isActive" column="is_active" />
@@ -15,51 +15,28 @@
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
 
-	<select id="findTopRestaurants" parameterType="int"
-		resultMap="restaurantResultMap">
+	<select id="findByOwnerId" parameterType="int" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants 
+		WHERE owner_id = #{ownerId} AND is_active = true
+		ORDER BY created_at DESC
+	</select>
+	
+	<select id="findTopRestaurants" parameterType="int" resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
 		WHERE is_active = true
 		ORDER BY rating DESC, review_count DESC
 		LIMIT #{limit}
 	</select>
 
-	<select id="findById" parameterType="int"
-		resultMap="restaurantResultMap">
+	<select id="findById" parameterType="int" resultMap="restaurantResultMap">
 		SELECT * FROM restaurants WHERE id = #{id} AND is_active = true
 	</select>
 
-	<select id="searchRestaurants" parameterType="map"
-		resultMap="restaurantResultMap">
-		SELECT * FROM restaurants
-		<where>
-			is_active = true
-			<if test="keyword != null and keyword != ''">
-				AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE
-				CONCAT('%', #{keyword}, '%'))
-			</if>
-			<if
-				test="category != null and category != '' and category != '전체'">
-				AND category = #{category}
-			</if>
-			<if test="location != null and location != ''">
-				AND location = #{location}
-			</if>
-			<if test="priceRange != null and priceRange != ''">
-			</if>
-			<if test="parking != null and parking == 'true'">
-				AND parking = true
-			</if>
-		</where>
-		ORDER BY rating DESC
-	</select>
-
-	<insert id="insert" parameterType="Restaurant"
-		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO restaurants (name, category, location, address, jibun_address,
-		phone, hours, description, image, parking, created_at, updated_at)
-		VALUES (#{name}, #{category}, #{location}, #{address},
-		#{jibunAddress}, #{phone}, #{hours}, #{description}, #{image},
-		#{parking}, NOW(), NOW())
+	<insert id="insert" parameterType="Restaurant" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO restaurants 
+		    (owner_id, name, category, location, address, jibun_address, phone, hours, description, image, parking, created_at, updated_at)
+		VALUES 
+		    (#{ownerId}, #{name}, #{category}, #{location}, #{address}, #{jibunAddress}, #{phone}, #{hours}, #{description}, #{image}, #{parking}, NOW(), NOW())
 	</insert>
 
 	<update id="update" parameterType="Restaurant">
@@ -81,7 +58,6 @@
 	</update>
 
 	<update id="delete" parameterType="int">
-		UPDATE restaurants SET is_active = false, updated_at = NOW() WHERE id =
-		#{id}
+		UPDATE restaurants SET is_active = false, updated_at = NOW() WHERE id = #{id}
 	</update>
 </mapper>
