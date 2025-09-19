@@ -158,6 +158,12 @@
                 
                 const ampm = $slot.find(`select[name='${name}_ampm']`).val();
                 const time = $slot.find(`select[name='${name}_time']`).val();
+                
+                // time이 undefined이거나 빈 문자열인 경우 처리
+                if (!time || time === '') {
+                    return;
+                }
+                
                 let [hour, minute] = time.split(':').map(Number);
 
                 if (ampm === 'pm' && hour < 12) hour += 12;

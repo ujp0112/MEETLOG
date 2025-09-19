@@ -2,6 +2,47 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
+<style>
+/* 드롭다운 메뉴 개선 */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-content {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease-in-out;
+}
+
+.dropdown:hover .dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* 드롭다운 메뉴가 사라지는 것을 방지하기 위한 패딩 추가 */
+.dropdown-content::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background: transparent;
+}
+
+/* 드롭다운 메뉴 항목 호버 효과 개선 */
+.dropdown-content a {
+    transition: all 0.15s ease-in-out;
+}
+
+.dropdown-content a:hover {
+    background-color: #f8fafc;
+    transform: translateX(2px);
+}
+</style>
+
 <header id="global-header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-20">
     <div class="container mx-auto px-4 py-4 flex justify-between items-center">
         <a href="${pageContext.request.contextPath}/main">
@@ -34,9 +75,9 @@ hover:text-sky-600 transition font-medium px-4 py-2">추천코스</a>
 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">비즈니스 ▼</a>
                             
                             <%-- (mt-2 삭제됨) --%>
-                            <div class="dropdown-content hidden group-hover:block absolute z-50 top-full right-0 min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
+                            <div class="dropdown-content absolute z-50 top-full right-0 min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
-<<<<<<< HEAD
+
                                 <a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊 통계/분석</a>
                                 <a href="${pageContext.request.contextPath}/business/restaurants" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 내 음식점 관리</a>
                                 <a href="${pageContext.request.contextPath}/business/restaurants/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 새 음식점 등록</a>
@@ -45,7 +86,7 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">고급 기능</div>
                                 <a href="${pageContext.request.contextPath}/advanced-search" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔍 고급 검색</a>
                                 <a href="${pageContext.request.contextPath}/notifications" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔔 알림</a>
-=======
+
                                 <a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏠 대시보드</a>
                                 <a href="${pageContext.request.contextPath}/restaurant/my" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 내 음식점 관리</a>
                                 <a href="${pageContext.request.contextPath}/restaurant/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 음식점 등록</a>
@@ -60,7 +101,7 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                                         <span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">${unreadCount}</span>
                                     </c:if>
                                 </a>
->>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
+
                             </div>
                         </div>
                     </c:if>
@@ -74,7 +115,7 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">�
                         </button>
                         
                         <%-- (mt-2 삭제됨) --%>
-                        <div class="dropdown-content hidden group-hover:block absolute z-50 top-full right-0 min-w-[240px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
+                        <div class="dropdown-content absolute z-50 top-full right-0 min-w-[240px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
                             <div class="px-4 py-2 text-sm font-semibold text-slate-500">사용자 메뉴</div>
                             <a href="${pageContext.request.contextPath}/mypage" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">👤 내 프로필</a>
                             <a href="${pageContext.request.contextPath}/mypage/reviews" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✨ 내 리뷰 관리</a>

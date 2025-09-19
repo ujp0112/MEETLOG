@@ -80,8 +80,19 @@ public class MainServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/main.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "메인 페이지 로딩 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+            // 응답이 이미 커밋되었는지 확인
+            if (!response.isCommitted()) {
+                request.setAttribute("errorMessage", "메인 페이지 로딩 중 오류가 발생했습니다.");
+                try {
+                    request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
+                }
+            } else {
+                // 응답이 이미 커밋된 경우 에러 로그만 출력
+                System.err.println("응답이 이미 커밋되어 에러 페이지로 이동할 수 없습니다: " + e.getMessage());
+            }
         }
     }
 }

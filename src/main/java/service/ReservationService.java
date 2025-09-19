@@ -127,4 +127,30 @@ public class ReservationService {
     public List<Reservation> searchReservations(java.util.Map<String, Object> searchParams) {
         return reservationDAO.searchReservations(searchParams);
     }
+    
+    /**
+     * 예약 생성
+     */
+    public boolean createReservation(Reservation reservation) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = reservationDAO.insert(reservation, sqlSession);
+            if (result > 0) {
+                sqlSession.commit();
+                return true;
+            } else {
+                sqlSession.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 예약 취소
+     */
+    public boolean cancelReservation(int reservationId) {
+        return updateReservationStatus(reservationId, "CANCELLED");
+    }
 }

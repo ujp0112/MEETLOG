@@ -2,134 +2,139 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="restaurant">
+    <resultMap id="restaurantResultMap" type="Restaurant" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="ownerId" column="owner_id" />
+        <result property="name" column="name" />
+        <result property="category" column="category" />
+        <result property="location" column="location" />
+        <result property="address" column="address" />
+        <result property="phone" column="phone" />
+        <result property="description" column="description" />
+        <result property="imageUrl" column="image_url" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
 
-<mapper namespace="dao.RestaurantDAO">
+    <!-- 모든 음식점 조회 -->
+    <select id="findAll" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE is_active = true 
+        ORDER BY created_at DESC
+    </select>
 
-	<resultMap id="restaurantResultMap" type="Restaurant"
-		autoMapping="true">
-		<id property="id" column="id" />
-		<result property="jibunAddress" column="jibun_address" />
-		<result property="reviewCount" column="review_count" />
-		<result property="isActive" column="is_active" />
-		<result property="createdAt" column="created_at" />
-		<result property="updatedAt" column="updated_at" />
-		<result property="ownerId" column="owner_id" />
-	</resultMap>
+    <!-- ID로 음식점 조회 -->
+    <select id="findById" parameterType="int" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE id = #{id} AND is_active = true
+    </select>
 
-	<select id="findTopRestaurants" parameterType="int"
-		resultMap="restaurantResultMap">
-		SELECT * FROM restaurants
-		WHERE is_active = true
-		ORDER BY rating DESC, review_count DESC
-		LIMIT #{limit}
-	</select>
+    <!-- 카테고리로 음식점 조회 -->
+    <select id="findByCategory" parameterType="String" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE category = #{category} AND is_active = true 
+        ORDER BY created_at DESC
+    </select>
 
-	<select id="findById" parameterType="int"
-		resultMap="restaurantResultMap">
-		SELECT * FROM restaurants WHERE id = #{id} AND is_active = true
-	</select>
+    <!-- 위치로 음식점 조회 -->
+    <select id="findByLocation" parameterType="String" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE location = #{location} AND is_active = true 
+        ORDER BY created_at DESC
+    </select>
 
-	<select id="searchRestaurants" parameterType="map"
-		resultMap="restaurantResultMap">
-		SELECT * FROM restaurants
-		<where>
-			is_active = true
-			<if test="keyword != null and keyword != ''">
-				AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE
-				CONCAT('%', #{keyword}, '%'))
-			</if>
-			<if
-				test="category != null and category != '' and category != '전체'">
-				AND category = #{category}
-			</if>
-			<if test="location != null and location != ''">
-				AND location = #{location}
-			</if>
-			<if test="priceRange != null and priceRange != ''">
-			</if>
-			<if test="parking != null and parking == 'true'">
-				AND parking = true
-			</if>
-		</where>
-		ORDER BY rating DESC
-	</select>
+    <!-- 사업자별 레스토랑 조회 -->
+    <select id="findByOwnerId" parameterType="int" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE owner_id = #{ownerId} AND is_active = true
+        ORDER BY created_at DESC
+    </select>
 
-	<insert id="insert" parameterType="Restaurant"
-		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO restaurants (name, category, location, address, jibun_address,
-		phone, hours, description, image, parking, owner_id, created_at, updated_at)
-		VALUES (#{name}, #{category}, #{location}, #{address},
-		#{jibunAddress}, #{phone}, #{hours}, #{description}, #{image},
-		#{parking}, #{ownerId}, NOW(), NOW())
-	</insert>
+    <!-- 사업자별 레스토랑 요약 정보 조회 (경량 DTO) -->
+    <select id="findSummariesByOwnerId" parameterType="int" resultType="RestaurantSummaryDTO">
+        SELECT 
+            r.id,
+            r.name,
+            r.category,
+            r.location,
+            r.address,
+            r.phone,
+            r.image_url as imageUrl,
+            COALESCE(AVG(reviews.rating), 0) as rating,
+            COUNT(reviews.id) as reviewCount
+        FROM restaurants r
+        LEFT JOIN reviews ON r.id = reviews.restaurant_id
+        WHERE r.owner_id = #{ownerId} AND r.is_active = true
+        GROUP BY r.id, r.name, r.category, r.location, r.address, r.phone, r.image_url
+        ORDER BY r.created_at DESC
+    </select>
 
-	<update id="update" parameterType="Restaurant">
-		UPDATE restaurants
-		<set>
-			<if test="name != null">name = #{name},</if>
-			<if test="category != null">category = #{category},</if>
-			<if test="location != null">location = #{location},</if>
-			<if test="address != null">address = #{address},</if>
-			<if test="jibunAddress != null">jibun_address = #{jibunAddress},</if>
-			<if test="phone != null">phone = #{phone},</if>
-			<if test="hours != null">hours = #{hours},</if>
-			<if test="description != null">description = #{description},</if>
-			<if test="image != null">image = #{image},</if>
-			<if test="parking != null">parking = #{parking},</if>
-			<if test="ownerId != null">owner_id = #{ownerId},</if>
-			updated_at = NOW()
-		</set>
-		WHERE id = #{id}
-	</update>
+    <!-- 음식점 추가 -->
+    <insert id="insert" parameterType="Restaurant" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurants (
+            owner_id, name, category, location, address, phone, 
+            description, image_url, is_active, created_at, updated_at
+        ) VALUES (
+            #{ownerId}, #{name}, #{category}, #{location}, #{address}, #{phone},
+            #{description}, #{imageUrl}, #{isActive}, NOW(), NOW()
+        )
+    </insert>
 
-	<update id="delete" parameterType="int">
-		UPDATE restaurants SET is_active = false, updated_at = NOW() WHERE id =
-		#{id}
-	</update>
+    <!-- 음식점 수정 -->
+    <update id="update" parameterType="Restaurant">
+        UPDATE restaurants SET
+            name = #{name},
+            category = #{category},
+            location = #{location},
+            address = #{address},
+            phone = #{phone},
+            description = #{description},
+            image_url = #{imageUrl},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 
-	<!-- 사업자별 레스토랑 조회 쿼리 추가 -->
-	<select id="findByOwnerId" parameterType="int" resultMap="restaurantResultMap">
-		SELECT * FROM restaurants 
-		WHERE owner_id = #{ownerId} AND is_active = true
-		ORDER BY created_at DESC
-	</select>
-<<<<<<< HEAD
+    <!-- 음식점 삭제 (소프트 삭제) -->
+    <update id="delete" parameterType="int">
+        UPDATE restaurants SET
+            is_active = false,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 
-	<!-- 사업자별 레스토랑 요약 정보 조회 (경량 DTO) -->
-	<select id="findSummariesByOwnerId" parameterType="int" resultType="model.RestaurantSummaryDTO">
-		SELECT id, name, category, location, address, image
-		FROM restaurants 
-		WHERE owner_id = #{ownerId} AND is_active = true
-=======
-	
-	<select id="searchRestaurants" parameterType="map" resultMap="restaurantResultMap">
-		SELECT * FROM restaurants 
-		WHERE owner_id = #{userId} AND is_active = true
-		<if test="keyword != null and keyword != ''">
-			AND (name LIKE CONCAT('%', #{keyword}, '%') 
-				OR category LIKE CONCAT('%', #{keyword}, '%')
-				OR location LIKE CONCAT('%', #{keyword}, '%')
-				OR description LIKE CONCAT('%', #{keyword}, '%'))
-		</if>
-		<if test="category != null and category != ''">
-			AND category = #{category}
-		</if>
-		<if test="location != null and location != ''">
-			AND location LIKE CONCAT('%', #{location}, '%')
-		</if>
-		<if test="minRating != null and minRating != ''">
-			AND rating >= #{minRating}
-		</if>
-		<if test="maxRating != null and maxRating != ''">
-			AND rating <= #{maxRating}
-		</if>
-		<if test="startDate != null and startDate != ''">
-			AND created_at >= #{startDate}
-		</if>
-		<if test="endDate != null and endDate != ''">
-			AND created_at <= #{endDate}
-		</if>
->>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
-		ORDER BY created_at DESC
-	</select>
+    <!-- 고급 검색을 위한 음식점 검색 -->
+    <select id="searchRestaurants" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE is_active = true
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="location != null and location != ''">
+            AND location = #{location}
+        </if>
+        <if test="name != null and name != ''">
+            AND name LIKE CONCAT('%', #{name}, '%')
+        </if>
+        <if test="minRating != null">
+            AND id IN (
+                SELECT restaurant_id FROM reviews 
+                GROUP BY restaurant_id 
+                HAVING AVG(rating) >= #{minRating}
+            )
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 인기 음식점 조회 (리뷰 수 기준) -->
+    <select id="findTopRestaurants" parameterType="int" resultMap="restaurantResultMap">
+        SELECT r.*, COUNT(reviews.id) as review_count
+        FROM restaurants r
+        LEFT JOIN reviews ON r.id = reviews.restaurant_id AND reviews.is_active = true
+        WHERE r.is_active = true
+        GROUP BY r.id
+        ORDER BY review_count DESC, r.created_at DESC
+        LIMIT #{limit}
+    </select>
 </mapper>

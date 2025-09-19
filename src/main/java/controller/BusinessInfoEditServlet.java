@@ -24,7 +24,7 @@ public class BusinessInfoEditServlet extends HttpServlet {
             }
             
             // 비즈니스 사용자가 음식점과 연결되어 있는지 확인
-            if (user.getRestaurantId() == null) {
+            if (user.getRestaurantId() <= 0) {
                 response.sendRedirect(request.getContextPath() + "/business/register");
                 return;
             }

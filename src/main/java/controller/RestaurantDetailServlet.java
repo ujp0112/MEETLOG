@@ -11,29 +11,37 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import model.Menu;
+import model.OperatingHour;
 import model.Restaurant;
 import model.User;
 import service.MenuService;
+import service.OperatingHourService;
 import service.RestaurantService;
 
 public class RestaurantDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RestaurantService restaurantService = new RestaurantService();
     private MenuService menuService = new MenuService();
+    private OperatingHourService operatingHourService = new OperatingHourService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
         // URL에서 음식점 ID 추출
-        String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String path = requestURI.substring(contextPath.length());
+        
+        // /restaurant/detail/11 -> 11 추출
+        String[] pathParts = path.split("/");
+        if (pathParts.length < 4 || pathParts[3].isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
             return;
         }
         
         try {
-            int restaurantId = Integer.parseInt(pathInfo.substring(1));
+            int restaurantId = Integer.parseInt(pathParts[3]);
             
             // 음식점 정보 조회
             Restaurant restaurant = restaurantService.findById(restaurantId);
@@ -45,6 +53,9 @@ public class RestaurantDetailServlet extends HttpServlet {
             // 메뉴 목록 조회
             List<Menu> menus = menuService.findByRestaurantId(restaurantId);
             
+            // 운영시간 조회
+            List<OperatingHour> operatingHours = operatingHourService.findByRestaurantId(restaurantId);
+            
             // 세션에서 사용자 정보 확인 (소유자 여부 판단용)
             HttpSession session = request.getSession(false);
             boolean isOwner = false;
@@ -55,6 +66,7 @@ public class RestaurantDetailServlet extends HttpServlet {
             
             request.setAttribute("restaurant", restaurant);
             request.setAttribute("menus", menus);
+            request.setAttribute("operatingHours", operatingHours);
             request.setAttribute("isOwner", isOwner);
             
             request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);

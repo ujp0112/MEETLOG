@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,14 +25,19 @@ public class MenuManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         
         // URL에서 음식점 ID 추출
-        String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String path = requestURI.substring(contextPath.length());
+        
+        // /business/restaurants/11/menus -> 11 추출
+        String[] pathParts = path.split("/");
+        if (pathParts.length < 5 || pathParts[3].isEmpty()) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
             return;
         }
         
         try {
-            int restaurantId = Integer.parseInt(pathInfo.substring(1).replace("/menus", ""));
+            int restaurantId = Integer.parseInt(pathParts[3]);
             
             // 세션 확인
             HttpSession session = request.getSession(false);

@@ -15,4 +15,8 @@ public class OperatingHourService {
 	public void addOperatingHours(SqlSession sqlSession, List<OperatingHour> hours) {
 		operatingHourDAO.insertBatch(sqlSession, hours);
 	}
+
+	public List<OperatingHour> findByRestaurantId(int restaurantId) {
+		return operatingHourDAO.findByRestaurantId(restaurantId);
+	}
 }

@@ -2,71 +2,79 @@ package service;
 
 import dao.ReviewDAO;
 import model.Review;
-import model.ReviewInfo; // ReviewInfo 모델을 import 합니다.
+import model.ReviewInfo;
 import java.util.List;
 
 public class ReviewService {
-	// IDE Cache Refresh - v2.0
-	private ReviewDAO reviewDAO = new ReviewDAO();
-
-    // --- 여기에 추가될 새로운 메소드 ---
+    private ReviewDAO reviewDAO = new ReviewDAO();
+    
     /**
-     * 최신 리뷰 목록을 맛집 이름 정보와 함께 가져옵니다. (MainServlet용)
-     * @param limit 가져올 리뷰 개수
-     * @return ReviewInfo 객체의 리스트
+     * 모든 리뷰 조회
      */
-    public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
-        // DAO에 있는 새로운 메소드를 그대로 호출해줍니다.
-        return reviewDAO.getRecentReviewsWithInfo(limit);
+    public List<Review> findAll() {
+        return reviewDAO.findAll();
     }
     
-    // --- 기존 메소드들 (변경 없음) ---
-    public List<Review> getRecentReviews(int limit) {
-        return reviewDAO.findRecentReviews(limit);
+    /**
+     * ID로 리뷰 조회
+     */
+    public Review findById(int id) {
+        return reviewDAO.findById(id);
     }
-
+    
+    /**
+     * 음식점별 리뷰 조회
+     */
     public List<Review> getReviewsByRestaurantId(int restaurantId) {
         return reviewDAO.findByRestaurantId(restaurantId);
     }
-
+    
+    /**
+     * 사용자별 리뷰 조회
+     */
     public List<Review> getReviewsByUserId(int userId) {
         return reviewDAO.findByUserId(userId);
     }
-
+    
+    /**
+     * 리뷰 추가
+     */
     public boolean addReview(Review review) {
         return reviewDAO.insert(review) > 0;
     }
-
-    public boolean deleteReview(int reviewId) {
-        return reviewDAO.delete(reviewId) > 0;
+    
+    /**
+     * 리뷰 수정
+     */
+    public boolean updateReview(Review review) {
+        return reviewDAO.update(review) > 0;
     }
-
-    public boolean likeReview(int reviewId) {
-        return reviewDAO.likeReview(reviewId) > 0;
+    
+    /**
+     * 리뷰 삭제
+     */
+    public boolean deleteReview(int id) {
+        return reviewDAO.delete(id) > 0;
     }
-<<<<<<< HEAD
-
-    // 사업자별 최근 리뷰 조회
+    
+    /**
+     * 최근 리뷰 조회 (사업자용)
+     */
     public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
         return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
     }
-=======
     
     /**
-     * 특정 사업자의 음식점들에 대한 최근 리뷰를 가져옵니다.
-     * @param ownerId 사업자 ID
-     * @param limit 가져올 리뷰 개수
-     * @return Review 객체의 리스트
+     * 최근 리뷰 정보 조회 (ReviewInfo 타입)
      */
-	public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
-		return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
-	}
-	
-	/**
-	 * 고급 검색을 위한 리뷰 검색
-	 */
-	public List<Review> searchReviews(java.util.Map<String, Object> searchParams) {
-		return reviewDAO.searchReviews(searchParams);
-	}
->>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
+    public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
+        return reviewDAO.findRecentReviewsWithInfo(limit);
+    }
+    
+    /**
+     * 고급 검색을 위한 리뷰 검색
+     */
+    public List<Review> searchReviews(java.util.Map<String, Object> searchParams) {
+        return reviewDAO.findAll(); // 임시로 모든 리뷰 반환
+    }
 }

@@ -70,4 +70,11 @@ public class ReservationDAO {
             return sqlSession.selectList(NAMESPACE + ".searchReservations", searchParams);
         }
     }
+    
+    /**
+     * 예약 생성 (트랜잭션 포함)
+     */
+    public int insert(Reservation reservation, SqlSession sqlSession) {
+        return sqlSession.insert(NAMESPACE + ".insert", reservation);
+    }
 }

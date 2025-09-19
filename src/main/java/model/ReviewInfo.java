@@ -1,88 +1,118 @@
 package model;
 
-import java.sql.Timestamp; // 시간까지 표현하려면 Timestamp가 더 좋습니다.
+import java.time.LocalDateTime;
 
 public class ReviewInfo {
+    private int id;
+    private int restaurantId;
+    private int userId;
+    private double rating;
+    private String content;
+    private String imageUrl;
+    private int likes;
+    private LocalDateTime createdAt;
+    private String userName;
+    private String author;
+    private String authorImage;
+    private String restaurantName;
 
-	// --- 기존 Review 정보 ---
-	private int id;
-	private String content;
-	private int rating;
-	private String author;
-	private Timestamp createdAt; // java.sql.Timestamp 사용
+    // 기본 생성자
+    public ReviewInfo() {}
 
-	// --- JOIN으로 추가된 Restaurant 정보 ---
-	private int restaurantId;
-	private String restaurantName;
-	
-	public String authorImage;
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	// 기본 생성자
-	public ReviewInfo() {
-	}
+    public int getRestaurantId() {
+        return restaurantId;
+    }
 
-	// Getters and Setters (모든 필드에 대해 생성해주세요)
-	public String getAuthorImage() {
-		return authorImage;
-	}
-	
-	public void setAuthorImage(String authorImage) {
-		this.authorImage = authorImage;
-	}
-	public int getId() {
-		return id;
-	}
+    public void setRestaurantId(int restaurantId) {
+        this.restaurantId = restaurantId;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public int getUserId() {
+        return userId;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public double getRating() {
+        return rating;
+    }
 
-	public int getRating() {
-		return rating;
-	}
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
 
-	public void setRating(int rating) {
-		this.rating = rating;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public String getAuthor() {
-		return author;
-	}
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
-	public Timestamp getCreatedAt() {
-		return createdAt;
-	}
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
-	public void setCreatedAt(Timestamp createdAt) {
-		this.createdAt = createdAt;
-	}
+    public int getLikes() {
+        return likes;
+    }
 
-	public int getRestaurantId() {
-		return restaurantId;
-	}
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
 
-	public void setRestaurantId(int restaurantId) {
-		this.restaurantId = restaurantId;
-	}
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-	public String getRestaurantName() {
-		return restaurantName;
-	}
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public void setRestaurantName(String restaurantName) {
-		this.restaurantName = restaurantName;
-	}
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getAuthorImage() {
+        return authorImage;
+    }
+
+    public void setAuthorImage(String authorImage) {
+        this.authorImage = authorImage;
+    }
+
+    public String getRestaurantName() {
+        return restaurantName;
+    }
+
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
 }

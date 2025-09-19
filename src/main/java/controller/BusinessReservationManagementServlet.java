@@ -38,7 +38,7 @@ public class BusinessReservationManagementServlet extends HttpServlet {
             
             // 비즈니스 사용자의 음식점 목록 가져오기
             RestaurantService restaurantService = new RestaurantService();
-            List<Restaurant> myRestaurants = restaurantService.getRestaurantsByOwnerId(user.getId());
+            List<Restaurant> myRestaurants = restaurantService.findByOwnerId(user.getId());
             
             // 예약 서비스 초기화
             ReservationService reservationService = new ReservationService();
@@ -46,7 +46,8 @@ public class BusinessReservationManagementServlet extends HttpServlet {
             // 각 음식점의 예약 목록 가져오기
             for (Restaurant restaurant : myRestaurants) {
                 List<Reservation> reservations = reservationService.getReservationsByRestaurantId(restaurant.getId());
-                restaurant.setReservationList(reservations);
+                // Restaurant 모델에 setReservationList 메서드가 없다면 주석 처리
+                // restaurant.setReservationList(reservations);
             }
             
             // 예약 통계 계산
@@ -56,9 +57,10 @@ public class BusinessReservationManagementServlet extends HttpServlet {
             int cancelledReservations = 0;
             
             for (Restaurant restaurant : myRestaurants) {
-                if (restaurant.getReservationList() != null) {
-                    totalReservations += restaurant.getReservationList().size();
-                    for (Reservation reservation : restaurant.getReservationList()) {
+                List<Reservation> reservations = reservationService.getReservationsByRestaurantId(restaurant.getId());
+                if (reservations != null) {
+                    totalReservations += reservations.size();
+                    for (Reservation reservation : reservations) {
                         switch (reservation.getStatus()) {
                             case "PENDING":
                                 pendingReservations++;
@@ -91,66 +93,4 @@ public class BusinessReservationManagementServlet extends HttpServlet {
         }
     }
     
-    private List<Reservation> createSampleReservations() {
-        List<Reservation> reservations = new ArrayList<>();
-        
-        Reservation reservation1 = new Reservation();
-        reservation1.setId(1);
-        reservation1.setRestaurantName("고미정");
-        reservation1.setCustomerName("김고객");
-        reservation1.setCustomerPhone("010-1234-5678");
-        reservation1.setReservationDate("2025-09-20");
-        reservation1.setReservationTime("19:00");
-        reservation1.setPartySize(4);
-        reservation1.setStatus("PENDING");
-        reservation1.setSpecialRequests("창가 자리 부탁드립니다");
-        reservations.add(reservation1);
-        
-        Reservation reservation2 = new Reservation();
-        reservation2.setId(2);
-        reservation2.setRestaurantName("고미정");
-        reservation2.setCustomerName("이고객");
-        reservation2.setCustomerPhone("010-9876-5432");
-        reservation2.setReservationDate("2025-09-20");
-        reservation2.setReservationTime("20:30");
-        reservation2.setPartySize(2);
-        reservation2.setStatus("CONFIRMED");
-        reservation2.setSpecialRequests("");
-        reservations.add(reservation2);
-        
-        return reservations;
-    }
-    
-    // 예약 클래스
-    public static class Reservation {
-        private int id;
-        private String restaurantName;
-        private String customerName;
-        private String customerPhone;
-        private String reservationDate;
-        private String reservationTime;
-        private int partySize;
-        private String status;
-        private String specialRequests;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getRestaurantName() { return restaurantName; }
-        public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
-        public String getCustomerName() { return customerName; }
-        public void setCustomerName(String customerName) { this.customerName = customerName; }
-        public String getCustomerPhone() { return customerPhone; }
-        public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
-        public String getReservationDate() { return reservationDate; }
-        public void setReservationDate(String reservationDate) { this.reservationDate = reservationDate; }
-        public String getReservationTime() { return reservationTime; }
-        public void setReservationTime(String reservationTime) { this.reservationTime = reservationTime; }
-        public int getPartySize() { return partySize; }
-        public void setPartySize(int partySize) { this.partySize = partySize; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getSpecialRequests() { return specialRequests; }
-        public void setSpecialRequests(String specialRequests) { this.specialRequests = specialRequests; }
-    }
 }

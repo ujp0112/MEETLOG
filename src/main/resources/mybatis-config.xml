@@ -15,6 +15,7 @@
 		<typeAlias type="model.Column" alias="Column" />
 		<typeAlias type="model.Reservation" alias="Reservation" />
 		<typeAlias type="model.Menu" alias="Menu" />
+		<typeAlias type="model.ReviewInfo" alias="ReviewInfo" />
 
         <typeAlias type="model.Event" alias="Event" />
 
@@ -104,7 +105,6 @@
 		<mapper resource="mappers/OfficialCourseMapper.xml" />
     <mapper resource="mappers/OperatingHourMapper.xml" />
     <mapper resource="mappers/BusinessUserMapper.xml" />
-    <mapper resource="mappers/ReservationMapper.xml" />
     <mapper resource="mappers/ReviewCommentMapper.xml" />
 	</mappers>
 </configuration>

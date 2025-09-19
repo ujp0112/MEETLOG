@@ -1,14 +1,23 @@
 package service;
 
 import java.util.List;
-import model.Menu;
-import dao.MenuDAO;
-import util.MyBatisSqlSessionFactory;
+
 import org.apache.ibatis.session.SqlSession;
+
+import dao.MenuDAO;
+import model.Menu;
+import util.MyBatisSqlSessionFactory;
 
 public class MenuService {
     private MenuDAO menuDAO = new MenuDAO();
-    
+
+    /**
+     * 특정 음식점의 메뉴 목록 조회
+     */
+    public List<Menu> findByRestaurantId(int restaurantId) {
+        return menuDAO.findByRestaurantId(restaurantId);
+    }
+
     /**
      * 메뉴 추가 (트랜잭션 포함)
      */
@@ -98,49 +107,11 @@ public class MenuService {
             return false;
         }
     }
-    
-    /**
-     * 음식점별 메뉴 목록 조회
-     */
-    public List<Menu> getMenusByRestaurantId(int restaurantId) {
-        return menuDAO.findByRestaurantId(restaurantId);
-    }
-<<<<<<< HEAD
 
-    public List<Menu> findByRestaurantId(int restaurantId) {
-        return menuDAO.findByRestaurantId(restaurantId);
-    }
-
-    public Menu findById(int menuId) {
-        return menuDAO.findById(menuId);
-    }
-
-    public boolean addMenu(Menu menu) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
-        return menuDAO.insert(menu) > 0;
-    }
-
-    public boolean updateMenu(Menu menu) {
-        return menuDAO.update(menu) > 0;
-    }
-
-    public boolean deleteMenu(int menuId) {
-        return menuDAO.delete(menuId) > 0;
-    }
-=======
-    
     /**
      * 메뉴 상세 조회
      */
-    public Menu getMenuById(int menuId) {
+    public Menu findById(int menuId) {
         return menuDAO.findById(menuId);
     }
-    
-    /**
-     * 인기 메뉴 목록 조회
-     */
-    public List<Menu> getPopularMenus() {
-        return menuDAO.findPopularMenus();
-    }
->>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
 }

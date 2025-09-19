@@ -1,37 +1,362 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>${restaurant.name} - MEET LOG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEET LOG - <c:out value="${restaurant.name}" default="맛집 상세" /></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .card { background-color: white; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #8b5cf6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+        }
+        
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #7c3aed 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        }
+        
+        .rating-stars {
+            filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); 
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); 
+            }
+        }
+        
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent) 0%, #fbbf24 100%);
+            transition: width 1s ease-out;
+        }
+        
+        .image-hover {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .image-hover:hover {
+            transform: scale(1.05);
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .border-gradient {
+            border: 2px solid transparent;
+            background: linear-gradient(white, white) padding-box,
+                        linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
+        }
+        
+        .coupon-glow {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            animation: couponGlow 3s ease-in-out infinite;
+        }
+        
+        @keyframes couponGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); 
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(245, 158, 11, 0.5); 
+            }
+        }
+        
+        .review-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .menu-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .menu-item:hover {
+            transform: translateX(4px);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        .info-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .location-badge {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .rating-badge {
+            background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--gray-300) 50%, transparent 100%);
+            margin: 2rem 0;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .time-slot {
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            border: 2px solid transparent;
+        }
+        
+        .time-slot-available {
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+        }
+        
+        .time-slot-available:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .time-slot-closing {
+            cursor: pointer;
+            color: white;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: #f59e0b;
+        }
+        
+        .time-slot-closing:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+        
+        .time-slot-full {
+            cursor: not-allowed;
+            color: #94a3b8;
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+        
+        .floating-action-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            animation: float 3s ease-in-out infinite;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .floating-action-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+        }
+        
+        @media (max-width: 768px) {
+            .glass-card {
+                margin: 0.5rem;
+                border-radius: 1rem;
+                padding: 1.5rem;
+            }
+            
+            .floating-action-btn {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1.25rem;
+            }
+            
+            .text-4xl {
+                font-size: 2rem;
+            }
+            
+            .text-5xl {
+                font-size: 2.5rem;
+            }
+            
+            .grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .glass-card {
+                margin: 0.25rem;
+                padding: 1rem;
+            }
+            
+            .text-2xl {
+                font-size: 1.5rem;
+            }
+            
+            .text-3xl {
+                font-size: 1.75rem;
+            }
+        }
     </style>
 </head>
-<<<<<<< HEAD
-<body class="bg-gray-100">
-    <jsp:include page="/WEB-INF/views/common/header.jsp" />
-    
-    <div class="max-w-6xl mx-auto py-12 px-4">
-        <!-- 음식점 정보 -->
-        <div class="card mb-8">
-            <div class="flex flex-col md:flex-row gap-6">
-                <!-- 이미지 -->
-                <div class="md:w-1/3">
-                    <c:choose>
-                        <c:when test="${not empty restaurant.image}">
-                            <img src="${pageContext.request.contextPath}/${restaurant.image}" 
-                                 alt="${restaurant.name} 이미지" 
-                                 class="w-full h-64 object-cover rounded-lg">
-                        </c:when>
-                        <c:otherwise>
-                            <div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                                No Image
-=======
 <body class="bg-slate-100">
 
     <div id="app" class="min-h-screen flex flex-col">
@@ -126,9 +451,42 @@
                                         </div>
                                         <div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
                                             <div class="text-2xl">🕒</div>
-                                            <div>
+                                            <div class="flex-1">
                                                 <span class="font-bold text-slate-700">영업시간</span>
-                                                <p class="text-slate-600 mt-1">${not empty restaurant.hours ? restaurant.hours : "정보 없음"}</p>
+                                                <c:choose>
+                                                    <c:when test="${not empty operatingHours}">
+                                                        <div class="mt-2 space-y-1">
+                                                            <c:forEach var="hour" items="${operatingHours}">
+                                                                <div class="flex justify-between text-sm">
+                                                                    <span class="text-slate-600">
+                                                                        <c:choose>
+                                                                            <c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 4}">목요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 5}">금요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
+                                                                            <c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
+                                                                        </c:choose>
+                                                                    </span>
+                                                                    <span class="text-slate-600">
+                                                                        <c:choose>
+                                                                            <c:when test="${empty hour.openingTime}">
+                                                                                <span class="text-red-500">휴무</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                ${hour.openingTime} - ${hour.closingTime}
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </span>
+                                                                </div>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <p class="text-slate-600 mt-1">영업시간 정보 없음</p>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
                                         </div>
                                         <div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
@@ -147,21 +505,6 @@
                                         </div>
                                     </c:if>
                                 </section>
-
-                                <!-- 🕒 운영 시간 섹션 -->
-                                <c:if test="${not empty operatingHours}">
-                                    <section class="glass-card p-8 rounded-3xl slide-up">
-                                        <h3 class="text-2xl font-bold gradient-text mb-6">🕒 운영 시간</h3>
-                                        <div class="space-y-2">
-                                            <c:forEach var="hour" items="${operatingHours}">
-                                                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                                    <span class="font-semibold">${hour.dayOfWeek}</span>
-                                                    <span class="text-slate-600">${hour.openingTime} - ${hour.closingTime}</span>
-                                                </div>
-                                            </c:forEach>
-                                        </div>
-                                    </section>
-                                </c:if>
 
                                 <!-- 🍽️ 메뉴 섹션 -->
                                 <c:if test="${not empty restaurant.menuList}">
@@ -440,106 +783,87 @@
                                         </a>
                                     </div>
                                 </section>
->>>>>>> 0964c5034709fc22f4307bc36d412f3659e9c08d
                             </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-                
-                <!-- 정보 -->
-                <div class="md:w-2/3">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-4">${restaurant.name}</h1>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">카테고리</h3>
-                            <p class="text-gray-900">${restaurant.category}</p>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">위치</h3>
-                            <p class="text-gray-900">${restaurant.location}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">주소</h3>
-                            <p class="text-gray-900">${restaurant.address}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-500 mb-1">전화번호</h3>
-                            <p class="text-gray-900">${restaurant.phone}</p>
-                        </div>
-                    </div>
-                    
-                    <c:if test="${not empty restaurant.description}">
-                        <div class="mb-6">
-                            <h3 class="text-sm font-semibold text-gray-500 mb-2">소개</h3>
-                            <p class="text-gray-700">${restaurant.description}</p>
-                        </div>
-                    </c:if>
-                    
-                    <c:if test="${not empty restaurant.hours}">
-                        <div class="mb-6">
-                            <h3 class="text-sm font-semibold text-gray-500 mb-2">운영시간</h3>
-                            <p class="text-gray-700">${restaurant.hours}</p>
-                        </div>
-                    </c:if>
-                    
-                    <!-- 소유자용 관리 버튼 -->
-                    <c:if test="${isOwner}">
-                        <div class="flex space-x-3">
-                            <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus" 
-                               class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
-                                메뉴 관리
-                            </a>
-                            <a href="${pageContext.request.contextPath}/business/restaurants" 
-                               class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">
-                                내 음식점 목록
+                    </c:when>
+                    <c:otherwise>
+                        <div class="glass-card p-12 rounded-3xl text-center fade-in">
+                            <div class="text-8xl mb-6">😔</div>
+                            <h2 class="text-3xl font-bold gradient-text mb-4">맛집 정보를 찾을 수 없습니다</h2>
+                            <p class="text-slate-600 mb-8">요청하신 맛집 정보가 존재하지 않거나 삭제되었습니다.</p>
+                            <a href="${pageContext.request.contextPath}/main" 
+                               class="btn-primary text-white px-8 py-4 rounded-2xl font-semibold inline-block">
+                                🏠 메인 페이지로 돌아가기
                             </a>
                         </div>
-                    </c:if>
-                </div>
+                    </c:otherwise>
+                </c:choose>
             </div>
-        </div>
+        </main>
         
-        <!-- 메뉴 목록 -->
-        <div class="card">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">메뉴</h2>
-            
-            <c:if test="${empty menus}">
-                <div class="text-center py-12 text-gray-500">
-                    <div class="text-6xl mb-4">🍽️</div>
-                    <p class="text-xl">아직 등록된 메뉴가 없습니다.</p>
-                </div>
-            </c:if>
-            
-            <c:if test="${not empty menus}">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <c:forEach var="menu" items="${menus}">
-                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                            <c:if test="${not empty menu.image}">
-                                <img src="${pageContext.request.contextPath}/${menu.image}" 
-                                     alt="${menu.name} 이미지" 
-                                     class="w-full h-32 object-cover rounded-lg mb-3">
-                            </c:if>
-                            
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-lg font-semibold text-gray-900">${menu.name}</h3>
-                                <c:if test="${menu.popular}">
-                                    <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full">인기</span>
-                                </c:if>
-                            </div>
-                            
-                            <p class="text-lg font-bold text-blue-600 mb-2">${menu.price}</p>
-                            
-                            <c:if test="${not empty menu.description}">
-                                <p class="text-gray-600 text-sm">${menu.description}</p>
-                            </c:if>
-                        </div>
-                    </c:forEach>
-                </div>
-            </c:if>
-        </div>
+        <%-- Added missing footer include for consistency --%>
+        <jsp:include page="/WEB-INF/views/common/footer.jsp" />
+        
+        <!-- 플로팅 액션 버튼 -->
+        <c:if test="${not empty restaurant}">
+            <a href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}" 
+               class="floating-action-btn">
+                🎯 예약하기
+            </a>
+        </c:if>
     </div>
-    
-    <jsp:include page="/WEB-INF/views/common/footer.jsp" />
+
+    <script>
+        // 페이지 로드 시 애니메이션 효과
+        document.addEventListener('DOMContentLoaded', function() {
+            // 스크롤 애니메이션
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+            
+            // 모든 섹션에 애니메이션 적용
+            document.querySelectorAll('.glass-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                observer.observe(card);
+            });
+            
+            // 이미지 호버 효과
+            document.querySelectorAll('.image-hover').forEach(img => {
+                img.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                
+                img.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+            
+            // 카드 호버 효과
+            document.querySelectorAll('.card-hover').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                    this.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>

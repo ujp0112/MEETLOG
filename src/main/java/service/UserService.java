@@ -28,6 +28,10 @@ public class UserService {
         return userDAO.findByEmail(email) != null;
     }
     
+    public User findByEmail(String email) {
+        return userDAO.findByEmail(email);
+    }
+    
     public boolean isNicknameExists(String nickname) {
         return userDAO.findByNickname(nickname) != null;
     }

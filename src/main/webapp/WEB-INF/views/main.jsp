@@ -46,7 +46,7 @@ to {
 							<c:forEach var="r" items="${topRankedRestaurants}"
 								varStatus="status">
 								<a
-									href="${pageContext.request.contextPath}/restaurant/detail?id=${r.id}"
+									href="${pageContext.request.contextPath}/restaurant/detail/${r.id}"
 									class="flex-shrink-0 w-60 bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 group">
 									<div class="relative">
 										<img
@@ -235,7 +235,7 @@ to {
 									</div>
 									<p class="text-slate-700 h-16 overflow-hidden line-clamp-3">${review.content}</p>
 									<a
-										href="${pageContext.request.contextPath}/restaurant/detail?id=${review.restaurantId}"
+										href="${pageContext.request.contextPath}/restaurant/detail/${review.restaurantId}"
 										class="block mt-3 pt-3 border-t border-slate-100 text-sm font-semibold text-sky-600 hover:underline">
 										'${review.restaurantName}' 리뷰 더보기 </a>
 								</div>

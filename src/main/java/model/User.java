@@ -3,133 +3,171 @@ package model;
 import java.time.LocalDateTime;
 
 public class User {
-	private int id;
-	private String email;
-	private String nickname;
-	private String password;
-	private String userType; // PERSONAL, BUSINESS
-	private String profileImage;
-	private int level;
-	private int followerCount;
-	private int followingCount;
-	private Integer restaurantId; // BUSINESS 사용자의 경우 연결된 음식점 ID
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private boolean isActive;
+    private int id;
+    private String username;
+    private String password;
+    private String email;
+    private String phone;
+    private String userType; // USER, BUSINESS, ADMIN
+    private int level;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String name;
+    private String address;
 
-	public User() {
-	}
+    // 기본 생성자
+    public User() {}
 
-	public User(String email, String nickname, String password, String userType) {
-		this.email = email;
-		this.nickname = nickname;
-		this.password = password;
-		this.userType = userType;
-	}
+    // 생성자
+    public User(String username, String password, String email, String userType) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.userType = userType;
+    }
 
-	// --- Getters and Setters ---
-	// (이하 모든 Getter/Setter 코드는 기존과 동일)
-	public int getId() {
-		return id;
-	}
+    // Getters and Setters
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getUsername() {
+        return username;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-	public String getNickname() {
-		return nickname;
-	}
+    public String getPassword() {
+        return password;
+    }
 
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
-	}
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-	public String getPassword() {
-		return password;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public String getUserType() {
-		return userType;
-	}
+    public String getPhone() {
+        return phone;
+    }
 
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-	public String getProfileImage() {
-		return profileImage;
-	}
+    public String getUserType() {
+        return userType;
+    }
 
-	public void setProfileImage(String profileImage) {
-		this.profileImage = profileImage;
-	}
+    public void setUserType(String userType) {
+        this.userType = userType;
+    }
 
-	public int getLevel() {
-		return level;
-	}
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-	public void setLevel(int level) {
-		this.level = level;
-	}
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public int getFollowerCount() {
-		return followerCount;
-	}
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
-	public void setFollowerCount(int followerCount) {
-		this.followerCount = followerCount;
-	}
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
-	public int getFollowingCount() {
-		return followingCount;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setFollowingCount(int followingCount) {
-		this.followingCount = followingCount;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Integer getRestaurantId() {
-		return restaurantId;
-	}
+    public String getAddress() {
+        return address;
+    }
 
-	public void setRestaurantId(Integer restaurantId) {
-		this.restaurantId = restaurantId;
-	}
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    // 추가 필드들
+    private String nickname;
+    private String profileImage;
+    private int restaurantId;
+    private int followerCount;
+    private int followingCount;
+    private boolean isActive;
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public String getNickname() {
+        return nickname;
+    }
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
 
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+    public String getProfileImage() {
+        return profileImage;
+    }
 
-	public boolean isActive() {
-		return isActive;
-	}
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 
-	public void setActive(boolean active) {
-		isActive = active;
-	}
+    public int getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(int restaurantId) {
+        this.restaurantId = restaurantId;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
+    }
+
+    public int getFollowingCount() {
+        return followingCount;
+    }
+
+    public void setFollowingCount(int followingCount) {
+        this.followingCount = followingCount;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 }

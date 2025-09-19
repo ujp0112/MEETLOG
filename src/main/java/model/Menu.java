@@ -4,7 +4,7 @@ public class Menu {
 	private int id;
 	private int restaurantId;
 	private String name;
-	private double price;
+	private String price;
 	private String description;
 	private String image;
 	private boolean isPopular;
@@ -12,7 +12,7 @@ public class Menu {
 	public Menu() {
 	}
 
-	public Menu(int restaurantId, String name, double price) {
+	public Menu(int restaurantId, String name, String price) {
 		this.restaurantId = restaurantId;
 		this.name = name;
 		this.price = price;
@@ -43,11 +43,11 @@ public class Menu {
 		this.name = name;
 	}
 
-	public double getPrice() {
+	public String getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 

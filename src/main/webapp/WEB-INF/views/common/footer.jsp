@@ -1,3 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <footer class="bg-slate-900 text-white py-12 mt-16">
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -53,7 +54,7 @@
         
         <div class="border-t border-slate-700 mt-8 pt-8 text-center">
             <p class="text-slate-400">
-                © 2024 MEET LOG. All rights reserved. | 
+                © 2025 MEET LOG. All rights reserved. | 
                 <a href="${pageContext.request.contextPath}/privacy" class="hover:text-white transition">개인정보처리방침</a> | 
                 <a href="${pageContext.request.contextPath}/service" class="hover:text-white transition">이용약관</a>
             </p>
