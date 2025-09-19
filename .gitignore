@@ -6,3 +6,7 @@
 # Eclipse settings
 /.settings/
  main
+
+MeetLog/src/main/webapp/WEB-INF/api.properties
+
+MeetLog/src/main/resources/mybatis-config.xml

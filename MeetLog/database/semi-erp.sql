@@ -77,6 +77,9 @@ CREATE TABLE IF NOT EXISTS menu (
 ALTER TABLE menu
 DROP CONSTRAINT uq_menu_company_name;
 
+ALTER TABLE material
+DROP CONSTRAINT uq_material_company_name;
+
 CREATE TABLE IF NOT EXISTS menu_ingredient (
   company_id BIGINT NOT NULL,
   menu_id BIGINT NOT NULL,
