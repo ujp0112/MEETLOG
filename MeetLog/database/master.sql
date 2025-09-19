@@ -875,6 +875,9 @@ CREATE TABLE IF NOT EXISTS purchase_order_line (
   CONSTRAINT fk_pol_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE purchase_order_line
+ADD COLUMN STATUS ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED';
+
 -- View-like helper query for inventory page (LEFT JOIN to show 0 qty)
 -- Example SELECT:
 -- SELECT m.id, m.name, m.unit, m.unit_price,

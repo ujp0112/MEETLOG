@@ -72,6 +72,7 @@ hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">BR
                             <%-- (mt-2 삭제됨) --%>
                             <div class="dropdown-content hidden group-hover:block absolute z-50 top-full right-0 min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
                                 <div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
+                                <a href="${ctx }/business/restaurants" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙 음식점 관리</a>
                                 <a href="${ctx }/branch/menus" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊 메뉴관리</a>
                                 <a href="${ctx }/branch/order" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍽️ 발주</a>
                                 <a href="${ctx }/branch/orders-history" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🎟️ 발주기록</a>
