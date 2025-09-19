@@ -10,12 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
-        /* 탭 활성화 시 적용될 스타일 */
         .tab-active {
-            border-color: #0ea5e9; /* sky-500 */
-            color: #0f172a; /* slate-900 */
+            border-color: #0ea5e9;
+            color: #0f172a;
         }
-        /* 추가: 입력 필드 기본 스타일 */
         .form-input {
             display: block;
             width: 100%;
@@ -77,9 +75,7 @@
                 </div>
 
                 <div id="login-personal-content">
-                    <%-- [수정] form action 경로 수정 --%>
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-                        <%-- [추가] 돌아갈 URL을 hidden 필드로 추가 --%>
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
@@ -101,9 +97,7 @@
                 </div>
 
                 <div id="login-business-content" class="hidden">
-                    <%-- [수정] form action 경로 수정 --%>
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-                        <%-- [추가] 돌아갈 URL을 hidden 필드로 추가 --%>
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
@@ -141,7 +135,8 @@
                 </div>
 
                 <div class="text-center text-sm text-slate-500 mt-8">
-                    <p>아직 회원이 아니신가요? <a id="signup-link" href="${pageContext.request.contextPath}/register" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
+                    <p>아직 회원이 아니신가요?
+<a id="signup-link" href="${pageContext.request.contextPath}/register" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
                 </div>
             </div>
         </div>

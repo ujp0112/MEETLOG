@@ -19,6 +19,17 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE business_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE,          -- users 테이블의 id와 연결되는 외래키
+    business_name VARCHAR(200) NOT NULL,  -- 사업체명
+    owner_name VARCHAR(100) NOT NULL,     -- 대표자명
+    business_number VARCHAR(20) NOT NULL, -- 사업자등록번호
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- 맛집 테이블
 CREATE TABLE restaurants (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -41,6 +52,10 @@ CREATE TABLE restaurants (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+ALTER TABLE restaurants
+ADD COLUMN owner_id INT,
+ADD FOREIGN KEY (owner_id) REFERENCES users(id);
 
 -- 메뉴 테이블
 CREATE TABLE menus (
@@ -523,8 +538,9 @@ VALUES
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ===================================================================
--- 1. 기존 코스 관련 테이블 삭제 (있을 경우)
+-- 1. 기존 테이블 삭제 (있을 경우)
 -- ===================================================================
+-- (코스 관련)
 DROP TABLE IF EXISTS course_reviews;
 DROP TABLE IF EXISTS course_reservations;
 DROP TABLE IF EXISTS course_likes;
@@ -533,14 +549,23 @@ DROP TABLE IF EXISTS course_tags;
 DROP TABLE IF EXISTS tags;
 DROP TABLE IF EXISTS courses;
 
+-- (신규 추가 테이블)
+DROP TABLE IF EXISTS user_storage_items;
+DROP TABLE IF EXISTS user_storages;
+DROP TABLE IF EXISTS user_badges;
+DROP TABLE IF EXISTS badges;
+DROP TABLE IF EXISTS notices;
+DROP TABLE IF EXISTS feed_items;
+DROP TABLE IF EXISTS alerts;
+
 -- ===================================================================
 -- 2. 외래 키 제약 조건 다시 활성화
 -- ===================================================================
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ===================================================================
--- 3. 코스(Course) 관련 테이블 생성 (FK 포함)
--- (users 테이블이 존재한다고 가정)
+-- 3. 테이블 생성 (FK 포함)
+-- (users, restaurants 테이블이 존재한다고 가정)
 -- ===================================================================
 
 -- 3-1. 코스 테이블 (users 참조)
@@ -558,7 +583,6 @@ CREATE TABLE courses (
     preview_image VARCHAR(1000) COMMENT '목록용 썸네일 이미지',
     author_id INT NULL COMMENT '작성자 ID (users.id 참조)',
     
-    -- 외래 키(FK) 설정: users 테이블의 id 참조
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
@@ -568,19 +592,16 @@ CREATE TABLE tags (
     tag_name VARCHAR(50) NOT NULL UNIQUE COMMENT '태그 이름'
 ) COMMENT '코스 태그 목록';
 
--- 3-3. 코스-태그 연결 테이블 (courses, tags 참조)
+-- 3-3. 코스-태그 연결 (courses, tags 참조)
 CREATE TABLE course_tags (
     course_id INT NOT NULL COMMENT '코스 ID',
     tag_id INT NOT NULL COMMENT '태그 ID',
-    
     PRIMARY KEY (course_id, tag_id),
-    
-    -- 외래 키(FK) 설정
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
 ) COMMENT '코스와 태그 연결 테이블';
 
--- 3-4. 코스 상세 단계 테이블 (courses 참조)
+-- 3-4. 코스 상세 단계 (courses 참조)
 CREATE TABLE course_steps (
     step_id INT PRIMARY KEY AUTO_INCREMENT COMMENT '단계 고유 ID',
     course_id INT NOT NULL COMMENT '코스 ID',
@@ -590,24 +611,20 @@ CREATE TABLE course_steps (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     image VARCHAR(1000),
-    
     KEY idx_course_id (course_id),
-    
-    -- 외래 키(FK) 설정
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
 ) COMMENT '코스 상세 단계 목록';
 
--- 3-5. 코스 좋아요 테이블 (courses, users 참조)
+-- 3-5. 코스 좋아요 (courses, users 참조)
 CREATE TABLE course_likes (
     course_id INT NOT NULL,
     user_id INT NOT NULL,
-    
     PRIMARY KEY (course_id, user_id), 
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 3-6. 코스 예약 테이블 (courses, users 참조)
+-- 3-6. 코스 예약 (courses, users 참조)
 CREATE TABLE course_reservations (
     reservation_id INT AUTO_INCREMENT PRIMARY KEY,
     course_id INT NOT NULL,
@@ -621,12 +638,11 @@ CREATE TABLE course_reservations (
     total_price INT DEFAULT 0,
     status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- 3-7. 코스 리뷰 테이블 (courses, users 참조)
+-- 3-7. 코스 리뷰 (courses, users 참조)
 CREATE TABLE course_reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
     course_id INT NOT NULL,
@@ -635,31 +651,111 @@ CREATE TABLE course_reviews (
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     response_content TEXT,
-    
     FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 3-8. [신규] 사용자 저장소 (users 참조)
+CREATE TABLE user_storages (
+    storage_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    color_class VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 3-9. [신규] 사용자 저장소 아이템 (user_storages 참조)
+CREATE TABLE user_storage_items (
+    item_id INT AUTO_INCREMENT PRIMARY KEY,
+    storage_id INT NOT NULL,
+    item_type ENUM('RESTAURANT', 'COURSE') NOT NULL,
+    content_id INT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (storage_id) REFERENCES user_storages(storage_id) ON DELETE CASCADE,
+    UNIQUE KEY uk_storage_item (storage_id, item_type, content_id)
+);
+
+-- 3-10. [신규] 뱃지 (독립 테이블)
+CREATE TABLE badges (
+    badge_id INT AUTO_INCREMENT PRIMARY KEY,
+    icon VARCHAR(10),
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(255)
+);
+
+-- 3-11. [신규] 사용자 뱃지 (users, badges 참조)
+CREATE TABLE user_badges (
+    user_id INT NOT NULL,
+    badge_id INT NOT NULL,
+    earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, badge_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (badge_id) REFERENCES badges(badge_id) ON DELETE CASCADE
+);
+
+-- 3-12. [신규] 공지사항 (독립 테이블)
+CREATE TABLE notices (
+    notice_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT,
+    created_at DATE
+);
+
+-- 3-13. [신규] 팔로우 피드 (users 참조)
+CREATE TABLE feed_items (
+    feed_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL, -- The user who performed the action
+    feed_type ENUM('COLUMN', 'REVIEW') NOT NULL,
+    content_id INT NOT NULL, -- ID of the column or review
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 3-14. [신규] 알림 (users 참조)
+CREATE TABLE alerts (
+    alert_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL, -- The user who receives the alert
+    content VARCHAR(500) NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE restaurant_operating_hours (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    restaurant_id INT NOT NULL,
+    day_of_week INT NOT NULL, /* 1:월요일, 2:화요일, ..., 7:일요일 */
+    opening_time TIME NOT NULL, /* 예: '11:00:00' */
+    closing_time TIME NOT NULL, /* 예: '15:00:00' */
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
 );
 
 -- ===================================================================
 -- 4. 목 데이터(Mock Data) 삽입
 -- ===================================================================
 
+-- 4-1. 태그 (tags)
 INSERT INTO tags (tag_id, tag_name) VALUES
 (1, '데이트'),
 (2, '홍대'),
 (3, '성수'),
 (4, '양식'),
 (5, '카페'),
-(6, '커뮤니티추천');
+(6, '커뮤니티추천'),
+(7, '을지로'),
+(8, '직장인'),
+(9, '노포'),
+(10, '카페투어'),
+(11, '디저트');
 
-INSERT INTO courses (course_id, title, description, area, duration, price, type, preview_image, author_id) VALUES
+-- 4-2. 코스 (courses)
+INSERT INTO courses (course_id, title, description, area, duration, type, preview_image, author_id) VALUES
 (
     1, 
     '홍대 데이트 완벽 코스 (파스타+카페)', 
     '데이트장인이 추천하는 홍대 데이트 코스입니다. 이대로만 따라오시면 실패 없는 하루!', 
     '홍대/연남', 
     '약 3시간', 
-    0, 
     'COMMUNITY', 
     'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', 
     4 -- '데이트장인' (users.id = 4)
@@ -670,36 +766,187 @@ INSERT INTO courses (course_id, title, description, area, duration, price, type,
     'MEET LOG가 직접 큐레이션한 성수동 감성 맛집과 카페 코스입니다. 힙한 성수를 느껴보세요.', 
     '성수/건대', 
     '약 4시간', 
-    15000, 
     'OFFICIAL', 
     'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg', 
     NULL -- OFFICIAL 코스 (운영자)
+),
+(
+    3,
+    '을지로 직장인 힐링 코스',
+    '미스터노포가 추천하는 을지로 찐 맛집 코스. 칼퇴하고 바로 달려가세요.',
+    '을지로',
+    '약 2.5시간',
+    'COMMUNITY',
+    'https://mblogthumb-phinf.pstatic.net/MjAyMTAzMTdfNTUg/MDAxNjE1OTM3NTYyNDA4.q9XslyFjKUHI6QbbhHqbBqk19Ox3GNAQoT9hxbqOkAg.fRlvymC8y7o-4LgTKKPUHR4zymM4da2dnHPtRveiD8Mg.JPEG.ichufs/DSC_3894.jpg?type=w800',
+    2 -- '미스터노포' (users.id = 2)
+),
+(
+    4,
+    '성수동 카페거리 완전 정복',
+    '빵순이가 직접 다녀온 성수동 디저트 카페 베스트 3 코스입니다.',
+    '성수동',
+    '약 3시간',
+    'COMMUNITY',
+    'https://access.visitkorea.or.kr/bfvk_img/call?cmd=VIEW&id=e8b56b19-dafc-4e58-bbe1-967b027c820c',
+    3 -- '빵순이' (users.id = 3)
 );
 
+-- 4-3. 코스-태그 연결 (course_tags)
 INSERT INTO course_tags (course_id, tag_id) VALUES
 (1, 1), (1, 2), (1, 4), (1, 6),
-(2, 1), (2, 3), (2, 5);
+(2, 1), (2, 3), (2, 5),
+(3, 7), (3, 8), (3, 9), (3, 6),
+(4, 3), (4, 5), (4, 10), (4, 11), (4, 6);
 
+-- 4-4. 코스 상세 단계 (course_steps)
 INSERT INTO course_steps (course_id, step_order, step_type, emoji, name, description, image) VALUES
+-- 코스 1: 홍대
 (1, 1, 'RESTAURANT', '🍝', '파스타 팩토리 (ID: 2)', '분위기 좋은 곳에서 맛있는 파스타로 시작!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832'),
 (1, 2, 'ETC', '🚶', '연남동 산책', '소화시킬 겸 연트럴파크를 가볍게 산책하세요.', NULL),
 (1, 3, 'RESTAURANT', '☕', '연남동 감성 카페', '분위기 좋은 카페에서 디저트와 커피로 마무리.', 'https://placehold.co/600x400/fde68a/ffffff?text=Yeonnam+Cafe'),
+-- 코스 2: 성수
 (2, 1, 'RESTAURANT', '🍔', '브루클린 버거 (ID: 7)', '육즙 가득한 수제버거로 든든하게 시작!', 'https://placehold.co/600x400/fb923c/ffffff?text=버거'),
 (2, 2, 'ETC', '🛍️', '성수 소품샵 구경', '아기자기한 소품샵들을 구경하며 성수의 감성을 느껴보세요.', NULL),
-(2, 3, 'RESTAURANT', '🍰', '카페 클라우드 (ID: 5)', '뷰맛집 카페에서 시그니처 케이크와 커피 즐기기', 'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg');
+(2, 3, 'RESTAURANT', '🍰', '카페 클라우드 (ID: 5)', '뷰맛집 카페에서 시그니처 케이크와 커피 즐기기', 'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg'),
+-- 코스 3: 을지로
+(3, 1, 'RESTAURANT', '🍜', '평양면옥 (ID: 10)', '슴슴한 평양냉면으로 속을 달래며 1차 시작', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA3MDhfMTM4%2FMDAxNzUxOTM3MDgxMzg4.X3ArTpASVrp_B8rvyV-MoP42-WwO8bDzMz7Gt6TJfM4g.-5G-C_j45N7ColfwgCaYtqVMfDj-vzXOoWP5enQO5Iog.JPEG%2FrP2142571.jpg&type=sc960_832'),
+(3, 2, 'RESTAURANT', '🍺', '치맥 하우스 (ID: 4)', '바삭한 치킨과 시원한 수제맥주로 2차 마무리!', 'https://placehold.co/600x400/fbbf24/ffffff?text=치킨'),
+-- 코스 4: 성수 카페
+(4, 1, 'RESTAURANT', '☕', '카페 클라우드 (ID: 5)', '뷰맛집 카페에서 시그니처 케이크와 커피', 'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg'),
+(4, 2, 'RESTAURANT', '🍞', '성수동 대림창고', '공장을 개조한 갤러리형 카페에서 커피 한 잔', 'https://placehold.co/600x400/8d99ae/ffffff?text=대림창고');
 
+
+-- 4-5. 코스 좋아요 (course_likes)
 INSERT INTO course_likes (course_id, user_id) VALUES
-(1, 3), (1, 5),
-(2, 1), (2, 3), (2, 4);
+(1, 3), (1, 5), (1, 1), (1, 2),
+(2, 1), (2, 3), (2, 4),
+(3, 1), (3, 4), (3, 5),
+(4, 1), (4, 2), (4, 4), (4, 5);
 
+-- 4-6. 코스 예약 (course_reservations)
 INSERT INTO course_reservations (course_id, user_id, participant_name, phone, email, reservation_date, reservation_time, participant_count, total_price, status) VALUES
 (
     2, 3, '빵순이', '010-1234-5678', 'bbang@meetlog.com', '2025-09-20', '14:00', 2, 30000, 'CONFIRMED'
 );
 
+-- 4-7. 코스 리뷰 (course_reviews)
 INSERT INTO course_reviews (course_id, user_id, rating, content, response_content) VALUES
 (
     1, 3, 5, '이 코스 그대로 다녀왔는데 정말 좋았어요! 파스타 팩토리 진짜 맛있네요. 추천 감사합니다!', '좋게 봐주셔서 감사합니다! (작성자: 데이트장인)'
+),
+(
+    3, 5, 4, '미스터노포님 믿고 다녀왔습니다. 평양면옥은 역시 최고네요. 치맥하우스는 그냥 그랬어요.', '방문 감사합니다! (작성자: 미스터노포)'
 );
+
+-- 4-8. [신규] 뱃지 (badges)
+INSERT INTO badges (icon, name, description) VALUES
+('🏆', '첫 리뷰', '첫 리뷰를 작성하여 획득'),
+('✍️', '칼럼니스트 데뷔', '첫 칼럼을 발행하여 획득'),
+('📸', '포토그래퍼', '리뷰에 사진 10장 첨부하여 획득'),
+('👍', '첫 팔로워', '첫 팔로워가 생기면 획득');
+
+-- 4-9. [신규] 사용자 뱃지 (user_badges)
+-- (id: 4='데이트장인', id: 3='빵순이')
+INSERT INTO user_badges (user_id, badge_id) VALUES
+(4, 1), -- 데이트장인 - 첫 리뷰
+(4, 2), -- 데이트장인 - 칼럼니스트 데뷔
+(3, 1), -- 빵순이 - 첫 리뷰
+(3, 2), -- 빵순이 - 칼럼니스트 데뷔
+(3, 4); -- 빵순이 - 첫 팔로워
+
+-- 4-10. [신규] 공지사항 (notices)
+INSERT INTO notices (title, content, created_at) VALUES
+('개인정보처리방침 개정 안내', '개인정보처리방침이 개정되어 안내드립니다. ...', '2025-09-01'),
+('서버 점검 안내 (09/15 02:00 ~ 04:00)', '보다 나은 서비스 제공을 위해 서버 점검을 실시합니다. ...', '2025-09-08'),
+('나만의 코스 만들기 기능 업데이트 안내', '이제 나만의 맛집 코스를 만들고 친구들과 공유할 수 있습니다. 많은 이용 바랍니다.', '2025-09-10');
+
+-- 4-11. [신규] 팔로우 피드 (feed_items)
+-- (id: 3='빵순이', id: 2='미스터노포')
+-- (columnId: 1='우부래도 칼럼', reviewId: 4='평양면옥 리뷰')
+INSERT INTO feed_items (user_id, feed_type, content_id, created_at) VALUES
+(3, 'COLUMN', 1, '2025-09-16 19:00:00'),
+(2, 'REVIEW', 4, '2025-09-15 14:00:00');
+
+-- 4-12. [신규] 알림 (alerts)
+-- (id: 4='데이트장인')
+INSERT INTO alerts (user_id, content, is_read, created_at) VALUES
+(4, '<span class="font-bold">미스터노포</span>님이 회원님을 팔로우하기 시작했습니다.', FALSE, '2025-09-16 20:00:00'),
+(4, '<span class="font-bold">중데생</span>님이 회원님의 [홍대 최고의 파스타...] 칼럼에 댓글을 남겼습니다.', TRUE, '2025-09-16 18:00:00'),
+(4, '[공지] 개인정보처리방침 개정 안내', TRUE, '2025-09-14 09:00:00');
+
+-- 4-13. [신규] 사용자 저장소 (user_storages)
+-- (id: 4='데이트장인', id: 5='가산직장인', id: 2='미스터노포', id: 3='빵순이')
+INSERT INTO user_storages (user_id, name, color_class) VALUES
+(4, '강남역 데이트', 'text-red-500'),
+(4, '혼밥하기 좋은 곳', 'text-sky-500'),
+(5, '가산 맛집', 'text-amber-500'),
+(2, '여의도 점심', 'text-green-500'),
+(3, '저장한 코스', 'text-violet-500');
+
+-- 4-14. [신규] 사용자 저장소 아이템 (user_storage_items)
+-- (user_storages의 storage_id가 순서대로 1, 2, 3, 4, 5라고 가정)
+INSERT INTO user_storage_items (storage_id, item_type, content_id) VALUES
+(1, 'RESTAURANT', 1), -- 강남역 데이트 -> 고미정
+(1, 'RESTAURANT', 7), -- 강남역 데이트 -> 브루클린 버거
+(2, 'RESTAURANT', 10), -- 혼밥하기 -> 평양면옥
+(3, 'RESTAURANT', 12), -- 가산 맛집 -> 가산생고기
+(3, 'RESTAURANT', 13), -- 가산 맛집 -> 직장인 국밥
+(3, 'RESTAURANT', 22), -- 가산 맛집 -> 월화 G밸리점
+(4, 'RESTAURANT', 3), -- 여의도 점심 -> 스시 마에
+(5, 'COURSE', 1); -- 저장한 코스 -> 홍대 데이트 코스
+
+INSERT INTO EVENTS (TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE)
+VALUES
+(
+    '이번 주 최고의 리뷰 선정',
+    '정성스러운 맛집 리뷰를 작성하고 10,000 포인트를 받으세요!',
+    '매주 3명을 선정하여 10,000 포인트를 드립니다. 사진 3장 이상, 200자 이상의 리뷰가 대상입니다. 당첨자는 매주 월요일 공지됩니다.',
+    'https://example.com/images/events/best_review_contest.jpg',
+    '2025-09-15',
+    '2025-09-21'
+),
+(
+    '신규 오픈 \'강남 이탈리안 키친\' 방문 챌린지',
+    '\'강남 이탈리안 키친\' 방문 리뷰 작성 시, 참여자 전원 3,000 포인트 증정!',
+    '강남역 10번 출구에 새로 오픈한 \'이탈리안 키친\'에 방문하고 #강남이탈리안키친 태그와 함께 인증샷, 리뷰를 남겨주세요. (1인 1회 한정)',
+    'https://example.com/images/restaurants/gangnam_italian_promo.png',
+    '2025-09-10',
+    '2025-10-10'
+),
+(
+    '\'나만의 가을 맛집\' 추천 이벤트',
+    '가을 분위기 물씬 나는 나만 아는 맛집을 공유해주세요. 5분께 백화점 상품권 증정!',
+    '#가을맛집 태그를 달아 커뮤니티에 글을 작성해주세요. 추첨을 통해 5분께 백화점 상품권 5만원권을 드립니다.',
+    '/static/images/events/autumn_food_challenge.gif',
+    '2025-09-16',
+    '2025-09-30'
+),
+(
+    '맛zip 커뮤니티 10만 회원 달성!',
+    '감사하는 마음으로 이벤트 기간 동안 로그인하는 모든 회원님께 1,000 포인트를 드립니다.',
+    NULL,
+    'https://example.com/images/events/100k_members_party.jpg',
+    '2025-10-01',
+    '2025-10-07'
+),
+(
+    '첫 리뷰 작성 100% 선물',
+    '가입 후 첫 맛집 리뷰를 작성하시면 스타벅스 기프티콘 증정!',
+    '정성스러운 첫 리뷰를 작성해주시는 모든 신규 회원님께 감사의 의미로 스타벅스 아메리카노 기프티콘을 드립니다. (본 이벤트는 별도 공지 시까지 계속됩니다)',
+    NULL,
+    '2025-01-01',
+    NULL
+);
+
+-- ID가 1인 '고미정'의 운영 시간을 월요일(1)부터 일요일(7)까지 매일 추가합니다.
+INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time, closing_time) VALUES
+(1, 1, '11:30:00', '22:00:00'), /* 월요일 */
+(1, 2, '11:30:00', '22:00:00'), /* 화요일 */
+(1, 3, '11:30:00', '22:00:00'), /* 수요일 */
+(1, 4, '11:30:00', '22:00:00'), /* 목요일 */
+(1, 5, '11:30:00', '22:00:00'), /* 금요일 */
+(1, 6, '11:30:00', '22:00:00'), /* 토요일 */
+(1, 7, '11:30:00', '22:00:00'restaurant_operating_hours); /* 일요일 */
+
 
 

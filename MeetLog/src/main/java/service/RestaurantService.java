@@ -27,6 +27,10 @@ public class RestaurantService {
 		// 다른 파라미터는 null로 전달하여 MyBatis가 동적 쿼리로 처리하도록 함
 		return restaurantDAO.searchRestaurants(params);
 	}
+	
+	public List<Restaurant> getRestaurantsByOwnerId(int ownerId) {
+		return restaurantDAO.findByOwnerId(ownerId);
+	}
 
 	/**
 	 * 상세 검색 (모든 파라미터 사용)
