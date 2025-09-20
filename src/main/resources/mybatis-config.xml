@@ -44,6 +44,7 @@
 		<typeAlias type="model.FeedItem" alias="FeedItem" />
 		<typeAlias type="model.Collection" alias="RestaurantCollection" />
 		<typeAlias type="model.ReviewComment" alias="ReviewComment" />
+		<typeAlias type="model.ReviewStatistics" alias="ReviewStatistics" />
 		<typeAlias type="model.Notification" alias="Notification" />
     <typeAlias type="model.OperatingHour" alias="OperatingHour" />
     <typeAlias type="model.BusinessUser" alias="BusinessUser" />
@@ -104,6 +105,7 @@
     <mapper resource="mappers/OperatingHourMapper.xml" />
     <mapper resource="mappers/BusinessUserMapper.xml" />
     <mapper resource="mappers/ReviewCommentMapper.xml" />
+    <mapper resource="mappers/ReviewStatisticsMapper.xml" />
     <mapper resource="mappers/NotificationMapper.xml" />
 	</mappers>
 </configuration>

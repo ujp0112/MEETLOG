@@ -28,6 +28,9 @@ public class Review {
 	private String visitDate; // 방문 날짜
 	private int partySize; // 인원수
 	private String visitPurpose; // 방문 목적 ("데이트", "비즈니스", "가족모임", "친구모임", "혼밥")
+	
+	// 답글 목록
+	private List<ReviewComment> comments;
 
 	public Review() {
 		// Default constructor
@@ -209,5 +212,13 @@ public class Review {
 
 	public void setVisitPurpose(String visitPurpose) {
 		this.visitPurpose = visitPurpose;
+	}
+	
+	public List<ReviewComment> getComments() {
+		return comments;
+	}
+	
+	public void setComments(List<ReviewComment> comments) {
+		this.comments = comments;
 	}
 }

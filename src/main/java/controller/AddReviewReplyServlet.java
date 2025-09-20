@@ -49,6 +49,7 @@ public class AddReviewReplyServlet extends HttpServlet {
                 ReviewComment reply = new ReviewComment();
                 reply.setReviewId(reviewId);
                 reply.setUserId(user.getId());
+                reply.setAuthor(user.getNickname() != null ? user.getNickname() : user.getName());
                 reply.setContent(content.trim());
                 reply.setIsOwnerReply(true); // 사업자 답글 표시
                 
