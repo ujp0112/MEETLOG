@@ -74,4 +74,17 @@ public class QnAService {
             return false;
         }
     }
+    
+    /**
+     * 사업자별 Q&A 조회
+     */
+    public List<QnA> findByBusinessUserId(int businessUserId) {
+        try {
+            return qnaDAO.findByBusinessUserId(businessUserId);
+        } catch (Exception e) {
+            System.err.println("사업자별 Q&A 조회 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

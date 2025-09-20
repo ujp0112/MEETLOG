@@ -3,6 +3,19 @@
 
 <mapper namespace="QnAMapper">
     
+    <!-- QnA ResultMap -->
+    <resultMap id="qnaResultMap" type="QnA">
+        <id property="id" column="id"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="isOwner" column="is_owner"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="userName" column="userName"/>
+        <result property="userEmail" column="userEmail"/>
+    </resultMap>
+    
     <!-- 맛집별 Q&A 조회 -->
     <select id="findByRestaurantId" parameterType="int" resultType="QnA">
         SELECT 
@@ -70,5 +83,16 @@
             is_active = false
         WHERE id = #{qnaId}
     </update>
+    
+    <!-- 사업자별 Q&A 조회 -->
+    <select id="findByBusinessUserId" parameterType="int" resultMap="qnaResultMap">
+        SELECT q.*, u.nickname as userName, u.email as userEmail
+        FROM restaurant_qna q
+        LEFT JOIN users u ON q.user_id = u.id
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE r.owner_id = #{businessUserId}
+        AND q.is_active = true
+        ORDER BY q.created_at DESC
+    </select>
     
 </mapper>

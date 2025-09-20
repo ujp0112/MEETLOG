@@ -480,4 +480,24 @@
 		<url-pattern>/img/*</url-pattern>
 	</servlet-mapping>
 
+	<!-- 비즈니스 통계 서블릿 -->
+	<servlet>
+		<servlet-name>BusinessStatisticsServlet</servlet-name>
+		<servlet-class>controller.BusinessStatisticsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BusinessStatisticsServlet</servlet-name>
+		<url-pattern>/business/statistics</url-pattern>
+	</servlet-mapping>
+
+	<!-- 비즈니스 문의 서블릿 -->
+	<servlet>
+		<servlet-name>BusinessInquiriesServlet</servlet-name>
+		<servlet-class>controller.BusinessInquiriesServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>BusinessInquiriesServlet</servlet-name>
+		<url-pattern>/business/inquiries</url-pattern>
+	</servlet-mapping>
+
 </web-app>

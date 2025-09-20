@@ -84,4 +84,11 @@ public class BusinessDashboardServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/business-dashboard.jsp").forward(request, response);
         }
     }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // POST 요청도 GET과 동일하게 처리
+        doGet(request, response);
+    }
 }

@@ -77,4 +77,13 @@ public class QnADAO {
             return 0;
         }
     }
+    
+    /**
+     * 사업자별 Q&A 조회
+     */
+    public List<QnA> findByBusinessUserId(int businessUserId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findByBusinessUserId", businessUserId);
+        }
+    }
 }
