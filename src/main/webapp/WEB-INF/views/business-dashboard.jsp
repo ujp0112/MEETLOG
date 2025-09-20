@@ -165,7 +165,7 @@
                                             <span class="text-yellow-400">★</span>
                                             <span class="text-sm text-slate-600">${restaurant.rating}</span>
                                         </div>
-                                        <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus" 
+                                        <a href="${pageContext.request.contextPath}/menu-management?restaurantId=${restaurant.id}" 
                                            class="text-blue-600 hover:text-blue-700 text-sm font-medium">메뉴 관리</a>
                                     </div>
                                 </div>

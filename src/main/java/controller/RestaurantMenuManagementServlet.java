@@ -31,14 +31,22 @@ public class RestaurantMenuManagementServlet extends HttpServlet {
                 return;
             }
 
-            // URL에서 음식점 ID 추출
-            String pathInfo = request.getPathInfo();
-            if (pathInfo == null || pathInfo.equals("/")) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
-                return;
-            }
+            int restaurantId;
             
-            int restaurantId = Integer.parseInt(pathInfo.substring(1)); // "/1" -> "1"
+            // URL 파라미터에서 음식점 ID 추출 (두 가지 방식 지원)
+            String restaurantIdParam = request.getParameter("restaurantId");
+            if (restaurantIdParam != null && !restaurantIdParam.isEmpty()) {
+                // /menu-management?restaurantId=1 방식
+                restaurantId = Integer.parseInt(restaurantIdParam);
+            } else {
+                // /business/restaurants/1/menus 방식
+                String pathInfo = request.getPathInfo();
+                if (pathInfo == null || pathInfo.equals("/")) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
+                    return;
+                }
+                restaurantId = Integer.parseInt(pathInfo.substring(1)); // "/1" -> "1"
+            }
             
             // 음식점 정보 조회
             Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);

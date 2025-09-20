@@ -97,15 +97,7 @@
 		<url-pattern>/hq/sales-orders</url-pattern>
 	</servlet-mapping>
 
-	<!-- 메뉴 관리 서블릿들 -->
-	<servlet>
-		<servlet-name>MenuManagementServlet</servlet-name>
-		<servlet-class>controller.MenuManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>MenuManagementServlet</servlet-name>
-		<url-pattern>/business/restaurants/*/menus</url-pattern>
-	</servlet-mapping>
+	<!-- 메뉴 관리 서블릿들 (제거됨 - RestaurantMenuManagementServlet으로 대체) -->
 
 	<servlet>
 		<servlet-name>AddMenuServlet</servlet-name>
@@ -518,6 +510,18 @@
 	<servlet-mapping>
 		<servlet-name>CouponCreateServlet</servlet-name>
 		<url-pattern>/coupon/create</url-pattern>
+	</servlet-mapping>
+
+	<!-- 음식점 메뉴 관리 서블릿 -->
+	<servlet>
+		<servlet-name>RestaurantMenuManagementServlet</servlet-name>
+		<servlet-class>controller.RestaurantMenuManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RestaurantMenuManagementServlet</servlet-name>
+		<url-pattern>/menu-management</url-pattern>
+		<url-pattern>/business/restaurants/*/menus</url-pattern>
+		<url-pattern>/restaurant-menus</url-pattern>
 	</servlet-mapping>
 
 </web-app>

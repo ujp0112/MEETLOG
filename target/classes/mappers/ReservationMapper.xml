@@ -9,7 +9,7 @@
         <result property="userId" column="user_id" />
         <result property="customerName" column="customer_name" />
         <result property="customerPhone" column="customer_phone" />
-        <result property="reservationDate" column="reservation_date" />
+        <result property="reservationDate" column="reservation_time" />
         <result property="reservationTime" column="reservation_time" />
         <result property="partySize" column="party_size" />
         <result property="specialRequests" column="special_requests" />
@@ -31,7 +31,7 @@
         FROM reservations r
         LEFT JOIN users u ON r.user_id = u.id
         WHERE r.restaurant_id = #{restaurantId}
-        ORDER BY r.reservation_date DESC, r.reservation_time DESC
+        ORDER BY r.reservation_time DESC
     </select>
 
     <!-- 예약 상세 조회 -->
@@ -60,7 +60,7 @@
         FROM reservations r
         LEFT JOIN users u ON r.user_id = u.id
         WHERE r.restaurant_id = #{restaurantId}
-        AND DATE(r.reservation_date) = CURDATE()
+        AND DATE(r.reservation_time) = CURDATE()
         ORDER BY r.reservation_time ASC
     </select>
 
@@ -80,7 +80,7 @@
     <insert id="insert" parameterType="Reservation" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO reservations (
             restaurant_id, user_id, customer_name, customer_phone,
-            reservation_date, reservation_time, party_size, status,
+            reservation_time, party_size, status,
             special_requests, created_at, updated_at
         ) VALUES (
             #{restaurantId}, #{userId}, #{customerName}, #{customerPhone},
@@ -106,11 +106,11 @@
             AND u.nickname LIKE CONCAT('%', #{customerName}, '%')
         </if>
         <if test="startDate != null and startDate != ''">
-            AND r.reservation_date >= #{startDate}
+            AND r.reservation_time >= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
-            AND r.reservation_date &lt;= #{endDate}
+            AND r.reservation_time &lt;= #{endDate}
         </if>
-        ORDER BY r.reservation_date DESC, r.reservation_time DESC
+        ORDER BY r.reservation_time DESC
     </select>
 </mapper>

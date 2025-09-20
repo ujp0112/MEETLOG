@@ -68,7 +68,7 @@
                                     <h4 class="text-lg font-semibold text-slate-800 mb-2">${menu.name}</h4>
                                     <p class="text-slate-600 text-sm mb-2">${menu.description}</p>
                                     <p class="text-lg font-bold text-blue-600 mb-4">
-                                        <fmt:formatNumber value="${menu.price}" type="currency" currencySymbol="원"/>
+                                        ${menu.price}원
                                     </p>
                                     
                                     <div class="flex space-x-2">
