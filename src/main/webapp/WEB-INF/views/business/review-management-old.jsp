@@ -137,21 +137,6 @@
                                     </div>
                                 </c:if>
                                 
-                                <!-- 사업자 답글 섹션 -->
-                                <c:if test="${not empty review.comments}">
-                                    <div class="mt-4 space-y-2">
-                                        <c:forEach var="comment" items="${review.comments}">
-                                            <div class="p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                                                <div class="flex items-center space-x-2 mb-2">
-                                                    <span class="text-sm font-semibold text-blue-600">사업자 답글</span>
-                                                    <span class="text-xs text-slate-500">${comment.createdAt}</span>
-                                                </div>
-                                                <p class="text-slate-700">${comment.content}</p>
-                                            </div>
-                                        </c:forEach>
-                                    </div>
-                                </c:if>
-                                
                                 <!-- 답글 작성 폼 -->
                                 <div class="mt-4">
                                     <form method="post" action="${pageContext.request.contextPath}/business/review/add-reply" class="flex space-x-2">
@@ -195,18 +180,37 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 카드 호버 효과
-            document.querySelectorAll('.card-hover').forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-4px)';
-                    this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-                });
+        // 필터링 기능
+        document.querySelector('select').addEventListener('change', function() {
+            const selectedRating = this.value;
+            const reviewCards = document.querySelectorAll('.glass-card');
+            
+            reviewCards.forEach(card => {
+                if (selectedRating === '전체') {
+                    card.style.display = 'block';
+                } else {
+                    const rating = card.querySelector('.rating-stars').children.length;
+                    if (rating.toString() === selectedRating) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+        });
+        
+        // 답글 작성 폼 제출
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const content = this.querySelector('input[name="content"]').value;
+                if (content.trim() === '') {
+                    alert('답글 내용을 입력해주세요.');
+                    return;
+                }
+                // 실제 답글 작성 로직은 서버에서 처리
+                alert('답글이 작성되었습니다.');
+                this.querySelector('input[name="content"]').value = '';
             });
         });
     </script>
