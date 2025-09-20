@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.BusinessQnADAO">
+    
+    <resultMap id="businessQnAResultMap" type="model.BusinessQnA">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id" />
+        <result property="restaurantName" column="restaurant_name" />
+        <result property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="userEmail" column="user_email" />
+        <result property="question" column="question" />
+        <result property="answer" column="answer" />
+        <result property="status" column="status" />
+        <result property="isOwner" column="is_owner" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="answeredAt" column="answered_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+    
+    <select id="findByOwnerId" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT 
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            q.user_id,
+            u.name as user_name,
+            u.email as user_email,
+            q.question,
+            q.answer,
+            q.status,
+            q.is_owner,
+            q.is_active,
+            q.created_at,
+            q.answered_at,
+            q.updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        LEFT JOIN users u ON q.user_id = u.id
+        WHERE r.owner_id = #{ownerId}
+        AND q.is_active = 1
+        ORDER BY q.created_at DESC
+    </select>
+    
+    <update id="updateAnswer" parameterType="model.BusinessQnA">
+        UPDATE restaurant_qna 
+        SET answer = #{answer}, 
+            status = #{status},
+            answered_at = NOW(),
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updateStatus" parameterType="model.BusinessQnA">
+        UPDATE restaurant_qna 
+        SET status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+    
+    <delete id="delete" parameterType="int">
+        UPDATE restaurant_qna 
+        SET is_active = 0, updated_at = NOW()
+        WHERE id = #{id}
+    </delete>
+    
+</mapper>
