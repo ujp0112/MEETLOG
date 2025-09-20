@@ -89,6 +89,13 @@ public class RestaurantService {
     }
     
     /**
+     * 사업자 ID로 음식점 목록 조회
+     */
+    public List<Restaurant> getRestaurantsByOwnerId(int ownerId) {
+        return restaurantDAO.findByOwnerId(ownerId);
+    }
+    
+    /**
      * 음식점 생성 (createRestaurant)
      */
     public boolean createRestaurant(Restaurant restaurant) {

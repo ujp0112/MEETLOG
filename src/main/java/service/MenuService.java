@@ -114,4 +114,11 @@ public class MenuService {
     public Menu findById(int menuId) {
         return menuDAO.findById(menuId);
     }
+    
+    /**
+     * 음식점 ID로 메뉴 목록 조회 (getMenusByRestaurantId)
+     */
+    public List<Menu> getMenusByRestaurantId(int restaurantId) {
+        return findByRestaurantId(restaurantId);
+    }
 }

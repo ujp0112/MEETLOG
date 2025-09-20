@@ -500,4 +500,14 @@
 		<url-pattern>/business/inquiries</url-pattern>
 	</servlet-mapping>
 
+	<!-- 쿠폰 관리 서블릿 -->
+	<servlet>
+		<servlet-name>CouponManagementServlet</servlet-name>
+		<servlet-class>controller.CouponManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CouponManagementServlet</servlet-name>
+		<url-pattern>/coupon-management</url-pattern>
+	</servlet-mapping>
+
 </web-app>
