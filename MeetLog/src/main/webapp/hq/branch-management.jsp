@@ -207,18 +207,33 @@ table {
                 <h2 class="text-3xl font-bold mb-8">🏪 지점 관리</h2>
                 <div class="bg-white p-6 rounded-lg shadow">
                     <h3 class="font-bold text-xl mb-4">신규 지점 추가 요청</h3>
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-center p-3 border rounded-md">
-                            <div>
-                                <p class="font-bold">우부래도 강남점</p>
-                                <p class="text-sm text-slate-500">주소: 서울시 강남구 테헤란로 123</p>
-                            </div>
-                            <div class="space-x-2">
-                                <button class="bg-sky-500 text-white text-sm font-bold py-1 px-3 rounded-md">승인</button>
-                                <button class="bg-red-500 text-white text-sm font-bold py-1 px-3 rounded-md">거절</button>
-                            </div>
+    
+    <c:choose>
+        <c:when test="${not empty pendingBranches}">
+            <div class="space-y-2">
+                <c:forEach var="branch" items="${pendingBranches}">
+                    <div class="flex justify-between items-center p-3 border rounded-md">
+                        <div>
+                            <p class="font-bold">${branch.name}</p>
+                            <p class="text-sm text-slate-500">담당자 이메일: ${branch.user.email}</p>
+                        </div>
+                        <div class="space-x-2">
+                            <form action="${pageContext.request.contextPath}/hq/branch-management" method="post" class="inline">
+                                <input type="hidden" name="branchId" value="${branch.id}">
+                                <input type="hidden" name="userId" value="${branch.user.id}">
+                                <button type="submit" name="action" value="approve" class="bg-sky-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-sky-600">승인</button>
+                                <button type="submit" name="action" value="reject" class="bg-red-500 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-red-600">거절</button>
+                            </form>
                         </div>
                     </div>
+                </c:forEach>
+            </div>
+        </c:when>
+        <c:otherwise>
+            <p class="text-center text-slate-500 p-4">현재 승인을 기다리는 지점이 없습니다.</p>
+        </c:otherwise>
+    </c:choose>
+
                 </div>
             </div>
         </main>

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,6 +19,7 @@ import dto.PurchaseOrder;
 import dto.PurchaseOrderLine;
 import service.OrderService;
 
+@WebServlet(urlPatterns = {"/branch/orders-history", "/branch/orders/*"})
 public class BranchOrdersHistoryServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final Gson gson = new Gson();

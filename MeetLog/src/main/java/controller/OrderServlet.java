@@ -1,13 +1,20 @@
 package controller;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.*;
-import service.OrderService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import dto.AppUser;
 import dto.PurchaseOrderLine;
+import service.OrderService;
 
+@WebServlet("/orderForm")
 public class OrderServlet extends HttpServlet {
 	private final OrderService orderService = new OrderService();
 

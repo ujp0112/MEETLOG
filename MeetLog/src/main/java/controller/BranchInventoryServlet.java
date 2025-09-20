@@ -17,6 +17,8 @@ import dto.InventoryItem;
 /**
  * Servlet implementation class BranchInventoryServlet
  */
+
+@WebServlet("/branch/inventory")
 public class BranchInventoryServlet extends HttpServlet {
     private final BranchService branchService = new BranchService();
     private static final int PAGE_SIZE = 10;

@@ -1,21 +1,32 @@
 package controller;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
 import dto.AppUser;
 import dto.BranchMenu;
 import dto.MenuIngredient;
 import service.BranchMenuService;
 import service.MaterialService;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.http.*;
-import java.io.*;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @MultipartConfig(maxFileSize = 10 * 1024 * 1024)
+@WebServlet(urlPatterns = {"/hq/menus", "/hq/menus/*"})
 public class HqMenusServlet extends HttpServlet {
 
   private final BranchMenuService menuService = new BranchMenuService();

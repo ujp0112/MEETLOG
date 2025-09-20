@@ -1,11 +1,11 @@
 package controller;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +19,7 @@ import dto.PurchaseOrder;
 import dto.PurchaseOrderLine;
 import service.OrderService;
 
+@WebServlet(urlPatterns = {"/hq/sales-orders", "/hq/sales-orders/*"})
 public class HqSalesOrdersServlet extends HttpServlet {
 	private final OrderService orderService = new OrderService();
 	private final Gson gson = new Gson();

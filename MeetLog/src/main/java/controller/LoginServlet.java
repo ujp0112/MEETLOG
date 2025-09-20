@@ -42,6 +42,9 @@ public class LoginServlet extends HttpServlet {
         AppUser u = authService.findByEmail(email);
         
         try {
+        	if(u.getRole().equals("BRANCH")&&u.getActiveYn().equals("N")) {
+        		throw new Exception();
+        	}
             User user = this.userService.authenticateUser(email, password, userType);
 
             if (user == null && "PERSONAL".equals(userType)) {

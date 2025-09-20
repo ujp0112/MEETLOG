@@ -341,7 +341,7 @@
 
     // 파일 미리보기 (Edit)
     const fImage = $('#f-image'), fPreview = $('#f-preview'), fSelectFile = $('#f-selectFile');
-    $('.preview-circle[for="f-image"]').addEventListener('click', ()=> fImage.click());
+    //$('.preview-circle[for="f-image"]').addEventListener('click', ()=> fImage.click());
     fImage.addEventListener('change', function(){
       if(this.files && this.files[0]){
         const f = this.files[0];
@@ -376,7 +376,7 @@
 
     // 파일 미리보기 (Append)
     const aImage = $('#a-image'), aPreview = $('#a-preview'), aSelectFile = $('#a-selectFile');
-    $('.preview-circle[for="a-image"]').addEventListener('click', ()=> aImage.click());
+    //$('.preview-circle[for="a-image"]').addEventListener('click', ()=> aImage.click());
     aImage.addEventListener('change', function(){
       if(this.files && this.files[0]){
         const f = this.files[0];

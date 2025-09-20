@@ -4,7 +4,16 @@ package dto;
 public class Branch {
 	private Long id, companyId;
 	private String name, code, activeYn;
+	private AppUser user;
+	
+	public AppUser getUser() {
+        return user;
+    }
 
+    public void setUser(AppUser user) {
+        this.user = user;
+    }
+    
 	public Long getId() {
 		return id;
 	}
