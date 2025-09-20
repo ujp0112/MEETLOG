@@ -700,7 +700,37 @@
 
                                 <!-- ❓ Q&A 섹션 -->
                                 <section class="glass-card p-8 rounded-3xl slide-up">
-                                    <h2 class="text-2xl font-bold gradient-text mb-6">Q&A</h2>
+                                    <div class="flex justify-between items-center mb-6">
+                                        <h2 class="text-2xl font-bold gradient-text">Q&A</h2>
+                                        <button onclick="toggleQnAForm()" class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
+                                            💬 문의하기
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Q&A 등록 폼 -->
+                                    <div id="qnaForm" class="hidden mb-8">
+                                        <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
+                                            <h3 class="text-lg font-bold text-slate-800 mb-4">궁금한 점을 문의해주세요</h3>
+                                            <form method="post" action="${pageContext.request.contextPath}/restaurant/qna/register" class="space-y-4">
+                                                <input type="hidden" name="restaurantId" value="${restaurant.id}">
+                                                <div>
+                                                    <label class="block text-sm font-semibold text-slate-700 mb-2">문의 내용</label>
+                                                    <textarea name="question" rows="4" placeholder="음식점에 대해 궁금한 점을 자유롭게 문의해주세요..." 
+                                                              class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" required></textarea>
+                                                </div>
+                                                <div class="flex space-x-3">
+                                                    <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                                                        문의 등록
+                                                    </button>
+                                                    <button type="button" onclick="toggleQnAForm()" class="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">
+                                                        취소
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Q&A 목록 -->
                                     <c:choose>
                                         <c:when test="${not empty qnas}">
                                             <div class="space-y-6">
@@ -709,17 +739,27 @@
                                                         <div class="mb-4">
                                                             <div class="flex items-center mb-3">
                                                                 <span class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Q</span>
-                                                                <span class="ml-3 text-sm text-slate-500 font-medium">${qna.isOwner ? '사장님' : '고객'}</span>
+                                                                <span class="ml-3 text-sm text-slate-500 font-medium">${qna.userName}</span>
+                                                                <span class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
+                                                                    <c:choose>
+                                                                        <c:when test="${qna.status == 'PENDING'}">답변 대기</c:when>
+                                                                        <c:when test="${qna.status == 'ANSWERED'}">답변 완료</c:when>
+                                                                        <c:when test="${qna.status == 'CLOSED'}">종료</c:when>
+                                                                        <c:otherwise>${qna.status}</c:otherwise>
+                                                                    </c:choose>
+                                                                </span>
                                                             </div>
                                                             <p class="text-slate-800 font-medium">${qna.question}</p>
                                                         </div>
-                                                        <div class="border-t border-slate-200 pt-4">
-                                                            <div class="flex items-center mb-3">
-                                                                <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">A</span>
-                                                                <span class="ml-3 text-sm text-slate-500 font-medium">사장님</span>
+                                                        <c:if test="${not empty qna.answer}">
+                                                            <div class="border-t border-slate-200 pt-4">
+                                                                <div class="flex items-center mb-3">
+                                                                    <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">A</span>
+                                                                    <span class="ml-3 text-sm text-slate-500 font-medium">사장님</span>
+                                                                </div>
+                                                                <p class="text-slate-800">${qna.answer}</p>
                                                             </div>
-                                                            <p class="text-slate-800">${qna.answer}</p>
-                                                        </div>
+                                                        </c:if>
                                                     </div>
                                                 </c:forEach>
                                             </div>
@@ -862,6 +902,38 @@
                     this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
                 });
             });
+        });
+        
+        // Q&A 폼 토글 함수
+        function toggleQnAForm() {
+            const form = document.getElementById('qnaForm');
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                form.classList.add('hidden');
+            }
+        }
+        
+        // URL 파라미터 확인하여 성공/오류 메시지 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            
+            if (success === 'qna_added') {
+                alert('문의가 성공적으로 등록되었습니다!');
+                // URL에서 파라미터 제거
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (error === 'missing_info') {
+                alert('문의 내용을 입력해주세요.');
+            } else if (error === 'qna_failed') {
+                alert('문의 등록에 실패했습니다. 다시 시도해주세요.');
+            } else if (error === 'invalid_id') {
+                alert('올바르지 않은 음식점 ID입니다.');
+            } else if (error === 'server_error') {
+                alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
         });
     </script>
 

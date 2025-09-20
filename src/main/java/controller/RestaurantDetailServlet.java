@@ -17,12 +17,14 @@ import model.User;
 import service.MenuService;
 import service.OperatingHourService;
 import service.RestaurantService;
+import service.BusinessQnAService;
 
 public class RestaurantDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private RestaurantService restaurantService = new RestaurantService();
     private MenuService menuService = new MenuService();
     private OperatingHourService operatingHourService = new OperatingHourService();
+    private BusinessQnAService qnaService = new BusinessQnAService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -56,6 +58,9 @@ public class RestaurantDetailServlet extends HttpServlet {
             // 운영시간 조회
             List<OperatingHour> operatingHours = operatingHourService.findByRestaurantId(restaurantId);
             
+            // Q&A 조회
+            List<model.BusinessQnA> qnas = qnaService.getQnAByRestaurantId(restaurantId);
+            
             // 세션에서 사용자 정보 확인 (소유자 여부 판단용)
             HttpSession session = request.getSession(false);
             boolean isOwner = false;
@@ -67,6 +72,7 @@ public class RestaurantDetailServlet extends HttpServlet {
             request.setAttribute("restaurant", restaurant);
             request.setAttribute("menus", menus);
             request.setAttribute("operatingHours", operatingHours);
+            request.setAttribute("qnas", qnas);
             request.setAttribute("isOwner", isOwner);
             
             request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);

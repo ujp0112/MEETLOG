@@ -111,6 +111,14 @@ public class BusinessQnA {
         isOwner = owner;
     }
     
+    public void setIsOwner(boolean isOwner) {
+        this.isOwner = isOwner;
+    }
+    
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+    
     public boolean isActive() {
         return isActive;
     }

@@ -17,6 +17,32 @@ public class BusinessQnAService {
     }
     
     /**
+     * Q&A 등록
+     */
+    public boolean addQnA(BusinessQnA qna) {
+        try {
+            // TODO: 실제 데이터베이스 등록 구현
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * 음식점별 Q&A 조회
+     */
+    public List<BusinessQnA> getQnAByRestaurantId(int restaurantId) {
+        try {
+            // TODO: 실제 데이터베이스 조회 구현
+            return new java.util.ArrayList<>();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
+    }
+    
+    /**
      * Q&A 답변 업데이트 (트랜잭션 포함)
      */
     public boolean updateQnAAnswer(int qnaId, String answer, Object sqlSession) {
