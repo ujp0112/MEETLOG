@@ -116,8 +116,8 @@
     
     <script>
         function createCoupon() {
-            // 쿠폰 생성 로직 (추후 구현)
-            alert('쿠폰 생성 기능은 추후 구현될 예정입니다.');
+            // 쿠폰 생성 페이지로 이동
+            window.location.href = '${pageContext.request.contextPath}/coupon/create';
         }
     </script>
 </body>

@@ -104,5 +104,6 @@
     <mapper resource="mappers/OperatingHourMapper.xml" />
     <mapper resource="mappers/BusinessUserMapper.xml" />
     <mapper resource="mappers/ReviewCommentMapper.xml" />
+    <mapper resource="mappers/NotificationMapper.xml" />
 	</mappers>
 </configuration>

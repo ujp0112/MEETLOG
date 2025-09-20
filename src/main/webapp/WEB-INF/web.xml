@@ -510,4 +510,14 @@
 		<url-pattern>/coupon-management</url-pattern>
 	</servlet-mapping>
 
+	<!-- 쿠폰 생성 서블릿 -->
+	<servlet>
+		<servlet-name>CouponCreateServlet</servlet-name>
+		<servlet-class>controller.CouponCreateServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>CouponCreateServlet</servlet-name>
+		<url-pattern>/coupon/create</url-pattern>
+	</servlet-mapping>
+
 </web-app>
