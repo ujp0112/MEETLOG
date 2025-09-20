@@ -123,12 +123,12 @@ public class RegisterServlet extends HttpServlet {
 			Branch b = new Branch();
 			b.setCompanyId(hq.getCompanyId());
 			b.setName(businessName);
-			b.setActiveYn("Y");
+			b.setActiveYn("N");
 			long branchId = authService.createBranch(b);
 			
 			AppUser u = new AppUser();
 		    u.setCompanyId(hq.getCompanyId()); u.setBranchId(branchId); u.setRole("BRANCH");
-		    u.setEmail(email); u.setPwHash(PasswordUtil.hash(password)); u.setActiveYn("Y");
+		    u.setEmail(email); u.setPwHash(PasswordUtil.hash(password)); u.setActiveYn("N");
 		    authService.createUser(u);
 		}
 

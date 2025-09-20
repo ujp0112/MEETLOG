@@ -1,14 +1,20 @@
 package controller;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import dto.AppUser;
 import dto.Material;
 import service.MaterialService;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.IOException;
-import java.util.List;
-
+@WebServlet(urlPatterns = {"/branch/order", "/branch/order/*"})
 public class BranchOrderPageServlet extends HttpServlet {
   private final MaterialService materialService = new MaterialService();
 

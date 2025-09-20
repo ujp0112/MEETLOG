@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.*;
 
-@WebServlet(name = "HqMaterialsServlet", urlPatterns = {"/hq/materials/*"})
+@WebServlet(name = "HqMaterialsServlet", urlPatterns = {"/hq/materials", "/hq/materials/*"})
 @MultipartConfig
 public class HqMaterialsServlet extends HttpServlet {
 
