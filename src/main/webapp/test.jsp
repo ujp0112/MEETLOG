@@ -6,9 +6,8 @@
     <title>Test Page</title>
 </head>
 <body>
-    <h1>Test Page - 서버가 정상 작동합니다!</h1>
+    <h1>Test Page</h1>
+    <p>웹 애플리케이션이 정상적으로 작동하고 있습니다!</p>
     <p>현재 시간: <%= new java.util.Date() %></p>
-    <p>Context Path: <%= request.getContextPath() %></p>
-    <p>Request URI: <%= request.getRequestURI() %></p>
 </body>
 </html>

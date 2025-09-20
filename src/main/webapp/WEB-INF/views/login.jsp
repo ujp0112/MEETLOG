@@ -52,7 +52,7 @@
 
                 <!-- 개인 회원 로그인 폼 -->
                 <div id="login-personal-content">
-                    <form "${pageContext.request.contextPath}.do/login" method="post" class="space-y-5">
+                    <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
                         <input type="hidden" name="userType" value="PERSONAL">
                         <div>
                             <label for="personal-email" class="block text-sm font-medium text-slate-700">이메일</label>
@@ -70,7 +70,7 @@
 
                 <!-- 기업 회원 로그인 폼 (초기에는 숨김) -->
                 <div id="login-business-content" class="hidden">
-                    <form "${pageContext.request.contextPath}.do/login" method="post" class="space-y-5">
+                    <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
                         <input type="hidden" name="userType" value="BUSINESS">
                         <div>
                             <label for="business-email" class="block text-sm font-medium text-slate-700">사업자 이메일</label>

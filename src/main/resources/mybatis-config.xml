@@ -47,8 +47,6 @@
 		<typeAlias type="model.Notification" alias="Notification" />
     <typeAlias type="model.OperatingHour" alias="OperatingHour" />
     <typeAlias type="model.BusinessUser" alias="BusinessUser" />
-    <typeAlias type="model.Reservation" alias="Reservation" />
-    <typeAlias type="model.ReviewComment" alias="ReviewComment" />
 		
 		<!-- DTO 클래스들 -->
 		<typeAlias type="model.RestaurantSummaryDTO" alias="RestaurantSummaryDTO" />

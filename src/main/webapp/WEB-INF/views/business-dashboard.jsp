@@ -89,7 +89,7 @@
                             </div>
                         </a>
 
-                        <a href="${pageContext.request.contextPath}/business/restaurants" 
+                        <a href="${pageContext.request.contextPath}/restaurant/my" 
                            class="p-6 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105">
                             <div class="text-center">
                                 <div class="text-3xl mb-2">🏪</div>
@@ -98,7 +98,7 @@
                             </div>
                         </a>
 
-                        <a href="#" 
+                        <a href="${pageContext.request.contextPath}/business/statistics" 
                            class="p-6 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-2xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
                             <div class="text-center">
                                 <div class="text-3xl mb-2">📊</div>
@@ -107,7 +107,7 @@
                             </div>
                         </a>
 
-                        <a href="#" 
+                        <a href="${pageContext.request.contextPath}/business/inquiries" 
                            class="p-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl hover:from-orange-600 hover:to-orange-700 transition-all duration-300 transform hover:scale-105">
                             <div class="text-center">
                                 <div class="text-3xl mb-2">💬</div>
