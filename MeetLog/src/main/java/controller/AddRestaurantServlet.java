@@ -79,6 +79,8 @@ public class AddRestaurantServlet extends HttpServlet {
                     }
                 }
             }
+            
+            System.out.println("파일설정");
 
             Restaurant restaurant = new Restaurant();
             restaurant.setOwnerId(owner.getId());
