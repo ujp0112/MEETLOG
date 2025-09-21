@@ -7,6 +7,8 @@ import util.MyBatisSqlSessionFactory;
 
 public class QnADAO {
     
+    private static final String NAMESPACE = "QnAMapper";
+    
     /**
      * 맛집별 Q&A 조회
      */

@@ -14,6 +14,11 @@ public class MyBatisSqlSessionFactory {
         try {
             String resource = "mybatis-config.xml";
             InputStream inputStream = Resources.getResourceAsStream(resource);
+            if (inputStream == null) {
+                // 클래스패스에서 찾을 수 없으면 절대 경로로 시도
+                String absolutePath = "/Users/sangwoolee/github/MEETLOG/.metadata/.plugins/org.eclipse.wst.server.core/tmp0/wtpwebapps/MeetLog/WEB-INF/classes/mybatis-config.xml";
+                inputStream = new java.io.FileInputStream(absolutePath);
+            }
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
             
         } catch (Exception e) {

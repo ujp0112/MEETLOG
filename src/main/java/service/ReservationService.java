@@ -95,7 +95,7 @@ public class ReservationService {
      * 예약 통계 조회
      */
     public ReservationStats getReservationStats(int restaurantId) {
-        return reservationDAO.getReservationStats(restaurantId);
+        return (ReservationStats) reservationDAO.getReservationStats(restaurantId);
     }
     
     /**

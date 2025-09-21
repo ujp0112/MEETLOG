@@ -1,7 +1,7 @@
 package dao;
 
 import model.Reservation;
-import service.ReservationService.ReservationStats;
+// import service.ReservationService.ReservationStats;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
@@ -56,7 +56,7 @@ public class ReservationDAO {
     /**
      * 예약 통계 조회
      */
-    public ReservationStats getReservationStats(int restaurantId) {
+    public Object getReservationStats(int restaurantId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             return sqlSession.selectOne(NAMESPACE + ".getReservationStats", restaurantId);
         }

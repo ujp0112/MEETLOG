@@ -96,6 +96,15 @@ public class ReviewDAO {
     }
     
     /**
+     * 최근 리뷰 조회
+     */
+    public List<Review> findRecentReviews(int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findRecentReviews", limit);
+        }
+    }
+    
+    /**
      * 최근 리뷰 정보 조회 (ReviewInfo 타입)
      */
     public List<ReviewInfo> findRecentReviewsWithInfo(int limit) {

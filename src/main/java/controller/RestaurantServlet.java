@@ -123,7 +123,15 @@ public class RestaurantServlet extends HttpServlet {
         String priceRange = request.getParameter("priceRange");
         String parking = request.getParameter("parking");
 
-        List<Restaurant> results = restaurantService.searchRestaurants(keyword, category, location, priceRange, parking);
+        // 검색 파라미터를 Map으로 구성
+        java.util.Map<String, Object> searchParams = new java.util.HashMap<>();
+        if (keyword != null && !keyword.trim().isEmpty()) searchParams.put("keyword", keyword);
+        if (category != null && !category.trim().isEmpty()) searchParams.put("category", category);
+        if (location != null && !location.trim().isEmpty()) searchParams.put("location", location);
+        if (priceRange != null && !priceRange.trim().isEmpty()) searchParams.put("priceRange", priceRange);
+        if (parking != null && !parking.trim().isEmpty()) searchParams.put("parking", parking);
+
+        List<Restaurant> results = restaurantService.searchRestaurants(searchParams);
 
         request.setAttribute("searchResults", results);
         request.getRequestDispatcher("/WEB-INF/views/search-results.jsp").forward(request, response);

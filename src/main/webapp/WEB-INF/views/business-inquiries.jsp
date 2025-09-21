@@ -91,10 +91,10 @@
                                         </div>
                                         <div class="ml-4">
                                             <c:choose>
-                                                <c:when test="${'PENDING'.equals(inquiry.status)}">
+                                                <c:when test="${inquiry.status == 'PENDING'}">
                                                     <span class="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">답변 대기</span>
                                                 </c:when>
-                                                <c:when test="${'ANSWERED'.equals(inquiry.status)}">
+                                                <c:when test="${inquiry.status == 'ANSWERED'}">
                                                     <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">답변 완료</span>
                                                 </c:when>
                                                 <c:otherwise>
@@ -114,7 +114,7 @@
                                         </div>
                                     </c:if>
                                     
-                                    <c:if test="${'PENDING'.equals(inquiry.status)}">
+                                    <c:if test="${inquiry.status == 'PENDING'}">
                                         <div class="mt-4 flex space-x-2">
                                             <button onclick="answerInquiry(${inquiry.id})" 
                                                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">

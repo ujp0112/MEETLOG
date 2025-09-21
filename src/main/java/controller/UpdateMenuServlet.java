@@ -55,7 +55,7 @@ public class UpdateMenuServlet extends HttpServlet {
                 Menu menu = new Menu();
                 menu.setId(menuId);
                 menu.setName(name.trim());
-                menu.setPrice((double) price);
+                menu.setPrice(String.valueOf(price));
                 menu.setDescription(description != null ? description.trim() : "");
                 menu.setPopular(popular);
                 

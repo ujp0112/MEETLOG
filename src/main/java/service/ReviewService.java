@@ -72,6 +72,13 @@ public class ReviewService {
     }
     
     /**
+     * 최근 리뷰 조회
+     */
+    public List<Review> getRecentReviews(int limit) {
+        return reviewDAO.findRecentReviews(limit);
+    }
+    
+    /**
      * 고급 검색을 위한 리뷰 검색
      */
     public List<Review> searchReviews(java.util.Map<String, Object> searchParams) {
