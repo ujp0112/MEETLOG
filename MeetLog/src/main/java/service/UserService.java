@@ -1,69 +1,91 @@
 package service;
 
+import org.apache.ibatis.session.SqlSession;
 import dao.UserDAO;
 import dao.BusinessUserDAO;
+import dao.CompanyDAO;
 import model.User;
 import model.BusinessUser;
-import util.PasswordUtil;
+import model.Company;
 import util.MyBatisSqlSessionFactory;
-import org.apache.ibatis.session.SqlSession;
+import util.PasswordUtil; // 새로 만든 PasswordUtil 클래스를 import 합니다.
 import java.util.List;
 
 public class UserService {
-    private UserDAO userDAO = new UserDAO();
-    private BusinessUserDAO businessUserDAO = new BusinessUserDAO();
+    private final UserDAO userDAO = new UserDAO();
+    private final BusinessUserDAO businessUserDAO = new BusinessUserDAO();
+    private final CompanyDAO companyDAO = new CompanyDAO();
 
-    /**
-     * 사업자 회원가입 (User 정보와 BusinessUser 정보를 하나의 트랜잭션으로 처리)
-     */
-    public boolean registerBusinessUser(User user, BusinessUser businessUser) {
-        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+    // --- 신규 통합 회원가입 로직 ---
+    public boolean registerHqUser(User user, BusinessUser businessUser) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
         try {
-            // 1. users 테이블에 사용자 정보 삽입
+            Company company = new Company();
+            company.setName(businessUser.getBusinessName());
+            companyDAO.insert(sqlSession, company);
+            int newCompanyId = company.getId();
+
             String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
             user.setPassword(hashedPassword);
             user.setUserType("BUSINESS");
-            userDAO.insert(user, sqlSession); // SqlSession을 전달하여 트랜잭션에 참여
+            userDAO.insert(user, sqlSession);
+            int newUserId = user.getId();
 
-            // 2. 방금 생성된 user의 id를 businessUser 객체에 설정
-            businessUser.setUserId(user.getId());
-
-            // 3. business_users 테이블에 사업자 정보 삽입
+            businessUser.setUserId(newUserId);
+            businessUser.setCompanyId(newCompanyId);
             businessUserDAO.insert(businessUser, sqlSession);
 
-            // 4. 모든 작업이 성공하면 최종적으로 commit
             sqlSession.commit();
             return true;
         } catch (Exception e) {
-            // 중간에 하나라도 오류가 발생하면 모든 작업을 취소 (rollback)
             e.printStackTrace();
-            sqlSession.rollback();
+            if (sqlSession != null) sqlSession.rollback();
             return false;
         } finally {
-            // 작업이 끝나면 항상 SqlSession을 닫아줍니다.
-            sqlSession.close();
+            if (sqlSession != null) sqlSession.close();
         }
     }
-    
-    /**
-     * 개인 회원가입
-     */
+
+    public boolean registerBranchUser(User user, BusinessUser businessUser) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
+        try {
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+            user.setUserType("BUSINESS");
+            userDAO.insert(user, sqlSession);
+            int newUserId = user.getId();
+
+            businessUser.setUserId(newUserId);
+            businessUserDAO.insert(businessUser, sqlSession);
+            
+            sqlSession.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (sqlSession != null) sqlSession.rollback();
+            return false;
+        } finally {
+            if (sqlSession != null) sqlSession.close();
+        }
+    }
+
     public boolean registerUser(User user) {
-        // 이 메소드는 단독 트랜잭션으로 동작합니다.
         String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
         return userDAO.insert(user) > 0;
     }
 
-    // --- 이하 다른 서비스 메소드들 (기존과 동일) ---
-
-    public User authenticateUser(String email, String password, String userType) {
+    // --- 기존 서비스 메소드들 ---
+    public User authenticateUser(String email, String password) {
         User user = userDAO.findByEmail(email);
-        if (user != null && user.getUserType().equals(userType) && 
-            PasswordUtil.verifyPassword(password, user.getPassword())) {
+        if (user != null && PasswordUtil.verifyPassword(password, user.getPassword())) {
             return user;
         }
         return null;
+    }
+    
+    public boolean isCompanyExists(int companyId) {
+        return companyDAO.existsById(companyId);
     }
 
     public boolean updateProfile(int userId, String nickname, String profileImage) {
@@ -131,5 +153,27 @@ public class UserService {
             }
         }
         return false;
+    }
+    
+    public BusinessUser findHqUserByIdentifier(String identifier) {
+        return businessUserDAO.findHqByIdentifier(identifier);
+    }
+    
+    // --- HQ/Branch 관리 기능 ---
+    
+    public BusinessUser getBusinessUserByUserId(int userId) {
+        return businessUserDAO.findByUserId(userId);
+    }
+    
+    public List<BusinessUser> getPendingBranches(int companyId) {
+        return businessUserDAO.findPendingByCompanyId(companyId);
+    }
+    
+    public boolean approveBranch(int branchUserId) {
+        return businessUserDAO.updateStatus(branchUserId, "ACTIVE") > 0;
+    }
+
+    public boolean rejectBranch(int branchUserId) {
+        return userDAO.delete(branchUserId) > 0;
     }
 }

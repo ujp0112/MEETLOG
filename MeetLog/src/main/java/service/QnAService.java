@@ -8,9 +8,9 @@ public class QnAService {
     private QnADAO qnaDAO = new QnADAO();
     
     /**
-     * 맛집별 Q&A 조회
+     * 맛집별 Q&A 조회 (메서드 이름 수정: getQnAByRestaurantId -> getQnAsByRestaurantId)
      */
-    public List<QnA> getQnAByRestaurantId(int restaurantId) {
+    public List<QnA> getQnAsByRestaurantId(int restaurantId) {
         try {
             return qnaDAO.findByRestaurantId(restaurantId);
         } catch (Exception e) {
@@ -20,9 +20,6 @@ public class QnAService {
         }
     }
     
-    /**
-     * 모든 활성 Q&A 조회
-     */
     public List<QnA> getAllActiveQnA() {
         try {
             return qnaDAO.findAllActive();
@@ -33,9 +30,6 @@ public class QnAService {
         }
     }
     
-    /**
-     * Q&A 추가
-     */
     public boolean addQnA(QnA qna) {
         try {
             int result = qnaDAO.insertQnA(qna);
@@ -47,9 +41,6 @@ public class QnAService {
         }
     }
     
-    /**
-     * Q&A 수정
-     */
     public boolean updateQnA(QnA qna) {
         try {
             int result = qnaDAO.updateQnA(qna);
@@ -61,9 +52,6 @@ public class QnAService {
         }
     }
     
-    /**
-     * Q&A 삭제
-     */
     public boolean deleteQnA(int qnaId) {
         try {
             int result = qnaDAO.deleteQnA(qnaId);

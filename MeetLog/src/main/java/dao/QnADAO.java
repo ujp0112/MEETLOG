@@ -6,13 +6,11 @@ import org.apache.ibatis.session.SqlSession;
 import util.MyBatisSqlSessionFactory;
 
 public class QnADAO {
-    
-    /**
-     * 맛집별 Q&A 조회
-     */
+    private static final String NAMESPACE = "QnAMapper"; // <- namespace 수정
+
     public List<QnA> findByRestaurantId(int restaurantId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList("QnAMapper.findByRestaurantId", restaurantId);
+            return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", restaurantId);
         } catch (Exception e) {
             System.err.println("Q&A 조회 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
@@ -20,12 +18,9 @@ public class QnADAO {
         }
     }
     
-    /**
-     * 모든 활성 Q&A 조회
-     */
     public List<QnA> findAllActive() {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList("QnAMapper.findAllActive");
+            return sqlSession.selectList(NAMESPACE + ".findAllActive");
         } catch (Exception e) {
             System.err.println("Q&A 조회 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
@@ -33,12 +28,9 @@ public class QnADAO {
         }
     }
     
-    /**
-     * Q&A 추가
-     */
     public int insertQnA(QnA qna) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.insert("QnAMapper.insertQnA", qna);
+            int result = sqlSession.insert(NAMESPACE + ".insertQnA", qna);
             sqlSession.commit();
             return result;
         } catch (Exception e) {
@@ -48,12 +40,9 @@ public class QnADAO {
         }
     }
     
-    /**
-     * Q&A 수정
-     */
     public int updateQnA(QnA qna) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update("QnAMapper.updateQnA", qna);
+            int result = sqlSession.update(NAMESPACE + ".updateQnA", qna);
             sqlSession.commit();
             return result;
         } catch (Exception e) {
@@ -63,12 +52,9 @@ public class QnADAO {
         }
     }
     
-    /**
-     * Q&A 삭제 (비활성화)
-     */
     public int deleteQnA(int qnaId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update("QnAMapper.deleteQnA", qnaId);
+            int result = sqlSession.update(NAMESPACE + ".deleteQnA", qnaId);
             sqlSession.commit();
             return result;
         } catch (Exception e) {

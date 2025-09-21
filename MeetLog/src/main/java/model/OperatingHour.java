@@ -5,14 +5,14 @@ import java.time.LocalTime;
 public class OperatingHour {
 	private int id;
 	private int restaurantId;
-	private int dayOfWeek; // 1:월요일, ..., 7:일요일
+	private int dayOfWeek; // DB 타입과 일치시키기 위해 INT로 수정 (1:월요일, ..., 7:일요일)
 	private LocalTime openingTime;
 	private LocalTime closingTime;
 
 	public OperatingHour() {
 	}
 
-	// Getters and Setters
+	// --- Getters and Setters ---
 	public int getId() {
 		return id;
 	}

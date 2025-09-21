@@ -61,7 +61,8 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
 </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jspf/header.jspf" %>  <div class="container">
+  <jsp:include page="/WEB-INF/layout/header.jspf" />
+  <div class="container">
     <section class="card">
       <div class="hd">
         <h1 class="title">수주 관리</h1>
@@ -95,11 +96,11 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
                     </c:choose>
                   </td>
                   <td class="cell-num"><fmt:formatNumber value="${o.totalPrice}"/></td>
-                  <td><fmt:formatDate value="${o.orderedAt}" pattern="yyyy-MM-dd"/></td>
+                  <td><fmt:formatDate value="${o.orderDate}" pattern="yyyy-MM-dd"/></td>
                   <td>
                     <c:choose>
-                      <c:when test="${o.status eq 'APPROVED'}"><span class="badge ok">검수완</span></c:when>
-                      <c:when test="${o.status eq 'RECEIVED'}"><span class="badge rcv">입고완</span></c:when>
+                      <c:when test="${o.status eq '검수완'}"><span class="badge ok">검수완</span></c:when>
+                      <c:when test="${o.status eq '입고완'}"><span class="badge rcv">입고완</span></c:when>
                       <c:otherwise><span class="badge na">미검</span></c:otherwise>
                     </c:choose>
                   </td>
@@ -188,7 +189,32 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
     </div>
   </div>
 
-  
+  <script>
+  // === MOCK 데이터 (orders가 비어있을 때 사용) ===
+  var MOCK = {
+    details: {
+      '101': (function(){
+        var arr = [];
+        for (var i=1;i<=13;i++){
+          arr.push({ lineId:'101-'+i, name: (i%3===1?'브로콜리': i%3===2?'방울토마토':'닭가슴살'), unit:(i%3===1?'kg': i%3===2?'팩':'kg'), unitPrice:(i%3===1?4500: i%3===2?3200:8700), qty:(i%3===1?10: i%3===2?20:8), imgfilename:'', status: '미검' });
+        }
+        return arr;
+      })(),
+      '102': (function(){
+        var arr = [];
+        for (var i=1;i<=24;i++){
+          arr.push({ lineId:'102-'+i, name: (i%2? '닭가슴살':'시금치'), unit:(i%2? 'kg':'단'), unitPrice:(i%2? 8800:2100), qty:(i%2? 12:30), imgfilename:'', status: (i%2?'검수완':'미검') });
+        }
+        return arr;
+      })(),
+      '103': [
+        { lineId:'103-1', name:'방울토마토', unit:'팩', unitPrice:3300, qty:30, imgfilename:'', status:'입고완' },
+        { lineId:'103-2', name:'로메인', unit:'kg', unitPrice:4700, qty:15, imgfilename:'', status:'입고완' },
+        { lineId:'103-3', name:'브로콜리', unit:'kg', unitPrice:4600, qty:12, imgfilename:'', status:'입고완' }
+      ]
+    }
+  };
+  </script>
 
   <script>
   (function(){
@@ -201,53 +227,85 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
       if(!btn) return;
       var orderId = btn.getAttribute('data-id');
       var tr = btn.closest('tr');
-      // 이제 mock 데이터가 없으므로 isMock 파라미터는 항상 false입니다.
-      openInspect(orderId, tr && tr.getAttribute('data-branch'));
+      openInspect(orderId, tr && tr.getAttribute('data-branch'), tr && tr.getAttribute('data-mock')==='1');
     });
 
     // ===== Inspect Modal state =====
     var modal = document.getElementById('inspectModal');
     var tbody = document.querySelector('#inspectTable tbody');
     var pager = document.getElementById('inspectPager');
-    // 페이징은 현재 백엔드에서 구현되지 않았으므로 숨기거나 단순화합니다.
-    pager.style.display = 'none'; 
+    var pageInfo = document.getElementById('inspectPageInfo');
     var metaEl = document.getElementById('modalOrderMeta');
     var btnSave = document.getElementById('btnSaveInspect');
 
-    var state = { orderId:null, branchName:'' };
+    var state = { orderId:null, branchName:'', page:1, pageSize:10, total:0, totalPages:1, mock:false };
+    var inspectionState = new Map(); // key: lineId, value: status string
 
-    function openInspect(orderId, branchName){
+    function openInspect(orderId, branchName, isMock){
       state.orderId = orderId;
       state.branchName = branchName || '';
+      state.page = 1;
+      state.mock = !!isMock;
+      inspectionState.clear();
       metaEl.textContent = '#' + orderId + ' · ' + (branchName || '');
       modal.classList.add('show');
       modal.setAttribute('aria-hidden','false');
-      loadDetails();
+      loadPage(1);
     }
-    
     function closeInspect(){
       modal.classList.remove('show');
       modal.setAttribute('aria-hidden','true');
       tbody.innerHTML = '';
     }
+    // expose for inline onclick
     window.closeInspect = closeInspect;
 
     modal.addEventListener('click', function(e){ if(e.target===modal) closeInspect(); });
     document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('show')) closeInspect(); });
 
-    function loadDetails(){
+    // Pager buttons
+    pager.querySelector('[data-role="first"]').addEventListener('click', function(){ loadPage(1); });
+    pager.querySelector('[data-role="prev"]').addEventListener('click', function(){ loadPage(Math.max(1, state.page-1)); });
+    pager.querySelector('[data-role="next"]').addEventListener('click', function(){ loadPage(Math.min(state.totalPages, state.page+1)); });
+    pager.querySelector('[data-role="last"]').addEventListener('click', function(){ loadPage(state.totalPages); });
+
+    function loadPage(page){
       if(!state.orderId) return;
+      state.page = page;
       tbody.innerHTML = '<tr><td colspan="5" style="padding:16px;text-align:center;color:#64748b">불러오는 중...</td></tr>';
 
-      var url = ctx + '/hq/sales-orders/' + encodeURIComponent(state.orderId) + '/details';
+      if(state.mock && window.MOCK && MOCK.details[state.orderId]){
+        var all = MOCK.details[state.orderId];
+        state.total = all.length;
+        state.totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+        var start = (page-1)*state.pageSize;
+        var slice = all.slice(start, start + state.pageSize);
+        renderTable(slice);
+        renderPager();
+        return;
+      }
+
+      var url = ctx + '/hq/sales-orders/' + encodeURIComponent(state.orderId) + '/details?page=' + page + '&size=' + state.pageSize;
       fetch(url, { headers:{'Accept':'application/json'} })
         .then(function(r){ if(!r.ok) throw new Error('네트워크 오류'); return r.json(); })
-        .then(function(items){
-          renderTable(Array.isArray(items) ? items : []);
+        .then(function(data){
+          var items = Array.isArray(data.items) ? data.items : [];
+          state.total = Number(data.totalCount||items.length)||0;
+          state.page = Number(data.page||page)||1;
+          state.pageSize = Number(data.pageSize||10)||10;
+          state.totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+          renderTable(items);
+          renderPager();
         })
-        .catch(function(err){
-          console.error(err);
+        .catch(function(){
+          // 서버가 없으면 MOCK로 폴백
+          if(window.MOCK && MOCK.details[state.orderId]){
+            state.mock = true;
+            loadPage(page);
+            return;
+          }
           tbody.innerHTML = '<tr><td colspan="5" style="padding:16px;text-align:center;color:#ef4444">상세를 불러오지 못했습니다.</td></tr>';
+          pageInfo.textContent = '';
         });
     }
 
@@ -259,25 +317,24 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
       var html = '';
       for(var i=0;i<items.length;i++){
         var it = items[i] || {};
-        var lineNo = it.lineNo;
-        var name = it.materialName || ''; // DTO 필드명은 materialName
+        var lineId = (it.lineId!=null ? it.lineId : (it.id!=null ? it.id : String(Math.random())));
+        var name = it.name || '';
         var unit = it.unit || '';
         var qty = Number(it.qty||0);
         var unitPrice = Number(it.unitPrice||0);
         var total = Math.round(unitPrice * qty);
-        var img = it.imgPath ? (ctx + it.imgPath) : ''; // DTO에 imgPath 필드가 있다면 사용
-        var curStatus = it.status || 'REQUESTED'; // DB에서 온 상태값
-
-        html += '<tr data-line-no="' + escapeHtml(String(lineNo)) + '">'
+        var img = it.imgfilename ? (ctx + '/imageView?filename=' + encodeURIComponent(it.imgfilename)) : '';
+        var cur = inspectionState.has(lineId) ? inspectionState.get(lineId) : (it.status || '미검');
+        html += '<tr data-line-id="' + escapeHtml(String(lineId)) + '">'
               +   '<td>' + (img ? '<img class="thumb" src="' + img + '" alt="">' : '<div class="thumb" style="display:grid;place-items:center">📦</div>') + '</td>'
               +   '<td>' + escapeHtml(name) + '</td>'
               +   '<td class="cell-num">' + nf.format(total) + '</td>'
               +   '<td class="cell-num">' + nf.format(qty) + ' <span style="color:#64748b">' + escapeHtml(unit) + '</span></td>'
               +   '<td>'
               +     '<select class="input" data-role="status">'
-              +       '<option value="REQUESTED"' + (curStatus==='REQUESTED'?' selected':'') + '>미검</option>'
-              +       '<option value="APPROVED"'  + (curStatus==='APPROVED'?' selected':'')  + '>검수완</option>'
-              +       '<option value="RECEIVED"'  + (curStatus==='RECEIVED'?' selected':'')  + '>입고완</option>'
+              +       '<option value="미검"'   + (cur==='미검'?' selected':'')   + '>미검</option>'
+              +       '<option value="검수완"' + (cur==='검수완'?' selected':'') + '>검수완</option>'
+              +       '<option value="입고완"' + (cur==='입고완'?' selected':'') + '>입고완</option>'
               +     '</select>'
               +   '</td>'
               + '</tr>';
@@ -285,36 +342,42 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
       tbody.innerHTML = html;
     }
 
+    function renderPager(){
+      var start = (state.page-1)*state.pageSize + 1;
+      var end = Math.min(state.page*state.pageSize, state.total);
+      pageInfo.textContent = start + '–' + end + ' / ' + state.total + ' (페이지 ' + state.page + ' / ' + state.totalPages + ')';
+      pager.querySelector('[data-role="first"]').disabled = state.page<=1;
+      pager.querySelector('[data-role="prev"]').disabled  = state.page<=1;
+      pager.querySelector('[data-role="next"]').disabled  = state.page>=state.totalPages;
+      pager.querySelector('[data-role="last"]').disabled  = state.page>=state.totalPages;
+    }
+
+    tbody.addEventListener('change', function(e){
+      if(!e.target.matches('select[data-role="status"]')) return;
+      var tr = e.target.closest('tr');
+      var id = tr.getAttribute('data-line-id');
+      var val = e.target.value;
+      inspectionState.set(id, val);
+    });
+
     btnSave.addEventListener('click', function(){
-      var rows = Array.from(tbody.querySelectorAll('tr[data-line-no]'));
+      var rows = Array.from(tbody.querySelectorAll('tr[data-line-id]'));
       var lines = rows.map(function(tr){
-        return { 
-          lineNo: parseInt(tr.getAttribute('data-line-no'), 10), 
-          status: tr.querySelector('select[data-role="status"]').value 
-        };
+        return { lineId: tr.getAttribute('data-line-id'), status: tr.querySelector('select[data-role="status"]').value };
       });
       if(!lines.length) { alert('저장할 항목이 없습니다.'); return; }
 
-      var url = ctx + '/hq/sales-orders/' + encodeURIComponent(state.orderId) + '/inspect';
-      fetch(url, { 
-          method:'POST', 
-          headers:{ 'Content-Type':'application/json' }, 
-          body: JSON.stringify(lines) // lines 배열을 직접 전송
-        })
-        .then(function(r){ 
-            if(!r.ok) throw new Error('save failed'); 
-            return r.json(); 
-        })
-        .then(function(){ 
-            alert('검수 상태가 저장되었습니다.'); 
-            closeInspect();
-            // 목록을 새로고침하여 상태 변경을 반영
-            window.location.reload(); 
-        })
-        .catch(function(err){ 
-            console.error(err);
-            alert('저장에 실패했습니다. 다시 시도해주세요.'); 
-        });
+      if(state.mock){
+        alert('MOCK: 검수 상태가 저장되었습니다. (서버 연동 전)');
+        closeInspect();
+        return;
+      }
+
+      var url = ctx + '/hq/sales-orders/' + encodeURIComponent(state.orderId) + '/inspect?page=' + state.page;
+      fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ lines: lines }) })
+        .then(function(r){ if(!r.ok) throw new Error('save failed'); return r.json ? r.json() : null; })
+        .then(function(){ alert('검수 상태가 저장되었습니다.'); closeInspect(); })
+        .catch(function(){ alert('저장에 실패했습니다. 다시 시도해주세요.'); });
     });
 
     function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;'); }

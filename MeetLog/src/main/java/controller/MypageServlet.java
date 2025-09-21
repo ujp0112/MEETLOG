@@ -17,47 +17,60 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/mypage/*")
+//@WebServlet("/mypage/*")
 public class MypageServlet extends HttpServlet {
-    
-    private UserService userService = new UserService();
-    private ReservationService reservationService = new ReservationService();
-    private ReviewService reviewService = new ReviewService();
-    private ColumnService columnService = new ColumnService();
+    private static final long serialVersionUID = 1L;
+    private final UserService userService = new UserService();
+    private final ReservationService reservationService = new ReservationService();
+    private final ReviewService reviewService = new ReviewService();
+    private final ColumnService columnService = new ColumnService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
         
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-        
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login?redirectUrl=" + request.getRequestURI());
             return;
         }
         
+        User user = (User) session.getAttribute("user");
         request.setAttribute("user", user);
         
         try {
+            String forwardPath = null;
             if (pathInfo == null || pathInfo.equals("/")) {
-                handleMyPageMain(request, response, user.getId()); 
-            } else if (pathInfo.equals("/reservations")) {
-                handleMyReservations(request, response, user.getId()); 
-            } else if (pathInfo.equals("/reviews")) {
-                handleMyReviews(request, response, user.getId()); 
-            } else if (pathInfo.equals("/columns")) {
-                handleMyColumns(request, response, user.getId()); 
-            } else if (pathInfo.equals("/settings")) {
-                handleSettings(request, response);
+                handleMyPageMain(request, user.getId()); 
+                forwardPath = "/WEB-INF/views/mypage.jsp";
             } else {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                switch (pathInfo) {
+                    case "/reservations":
+                        handleMyReservations(request, user.getId()); 
+                        forwardPath = "/WEB-INF/views/my-reservations.jsp";
+                        break;
+                    case "/reviews":
+                        handleMyReviews(request, user.getId()); 
+                        forwardPath = "/WEB-INF/views/my-reviews.jsp";
+                        break;
+                    case "/columns":
+                        handleMyColumns(request, user.getId()); 
+                        forwardPath = "/WEB-INF/views/my-columns.jsp";
+                        break;
+                    case "/settings":
+                        forwardPath = "/WEB-INF/views/settings.jsp";
+                        break;
+                    default:
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                        return;
+                }
             }
+            request.getRequestDispatcher(forwardPath).forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "페이지 처리 중 오류가 발생했습니다: " + e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
         }
     }
     
@@ -68,26 +81,27 @@ public class MypageServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String pathInfo = request.getPathInfo();
         
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-
-        if (user == null) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        
+        User user = (User) session.getAttribute("user");
 
-        if (pathInfo != null && pathInfo.equals("/settings")) {
+        if ("/settings".equals(pathInfo)) {
             String action = request.getParameter("action");
 
             if ("updateProfile".equals(action)) {
                 String nickname = request.getParameter("nickname");
-                String profileImage = request.getParameter("profileImage");
+                String profileImage = request.getParameter("profileImage"); // 파일 업로드 로직이 필요하다면 별도 구현 필요
                 boolean success = userService.updateProfile(user.getId(), nickname, profileImage);
                 
                 if (success) {
                     request.setAttribute("successMessage", "프로필이 성공적으로 수정되었습니다.");
+                    // 세션의 user 객체도 업데이트
                     user.setNickname(nickname);
-                    user.setProfileImage(profileImage);
+                    if (profileImage != null) user.setProfileImage(profileImage);
                     session.setAttribute("user", user);
                 } else {
                     request.setAttribute("errorMessage", "프로필 수정 중 오류가 발생했습니다.");
@@ -98,7 +112,7 @@ public class MypageServlet extends HttpServlet {
                 String newPassword = request.getParameter("newPassword");
                 String confirmPassword = request.getParameter("confirmPassword");
                 
-                if (!newPassword.equals(confirmPassword)) {
+                if (newPassword == null || !newPassword.equals(confirmPassword)) {
                     request.setAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
                 } else {
                     boolean success = userService.changePassword(user.getId(), currentPassword, newPassword);
@@ -115,37 +129,21 @@ public class MypageServlet extends HttpServlet {
         }
     }
     
-    private void handleMyPageMain(HttpServletRequest request, HttpServletResponse response, int userId) throws ServletException, IOException {
-        List<Reservation> recentReservations = reservationService.getRecentReservations(userId, 3);
-        List<Review> recentReviews = reviewService.getRecentReviews(userId, 3);
-        List<Column> recentColumns = columnService.getRecentColumns(userId, 3);
-        
-        request.setAttribute("recentReservations", recentReservations);
-        request.setAttribute("recentReviews", recentReviews);
-        request.setAttribute("recentColumns", recentColumns);
-        
-        request.getRequestDispatcher("/WEB-INF/views/mypage.jsp").forward(request, response);
+    private void handleMyPageMain(HttpServletRequest request, int userId) {
+        request.setAttribute("recentReservations", reservationService.getRecentReservations(userId, 3));
+        request.setAttribute("recentReviews", reviewService.getRecentReviews(userId, 3));
+        request.setAttribute("recentColumns", columnService.getRecentColumns(userId, 3));
     }
     
-    private void handleMyReservations(HttpServletRequest request, HttpServletResponse response, int userId) throws ServletException, IOException {
-        List<Reservation> reservations = reservationService.getReservationsByUserId(userId);
-        request.setAttribute("reservations", reservations);
-        request.getRequestDispatcher("/WEB-INF/views/my-reservations.jsp").forward(request, response);
+    private void handleMyReservations(HttpServletRequest request, int userId) {
+        request.setAttribute("reservations", reservationService.getReservationsByUserId(userId));
     }
     
-    private void handleMyReviews(HttpServletRequest request, HttpServletResponse response, int userId) throws ServletException, IOException {
-        List<Review> reviews = reviewService.getReviewsByUserId(userId);
-        request.setAttribute("reviews", reviews);
-        request.getRequestDispatcher("/WEB-INF/views/my-reviews.jsp").forward(request, response);
+    private void handleMyReviews(HttpServletRequest request, int userId) {
+        request.setAttribute("reviews", reviewService.getReviewsByUserId(userId));
     }
     
-    private void handleMyColumns(HttpServletRequest request, HttpServletResponse response, int userId) throws ServletException, IOException {
-        List<Column> columns = columnService.getColumnsByUserId(userId);
-        request.setAttribute("columns", columns);
-        request.getRequestDispatcher("/WEB-INF/views/my-columns.jsp").forward(request, response);
-    }
-    
-    private void handleSettings(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/settings.jsp").forward(request, response);
+    private void handleMyColumns(HttpServletRequest request, int userId) {
+        request.setAttribute("columns", columnService.getColumnsByUserId(userId));
     }
 }

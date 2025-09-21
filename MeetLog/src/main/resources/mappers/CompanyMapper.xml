@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.CompanyDAO">
+
+    <insert id="insert" parameterType="model.Company" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO companies (name)
+        VALUES (#{name})
+    </insert>
+
+    <select id="existsById" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM companies WHERE id = #{id}
+    </select>
+    
+</mapper>

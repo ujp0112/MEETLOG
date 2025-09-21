@@ -3,19 +3,28 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.OperatingHourDAO">
-	<resultMap id="operatingHourResultMap" type="OperatingHour">
-		<id property="id" column="id" />
-		<result property="restaurantId" column="restaurant_id" />
-		<result property="dayOfWeek" column="day_of_week" />
-		<result property="openingTime" column="opening_time" />
-		<result property="closingTime" column="closing_time" />
-	</resultMap>
+    
+    <resultMap id="operatingHourResultMap" type="OperatingHour">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id" />
+        <result property="dayOfWeek" column="day_of_week" />
+        <result property="openingTime" column="opening_time" />
+        <result property="closingTime" column="closing_time" />
+    </resultMap>
 
-	<select id="findByRestaurantId" parameterType="int"
-		resultMap="operatingHourResultMap">
-		SELECT id, restaurant_id, day_of_week, opening_time, closing_time
-		FROM restaurant_operating_hours
-		WHERE restaurant_id = #{restaurantId}
-		ORDER BY day_of_week, opening_time
-	</select>
+    <select id="findByRestaurantId" parameterType="int" resultMap="operatingHourResultMap">
+        SELECT *
+        FROM restaurant_operating_hours
+        WHERE restaurant_id = #{restaurantId}
+        ORDER BY day_of_week, opening_time
+    </select>
+    
+    <insert id="insertList" parameterType="java.util.List">
+        INSERT INTO restaurant_operating_hours 
+        (restaurant_id, day_of_week, opening_time, closing_time)
+        VALUES
+        <foreach collection="list" item="hour" separator=",">
+            (#{hour.restaurantId}, #{hour.dayOfWeek}, #{hour.openingTime}, #{hour.closingTime})
+        </foreach>
+    </insert>
 </mapper>

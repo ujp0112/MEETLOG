@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,11 +19,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.CommunityCourse;
 import model.OfficialCourse;
-import model.Paging; 
+import model.Paging;
 import model.User;
 import model.CourseStep;
 import model.Restaurant;
-import service.CourseService; 
+import service.CourseService;
 import service.RestaurantService;
 
 @MultipartConfig(
@@ -28,6 +31,7 @@ import service.RestaurantService;
     maxFileSize = 1024 * 1024 * 10,
     maxRequestSize = 1024 * 1024 * 15
 )
+//@WebServlet("/course/*")
 public class CourseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -48,7 +52,7 @@ public class CourseServlet extends HttpServlet {
                 showCourseDetail(request, response);
             } else if (path.equals("/create")) {
                 showCreateCourseForm(request, response);
-            } else if (path.equals("/search-places")) { 
+            } else if (path.equals("/search-places")) {
                 handleSearchPlaces(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -61,24 +65,24 @@ public class CourseServlet extends HttpServlet {
         }
     }
     
-    private void handleSearchPlaces(HttpServletRequest request, HttpServletResponse response) 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        String path = request.getPathInfo();
+        if ("/create".equals(path)) {
+            handleCreateCourseSubmit(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        }
+    }
+
+    private void handleSearchPlaces(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String keyword = request.getParameter("keyword");
         List<Restaurant> results = restaurantService.searchRestaurants(keyword);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(results));
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8"); 
-        String path = request.getPathInfo();
-        if ("/create".equals(path)) {
-            handleCreateCourseSubmit(request, response);
-        } else {
-            doGet(request, response);
-        }
     }
 
     private void handleCreateCourseSubmit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -88,22 +92,34 @@ public class CourseServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+        
         try {
             String title = request.getParameter("title");
             String tags = request.getParameter("tags");
             Part filePart = request.getPart("thumbnail");
-            String fileName = filePart.getSubmittedFileName();
-            String uploadPath = getServletContext().getRealPath("") + File.separator + "uploads";
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) uploadDir.mkdir();
-            String filePath = uploadPath + File.separator + fileName;
-            filePart.write(filePath);
-            String previewImageUrl = "uploads/" + fileName;
+            
+            String savedFilePath = null;
+            if (filePart != null && filePart.getSize() > 0) {
+                String originalFileName = filePart.getSubmittedFileName();
+                String uploadDirectory = "uploads" + File.separator + "course_thumbnails";
+                String realUploadPath = getServletContext().getRealPath(uploadDirectory);
+                
+                File uploadDir = new File(realUploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+                filePart.write(realUploadPath + File.separator + uniqueFileName);
+                savedFilePath = uploadDirectory + File.separator + uniqueFileName;
+            }
+
             List<CourseStep> steps = new ArrayList<>();
             int stepIndex = 1;
             while (true) {
                 String stepName = request.getParameter("step_name_" + stepIndex);
                 if (stepName == null) break;
+                
                 CourseStep step = new CourseStep();
                 step.setName(stepName);
                 step.setType(request.getParameter("step_type_" + stepIndex));
@@ -112,11 +128,14 @@ public class CourseServlet extends HttpServlet {
                 steps.add(step);
                 stepIndex++;
             }
+            
             CommunityCourse course = new CommunityCourse();
             course.setUserId(user.getId());
             course.setTitle(title);
-            course.setPreviewImage(previewImageUrl);
+            course.setPreviewImage(savedFilePath);
+            
             boolean success = courseService.createCourseWithSteps(course, steps);
+            
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/course/detail?id=" + course.getId());
             } else {
@@ -147,18 +166,20 @@ public class CourseServlet extends HttpServlet {
                 page = Integer.parseInt(request.getParameter("page"));
             } catch (NumberFormatException e) { page = 1; }
         }
+        
         List<CommunityCourse> communityCourses = courseService.getCommunityCourses(query, area, page);
         Paging paging = courseService.getCommunityCoursePaging(query, area, page);
         List<OfficialCourse> officialCourses = courseService.getOfficialCourses();
+        
         request.setAttribute("communityCourses", communityCourses);
         request.setAttribute("paging", paging);
         request.setAttribute("officialCourses", officialCourses);
         request.setAttribute("query", query);
         request.setAttribute("area", area);
+        
         request.getRequestDispatcher("/WEB-INF/views/course-recommendation.jsp").forward(request, response);
     }
     
-    // [수정] 코스 상세 정보를 보여주는 메소드
     private void showCourseDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int courseId = 0;
         try {
@@ -168,15 +189,11 @@ public class CourseServlet extends HttpServlet {
             return;
         }
         
-        // 1. 코스 기본 정보 가져오기
         CommunityCourse course = courseService.getCourseDetail(courseId);
-        
-        // 2. [추가] 코스에 포함된 개별 경로(steps) 목록 가져오기
         List<CourseStep> steps = courseService.getCourseSteps(courseId);
         
-        // 3. JSP로 두 가지 데이터를 모두 전달
         request.setAttribute("course", course);
-        request.setAttribute("steps", steps); // <-- 이 부분이 추가되었습니다.
+        request.setAttribute("steps", steps);
         
         request.getRequestDispatcher("/WEB-INF/views/course-detail.jsp").forward(request, response);
     }

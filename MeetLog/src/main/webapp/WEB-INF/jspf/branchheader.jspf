@@ -357,13 +357,13 @@ a {
 			<a href="${ctx }/branch/menus"
    class="${fn:contains(uri, '/branch/menu') ? 'act' : ''}">메뉴관리</a>
 
-<a href="${pageContext.request.contextPath}/branch/order"
+<a href="./order.jsp"
    class="${fn:contains(uri, '/branch/order') ? 'act' : ''}">발주</a>
 
-<a href="${ctx }/branch/orders-history"
+<a href="./orders-history.jsp"
    class="${fn:contains(uri, '/branch/orders-history') ? 'act' : ''}">발주기록</a>
 
-<a href="${ctx }/branch/inventory"
+<a href="./inventory.jsp"
    class="${fn:contains(uri, '/branch/inventory') ? 'act' : ''}">재고</a>
 </div>
 
@@ -375,7 +375,7 @@ a {
 				<c:when test="${not empty sessionScope.authUser}">
 					<span style="margin-right: 8px;"><c:out
 							value="${sessionScope.authUser.name}" /></span>
-					<a class="btn" href="${pageContext.request.contextPath}/logout">로그아웃</a>
+					<a class="btn" href="${contextPath}/auth/logout">로그아웃</a>
 				</c:when>
 				<c:otherwise>
 					<a class="btn primary" href="${contextPath}/login.jsp">로그인</a>

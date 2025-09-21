@@ -11,7 +11,7 @@ public class Restaurant {
 	private String address;
 	private String jibunAddress;
 	private String phone;
-	private String hours; // 사용자에게 보여줄 운영 시간 문자열
+	private String hours;
 	private String description;
 	private String image;
 	private double rating;
@@ -23,14 +23,14 @@ public class Restaurant {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private boolean isActive;
+	private int ownerId; // 사업자 회원의 user_id
+
 	private List<Menu> menuList;
-	private int ownerId;
 
 	public Restaurant() {
 	}
 
-	// --- 모든 Getters and Setters ---
-	// (기존 Getter/Setter 내용은 여기에 그대로 유지)
+	// --- Getters and Setters ---
 	public int getId() {
 		return id;
 	}
@@ -183,19 +183,19 @@ public class Restaurant {
 		this.isActive = active;
 	}
 
-	public List<Menu> getMenuList() {
-		return menuList;
-	}
-
-	public void setMenuList(List<Menu> menuList) {
-		this.menuList = menuList;
-	}
-
 	public int getOwnerId() {
 		return ownerId;
 	}
 
 	public void setOwnerId(int ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public List<Menu> getMenuList() {
+		return menuList;
+	}
+
+	public void setMenuList(List<Menu> menuList) {
+		this.menuList = menuList;
 	}
 }

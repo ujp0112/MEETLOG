@@ -37,40 +37,32 @@ public class UserDAO {
     }
 
     /**
-     * 단독으로 User를 삽입할 때 사용하는 기존 메소드 (Auto-commit은 MyBatis 설정에 따름)
+     * 단독으로 User를 삽입할 때 사용하는 기존 메소드 (Auto-commit)
      */
     public int insert(User user) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.insert(NAMESPACE + ".insert", user);
-            sqlSession.commit(); // 수동 커밋
-            return result;
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) { // 자동 커밋
+            return sqlSession.insert(NAMESPACE + ".insert", user);
         }
     }
 
     public int update(User user) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".update", user);
-            sqlSession.commit(); // 수동 커밋
-            return result;
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
+            return sqlSession.update(NAMESPACE + ".update", user);
         }
     }
     
     public int updatePassword(int userId, String newHashedPassword) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
             Map<String, Object> params = new HashMap<>();
             params.put("id", userId);
             params.put("password", newHashedPassword);
-            int result = sqlSession.update(NAMESPACE + ".updatePassword", params);
-            sqlSession.commit(); // 수동 커밋
-            return result;
+            return sqlSession.update(NAMESPACE + ".updatePassword", params);
         }
     }
 
     public int delete(int id) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".delete", id);
-            sqlSession.commit(); // 수동 커밋
-            return result;
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
+            return sqlSession.update(NAMESPACE + ".delete", id);
         }
     }
 

@@ -60,7 +60,7 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:760px
 </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jspf/header.jspf" %>
+<%@ include file="/WEB-INF/layout/header.jspf" %>
 
 <section class="panel" aria-labelledby="pageTitle">
   <div class="hd">

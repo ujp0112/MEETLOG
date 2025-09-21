@@ -3,8 +3,10 @@ package service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import dao.CourseDAO;
 
+import org.apache.ibatis.session.SqlSession; // SqlSession import
+import util.MyBatisSqlSessionFactory;      // SqlSessionFactory import
+import dao.CourseDAO;
 import model.CommunityCourse;
 import model.OfficialCourse;
 import model.CourseStep;
@@ -14,32 +16,44 @@ public class CourseService {
     
     private CourseDAO courseDAO = new CourseDAO();
 
+    /**
+     * [수정] 코스와 경로들을 하나의 트랜잭션으로 묶어 처리하는 메소드
+     */
     public boolean createCourseWithSteps(CommunityCourse course, List<CourseStep> steps) {
-        int courseResult = courseDAO.insertCourse(course);
-        
-        if (courseResult > 0) {
-            int generatedCourseId = course.getId();
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. 코스 정보 저장
+            courseDAO.insertCourse(course, session);
             
+            // 2. 방금 생성된 코스의 ID를 가져옴
+            int generatedCourseId = course.getId(); 
+            
+            // 3. 각 경로(Step)에 코스 ID를 설정하고 순서대로 저장
             for (int i = 0; i < steps.size(); i++) {
                 CourseStep step = steps.get(i);
                 step.setCourseId(generatedCourseId);
-                step.setOrder(i + 1); // 순서 설정
-                courseDAO.insertCourseStep(step);
+                step.setOrder(i + 1);
+                courseDAO.insertCourseStep(step, session);
             }
+            
+            // 4. 모든 작업이 성공하면 최종 commit
+            session.commit();
             return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 5. 중간에 오류가 발생하면 모든 작업을 취소 (rollback)
+            session.rollback();
+            return false;
+        } finally {
+            // 6. 작업이 끝나면 세션을 닫아줌
+            session.close();
         }
-        return false;
     }
 
     public CommunityCourse getCourseDetail(int courseId) {
         return courseDAO.findDetailById(courseId);
     }
     
-    /**
-     * [추가] 특정 코스의 경로(steps) 목록을 조회하는 서비스 메소드
-     * @param courseId 코스 ID
-     * @return 해당 코스의 경로 목록
-     */
     public List<CourseStep> getCourseSteps(int courseId) {
         return courseDAO.findStepsByCourseId(courseId);
     }

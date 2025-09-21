@@ -38,14 +38,12 @@
             answer,
             is_owner,
             restaurant_id,
-            is_active,
             created_at
         ) VALUES (
             #{question},
             #{answer},
             #{isOwner},
             #{restaurantId},
-            true,
             NOW()
         )
     </insert>
@@ -61,9 +59,8 @@
     
     <update id="deleteQnA" parameterType="int">
         UPDATE restaurant_qna 
-        SET 
-            is_active = false
-        WHERE id = #{qnaId}
+        SET is_active = false 
+        WHERE id = #{id}
     </update>
     
 </mapper>
