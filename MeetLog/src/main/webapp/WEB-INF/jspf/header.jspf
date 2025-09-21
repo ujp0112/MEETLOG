@@ -82,7 +82,7 @@
 
 <header class="app-header">
   <div class="container row">
-    <a class="brand" href="#">
+    <a class="brand" href="${ctx}/main">
       <span>Meetlog</span>
       <span class="badge">HQ</span>
     </a>
@@ -98,14 +98,14 @@
 
         <span>
   <c:choose>
-    <c:when test="${not empty sessionScope.authUser}">
-      <span style="margin-right:8px;"><c:out value="${sessionScope.authUser.name}" /></span>
+    <c:when test="${not empty sessionScope.user}">
+      <span style="margin-right:8px;"><c:out value="${sessionScope.user.nickname}" /></span>
       <a class="btn" href="${contextPath}/auth/logout">로그아웃</a>
     </c:when>
     <c:otherwise>
-      <a class="btn primary" href="${contextPath}/login.jsp">로그인</a>
+      <a class="btn primary" href="#">로그인</a>
       &nbsp;|&nbsp;
-      <a class="btn primary" href="${contextPath}/register-hq.jsp">회원가입</a>
+      <a class="btn primary" href="#">회원가입</a>
     </c:otherwise>
   </c:choose>
 </span>

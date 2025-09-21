@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
 import dto.AppUser;
 import dto.PurchaseOrder;
 import dto.PurchaseOrderLine;
+import model.BusinessUser;
 import service.OrderService;
 
 @WebServlet(urlPatterns = {"/hq/sales-orders", "/hq/sales-orders/*"})
@@ -30,7 +31,7 @@ public class HqSalesOrdersServlet extends HttpServlet {
 
 		String path = req.getPathInfo();
 	    HttpSession session = req.getSession(false);
-	    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+	    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 	    if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
 	    long companyId = user.getCompanyId();
 
@@ -43,7 +44,7 @@ public class HqSalesOrdersServlet extends HttpServlet {
 
 			List<PurchaseOrder> list = orderService.listOrdersForCompany(companyId, status, size, offset);
 			req.setAttribute("orders", list);
-			req.getRequestDispatcher("/hq/sales-orders.jsp").forward(req, resp);
+			req.getRequestDispatcher("/WEB-INF/hq/sales-orders.jsp").forward(req, resp);
 			return;
 		}
 
@@ -76,7 +77,7 @@ public class HqSalesOrdersServlet extends HttpServlet {
 	    // 경로가 /_ORDER_ID_/inspect 형태인지 확인 (e.g., /101/inspect)
 	    if (pathParts.length == 3 && "inspect".equals(pathParts[2])) {
 	        HttpSession session = req.getSession(false);
-	        AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+	        BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 	        if (user == null) {
 	            resp.sendError(403, "Authentication required");
 	            return;

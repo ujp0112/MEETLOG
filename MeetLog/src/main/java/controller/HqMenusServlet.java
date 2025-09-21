@@ -22,6 +22,7 @@ import javax.servlet.http.Part;
 import dto.AppUser;
 import dto.BranchMenu;
 import dto.MenuIngredient;
+import model.BusinessUser;
 import service.BranchMenuService;
 import service.MaterialService;
 
@@ -37,7 +38,7 @@ public class HqMenusServlet extends HttpServlet {
     req.setCharacterEncoding("UTF-8");
 
     HttpSession session = req.getSession(false);
-    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
     if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
     long companyId = user.getCompanyId();
     String pi = req.getPathInfo(); // 예: null, "/", "/123/ingredients"
@@ -74,7 +75,7 @@ public class HqMenusServlet extends HttpServlet {
     req.setAttribute("materials", materialService.listByCompany(companyId));
 
     // 이 JSP는 반드시 서블릿을 통해 접근
-    req.getRequestDispatcher("/hq/menu-register.jsp").forward(req, resp);
+    req.getRequestDispatcher("/WEB-INF/hq/menu-register.jsp").forward(req, resp);
   }
 
   @Override
@@ -82,7 +83,7 @@ public class HqMenusServlet extends HttpServlet {
     req.setCharacterEncoding("UTF-8");
 
     HttpSession session = req.getSession(false);
-    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
     if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
     long companyId = user.getCompanyId();
 

@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import dto.AppUser;
 import dto.PurchaseOrderLine;
+import model.BusinessUser;
 import service.OrderService;
 
 @WebServlet("/orderForm")
@@ -23,16 +23,17 @@ public class OrderServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		HttpSession session = req.getSession(false);
-        AppUser user = (session != null) ? (AppUser) session.getAttribute("authUser") : null;
+		BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 
-        if (user == null || user.getBranchId() == null) {
+        if (user == null || user.getUserId()+"" == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
 
         long companyId = user.getCompanyId();
-        long branchIdObj = user.getBranchId();
-		if (user.getBranchId() == null) {
+        long branchIdObj = user.getUserId();
+        System.out.println("companyId : " + companyId + ", branchId : " + branchIdObj);
+		if ((user.getUserId()+"").equals("") || user.getUserId()+"" == null) {
 			resp.sendError(403);
 			return;
 		}

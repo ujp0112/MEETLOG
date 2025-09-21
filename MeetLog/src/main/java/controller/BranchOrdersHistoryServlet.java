@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import dto.AppUser;
 import dto.PurchaseOrder;
 import dto.PurchaseOrderLine;
+import model.BusinessUser;
 import service.OrderService;
 
 @WebServlet(urlPatterns = {"/branch/orders-history", "/branch/orders/*"})
@@ -28,15 +29,15 @@ public class BranchOrdersHistoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        AppUser user = (session != null) ? (AppUser) session.getAttribute("authUser") : null;
+        BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 
-        if (user == null || user.getBranchId() == null) {
+        if (user == null || user.getUserId()+"" == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
 
         long companyId = user.getCompanyId();
-        long branchId = user.getBranchId();
+        long branchId = user.getUserId();
         String path = req.getPathInfo();
 
         // 1. 상세 보기 API 요청 처리 (e.g., /123/details)
@@ -82,9 +83,9 @@ public class BranchOrdersHistoryServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        AppUser user = (session != null) ? (AppUser) session.getAttribute("authUser") : null;
+        BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 
-        if (user == null || user.getBranchId() == null) {
+        if (user == null || user.getUserId()+"" == null) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN); // 403 Forbidden
             return;
         }

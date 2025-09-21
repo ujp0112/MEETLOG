@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 
 import dto.AppUser;
 import dto.Material;
+import model.BusinessUser;
 import service.MaterialService;
 
 @WebServlet(urlPatterns = {"/branch/order", "/branch/order/*"})
@@ -20,8 +21,8 @@ public class BranchOrderPageServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-    HttpSession session = req.getSession(false);
-    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+    HttpSession session = req.getSession();
+    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
     if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
 
     long companyId = user.getCompanyId();

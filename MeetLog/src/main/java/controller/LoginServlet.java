@@ -46,7 +46,7 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("user", user);
                 
                 // 비즈니스 회원이면 businessUser 정보도 세션에 저장
-                if ("BUSINESS".equals(user.getUserType())) {
+                if ("BUSINESS".equals(user.getUserType().toUpperCase())) {
                      session.setAttribute("businessUser", userService.getBusinessUserByUserId(user.getId()));
                 }
                 

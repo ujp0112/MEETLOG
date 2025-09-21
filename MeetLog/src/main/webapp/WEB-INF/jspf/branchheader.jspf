@@ -349,7 +349,7 @@ a {
 
 <header class="app-header">
 	<div class="container row">
-		<a class="brand" href="#"> <span>Meetlog</span>
+		<a class="brand" href="${ctx}/main"> <span>Meetlog</span>
 			<span class="badge">BRANCH</span>
 		</a>
 
@@ -357,13 +357,13 @@ a {
 			<a href="${ctx }/branch/menus"
    class="${fn:contains(uri, '/branch/menu') ? 'act' : ''}">메뉴관리</a>
 
-<a href="./order.jsp"
+<a href="${ctx }/branch/order"
    class="${fn:contains(uri, '/branch/order') ? 'act' : ''}">발주</a>
 
-<a href="./orders-history.jsp"
+<a href="${ctx }/branch/orders-history"
    class="${fn:contains(uri, '/branch/orders-history') ? 'act' : ''}">발주기록</a>
 
-<a href="./inventory.jsp"
+<a href="${ctx }/branch/inventory"
    class="${fn:contains(uri, '/branch/inventory') ? 'act' : ''}">재고</a>
 </div>
 
@@ -372,9 +372,9 @@ a {
 
 
 		<span> <c:choose>
-				<c:when test="${not empty sessionScope.authUser}">
+				<c:when test="${not empty sessionScope.businessUser}">
 					<span style="margin-right: 8px;"><c:out
-							value="${sessionScope.authUser.name}" /></span>
+							value="${sessionScope.businessUser.ownerName}" /></span>
 					<a class="btn" href="${contextPath}/auth/logout">로그아웃</a>
 				</c:when>
 				<c:otherwise>

@@ -56,5 +56,6 @@
 		<mapper resource="mappers/BranchMenuMapper.xml" />
 		<mapper resource="mappers/BranchMapper.xml" />
 		<mapper resource="mappers/OrderMapper.xml" />
+		<mapper resource="mappers/CompanyMapper.xml" />
 	</mappers>
 </configuration>

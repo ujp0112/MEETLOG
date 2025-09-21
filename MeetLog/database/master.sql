@@ -88,6 +88,105 @@ CREATE TABLE `restaurants` (
   CONSTRAINT `restaurants_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+CREATE TABLE material (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  company_id INT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  unit VARCHAR(30) NOT NULL,
+  unit_price DECIMAL(12,2) NOT NULL,
+  img_path VARCHAR(255),
+  step DECIMAL(12,2) DEFAULT 1,
+  active_yn CHAR(1) DEFAULT 'Y',
+  deleted_yn CHAR(1) DEFAULT 'N',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  KEY idx_material_company (company_id),
+  UNIQUE KEY uq_material_company_id (company_id, id),
+  CONSTRAINT fk_material_company FOREIGN KEY (company_id) REFERENCES business_users(company_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE menu (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  company_id INT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  price DECIMAL(12,0) NOT NULL,
+  img_path VARCHAR(255),
+  active_yn CHAR(1) DEFAULT 'Y',
+  deleted_yn CHAR(1) DEFAULT 'N',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  KEY idx_menu_company (company_id),
+  UNIQUE KEY uq_menu_company_id (company_id, id),
+  CONSTRAINT fk_menu_company FOREIGN KEY (company_id) REFERENCES business_users(company_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE menu_ingredient (
+  company_id INT NOT NULL,
+  menu_id INT NOT NULL,
+  material_id INT NOT NULL,
+  qty DECIMAL(12,3) NOT NULL,
+  PRIMARY KEY (company_id, menu_id, material_id),
+  KEY idx_mi_menu (menu_id),
+  KEY idx_mi_material (material_id),
+  CONSTRAINT fk_mi_menu FOREIGN KEY (company_id, menu_id) REFERENCES menu(company_id, id) ON DELETE CASCADE,
+  CONSTRAINT fk_mi_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE branch_inventory (
+  company_id INT NOT NULL,
+  branch_id INT NOT NULL,
+  material_id INT NOT NULL,
+  qty DECIMAL(12,2) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMP NULL,
+  PRIMARY KEY (company_id, branch_id, material_id),
+  KEY idx_bi_branch (branch_id),
+  KEY idx_bi_material (material_id),
+  CONSTRAINT fk_bi_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_bi_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE branch_menu_toggle (
+  company_id INT NOT NULL,
+  branch_id INT NOT NULL,
+  menu_id INT NOT NULL,
+  enabled CHAR(1) NOT NULL DEFAULT 'Y',
+  updated_at TIMESTAMP NULL,
+  PRIMARY KEY (company_id, branch_id, menu_id),
+  KEY idx_bmt_branch (branch_id),
+  KEY idx_bmt_menu (menu_id),
+  CONSTRAINT fk_bmt_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_bmt_menu FOREIGN KEY (company_id, menu_id) REFERENCES menu(company_id, id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE purchase_order (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  company_id INT NOT NULL,
+  branch_id INT NOT NULL,
+  status ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
+  total_price DECIMAL(14,0) NOT NULL DEFAULT 0,
+  ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  KEY idx_po_company (company_id),
+  KEY idx_po_branch (branch_id),
+  CONSTRAINT fk_po_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE purchase_order_line (
+  company_id INT NOT NULL,
+  order_id INT NOT NULL,
+  line_no INT NOT NULL,
+  material_id INT NOT NULL,
+  qty DECIMAL(12,2) NOT NULL,
+  unit_price DECIMAL(12,2) NOT NULL,
+  status ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
+  PRIMARY KEY (company_id, order_id, line_no),
+  KEY idx_pol_order (order_id),
+  KEY idx_pol_material (material_id),
+  CONSTRAINT fk_pol_order FOREIGN KEY (company_id, order_id) REFERENCES purchase_order(company_id, id) ON DELETE CASCADE,
+  CONSTRAINT fk_pol_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 -- (이하 모든 테이블 생성 구문은 생략 없이 올바르게 포함됩니다)
 CREATE TABLE `menus` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `price` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `is_popular` tinyint(1) DEFAULT '0', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `reviews` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `user_id` int NOT NULL, `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `author_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `rating` int NOT NULL, `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `images` json DEFAULT NULL, `keywords` json DEFAULT NULL, `likes` int DEFAULT '0', `is_active` tinyint(1) DEFAULT '1', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), KEY `user_id` (`user_id`), CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_chk_1` CHECK ((`rating` >= 1) and (`rating` <= 5)) ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

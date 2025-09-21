@@ -10,9 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import service.BranchService;
-import dto.AppUser;
 import dto.InventoryItem;
+import model.BusinessUser;
+import service.BranchService;
 
 /**
  * Servlet implementation class BranchInventoryServlet
@@ -26,9 +26,9 @@ public class BranchInventoryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     	HttpSession session = req.getSession(false);
-        AppUser user = (session != null) ? (AppUser) session.getAttribute("authUser") : null;
+    	BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
 
-        if (user == null || user.getBranchId() == null) {
+        if (user == null || user.getUserId()+"" == null) {
             resp.sendRedirect(req.getContextPath() + "/login.jsp");
             return;
         }
@@ -39,7 +39,7 @@ public class BranchInventoryServlet extends HttpServlet {
         int offset = (page - 1) * PAGE_SIZE;
 
         long companyId = user.getCompanyId();
-        long branchId = user.getBranchId();
+        long branchId = user.getUserId();
         List<InventoryItem> inventories = branchService.listInventoryForBranch(companyId, branchId, PAGE_SIZE, offset);
         int totalCount = branchService.getTotalMaterialCount(companyId);
         

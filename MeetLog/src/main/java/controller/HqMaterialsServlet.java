@@ -2,6 +2,7 @@ package controller;
 
 import dto.AppUser;
 import dto.Material;
+import model.BusinessUser;
 import service.MaterialService;
 
 import javax.servlet.ServletException;
@@ -24,14 +25,14 @@ public class HqMaterialsServlet extends HttpServlet {
     req.setCharacterEncoding("UTF-8");
 
     HttpSession session = req.getSession(false);
-    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
     if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
 
     long companyId = user.getCompanyId();
     List<Material> materials = materialService.listByCompany(companyId);
     req.setAttribute("materials", materials);
 
-    req.getRequestDispatcher("/hq/material-management.jsp").forward(req, resp);
+    req.getRequestDispatcher("/WEB-INF/hq/material-management.jsp").forward(req, resp);
   }
 
   @Override
@@ -39,7 +40,7 @@ public class HqMaterialsServlet extends HttpServlet {
     req.setCharacterEncoding("UTF-8");
 
     HttpSession session = req.getSession(false);
-    AppUser user = (session == null) ? null : (AppUser) session.getAttribute("authUser");
+    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
     if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
     long companyId = user.getCompanyId();
 

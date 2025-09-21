@@ -44,9 +44,9 @@
 </select>
 
   <select id="getOrderWithLines" parameterType="map" resultMap="PurchaseOrderMap">
-    SELECT po.*, b.name AS branch_name
+    SELECT po.*, b.business_name AS branch_name
     FROM purchase_order po
-    JOIN branch b ON b.company_id=po.company_id AND b.id=po.branch_id
+    JOIN business_users b ON b.company_id=po.company_id AND b.user_id=po.branch_id
     WHERE po.company_id=#{companyId} AND po.id=#{orderId}
   </select>
 
@@ -72,7 +72,7 @@
   <select id="listOrdersForBranch" parameterType="map" resultMap="PurchaseOrderMap">
   SELECT 
       po.*, 
-      b.name AS branch_name,
+      b.business_name AS branch_name,
       (SELECT m.name 
        FROM purchase_order_line pol 
        JOIN material m ON pol.material_id = m.id AND pol.company_id = m.company_id
@@ -85,7 +85,7 @@
   FROM 
       purchase_order po
   JOIN 
-      branch b ON b.company_id = po.company_id AND b.id = po.branch_id
+      business_users b ON b.company_id = po.company_id AND b.user_id = po.branch_id
   WHERE 
       po.company_id = #{companyId} AND po.branch_id = #{branchId}
   ORDER BY 
@@ -102,7 +102,7 @@
   <select id="listOrdersForCompany" parameterType="map" resultMap="PurchaseOrderMap">
     SELECT 
         po.*, 
-        b.name AS branch_name,
+        b.business_name AS branch_name,
         (SELECT m.name 
          FROM purchase_order_line pol 
          JOIN material m ON pol.material_id = m.id AND pol.company_id = m.company_id
@@ -115,7 +115,7 @@
     FROM 
         purchase_order po
     JOIN 
-        branch b ON b.company_id = po.company_id AND b.id = po.branch_id
+        business_users b ON b.company_id = po.company_id AND b.user_id = po.branch_id
     WHERE 
         po.company_id = #{companyId}
     <if test="status != null and status != ''">
