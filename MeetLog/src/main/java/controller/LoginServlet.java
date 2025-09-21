@@ -28,6 +28,8 @@ public class LoginServlet extends HttpServlet {
         String redirectUrl = request.getParameter("redirectUrl");
         
         try {
+            // 1. UserService를 통해 이메일과 비밀번호로 사용자 인증을 시도합니다.
+            //    이때 반환되는 user 객체는 DB의 모든 컬럼 정보(profileImage 포함)를 가지고 있습니다.
             User user = userService.authenticateUser(email, password);
 
             if (user != null) {
@@ -42,6 +44,7 @@ public class LoginServlet extends HttpServlet {
                     }
                 }
 
+                // 2. 새로운 세션을 생성하고, profileImage가 포함된 완전한 user 객체를 세션에 저장합니다.
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
                 
@@ -52,7 +55,7 @@ public class LoginServlet extends HttpServlet {
                 
                 session.setMaxInactiveInterval(30 * 60);
 
-                // 리다이렉트 처리
+                // 3. 사용자의 유형 또는 요청된 URL에 따라 올바른 페이지로 리다이렉트합니다.
                 String targetUrl = redirectUrl;
                 if (targetUrl == null || targetUrl.trim().isEmpty()) {
                     switch (user.getUserType()) {

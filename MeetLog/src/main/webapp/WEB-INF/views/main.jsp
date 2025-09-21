@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -49,10 +50,8 @@ to {
 									href="${pageContext.request.contextPath}/restaurant/detail?id=${r.id}"
 									class="flex-shrink-0 w-60 bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 group">
 									<div class="relative">
-										<img
-											src="${not empty r.image ? r.image : 'https://placehold.co/600x400/e2e8f0/64748b?text=MEET+LOG'}"
-											alt="${r.name}"
-											class="w-full h-36 object-cover group-hover:opacity-90 transition-opacity">
+										<mytag:image fileName="${r.image}" altText="${r.name}"
+											cssClass="w-full h-36 object-cover group-hover:opacity-90 transition-opacity" />
 										<div
 											class="absolute top-2 left-2 bg-black bg-opacity-60 text-white text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full shadow-lg">
 											${status.count}</div>
@@ -84,7 +83,8 @@ to {
 			<section class="bg-white p-6 rounded-xl my-12 shadow-md">
 				<h2 class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기
 					🔎</h2>
-				<form action="${pageContext.request.contextPath}/restaurant/search" method="get"
+				<form action="${pageContext.request.contextPath}/restaurant/search"
+					method="get"
 					class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 items-end">
 					<div class="col-span-2 lg:col-span-2">
 						<label class="block text-sm font-medium text-slate-700">키워드</label>
@@ -136,9 +136,9 @@ to {
 								<div
 									class="bg-white p-5 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
 									<div class="flex items-center mb-3">
-										<img
-											src="${not empty review.authorImage ? review.authorImage : 'https://placehold.co/100x100/e2e8f0/64748b?text=U'}"
-											class="w-12 h-12 rounded-full mr-4 object-cover">
+										<mytag:image fileName="${review.authorImage}"
+											altText="${review.author}"
+											cssClass="w-12 h-12 rounded-full mr-4 object-cover" />
 										<div>
 											<p class="font-bold text-slate-800">${review.author}</p>
 											<p class="text-sm text-yellow-500">
@@ -173,14 +173,12 @@ to {
 									href="${pageContext.request.contextPath}/column/detail?id=${column.id}"
 									class="bg-white p-6 rounded-2xl shadow-lg block hover:shadow-xl transition-shadow duration-300">
 									<div class="flex items-center mb-4">
-										<img
-											src="${not empty column.authorImage ? column.authorImage : 'https://placehold.co/50x50/a78bfa/ffffff?text=C'}"
-											alt="${column.author}" class="w-10 h-10 rounded-full mr-3">
+										<mytag:image fileName="${column.authorImage}"
+											altText="${column.author}"
+											cssClass="w-10 h-10 rounded-full mr-3" />
 										<div>
 											<h4 class="font-semibold">${column.author}</h4>
-											<p class="text-sm text-slate-500">
-												${column.createdAt}
-											</p>
+											<p class="text-sm text-slate-500">${column.createdAt}</p>
 										</div>
 									</div>
 									<h3

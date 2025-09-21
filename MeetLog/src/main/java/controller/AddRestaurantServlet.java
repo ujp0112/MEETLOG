@@ -25,6 +25,7 @@ import model.User;
 import service.OperatingHourService;
 import service.RestaurantService;
 import util.MyBatisSqlSessionFactory;
+import util.AppConfig;
 
 public class AddRestaurantServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -107,13 +108,23 @@ public class AddRestaurantServlet extends HttpServlet {
             }
 
             if (imageFileItem != null) {
-                String uploadPath = getServletContext().getRealPath("/uploads");
+                // AppConfig를 통해 설정 파일에 정의된 경로를 가져옴
+                String uploadPath = AppConfig.getUploadPath();
+                if (uploadPath == null || uploadPath.isEmpty()) {
+                    throw new Exception("업로드 경로가 config.properties에 설정되지 않았습니다.");
+                }
+
                 File uploadDir = new File(uploadPath);
                 if (!uploadDir.exists()) uploadDir.mkdirs();
-                String fileName = UUID.randomUUID().toString() + "_" + imageFileItem.getName();
+
+                String originalFileName = new File(imageFileItem.getName()).getName();
+                String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
+                
                 File storeFile = new File(uploadPath, fileName);
                 imageFileItem.write(storeFile);
-                restaurant.setImage("uploads/" + fileName);
+                
+                // 데이터베이스에는 경로 없이 순수 파일명만 저장
+                restaurant.setImage(fileName);
             }
             
             // 이 서비스 메소드는 내부적으로 DAO의 'insert'를 호출합니다.

@@ -1,15 +1,12 @@
 package controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-import model.Column;
-import model.Reservation;
-import model.Review;
-import model.User;
-import service.ColumnService;
-import service.ReservationService;
-import service.ReviewService;
-import service.UserService; 
+import java.util.Map;
+import java.util.UUID;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,6 +14,21 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import model.Column;
+import model.Reservation;
+import model.Review;
+import model.User;
+import service.ColumnService;
+import service.ReservationService;
+import service.ReviewService;
+import service.UserService;
+import util.AppConfig;
+
+// web.xml에 매핑되어 있으므로 @WebServlet은 주석 처리 또는 삭제
 //@WebServlet("/mypage/*")
 public class MypageServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -78,61 +90,118 @@ public class MypageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        request.setCharacterEncoding("UTF-8");
-        String pathInfo = request.getPathInfo();
-        
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
         
-        User user = (User) session.getAttribute("user");
+        User currentUser = (User) session.getAttribute("user");
 
-        if ("/settings".equals(pathInfo)) {
-            String action = request.getParameter("action");
+        String pathInfo = request.getPathInfo();
+        if (!"/settings".equals(pathInfo)) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-            if ("updateProfile".equals(action)) {
-                String nickname = request.getParameter("nickname");
-                String profileImage = request.getParameter("profileImage"); // 파일 업로드 로직이 필요하다면 별도 구현 필요
-                boolean success = userService.updateProfile(user.getId(), nickname, profileImage);
-                
-                if (success) {
-                    request.setAttribute("successMessage", "프로필이 성공적으로 수정되었습니다.");
-                    // 세션의 user 객체도 업데이트
-                    user.setNickname(nickname);
-                    if (profileImage != null) user.setProfileImage(profileImage);
-                    session.setAttribute("user", user);
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setHeaderEncoding("UTF-8");
+
+            Map<String, String> formFields = new HashMap<>();
+            FileItem imageFileItem = null;
+
+            List<FileItem> formItems = upload.parseRequest(request);
+
+            for (FileItem item : formItems) {
+                if (item.isFormField()) {
+                    formFields.put(item.getFieldName(), item.getString("UTF-8"));
                 } else {
-                    request.setAttribute("errorMessage", "프로필 수정 중 오류가 발생했습니다.");
-                }
-                
-            } else if ("changePassword".equals(action)) {
-                String currentPassword = request.getParameter("currentPassword");
-                String newPassword = request.getParameter("newPassword");
-                String confirmPassword = request.getParameter("confirmPassword");
-                
-                if (newPassword == null || !newPassword.equals(confirmPassword)) {
-                    request.setAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
-                } else {
-                    boolean success = userService.changePassword(user.getId(), currentPassword, newPassword);
-                    if (success) {
-                        request.setAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
-                    } else {
-                        request.setAttribute("errorMessage", "현재 비밀번호가 올바르지 않거나 오류가 발생했습니다.");
+                    if ("profileImage".equals(item.getFieldName()) && item.getSize() > 0) {
+                        imageFileItem = item;
                     }
                 }
             }
-            request.getRequestDispatcher("/WEB-INF/views/settings.jsp").forward(request, response);
+
+            String action = formFields.get("action");
+
+            if ("updateProfile".equals(action)) {
+                handleUpdateProfile(session, currentUser, formFields, imageFileItem);
+            } else if ("changePassword".equals(action)) {
+                handleChangePassword(session, currentUser, formFields);
+            }
+
+            response.sendRedirect(request.getContextPath() + "/mypage/settings");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.setAttribute("errorMessage", "요청 처리 중 오류가 발생했습니다: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/mypage/settings");
+        }
+    }
+
+    private void handleUpdateProfile(HttpSession session, User user, Map<String, String> formFields, FileItem imageFileItem) throws Exception {
+        String newNickname = formFields.get("nickname");
+        String imageFileName = formFields.get("existingProfileImage"); // 기본값은 기존 이미지 파일명
+
+        if (imageFileItem != null) {
+            String uploadPath = AppConfig.getUploadPath();
+            if (uploadPath == null || uploadPath.isEmpty()) {
+                throw new Exception("업로드 경로가 설정되지 않았습니다.");
+            }
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) uploadDir.mkdirs();
+
+            String originalFileName = new File(imageFileItem.getName()).getName();
+            imageFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+            
+            File storeFile = new File(uploadPath, imageFileName);
+            imageFileItem.write(storeFile);
+        }
+
+        user.setNickname(newNickname);
+        user.setProfileImage(imageFileName);
+
+        boolean success = userService.updateProfile(user.getId(), newNickname, imageFileName);
+
+        if (success) {
+            session.setAttribute("user", user); // 세션 정보 최신화
+            session.setAttribute("successMessage", "프로필이 성공적으로 수정되었습니다.");
         } else {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            session.setAttribute("errorMessage", "프로필 수정 중 오류가 발생했습니다.");
+        }
+    }
+
+    private void handleChangePassword(HttpSession session, User user, Map<String, String> formFields) {
+        String currentPassword = formFields.get("currentPassword");
+        String newPassword = formFields.get("newPassword");
+        String confirmPassword = formFields.get("confirmPassword");
+
+        if (newPassword == null || !newPassword.equals(confirmPassword)) {
+            session.setAttribute("errorMessage", "새 비밀번호가 일치하지 않습니다.");
+            return;
+        }
+        
+        boolean success = userService.changePassword(user.getId(), currentPassword, newPassword);
+        
+        if (success) {
+            session.setAttribute("successMessage", "비밀번호가 성공적으로 변경되었습니다.");
+        } else {
+            session.setAttribute("errorMessage", "현재 비밀번호가 올바르지 않거나 오류가 발생했습니다.");
         }
     }
     
+    // --- 기존의 doGet 헬퍼 메소드들은 그대로 유지 ---
     private void handleMyPageMain(HttpServletRequest request, int userId) {
-        request.setAttribute("recentReservations", reservationService.getRecentReservations(userId, 3));
-        request.setAttribute("recentReviews", reviewService.getRecentReviews(userId, 3));
-        request.setAttribute("recentColumns", columnService.getRecentColumns(userId, 3));
+        // request.setAttribute("recentReservations", reservationService.getRecentReservations(userId, 3));
+        // request.setAttribute("recentReviews", reviewService.getRecentReviews(userId, 3));
+        // request.setAttribute("recentColumns", columnService.getRecentColumns(userId, 3));
+        
+        // 전체 목록을 가져오는 것으로 변경 (mypage.jsp 구조에 맞춤)
+        request.setAttribute("myReviews", reviewService.getReviewsByUserId(userId));
+        request.setAttribute("myColumns", columnService.getColumnsByUserId(userId));
+        request.setAttribute("myReservations", reservationService.getReservationsByUserId(userId));
     }
     
     private void handleMyReservations(HttpServletRequest request, int userId) {

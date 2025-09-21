@@ -172,4 +172,13 @@
 		<url-pattern>/admin/course-statistics</url-pattern>
 	</servlet-mapping>
 
+    <servlet>
+        <servlet-name>ColumnServlet</servlet-name>
+        <servlet-class>controller.ColumnServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ColumnServlet</servlet-name>
+        <url-pattern>/column/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>

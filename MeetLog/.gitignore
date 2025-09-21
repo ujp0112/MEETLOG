@@ -1,12 +1,16 @@
-/build/
-/.apt_generated/
-/.apt_generated_tests/
+# 빌드 결과물 (Maven/Gradle)
 /target/
-/.metadata/
+/build/
 
-# API Key
+# IDE 설정 파일 (Eclipse)
+.settings/
+.classpath
+.project
+/.metadata
+
+# 로그 파일
+*.log
+
+# 개인 설정 및 API 키 파일 (Secrets)
+config.properties
 /src/main/webapp/WEB-INF/api.properties
-
-# Eclipse settings
-/.settings/
- main

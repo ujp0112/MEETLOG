@@ -133,19 +133,9 @@ body {
 				<%-- 상세 정보 --%>
 				<div class="border-t pt-6 space-y-6">
 					<div>
-						<label class="block text-sm font-medium text-gray-700">전화번호</label>
-						<div class="flex gap-2 mt-1">
-							<input type="text" id="phone1" maxlength="4"
-								class="form-input text-center"
-								oninput="this.value = this.value.replace(/[^0-9]/g, '');"><span>-</span>
-							<input type="text" id="phone2" maxlength="4"
-								class="form-input text-center"
-								oninput="this.value = this.value.replace(/[^0-9]/g, '');"><span>-</span>
-							<input type="text" id="phone3" maxlength="4"
-								class="form-input text-center"
-								oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-						</div>
-						<input type="hidden" id="phone" name="phone">
+						<label for="phone" class="block text-sm font-medium text-gray-700">전화번호</label>
+						<input type="text" id="phone" name="phone" class="form-input mt-1"
+							placeholder="예: 02-1234-5678">
 					</div>
 
 					<div>
@@ -208,8 +198,8 @@ body {
 											}
 											%>
 										</select> <input type="hidden" name="day_<%=dayIndex%>_open_1"
-											class="hidden-time-input" value="09:00"> <span>~</span> <select
-											name="day_<%=dayIndex%>_close_1_ampm"
+											class="hidden-time-input" value="09:00"> <span>~</span>
+										<select name="day_<%=dayIndex%>_close_1_ampm"
 											class="time-select form-select w-24"><option
 												value="am">오전</option>
 											<option value="pm" selected>오후</option></select> <select
@@ -448,12 +438,7 @@ $('#applyToAllBtn').on('click', function() {
             });
             
             $('#restaurantForm').on('submit', function(e) {
-                const phone1 = $('#phone1').val();
-                const phone2 = $('#phone2').val();
-                const phone3 = $('#phone3').val();
-                if (phone1 && phone2 && phone3) {
-                     $('#phone').val(`${phone1}-${phone2}-${phone3}`);
-                }
+                // 전화번호 필드가 하나로 통합되어 값을 합치는 로직을 제거했습니다.
                 
                 $('.day-wrapper').each(function() {
                     if (!$(this).hasClass('day-disabled')) {

@@ -4,7 +4,8 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.RestaurantDAO">
 
-	<resultMap id="restaurantResultMap" type="Restaurant" autoMapping="true">
+	<resultMap id="restaurantResultMap" type="Restaurant"
+		autoMapping="true">
 		<id property="id" column="id" />
 		<result property="ownerId" column="owner_id" />
 		<result property="jibunAddress" column="jibun_address" />
@@ -13,39 +14,52 @@
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
-	
-	<insert id="insert" parameterType="Restaurant" useGeneratedKeys="true" keyProperty="id">
+
+	<insert id="insert" parameterType="Restaurant"
+		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO restaurants
-		(owner_id, name, category, location, address, jibun_address, phone, hours,
-		description, image, parking, latitude, longitude, created_at, updated_at)
+		(owner_id,
+		name, category, location, address, jibun_address, phone, hours,
+		description, image, parking, latitude, longitude, created_at,
+		updated_at)
 		VALUES
-		(#{ownerId}, #{name}, #{category}, #{location}, #{address},
-		#{jibunAddress}, #{phone}, #{hours}, #{description}, #{image},
+		(#{ownerId}, #{name}, #{category}, #{location},
+		#{address},
+		#{jibunAddress}, #{phone}, #{hours}, #{description},
+		#{image},
 		#{parking}, #{latitude}, #{longitude}, NOW(), NOW())
 	</insert>
 
-	<select id="searchRestaurants" parameterType="map" resultMap="restaurantResultMap">
+	<select id="searchRestaurants" parameterType="map"
+		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
 		<where>
 			is_active = true
 			<if test="keyword != null and keyword != ''">
-				AND (name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+				AND (name LIKE CONCAT('%', #{keyword}, '%') OR
+				description LIKE CONCAT('%', #{keyword}, '%'))
 			</if>
 		</where>
 	</select>
-	<select id="findByOwnerId" parameterType="int" resultMap="restaurantResultMap">
+	<select id="findByOwnerId" parameterType="int"
+		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE owner_id = #{ownerId} AND is_active = true
+		WHERE owner_id = #{ownerId} AND
+		is_active = true
 		ORDER BY created_at DESC
 	</select>
-	<select id="findTopRestaurants" parameterType="int" resultMap="restaurantResultMap">
+	<select id="findTopRestaurants" parameterType="int"
+		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
 		WHERE is_active = true
-		ORDER BY rating DESC, review_count DESC
+		ORDER BY
+		rating DESC, review_count DESC
 		LIMIT #{limit}
 	</select>
-	<select id="findById" parameterType="int" resultMap="restaurantResultMap">
-		SELECT * FROM restaurants WHERE id = #{id} AND is_active = true
+	<select id="findById" parameterType="int"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants WHERE id = #{id} AND is_active =
+		true
 	</select>
 	<update id="update" parameterType="Restaurant">
 		UPDATE restaurants
@@ -64,7 +78,8 @@
 		UPDATE restaurants SET
 		is_active = false, updated_at = NOW() WHERE id = #{id}
 	</update>
-	<resultMap id="restaurantSummaryResultMap" type="model.RestaurantSummaryDTO">
+	<resultMap id="restaurantSummaryResultMap"
+		type="model.RestaurantSummaryDTO">
 		<id property="id" column="id" />
 		<result property="name" column="name" />
 		<result property="category" column="category" />
@@ -72,10 +87,52 @@
 		<result property="address" column="address" />
 		<result property="image" column="image" />
 	</resultMap>
-	<select id="findSummariesByOwnerId" parameterType="int" resultMap="restaurantSummaryResultMap">
+	<select id="findSummariesByOwnerId" parameterType="int"
+		resultMap="restaurantSummaryResultMap">
 		SELECT id, name, category, location, address, image
-		FROM restaurants
+		FROM
+		restaurants
 		WHERE owner_id = #{ownerId} AND is_active = true
-		ORDER BY created_at DESC
+		ORDER BY
+		created_at DESC
+	</select>
+	<select id="findWithFilters" parameterType="map"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		<where>
+			is_active = true
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="location != null and location != ''">
+				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+		</where>
+		<choose>
+			<when test="sortBy == 'rating'">
+				ORDER BY rating DESC, review_count DESC
+			</when>
+			<when test="sortBy == 'likes'">
+				ORDER BY likes DESC, rating DESC
+			</when>
+			<otherwise>
+				ORDER BY id DESC
+			</otherwise>
+		</choose>
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
+
+	<select id="countWithFilters" parameterType="map"
+		resultType="int">
+		SELECT count(*) FROM restaurants
+		<where>
+			is_active = true
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="location != null and location != ''">
+				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+		</where>
 	</select>
 </mapper>

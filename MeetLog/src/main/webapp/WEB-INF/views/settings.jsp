@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<%-- [추가] LocalDateTime 포맷을 위한 import --%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <!DOCTYPE html>
 <html lang="ko">
@@ -12,6 +12,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body class="bg-slate-100">
     <div id="app" class="flex flex-col min-h-screen">
@@ -37,39 +38,35 @@
                                                 ${errorMessage}
                                             </div>
                                         </c:if>
-
                                         <c:if test="${not empty successMessage}">
                                             <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
                                                 ${successMessage}
                                             </div>
                                         </c:if>
 
-                                        <form action="${pageContext.request.contextPath}/mypage/settings" method="post" class="space-y-4">
+                                        <form action="${pageContext.request.contextPath}/mypage/settings" method="post" enctype="multipart/form-data" class="space-y-4">
                                             <input type="hidden" name="action" value="updateProfile">
+                                            <input type="hidden" name="existingProfileImage" value="${sessionScope.user.profileImage}">
                                             
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">프로필 이미지</label>
                                                 <div class="flex items-center space-x-4">
-                                                    <img src="${not empty sessionScope.user.profileImage ?
- sessionScope.user.profileImage : 'https://placehold.co/100x100/94a3b8/ffffff?text=U'}"
-                                                         class="w-16 h-16 rounded-full" alt="프로필">
-                                                    <input type="url" name="profileImage" 
-                                                           value="${sessionScope.user.profileImage}"
-                                                           class="flex-1 px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                                                           placeholder="이미지 URL을 입력하세요">
+                                                    <mytag:image fileName="${sessionScope.user.profileImage}" altText="프로필" cssClass="w-16 h-16 rounded-full" />
+                                                    <input type="file" name="profileImage" id="imageUpload" accept="image/*"
+                                                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                                                 </div>
                                             </div>
                                             
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">닉네임</label>
                                                 <input type="text" name="nickname" value="${sessionScope.user.nickname}" required
-                                                       class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
+                                                        class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
                                             </div>
                                             
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">이메일</label>
                                                 <input type="email" value="${sessionScope.user.email}" disabled
-                                                       class="w-full px-3 py-2 border border-slate-300 rounded-md bg-slate-100 text-slate-500">
+                                                        class="w-full px-3 py-2 border border-slate-300 rounded-md bg-slate-100 text-slate-500">
                                                 <p class="text-sm text-slate-500 mt-1">이메일은 변경할 수 없습니다.</p>
                                             </div>
                                             
@@ -87,28 +84,23 @@
 
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-xl font-bold text-slate-800 mb-4">비밀번호 변경</h3>
-                                        
                                         <form action="${pageContext.request.contextPath}/mypage/settings" method="post" class="space-y-4">
                                             <input type="hidden" name="action" value="changePassword">
-                                            
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">현재 비밀번호</label>
                                                 <input type="password" name="currentPassword" required
                                                        class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
                                             </div>
-                                            
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">새 비밀번호</label>
                                                 <input type="password" name="newPassword" required
                                                        class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
                                             </div>
-                                            
                                             <div>
                                                 <label class="block text-sm font-medium text-slate-700 mb-2">새 비밀번호 확인</label>
                                                 <input type="password" name="confirmPassword" required
                                                        class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500">
                                             </div>
-                                            
                                             <button type="submit" class="w-full bg-slate-600 text-white font-bold py-2 px-4 rounded-md hover:bg-slate-700">
                                                 비밀번호 변경
                                             </button>
@@ -125,7 +117,6 @@
                                                 <span class="text-slate-800">
                                                     <c:choose>
                                                         <c:when test="${not empty sessionScope.user.createdAt}">
-                                                            <%-- [수정] fmt:formatDate -> EL 표현식으로 변경 --%>
                                                             ${sessionScope.user.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))}
                                                         </c:when>
                                                         <c:otherwise>정보 없음</c:otherwise>
@@ -138,7 +129,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-lg font-bold text-slate-800 mb-4">계정 관리</h3>
                                         <div class="space-y-3">
@@ -173,6 +163,21 @@
     </div>
 
     <script>
+        $(document).ready(function() {
+            $('#imageUpload').on('change', function(event) {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewImage = $('form[action*="updateProfile"] img');
+                        if(previewImage.length > 0) {
+                            previewImage.attr('src', e.target.result);
+                        }
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        });
+
         function exportData() {
             alert('데이터 내보내기 기능은 준비 중입니다.');
         }
@@ -191,11 +196,11 @@
 
             if (confirmPasswordInput) {
                  confirmPasswordInput.addEventListener('input', function() {
-                    if (newPasswordInput.value !== this.value) {
+                     if (newPasswordInput.value !== this.value) {
                         this.setCustomValidity('비밀번호가 일치하지 않습니다.');
                     } else {
                         this.setCustomValidity('');
-                    }
+                     }
                 });
             }
         });
