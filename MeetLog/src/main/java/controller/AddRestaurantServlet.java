@@ -129,8 +129,9 @@ public class AddRestaurantServlet extends HttpServlet {
                 
                 int slotIndex = 1;
                 while (true) {
-                    String openTimeStr = formFields.get("day_" + i + "_open_" + slotIndex);
-                    String closeTimeStr = formFields.get("day_" + i + "_close_" + slotIndex);
+                    String openTimeStr = formFields.get("day_" + i + "_open_" + slotIndex + "_time");
+                    String closeTimeStr = formFields.get("day_" + i + "_close_" + slotIndex + "_time");
+                    
                     if (openTimeStr == null || closeTimeStr == null || openTimeStr.isEmpty() || closeTimeStr.isEmpty()) break;
                     
                     OperatingHour oh = new OperatingHour();
