@@ -9,7 +9,8 @@ import dao.CourseDAO;
 import model.Course;
 import model.CommunityCourse;
 import model.OfficialCourse;
-import model.Paging; 
+import model.Paging;
+import model.CourseStep; 
 
 /**
  * 사용자용 코스 서비스 (신규 JSP에 맞게 수정됨)
@@ -75,5 +76,26 @@ public class CourseService {
     public List<OfficialCourse> getOfficialCourses() {
         // DAO의 새 메서드 호출
         return courseDAO.selectOfficialCourses();
+    }
+
+    /**
+     * 4. (새로 추가) 코스 상세 정보 조회
+     */
+    public CommunityCourse getCourseDetail(int courseId) {
+        return courseDAO.selectCourseDetail(courseId);
+    }
+
+    /**
+     * 5. (새로 추가) 코스 단계 목록 조회
+     */
+    public List<CourseStep> getCourseSteps(int courseId) {
+        return courseDAO.selectCourseSteps(courseId);
+    }
+
+    /**
+     * 6. (새로 추가) 코스와 단계를 함께 생성
+     */
+    public boolean createCourseWithSteps(CommunityCourse course, List<CourseStep> steps) {
+        return courseDAO.insertCourseWithSteps(course, steps);
     }
 }

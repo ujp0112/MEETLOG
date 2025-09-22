@@ -5,6 +5,7 @@ import java.util.List;
 // JSP의 "모두의 코스" 섹션에 필요한 데이터를 담는 모델
 public class CommunityCourse {
 	private int id;
+	private int userId;
 	private String title;
 	private String previewImage;
 	private String authorName;
@@ -20,6 +21,14 @@ public class CommunityCourse {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 
 	public String getTitle() {

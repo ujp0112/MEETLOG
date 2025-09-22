@@ -9,6 +9,7 @@ import util.MyBatisSqlSessionFactory;
 import model.Course; 
 import model.CommunityCourse;
 import model.OfficialCourse;
+import model.CourseStep;
 
 /**
  * 사용자용 코스 DAO (새로운 JSP 디자인에 맞게 수정됨)
@@ -57,6 +58,81 @@ public class CourseDAO {
     public List<OfficialCourse> selectOfficialCourses() {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             return session.selectList(OFFICIAL_MAPPER + ".selectOfficialCourses");
+        }
+    }
+
+    // --- 트랜잭션 참가를 위한 메소드들 ---
+    public int insertCourse(CommunityCourse course, SqlSession session) {
+        return session.insert(COMMUNITY_MAPPER + ".insertCourse", course);
+    }
+    
+    public int insertCourseStep(CourseStep step, SqlSession session) {
+        return session.insert(COMMUNITY_MAPPER + ".insertCourseStep", step);
+    }
+    // --- ---
+
+    public CommunityCourse findDetailById(int id) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(COMMUNITY_MAPPER + ".findDetailById", id);
+        }
+    }
+
+    public List<CourseStep> findStepsByCourseId(int courseId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectList(COMMUNITY_MAPPER + ".findStepsByCourseId", courseId);
+        }
+    }
+
+    // --- CourseService에서 필요한 메서드들 ---
+    
+    /**
+     * 코스 상세 정보 조회 (CourseService.getCourseDetail에서 사용)
+     */
+    public CommunityCourse selectCourseDetail(int courseId) {
+        return findDetailById(courseId);
+    }
+
+    /**
+     * 코스 단계 목록 조회 (CourseService.getCourseSteps에서 사용)
+     */
+    public List<CourseStep> selectCourseSteps(int courseId) {
+        return findStepsByCourseId(courseId);
+    }
+
+    /**
+     * 코스와 단계를 함께 생성 (트랜잭션 포함)
+     */
+    public boolean insertCourseWithSteps(CommunityCourse course, List<CourseStep> steps) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            try {
+                // 1. 코스 먼저 생성
+                int courseResult = insertCourse(course, session);
+                if (courseResult <= 0) {
+                    return false;
+                }
+
+                // 2. 생성된 코스의 ID를 가져와서 각 단계에 설정
+                int courseId = course.getId();
+                for (int i = 0; i < steps.size(); i++) {
+                    CourseStep step = steps.get(i);
+                    step.setCourseId(courseId);
+                    step.setOrder(i + 1); // 순서 설정
+                    
+                    int stepResult = insertCourseStep(step, session);
+                    if (stepResult <= 0) {
+                        return false;
+                    }
+                }
+
+                // 3. 모든 작업이 성공하면 커밋
+                session.commit();
+                return true;
+            } catch (Exception e) {
+                // 오류 발생 시 롤백
+                session.rollback();
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 }
