@@ -29,10 +29,29 @@ public class BranchMenuService {
 					s.insert("erpMapper.BranchMenuMapper.insertMenuIngredient", mi);
 				}
 			}
-			
+
 			return m.getId();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
+		}
+	}
+
+	public BranchMenu getMenuDetails(long companyId, long menuId) {
+		try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("companyId", companyId);
+			params.put("menuId", menuId);
+			return session.selectOne("erpMapper.BranchMenuMapper.selectMenuById", params);
+		}
+	}
+
+	public void updateRecipe(long companyId, long menuId, String recipe) {
+		try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("companyId", companyId);
+			params.put("menuId", menuId);
+			params.put("recipe", recipe);
+			session.update("erpMapper.BranchMenuMapper.updateMenuRecipe", params);
 		}
 	}
 
@@ -64,7 +83,6 @@ public class BranchMenuService {
 				}
 			}
 
-			
 		}
 	}
 
@@ -74,7 +92,7 @@ public class BranchMenuService {
 			p.put("companyId", companyId);
 			p.put("id", menuId);
 			s.update("erpMapper.BranchMenuMapper.softDeleteMenu", p);
-			
+
 		}
 	}
 
@@ -98,10 +116,9 @@ public class BranchMenuService {
 				// companyId/menuId/materialId/qty 가 채워진 DTO
 				s.insert("erpMapper.BranchMenuMapper.insertMenuIngredient", mi);
 			}
-			
+
 		}
 
 	}
 
-	
 }

@@ -1,9 +1,9 @@
-<!-- File: webapp/hq/recipe-management.jsp -->
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!DOCTYPE html>
@@ -366,8 +366,8 @@ table.sheet {
 									data-img="${contextPath}${m.imgPath}">
 									<td><c:choose>
 											<c:when test="${not empty m.imgPath}">
-												<img class="thumb" src="${contextPath}${m.imgPath}"
-													alt="${fn:escapeXml(m.name)}" />
+												<mytag:image fileName="${m.imgPath}" altText="${m.name}"
+													cssClass="thumb" />
 											</c:when>
 											<c:otherwise>
 												<span class="thumb"
@@ -378,8 +378,9 @@ table.sheet {
 									<td class="cell-num"><fmt:formatNumber value="${m.price}" /></td>
 									<td>
 										<div class="row-actions">
-											<button type="button" class="btn-sm" data-action="edit">레시피 수정</button>
-											
+											<button type="button" class="btn-sm" data-action="edit"
+												data-id="${m.id}">레시피 수정</button>
+
 										</div>
 									</td>
 								</tr>
@@ -407,6 +408,100 @@ table.sheet {
 			</div>
 		</section>
 	</main>
+	<div id="recipeModal" class="modal">
+		<div class="dialog" style="max-width: 800px;">
+			<div class="hd">
+				<strong id="modalTitle">레시피 수정</strong>
+				<button class="close-x" type="button" aria-label="닫기">×</button>
+			</div>
+			<div class="bd">
+				<form id="recipeForm">
+					<input type="hidden" id="menuId" name="menuId">
+					<h4>재료 목록</h4>
+					<ul id="ingredientList"
+						style="list-style: none; padding: 0; margin-bottom: 20px;"></ul>
 
+					<h4>레시피</h4>
+					<textarea id="recipeText" name="recipe" class="input" rows="15"
+						placeholder="레시피를 입력하세요..."></textarea>
+
+					<div class="actions" style="justify-content: flex-end;">
+						<button type="button" class="btn close-x">취소</button>
+						<button type="submit" class="btn primary">저장</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<script>
+const contextPath = '${contextPath}';
+const recipeModal = document.getElementById('recipeModal');
+const recipeForm = document.getElementById('recipeForm');
+const modalTitle = document.getElementById('modalTitle');
+const ingredientList = document.getElementById('ingredientList');
+const recipeText = document.getElementById('recipeText');
+const menuIdInput = document.getElementById('menuId');
+
+// 모달 열기
+document.querySelectorAll('button[data-action="edit"]').forEach(button => {
+    button.addEventListener('click', async () => {
+        const menuId = button.dataset.id;
+        try {
+            const response = await fetch(`${contextPath}/hq/recipe/${menuId}`);
+            if (!response.ok) throw new Error('데이터 로딩 실패');
+            
+            const data = await response.json(); // {menu, ingredients}
+            
+            modalTitle.textContent = `'${data.menu.name}' 레시피 수정`;
+            menuIdInput.value = data.menu.id;
+            recipeText.value = data.menu.recipe || '';
+            
+            ingredientList.innerHTML = '';
+            if (data.ingredients && data.ingredients.length > 0) {
+                data.ingredients.forEach(ing => {
+                    const li = document.createElement('li');
+                    li.textContent = `• ${ing.materialName}: ${ing.qty} ${ing.unit}`;
+                    ingredientList.appendChild(li);
+                });
+            } else {
+                ingredientList.innerHTML = '<li>등록된 재료가 없습니다.</li>';
+            }
+            
+            recipeModal.classList.add('show');
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+});
+
+// 모달 닫기
+function closeModal() {
+    recipeModal.classList.remove('show');
+}
+recipeModal.querySelectorAll('.close-x').forEach(el => el.addEventListener('click', closeModal));
+recipeModal.addEventListener('click', e => { if(e.target === recipeModal) closeModal(); });
+
+// 레시피 저장
+recipeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new URLSearchParams(new FormData(recipeForm));
+    
+    try {
+        const response = await fetch(`${contextPath}/hq/recipe`, {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) throw new Error('저장 실패');
+        
+        const result = await response.json();
+        if (result.status === 'OK') {
+            alert('레시피가 저장되었습니다.');
+            closeModal();
+        }
+    } catch (error) {
+        alert(error.message);
+    }
+});
+</script>
 </body>
 </html>

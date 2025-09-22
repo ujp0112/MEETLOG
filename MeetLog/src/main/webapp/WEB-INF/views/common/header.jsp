@@ -61,6 +61,8 @@
 										<a href="${pageContext.request.contextPath}/hq/notice"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내
 											공지 관리</a>
+										<a href="${pageContext.request.contextPath}/hq/recipe"
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">레시피 관리</a>
 									</c:if>
 
 									<c:if
@@ -80,10 +82,10 @@
 											href="${pageContext.request.contextPath}/branch/orders-history"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주
 											기록</a>
-										<a
-											href="${pageContext.request.contextPath}/branch/notice"
+										<a href="${pageContext.request.contextPath}/branch/notice"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내
 											공지</a>
+
 									</c:if>
 								</div>
 							</div>

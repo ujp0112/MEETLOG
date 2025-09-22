@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="ko">
@@ -120,7 +121,7 @@ function escapeHtml(s){
 
 function cardTpl(m){
 	  console.log(m);
-	  var img = m.imgPath ? (CTX + m.imgPath) : (CTX + '/img/placeholder-menu.png');
+	  var img = m.imgPath ? (CTX + '/images/' + encodeURIComponent(m.imgPath)) : (CTX + '/img/placeholder-menu.png');
 	  var checked = (m.enabled === 'Y');
 	  return ''
 	    + '<article class="card" data-id="' + m.id + '" data-name="' + escapeHtml(m.name||'') + '">'

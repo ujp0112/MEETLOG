@@ -23,138 +23,169 @@ import javax.servlet.http.Part;
 import erpDto.Material;
 import erpService.MaterialService;
 import model.BusinessUser;
+import util.AppConfig;
 
-@WebServlet(name = "HqMaterialsServlet", urlPatterns = {"/hq/materials", "/hq/materials/*"})
+@WebServlet(name = "HqMaterialsServlet", urlPatterns = { "/hq/materials", "/hq/materials/*" })
 @MultipartConfig
 public class HqMaterialsServlet extends HttpServlet {
 
-  private final MaterialService materialService = new MaterialService();
+	private final MaterialService materialService = new MaterialService();
 
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-    req.setCharacterEncoding("UTF-8");
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+		req.setCharacterEncoding("UTF-8");
 
-    HttpSession session = req.getSession(false);
-    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
-    if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
+		HttpSession session = req.getSession(false);
+		BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
+		if (user == null) {
+			resp.sendRedirect(req.getContextPath() + "/login.jsp");
+			return;
+		}
 
-    long companyId = user.getCompanyId();
-    List<Material> materials = materialService.listByCompany(companyId);
-    req.setAttribute("materials", materials);
+		long companyId = user.getCompanyId();
+		List<Material> materials = materialService.listByCompany(companyId);
+		req.setAttribute("materials", materials);
 
-    req.getRequestDispatcher("/WEB-INF/hq/material-management.jsp").forward(req, resp);
-  }
+		req.getRequestDispatcher("/WEB-INF/hq/material-management.jsp").forward(req, resp);
+	}
 
-  @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-    req.setCharacterEncoding("UTF-8");
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+		req.setCharacterEncoding("UTF-8");
+		HttpSession session = req.getSession(false);
+		BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
+		if (user == null) {
+			resp.sendRedirect(req.getContextPath() + "/login.jsp");
+			return;
+		}
+		long companyId = user.getCompanyId();
 
-    HttpSession session = req.getSession(false);
-    BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
-    if (user == null) { resp.sendRedirect(req.getContextPath()+"/login.jsp"); return; }
-    long companyId = user.getCompanyId();
+		String pathInfo = req.getPathInfo();
 
-    String pathInfo = req.getPathInfo(); // null or "/{id}/edit|/delete"
+		// === 생성 ===
+		if (pathInfo == null || "/".equals(pathInfo)) {
+			Material m = new Material();
+			m.setCompanyId(companyId);
+			m.setName(trim(req.getParameter("name")));
+			m.setUnit(trim(req.getParameter("unit")));
+			m.setUnitPrice(toDouble(req.getParameter("unit_price")));
+			m.setStep(toDouble(req.getParameter("step")));
 
-    // === 생성 ===
-    if (pathInfo == null || "/".equals(pathInfo)) {
-      Material m = new Material();
-      m.setCompanyId(companyId);
-      m.setName(trim(req.getParameter("name")));
-      m.setUnit(trim(req.getParameter("unit")));
-      m.setUnitPrice(toDouble(req.getParameter("unit_price")));
-      m.setStep(toDouble(req.getParameter("step")));
+			// [수정] 파일 업로드 로직 변경
+			m.setImgPath(saveImagePart(req.getPart("image")));
 
-      String fromText = trim(req.getParameter("img_path"));
-      String resolved = resolveImgPath(req, null, fromText);
-      m.setImgPath(resolved);
+			materialService.create(m);
+			resp.sendRedirect(req.getContextPath() + "/hq/materials");
+			return;
+		}
 
-      materialService.create(m);
-      resp.sendRedirect(req.getContextPath()+"/hq/materials");
-      return;
-    }
+		// === 수정/삭제 ===
+		String[] parts = pathInfo.split("/");
+		if (parts.length == 3) {
+			long id = Long.parseLong(parts[1]);
+			String action = parts[2];
 
-    // === 수정/삭제 ===
-    String[] parts = pathInfo.split("/");
-    if (parts.length == 3) {
-      long id = Long.parseLong(parts[1]);
-      String action = parts[2];
+			if ("edit".equals(action)) {
+				Material m = new Material();
+				m.setId(id);
+				m.setCompanyId(companyId);
+				m.setName(trim(req.getParameter("name")));
+				m.setUnit(trim(req.getParameter("unit")));
+				m.setUnitPrice(toDouble(req.getParameter("unit_price")));
+				m.setStep(toDouble(req.getParameter("step")));
 
-      if ("edit".equals(action)) {
-        Material existing = materialService.findById(companyId, id);
-        if (existing == null) { resp.sendError(404); return; }
+				// [수정] 파일 업로드 로직 변경
+				String newImgPath = saveImagePart(req.getPart("image"));
+				if (newImgPath != null) {
+					m.setImgPath(newImgPath);
+				} else {
+					// 새 파일이 없으면 기존 경로 유지
+					m.setImgPath(req.getParameter("prev_img_path"));
+				}
 
-        Material m = new Material();
-        m.setId(id);
-        m.setCompanyId(companyId);
-        m.setName(trim(req.getParameter("name")));
-        m.setUnit(trim(req.getParameter("unit")));
-        m.setUnitPrice(toDouble(req.getParameter("unit_price")));
-        m.setStep(toDouble(req.getParameter("step")));
+				materialService.update(m);
+				resp.sendRedirect(req.getContextPath() + "/hq/materials");
+				return;
+			}
 
-        String prev = trim(req.getParameter("prev_img_path"));
-        if (prev == null || prev.isEmpty()) prev = existing.getImgPath();
-        String fromText = trim(req.getParameter("img_path"));
-        String resolved = resolveImgPath(req, prev, fromText);
-        m.setImgPath(resolved);
+			if ("delete".equals(action)) {
+				materialService.softDelete(companyId, id);
+				resp.sendRedirect(req.getContextPath() + "/hq/materials");
+				return;
+			}
+		}
+		resp.sendError(400);
+	}
 
-        materialService.update(m);
-        resp.sendRedirect(req.getContextPath()+"/hq/materials");
-        return;
-      }
+	// [새로운 파일 저장 메소드]
+	private String saveImagePart(Part part) throws IOException {
+		if (part == null || part.getSize() <= 0)
+			return null;
 
-      if ("delete".equals(action)) {
-        materialService.softDelete(companyId, id);
-        resp.sendRedirect(req.getContextPath()+"/hq/materials");
-        return;
-      }
-    }
+		String uploadPath = AppConfig.getUploadPath();
+		File uploadDir = new File(uploadPath);
+		if (!uploadDir.exists())
+			uploadDir.mkdirs();
 
-    resp.sendError(400);
-  }
+		String submitted = part.getSubmittedFileName();
+		String ext = (submitted != null && submitted.lastIndexOf('.') >= 0)
+				? submitted.substring(submitted.lastIndexOf('.'))
+				: ".jpg";
+		String filename = UUID.randomUUID().toString() + ext;
 
-  // ----- utils -----
+		part.write(uploadPath + File.separator + filename);
+		return filename; // [핵심] 파일명만 반환
+	}
 
-  private static String trim(String s){ return s==null? null : s.trim(); }
+	// ----- utils -----
 
-  private static Double toDouble(String s) {
-    try {
-      if (s == null || s.isEmpty()) return null;
-      return new BigDecimal(s.replaceAll(",", "")).doubleValue();
-    } catch (Exception e) { return null; }
-  }
+	private static String trim(String s) {
+		return s == null ? null : s.trim();
+	}
 
-  /** 이미지 경로 결정: 텍스트(URL) > 파일업로드 > 이전값(prev) */
-  private String resolveImgPath(HttpServletRequest req, String prev, String textUrl)
-      throws IOException, ServletException {
+	private static Double toDouble(String s) {
+		try {
+			if (s == null || s.isEmpty())
+				return null;
+			return new BigDecimal(s.replaceAll(",", "")).doubleValue();
+		} catch (Exception e) {
+			return null;
+		}
+	}
 
-    if (textUrl != null && !textUrl.isEmpty()) {
-      return textUrl;
-    }
+	/** 이미지 경로 결정: 텍스트(URL) > 파일업로드 > 이전값(prev) */
+	private String resolveImgPath(HttpServletRequest req, String prev, String textUrl)
+			throws IOException, ServletException {
 
-    Part part = null;
-    try { part = req.getPart("image"); } catch (Exception ignore) {}
-    if (part != null && part.getSize() > 0) {
-      String saved = saveImagePart(part, req.getServletContext().getRealPath("/uploads/materials"));
-      return saved; // e.g. "/uploads/materials/uuid.jpg"
-    }
+		if (textUrl != null && !textUrl.isEmpty()) {
+			return textUrl;
+		}
 
-    return prev;
-  }
+		Part part = null;
+		try {
+			part = req.getPart("image");
+		} catch (Exception ignore) {
+		}
+		if (part != null && part.getSize() > 0) {
+			String saved = saveImagePart(part, req.getServletContext().getRealPath("/uploads/materials"));
+			return saved; // e.g. "/uploads/materials/uuid.jpg"
+		}
 
-  private String saveImagePart(Part part, String uploadDir) throws IOException {
-    Files.createDirectories(new File(uploadDir).toPath());
-    String submitted = part.getSubmittedFileName();
-    String ext = (submitted != null && submitted.lastIndexOf('.') >= 0)
-        ? submitted.substring(submitted.lastIndexOf('.')).toLowerCase(Locale.ROOT)
-        : ".jpg";
-    String filename = UUID.randomUUID().toString().replace("-", "") + ext;
-    File target = new File(uploadDir, filename);
-    try (InputStream in = part.getInputStream(); OutputStream out = new FileOutputStream(target)) {
-      in.transferTo(out);
-    }
-    return "/uploads/materials/" + filename;
-  }
+		return prev;
+	}
 
-  
+	private String saveImagePart(Part part, String uploadDir) throws IOException {
+		Files.createDirectories(new File(uploadDir).toPath());
+		String submitted = part.getSubmittedFileName();
+		String ext = (submitted != null && submitted.lastIndexOf('.') >= 0)
+				? submitted.substring(submitted.lastIndexOf('.')).toLowerCase(Locale.ROOT)
+				: ".jpg";
+		String filename = UUID.randomUUID().toString().replace("-", "") + ext;
+		File target = new File(uploadDir, filename);
+		try (InputStream in = part.getInputStream(); OutputStream out = new FileOutputStream(target)) {
+			in.transferTo(out);
+		}
+		return "/uploads/materials/" + filename;
+	}
+
 }

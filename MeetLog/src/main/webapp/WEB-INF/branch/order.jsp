@@ -4,6 +4,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!-- 서버사이드 페이징: pageSize 고정 10. 컨트롤러가 materials(현재 페이지 목록), totalCount(전체 건수), page(현재 페이지)를 세팅해주는 것을 가정. -->
@@ -393,8 +394,7 @@ table.sheet {
 											data-img="${m.imgPath}">
 											<td><c:choose>
 													<c:when test="${not empty m.imgPath}">
-														<img class="thumb" src="${contextPath}${m.imgPath}"
-															alt="${fn:escapeXml(m.name)}" />
+														<mytag:image fileName="${m.imgPath}" altText="${m.name}" cssClass="thumb"/>
 													</c:when>
 													<c:otherwise>
 														<span class="thumb"
@@ -687,8 +687,9 @@ table.sheet {
       var it = arr[i];
       var sub = toNumber(it.unitPrice) * toNumber(it.quantity);
       sum += sub;
+      var imageUrl = it.img ? ('${contextPath}/images/' + encodeURIComponent(it.img)) : '';
       html += '<div class="cart-item">' +
-        (it.img ? '<img src="' + '${contextPath}' + it.img + '" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid var(--border)">' : '<div style="width:48px;height:48px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center">📦</div>') +
+        (imageUrl ? '<img src="' + imageUrl + '" alt="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:1px solid var(--border)">' : '<div style="width:48px;height:48px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center">📦</div>') +
         '<div class="meta">' +
           '<div><strong>' + escapeHtml(it.name) + '</strong> <span class="hint">(' + escapeHtml(it.unit) + ')</span></div>' +
           '<div class="hint">단가 ' + new Intl.NumberFormat('ko-KR').format(toNumber(it.unitPrice)) + '원</div>' +

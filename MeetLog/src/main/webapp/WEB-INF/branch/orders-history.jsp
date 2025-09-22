@@ -4,6 +4,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!-- 서버사이드 페이징: pageSize 고정 10. 컨트롤러가 orders(현재 페이지 목록), totalCount(전체 건수), page(현재 페이지) 세팅 가정 -->
@@ -947,7 +948,7 @@ table.sheet {
 	    var qty = Number(it.qty||0);
 	    var unitPrice = Number(it.unitPrice||0);
 	    var total = Math.round(unitPrice*qty);
-	    var img = it.imgPath ? (ctx + it.imgPath) : '';
+	    var img = it.imgPath ? (ctx + '/images/' + encodeURIComponent(it.imgPath)) : '';
 	    var status = it.status || 'REQUESTED'; // [수정 2] DB에서 온 영어 상태값을 사용합니다.
 	    
 	    // 영어 상태값에 따라 적절한 한글 배지를 생성합니다.

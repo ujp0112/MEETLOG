@@ -4,6 +4,15 @@ package erpDto;
 public class BranchMenu {
 	private Long id, companyId, price;
 	private String name, imgPath, activeYn, deletedYn;
+	private String recipe;
+
+	public String getRecipe() {
+		return recipe;
+	}
+
+	public void setRecipe(String recipe) {
+		this.recipe = recipe;
+	}
 
 	public Long getId() {
 		return id;

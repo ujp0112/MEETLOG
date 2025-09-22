@@ -4,6 +4,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!-- 서버사이드 페이징: pageSize=10 고정 -->
@@ -43,50 +44,293 @@
 	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
 	rel="stylesheet">
 <style>
-:root{--bg:#f6faf8;--surface:#ffffff;--border:#e5e7eb;--muted:#6b7280;--title:#0f172a;--primary:#2f855a;--primary-600:#27764f;--ring:#93c5aa}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--title);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.panel{max-width:1100px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 20px rgba(16,24,40,.05);margin:20px auto;}
-.panel .hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
-.panel .bd{padding:16px 18px}
-.title{margin:0;font-size:20px;font-weight:800}
-.pill{padding:6px 10px;border-radius:999px;background:#eef7f0;border:1px solid #ddeee1;color:#246b45;font-weight:700}
-.field{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 10px}
-.field>input{border:0;outline:0;min-width:220px}
-.btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer;text-decoration:none;color:#111827}
-.btn:hover{background:#f8fafc}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-@media (max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:640px){.grid{grid-template-columns:1fr}}
-.card{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;cursor:pointer}
-.card .thumb{width:100%;aspect-ratio:16/10;object-fit:cover;background:#f3f4f6}
-.card .body{padding:12px 14px;display:grid;gap:8px}
-.card .name{font-weight:800}
-.card .meta{display:flex;justify-content:space-between;color:#374151}
-.switch{display:inline-flex;align-items:center;gap:10px}
-.switch input{position:absolute;opacity:0;width:0;height:0}
-.switch .track{width:44px;height:24px;border-radius:999px;background:#e5e7eb;position:relative;transition:.2s}
-.switch .dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:.2s}
-.switch input:checked + .track{background:var(--primary)}
-.switch input:checked + .track .dot{transform:translateX(20px)}
-.badge{padding:2px 8px;border-radius:999px;font-weight:700;font-size:12px;border:1px solid var(--border)}
-.badge.on{color:#065f46;background:#ecfdf5;border-color:#a7f3d0}
-.badge.off{color:#991b1b;background:#fef2f2;border-color:#fecaca}
-.empty{color:var(--muted);text-align:center;padding:24px}
+:root { --bg: #f6faf8;
+ --surface: #ffffff;
+  --border: #e5e7eb;
+   --muted: #6b7280;
+    --title: #0f172a;
+     --primary: #2f855a;
+      --primary-600: #27764f;
+       --ring: #93c5aa
+}
+
+html, body {
+	height: 100%
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--title);
+	font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+		Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif
+}
+
+.panel {
+	max-width: 1100px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow: 0 8px 20px rgba(16, 24, 40, .05);
+	margin: 20px auto;
+}
+
+.panel .hd {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 16px 18px;
+	border-bottom: 1px solid var(--border)
+}
+
+.panel .bd {
+	padding: 16px 18px
+}
+
+.title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800
+}
+
+.pill {
+	padding: 6px 10px;
+	border-radius: 999px;
+	background: #eef7f0;
+	border: 1px solid #ddeee1;
+	color: #246b45;
+	font-weight: 700
+}
+
+.field {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: #fff;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	padding: 8px 10px
+}
+
+.field>input {
+	border: 0;
+	outline: 0;
+	min-width: 220px
+}
+
+.btn {
+	appearance: none;
+	border: 1px solid var(--border);
+	background: #fff;
+	padding: 10px 14px;
+	border-radius: 999px;
+	font-weight: 700;
+	cursor: pointer;
+	text-decoration: none;
+	color: #111827
+}
+
+.btn:hover {
+	background: #f8fafc
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px
+}
+
+@media ( max-width :980px) {
+	.grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr))
+	}
+}
+
+@media ( max-width :640px) {
+	.grid {
+		grid-template-columns: 1fr
+	}
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	overflow: hidden;
+	background: #fff;
+	cursor: pointer
+}
+
+.card .thumb {
+	width: 100%;
+	aspect-ratio: 16/10;
+	object-fit: cover;
+	background: #f3f4f6
+}
+
+.card .body {
+	padding: 12px 14px;
+	display: grid;
+	gap: 8px
+}
+
+.card .name {
+	font-weight: 800
+}
+
+.card .meta {
+	display: flex;
+	justify-content: space-between;
+	color: #374151
+}
+
+.switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px
+}
+
+.switch input {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0
+}
+
+.switch .track {
+	width: 44px;
+	height: 24px;
+	border-radius: 999px;
+	background: #e5e7eb;
+	position: relative;
+	transition: .2s
+}
+
+.switch .dot {
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, .15);
+	transition: .2s
+}
+
+.switch input:checked+.track {
+	background: var(--primary)
+}
+
+.switch input:checked+.track .dot {
+	transform: translateX(20px)
+}
+
+.badge {
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 12px;
+	border: 1px solid var(--border)
+}
+
+.badge.on {
+	color: #065f46;
+	background: #ecfdf5;
+	border-color: #a7f3d0
+}
+
+.badge.off {
+	color: #991b1b;
+	background: #fef2f2;
+	border-color: #fecaca
+}
+
+.empty {
+	color: var(--muted);
+	text-align: center;
+	padding: 24px
+}
 
 /* Popover (가운데 뜨는 경량 모달) */
-.popover-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200}
-.popover-mask.show{display:flex}
-.popover{width:100%;max-width:560px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.popover .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
-.popover .bd{padding:12px 14px}
-.close-x{border:0;background:transparent;font-size:22px;cursor:pointer}
-.table-wrap{border:1px solid var(--border);border-radius:12px;background:#fff}
-table.sheet{width:100%;border-collapse:separate;border-spacing:0}
-.sheet thead th{background:#fff;border-bottom:1px solid var(--border);font-weight:800;text-align:left;padding:10px}
-.sheet tbody td{padding:10px;border-bottom:1px solid #f1f5f9}
-.cell-num{text-align:right}
-.total{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.popover-mask {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, .35);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 200
+}
+
+.popover-mask.show {
+	display: flex
+}
+
+.popover {
+	width: 100%;
+	max-width: 560px;
+	background: #fff;
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, .2)
+}
+
+.popover .hd {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 14px;
+	border-bottom: 1px solid var(--border)
+}
+
+.popover .bd {
+	padding: 12px 14px
+}
+
+.close-x {
+	border: 0;
+	background: transparent;
+	font-size: 22px;
+	cursor: pointer
+}
+
+.table-wrap {
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: #fff
+}
+
+table.sheet {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0
+}
+
+.sheet thead th {
+	background: #fff;
+	border-bottom: 1px solid var(--border);
+	font-weight: 800;
+	text-align: left;
+	padding: 10px
+}
+
+.sheet tbody td {
+	padding: 10px;
+	border-bottom: 1px solid #f1f5f9
+}
+
+.cell-num {
+	text-align: right
+}
+
+.total {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	margin-top: 8px
+}
 
 :root { -
 	-bg: #f6faf8; -
@@ -111,8 +355,8 @@ body {
 	margin: 0;
 	font-family: system-ui, -apple-system, Segoe UI, Roboto,
 		Apple SD Gothic Neo, Noto Sans KR, sans-serif;
-	background: var(- -bg);
-	color: var(- -title)
+	background: var(--bg);
+	color: var(--title)
 }
 
 .container {
@@ -123,8 +367,8 @@ body {
 
 .panel {
 	max-width: 1000px;
-	background: var(- -surface);
-	border: 1px solid var(- -border);
+	background: var(--surface);
+	border: 1px solid var(--border);
 	border-radius: 16px;
 	box-shadow: 0 8px 20px rgba(16, 24, 40, .05);
 	margin: 0 auto
@@ -135,7 +379,7 @@ body {
 	align-items: center;
 	gap: 10px;
 	padding: 16px 18px;
-	border-bottom: 1px solid var(- -border)
+	border-bottom: 1px solid var(--border)
 }
 
 .panel .bd {
@@ -150,7 +394,7 @@ body {
 
 .btn {
 	appearance: none;
-	border: 1px solid var(- -border);
+	border: 1px solid var(--border);
 	background: #fff;
 	padding: 8px 12px;
 	border-radius: 10px;
@@ -164,13 +408,13 @@ body {
 }
 
 .btn.primary {
-	background: var(- -primary);
-	border-color: var(- -primary);
+	background: var(--primary);
+	border-color: var(--primary);
 	color: #fff
 }
 
 .btn.primary:hover {
-	background: var(- -primary-600)
+	background: var(--primary-600)
 }
 
 .btn.sm {
@@ -184,7 +428,7 @@ body {
 }
 
 .table-wrap {
-	border: 1px solid var(- -border);
+	border: 1px solid var(--border);
 	border-radius: 14px;
 	overflow: auto;
 	background: #fff
@@ -200,7 +444,7 @@ table.sheet {
 	position: sticky;
 	top: 0;
 	background: #fff;
-	border-bottom: 1px solid var(- -border);
+	border-bottom: 1px solid var(--border);
 	font-weight: 800;
 	text-align: left;
 	padding: 12px 10px;
@@ -221,7 +465,7 @@ table.sheet {
 	width: 40px;
 	height: 40px;
 	border-radius: 8px;
-	border: 1px solid var(- -border);
+	border: 1px solid var(--border);
 	object-fit: cover;
 	background: #fafafa;
 	display: block
@@ -231,7 +475,7 @@ table.sheet {
 	display: inline-block;
 	padding: 2px 8px;
 	border-radius: 999px;
-	border: 1px solid var(- -border);
+	border: 1px solid var(--border);
 	font-size: 12px
 }
 
@@ -249,7 +493,7 @@ table.sheet {
 
 .btn {
 	appearance: none;
-	border: 1px solid var(- -border);
+	border: 1px solid var(--border);
 	background: #fff;
 	padding: 8px 12px;
 	border-radius: 10px;
@@ -294,7 +538,7 @@ table.sheet {
 
 .pager .info {
 	font-size: 12px;
-	color: var(- -muted)
+	color: var(--muted)
 }
 </style>
 </head>
@@ -324,8 +568,8 @@ table.sheet {
 								<tr>
 									<td><c:choose>
 											<c:when test="${not empty it.imgPath}">
-												<img class="thumb" src="${contextPath}${it.imgPath}"
-													alt="${fn:escapeXml(it.name)}" />
+												<mytag:image fileName="${it.imgPath}" altText="${it.name}"
+													cssClass="thumb" />
 											</c:when>
 											<c:otherwise>
 												<span class="thumb"

@@ -3,6 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html lang="ko">
@@ -97,11 +98,11 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:760px
                 data-id="${m.id}"
                 data-name="${fn:escapeXml(m.name)}"
                 data-saleprice="${m.price}"
-                data-img="${contextPath}${m.imgPath}">
+                data-img="${m.imgPath}">
               <td>
                 <c:choose>
                   <c:when test="${not empty m.imgPath}">
-                    <img class="thumb" src="${contextPath}${m.imgPath}" alt="${fn:escapeXml(m.name)}"/>
+                    <mytag:image fileName="${m.imgPath}" altText="${m.name}" cssClass="thumb"/>
                   </c:when>
                   <c:otherwise>
                     <span class="thumb" style="display:grid;place-items:center">🍽️</span>
@@ -484,7 +485,13 @@ function openEdit(tr){
   $('#f-salePrice').value = tr.dataset.saleprice || '';
   $('#f-unitPrice').value = '';
   $('#f-selectFile').value = '';
-  $('#f-preview').src = tr.dataset.img || (CTX + '/img/plus.png');
+  const imgFileName = tr.dataset.img || ''; // DB에 저장된 파일명
+  const previewImg = $('#f-preview');
+  if (imgFileName) {
+      previewImg.src = CTX + '/images/' + encodeURIComponent(imgFileName);
+  } else {
+      previewImg.src = CTX + '/img/plus.png';
+  }
 
   editModal.classList.add('show');
   editModal.setAttribute('aria-hidden','false');
