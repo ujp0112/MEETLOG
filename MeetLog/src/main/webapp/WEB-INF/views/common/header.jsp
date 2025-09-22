@@ -2,7 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%-- [추가] 직접 만든 mytag 라이브러리 선언 --%>
-<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 
 <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
 	<div
@@ -58,22 +58,32 @@
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">메뉴</a>
 										<a href="${pageContext.request.contextPath}/hq/sales-orders"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">수주</a>
+										<a href="${pageContext.request.contextPath}/hq/notice"
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내
+											공지 관리</a>
 									</c:if>
-									
-									<c:if test="${sessionScope.businessUser.role.toUpperCase() == 'BRANCH'}">
+
+									<c:if
+										test="${sessionScope.businessUser.role.toUpperCase() == 'BRANCH'}">
 										<div class="my-1 border-t border-slate-200"></div>
 										<div class="px-4 py-2 text-sm font-semibold text-slate-500">지점(BRANCH)
 											메뉴</div>
-										<a
-											href="${pageContext.request.contextPath}/branch/inventory"
+										<a href="${pageContext.request.contextPath}/branch/inventory"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏪
 											지점 재고 관리</a>
 										<a href="${pageContext.request.contextPath}/branch/menus"
-											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">메뉴 관리</a>
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">메뉴
+											관리</a>
 										<a href="${pageContext.request.contextPath}/branch/order"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주</a>
-										<a href="${pageContext.request.contextPath}/branch/orders-history"
-											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주 기록</a>
+										<a
+											href="${pageContext.request.contextPath}/branch/orders-history"
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주
+											기록</a>
+										<a
+											href="${pageContext.request.contextPath}/branch/notice"
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내
+											공지</a>
 									</c:if>
 								</div>
 							</div>
@@ -82,10 +92,13 @@
 
 					<%-- 마이페이지 + 로그아웃 메뉴 --%>
 					<div class="group relative ml-2">
-						<button class="flex items-center space-x-2 py-2 px-2 rounded-md hover:bg-slate-100">
+						<button
+							class="flex items-center space-x-2 py-2 px-2 rounded-md hover:bg-slate-100">
 							<%-- [수정] 프로필 이미지를 mytag으로 추가 --%>
-							<mytag:image fileName="${sessionScope.user.profileImage}" altText="프로필" cssClass="w-8 h-8 rounded-full object-cover" />
-							<span class="text-slate-700 font-medium">안녕하세요, ${sessionScope.user.nickname}님 ▼</span>
+							<mytag:image fileName="${sessionScope.user.profileImage}"
+								altText="프로필" cssClass="w-8 h-8 rounded-full object-cover" />
+							<span class="text-slate-700 font-medium">안녕하세요,
+								${sessionScope.user.nickname}님 ▼</span>
 						</button>
 						<div
 							class="absolute right-0 top-full pt-4 hidden group-hover:block z-50">

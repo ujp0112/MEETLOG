@@ -92,6 +92,7 @@
 <a href="${ctx }/hq/materials" class="${fn:contains(uri, '/hq/materials') ? '' : ''}">재료</a>
 <a href="${ctx }/hq/menus" class="${fn:contains(uri, '/hq/menus') ? '' : ''}">메뉴</a>
 <a href="${ctx }/hq/sales-orders" class="${fn:contains(uri, '/hq/sales-orders') ? '' : ''}">수주</a>
+<a href="${ctx }/hq/notice" class="${fn:contains(uri, '/hq/notice') ? '' : ''}">공지</a>
 </div>
 
     <div class="spacer"></div>
