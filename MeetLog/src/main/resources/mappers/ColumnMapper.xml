@@ -60,4 +60,10 @@
 	<update id="likeColumn" parameterType="int">
 		UPDATE columns SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
 	</update>
+	<select id="findRecentByUserId" parameterType="map" resultMap="columnResultMap">
+        SELECT * FROM columns 
+        WHERE user_id = #{userId} AND is_active = true 
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
 </mapper>

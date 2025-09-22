@@ -116,7 +116,8 @@ INSERT INTO reviews (id, restaurant_id, user_id, author, author_image, rating, c
 (7, 19, 3, '빵순이', 'https://placehold.co/150x150/fcd34d/ffffff?text=C3', 4, '산미있는 원두를 좋아하시면 여기입니다. 디저트 케이크도 괜찮았어요.', NULL, NULL, 19),
 (8, 14, 4, '데이트장인', 'https://placehold.co/100x100/e879f9/ffffff?text=U1', 4, '가산에서 파스타 먹고 싶을 때 가끔 들러요. 창가 자리가 분위기 좋아요.', NULL, NULL, 15),
 (9, 11, 4, '데이트장인', 'https://placehold.co/100x100/e879f9/ffffff?text=U1', 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다. 다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832"]', NULL, 25),
-(10, 11, 3, '빵순이', 'https://item.kakaocdn.net/do/4f2c16435337b94a65d4613f785fded24022de826f725e10df604bf1b9725cfd', 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다.\n다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]', '["#음식이 맛있어요", "#재료가 신선해요"]', 25);
+(10, 11, 3, '빵순이', 'https://item.kakaocdn.net/do/4f2c16435337b94a65d4613f785fded24022de826f725e10df604bf1b9725cfd', 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다.\n다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]', '["#음식이 맛있어요", "#재료가 신선해요"]', 25),
+(11, 1, 1, '김맛잘알', 5, '정말 맛있어요! (마이페이지 임시 데이터)');
 
 -- 칼럼 (columns)
 INSERT INTO columns (id, user_id, author, author_image, title, content, image, tags, likes, views) VALUES
@@ -133,7 +134,8 @@ INSERT INTO columns (id, user_id, author, author_image, title, content, image, t
 (11, 1, '김맛잘알', 'https://placehold.co/150x150/fca5a5/ffffff?text=C1', '여의도 오마카세 입문자에게 추천, ''스시 마에''', '오마카세가 처음이라 부담스러우신가요? ''스시 마에''는 합리적인 가격과 친절한 설명으로 입문자들에게 최고의 경험을 선사합니다.', 'https://placehold.co/600x400/60a5fa/ffffff?text=오마카세', '["#여의도", "#오마카세", "#입문"]', 152, 810),
 (12, 2, '미스터노포', 'https://placehold.co/150x150/93c5fd/ffffff?text=C2', '명동의 숨은 맛, ''북경 오리'' 전문점 탐방', '북적이는 명동 거리 안쪽에 위치한 이 곳은 수십 년 경력의 주방장님이 선보이는 정통 북경 오리 요리를 맛볼 수 있는 숨은 고수의 가게입니다.', 'https://placehold.co/600x400/f472b6/ffffff?text=중식', '["#명동", "#북경오리", "#노포"]', 133, 740),
 (13, 5, '가산직장인', 'https://placehold.co/150x150/a78bfa/ffffff?text=가산', '가산 W몰 쇼핑 후 필수코스, ''샐러디''', '쇼핑으로 지쳤을 때, 건강하고 가볍게 한 끼 식사를 해결하고 싶다면 ''샐러디''를 추천합니다. 든든한 웜볼 메뉴가 특히 좋습니다.', 'https://placehold.co/600x400/22c55e/ffffff?text=샐러드', '["#가산", "#W몰", "#샐러드"]', 105, 620),
-(14, 1, '김맛잘알', 'https://placehold.co/150x150/fca5a5/ffffff?text=C1', '인사동 골목의 정겨움, ''소담길'' 보쌈정식', '전통적인 분위기의 인사동에서 맛보는 부드러운 보쌈과 맛깔나는 반찬들. ''소담길''은 부모님을 모시고 가기에도 손색없는 곳입니다.', 'https://placehold.co/600x400/c084fc/ffffff?text=보쌈', '["#인사동", "#보쌈", "#데이트"]', 198, 980);
+(14, 1, '김맛잘알', 'https://placehold.co/150x150/fca5a5/ffffff?text=C1', '인사동 골목의 정겨움, ''소담길'' 보쌈정식', '전통적인 분위기의 인사동에서 맛보는 부드러운 보쌈과 맛깔나는 반찬들. ''소담길''은 부모님을 모시고 가기에도 손색없는 곳입니다.', 'https://placehold.co/600x400/c084fc/ffffff?text=보쌈', '["#인사동", "#보쌈", "#데이트"]', 198, 980),
+(15, 1, '김맛잘알', '강남 맛집 베스트 5', '이 칼럼은 마이페이지 임시 데이터에서 생성되었습니다.');
 -- 팔로우 (follows)
 INSERT INTO follows (follower_id, following_id) VALUES
 (2, 4), (3, 1), (3, 6), (4, 3), (4, 2), (6, 1), (7, 3);
@@ -143,6 +145,11 @@ INSERT INTO reservations (id, restaurant_id, user_id, restaurant_name, user_name
 (1, 11, 4, '우부래도', '데이트장인', '2025-09-14 19:00:00', 2, 'CONFIRMED', '010-1234-5678'),
 (2, 2, 6, '파스타 팩토리', '퇴근후한잔', '2025-09-13 20:00:00', 4, 'COMPLETED', '010-2345-6789'),
 (3, 32, 7, '툭툭누들타이', '효녀딸', '2025-08-15 18:30:00', 2, 'CANCELLED', '010-3456-7890');
+
+-- 임시 예약 데이터 추가
+INSERT INTO reservations (restaurant_id, user_id, restaurant_name, user_name, reservation_time, party_size, status) VALUES
+(1, 4, '고미정', '김고객', '2025-09-15 19:00:00', 4, 'CONFIRMED'),
+(2, 6, '파스타 팩토리', '이고객', '2025-09-15 20:30:00', 2, 'PENDING');
 
 
 -- ===================================================================

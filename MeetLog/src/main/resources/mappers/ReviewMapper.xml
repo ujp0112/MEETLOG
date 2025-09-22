@@ -2,21 +2,20 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="review">
-    <resultMap id="reviewResultMap" type="Review" autoMapping="true">
-        <id property="id" column="id" />
-        <result property="restaurantId" column="restaurant_id" />
-        <result property="userId" column="user_id" />
-        <result property="rating" column="rating" />
-        <result property="content" column="content" />
-        <result property="imageUrl" column="image_url" />
-        <result property="likes" column="likes" />
-        <result property="isActive" column="is_active" />
-        <result property="createdAt" column="created_at" />
-        <result property="updatedAt" column="updated_at" />
-    </resultMap>
+<mapper namespace="dao.ReviewDAO">
 
-    <!-- 모든 리뷰 조회 -->
+	<resultMap id="reviewResultMap" type="model.Review" autoMapping="true">
+		<id property="id" column="id" />
+		<result property="restaurantId" column="restaurant_id" />
+		<result property="userId" column="user_id" />
+		<result property="authorImage" column="author_image" />
+		<result property="images" column="images" typeHandler="typehandler.JsonArrayTypeHandler" />
+		<result property="keywords" column="keywords" typeHandler="typehandler.JsonArrayTypeHandler" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+
     <select id="findAll" resultMap="reviewResultMap">
         SELECT r.*, r.author as user_name, res.name as restaurant_name
         FROM reviews r
@@ -25,7 +24,6 @@
         ORDER BY r.created_at DESC
     </select>
 
-    <!-- ID로 리뷰 조회 -->
     <select id="findById" parameterType="int" resultMap="reviewResultMap">
         SELECT r.*, r.author as user_name, res.name as restaurant_name
         FROM reviews r
@@ -33,60 +31,24 @@
         WHERE r.id = #{id} AND r.is_active = true
     </select>
 
-    <!-- 음식점별 리뷰 조회 -->
     <select id="findByRestaurantId" parameterType="int" resultMap="reviewResultMap">
-        SELECT r.*, r.author as user_name, res.name as restaurant_name
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
-        WHERE r.restaurant_id = #{restaurantId} AND r.is_active = true
-        ORDER BY r.created_at DESC
+        SELECT * FROM reviews WHERE restaurant_id = #{restaurantId}
+        AND is_active = true ORDER BY created_at DESC
     </select>
 
-    <!-- 사용자별 리뷰 조회 -->
     <select id="findByUserId" parameterType="int" resultMap="reviewResultMap">
-        SELECT r.*, r.author as user_name, res.name as restaurant_name
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
-        WHERE r.user_id = #{userId} AND r.is_active = true
-        ORDER BY r.created_at DESC
+        SELECT * FROM reviews WHERE user_id = #{userId} AND
+        is_active = true ORDER
+        BY created_at DESC
     </select>
 
-    <!-- 리뷰 추가 -->
-    <insert id="insert" parameterType="Review" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reviews (
-            restaurant_id, user_id, author, rating, content, images, 
-            likes, is_active, created_at, updated_at
-        ) VALUES (
-            #{restaurantId}, #{userId}, #{author}, #{rating}, #{content}, #{images},
-            #{likes}, #{isActive}, NOW(), NOW()
-        )
-    </insert>
+    <select id="findRecentByUserId" parameterType="map" resultMap="reviewResultMap">
+        SELECT * FROM reviews 
+        WHERE user_id = #{userId} AND is_active = true 
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
 
-    <!-- 리뷰 수정 -->
-    <update id="update" parameterType="Review">
-        UPDATE reviews SET
-            rating = #{rating},
-            content = #{content},
-            images = #{images},
-            updated_at = NOW()
-        WHERE id = #{id}
-    </update>
-
-    <!-- 리뷰 삭제 (소프트 삭제) -->
-    <update id="delete" parameterType="int">
-        UPDATE reviews SET 
-            is_active = false, updated_at = NOW() 
-        WHERE id = #{id}
-    </update>
-
-    <!-- 리뷰 좋아요 -->
-    <update id="likeReview" parameterType="int">
-        UPDATE reviews SET 
-            likes = likes + 1, updated_at = NOW() 
-        WHERE id = #{id}
-    </update>
-
-    <!-- 사업자별 최근 리뷰 조회 -->
     <select id="findRecentReviewsByOwnerId" parameterType="map" resultMap="reviewResultMap">
         SELECT r.*, res.name as restaurant_name 
         FROM reviews r
@@ -96,8 +58,34 @@
         LIMIT #{limit}
     </select>
 
-    <!-- 고급 검색을 위한 리뷰 검색 -->
-    <select id="searchReviews" resultMap="reviewResultMap">
+    <select id="getRecentReviewsWithInfo" parameterType="int" resultType="model.ReviewInfo">
+		SELECT
+		r.id,
+		r.content,
+		r.rating,
+		r.author,
+		r.created_at AS createdAt,
+		r.author_image AS authorImage,
+		res.id AS restaurantId,
+		res.name AS restaurantName
+		FROM
+		reviews r
+		JOIN
+		restaurants res ON r.restaurant_id = res.id
+		WHERE
+		r.is_active = true
+		ORDER BY
+		r.created_at DESC
+		LIMIT #{limit}
+	</select>
+
+	<select id="findRecentReviews" parameterType="int" resultMap="reviewResultMap">
+		SELECT * FROM reviews WHERE is_active = true ORDER BY
+		created_at DESC LIMIT
+		#{limit}
+	</select>
+
+    <select id="searchReviews" parameterType="map" resultMap="reviewResultMap">
         SELECT r.*, r.author as user_name, res.name as restaurant_name
         FROM reviews r
         LEFT JOIN restaurants res ON r.restaurant_id = res.id
@@ -120,25 +108,34 @@
         ORDER BY r.created_at DESC
     </select>
 
-    <!-- 최근 리뷰 정보 조회 (ReviewInfo 타입) -->
-    <select id="findRecentReviewsWithInfo" parameterType="int" resultType="ReviewInfo">
-        SELECT 
-            r.id,
-            r.restaurant_id as restaurantId,
-            r.user_id as userId,
-            r.rating,
-            r.content,
-            r.images as imageUrl,
-            r.likes,
-            r.created_at as createdAt,
-            r.author as userName,
-            r.author as author,
-            r.author_image as authorImage,
-            res.name as restaurantName
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
-        WHERE r.is_active = true
-        ORDER BY r.created_at DESC
-        LIMIT #{limit}
-    </select>
+	<insert id="insert" parameterType="model.Review" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO reviews
+		(restaurant_id, user_id, author, author_image, rating,
+		content, images,
+		keywords, created_at, updated_at)
+		VALUES (#{restaurantId}, #{userId},
+		#{author}, #{authorImage}, #{rating},
+		#{content},
+		#{images, typeHandler=typehandler.JsonArrayTypeHandler},
+		#{keywords, typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
+	</insert>
+
+	<update id="update" parameterType="model.Review">
+		UPDATE reviews SET
+		rating = #{rating},
+		content = #{content},
+		images = #{images, typeHandler=typehandler.JsonArrayTypeHandler},
+        keywords = #{keywords, typeHandler=typehandler.JsonArrayTypeHandler},
+		updated_at = NOW()
+		WHERE id = #{id}
+	</update>
+
+	<update id="delete" parameterType="int">
+		UPDATE reviews SET is_active = false, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<update id="likeReview" parameterType="int">
+		UPDATE reviews SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
+	</update>
+
 </mapper>

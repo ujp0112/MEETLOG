@@ -15,19 +15,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-// [필수] Paging과 Course 모델 클래스를 import 해야 합니다.
+
 import model.CommunityCourse;
 import model.OfficialCourse;
-import model.Paging; 
+import model.Paging;
 import model.User;
 import model.CourseStep;
 import model.Restaurant;
-import service.CourseService; 
+import service.CourseService;
 import service.RestaurantService;
-
+import util.AppConfig;
 
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 1,
@@ -35,17 +38,12 @@ import service.RestaurantService;
     maxRequestSize = 1024 * 1024 * 15
 )
 @WebServlet("/course/*")
-/**
- * '추천코스' 페이지(/course) 요청을 처리하는 서블릿 (새로운 JSP 디자인에 맞게 수정됨)
- */
 public class CourseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
     private CourseService courseService = new CourseService();
     private RestaurantService restaurantService = new RestaurantService();
     private ObjectMapper objectMapper = new ObjectMapper();
-
-
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -54,13 +52,13 @@ public class CourseServlet extends HttpServlet {
         try {
             String path = request.getPathInfo();
 
-            if (path == null || path.equals("/")) {
+            if (path == null || path.equals("/") || "/list".equals(path)) {
                 showCourseList(request, response);
-            } else if (path.equals("/detail")) {
+            } else if ("/detail".equals(path)) {
                 showCourseDetail(request, response);
-            } else if (path.equals("/create")) {
+            } else if ("/create".equals(path)) {
                 showCreateCourseForm(request, response);
-            } else if (path.equals("/search-places")) {
+            } else if ("/search-places".equals(path)) {
                 handleSearchPlaces(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -87,9 +85,7 @@ public class CourseServlet extends HttpServlet {
     private void handleSearchPlaces(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String keyword = request.getParameter("keyword");
-        Map<String, Object> searchParams = new HashMap<>();
-        searchParams.put("keyword", keyword);
-        List<Restaurant> results = restaurantService.searchRestaurants(searchParams);
+        List<Restaurant> results = restaurantService.searchRestaurants(keyword);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(results));
@@ -104,43 +100,62 @@ public class CourseServlet extends HttpServlet {
         }
         
         try {
-            String title = request.getParameter("title");
-            Part filePart = request.getPart("thumbnail");
-            
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setHeaderEncoding("UTF-8");
+
+            Map<String, String> formFields = new HashMap<>();
+            FileItem imageFileItem = null;
+
+            List<FileItem> formItems = upload.parseRequest(request);
+
+            for (FileItem item : formItems) {
+                if (item.isFormField()) {
+                    formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                } else {
+                    if ("thumbnail".equals(item.getFieldName()) && item.getSize() > 0) {
+                        imageFileItem = item;
+                    }
+                }
+            }
+
             String savedFilePath = null;
-            if (filePart != null && filePart.getSize() > 0) {
-                String originalFileName = filePart.getSubmittedFileName();
-                String uploadDirectory = "uploads" + File.separator + "course_thumbnails";
-                String realUploadPath = getServletContext().getRealPath(uploadDirectory);
-                
-                File uploadDir = new File(realUploadPath);
+            if (imageFileItem != null) {
+                String uploadPath = AppConfig.getUploadPath();
+                 if (uploadPath == null || uploadPath.isEmpty()) {
+                    throw new Exception("업로드 경로가 설정되지 않았습니다.");
+                }
+                File uploadDir = new File(uploadPath, "course_thumbnails");
                 if (!uploadDir.exists()) {
                     uploadDir.mkdirs();
                 }
 
+                String originalFileName = new File(imageFileItem.getName()).getName();
                 String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-                filePart.write(realUploadPath + File.separator + uniqueFileName);
-                savedFilePath = uploadDirectory + File.separator + uniqueFileName;
+                File storeFile = new File(uploadDir, uniqueFileName);
+                imageFileItem.write(storeFile);
+                savedFilePath = "uploads/course_thumbnails/" + uniqueFileName;
             }
 
             List<CourseStep> steps = new ArrayList<>();
             int stepIndex = 1;
             while (true) {
-                String stepName = request.getParameter("step_name_" + stepIndex);
+                String stepName = formFields.get("step_name_" + stepIndex);
                 if (stepName == null) break;
                 
                 CourseStep step = new CourseStep();
                 step.setName(stepName);
-                step.setType(request.getParameter("step_type_" + stepIndex));
-                step.setTime(Integer.parseInt(request.getParameter("step_time_" + stepIndex)));
-                step.setCost(Integer.parseInt(request.getParameter("step_cost_" + stepIndex)));
+                step.setType(formFields.get("step_type_" + stepIndex));
+                step.setTime(Integer.parseInt(formFields.get("step_time_" + stepIndex)));
+                step.setCost(Integer.parseInt(formFields.get("step_cost_" + stepIndex)));
                 steps.add(step);
                 stepIndex++;
             }
             
             CommunityCourse course = new CommunityCourse();
             course.setUserId(user.getId());
-            course.setTitle(title);
+            course.setTitle(formFields.get("title"));
+            course.setTags(formFields.get("tags"));
             course.setPreviewImage(savedFilePath);
             
             boolean success = courseService.createCourseWithSteps(course, steps);
@@ -152,7 +167,7 @@ public class CourseServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "코스 등록 중 오류 발생");
+            request.setAttribute("errorMessage", "코스 등록 중 오류 발생: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/create-course.jsp").forward(request, response);
         }
     }

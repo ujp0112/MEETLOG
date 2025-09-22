@@ -10,10 +10,38 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
-        /* 탭 활성화 시 적용될 스타일 */
         .tab-active {
-            border-color: #0ea5e9; /* sky-500 */
-            color: #0f172a; /* slate-900 */
+            border-color: #0ea5e9;
+            color: #0f172a;
+        }
+        .form-input {
+            display: block;
+            width: 100%;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        .form-input:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px #7dd3fc;
+        }
+        .form-btn-primary {
+            display: inline-flex;
+            width: 100%;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background-color: #0284c7;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        }
+        .form-btn-primary:hover {
+            background-color: #0369a1;
         }
     </style>
 </head>
@@ -21,7 +49,6 @@
     <main class="flex items-center justify-center min-h-screen p-4">
         <div class="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden">
             
-            <!-- 왼쪽 홍보 패널 (모바일에서는 숨김) -->
             <div class="hidden md:flex flex-col justify-center p-12 bg-sky-600 text-white">
                 <a href="${pageContext.request.contextPath}/"><h1 class="text-4xl font-bold">MEET LOG</h1></a>
                 <p class="mt-4 text-lg text-sky-100">로그인하고 나만의 맛집 지도와 미식 여정을 기록해보세요!</p>
@@ -30,11 +57,9 @@
                 </div>
             </div>
 
-            <!-- 오른쪽 로그인 폼 -->
             <div class="p-8 md:p-12 flex flex-col justify-center">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">로그인</h2>
 
-                <!-- 성공/에러 메시지 표시 -->
                 <c:if test="${not empty successMessage}">
                     <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">${successMessage}</div>
                 </c:if>
@@ -42,7 +67,6 @@
                     <div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">${errorMessage}</div>
                 </c:if>
 
-                <!-- 탭 메뉴 -->
                 <div class="border-b border-slate-200 mb-6">
                     <nav class="-mb-px flex space-x-6" id="login-tabs">
                         <button data-tab="personal" class="tab-active py-3 px-1 border-b-2 font-semibold text-sm">개인 회원</button>
@@ -50,9 +74,16 @@
                     </nav>
                 </div>
 
-                <!-- 개인 회원 로그인 폼 -->
                 <div id="login-personal-content">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
+<<<<<<< HEAD
+=======
+                        <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
+                        <c:if test="${not empty redirectUrlValue}">
+                            <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
+                        </c:if>
+                        
+>>>>>>> origin/my-feature
                         <input type="hidden" name="userType" value="PERSONAL">
                         <div>
                             <label for="personal-email" class="block text-sm font-medium text-slate-700">이메일</label>
@@ -68,9 +99,16 @@
                     </form>
                 </div>
 
-                <!-- 기업 회원 로그인 폼 (초기에는 숨김) -->
                 <div id="login-business-content" class="hidden">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
+<<<<<<< HEAD
+=======
+                        <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
+                        <c:if test="${not empty redirectUrlValue}">
+                            <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
+                        </c:if>
+                        
+>>>>>>> origin/my-feature
                         <input type="hidden" name="userType" value="BUSINESS">
                         <div>
                             <label for="business-email" class="block text-sm font-medium text-slate-700">사업자 이메일</label>
@@ -103,7 +141,8 @@
                 </div>
 
                 <div class="text-center text-sm text-slate-500 mt-8">
-                    <p>아직 회원이 아니신가요? <a id="signup-link" href="${pageContext.request.contextPath}/register" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
+                    <p>아직 회원이 아니신가요?
+<a id="signup-link" href="${pageContext.request.contextPath}/register" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
                 </div>
             </div>
         </div>
@@ -118,17 +157,14 @@
 
             tabs.forEach(clickedTab => {
                 clickedTab.addEventListener('click', () => {
-                    // 모든 탭 스타일 초기화
                     tabs.forEach(tab => {
                         tab.classList.remove('tab-active');
                         tab.classList.add('text-slate-500', 'border-transparent');
                     });
                     
-                    // 클릭된 탭에 활성 스타일 적용
                     clickedTab.classList.add('tab-active');
                     clickedTab.classList.remove('text-slate-500', 'border-transparent');
                     
-                    // 탭에 맞는 폼 보여주기 및 회원가입 링크 변경
                     if (clickedTab.dataset.tab === 'personal') {
                         personalContent.classList.remove('hidden');
                         businessContent.classList.add('hidden');
@@ -136,7 +172,7 @@
                     } else {
                         personalContent.classList.add('hidden');
                         businessContent.classList.remove('hidden');
-                        signupLink.href = '${pageContext.request.contextPath}/register?type=business'; // 기업회원 가입 페이지로 링크 변경
+                        signupLink.href = '${pageContext.request.contextPath}/register?type=business';
                     }
                 });
             });

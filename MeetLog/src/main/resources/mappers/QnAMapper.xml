@@ -32,7 +32,6 @@
         ORDER BY created_at DESC
     </select>
     
-    <!-- 모든 활성 Q&A 조회 -->
     <select id="findAllActive" resultType="QnA">
         SELECT 
             id,
@@ -47,7 +46,6 @@
         ORDER BY created_at DESC
     </select>
     
-    <!-- Q&A 추가 -->
     <insert id="insertQnA" parameterType="QnA" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO restaurant_qna (
             question,
@@ -66,7 +64,6 @@
         )
     </insert>
     
-    <!-- Q&A 수정 -->
     <update id="updateQnA" parameterType="QnA">
         UPDATE restaurant_qna 
         SET 
@@ -76,7 +73,6 @@
         WHERE id = #{id}
     </update>
     
-    <!-- Q&A 삭제 (비활성화) -->
     <update id="deleteQnA" parameterType="int">
         UPDATE restaurant_qna 
         SET 

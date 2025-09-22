@@ -3,7 +3,6 @@
 
 <mapper namespace="CouponMapper">
     
-    <!-- 맛집별 쿠폰 조회 -->
     <select id="findByRestaurantId" parameterType="int" resultType="Coupon">
         SELECT 
             id,
@@ -19,7 +18,6 @@
         ORDER BY created_at DESC
     </select>
     
-    <!-- 모든 활성 쿠폰 조회 -->
     <select id="findAllActive" resultType="Coupon">
         SELECT 
             id,
@@ -34,7 +32,6 @@
         ORDER BY created_at DESC
     </select>
     
-    <!-- 쿠폰 추가 -->
     <insert id="insertCoupon" parameterType="Coupon" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO coupons (
             title,
@@ -53,7 +50,6 @@
         )
     </insert>
     
-    <!-- 쿠폰 수정 -->
     <update id="updateCoupon" parameterType="Coupon">
         UPDATE coupons 
         SET 
@@ -63,7 +59,6 @@
         WHERE id = #{id}
     </update>
     
-    <!-- 쿠폰 삭제 (비활성화) -->
     <update id="deleteCoupon" parameterType="int">
         UPDATE coupons 
         SET 

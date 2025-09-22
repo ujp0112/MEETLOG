@@ -28,20 +28,31 @@ public class UserDAO {
         }
     }
 
+    /**
+     * [신규] 트랜잭션 관리를 위해 SqlSession을 외부(서비스 계층)에서 받아 처리하는 메소드
+     */
+    public int insert(User user, SqlSession sqlSession) {
+        // 이 메소드는 commit/close를 직접 하지 않습니다.
+        return sqlSession.insert(NAMESPACE + ".insert", user);
+    }
+
+    /**
+     * 단독으로 User를 삽입할 때 사용하는 기존 메소드 (Auto-commit)
+     */
     public int insert(User user) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) { // 자동 커밋
             return sqlSession.insert(NAMESPACE + ".insert", user);
         }
     }
 
     public int update(User user) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
             return sqlSession.update(NAMESPACE + ".update", user);
         }
     }
     
     public int updatePassword(int userId, String newHashedPassword) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
             Map<String, Object> params = new HashMap<>();
             params.put("id", userId);
             params.put("password", newHashedPassword);
@@ -50,7 +61,7 @@ public class UserDAO {
     }
 
     public int delete(int id) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
             return sqlSession.update(NAMESPACE + ".delete", id);
         }
     }

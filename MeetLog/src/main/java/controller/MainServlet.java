@@ -3,11 +3,15 @@ package controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap; 
+import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 import model.Column;
 import model.Restaurant;
@@ -34,11 +38,17 @@ public class MainServlet extends HttpServlet {
             ServletContext application = getServletContext();
             long currentTime = System.currentTimeMillis();
 
-            // 1. 맛집 랭킹 (5분 캐시)
+         // 1. 맛집 랭킹 (5분 캐시)
             List<Restaurant> topRestaurants = (List<Restaurant>) application.getAttribute("topRankedRestaurants");
             Long lastUpdateTopRestaurants = (Long) application.getAttribute("lastUpdateTopRestaurants");
             if (topRestaurants == null || lastUpdateTopRestaurants == null || (currentTime - lastUpdateTopRestaurants > 5 * 60 * 1000)) {
-                topRestaurants = restaurantService.getTopRestaurants(10);
+                // [수정] 새로운 페이징/필터 메소드를 사용하도록 변경
+                Map<String, Object> params = new HashMap<>();
+                params.put("sortBy", "rating"); // 평점순으로 정렬
+                params.put("limit", 10);        // 10개만 가져오기
+                params.put("offset", 0);        // 첫 페이지부터
+                topRestaurants = restaurantService.getPaginatedRestaurants(params);
+
                 application.setAttribute("topRankedRestaurants", topRestaurants);
                 application.setAttribute("lastUpdateTopRestaurants", currentTime);
             }

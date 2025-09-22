@@ -1,35 +1,119 @@
 package service;
 
+import org.apache.ibatis.session.SqlSession;
 import dao.UserDAO;
+import dao.BusinessUserDAO;
+import dao.CompanyDAO;
 import model.User;
-import util.PasswordUtil;
+import model.BusinessUser;
+import model.Company;
+import util.MyBatisSqlSessionFactory;
+import util.PasswordUtil; // 새로 만든 PasswordUtil 클래스를 import 합니다.
 import java.util.List;
 
 public class UserService {
-    private UserDAO userDAO = new UserDAO();
+    private final UserDAO userDAO = new UserDAO();
+    private final BusinessUserDAO businessUserDAO = new BusinessUserDAO();
+    private final CompanyDAO companyDAO = new CompanyDAO();
 
-    public User authenticateUser(String email, String password, String userType) {
-        User user = userDAO.findByEmail(email);
-        if (user != null && user.getUserType().equals(userType) && 
-            PasswordUtil.verifyPassword(password, user.getPassword())) {
-            return user;
+    // --- 신규 통합 회원가입 로직 ---
+    public boolean registerHqUser(User user, BusinessUser businessUser) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
+        try {
+            Company company = new Company();
+            company.setName(businessUser.getBusinessName());
+            companyDAO.insert(sqlSession, company);
+            int newCompanyId = company.getId();
+
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+            user.setUserType("BUSINESS");
+            userDAO.insert(user, sqlSession);
+            int newUserId = user.getId();
+
+            businessUser.setUserId(newUserId);
+            businessUser.setCompanyId(newCompanyId);
+            businessUserDAO.insert(businessUser, sqlSession);
+
+            sqlSession.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (sqlSession != null) sqlSession.rollback();
+            return false;
+        } finally {
+            if (sqlSession != null) sqlSession.close();
         }
-        return null;
+    }
+
+    public boolean registerBranchUser(User user, BusinessUser businessUser) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
+        try {
+            String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+            user.setPassword(hashedPassword);
+            user.setUserType("BUSINESS");
+            userDAO.insert(user, sqlSession);
+            int newUserId = user.getId();
+
+            businessUser.setUserId(newUserId);
+            businessUserDAO.insert(businessUser, sqlSession);
+            
+            sqlSession.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (sqlSession != null) sqlSession.rollback();
+            return false;
+        } finally {
+            if (sqlSession != null) sqlSession.close();
+        }
     }
 
     public boolean registerUser(User user) {
         String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.insert(user) > 0;
+    }
+
+    // --- 기존 서비스 메소드들 ---
+    public User authenticateUser(String email, String password) {
+        User user = userDAO.findByEmail(email);
+        if (user != null && PasswordUtil.verifyPassword(password, user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
+    
+    public boolean isCompanyExists(int companyId) {
+        return companyDAO.existsById(companyId);
+    }
+
+    public boolean updateProfile(int userId, String nickname, String profileImage) {
+        User user = userDAO.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        user.setNickname(nickname);
+        user.setProfileImage(profileImage);
+        return userDAO.update(user) > 0; 
+    }
+    
+    public boolean changePassword(int userId, String currentPassword, String newPassword) {
+        User user = userDAO.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        
+        if (!PasswordUtil.verifyPassword(currentPassword, user.getPassword())) {
+            return false;
+        }
+        
+        String newHashedPassword = PasswordUtil.hashPassword(newPassword);
+        return userDAO.updatePassword(userId, newHashedPassword) > 0;
     }
 
     public boolean isEmailExists(String email) {
         return userDAO.findByEmail(email) != null;
-    }
-    
-    public User findByEmail(String email) {
-        return userDAO.findByEmail(email);
     }
     
     public boolean isNicknameExists(String nickname) {
@@ -41,12 +125,10 @@ public class UserService {
     }
 
     public boolean updateUser(User user) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.update(user) > 0;
     }
 
     public boolean deleteUser(int userId) {
-        // (핵심 수정!) int 결과를 boolean으로 변환
         return userDAO.delete(userId) > 0;
     }
 
@@ -65,15 +147,33 @@ public class UserService {
             String tempPassword = PasswordUtil.generateTempPassword();
             String hashedPassword = PasswordUtil.hashPassword(tempPassword);
             
-            // (핵심 수정!) int 결과를 boolean으로 변환
-            boolean updated = userDAO.updatePassword(user.getId(), hashedPassword) > 0;
-            
-            if (updated) {
-                // TODO: 이메일 발송 로직 구현
+            if (userDAO.updatePassword(user.getId(), hashedPassword) > 0) {
                 System.out.println("임시 비밀번호 발급 [" + email + ": " + tempPassword + "]");
                 return true;
             }
         }
         return false;
+    }
+    
+    public BusinessUser findHqUserByIdentifier(String identifier) {
+        return businessUserDAO.findHqByIdentifier(identifier);
+    }
+    
+    // --- HQ/Branch 관리 기능 ---
+    
+    public BusinessUser getBusinessUserByUserId(int userId) {
+        return businessUserDAO.findByUserId(userId);
+    }
+    
+    public List<BusinessUser> getPendingBranches(int companyId) {
+        return businessUserDAO.findPendingByCompanyId(companyId);
+    }
+    
+    public boolean approveBranch(int branchUserId) {
+        return businessUserDAO.updateStatus(branchUserId, "ACTIVE") > 0;
+    }
+
+    public boolean rejectBranch(int branchUserId) {
+        return userDAO.delete(branchUserId) > 0;
     }
 }

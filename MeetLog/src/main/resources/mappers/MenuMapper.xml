@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="menu">
+<mapper namespace="dao.MenuDAO">
 	<resultMap id="menuResultMap" type="model.Menu" autoMapping="true">
 		<id property="id" column="id" />
 		<result property="restaurantId" column="restaurant_id" />
@@ -19,7 +19,7 @@
 		SELECT * FROM menus WHERE id = #{id}
 	</select>
 
-	<insert id="insert" parameterType="Menu" useGeneratedKeys="true"
+	<insert id="insert" parameterType="model.Menu" useGeneratedKeys="true"
 		keyProperty="id">
 		INSERT INTO menus (restaurant_id, name, price, description, image,
 		is_popular)
@@ -27,7 +27,7 @@
 		#{isPopular})
 	</insert>
 
-	<update id="update" parameterType="Menu">
+	<update id="update" parameterType="model.Menu">
 		UPDATE menus SET
 		name = #{name},
 		price = #{price},

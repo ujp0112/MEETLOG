@@ -45,15 +45,7 @@ public class Restaurant {
 		// Default constructor
 	}
 
-	public Restaurant(String name, String category, String location, String address, String phone) {
-		this.name = name;
-		this.category = category;
-		this.location = location;
-		this.address = address;
-		this.phone = phone;
-	}
-
-	// --- 모든 Getters and Setters ---
+	// --- Getters and Setters ---
 	public int getId() {
 		return id;
 	}

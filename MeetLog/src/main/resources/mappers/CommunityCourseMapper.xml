@@ -59,4 +59,39 @@
             </if>
         </where>
     </select>
+
+    <select id="findDetailById" parameterType="int" resultMap="communityCourseResult">
+        SELECT
+            c.course_id, c.title, c.preview_image,
+            u.nickname AS author_name,
+            u.profile_image AS author_image,
+            (SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likes
+        FROM courses c
+        LEFT JOIN users u ON c.author_id = u.id
+        WHERE c.course_id = #{id}
+    </select>
+    
+    <select id="findStepsByCourseId" parameterType="int" resultType="model.CourseStep">
+        SELECT 
+            step_id AS id, 
+            step_type AS type, 
+            emoji, 
+            name, 
+            description, 
+            image 
+        FROM course_steps 
+        WHERE course_id = #{courseId} 
+        ORDER BY step_order ASC
+    </select>
+
+    <insert id="insertCourse" parameterType="model.CommunityCourse" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO courses (author_id, title, preview_image, type)
+        VALUES (#{userId}, #{title}, #{previewImage}, 'COMMUNITY')
+    </insert>
+
+    <insert id="insertCourseStep" parameterType="model.CourseStep">
+        INSERT INTO course_steps (course_id, step_order, name, type, time, cost)
+        VALUES (#{courseId}, #{order}, #{name}, #{type}, #{time}, #{cost})
+    </insert>
+
 </mapper>

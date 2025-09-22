@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,8 +16,7 @@ import model.User;
 import service.ReviewService;
 import service.RestaurantService;
 
-// [아키텍처 오류 수정] 기존 JDBC 서블릿을 삭제하고 Service 계층을 사용하는 컨트롤러로 변경합니다.
-//
+@WebServlet("/review/*")
 public class ReviewServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -76,7 +76,7 @@ public class ReviewServlet extends HttpServlet {
     
     private void handleReviewList(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // 전체 리뷰 목록 (기존 JDBC doGet 대체)
+        // [수정] 파라미터 1개짜리 메서드 호출
         List<Review> reviews = reviewService.getRecentReviews(50); // 최근 50개
         request.setAttribute("reviews", reviews);
         request.getRequestDispatcher("/WEB-INF/views/review-list.jsp").forward(request, response);
@@ -112,9 +112,9 @@ public class ReviewServlet extends HttpServlet {
             List<String> keywordsList = null;
             if (keywordsInput != null && !keywordsInput.trim().isEmpty()) {
                  keywordsList = Arrays.stream(keywordsInput.split(","))
-                                      .map(String::trim)
-                                      .filter(tag -> !tag.isEmpty())
-                                      .collect(Collectors.toList());
+                                       .map(String::trim)
+                                       .filter(tag -> !tag.isEmpty())
+                                       .collect(Collectors.toList());
             }
 
             Review review = new Review();

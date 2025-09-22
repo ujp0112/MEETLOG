@@ -4,20 +4,17 @@ import model.Column;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
+import java.util.Map;
 
 public class ColumnDAO {
 	private static final String NAMESPACE = "dao.ColumnDAO";
 
-    /**
-     * [신규] 모든 칼럼을 조회하는 DAO 메소드
-     */
     public List<Column> findAll() {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             return sqlSession.selectList(NAMESPACE + ".findAll");
         }
     }
 
-    // --- 기존 코드 (메소드 호출 방식만 수정) ---
 	public List<Column> findTopColumns(int limit) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".findTopColumns", limit);
@@ -41,6 +38,12 @@ public class ColumnDAO {
 			return sqlSession.selectList(NAMESPACE + ".findByUserId", userId);
 		}
 	}
+
+    public List<Column> findRecentByUserId(Map<String, Object> params) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findRecentByUserId", params);
+        }
+    }
 
 	public int insert(Column column) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
