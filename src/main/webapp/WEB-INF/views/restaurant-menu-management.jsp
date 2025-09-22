@@ -72,11 +72,11 @@
                                     </p>
                                     
                                     <div class="flex space-x-2">
-                                        <button onclick="editMenu(${menu.id})" 
+                                        <button onclick="editMenu('${menu.id}')" 
                                                 class="flex-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100 transition-colors">
                                             수정
                                         </button>
-                                        <button onclick="deleteMenu(${menu.id})" 
+                                        <button onclick="deleteMenu('${menu.id}')" 
                                                 class="flex-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors">
                                             삭제
                                         </button>

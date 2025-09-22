@@ -102,7 +102,7 @@
                                 </div>
                                 
                                 <div class="mt-4 pt-4 border-t border-slate-200">
-                                    <button onclick="deleteRestaurant(${restaurant.id})" 
+                                    <button onclick="deleteRestaurant('${restaurant.id}')" 
                                             class="w-full btn-danger text-white py-2 px-4 rounded-xl font-semibold text-center"
                                             onclick="return confirm('정말로 이 음식점을 삭제하시겠습니까?')">
                                         🗑️ 삭제
