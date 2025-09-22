@@ -85,7 +85,9 @@ public class CourseServlet extends HttpServlet {
     private void handleSearchPlaces(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         String keyword = request.getParameter("keyword");
-        List<Restaurant> results = restaurantService.searchRestaurants(keyword);
+        Map<String, Object> params = new HashMap<>();
+        params.put("keyword", keyword);
+        List<Restaurant> results = restaurantService.searchRestaurants(params);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(results));
@@ -155,7 +157,10 @@ public class CourseServlet extends HttpServlet {
             CommunityCourse course = new CommunityCourse();
             course.setUserId(user.getId());
             course.setTitle(formFields.get("title"));
-            course.setTags(formFields.get("tags"));
+            String tagsString = formFields.get("tags");
+            if (tagsString != null && !tagsString.isEmpty()) {
+                course.setTags(java.util.Arrays.asList(tagsString.split("\\s*,\\s*")));
+            }
             course.setPreviewImage(savedFilePath);
             
             boolean success = courseService.createCourseWithSteps(course, steps);

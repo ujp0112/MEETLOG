@@ -1,5 +1,5 @@
 <!-- =============================================================== -->
-<!-- File: /webapp/WEB-INF/jspf/branchheader.jspf                       -->
+<!-- File: /webapp/WEB-INF/layout/branchheader.jspf                       -->
 <!-- Purpose: Sticky top header + global theme tokens               -->
 <!-- =============================================================== -->
 <c:set var="ctx" value="${pageContext.request.contextPath}" />

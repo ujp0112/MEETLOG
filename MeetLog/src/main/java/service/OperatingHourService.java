@@ -8,6 +8,10 @@ import java.util.List;
 public class OperatingHourService {
 	private final OperatingHourDAO operatingHourDAO = new OperatingHourDAO();
 
+	public List<OperatingHour> findByRestaurantId(int restaurantId) {
+		return operatingHourDAO.findByRestaurantId(restaurantId);
+	}
+
 	public List<OperatingHour> getOperatingHoursByRestaurantId(int restaurantId) {
 		return operatingHourDAO.findByRestaurantId(restaurantId);
 	}

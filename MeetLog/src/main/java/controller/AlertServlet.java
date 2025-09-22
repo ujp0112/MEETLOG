@@ -45,7 +45,7 @@ public class AlertServlet extends HttpServlet {
         alert1.setId(1);
         alert1.setTitle("새로운 리뷰가 등록되었습니다");
         alert1.setContent("고미정에 대한 리뷰가 새로 등록되었습니다.");
-        alert1.setCreatedAt("2025-09-14 15:30");
+        alert1.setCreatedAt(java.time.LocalDateTime.now().minusMinutes(10));
         alert1.setRead(false);
         alerts.add(alert1);
         
@@ -53,7 +53,7 @@ public class AlertServlet extends HttpServlet {
         alert2.setId(2);
         alert2.setTitle("예약이 확정되었습니다");
         alert2.setContent("파스타 팩토리 예약이 확정되었습니다. (2025-09-16 19:00)");
-        alert2.setCreatedAt("2025-09-14 14:20");
+        alert2.setCreatedAt(java.time.LocalDateTime.now().minusHours(1));
         alert2.setRead(true);
         alerts.add(alert2);
         
@@ -61,7 +61,7 @@ public class AlertServlet extends HttpServlet {
         alert3.setId(3);
         alert3.setTitle("칼럼이 추천되었습니다");
         alert3.setContent("작성하신 '강남 맛집 베스트 5' 칼럼이 추천 목록에 등록되었습니다.");
-        alert3.setCreatedAt("2025-09-14 10:15");
+        alert3.setCreatedAt(java.time.LocalDateTime.now().minusHours(5));
         alert3.setRead(false);
         alerts.add(alert3);
         

@@ -9,8 +9,12 @@ import model.Restaurant;
 import model.RestaurantSummaryDTO;
 import util.MyBatisSqlSessionFactory;
 
+import dao.OperatingHourDAO;
+import model.OperatingHour;
+
 public class RestaurantService {
     private final RestaurantDAO restaurantDAO = new RestaurantDAO();
+    private final OperatingHourDAO operatingHourDAO = new OperatingHourDAO();
 
     // --- Read Operations ---
     public List<Restaurant> findAll() {
@@ -67,19 +71,36 @@ public class RestaurantService {
 
     // --- Write Operations with Service-Layer Transaction Management ---
     public boolean createRestaurant(Restaurant restaurant) {
+        return createRestaurant(restaurant, null);
+    }
+
+    public boolean createRestaurant(Restaurant restaurant, List<OperatingHour> hoursList) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
+                // 1. 레스토랑 정보 삽입
                 int result = restaurantDAO.insert(sqlSession, restaurant);
-                if (result > 0) {
-                    sqlSession.commit();
-                    return true;
+                if (result == 0) {
+                    throw new Exception("Restaurant insert failed.");
                 }
+                
+                // 2. 생성된 레스토랑 ID를 영업시간 정보에 설정
+                int restaurantId = restaurant.getId();
+                if (hoursList != null && !hoursList.isEmpty()) {
+                    for (OperatingHour hour : hoursList) {
+                        hour.setRestaurantId(restaurantId);
+                    }
+                    // 3. 영업시간 정보 삽입
+                    operatingHourDAO.insertList(sqlSession, hoursList);
+                }
+                
+                sqlSession.commit();
+                return true;
             } catch (Exception e) {
                 e.printStackTrace();
                 sqlSession.rollback();
+                return false;
             }
         }
-        return false;
     }
 
     public boolean updateRestaurant(Restaurant restaurant) {

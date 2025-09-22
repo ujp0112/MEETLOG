@@ -51,17 +51,14 @@ public class UpdateReservationStatusServlet extends HttpServlet {
                     return;
                 }
                 
-                sqlSession = MyBatisSqlSessionFactory.getSqlSession();
                 ReservationService reservationService = new ReservationService();
                 
                 // 예약 상태 변경
-                boolean success = reservationService.updateReservationStatus(reservationId, status, sqlSession);
+                boolean success = reservationService.updateReservationStatus(reservationId, status);
                 
                 if (success) {
-                    sqlSession.commit();
                     response.sendRedirect(request.getContextPath() + "/business/reservation-management?success=updated");
                 } else {
-                    sqlSession.rollback();
                     request.setAttribute("errorMessage", "예약 상태 변경에 실패했습니다.");
                     request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
                 }
@@ -73,15 +70,8 @@ public class UpdateReservationStatusServlet extends HttpServlet {
             
         } catch (Exception e) {
             e.printStackTrace();
-            if (sqlSession != null) {
-                sqlSession.rollback();
-            }
             request.setAttribute("errorMessage", "예약 상태 변경 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
-        } finally {
-            if (sqlSession != null) {
-                sqlSession.close();
-            }
         }
     }
     

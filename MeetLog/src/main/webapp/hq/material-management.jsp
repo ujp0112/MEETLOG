@@ -79,7 +79,7 @@
   </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jspf/header.jspf" %>
+<%@ include file="/WEB-INF/layout/header.jspf" %>
 
   <main>
     <section class="panel" aria-labelledby="pageTitle">

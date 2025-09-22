@@ -9,6 +9,10 @@ import util.MyBatisSqlSessionFactory;
 public class MenuService {
     private MenuDAO menuDAO = new MenuDAO();
 
+    public List<Menu> findByRestaurantId(int restaurantId) {
+        return menuDAO.findByRestaurantId(restaurantId);
+    }
+
     public List<Menu> getMenusByRestaurantId(int restaurantId) {
         return menuDAO.findByRestaurantId(restaurantId);
     }

@@ -59,17 +59,14 @@ public class UpdateMenuServlet extends HttpServlet {
                 menu.setDescription(description != null ? description.trim() : "");
                 menu.setPopular(popular);
                 
-                sqlSession = MyBatisSqlSessionFactory.getSqlSession();
                 MenuService menuService = new MenuService();
                 
                 // 메뉴 업데이트
-                boolean success = menuService.updateMenu(menu, sqlSession);
+                boolean success = menuService.updateMenu(menu);
                 
                 if (success) {
-                    sqlSession.commit();
                     response.sendRedirect(request.getContextPath() + "/business/menu-management?success=updated");
                 } else {
-                    sqlSession.rollback();
                     request.setAttribute("errorMessage", "메뉴 수정에 실패했습니다.");
                     request.getRequestDispatcher("/WEB-INF/views/business/menu-management.jsp").forward(request, response);
                 }
@@ -81,15 +78,10 @@ public class UpdateMenuServlet extends HttpServlet {
             
         } catch (Exception e) {
             e.printStackTrace();
-            if (sqlSession != null) {
-                sqlSession.rollback();
-            }
             request.setAttribute("errorMessage", "메뉴 수정 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         } finally {
-            if (sqlSession != null) {
-                sqlSession.close();
-            }
+            // 서비스에서 세션을 관리하므로 여기서 닫을 필요가 없습니다.
         }
     }
 }

@@ -44,6 +44,10 @@ public class ReviewService {
         return reviewDAO.findRecentByUserId(params);
     }
 
+    public List<Review> getRecentReviewsByOwnerId(int ownerId, int limit) {
+        return reviewDAO.findRecentReviewsByOwnerId(ownerId, limit);
+    }
+
     public List<Review> searchReviews(Map<String, Object> searchParams) {
         return reviewDAO.findAll(); // 임시로 모든 리뷰 반환
     }

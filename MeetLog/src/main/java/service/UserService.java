@@ -112,6 +112,10 @@ public class UserService {
         return userDAO.updatePassword(userId, newHashedPassword) > 0;
     }
 
+    public User findByEmail(String email) {
+        return userDAO.findByEmail(email);
+    }
+
     public boolean isEmailExists(String email) {
         return userDAO.findByEmail(email) != null;
     }

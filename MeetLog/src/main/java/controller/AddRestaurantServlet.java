@@ -47,131 +47,97 @@ public class AddRestaurantServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        SqlSession sqlSession = null;
-        try {
-            HttpSession session = request.getSession(false);
-            if (session == null || session.getAttribute("user") == null) {
-                response.sendRedirect(request.getContextPath() + "/login?error=sessionExpired");
-                return; 
-            }
-            User owner = (User) session.getAttribute("user");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login?error=sessionExpired");
+            return; 
+        }
+        User owner = (User) session.getAttribute("user");
 
-            sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
+        Restaurant restaurant = new Restaurant();
+        List<OperatingHour> hoursList = new ArrayList<>();
+        Map<String, String> formFields = new HashMap<>();
+        String imagePath = null;
 
-            if (!ServletFileUpload.isMultipartContent(request)) {
-                throw new Exception("폼 enctype이 multipart/form-data가 아닙니다.");
-            }
-
+        if (ServletFileUpload.isMultipartContent(request)) {
             DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setHeaderEncoding("UTF-8");
 
-            Map<String, String> formFields = new HashMap<>();
-            FileItem imageFileItem = null;
+            try {
+                List<FileItem> formItems = upload.parseRequest(request);
 
-            List<FileItem> formItems = upload.parseRequest(request);
-
-            for (FileItem item : formItems) {
-                if (item.isFormField()) {
-                    formFields.put(item.getFieldName(), item.getString("UTF-8"));
-                } else {
-                    if ("restaurantImage".equals(item.getFieldName()) && item.getSize() > 0) {
-                        imageFileItem = item;
+                if (formItems != null && !formItems.isEmpty()) {
+                    for (FileItem item : formItems) {
+                        if (item.isFormField()) {
+                            formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                        } else {
+                            String fileName = new File(item.getName()).getName();
+                            if (fileName != null && !fileName.isEmpty()) {
+                                String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
+                                String uploadPath = AppConfig.getUploadPath();
+                                File uploadDir = new File(uploadPath);
+                                if (!uploadDir.exists()) uploadDir.mkdirs();
+                                File storeFile = new File(uploadPath + File.separator + uniqueFileName);
+                                item.write(storeFile);
+                                imagePath = "images/" + uniqueFileName;
+                            }
+                        }
                     }
                 }
-            }
-            
-            System.out.println("파일설정");
 
-            Restaurant restaurant = new Restaurant();
-            restaurant.setOwnerId(owner.getId());
-            restaurant.setName(formFields.get("name"));
-            restaurant.setCategory(formFields.get("category"));
-            restaurant.setLocation(formFields.get("location"));
-            
-            String baseAddress = formFields.getOrDefault("address", "");
-            String detailAddress = formFields.getOrDefault("detail_address", "");
-            restaurant.setAddress((baseAddress + " " + detailAddress).trim());
-            
-            restaurant.setJibunAddress(formFields.get("jibun_address"));
-            restaurant.setPhone(formFields.get("phone"));
-            restaurant.setDescription(formFields.get("description"));
-            restaurant.setHours(formFields.get("hours"));
-            restaurant.setParking(formFields.get("parking") != null && formFields.get("parking").equals("true"));
+                restaurant.setName(formFields.get("name"));
+                restaurant.setAddress(formFields.get("address"));
+                restaurant.setPhone(formFields.get("tel"));
+                restaurant.setDescription(formFields.get("description"));
+                restaurant.setCategory(formFields.get("category"));
+                restaurant.setOwnerId(owner.getId());
+                if (imagePath != null) {
+                    restaurant.setImageUrl(imagePath);
+                }
 
-            try {
-                restaurant.setLatitude(Double.parseDouble(formFields.get("latitude")));
-                restaurant.setLongitude(Double.parseDouble(formFields.get("longitude")));
+                // Operating hours processing
+                for (int i = 0; i < 7; i++) { // 7 days a week
+                    String day = formFields.get("days[" + i + "]");
+                    String openTimeStr = formFields.get("open_times[" + i + "]");
+                    String closeTimeStr = formFields.get("close_times[" + i + "]");
+
+                    if (day != null && openTimeStr != null && !openTimeStr.isEmpty() && closeTimeStr != null && !closeTimeStr.isEmpty()) {
+                        OperatingHour oh = new OperatingHour();
+                        oh.setDayOfWeek(i + 1); // Assuming days[0] is Monday (1)
+                        try {
+                            oh.setOpeningTime(LocalTime.parse(openTimeStr));
+                            oh.setClosingTime(LocalTime.parse(closeTimeStr));
+                            hoursList.add(oh);
+                        } catch (DateTimeParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
             } catch (Exception e) {
-                restaurant.setLatitude(0.0);
-                restaurant.setLongitude(0.0);
+                e.printStackTrace();
+                request.setAttribute("errorMessage", "요청 처리 중 오류가 발생했습니다: " + e.getMessage());
+                request.getRequestDispatcher("/WEB-INF/views/add-restaurant.jsp").forward(request, response);
+                return;
             }
+        }
 
-            if (imageFileItem != null) {
-                // AppConfig를 통해 설정 파일에 정의된 경로를 가져옴
-                String uploadPath = AppConfig.getUploadPath();
-                if (uploadPath == null || uploadPath.isEmpty()) {
-                    throw new Exception("업로드 경로가 config.properties에 설정되지 않았습니다.");
-                }
-
-                File uploadDir = new File(uploadPath);
-                if (!uploadDir.exists()) uploadDir.mkdirs();
-
-                String originalFileName = new File(imageFileItem.getName()).getName();
-                String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
-                
-                File storeFile = new File(uploadPath, fileName);
-                imageFileItem.write(storeFile);
-                
-                // 데이터베이스에는 경로 없이 순수 파일명만 저장
-                restaurant.setImage(fileName);
+        try {
+            boolean success = restaurantService.createRestaurant(restaurant, hoursList);
+            
+            if (success) {
+                response.sendRedirect(request.getContextPath() + "/business/restaurants?status=add_success");
+            } else {
+                throw new Exception("가게 및 영업시간 등록에 실패했습니다.");
             }
-            
-            // 이 서비스 메소드는 내부적으로 DAO의 'insert'를 호출합니다.
-            restaurantService.addRestaurant(sqlSession, restaurant);
-            
-            int newRestaurantId = restaurant.getId();
-            
-            if (newRestaurantId == 0) {
-                throw new Exception("가게 ID를 받아오지 못했습니다. RestaurantMapper.xml의 <insert> 태그에 useGeneratedKeys=\"true\"와 keyProperty=\"id\" 속성이 올바르게 설정되었는지 확인하세요.");
-            }
-
-            List<OperatingHour> hoursList = new ArrayList<>();
-            for (int i = 1; i <= 7; i++) {
-                if (formFields.get("is_closed_" + i) != null) continue;
-                
-                int slotIndex = 1;
-                while (true) {
-                    String openTimeStr = formFields.get("day_" + i + "_open_" + slotIndex);
-                    String closeTimeStr = formFields.get("day_" + i + "_close_" + slotIndex);
-                    
-                    if (openTimeStr == null || closeTimeStr == null || openTimeStr.isEmpty() || closeTimeStr.isEmpty()) break;
-                    
-                    OperatingHour oh = new OperatingHour();
-                    oh.setRestaurantId(newRestaurantId);
-                    oh.setDayOfWeek(i);
-                    oh.setOpeningTime(LocalTime.parse(openTimeStr));
-                    oh.setClosingTime(LocalTime.parse(closeTimeStr));
-                    hoursList.add(oh);
-                    slotIndex++;
-                }
-            }
-            
-            if (!hoursList.isEmpty()) {
-                operatingHourService.addOperatingHours(sqlSession, hoursList);
-            }
-            
-            sqlSession.commit();
-            response.sendRedirect(request.getContextPath() + "/business/restaurants");
 
         } catch (Exception e) {
-            if (sqlSession != null) sqlSession.rollback();
-            response.setContentType("text/plain; charset=UTF-8");
+            e.printStackTrace();
+            response.setContentType("text/html; charset=UTF-8");
             PrintWriter out = response.getWriter();
-            out.println("오류가 발생했습니다:");
-            e.printStackTrace(out);
-        } finally {
-            if (sqlSession != null) sqlSession.close();
+            out.println("<script>alert('오류가 발생했습니다: " + e.getMessage().replace("'", "\\'") + "'); history.back();</script>");
         }
     }
 }

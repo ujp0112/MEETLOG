@@ -56,7 +56,7 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0}
 </style>
 </head>
 <body>
-<%@ include file="/WEB-INF/jspf/branchheader.jspf" %>
+<%@ include file="/WEB-INF/layout/branchheader.jspf" %>
 
 <section class="panel" aria-labelledby="pageTitle">
   <div class="hd">

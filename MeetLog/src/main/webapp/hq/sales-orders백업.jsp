@@ -62,7 +62,7 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:960px
 </head>
 <body>
 <<<<<<<< HEAD:MeetLog/src/main/webapp/hq/sales-orders백업.jsp
-  <jsp:include page="/WEB-INF/jspf/header.jspf" />
+  <jsp:include page="/WEB-INF/layout/header.jspf" />
 ========
   <jsp:include page="/WEB-INF/layout/header.jspf" />
 >>>>>>>> origin/my-feature:MeetLog/src/main/webapp/WEB-INF/hq/sales-orders백업.jsp

@@ -1,5 +1,5 @@
 <!-- =============================================================== -->
-<!-- File: /webapp/WEB-INF/jspf/header.jspf                       -->
+<!-- File: /webapp/WEB-INF/layout/header.jspf                       -->
 <!-- Purpose: Sticky top header + global theme tokens               -->
 <!-- =============================================================== -->
 <%@ page language="java" contentType="text/html; charset=UTF-8"
