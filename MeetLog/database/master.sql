@@ -187,6 +187,52 @@ CREATE TABLE purchase_order_line (
   CONSTRAINT fk_pol_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
+-- 1. 공지사항 기본 정보를 저장할 테이블
+CREATE TABLE business_notice (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  company_id INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  content TEXT,
+  img_path VARCHAR(255),  -- 대표 이미지 경로
+  deleted_yn CHAR(1) DEFAULT 'N',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NULL,
+  CONSTRAINT fk_notice_company FOREIGN KEY (company_id) REFERENCES companies(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. 공지사항의 다중 첨부파일 정보를 저장할 테이블
+CREATE TABLE notice_file (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  notice_id INT NOT NULL,
+  company_id BIGINT NOT NULL,
+  original_filename VARCHAR(255) NOT NULL, -- 사용자가 올린 원래 파일명
+  saved_filename VARCHAR(255) NOT NULL,    -- 서버에 저장될 고유한 파일명
+  file_path VARCHAR(255) NOT NULL,         -- 서버 내 파일 경로
+  file_size BIGINT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notice_file_notice FOREIGN KEY (notice_id) REFERENCES business_notice(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- 1. 기존 notice 테이블에서 대표 이미지 컬럼 삭제
+ALTER TABLE business_notice DROP COLUMN img_path;
+
+-- 2. 여러 이미지를 순서대로 저장할 새로운 테이블 생성
+CREATE TABLE notice_image (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  notice_id INT NOT NULL,
+  company_id INT NOT NULL,
+  file_path VARCHAR(255) NOT NULL,
+  display_order INT NOT NULL,  -- 이미지 표시 순서
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_notice_image_notice FOREIGN KEY (notice_id) REFERENCES business_notice(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+ALTER TABLE business_notice
+ADD COLUMN view_count INT NOT NULL DEFAULT 0 AFTER content;
+
+ALTER TABLE menu
+ADD COLUMN recipe TEXT NULL COMMENT '메뉴 레시피' AFTER price;
+
 -- (이하 모든 테이블 생성 구문은 생략 없이 올바르게 포함됩니다)
 CREATE TABLE `menus` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `price` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `is_popular` tinyint(1) DEFAULT '0', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `reviews` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `user_id` int NOT NULL, `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `author_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `rating` int NOT NULL, `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `images` json DEFAULT NULL, `keywords` json DEFAULT NULL, `likes` int DEFAULT '0', `is_active` tinyint(1) DEFAULT '1', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), KEY `user_id` (`user_id`), CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_chk_1` CHECK ((`rating` >= 1) and (`rating` <= 5)) ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
