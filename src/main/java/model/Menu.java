@@ -7,6 +7,9 @@ public class Menu {
 	private String price;
 	private String description;
 	private String image;
+	private String category;
+	private int stock;
+	private boolean isActive;
 	private boolean isPopular;
 
 	public Menu() {
@@ -73,5 +76,29 @@ public class Menu {
 
 	public void setPopular(boolean popular) {
 		isPopular = popular;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public int getStock() {
+		return stock;
+	}
+
+	public void setStock(int stock) {
+		this.stock = stock;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean active) {
+		isActive = active;
 	}
 }

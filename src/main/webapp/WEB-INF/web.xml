@@ -7,6 +7,22 @@
 		<welcome-file>main</welcome-file>
 	</welcome-file-list>
 
+	<!-- 메뉴 관리 서블릿 - 테스트용으로 맨 위에 배치 -->
+	<servlet>
+		<servlet-name>MenuManagementServlet</servlet-name>
+		<servlet-class>controller.MenuManagementServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>MenuManagementServlet</servlet-name>
+		<url-pattern>/menu-test</url-pattern>
+		<url-pattern>/menu-management-test</url-pattern>
+		<url-pattern>/test-menu-management</url-pattern>
+		<url-pattern>/business/restaurants/1/menus</url-pattern>
+		<url-pattern>/business/restaurants/*/menus</url-pattern>
+		<url-pattern>/business/restaurants/*/menus/add</url-pattern>
+		<url-pattern>/business/restaurants/*/menus/edit/*</url-pattern>
+	</servlet-mapping>
+
 	<servlet>
 		<servlet-name>AuthServlet</servlet-name>
 		<servlet-class>controller.AuthServlet</servlet-class>
@@ -97,25 +113,7 @@
 		<url-pattern>/hq/sales-orders</url-pattern>
 	</servlet-mapping>
 
-	<!-- 메뉴 관리 서블릿들 (제거됨 - RestaurantMenuManagementServlet으로 대체) -->
-
-	<servlet>
-		<servlet-name>AddMenuServlet</servlet-name>
-		<servlet-class>controller.AddMenuServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>AddMenuServlet</servlet-name>
-		<url-pattern>/business/restaurants/*/menus/add</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>EditMenuServlet</servlet-name>
-		<servlet-class>controller.EditMenuServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EditMenuServlet</servlet-name>
-		<url-pattern>/business/restaurants/*/menus/edit/*</url-pattern>
-	</servlet-mapping>
+	<!-- 메뉴 관리 서블릿들 (제거됨 - MenuManagementServlet으로 통합) -->
 
 	<servlet>
 		<servlet-name>RestaurantDetailServlet</servlet-name>
@@ -520,8 +518,8 @@
 	<servlet-mapping>
 		<servlet-name>RestaurantMenuManagementServlet</servlet-name>
 		<url-pattern>/menu-management</url-pattern>
-		<url-pattern>/business/restaurants/*/menus</url-pattern>
 		<url-pattern>/restaurant-menus</url-pattern>
 	</servlet-mapping>
+
 
 </web-app>
