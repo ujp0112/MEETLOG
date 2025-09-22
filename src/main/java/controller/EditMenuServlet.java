@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,9 +18,9 @@ import service.MenuService;
 import service.RestaurantService;
 
 @MultipartConfig(
-    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
-    maxFileSize = 1024 * 1024 * 10,      // 10 MB
-    maxRequestSize = 1024 * 1024 * 100   // 100 MB
+    fileSizeThreshold = 1024 * 1024,      // 1 MB
+    maxFileSize = 1024 * 1024 * 10,       // 10 MB
+    maxRequestSize = 1024 * 1024 * 100    // 100 MB
 )
 public class EditMenuServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -32,19 +31,22 @@ public class EditMenuServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // URL에서 음식점 ID와 메뉴 ID 추출
+        // 요청 URL: /business/menus/edit/1/3
+        // request.getPathInfo()는 "/1/3"을 반환
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID와 메뉴 ID가 필요합니다.");
+        
+        if (pathInfo == null || pathInfo.equals("/") || pathInfo.split("/").length < 3) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "레스토랑 ID와 메뉴 ID가 필요합니다.");
             return;
         }
         
+        String[] pathParts = pathInfo.split("/");
+        // pathParts -> ["", "1", "3"]
+        
         try {
-            String[] pathParts = pathInfo.substring(1).split("/");
-            int restaurantId = Integer.parseInt(pathParts[0]);
+            int restaurantId = Integer.parseInt(pathParts[1]);
             int menuId = Integer.parseInt(pathParts[2]);
             
-            // 세션 확인
             HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("user") == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
@@ -57,19 +59,12 @@ public class EditMenuServlet extends HttpServlet {
                 return;
             }
             
-            // 음식점 정보 조회 및 소유자 확인
             Restaurant restaurant = restaurantService.findById(restaurantId);
-            if (restaurant == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "음식점을 찾을 수 없습니다.");
+            if (restaurant == null || restaurant.getOwnerId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
                 return;
             }
             
-            if (restaurant.getOwnerId() != user.getId()) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "이 음식점의 소유자가 아닙니다.");
-                return;
-            }
-            
-            // 메뉴 정보 조회
             Menu menu = menuService.findById(menuId);
             if (menu == null || menu.getRestaurantId() != restaurantId) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "메뉴를 찾을 수 없습니다.");
@@ -91,19 +86,21 @@ public class EditMenuServlet extends HttpServlet {
         
         request.setCharacterEncoding("UTF-8");
         
-        // URL에서 음식점 ID와 메뉴 ID 추출
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID와 메뉴 ID가 필요합니다.");
+        
+        if (pathInfo == null || pathInfo.equals("/") || pathInfo.split("/").length < 3) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "레스토랑 ID와 메뉴 ID가 필요합니다.");
             return;
         }
         
+        String[] pathParts = pathInfo.split("/");
+        int restaurantId = 0;
+        int menuId = 0;
+        
         try {
-            String[] pathParts = pathInfo.substring(1).split("/");
-            int restaurantId = Integer.parseInt(pathParts[0]);
-            int menuId = Integer.parseInt(pathParts[2]);
+            restaurantId = Integer.parseInt(pathParts[1]);
+            menuId = Integer.parseInt(pathParts[2]);
             
-            // 세션 확인
             HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("user") == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
@@ -116,19 +113,12 @@ public class EditMenuServlet extends HttpServlet {
                 return;
             }
             
-            // 음식점 정보 조회 및 소유자 확인
             Restaurant restaurant = restaurantService.findById(restaurantId);
-            if (restaurant == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "음식점을 찾을 수 없습니다.");
+            if (restaurant == null || restaurant.getOwnerId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
                 return;
             }
             
-            if (restaurant.getOwnerId() != user.getId()) {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "이 음식점의 소유자가 아닙니다.");
-                return;
-            }
-            
-            // 메뉴 정보 조회
             Menu menu = menuService.findById(menuId);
             if (menu == null || menu.getRestaurantId() != restaurantId) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "메뉴를 찾을 수 없습니다.");
@@ -148,22 +138,30 @@ public class EditMenuServlet extends HttpServlet {
                 menu.setImage("uploads/menu_images/" + uniqueFileName);
             }
             
-            // 메뉴 정보 업데이트
+            // 메뉴 정보 업데이트 (누락된 필드 모두 반영)
             menu.setName(request.getParameter("name"));
             menu.setDescription(request.getParameter("description"));
             menu.setPrice(request.getParameter("price"));
-            menu.setPopular(Boolean.parseBoolean(request.getParameter("popular")));
+            menu.setCategory(request.getParameter("category"));
             
-            // 메뉴 업데이트
+            String stockParam = request.getParameter("stock");
+            menu.setStock(stockParam != null && !stockParam.isEmpty() ? Integer.parseInt(stockParam) : 0);
+            
+            menu.setActive(request.getParameter("isActive") != null);
+            menu.setPopular(request.getParameter("popular") != null);
+            
             menuService.updateMenu(menu);
             
-            response.sendRedirect(request.getContextPath() + "/business/restaurants/" + restaurantId + "/menus");
+            // 성공 시 새로운 목록 URL로 리다이렉트
+            response.sendRedirect(request.getContextPath() + "/business/menus/" + restaurantId);
             
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "올바르지 않은 ID입니다.");
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "메뉴 수정 중 오류가 발생했습니다. 다시 시도해주세요.");
+            request.setAttribute("restaurant", restaurantService.findById(restaurantId));
+            request.setAttribute("menu", menuService.findById(menuId)); // menu 객체도 다시 설정
             request.getRequestDispatcher("/WEB-INF/views/edit-menu.jsp").forward(request, response);
         }
     }

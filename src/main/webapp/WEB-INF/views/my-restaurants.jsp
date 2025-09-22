@@ -95,7 +95,7 @@
                                        class="flex-1 btn-secondary text-white py-2 px-4 rounded-xl font-semibold text-center">
                                         상세보기
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus" 
+                                    <a href="${pageContext.request.contextPath}/business/menus/${restaurant.id}" 
                                        class="flex-1 btn-primary text-white py-2 px-4 rounded-xl font-semibold text-center">
                                         메뉴관리
                                     </a>

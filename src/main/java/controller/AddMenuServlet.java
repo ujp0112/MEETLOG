@@ -13,8 +13,10 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
 import model.Menu;
+import model.Restaurant; // Restaurant 모델 import 추가
 import model.User;
 import service.MenuService;
+import service.RestaurantService; // RestaurantService import 추가
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 
@@ -26,22 +28,28 @@ import org.apache.ibatis.session.SqlSession;
 public class AddMenuServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private MenuService menuService = new MenuService();
+    // RestaurantService 추가
+    private RestaurantService restaurantService = new RestaurantService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // URL에서 음식점 ID 추출
+        // 요청 URL: /business/menus/add/1
+        // request.getPathInfo()는 "/1"을 반환
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
+
+        if (pathInfo == null || pathInfo.equals("/") || pathInfo.split("/").length < 2) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "레스토랑 ID가 필요합니다.");
             return;
         }
+        
+        String[] pathParts = pathInfo.split("/");
+        // pathParts -> ["", "1"]
 
         try {
-            int restaurantId = Integer.parseInt(pathInfo.substring(1).split("/")[0]);
+            int restaurantId = Integer.parseInt(pathParts[1]);
             
-            // 세션 확인
             HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("user") == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
@@ -54,11 +62,18 @@ public class AddMenuServlet extends HttpServlet {
                 return;
             }
 
-            request.setAttribute("restaurantId", restaurantId);
+            // 레스토랑 정보도 조회해서 JSP로 넘겨줍니다. (JSP에서 ${restaurant.name} 사용)
+            Restaurant restaurant = restaurantService.findById(restaurantId);
+            if (restaurant == null || restaurant.getOwnerId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없거나 존재하지 않는 레스토랑입니다.");
+                return;
+            }
+
+            request.setAttribute("restaurant", restaurant); // restaurant 객체 전달
             request.getRequestDispatcher("/WEB-INF/views/add-menu.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 음식점 ID입니다.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 레스토랑 ID입니다.");
         }
     }
 
@@ -66,17 +81,22 @@ public class AddMenuServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // URL에서 음식점 ID 추출
+        request.setCharacterEncoding("UTF-8");
+
+        // 요청 URL: /business/menus/add/1
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "음식점 ID가 필요합니다.");
+
+        if (pathInfo == null || pathInfo.equals("/") || pathInfo.split("/").length < 2) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "레스토랑 ID가 필요합니다.");
             return;
         }
+        
+        String[] pathParts = pathInfo.split("/");
+        int restaurantId = 0;
 
         try {
-            int restaurantId = Integer.parseInt(pathInfo.substring(1).split("/")[0]);
+            restaurantId = Integer.parseInt(pathParts[1]);
             
-            // 세션 확인
             HttpSession session = request.getSession(false);
             if (session == null || session.getAttribute("user") == null) {
                 response.sendRedirect(request.getContextPath() + "/login");
@@ -89,24 +109,32 @@ public class AddMenuServlet extends HttpServlet {
                 return;
             }
 
+            // 소유권 확인
+            Restaurant restaurant = restaurantService.findById(restaurantId);
+            if (restaurant == null || restaurant.getOwnerId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "권한이 없습니다.");
+                return;
+            }
+
             // 파일 업로드 처리
             String savedFilePath = null;
-            Part filePart = request.getPart("image");
+            // JSP 파일에서 name="menuImage"로 설정되어 있으므로 "image"가 아닌 "menuImage"로 받습니다.
+            Part filePart = request.getPart("menuImage"); 
             if (filePart != null && filePart.getSize() > 0) {
                 String fileName = filePart.getSubmittedFileName();
                 if (fileName != null && !fileName.isEmpty()) {
-                    // 고유한 파일명 생성
-                    String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    String fileExtension = "";
+                    if (fileName.lastIndexOf(".") > 0) {
+                        fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    }
                     String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
                     
-                    // 업로드 디렉토리 생성
                     String uploadPath = getServletContext().getRealPath("/uploads/menus");
                     File uploadDir = new File(uploadPath);
                     if (!uploadDir.exists()) {
                         uploadDir.mkdirs();
                     }
                     
-                    // 파일 저장
                     String filePath = uploadPath + File.separator + uniqueFileName;
                     filePart.write(filePath);
                     savedFilePath = "uploads/menus/" + uniqueFileName;
@@ -119,26 +147,33 @@ public class AddMenuServlet extends HttpServlet {
             menu.setName(request.getParameter("name"));
             menu.setDescription(request.getParameter("description"));
             menu.setPrice(request.getParameter("price"));
-            menu.setPopular(Boolean.parseBoolean(request.getParameter("popular")));
+            menu.setCategory(request.getParameter("category")); // category 추가
+            String stockParam = request.getParameter("stock");
+            menu.setStock(stockParam != null && !stockParam.isEmpty() ? Integer.parseInt(stockParam) : 0); // stock 추가
+            menu.setActive(request.getParameter("isActive") != null); // isActive 추가
+            menu.setPopular(request.getParameter("popular") != null); 
+            
             if (savedFilePath != null) {
                 menu.setImage(savedFilePath);
             }
             
-            // 메뉴 저장
             boolean success = menuService.addMenu(menu);
             
             if (success) {
-                response.sendRedirect(request.getContextPath() + "/business/restaurants/" + restaurantId + "/menus");
+                // 성공 시 새로운 목록 URL로 리다이렉트
+                response.sendRedirect(request.getContextPath() + "/business/menus/" + restaurantId);
             } else {
-                request.setAttribute("error", "메뉴 추가에 실패했습니다.");
+                request.setAttribute("errorMessage", "메뉴 추가에 실패했습니다.");
+                request.setAttribute("restaurant", restaurant);
                 request.getRequestDispatcher("/WEB-INF/views/add-menu.jsp").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 음식점 ID입니다.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 레스토랑 ID입니다.");
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "메뉴 추가 중 오류가 발생했습니다: " + e.getMessage());
+            request.setAttribute("errorMessage", "메뉴 추가 중 오류가 발생했습니다: " + e.getMessage());
+            request.setAttribute("restaurant", restaurantService.findById(restaurantId));
             request.getRequestDispatcher("/WEB-INF/views/add-menu.jsp").forward(request, response);
         }
     }

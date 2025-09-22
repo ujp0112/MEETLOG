@@ -22,24 +22,22 @@
     <jsp:include page="/WEB-INF/views/common/header.jsp" />
     
     <div class="max-w-6xl mx-auto py-12 px-4">
-        <!-- 헤더 -->
         <div class="flex justify-between items-center mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">메뉴 관리</h1>
                 <p class="text-gray-600 mt-2">${restaurant.name}</p>
             </div>
             <div class="flex space-x-3">
-                <a href="${pageContext.request.contextPath}/business/restaurants" class="btn-secondary">← 내 음식점 목록</a>
-                <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus/add" class="btn-primary">➕ 새 메뉴 추가</a>
+                <a href="${pageContext.request.contextPath}/restaurant/my" class="btn-secondary">← 내 음식점 목록</a>
+                <a href="${pageContext.request.contextPath}/business/menus/add/${restaurant.id}" class="btn-primary">➕ 새 메뉴 추가</a>
             </div>
         </div>
 
-        <!-- 메뉴 목록 -->
         <c:if test="${empty menus}">
             <div class="bg-white p-8 rounded-lg shadow-md text-center text-gray-600">
                 <div class="text-6xl mb-4">🍽️</div>
                 <p class="text-xl mb-4">아직 등록된 메뉴가 없습니다.</p>
-                <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus/add" class="btn-primary">첫 메뉴를 추가해보세요!</a>
+                <a href="${pageContext.request.contextPath}/business/menus/add/${restaurant.id}" class="btn-primary">첫 메뉴를 추가해보세요!</a>
             </div>
         </c:if>
 
@@ -74,11 +72,11 @@
                                 </c:if>
                                 
                                 <div class="flex space-x-2">
-                                    <a href="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus/edit/${menu.id}" 
+                                    <a href="${pageContext.request.contextPath}/business/menus/edit/${restaurant.id}/${menu.id}" 
                                        class="text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200 transition">
                                         수정
                                     </a>
-                                    <form method="post" action="${pageContext.request.contextPath}/business/restaurants/${restaurant.id}/menus/delete/${menu.id}" 
+                                    <form method="post" action="${pageContext.request.contextPath}/business/menus/delete/${restaurant.id}/${menu.id}" 
                                           class="inline" onsubmit="return confirm('정말로 이 메뉴를 삭제하시겠습니까?')">
                                         <button type="submit" class="text-sm bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 transition">
                                             삭제

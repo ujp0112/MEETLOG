@@ -7,7 +7,27 @@
 		<welcome-file>main</welcome-file>
 	</welcome-file-list>
 
-	<!-- 메뉴 관리 서블릿 - 테스트용으로 맨 위에 배치 -->
+	<!-- 메뉴 추가 서블릿 - 우선순위를 위해 맨 위에 배치 -->
+	<servlet>
+		<servlet-name>AddMenuServlet</servlet-name>
+		<servlet-class>controller.AddMenuServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>AddMenuServlet</servlet-name>
+		<url-pattern>/business/menus/add/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 메뉴 수정 서블릿 - 우선순위를 위해 두 번째에 배치 -->
+	<servlet>
+		<servlet-name>EditMenuServlet</servlet-name>
+		<servlet-class>controller.EditMenuServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>EditMenuServlet</servlet-name>
+		<url-pattern>/business/menus/edit/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 메뉴 관리 서블릿 - 메뉴 목록만 처리 -->
 	<servlet>
 		<servlet-name>MenuManagementServlet</servlet-name>
 		<servlet-class>controller.MenuManagementServlet</servlet-class>
@@ -17,11 +37,9 @@
 		<url-pattern>/menu-test</url-pattern>
 		<url-pattern>/menu-management-test</url-pattern>
 		<url-pattern>/test-menu-management</url-pattern>
-		<url-pattern>/business/restaurants/1/menus</url-pattern>
-		<url-pattern>/business/restaurants/*/menus</url-pattern>
-		<url-pattern>/business/restaurants/*/menus/add</url-pattern>
-		<url-pattern>/business/restaurants/*/menus/edit/*</url-pattern>
+		<url-pattern>/business/menus/*</url-pattern>
 	</servlet-mapping>
+
 
 	<servlet>
 		<servlet-name>AuthServlet</servlet-name>
