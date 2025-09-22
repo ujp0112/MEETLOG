@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="erpMapper.OrderMapper">
-  <resultMap id="PurchaseOrderMap" type="erpDto.PurchaseOrder">
+  <resultMap id="PurchaseOrderMap" type="ErpPurchaseOrder">
     <id property="id" column="id"/>
     <result property="companyId" column="company_id"/>
     <result property="branchId" column="branch_id"/>
@@ -14,7 +14,7 @@
     <result property="mainItemName" column="main_item_name"/>
   </resultMap>
 
-  <resultMap id="PurchaseOrderLineMap" type="erpDto.PurchaseOrderLine">
+  <resultMap id="PurchaseOrderLineMap" type="ErpPurchaseOrderLine">
     <result property="companyId" column="company_id"/>
     <result property="orderId" column="order_id"/>
     <result property="lineNo" column="line_no"/>
@@ -27,12 +27,12 @@
     <result property="imgPath" column="img_path"/>
   </resultMap>
 
-  <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" parameterType="erpDto.PurchaseOrder">
+  <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" parameterType="ErpPurchaseOrder">
     INSERT INTO purchase_order (company_id, branch_id, status, total_price, ordered_at)
     VALUES (#{companyId}, #{branchId}, #{status}, #{totalPrice}, NOW())
   </insert>
 
-  <insert id="insertOrderLine" parameterType="erpDto.PurchaseOrderLine">
+  <insert id="insertOrderLine" parameterType="ErpPurchaseOrderLine">
     INSERT INTO purchase_order_line (company_id, order_id, line_no, material_id, qty, unit_price)
     VALUES (#{companyId}, #{orderId}, #{lineNo}, #{materialId}, #{qty}, #{unitPrice})
   </insert>

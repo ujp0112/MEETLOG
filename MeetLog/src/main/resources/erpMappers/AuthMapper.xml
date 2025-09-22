@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="erpMapper.AuthMapper">
-  <resultMap id="AppUserMap" type="erpDto.AppUser">
+  <resultMap id="AppUserMap" type="ErpAppUser">
     <id property="id" column="id"/>
     <result property="companyId" column="company_id"/>
     <result property="branchId" column="branch_id"/>
@@ -13,11 +13,11 @@
     <result property="name" column="name"/>
   </resultMap>
   
-  <resultMap id="PendingBranchMap" type="erpDto.Branch">
+  <resultMap id="PendingBranchMap" type="ErpBranch">
       <id property="id" column="branch_id"/>
       <result property="name" column="branch_name"/>
       <result property="companyId" column="company_id"/>
-      <association property="user" javaType="erpDto.AppUser">
+      <association property="user" javaType="ErpAppUser">
           <id property="id" column="user_id"/>
           <result property="email" column="user_email"/>
       </association>
@@ -35,16 +35,16 @@
     LIMIT 1
   </select>
 
-  <insert id="insertCompany" useGeneratedKeys="true" keyProperty="id" parameterType="erpDto.Company">
+  <insert id="insertCompany" useGeneratedKeys="true" keyProperty="id" parameterType="ErpCompany">
     INSERT INTO company (name) VALUES (#{name})
   </insert>
 
-  <insert id="insertBranch" useGeneratedKeys="true" keyProperty="id" parameterType="erpDto.Branch">
+  <insert id="insertBranch" useGeneratedKeys="true" keyProperty="id" parameterType="ErpBranch">
     INSERT INTO branch (company_id, name, active_yn)
     VALUES (#{companyId}, #{name}, #{activeYn})
   </insert>
 
-  <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="erpDto.AppUser">
+  <insert id="insertUser" useGeneratedKeys="true" keyProperty="id" parameterType="ErpAppUser">
     INSERT INTO app_user (company_id, branch_id, role, email, pw_hash, active_yn)
     VALUES (#{companyId}, #{branchId}, #{role}, #{email}, #{pwHash}, #{activeYn})
   </insert>

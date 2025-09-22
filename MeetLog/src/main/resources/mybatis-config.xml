@@ -9,9 +9,33 @@
 	</settings>
 
 	<typeAliases>
+		<!-- dto 패키지 개별 등록 (Company 충돌 방지) -->
+		<typeAlias type="dto.AppUser" alias="DtoAppUser"/>
+		<typeAlias type="dto.Branch" alias="DtoBranch"/>
+		<typeAlias type="dto.BranchMenu" alias="DtoBranchMenu"/>
+		<typeAlias type="dto.Company" alias="DtoCompany"/>
+		<typeAlias type="dto.InventoryItem" alias="DtoInventoryItem"/>
+		<typeAlias type="dto.Material" alias="DtoMaterial"/>
+		<typeAlias type="dto.MenuIngredient" alias="DtoMenuIngredient"/>
+		<typeAlias type="dto.MenuToggle" alias="DtoMenuToggle"/>
+		<typeAlias type="dto.PurchaseOrder" alias="DtoPurchaseOrder"/>
+		<typeAlias type="dto.PurchaseOrderLine" alias="DtoPurchaseOrderLine"/>
+		<!-- erpDto 패키지 개별 등록 (Company 충돌 방지) -->
+		<typeAlias type="erpDto.AppUser" alias="ErpAppUser"/>
+		<typeAlias type="erpDto.Branch" alias="ErpBranch"/>
+		<typeAlias type="erpDto.BranchMenu" alias="ErpBranchMenu"/>
+		<typeAlias type="erpDto.Company" alias="ErpCompany"/>
+		<typeAlias type="erpDto.InventoryItem" alias="ErpInventoryItem"/>
+		<typeAlias type="erpDto.Material" alias="ErpMaterial"/>
+		<typeAlias type="erpDto.MenuIngredient" alias="ErpMenuIngredient"/>
+		<typeAlias type="erpDto.MenuToggle" alias="ErpMenuToggle"/>
+		<typeAlias type="erpDto.Notice" alias="ErpNotice"/>
+		<typeAlias type="erpDto.NoticeFile" alias="ErpNoticeFile"/>
+		<typeAlias type="erpDto.NoticeImage" alias="ErpNoticeImage"/>
+		<typeAlias type="erpDto.PurchaseOrder" alias="ErpPurchaseOrder"/>
+		<typeAlias type="erpDto.PurchaseOrderLine" alias="ErpPurchaseOrderLine"/>
+		<!-- 패키지 자동 등록 -->
 		<package name="model"/> 
-		<package name="dto"/> 
-		<package name="erpDto"/> 
 	</typeAliases>
 
 	<typeHandlers>
@@ -26,7 +50,7 @@
 				<property name="url"
 					value="jdbc:mariadb://localhost:3306/meetlog?characterEncoding=UTF-8&amp;autoCommit=false" />
 				<property name="username" value="root" />
-				<property name="password" value="7564" />
+				<property name="password" value="789456" />
 			</dataSource>
 		</environment>
 	</environments>

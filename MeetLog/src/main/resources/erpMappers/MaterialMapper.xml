@@ -5,7 +5,7 @@
 
 <mapper namespace="MaterialMapper">
 
-  <resultMap id="MaterialResult" type="erpDto.Material">
+  <resultMap id="MaterialResult" type="ErpMaterial">
     <id     property="id"        column="id"/>
     <result property="companyId" column="company_id"/>
     <result property="name"      column="name"/>
@@ -19,14 +19,14 @@
     <result property="updatedAt" column="updated_at"/>
   </resultMap>
 
-  <insert id="insertMaterial" parameterType="erpDto.Material" useGeneratedKeys="true" keyProperty="id">
+  <insert id="insertMaterial" parameterType="ErpMaterial" useGeneratedKeys="true" keyProperty="id">
     INSERT INTO material
       (company_id, name, unit, unit_price, img_path, step, active_yn, deleted_yn, created_at)
     VALUES
       (#{companyId}, #{name}, #{unit}, #{unitPrice}, #{imgPath}, #{step}, 'Y', 'N', CURRENT_TIMESTAMP)
   </insert>
 
-  <update id="updateMaterial" parameterType="erpDto.Material">
+  <update id="updateMaterial" parameterType="ErpMaterial">
     UPDATE material
     <set>
       <if test="name != null">name = #{name},</if>

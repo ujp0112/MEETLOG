@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="erpMapper.NoticeMapper">
 
-	<select id="selectNoticesByCompany" parameterType="map" resultType="erpDto.Notice">
+	<select id="selectNoticesByCompany" parameterType="map" resultType="ErpNotice">
         SELECT id, company_id, title, content, view_count, created_at, updated_at
         FROM business_notice
         WHERE company_id = #{companyId} AND deleted_yn = 'N'
@@ -17,19 +17,19 @@
 		deleted_yn = 'N'
 	</select>
 
-	<resultMap id="NoticeResultMap" type="erpDto.Notice">
+	<resultMap id="NoticeResultMap" type="ErpNotice">
 		<id property="id" column="notice_id" />
 		<result property="companyId" column="company_id" />
 		<result property="title" column="title" />
 		<result property="content" column="content" />
 		<result property="createdAt" column="created_at" />
 		<result property="viewCount" column="view_count"/>
-		<collection property="images" ofType="erpDto.NoticeImage">
+		<collection property="images" ofType="ErpNoticeImage">
 			<id property="id" column="image_id" />
 			<result property="filePath" column="image_file_path" />
 			<result property="displayOrder" column="display_order" />
 		</collection>
-		<collection property="files" ofType="erpDto.NoticeFile">
+		<collection property="files" ofType="ErpNoticeFile">
 			<id property="id" column="file_id" />
 			<result property="originalFilename" column="original_filename" />
 			<result property="filePath" column="attachment_file_path" />
@@ -63,7 +63,7 @@
 		notice_image WHERE notice_id = #{noticeId}
 	</delete>
 
-	<insert id="insertNotice" parameterType="erpDto.Notice"
+	<insert id="insertNotice" parameterType="ErpNotice"
 		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO business_notice
 		(company_id, title, content)
@@ -71,7 +71,7 @@
 		#{content})
 	</insert>
 
-	<update id="updateNotice" parameterType="erpDto.Notice">
+	<update id="updateNotice" parameterType="ErpNotice">
 		UPDATE business_notice
 		SET title = #{title},
 		content = #{content},
