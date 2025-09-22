@@ -101,7 +101,7 @@
 
 	<servlet>
 		<servlet-name>HqBranchManagementServlet</servlet-name>
-		<servlet-class>controller.HqBranchManagementServlet</servlet-class>
+		<servlet-class>erpController.HqBranchManagementServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>HqBranchManagementServlet</servlet-name>

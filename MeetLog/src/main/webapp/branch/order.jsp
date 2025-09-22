@@ -359,7 +359,7 @@ table.sheet {
 </style>
 </head>
 <body>
-	<%@ include file="/WEB-INF/jspf/branchheader.jspf"%>
+	<%@ include file="/WEB-INF/layout/branchheader.jspf"%>
 	<div class="container">
 		<section class="panel">
 			<div class="hd">

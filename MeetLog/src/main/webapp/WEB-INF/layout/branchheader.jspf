@@ -349,7 +349,7 @@ a {
 
 <header class="app-header">
 	<div class="container row">
-		<a class="brand" href="#"> <span>Meetlog</span>
+		<a class="brand" href="${ctx }/main"> <span>Meetlog</span>
 			<span class="badge">BRANCH</span>
 		</a>
 
@@ -372,9 +372,9 @@ a {
 
 
 		<span> <c:choose>
-				<c:when test="${not empty sessionScope.authUser}">
+				<c:when test="${not empty sessionScope.businessUser}">
 					<span style="margin-right: 8px;"><c:out
-							value="${sessionScope.authUser.name}" /></span>
+							value="${sessionScope.businessUser.businessName}" /></span>
 					<a class="btn" href="${pageContext.request.contextPath}/logout">로그아웃</a>
 				</c:when>
 				<c:otherwise>

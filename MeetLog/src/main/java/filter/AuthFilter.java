@@ -2,8 +2,10 @@ package filter;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
+import erpDto.AppUser;
+
 import java.io.IOException;
-import dto.AppUser;
 
 public class AuthFilter implements Filter {
   @Override

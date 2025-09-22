@@ -51,11 +51,11 @@
 		<mapper resource="mappers/QnAMapper.xml" />
 		<mapper resource="mappers/OperatingHourMapper.xml" />
 		<mapper resource="mappers/RatingMapper.xml" />
-		<mapper resource="mappers/AuthMapper.xml" />
-		<mapper resource="mappers/MaterialMapper.xml" />
-		<mapper resource="mappers/BranchMenuMapper.xml" />
-		<mapper resource="mappers/BranchMapper.xml" />
-		<mapper resource="mappers/OrderMapper.xml" />
+		<mapper resource="erpMappers/AuthMapper.xml" />
+		<mapper resource="erpMappers/MaterialMapper.xml" />
+		<mapper resource="erpMappers/BranchMenuMapper.xml" />
+		<mapper resource="erpMappers/BranchMapper.xml" />
+		<mapper resource="erpMappers/OrderMapper.xml" />
 		<mapper resource="mappers/CompanyMapper.xml" />
 	</mappers>
 </configuration>
