@@ -47,7 +47,7 @@ public class ReservationService {
     public boolean createReservation(Reservation reservation) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
-                int result = reservationDAO.insert(sqlSession, reservation);
+                int result = reservationDAO.insert(reservation, sqlSession);
                 if (result > 0) {
                     sqlSession.commit();
                     return true;
@@ -83,7 +83,7 @@ public class ReservationService {
     public boolean deleteReservation(int reservationId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
-                int result = reservationDAO.delete(sqlSession, reservationId);
+                int result = reservationDAO.delete(reservationId, sqlSession);
                 if (result > 0) {
                     sqlSession.commit();
                     return true;

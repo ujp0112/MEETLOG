@@ -20,34 +20,16 @@ public class MenuDAO {
         }
     }
 
-    public int insert(Menu menu) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.insert(NAMESPACE + ".insert", menu);
-            if (result > 0) {
-                sqlSession.commit();
-            }
-            return result;
-        }
+    public int insert(SqlSession sqlSession, Menu menu) {
+        return sqlSession.insert(NAMESPACE + ".insert", menu);
     }
 
-    public int update(Menu menu) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.update(NAMESPACE + ".update", menu);
-            if (result > 0) {
-                sqlSession.commit();
-            }
-            return result;
-        }
+    public int update(SqlSession sqlSession, Menu menu) {
+        return sqlSession.update(NAMESPACE + ".update", menu);
     }
 
-    public int delete(int menuId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            int result = sqlSession.delete(NAMESPACE + ".delete", menuId);
-            if (result > 0) {
-                sqlSession.commit();
-            }
-            return result;
-        }
+    public int delete(SqlSession sqlSession, int menuId) {
+        return sqlSession.delete(NAMESPACE + ".delete", menuId);
     }
 
     public List<Menu> findPopularMenus() {

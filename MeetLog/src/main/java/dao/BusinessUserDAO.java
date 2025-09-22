@@ -12,6 +12,26 @@ public class BusinessUserDAO {
         return sqlSession.insert(NAMESPACE + ".insert", businessUser);
     }
     
+    public int update(BusinessUser businessUser, SqlSession sqlSession) {
+        return sqlSession.update(NAMESPACE + ".update", businessUser);
+    }
+
+    public int deleteByUserId(int userId, SqlSession sqlSession) {
+        return sqlSession.delete(NAMESPACE + ".deleteByUserId", userId);
+    }
+
+    public BusinessUser findByBusinessNumber(String businessNumber) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".findByBusinessNumber", businessNumber);
+        }
+    }
+
+    public List<BusinessUser> findAll() {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findAll");
+        }
+    }
+
     public BusinessUser findByUserId(int userId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             return sqlSession.selectOne(NAMESPACE + ".findByUserId", userId);

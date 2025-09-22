@@ -17,17 +17,10 @@ public class BusinessUserService {
      * @param businessUser 비즈니스 사용자 정보
      * @return 등록 성공 여부
      */
-    public boolean registerBusinessUser(BusinessUser businessUser) {
+    public boolean registerBusinessUser(User user, BusinessUser businessUser) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
                 // 1. 사용자 정보 먼저 등록
-                User user = new User();
-                user.setEmail(businessUser.getEmail());
-                user.setNickname(businessUser.getNickname());
-                user.setPassword(businessUser.getPassword());
-                user.setUserType("BUSINESS");
-                user.setProfileImage(businessUser.getProfileImage());
-                
                 int userResult = userDAO.insert(user, sqlSession);
                 if (userResult <= 0) {
                     sqlSession.rollback();
@@ -63,20 +56,14 @@ public class BusinessUserService {
 
     /**
      * 비즈니스 사용자 정보 수정
+     * @param user 수정할 사용자 정보
      * @param businessUser 수정할 비즈니스 사용자 정보
      * @return 수정 성공 여부
      */
-    public boolean updateBusinessUser(BusinessUser businessUser) {
+    public boolean updateBusinessUser(User user, BusinessUser businessUser) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
                 // 1. 사용자 정보 수정
-                User user = new User();
-                user.setId(businessUser.getUserId());
-                user.setEmail(businessUser.getEmail());
-                user.setNickname(businessUser.getNickname());
-                user.setPassword(businessUser.getPassword());
-                user.setProfileImage(businessUser.getProfileImage());
-                
                 int userResult = userDAO.update(user, sqlSession);
                 if (userResult <= 0) {
                     sqlSession.rollback();
