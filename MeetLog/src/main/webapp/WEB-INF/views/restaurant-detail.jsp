@@ -388,13 +388,19 @@
                 font-size: 1.75rem;
             }
         }
-    .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+    .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; height: 400px; /* 갤러리 높이 고정 */ }
     .gallery-main img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
     .gallery-side { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
     .gallery-side .img-wrap { position: relative; }
     .gallery-side img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
     .more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 12px; cursor: pointer;}
-    </style>
+	.gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+	</style>
 </head>
 <body class="bg-slate-100">
     <div id="app" class="min-h-screen flex flex-col">
@@ -410,22 +416,36 @@
                                 <section class="glass-card p-8 rounded-3xl fade-in">
 								    <div class="gallery" id="restaurantGallery">
 								        <div class="gallery-main">
-								            <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="" />
+								            <%-- [수정] cssClass 적용 --%>
+								            <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="gallery-image" />
 								        </div>
 								        <div class="gallery-side">
 								            <c:choose>
-								                <c:when test="${fn:length(restaurant.additionalImages) >= 2}">
-								                    <div class="img-wrap"><mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="" /></div>
+								                <c:when test="${fn:length(restaurant.additionalImages) >= 1}">
 								                    <div class="img-wrap">
-								                        <mytag:image fileName="${restaurant.additionalImages[1]}" altText="${restaurant.name}" cssClass="" />
-								                        <c:if test="${fn:length(restaurant.additionalImages) > 2}">
-								                            <div class="more-overlay" onclick="showMoreImages()">+${fn:length(restaurant.additionalImages) - 1}</div>
+								                        <%-- [수정] cssClass 적용 --%>
+								                        <mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="gallery-image" />
+								                    </div>
+								                </c:when>
+								                <c:otherwise>
+								                    <div class="img-wrap" style="background:#f1f5f9; border-radius:12px;"></div>
+								                </c:otherwise>
+								            </c:choose>
+								
+								            <c:choose>
+								                <c:when test="${fn:length(restaurant.additionalImages) >= 2}">
+								                     <div class="img-wrap">
+								                        <%-- [수정] cssClass 적용 --%>
+								                        <mytag:image fileName="${restaurant.additionalImages[1]}" altText="${restaurant.name}" cssClass="gallery-image" />
+								                        <c:if test="${fn:length(restaurant.additionalImages) + 1 > 3}">
+								                            <%-- [수정] 대표이미지 포함 3개 초과시 더보기 표시 --%>
+								                            <div class="more-overlay" onclick="cycleImages()">+${fn:length(restaurant.additionalImages) - 1}</div>
 								                        </c:if>
 								                    </div>
 								                </c:when>
-								                <c:when test="${fn:length(restaurant.additionalImages) == 1}">
-								                    <div class="img-wrap"><mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="" /></div>
-								                </c:when>
+								                <c:otherwise>
+								                    <div class="img-wrap" style="background:#f1f5f9; border-radius:12px;"></div>
+								                </c:otherwise>
 								            </c:choose>
 								        </div>
 								    </div>
@@ -985,17 +1005,45 @@
         });
     </script>
     <script>
-    const allImages = [
-        "${restaurant.image}",
-        <c:forEach var="img" items="${restaurant.additionalImages}">'${img}',</c:forEach>
-    ];
-    let currentImageIndex = 0;
+    // 상세 페이지용 이미지 목록 (대표 이미지 + 추가 이미지)
+    const allImageFiles = [
+        "${restaurant.image}", // 대표 이미지
+        // 추가 이미지 목록 (JSTL로 배열 생성)
+        <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>
+    ].filter(Boolean); // null이나 빈 문자열 값은 배열에서 제거
 
-    function showMoreImages() {
-        // 간단한 예시: 클릭 시 메인 이미지를 다음 이미지로 변경
-        currentImageIndex = (currentImageIndex + 1) % allImages.length;
-        const mainImageEl = document.querySelector('#restaurantGallery .gallery-main img');
-        mainImageEl.src = '${contextPath}/images/' + allImages[currentImageIndex];
+    // 화면에 표시될 이미지 엘리먼트들
+    const galleryImages = document.querySelectorAll('#restaurantGallery img');
+    const mainImageEl = galleryImages[0];
+    const sideImageEl1 = galleryImages[1];
+    const sideImageEl2 = galleryImages[2];
+
+    let currentIndex = 0; // 현재 메인 이미지의 인덱스
+
+    function cycleImages() {
+        // 인덱스를 순환시킴 (0 -> 1 -> 2 -> ... -> 마지막 -> 0)
+        currentIndex = (currentIndex + 1) % allImageFiles.length;
+        
+        updateGallery();
+    }
+
+    function updateGallery() {
+        const ctx = '${pageContext.request.contextPath}';
+
+        // 1. 메인 이미지 업데이트
+        mainImageEl.src = ctx + '/images/' + encodeURIComponent(allImageFiles[currentIndex]);
+
+        // 2. 첫 번째 사이드 이미지 업데이트 (메인 이미지의 다음 이미지)
+        if (sideImageEl1) {
+            const nextIndex1 = (currentIndex + 1) % allImageFiles.length;
+            sideImageEl1.src = ctx + '/images/' + encodeURIComponent(allImageFiles[nextIndex1]);
+        }
+        
+        // 3. 두 번째 사이드 이미지 업데이트 (메인 이미지의 다다음 이미지)
+        if (sideImageEl2) {
+            const nextIndex2 = (currentIndex + 2) % allImageFiles.length;
+            sideImageEl2.src = ctx + '/images/' + encodeURIComponent(allImageFiles[nextIndex2]);
+        }
     }
 	</script>
 </body>

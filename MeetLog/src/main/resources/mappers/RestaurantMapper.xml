@@ -4,20 +4,17 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.RestaurantDAO">
 
-	<resultMap id="RestaurantResultMap" type="model.Restaurant">
-        <id property="id" column="id"/>
-        <result property="name" column="name"/>
-        <result property="category" column="category"/>
-        <result property="location" column="location"/>
-        <result property="address" column="address"/>
-        <result property="image" column="image"/>
-        <result property="rating" column="rating"/>
-        <result property="reviewCount" column="review_count"/>
-        <result property="ownerId" column="owner_id"/>
-        <collection property="additionalImages" ofType="java.lang.String">
-            <result column="additional_image_path"/>
-        </collection>
-    </resultMap>
+	<resultMap id="restaurantResultMap" type="model.Restaurant"
+		autoMapping="true">
+		<id property="id" column="id" />
+		<result property="ownerId" column="owner_id" />
+		<result property="image" column="image" />
+		<result property="jibunAddress" column="jibun_address" />
+		<result property="reviewCount" column="review_count" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
 
     <resultMap id="restaurantSummaryResultMap"
 		type="model.RestaurantSummaryDTO">
@@ -37,23 +34,10 @@
         ORDER BY created_at DESC
     </select>
 
-    <select id="findById" parameterType="int" resultMap="RestaurantResultMap">
-        SELECT 
-            r.*,
-            ri.image_path AS additional_image_path
-        FROM restaurants r
-        LEFT JOIN restaurant_images ri ON r.id = ri.restaurant_id
-        WHERE r.id = #{id}
-        ORDER BY ri.display_order ASC
+    <select id="findById" parameterType="int" resultMap="restaurantResultMap">
+        SELECT * FROM restaurants 
+        WHERE id = #{id} AND is_active = true
     </select>
-    
-    <insert id="insertRestaurantImages" parameterType="map">
-        INSERT INTO restaurant_images (restaurant_id, image_path, display_order)
-        VALUES
-        <foreach collection="imageList" item="image" index="index" separator=",">
-            (#{restaurantId}, #{image}, #{index})
-        </foreach>
-    </insert>
 
     <select id="findByCategory" parameterType="String" resultMap="restaurantResultMap">
         SELECT * FROM restaurants 
@@ -230,5 +214,29 @@
 		UPDATE restaurants SET
 		is_active = false, updated_at = NOW() WHERE id = #{id}
 	</update>
+
+<resultMap id="restaurantDetailResultMap" type="model.Restaurant" extends="restaurantResultMap">
+        <collection property="additionalImages" ofType="java.lang.String">
+            <result column="additional_image_path"/>
+        </collection>
+    </resultMap>
+
+    <select id="findDetailById" parameterType="int" resultMap="restaurantDetailResultMap">
+        SELECT 
+            r.*,
+            ri.image_path AS additional_image_path
+        FROM restaurants r
+        LEFT JOIN restaurant_images ri ON r.id = ri.restaurant_id
+        WHERE r.id = #{id} AND r.is_active = true
+        ORDER BY ri.display_order ASC
+    </select>
+
+    <insert id="insertRestaurantImages" parameterType="map">
+        INSERT INTO restaurant_images (restaurant_id, image_path, display_order)
+        VALUES
+        <foreach collection="imageList" item="image" index="index" separator=",">
+            (#{restaurantId}, #{image}, #{index})
+        </foreach>
+    </insert>
 
 </mapper>

@@ -71,10 +71,7 @@ public class AddRestaurantServlet extends HttpServlet {
                 boolean isFirstImage = true;
 
                 for (FileItem item : formItems) {
-                    if (item.isFormField()) {
-                        formFields.put(item.getFieldName(), item.getString("UTF-8"));
-                    } else if ("restaurantImage".equals(item.getFieldName()) && item.getSize() > 0) {
-                        // 여러 이미지 처리
+                	if ("restaurantImage".equals(item.getFieldName()) && item.getSize() > 0) {
                         String originalFileName = new File(item.getName()).getName();
                         String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
                         
@@ -88,7 +85,9 @@ public class AddRestaurantServlet extends HttpServlet {
                         } else {
                             additionalImageFileNames.add(uniqueFileName);
                         }
-                    }
+                    }else if (item.isFormField()) {
+                		formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                	}
                 }
 
                 restaurant.setName(formFields.get("name"));
@@ -97,6 +96,7 @@ public class AddRestaurantServlet extends HttpServlet {
                 restaurant.setDescription(formFields.get("description"));
                 restaurant.setCategory(formFields.get("category"));
                 restaurant.setOwnerId(owner.getId());
+                restaurant.setLocation(formFields.get("location"));
 //                if (imagePath != null) {
 //                    restaurant.setImageUrl(imagePath);
 //                }
@@ -130,12 +130,13 @@ public class AddRestaurantServlet extends HttpServlet {
         }
 
         try {
+            // [수정] 서비스 호출 시 추가 이미지 목록 전달
             boolean success = restaurantService.createRestaurant(restaurant, additionalImageFileNames, hoursList);
             
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/business/restaurants?status=add_success");
             } else {
-                throw new Exception("가게 및 영업시간 등록에 실패했습니다.");
+                throw new Exception("가게 등록에 실패했습니다.");
             }
 
         } catch (Exception e) {

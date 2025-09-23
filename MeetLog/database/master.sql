@@ -327,6 +327,15 @@ CREATE TABLE feed_items ( feed_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NO
 CREATE TABLE alerts ( alert_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, content VARCHAR(500) NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE restaurant_operating_hours ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, day_of_week INT NOT NULL, opening_time TIME NOT NULL, closing_time TIME NOT NULL, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 
+-- master.sql 또는 사용하는 DB 스크립트에 추가
+CREATE TABLE restaurant_images (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  restaurant_id INT NOT NULL,
+  image_path VARCHAR(255) NOT NULL COMMENT '서버에 저장된 이미지 파일명',
+  display_order INT NOT NULL DEFAULT 0 COMMENT '이미지 표시 순서',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_res_images_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 UPDATE columns c
 JOIN users u ON c.user_id = u.id

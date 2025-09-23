@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -47,8 +48,7 @@
                         <c:forEach var="restaurant" items="${myRestaurants}">
                             <div class="glass-card p-6 rounded-2xl card-hover">
                                 <div class="relative mb-4">
-                                    <img src="${not empty restaurant.image ? restaurant.image : 'https://placehold.co/400x200/3b82f6/ffffff?text=음식점+이미지'}" 
-                                         alt="${restaurant.name}" class="w-full h-48 object-cover rounded-xl">
+                                    <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="w-full h-48 object-cover rounded-xl" />
                                     <div class="absolute top-3 right-3">
                                         <span class="bg-white/90 text-slate-700 px-3 py-1 rounded-full text-sm font-semibold">
                                             ${restaurant.category}

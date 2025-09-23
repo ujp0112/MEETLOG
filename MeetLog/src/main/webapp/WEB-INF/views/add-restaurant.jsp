@@ -339,7 +339,6 @@
                     Array.from(this.files).forEach(file => {
                         const reader = new FileReader();
                         reader.onload = function(e) {
-                            // 미리보기 이미지 생성
                             const img = $('<img>').attr('src', e.target.result)
                                                   .addClass('rounded-lg shadow-sm')
                                                   .css({width: '120px', height: '120px', objectFit: 'cover'});

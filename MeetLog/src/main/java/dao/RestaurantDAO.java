@@ -69,4 +69,9 @@ public class RestaurantDAO {
 	public int delete(SqlSession session, int id) {
 		return session.delete(NAMESPACE + ".delete", id);
 	}
+	public Restaurant findDetailById(int id) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".findDetailById", id);
+        }
+    }
 }
