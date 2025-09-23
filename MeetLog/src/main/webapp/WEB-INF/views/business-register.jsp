@@ -34,6 +34,7 @@
                 <nav class="-mb-px flex space-x-6" id="register-tabs">
                     <button data-tab="hq" class="tab-active py-3 px-1 border-b-2 font-semibold text-sm">HQ 회원</button>
                     <button data-tab="branch" class="py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-sm">지점 회원</button>
+                    <button data-tab="individual" class="py-3 px-1 border-b-2 border-transparent text-slate-500 hover:text-slate-700 font-semibold text-sm">개인 사업자 회원</button>
                 </nav>
             </div>
             <div id="register-hq-content">
@@ -152,6 +153,62 @@
                     </div>
                 </form>
             </div>
+            <div id="register-individual-content">
+                <form class="space-y-5" action="${pageContext.request.contextPath}/business-register" method="post">
+                    <input type="hidden" name="userType" value="BUSINESS_INDIVIDUAL">
+                    <div>
+                        <label for="individualBusinessName" class="block text-sm font-medium text-slate-700">사업체명 (개인 사업자명)</label>
+                        <input id="individualBusinessName" name="businessName" type="text" required class="form-input" placeholder="상호명을 입력하세요">
+                    </div>
+                    <div>
+                        <label for="individualOwnerName" class="block text-sm font-medium text-slate-700">대표자명</label>
+                        <input id="individualOwnerName" name="ownerName" type="text" required class="form-input" placeholder="대표자명을 입력하세요">
+                    </div>
+                    <div>
+                        <label for="individualBusinessNumber" class="block text-sm font-medium text-slate-700">사업자등록번호</label>
+                        <input id="individualBusinessNumber" name="businessNumber" type="text" required class="form-input" placeholder="'-' 포함 10자리">
+                    </div>
+                    <div>
+                        <label for="individualCategory" class="block text-sm font-medium text-slate-700">업종</label>
+                        <select id="individualCategory" name="category" required class="form-select">
+                            <option value="">업종을 선택하세요</option>
+                            <option value="한식">한식</option>
+                            <option value="일식">일식</option>
+                            <option value="중식">중식</option>
+                            <option value="양식">양식</option>
+                            <option value="카페">카페</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="individualAddress" class="block text-sm font-medium text-slate-700">주소</label>
+                        <input id="individualAddress" name="address" type="text" required class="form-input" placeholder="주소를 입력하세요">
+                    </div>
+                    <div>
+                        <label for="individualPhone" class="block text-sm font-medium text-slate-700">전화번호</label>
+                        <input id="individualPhone" name="phone" type="tel" required class="form-input" placeholder="02-1234-5678">
+                    </div>
+                    <div>
+                        <label for="individualEmail" class="block text-sm font-medium text-slate-700">로그인 이메일</label>
+                        <input id="individualEmail" name="email" type="email" required class="form-input" placeholder="로그인 시 사용할 이메일">
+                    </div>
+                    <div>
+                        <label for="individualPassword" class="block text-sm font-medium text-slate-700">비밀번호</label>
+                        <input id="individualPassword" name="password" type="password" required class="form-input" placeholder="영문, 숫자 포함 8자 이상">
+                    </div>
+                    <div>
+                        <label for="individualConfirmPassword" class="block text-sm font-medium text-slate-700">비밀번호 확인</label>
+                        <input id="individualConfirmPassword" name="confirmPassword" type="password" required class="form-input" placeholder="비밀번호를 다시 입력하세요">
+                    </div>
+                    <div>
+                        <label for="individualDescription" class="block text-sm font-medium text-slate-700">사업체 소개</label>
+                        <textarea id="individualDescription" name="description" rows="3" class="form-textarea" placeholder="사업체에 대한 간단한 소개를 작성해주세요"></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" class="form-btn-primary">가입 신청</button>
+                    </div>
+                </form>
+            </div>
             
             <div class="text-center text-sm mt-6">
                 <a href="${pageContext.request.contextPath}/login" class="font-medium text-sky-600 hover:text-sky-500">
@@ -166,6 +223,7 @@
             const tabs = document.querySelectorAll('#register-tabs button');
             const hqContent = document.getElementById('register-hq-content');
             const branchContent = document.getElementById('register-branch-content');
+            const individualContent = document.getElementById('register-individual-content');
             tabs.forEach(clickedTab => {
                 clickedTab.addEventListener('click', () => {
                     tabs.forEach(tab => {
@@ -178,9 +236,15 @@
                     if (clickedTab.dataset.tab === 'hq') {
                         hqContent.classList.remove('hidden');
                         branchContent.classList.add('hidden');
-                    } else {
+                        individualContent.classList.add('hidden');
+                    } else if (clickedTab.dataset.tab === 'branch') {
                         hqContent.classList.add('hidden');
+                        individualContent.classList.add('hidden');
                         branchContent.classList.remove('hidden');
+                    } else {
+                    	hqContent.classList.add('hidden');
+                        branchContent.classList.add('hidden');
+                        individualContent.classList.remove('hidden');
                     }
                 });
             });

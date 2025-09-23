@@ -56,7 +56,7 @@ CREATE TABLE `business_users` (
   `business_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `owner_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `business_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '역할 (HQ 또는 BRANCH)',
+  `role` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '역할 (HQ 또는 BRANCH 또는 INDIVIDUAL)',
   `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING' COMMENT '상태 (PENDING, ACTIVE)',
   `company_id` int DEFAULT NULL COMMENT '소속된 회사의 ID',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,

@@ -77,6 +77,10 @@ public class BusinessRegisterServlet extends HttpServlet {
                 handleHqRegister(user, businessName, ownerName, businessNumber, restaurant, company);
             } else if ("BUSINESS_BRANCH".equals(userType)) {
                 handleBranchRegister(request, user, businessName, ownerName, businessNumber, restaurant);
+            } else if ("BUSINESS_INDIVIDUAL".equals(userType)) {
+            	Company company = new Company();
+                company.setName(businessName);
+                handleIndividualRegister(user, businessName, ownerName, businessNumber, restaurant, company);
             } else {
                 throw new ServletException("잘못된 회원 유형입니다.");
             }
@@ -121,5 +125,16 @@ public class BusinessRegisterServlet extends HttpServlet {
         businessUser.setCompanyId(hqInfo.getCompanyId());
         
         businessUserService.registerBranchUser(user, businessUser, restaurant);
+    }
+    
+    private void handleIndividualRegister(User user, String businessName, String ownerName, String businessNumber, Restaurant restaurant, Company company) throws Exception {
+        BusinessUser businessUser = new BusinessUser();
+        businessUser.setBusinessName(businessName);
+        businessUser.setOwnerName(ownerName);
+        businessUser.setBusinessNumber(businessNumber);
+        businessUser.setRole("INDIVIDUAL");
+        businessUser.setStatus("APPROVED");
+        
+        businessUserService.registerIndividualUser(user, businessUser, restaurant, company);
     }
 }
