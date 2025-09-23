@@ -40,6 +40,28 @@ public class RegisterServlet extends HttpServlet {
         String nickname = request.getParameter("nickname");
         String password = request.getParameter("password");
         
+        // 입력값 검증
+        if (email == null || email.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "이메일을 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        if (nickname == null || nickname.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "닉네임을 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "비밀번호를 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        if (password.length() < 6) {
+            request.setAttribute("errorMessage", "비밀번호는 6자 이상이어야 합니다.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            return;
+        }
+        
         if (userService.isEmailExists(email)) {
             request.setAttribute("errorMessage", "이미 사용 중인 이메일입니다.");
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
@@ -57,12 +79,21 @@ public class RegisterServlet extends HttpServlet {
         user.setPassword(password);
         user.setUserType("PERSONAL");
         
-		if (userService.registerUser(user)) {
-			response.sendRedirect(request.getContextPath() + "/login?register=success");
-		} else {
-			request.setAttribute("errorMessage", "회원가입 중 오류가 발생했습니다.");
-			request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
-		}
+        try {
+            if (userService.registerUser(user)) {
+                response.sendRedirect(request.getContextPath() + "/login?register=success");
+            } else {
+                request.setAttribute("errorMessage", "회원가입 중 오류가 발생했습니다.");
+                request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+            }
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("errorMessage", e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "회원가입 처리 중 시스템 오류가 발생했습니다.");
+            request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);
+        }
     }
 
     private void handleBusinessRegister(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -72,6 +103,33 @@ public class RegisterServlet extends HttpServlet {
         String businessName = request.getParameter("businessName");
         String ownerName = request.getParameter("ownerName");
         String businessNumber = request.getParameter("businessNumber");
+
+        // 입력값 검증
+        if (email == null || email.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "이메일을 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
+        if (password == null || password.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "비밀번호를 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
+        if (password.length() < 6) {
+            request.setAttribute("errorMessage", "비밀번호는 6자 이상이어야 합니다.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
+        if (businessName == null || businessName.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "사업자명을 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
+        if (ownerName == null || ownerName.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "대표자명을 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
 
         if (userService.isEmailExists(email)) {
             request.setAttribute("errorMessage", "이미 사용 중인 이메일입니다.");

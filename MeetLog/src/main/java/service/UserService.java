@@ -70,6 +70,17 @@ public class UserService {
     }
 
     public boolean registerUser(User user) {
+        // 입력값 검증
+        if (user == null) {
+            throw new IllegalArgumentException("사용자 정보가 null입니다.");
+        }
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("이메일이 비어있습니다.");
+        }
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("비밀번호가 비어있습니다.");
+        }
+        
         String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
         return userDAO.insert(user) > 0;

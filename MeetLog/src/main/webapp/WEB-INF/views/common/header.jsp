@@ -44,6 +44,7 @@
 
 		<nav class="hidden md:flex items-center space-x-2">
 			<a href="${pageContext.request.contextPath}/main" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">홈</a>
+			<a href="${pageContext.request.contextPath}/search" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">키워드 검색</a>
 			<a href="${pageContext.request.contextPath}/restaurant/list" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">맛집찾기</a>
 			<a href="${pageContext.request.contextPath}/column" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">칼럼</a>
 			<a href="${pageContext.request.contextPath}/course" class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">추천코스</a>
@@ -61,7 +62,15 @@
 							<div class="dropdown-content absolute right-0 top-full pt-4 hidden group-hover:block z-50">
 								<div class="min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
 									<div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
+									<a href="${pageContext.request.contextPath}/business/dashboard" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊 대시보드</a>
 									<a href="${pageContext.request.contextPath}/business/restaurants" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙 내 가게 관리</a>
+									<a href="${pageContext.request.contextPath}/business/restaurants/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕ 새 음식점 등록</a>
+									<a href="${pageContext.request.contextPath}/coupon-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🎟️ 쿠폰 관리</a>
+									<a href="${pageContext.request.contextPath}/business/review-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">💬 고객 리뷰 관리</a>
+									<a href="${pageContext.request.contextPath}/business/qna-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">❓ Q&A 관리</a>
+									<a href="${pageContext.request.contextPath}/business/reservation-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📅 예약 관리</a>
+									<div class="border-t border-slate-200 my-2"></div>
+
 
 									<c:if test="${sessionScope.businessUser.role == 'HQ'}">
 										<div class="my-1 border-t border-slate-200"></div>
@@ -97,6 +106,12 @@
 						<div class="dropdown-content absolute right-0 top-full pt-4 hidden group-hover:block z-50">
 							<div class="min-w-[240px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
 								<div class="px-4 py-2 text-sm font-semibold text-slate-500">사용자 메뉴</div>
+								<a href="${pageContext.request.contextPath}/notifications" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">
+									🔔 알림
+									<c:if test="${not empty unreadCount && unreadCount > 0}">
+										<span class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">${unreadCount}</span>
+									</c:if>
+								</a>
 								<a href="${pageContext.request.contextPath}/mypage" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">👤 내 프로필</a>
                                 <a href="${pageContext.request.contextPath}/mypage/reviews" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✨ 내 리뷰 관리</a>
                                 <a href="${pageContext.request.contextPath}/column/write" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✍️ 새 칼럼 작성</a>

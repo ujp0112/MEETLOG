@@ -10,6 +10,11 @@ public class PasswordUtil {
 	private static final int SALT_LENGTH = 16;
 
 	public static String hashPassword(String password) {
+		// null 체크 추가
+		if (password == null || password.trim().isEmpty()) {
+			throw new IllegalArgumentException("비밀번호가 null이거나 비어있습니다.");
+		}
+		
 		// BCrypt 형식인지 확인
 		if (password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$")) {
 			return password; // 이미 BCrypt로 해시된 경우 그대로 반환
