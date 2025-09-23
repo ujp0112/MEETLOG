@@ -30,17 +30,14 @@ public class AdvancedSearchServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-        
+        // 로그인하지 않아도 검색 페이지는 접근 가능하게 변경
         String type = request.getParameter("type");
         if (type == null) {
             type = "restaurants";
         }
         
         request.setAttribute("searchType", type);
+        request.setAttribute("user", user); // 사용자 정보를 JSP에 전달 (null일 수 있음)
         request.getRequestDispatcher("/WEB-INF/views/advanced-search.jsp").forward(request, response);
     }
     
@@ -51,16 +48,20 @@ public class AdvancedSearchServlet extends HttpServlet {
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         
-        if (user == null) {
+        String type = request.getParameter("type");
+        
+        // 개인 정보가 필요한 검색(리뷰, 예약)은 로그인 필수
+        if (("reviews".equals(type) || "reservations".equals(type)) && user == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
         
-        String type = request.getParameter("type");
         Map<String, Object> searchParams = new HashMap<>();
         
         // 공통 검색 파라미터
-        searchParams.put("userId", user.getId());
+        if (user != null) {
+            searchParams.put("userId", user.getId());
+        }
         searchParams.put("keyword", request.getParameter("keyword"));
         searchParams.put("startDate", request.getParameter("startDate"));
         searchParams.put("endDate", request.getParameter("endDate"));

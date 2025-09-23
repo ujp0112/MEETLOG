@@ -82,8 +82,11 @@ public class RestaurantServlet extends HttpServlet {
 			throws ServletException, IOException {
 		
 		// 1. 요청 파라미터(필터 조건 및 페이지 번호) 가져오기
+		String keyword = request.getParameter("keyword");
 		String category = request.getParameter("category");
 		String location = request.getParameter("location");
+		String price = request.getParameter("price");
+		String parking = request.getParameter("parking");
 		String sortBy = request.getParameter("sortBy");
 		String pageStr = request.getParameter("page");
 		
@@ -93,8 +96,11 @@ public class RestaurantServlet extends HttpServlet {
 
 		// 2. 서비스 메소드에 전달할 파라미터 맵(Map) 생성
 		Map<String, Object> params = new HashMap<>();
+		params.put("keyword", keyword);
 		params.put("category", category);
 		params.put("location", location);
+		params.put("price", price);
+		params.put("parking", parking);
 		params.put("sortBy", sortBy);
 		params.put("limit", pageSize);
 		params.put("offset", offset);
@@ -112,8 +118,11 @@ public class RestaurantServlet extends HttpServlet {
 		request.setAttribute("totalPages", totalPages);
 		
 		// 6. 사용자가 선택한 필터 값을 JSP에 다시 전달 (검색창의 상태를 유지하기 위함)
+		request.setAttribute("selectedKeyword", keyword);
 		request.setAttribute("selectedCategory", category);
 		request.setAttribute("selectedLocation", location);
+		request.setAttribute("selectedPrice", price);
+		request.setAttribute("selectedParking", parking);
 		request.setAttribute("selectedSortBy", sortBy);
 		
 		// 7. restaurant-list.jsp로 포워딩

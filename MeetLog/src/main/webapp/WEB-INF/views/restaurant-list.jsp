@@ -21,31 +21,42 @@
                 <div class="mb-8">
                     <h2 class="text-2xl md:text-3xl font-bold mb-6">맛집 목록</h2>
                     <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                        <form action="${pageContext.request.contextPath}/restaurant/list" method="get" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <form action="${pageContext.request.contextPath}/restaurant/list" method="get" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
+                            <div class="col-span-2 lg:col-span-2">
+                                <label class="block text-sm font-medium mb-2">키워드</label>
+                                <input type="text" name="keyword" value="${selectedKeyword}" class="w-full rounded-md border-slate-300" placeholder="맛집 이름, 지역, 메뉴 등">
+                            </div>
                             <div>
-                                <label class="block text-sm font-medium mb-2">카테고리</label>
+                                <label class="block text-sm font-medium mb-2">음식 종류</label>
                                 <select name="category" class="w-full rounded-md border-slate-300">
                                     <option value="">전체</option>
                                     <option value="한식" ${selectedCategory == '한식' ? 'selected' : ''}>한식</option>
                                     <option value="양식" ${selectedCategory == '양식' ? 'selected' : ''}>양식</option>
                                     <option value="일식" ${selectedCategory == '일식' ? 'selected' : ''}>일식</option>
                                     <option value="중식" ${selectedCategory == '중식' ? 'selected' : ''}>중식</option>
+                                    <option value="카페" ${selectedCategory == '카페' ? 'selected' : ''}>카페</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-2">지역</label>
-                                <input type="text" name="location" value="${selectedLocation}" class="w-full rounded-md border-slate-300" placeholder="예: 강남역">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium mb-2">정렬</label>
-                                <select name="sortBy" class="w-full rounded-md border-slate-300">
-                                    <option value="rating" ${selectedSortBy == 'rating' ? 'selected' : ''}>평점순</option>
-                                    <option value="likes" ${selectedSortBy == 'likes' ? 'selected' : ''}>좋아요순</option>
-                                    <option value="recent" ${selectedSortBy == 'recent' ? 'selected' : ''}>최신순</option>
+                                <label class="block text-sm font-medium mb-2">가격대 (1인)</label>
+                                <select name="price" class="w-full rounded-md border-slate-300">
+                                    <option value="">전체</option>
+                                    <option value="1" ${selectedPrice == '1' ? 'selected' : ''}>~1만원</option>
+                                    <option value="2" ${selectedPrice == '2' ? 'selected' : ''}>1~2만원</option>
+                                    <option value="3" ${selectedPrice == '3' ? 'selected' : ''}>2~4만원</option>
+                                    <option value="4" ${selectedPrice == '4' ? 'selected' : ''}>4만원~</option>
                                 </select>
                             </div>
-                            <div class="flex items-end">
-                                <button type="submit" class="w-full bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700">검색</button>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">주차 여부</label>
+                                <select name="parking" class="w-full rounded-md border-slate-300">
+                                    <option value="">전체</option>
+                                    <option value="true" ${selectedParking == 'true' ? 'selected' : ''}>가능</option>
+                                    <option value="false" ${selectedParking == 'false' ? 'selected' : ''}>불가</option>
+                                </select>
+                            </div>
+                            <div class="col-span-2 md:col-span-1">
+                                <button type="submit" class="w-full bg-sky-600 text-white font-bold py-2 px-4 rounded-md hover:bg-sky-700">맛집 찾기</button>
                             </div>
                         </form>
                     </div>
@@ -55,7 +66,7 @@
                         <c:when test="${not empty restaurants}">
                             <c:forEach var="restaurant" items="${restaurants}">
                                 <div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:-translate-y-1 transition duration-300">
-                                    <a href="${pageContext.request.contextPath}/restaurant/${restaurant.id}">
+                                    <a href="${pageContext.request.contextPath}/restaurant/detail/${restaurant.id}">
                                         <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="w-full h-48 object-cover" />
                                         <div class="p-4">
                                             <h3 class="text-lg font-bold text-slate-800 mb-2">${restaurant.name}</h3>
@@ -86,11 +97,20 @@
                                     <li>
                                         <c:url var="prevUrl" value="/restaurant/list">
                                             <c:param name="page" value="${currentPage - 1}" />
+                                            <c:if test="${not empty selectedKeyword}">
+                                                <c:param name="keyword" value="${selectedKeyword}" />
+                                            </c:if>
                                             <c:if test="${not empty selectedCategory}">
                                                 <c:param name="category" value="${selectedCategory}" />
                                             </c:if>
                                             <c:if test="${not empty selectedLocation}">
                                                 <c:param name="location" value="${selectedLocation}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedPrice}">
+                                                <c:param name="price" value="${selectedPrice}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedParking}">
+                                                <c:param name="parking" value="${selectedParking}" />
                                             </c:if>
                                             <c:if test="${not empty selectedSortBy}">
                                                 <c:param name="sortBy" value="${selectedSortBy}" />
@@ -103,11 +123,20 @@
                                     <li>
                                         <c:url var="pageUrl" value="/restaurant/list">
                                             <c:param name="page" value="${i}" />
+                                            <c:if test="${not empty selectedKeyword}">
+                                                <c:param name="keyword" value="${selectedKeyword}" />
+                                            </c:if>
                                             <c:if test="${not empty selectedCategory}">
                                                 <c:param name="category" value="${selectedCategory}" />
                                             </c:if>
                                             <c:if test="${not empty selectedLocation}">
                                                 <c:param name="location" value="${selectedLocation}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedPrice}">
+                                                <c:param name="price" value="${selectedPrice}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedParking}">
+                                                <c:param name="parking" value="${selectedParking}" />
                                             </c:if>
                                             <c:if test="${not empty selectedSortBy}">
                                                 <c:param name="sortBy" value="${selectedSortBy}" />
@@ -121,11 +150,20 @@
                                     <li>
                                         <c:url var="nextUrl" value="/restaurant/list">
                                             <c:param name="page" value="${currentPage + 1}" />
+                                            <c:if test="${not empty selectedKeyword}">
+                                                <c:param name="keyword" value="${selectedKeyword}" />
+                                            </c:if>
                                             <c:if test="${not empty selectedCategory}">
                                                 <c:param name="category" value="${selectedCategory}" />
                                             </c:if>
                                             <c:if test="${not empty selectedLocation}">
                                                 <c:param name="location" value="${selectedLocation}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedPrice}">
+                                                <c:param name="price" value="${selectedPrice}" />
+                                            </c:if>
+                                            <c:if test="${not empty selectedParking}">
+                                                <c:param name="parking" value="${selectedParking}" />
                                             </c:if>
                                             <c:if test="${not empty selectedSortBy}">
                                                 <c:param name="sortBy" value="${selectedSortBy}" />

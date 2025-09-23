@@ -75,11 +75,36 @@
 		SELECT * FROM restaurants
 		<where>
 			is_active = true
+			<if test="keyword != null and keyword != ''">
+				AND (name LIKE CONCAT('%', #{keyword}, '%') 
+				     OR location LIKE CONCAT('%', #{keyword}, '%')
+				     OR category LIKE CONCAT('%', #{keyword}, '%')
+				     OR description LIKE CONCAT('%', #{keyword}, '%'))
+			</if>
 			<if test="category != null and category != ''">
 				AND category = #{category}
 			</if>
 			<if test="location != null and location != ''">
 				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+			<if test="price != null and price != ''">
+				<choose>
+					<when test="price == '1'">
+						AND price_range &lt;= 10000
+					</when>
+					<when test="price == '2'">
+						AND price_range BETWEEN 10001 AND 20000
+					</when>
+					<when test="price == '3'">
+						AND price_range BETWEEN 20001 AND 40000
+					</when>
+					<when test="price == '4'">
+						AND price_range &gt;= 40001
+					</when>
+				</choose>
+			</if>
+			<if test="parking != null and parking != ''">
+				AND parking = #{parking}
 			</if>
 		</where>
 		<choose>
@@ -100,11 +125,36 @@
 		SELECT count(*) FROM restaurants
 		<where>
 			is_active = true
+			<if test="keyword != null and keyword != ''">
+				AND (name LIKE CONCAT('%', #{keyword}, '%') 
+				     OR location LIKE CONCAT('%', #{keyword}, '%')
+				     OR category LIKE CONCAT('%', #{keyword}, '%')
+				     OR description LIKE CONCAT('%', #{keyword}, '%'))
+			</if>
 			<if test="category != null and category != ''">
 				AND category = #{category}
 			</if>
 			<if test="location != null and location != ''">
 				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+			<if test="price != null and price != ''">
+				<choose>
+					<when test="price == '1'">
+						AND price_range &lt;= 10000
+					</when>
+					<when test="price == '2'">
+						AND price_range BETWEEN 10001 AND 20000
+					</when>
+					<when test="price == '3'">
+						AND price_range BETWEEN 20001 AND 40000
+					</when>
+					<when test="price == '4'">
+						AND price_range &gt;= 40001
+					</when>
+				</choose>
+			</if>
+			<if test="parking != null and parking != ''">
+				AND parking = #{parking}
 			</if>
 		</where>
 	</select>

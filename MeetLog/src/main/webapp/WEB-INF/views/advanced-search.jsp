@@ -52,22 +52,22 @@
                     </button>
                     
                     <button onclick="setSearchType('reviews')" 
-                            class="p-6 rounded-2xl card-hover ${searchType == 'reviews' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-slate-50'}"
-                            id="btn-reviews">
+                            class="p-6 rounded-2xl card-hover ${searchType == 'reviews' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-slate-50'} ${empty user ? 'opacity-50 cursor-not-allowed' : ''}"
+                            id="btn-reviews" ${empty user ? 'disabled' : ''}>
                         <div class="text-center">
                             <div class="text-4xl mb-2">⭐</div>
                             <h3 class="text-lg font-bold text-slate-800">리뷰</h3>
-                            <p class="text-slate-600 text-sm">리뷰 검색</p>
+                            <p class="text-slate-600 text-sm">리뷰 검색 ${empty user ? '(로그인 필요)' : ''}</p>
                         </div>
                     </button>
                     
                     <button onclick="setSearchType('reservations')" 
-                            class="p-6 rounded-2xl card-hover ${searchType == 'reservations' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-slate-50'}"
-                            id="btn-reservations">
+                            class="p-6 rounded-2xl card-hover ${searchType == 'reservations' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-slate-50'} ${empty user ? 'opacity-50 cursor-not-allowed' : ''}"
+                            id="btn-reservations" ${empty user ? 'disabled' : ''}>
                         <div class="text-center">
                             <div class="text-4xl mb-2">📅</div>
                             <h3 class="text-lg font-bold text-slate-800">예약</h3>
-                            <p class="text-slate-600 text-sm">예약 정보 검색</p>
+                            <p class="text-slate-600 text-sm">예약 정보 검색 ${empty user ? '(로그인 필요)' : ''}</p>
                         </div>
                     </button>
                 </div>
@@ -277,6 +277,14 @@
     
     <script>
         function setSearchType(type) {
+            // 로그인하지 않은 사용자가 리뷰/예약 검색을 시도하는 경우
+            <c:if test="${empty user}">
+                if (type === 'reviews' || type === 'reservations') {
+                    alert('로그인이 필요한 기능입니다.');
+                    return;
+                }
+            </c:if>
+            
             document.getElementById('searchType').value = type;
             
             // 버튼 스타일 업데이트
