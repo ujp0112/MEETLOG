@@ -1,17 +1,26 @@
-<%-- /WEB-INF/branch/branch-notice-view.jsp --%>
+<%-- promotion-form.jsp (새 파일) --%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<title>공지: ${fn:escapeXml(notice.title)}</title>
+<title>본사 · 프로모션 ${not empty promotion ? '수정' : '작성'}</title>
 <style>
-:root { --bg: #f6faf8; --surface: #ffffff; --border: #e5e7eb; --muted: #6b7280; --title: #0f172a; --primary: #2f855a; --primary-600: #27764f; --ring: #93c5aa
+:root { -
+	-bg: #f6faf8; -
+	-surface: #ffffff; -
+	-border: #e5e7eb; -
+	-muted: #6b7280; -
+	-title: #0f172a; -
+	-primary: #2f855a; -
+	-primary-600: #27764f; -
+	-ring: #93c5aa
 }
 
 html, body {
@@ -20,8 +29,8 @@ html, body {
 
 body {
 	margin: 0;
-	background: var(--bg);
-	color: var(--title);
+	background: var(- -bg);
+	color: var(- -title);
 	font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
 		Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif
 }
@@ -45,8 +54,8 @@ body {
 /* Card */
 .panel {
 	max-width: 1000px;
-	background: var(--surface);
-	border: 1px solid var(--border);
+	background: var(- -surface);
+	border: 1px solid var(- -border);
 	border-radius: 16px;
 	box-shadow: 0 8px 20px rgba(16, 24, 40, .05);
 	margin: 0 auto;
@@ -57,7 +66,7 @@ body {
 	align-items: center;
 	gap: 10px;
 	padding: 16px 18px;
-	border-bottom: 1px solid var(--border)
+	border-bottom: 1px solid var(- -border)
 }
 
 .panel .bd {
@@ -90,7 +99,7 @@ body {
 	align-items: center;
 	gap: 8px;
 	background: #fff;
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	border-radius: 10px;
 	padding: 8px 10px
 }
@@ -103,7 +112,7 @@ body {
 
 .btn {
 	appearance: none;
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	background: #fff;
 	padding: 10px 14px;
 	border-radius: 999px;
@@ -118,13 +127,13 @@ body {
 }
 
 .btn.primary {
-	background: var(--primary);
-	border-color: var(--primary);
+	background: var(- -primary);
+	border-color: var(- -primary);
 	color: #fff
 }
 
 .btn.primary:hover {
-	background: var(--primary-600)
+	background: var(- -primary-600)
 }
 
 .btn-sm {
@@ -144,7 +153,7 @@ body {
 
 /* Table (spreadsheet look) */
 .table-wrap {
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	border-radius: 14px;
 	overflow: auto;
 	background: #fff
@@ -161,7 +170,7 @@ table.sheet {
 	position: sticky;
 	top: 0;
 	background: #fff;
-	border-bottom: 1px solid var(--border);
+	border-bottom: 1px solid var(- -border);
 	font-weight: 800;
 	text-align: left;
 	padding: 12px 10px;
@@ -186,7 +195,7 @@ table.sheet {
 	width: 40px;
 	height: 40px;
 	border-radius: 8px;
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	object-fit: cover;
 	background: #fafafa;
 	display: block
@@ -198,7 +207,7 @@ table.sheet {
 }
 
 .empty {
-	color: var(--muted);
+	color: var(- -muted);
 	text-align: center;
 	padding: 24px
 }
@@ -223,7 +232,7 @@ table.sheet {
 	max-width: 720px;
 	background: #fff;
 	border-radius: 20px;
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	box-shadow: 0 10px 30px rgba(0, 0, 0, .12)
 }
 
@@ -232,7 +241,7 @@ table.sheet {
 	align-items: center;
 	justify-content: space-between;
 	padding: 14px 16px;
-	border-bottom: 1px solid var(--border)
+	border-bottom: 1px solid var(- -border)
 }
 
 .dialog .bd {
@@ -260,14 +269,14 @@ table.sheet {
 }
 
 .label {
-	color: var(--muted);
+	color: var(- -muted);
 	font-size: 14px
 }
 
 .input {
 	width: 100%;
 	padding: 12px 14px;
-	border: 1px solid var(--border);
+	border: 1px solid var(- -border);
 	border-radius: 12px;
 	background: #fff;
 	outline: 0;
@@ -275,8 +284,8 @@ table.sheet {
 }
 
 .input:focus {
-	border-color: var(--primary);
-	box-shadow: 0 0 0 3px var(--ring)
+	border-color: var(- -primary);
+	box-shadow: 0 0 0 3px var(- -ring)
 }
 
 .image-field {
@@ -290,7 +299,7 @@ table.sheet {
 	width: 72px;
 	height: 72px;
 	border-radius: 10px;
-	border: 2px dashed var(--border);
+	border: 2px dashed var(- -border);
 	background: #fafafa;
 	display: flex;
 	align-items: center;
@@ -306,7 +315,7 @@ table.sheet {
 }
 
 .hint {
-	color: var(--muted);
+	color: var(- -muted);
 	font-size: 12px
 }
 
@@ -322,50 +331,100 @@ table.sheet {
 		grid-template-columns: 1fr
 	}
 }
-.notice-image-style {
-    max-width: 100%;    /* 이미지의 최대 너비를 부모 요소의 100%로 제한 */
-    height: auto;       /* 너비에 맞춰 높이를 자동으로 조절 */
-    border-radius: 8px;
-    margin-bottom: 10px;
+
+.file-list-item {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 5px;
+}
+
+.custom {
+	width: 40px;
+	height: 40px;
 }
 </style>
 </head>
 <body>
-	<%@ include file="/WEB-INF/layout/branchheader.jspf"%>
+	<%@ include file="/WEB-INF/layout/header.jspf"%>
 	<main>
-		<section class="panel" style="max-width: 900px;">
+		<section class="panel" style="max-width: 800px;">
 			<div class="hd">
-				<h1 class="title">${fn:escapeXml(notice.title)}</h1>
+				<h1 class="title">프로모션 ${not empty promotion ? '수정' : '작성'}</h1>
 			</div>
 			<div class="bd">
-				<%-- 이미지들을 순서대로 표시 --%>
-				<div class="notice-images" style="margin-bottom: 20px;">
-					<c:forEach var="image" items="${notice.images}">
-						<mytag:image fileName="${image.filePath}" altText="공지 이미지"
-							cssClass="notice-image-style" />
-					</c:forEach>
-				</div>
+				<form action="${contextPath}/hq/promotion" method="post"
+					enctype="multipart/form-data">
+					<c:if test="${not empty promotion}">
+						<input type="hidden" name="id" value="${promotion.id}" />
+					</c:if>
+					<div class="form">
+						<div class="row">
+							<label class="label">제목</label> <input type="text" name="title"
+								class="input" value="${promotion.title}" required />
+						</div>
+						<div class="row">
+							<label class="label">설명</label>
+							<textarea name="description" class="input" rows="8">${promotion.description}</textarea>
+						</div>
+						<div class="row">
+							<label class="label">기간</label>
+							<div style="display: flex; align-items: center; gap: 10px;">
+								<fmt:formatDate value="${promotion.startDate}"
+									pattern="yyyy-MM-dd'T'HH:mm" var="sDate" />
+								<input type="datetime-local" name="startDate" class="input"
+									value="${sDate}" required /> <span>~</span>
+								<fmt:formatDate value="${promotion.endDate}"
+									pattern="yyyy-MM-dd'T'HH:mm" var="eDate" />
+								<input type="datetime-local" name="endDate" class="input"
+									value="${eDate}" required />
+							</div>
+						</div>
 
-				<%-- 공지 내용 (pre 태그로 줄바꿈 유지) --%>
-				<div class="notice-content"
-					style="width: 100%; white-space: pre-wrap; line-height: 1.7; overflow-wrap: break-word;">
-					${fn:escapeXml(notice.content)}</div>
+						<div class="row">
+							<label class="label">이미지</label> <input type="file" name="images"
+								class="input" accept="image/*" multiple />
+						</div>
+						<c:if test="${not empty promotion.images}">
+							<div class="row">
+								<label class="label">현재 이미지</label>
+								<div>
+									<c:forEach var="img" items="${promotion.images}">
+										<div class="file-list-item">
+											<mytag:image fileName="${img.filePath}" altText="현재 이미지"
+												cssClass="thumb custom" />
+											<label><input type="checkbox" name="deleteImageIds"
+												value="${img.id}"> 삭제</label>
+										</div>
+									</c:forEach>
+								</div>
+							</div>
+						</c:if>
 
-				<%-- 첨부파일 목록 --%>
-				<c:if test="${not empty notice.files}">
-					<hr
-						style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-					<h4>첨부파일</h4>
-					<c:forEach var="file" items="${notice.files}">
-						<p>
-							<a href="${contextPath}${file.filePath}"
-								download="${fn:escapeXml(file.originalFilename)}">${fn:escapeXml(file.originalFilename)}</a>
-						</p>
-					</c:forEach>
-				</c:if>
-				<div class="footer actions">
-					<a href="${contextPath}/branch/notice" class="btn">목록으로</a>
-				</div>
+						<div class="row">
+							<label class="label">첨부파일</label> <input type="file" name="files"
+								class="input" multiple />
+						</div>
+						<c:if test="${not empty promotion.files}">
+							<div class="row">
+								<label class="label">현재 첨부파일</label>
+								<div>
+									<c:forEach var="file" items="${promotion.files}">
+										<div class="file-list-item">
+											<span>${fn:escapeXml(file.originalFilename)}</span> <label><input
+												type="checkbox" name="deleteFileIds" value="${file.id}">
+												삭제</label>
+										</div>
+									</c:forEach>
+								</div>
+							</div>
+						</c:if>
+					</div>
+					<div class="actions">
+						<a href="${contextPath}/hq/promotion" class="btn">목록으로</a>
+						<button type="submit" class="btn primary">저장</button>
+					</div>
+				</form>
 			</div>
 		</section>
 	</main>

@@ -23,26 +23,37 @@ import javax.servlet.http.Part;
 import erpDto.Material;
 import erpService.MaterialService;
 import model.BusinessUser;
+import model.User;
+import service.UserService;
 import util.AppConfig;
 
-@WebServlet(name = "HqMaterialsServlet", urlPatterns = { "/hq/materials", "/hq/materials/*" })
+@WebServlet(urlPatterns = { "/hq/material", "/hq/material/*" })
 @MultipartConfig
-public class HqMaterialsServlet extends HttpServlet {
+public class HqMaterialServlet extends HttpServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final MaterialService materialService = new MaterialService();
+	private final UserService userService = new UserService();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+		for (int i = 0; i < 10; i++)
+			System.out.println("디버깅 시작");
 		req.setCharacterEncoding("UTF-8");
 
 		HttpSession session = req.getSession(false);
-		BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
-		if (user == null) {
-			resp.sendRedirect(req.getContextPath() + "/login.jsp");
+		User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+		BusinessUser bizUser = (session != null) ? (BusinessUser) session.getAttribute("businessUser") : null;
+		if (bizUser == null || !"HQ".equals(bizUser.getRole())) {
+			resp.sendRedirect(req.getContextPath() + "/login"); // 로그인 안됐거나 HQ가 아니면 리디렉션
 			return;
 		}
 
-		long companyId = user.getCompanyId();
+		long companyId = bizUser.getCompanyId();
 		List<Material> materials = materialService.listByCompany(companyId);
 		req.setAttribute("materials", materials);
 
@@ -51,10 +62,12 @@ public class HqMaterialsServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+		for (int i = 0; i < 10; i++)
+			System.out.println("디버깅 시작");
 		req.setCharacterEncoding("UTF-8");
 		HttpSession session = req.getSession(false);
 		BusinessUser user = (session == null) ? null : (BusinessUser) session.getAttribute("businessUser");
-		if (user == null) {
+		if (user == null || !"HQ".equals(user.getRole())) {
 			resp.sendRedirect(req.getContextPath() + "/login.jsp");
 			return;
 		}
@@ -75,7 +88,7 @@ public class HqMaterialsServlet extends HttpServlet {
 			m.setImgPath(saveImagePart(req.getPart("image")));
 
 			materialService.create(m);
-			resp.sendRedirect(req.getContextPath() + "/hq/materials");
+			resp.sendRedirect(req.getContextPath() + "/hq/material");
 			return;
 		}
 
@@ -104,13 +117,13 @@ public class HqMaterialsServlet extends HttpServlet {
 				}
 
 				materialService.update(m);
-				resp.sendRedirect(req.getContextPath() + "/hq/materials");
+				resp.sendRedirect(req.getContextPath() + "/hq/material");
 				return;
 			}
 
 			if ("delete".equals(action)) {
 				materialService.softDelete(companyId, id);
-				resp.sendRedirect(req.getContextPath() + "/hq/materials");
+				resp.sendRedirect(req.getContextPath() + "/hq/material");
 				return;
 			}
 		}

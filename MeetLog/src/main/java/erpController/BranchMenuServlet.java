@@ -17,12 +17,17 @@ import javax.servlet.http.HttpSession;
 import erpDto.MenuToggle;
 import erpService.BranchService;
 import model.BusinessUser;
+import com.google.gson.Gson; // Gson 임포트 추가
+import erpDto.BranchMenu;    // BranchMenu DTO 임포트 추가
+import java.util.Map;       // Map 임포트 추가
+import java.util.HashMap;   // HashMap 임포트 추가
 
 @WebServlet(name = "BranchMenuServlet", urlPatterns = { "/branch/menus", "/branch/menus/*" })
 public class BranchMenuServlet extends HttpServlet {
 
 	private BranchService branchService;
-
+	private final Gson gson = new Gson();
+	
 	@Override
 	public void init() throws ServletException {
 		branchService = new BranchService();
@@ -68,29 +73,23 @@ public class BranchMenuServlet extends HttpServlet {
 			return;
 		}
 
-		// ✅ 재료 목록: /branch/menus/{id}/ingredients
-		Matcher m = Pattern.compile("^/(\\d+)/ingredients$").matcher(pi);
-		if (m.find()) {
-			long menuId = Long.parseLong(m.group(1));
-			List<Map<String, Object>> rows = branchService.listMenuIngredientsByMenu(companyId, menuId);
-			resp.setContentType("application/json; charset=UTF-8");
-			PrintWriter out = resp.getWriter();
-			out.write('[');
-			for (int i = 0; i < rows.size(); i++) {
-				Map<String, Object> r = rows.get(i);
-				if (i > 0)
-					out.write(',');
-				out.write('{');
-				out.write("\"materialId\":" + r.get("materialId"));
-				out.write(",\"materialName\":\"" + esc((String) r.get("materialName")) + "\"");
-				out.write(",\"unit\":\"" + esc(nvl((String) r.get("unit"))) + "\"");
-				out.write(",\"unitPrice\":" + r.get("unitPrice"));
-				out.write(",\"qty\":" + r.get("qty"));
-				out.write('}');
-			}
-			out.write(']');
-			return;
-		}
+		Matcher m = Pattern.compile("^/(\\d+)/ingredients$").matcher(pi == null ? "" : pi);
+        if (m.find()) {
+            long menuId = Long.parseLong(m.group(1));
+
+            // [수정] 1. 재료 목록과 함께 메뉴 상세 정보(레시피 포함)도 조회
+            List<Map<String, Object>> ingredients = branchService.listMenuIngredientsByMenu(companyId, menuId);
+            BranchMenu menu = branchService.getMenuDetails(companyId, menuId); // getMenuDetails는 이전 구현에서 이미 존재
+
+            // [수정] 2. Map을 사용하여 재료와 레시피를 함께 담아 JSON으로 변환
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("ingredients", ingredients);
+            responseData.put("recipe", menu != null ? menu.getRecipe() : null);
+
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().write(gson.toJson(responseData)); // Gson을 사용해 응답
+            return;
+        }
 
 		resp.sendError(404);
 	}

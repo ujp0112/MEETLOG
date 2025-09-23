@@ -365,6 +365,7 @@ a {
 				class="${fn:contains(uri, '/branch/inventory') ? 'act' : ''}">재고</a>
 			<a href="${ctx}/branch/notice"
 				class="${fn:contains(uri, '/branch/notice') ? 'act' : ''}">사내 공지</a>
+			<a href="${ctx}/branch/promotion">프로모션</a>
 		</div>
 
 		<div class="spacer"></div>

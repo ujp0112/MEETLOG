@@ -79,4 +79,13 @@ public class BranchService {
             return ss.selectList("erpMapper.BranchMapper.listMenuIngredientsByMenu", p);
         }
     }
+
+    public BranchMenu getMenuDetails(long companyId, long menuId) {
+		try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("companyId", companyId);
+			params.put("menuId", menuId);
+			return session.selectOne("erpMapper.BranchMenuMapper.selectMenuById", params);
+		}
+	}
 }

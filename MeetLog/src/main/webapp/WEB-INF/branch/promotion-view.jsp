@@ -1,30 +1,17 @@
-<%-- /WEB-INF/branch/branch-notice-view.jsp --%>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+<!-- WEB-INF/branch/promotion-view -->
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<title>공지: ${fn:escapeXml(notice.title)}</title>
+    <title>프로모션: ${fn:escapeXml(promotion.title)}</title>
 <style>
-:root { --bg: #f6faf8; --surface: #ffffff; --border: #e5e7eb; --muted: #6b7280; --title: #0f172a; --primary: #2f855a; --primary-600: #27764f; --ring: #93c5aa
-}
 
-html, body {
-	height: 100%
-}
-
-body {
-	margin: 0;
-	background: var(--bg);
-	color: var(--title);
-	font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
-		Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif
-}
 
 /* Shell with left sidebar include */
 .shell {
@@ -43,25 +30,12 @@ body {
 }
 
 /* Card */
-.panel {
-	max-width: 1000px;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: 16px;
-	box-shadow: 0 8px 20px rgba(16, 24, 40, .05);
-	margin: 0 auto;
-}
-
-.panel .hd {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	padding: 16px 18px;
-	border-bottom: 1px solid var(--border)
-}
-
-.panel .bd {
-	padding: 16px 18px
+:root{--bg:#f6faf8;--surface:#ffffff;--border:#e5e7eb;--muted:#6b7280;--title:#0f172a;--primary:#2f855a;--primary-600:#27764f;--ring:#93c5aa}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--title);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
+.panel{max-width:1100px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 20px rgba(16,24,40,.05);margin:20px auto;}
+.panel .hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
+.panel .bd{padding:16px 18px
 }
 
 .title {
@@ -322,52 +296,64 @@ table.sheet {
 		grid-template-columns: 1fr
 	}
 }
-.notice-image-style {
-    max-width: 100%;    /* 이미지의 최대 너비를 부모 요소의 100%로 제한 */
-    height: auto;       /* 너비에 맞춰 높이를 자동으로 조절 */
-    border-radius: 8px;
-    margin-bottom: 10px;
+
+.custom {
+	width: 120px;
+	height: 120px;
+	flex-shrink: 0;
 }
 </style>
+<style>
+        :root { --bg:#f6faf8; ... }
+        /* ... promotion-management.jsp의 style 전체 복사 ... */
+        
+        .promo-images { margin-bottom: 24px; }
+        .promo-images img { width: 100%; border-radius: 12px; margin-bottom: 10px; }
+        .promo-content { white-space: pre-wrap; line-height: 1.7; }
+        .file-list a { text-decoration: none; }
+        .actions { justify-content: flex-end; padding-top:20px; border-top:1px solid var(--border); margin-top:20px; }
+    </style>
 </head>
 <body>
-	<%@ include file="/WEB-INF/layout/branchheader.jspf"%>
-	<main>
-		<section class="panel" style="max-width: 900px;">
-			<div class="hd">
-				<h1 class="title">${fn:escapeXml(notice.title)}</h1>
-			</div>
-			<div class="bd">
-				<%-- 이미지들을 순서대로 표시 --%>
-				<div class="notice-images" style="margin-bottom: 20px;">
-					<c:forEach var="image" items="${notice.images}">
-						<mytag:image fileName="${image.filePath}" altText="공지 이미지"
-							cssClass="notice-image-style" />
-					</c:forEach>
-				</div>
+    <%-- 역할에 따라 다른 헤더를 include 합니다 --%>
+    <c:choose>
+        <c:when test="${sessionScope.businessUser.role eq 'HQ'}">
+            <%@ include file="/WEB-INF/layout/header.jspf"%>
+        </c:when>
+        <c:otherwise>
+            <%@ include file="/WEB-INF/layout/branchheader.jspf"%>
+        </c:otherwise>
+    </c:choose>
+    
+    <main>
+        <section class="panel">
+            <div class="hd">
+                <h1 class="title">${fn:escapeXml(promotion.title)}</h1>
+            </div>
+            <div class="bd">
+                <div class="promo-images">
+                    <c:forEach var="image" items="${promotion.images}">
+                        <mytag:image fileName="${image.filePath}" altText="프로모션 이미지" cssClass="" />
+                    </c:forEach>
+                </div>
 
-				<%-- 공지 내용 (pre 태그로 줄바꿈 유지) --%>
-				<div class="notice-content"
-					style="width: 100%; white-space: pre-wrap; line-height: 1.7; overflow-wrap: break-word;">
-					${fn:escapeXml(notice.content)}</div>
+                <div class="promo-content">${fn:escapeXml(promotion.description)}</div>
 
-				<%-- 첨부파일 목록 --%>
-				<c:if test="${not empty notice.files}">
-					<hr
-						style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;">
-					<h4>첨부파일</h4>
-					<c:forEach var="file" items="${notice.files}">
-						<p>
-							<a href="${contextPath}${file.filePath}"
-								download="${fn:escapeXml(file.originalFilename)}">${fn:escapeXml(file.originalFilename)}</a>
-						</p>
-					</c:forEach>
-				</c:if>
-				<div class="footer actions">
-					<a href="${contextPath}/branch/notice" class="btn">목록으로</a>
-				</div>
-			</div>
-		</section>
-	</main>
+                <c:if test="${not empty promotion.files}">
+                    <hr style="border:0; border-top:1px solid #e5e7eb; margin: 24px 0;">
+                    <h4>첨부파일</h4>
+                    <div class="file-list">
+                        <c:forEach var="file" items="${promotion.files}">
+                            <p><a href="${contextPath}/files/${file.filePath}" download="${fn:escapeXml(file.originalFilename)}">${fn:escapeXml(file.originalFilename)}</a></p>
+                        </c:forEach>
+                    </div>
+                </c:if>
+
+                <div class="actions">
+                    <a href="${contextPath}/${fn:toLowerCase(sessionScope.businessUser.role)}/promotion" class="btn">목록으로</a>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

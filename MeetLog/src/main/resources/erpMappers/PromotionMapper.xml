@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="erpMapper.PromotionMapper">
+
+    <resultMap id="PromotionResultMap" type="erpDto.Promotion">
+        <id property="id" column="promo_id"/>
+        <result property="companyId" column="company_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="createdAt" column="created_at"/>
+        <collection property="images" ofType="erpDto.PromotionImage">
+            <id property="id" column="image_id"/>
+            <result property="filePath" column="image_file_path"/>
+            <result property="displayOrder" column="display_order"/>
+        </collection>
+        <collection property="files" ofType="erpDto.PromotionFile">
+            <id property="id" column="file_id"/>
+            <result property="originalFilename" column="original_filename"/>
+            <result property="filePath" column="file_file_path"/>
+        </collection>
+    </resultMap>
+    
+    <resultMap id="PromotionCardResult" type="erpDto.Promotion">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="imgPath" column="representative_img_path"/>
+    </resultMap>
+
+    <insert id="insertPromotion" parameterType="erpDto.Promotion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO promotion (company_id, title, description, start_date, end_date)
+        VALUES (#{companyId}, #{title}, #{description}, #{startDate}, #{endDate})
+    </insert>
+
+    <insert id="insertPromotionImages" parameterType="list">
+        INSERT INTO promotion_image (promotion_id, company_id, file_path, display_order)
+        VALUES
+        <foreach collection="list" item="image" separator=",">
+            (#{image.promotionId}, #{image.companyId}, #{image.filePath}, #{image.displayOrder})
+        </foreach>
+    </insert>
+    
+    <insert id="insertPromotionFiles" parameterType="list">
+        INSERT INTO promotion_file (promotion_id, company_id, original_filename, file_path, file_size)
+        VALUES
+        <foreach collection="list" item="file" separator=",">
+            (#{file.promotionId}, #{file.companyId}, #{file.originalFilename}, #{file.filePath}, #{file.fileSize})
+        </foreach>
+    </insert>
+    
+    <select id="selectPromotionById" parameterType="map" resultMap="PromotionResultMap">
+        SELECT 
+            p.id AS promo_id, p.company_id, p.title, p.description, p.start_date, p.end_date, p.created_at,
+            i.id AS image_id, i.file_path AS image_file_path, i.display_order,
+            f.id AS file_id, f.original_filename, f.file_path AS file_file_path
+        FROM promotion p
+        LEFT JOIN promotion_image i ON p.id = i.promotion_id
+        LEFT JOIN promotion_file f ON p.id = f.promotion_id
+        WHERE p.id = #{id} AND p.company_id = #{companyId} AND p.deleted_yn = 'N'
+        ORDER BY i.display_order ASC
+    </select>
+    
+    <select id="listPromotionsByCompany" parameterType="map" resultMap="PromotionCardResult">
+        SELECT 
+            p.*,
+            (SELECT pi.file_path 
+             FROM promotion_image pi
+             WHERE pi.promotion_id = p.id
+             ORDER BY pi.display_order ASC, pi.id ASC
+             LIMIT 1) AS representative_img_path
+        FROM promotion p
+        WHERE p.company_id = #{companyId} AND p.deleted_yn = 'N'
+        ORDER BY p.start_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <select id="listActivePromotionsForBranch" parameterType="map" resultMap="PromotionCardResult">
+        SELECT 
+            p.*,
+            (SELECT pi.file_path 
+             FROM promotion_image pi
+             WHERE pi.promotion_id = p.id
+             ORDER BY pi.display_order ASC, pi.id ASC
+             LIMIT 1) AS representative_img_path
+        FROM promotion p
+        WHERE p.company_id = #{companyId} 
+          AND p.deleted_yn = 'N' 
+          AND p.end_date >= NOW()
+        ORDER BY p.start_date ASC
+    </select>
+    
+    <select id="countPromotionsByCompany" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM promotion WHERE company_id = #{companyId} AND deleted_yn = 'N'
+    </select>
+    
+    <update id="updatePromotion" parameterType="erpDto.Promotion">
+        UPDATE promotion
+        SET title = #{title},
+            description = #{description},
+            start_date = #{startDate},
+            end_date = #{endDate},
+            updated_at = NOW()
+        WHERE id = #{id} AND company_id = #{companyId}
+    </update>
+    
+    <delete id="deleteImagesByIds" parameterType="list">
+        DELETE FROM promotion_image WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+    <delete id="deleteFilesByIds" parameterType="list">
+        DELETE FROM promotion_file WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+    <update id="softDeletePromotion" parameterType="map">
+        UPDATE promotion SET deleted_yn = 'Y', updated_at = NOW()
+        WHERE id = #{id} AND company_id = #{companyId}
+    </update>
+</mapper>

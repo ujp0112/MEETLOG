@@ -89,11 +89,12 @@
 
     <div class="topnav">
 <a href="${ctx }/hq/branch-management" class="${fn:contains(uri, '/hq/branches') ? '' : ''}">지점</a>
-<a href="${ctx }/hq/materials" class="${fn:contains(uri, '/hq/materials') ? '' : ''}">재료</a>
+<a href="${ctx }/hq/material" class="${fn:contains(uri, '/hq/material') ? '' : ''}">재료</a>
 <a href="${ctx }/hq/menus" class="${fn:contains(uri, '/hq/menus') ? '' : ''}">메뉴</a>
 <a href="${ctx }/hq/sales-orders" class="${fn:contains(uri, '/hq/sales-orders') ? '' : ''}">수주</a>
 <a href="${ctx }/hq/notice" class="${fn:contains(uri, '/hq/notice') ? '' : ''}">공지</a>
 <a href="${ctx }/hq/recipe" class="${fn:contains(uri, '/hq/recipe') ? '' : ''}">레시피</a>
+<a href="${ctx}/hq/promotion">프로모션</a>
 </div>
 
     <div class="spacer"></div>

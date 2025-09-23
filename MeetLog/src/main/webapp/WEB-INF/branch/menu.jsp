@@ -54,6 +54,19 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0}
 .sheet tbody td{padding:10px;border-bottom:1px solid #f1f5f9}
 .cell-num{text-align:right}
 .total{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.recipe-cell {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: #f9fafb; /* 살짝 다른 배경색 */
+  white-space: pre-wrap;     /* 줄바꿈 유지를 위해 기존 스타일 포함 */
+  line-height: 1.6;
+  max-height: 300px;
+  overflow-y: auto;
+  min-height: 150px;
+  color: #374151; /* 기본 텍스트보다 살짝 연한 색 */
+}
 </style>
 </head>
 <body>
@@ -100,7 +113,8 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0}
         </table>
       </div>
       <div class="total"><span class="hint">원가 합계:</span> <strong><span id="popSum">0</span>원</strong></div>
-    </div>
+      <h4 style="margin-top: 16px;">레시피</h4>
+      <div id="popRecipe" class="recipe-cell"></div> </div>
   </div>
 </div>
 
@@ -219,13 +233,18 @@ async function fillPopover(menuId){
   try{
     const res = await fetch(CTX + '/branch/menus/' + encodeURIComponent(String(menuId)) + '/ingredients');
     if(!res.ok) throw new Error();
-    const rows = await res.json(); // [{materialId, materialName, unit, unitPrice, qty}]
+    
+    // [수정] 이제 응답은 { ingredients: [...], recipe: "..." } 형태의 객체입니다.
+    const data = await res.json();
+    const ingredients = data.ingredients; // 재료 목록
+    const recipeText = data.recipe;       // 레시피 텍스트
+    
     const tbody = document.getElementById('popRows');
     tbody.innerHTML = '';
     let sum = 0;
 
-    if(Array.isArray(rows) && rows.length){
-      for(const it of rows){
+    if(Array.isArray(ingredients) && ingredients.length){
+      for(const it of ingredients){
         const price = Number(it.unitPrice||0), qty = Number(it.qty||0);
         sum += price * qty;
         const tr = document.createElement('tr');
@@ -242,6 +261,10 @@ async function fillPopover(menuId){
       tbody.appendChild(tr);
     }
     document.getElementById('popSum').textContent = nf.format(Math.round(sum));
+    
+    // [추가] 레시피 텍스트를 popRecipe div에 채워넣습니다.
+    document.getElementById('popRecipe').textContent = recipeText || '등록된 레시피가 없습니다.';
+
   }catch(e){
     document.getElementById('popRows').innerHTML =
       '<tr><td colspan="4" style="text-align:center;color:#b91c1c">불러오기에 실패했습니다.</td></tr>';

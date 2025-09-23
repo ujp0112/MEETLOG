@@ -34,6 +34,7 @@
 		<typeAlias type="erpDto.NoticeImage" alias="ErpNoticeImage"/>
 		<typeAlias type="erpDto.PurchaseOrder" alias="ErpPurchaseOrder"/>
 		<typeAlias type="erpDto.PurchaseOrderLine" alias="ErpPurchaseOrderLine"/>
+		<typeAlias type="erpDto.Promotion" alias="ErpPromotion"/>
 		<!-- 패키지 자동 등록 -->
 		<package name="model"/> 
 	</typeAliases>
@@ -88,5 +89,6 @@
 		<mapper resource="erpMappers/BranchMapper.xml" />
 		<mapper resource="erpMappers/OrderMapper.xml" />
 		<mapper resource="erpMappers/NoticeMapper.xml"/>
+		<mapper resource="erpMappers/PromotionMapper.xml"/>
 	</mappers>
 </configuration>

@@ -355,7 +355,7 @@ table.sheet {
 					</div>
 					<button class="btn" type="submit">검색</button>
 					<!-- 초기화는 서블릿 경유로 -->
-					<a class="btn" href="${contextPath}/hq/materials">초기화</a>
+					<a class="btn" href="${contextPath}/hq/material">초기화</a>
 				</form>
 
 				<div class="table-wrap" role="region" aria-label="재료 목록">
@@ -400,7 +400,7 @@ table.sheet {
 											<button type="button" class="btn-sm" data-action="edit">수정</button>
 											<button type="button" class="btn-sm btn-danger"
 												data-action="delete"
-												data-delete-url="${contextPath}/hq/materials/${m.id}/delete">삭제</button>
+												data-delete-url="${contextPath}/hq/material/${m.id}/delete">삭제</button>
 										</div>
 									</td>
 								</tr>
@@ -441,7 +441,7 @@ table.sheet {
 					onclick="closeEditModal()">×</button>
 			</div>
 			<div class="bd">
-				<!-- 수정: action은 JS에서 /hq/materials/{id}/edit 로 세팅 -->
+				<!-- 수정: action은 JS에서 /hq/material/{id}/edit 로 세팅 -->
 				<form id="editForm" class="form" method="post"
 					enctype="multipart/form-data">
 					<input type="hidden" name="id" id="f-id" /> <input type="hidden"
@@ -509,9 +509,9 @@ table.sheet {
 					onclick="closeAppendModal()">×</button>
 			</div>
 			<div class="bd">
-				<!-- 생성: POST /hq/materials -->
+				<!-- 생성: POST /hq/material -->
 				<form id="appendForm" class="form"
-					action="${contextPath}/hq/materials" method="post"
+					action="${contextPath}/hq/material" method="post"
 					enctype="multipart/form-data">
 					<div class="row">
 						<label class="label">재료 사진</label>
@@ -603,7 +603,7 @@ table.sheet {
     function openEdit(tr){
       if(!tr) return;
       const id = tr.dataset.id || '';
-      editForm.action = '${contextPath}/hq/materials/' + id + '/edit'; // POST {id}/edit
+      editForm.action = '${contextPath}/hq/material/' + id + '/edit'; // POST {id}/edit
 
       // 채우기
       $('#f-id').value        = id;

@@ -76,11 +76,12 @@
 										<div class="my-1 border-t border-slate-200"></div>
 										<div class="px-4 py-2 text-sm font-semibold text-slate-500">본사(HQ) 메뉴</div>
 										<a href="${pageContext.request.contextPath}/hq/branch-management" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏪 지점 승인 관리</a>
-										<a href="${pageContext.request.contextPath}/hq/materials" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">재료</a>
+										<a href="${pageContext.request.contextPath}/hq/material" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">재료</a>
 										<a href="${pageContext.request.contextPath}/hq/menus" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">메뉴</a>
 										<a href="${pageContext.request.contextPath}/hq/sales-orders" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">수주</a>
 										<a href="${pageContext.request.contextPath}/hq/notice" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내 공지 관리</a>
 										<a href="${pageContext.request.contextPath}/hq/recipe" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">레시피 관리</a>
+										<a href="${pageContext.request.contextPath}/hq/promotion" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">프로모션</a>
 									</c:if>
 
 									<c:if test="${sessionScope.businessUser.role.toUpperCase() == 'BRANCH'}">
@@ -91,6 +92,7 @@
 										<a href="${pageContext.request.contextPath}/branch/order" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주</a>
 										<a href="${pageContext.request.contextPath}/branch/orders-history" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">발주 기록</a>
 										<a href="${pageContext.request.contextPath}/branch/notice" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">사내 공지</a>
+										<a href="${pageContext.request.contextPath}/branch/promotion" class="block px-4 py-2 text-slate-700 hover:bg-slate-100">프로모션</a>
 									</c:if>
 								</div>
 							</div>
