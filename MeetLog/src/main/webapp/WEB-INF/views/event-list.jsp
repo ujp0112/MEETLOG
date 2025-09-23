@@ -34,7 +34,6 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <c:forEach var="event" items="${ongoingEvents}">
-                            <%-- [수정] 카드 전체를 클릭할 수 있도록 <a> 태그가 div를 감싸도록 변경 --%>
                             <a href="${pageContext.request.contextPath}/event/detail?id=${event.id}" class="block hover:shadow-xl transition-shadow rounded-lg">
                                 <div class="bg-white rounded-lg shadow-md overflow-hidden h-full">
                                     <mytag:image fileName="${event.image}" altText="${event.title}" cssClass="w-full h-48 object-cover" />
@@ -45,11 +44,6 @@
                                             <span>시작: <fmt:formatDate value="${event.startDate}" pattern="yyyy.MM.dd"/></span>
                                             <span>종료: <fmt:formatDate value="${event.endDate}" pattern="yyyy.MM.dd"/></span>
                                         </div>
-                                        <%-- "자세히 보기" 버튼은 이 자리에서 삭제되었습니다. --%>                                        
-                                             <span>종료: <fmt:formatDate value="${event.endDate}" pattern="yyyy.MM.dd"/></span>
-                                        </div>
-                                        <%-- "자세히 보기" 버튼은 이 자리에서 삭제되었습니다. --%>
->>>>>>> origin/my-feature
                                     </div>
                                 </div>
                             </a>
