@@ -78,7 +78,7 @@
 <header class="app-header">
   <div class="container row">
     <a class="brand" href="../hq/branch-management.jsp">
-      <span>Meetlog</span>
+      <span>MeetERP</span>
       <span class="badge">BRANCH</span>
     </a>
 

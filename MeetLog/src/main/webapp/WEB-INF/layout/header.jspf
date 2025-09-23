@@ -83,7 +83,7 @@
 <header class="app-header">
   <div class="container row">
     <a class="brand" href="${ctx }/main">
-      <span>Meetlog</span>
+      <span>MeetERP</span>
       <span class="badge">HQ</span>
     </a>
 
