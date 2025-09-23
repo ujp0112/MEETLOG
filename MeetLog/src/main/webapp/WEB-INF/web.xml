@@ -183,7 +183,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>BusinessRegisterServlet</servlet-name>
-        <url-pattern>/business/register</url-pattern>
+        <url-pattern>/business-register</url-pattern>
     </servlet-mapping>
 
     <servlet>
