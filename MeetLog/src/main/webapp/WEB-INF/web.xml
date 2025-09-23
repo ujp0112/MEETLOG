@@ -90,6 +90,8 @@
 
 
 
+    <!-- RestaurantDetailServlet은 @WebServlet 애노테이션으로 매핑됨 -->
+    <!--
     <servlet>
         <servlet-name>RestaurantDetailServlet</servlet-name>
         <servlet-class>controller.RestaurantDetailServlet</servlet-class>
@@ -98,6 +100,7 @@
         <servlet-name>RestaurantDetailServlet</servlet-name>
         <url-pattern>/restaurant/detail/*</url-pattern>
     </servlet-mapping>
+    -->
 
 
 
