@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -94,7 +95,8 @@
                         <div class="space-y-4">
                             <c:forEach var="notification" items="${notifications}">
                                 <div class="p-6 rounded-2xl card-hover ${notification.read ? 'notification-read' : 'notification-unread'}" 
-                                     id="notification-${notification.id}">
+                                     id="notification-${notification.id}"
+                                     <c:if test="${not empty notification.actionUrl}">data-action-url="${notification.actionUrl}" data-notification-id="${notification.id}" style="cursor: pointer;"</c:if>>
                                     <div class="flex items-start justify-between">
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-3 mb-2">
@@ -103,7 +105,7 @@
                                                     <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
                                                 </c:if>
                                                 <span class="text-slate-500 text-sm">
-                                                    <fmt:formatDate value="${notification.createdAt}" pattern="MM/dd HH:mm"/>
+                                                    ${notification.createdAt.format(DateTimeFormatter.ofPattern('MM/dd HH:mm'))}
                                                 </span>
                                             </div>
                                             <p class="text-slate-700 mb-4">${notification.content}</p>
@@ -115,13 +117,13 @@
                                         </div>
                                         <div class="flex space-x-2">
                                             <c:if test="${!notification.read}">
-                                                <button onclick="markAsRead(${notification.id})" 
-                                                        class="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+                                                <button data-notification-id="${notification.id}" 
+                                                        class="mark-read-btn text-blue-600 hover:text-blue-700 text-sm font-semibold">
                                                     읽음
                                                 </button>
                                             </c:if>
-                                            <button onclick="deleteNotification(${notification.id})" 
-                                                    class="text-red-600 hover:text-red-700 text-sm font-semibold">
+                                            <button data-notification-id="${notification.id}" 
+                                                    class="delete-btn text-red-600 hover:text-red-700 text-sm font-semibold">
                                                 삭제
                                             </button>
                                         </div>
@@ -147,6 +149,16 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
     <script>
+        function goToAction(actionUrl, notificationId) {
+            // 읽지 않은 알림이면 읽음 처리
+            const notification = document.getElementById('notification-' + notificationId);
+            if (notification.classList.contains('notification-unread')) {
+                markAsRead(notificationId);
+            }
+            // 액션 URL로 이동
+            window.location.href = '${pageContext.request.contextPath}' + actionUrl;
+        }
+        
         function markAsRead(notificationId) {
             fetch('${pageContext.request.contextPath}/notifications', {
                 method: 'POST',
@@ -235,6 +247,36 @@
                 card.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                     this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
+                });
+            });
+            
+            // 읽음 처리 버튼 이벤트 리스너
+            document.querySelectorAll('.mark-read-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-notification-id');
+                    markAsRead(notificationId);
+                });
+            });
+            
+            // 삭제 버튼 이벤트 리스너
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-notification-id');
+                    deleteNotification(notificationId);
+                });
+            });
+            
+            // 알림 카드 클릭 이벤트 리스너 (actionUrl이 있는 경우)
+            document.querySelectorAll('[data-action-url]').forEach(card => {
+                card.addEventListener('click', function(event) {
+                    // 버튼 클릭 시에는 카드 클릭 이벤트를 무시
+                    if (event.target.tagName === 'BUTTON') {
+                        return;
+                    }
+                    
+                    const actionUrl = this.getAttribute('data-action-url');
+                    const notificationId = this.getAttribute('data-notification-id');
+                    goToAction(actionUrl, notificationId);
                 });
             });
         });

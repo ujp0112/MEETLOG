@@ -7,7 +7,9 @@
         <id property="id" column="id" />
         <result property="userId" column="user_id" />
         <result property="isRead" column="is_read" />
+        <result property="actionUrl" column="action_url" />
         <result property="createdAt" column="created_at" />
+        <result property="readAt" column="read_at" />
     </resultMap>
 
     <select id="findByUserId" parameterType="int" resultMap="notificationResultMap">
@@ -18,13 +20,13 @@
     
     <update id="markAsRead" parameterType="map">
         UPDATE notifications 
-        SET is_read = true, updated_at = NOW()
+        SET is_read = true, read_at = NOW()
         WHERE id = #{id} AND user_id = #{userId}
     </update>
     
     <update id="markAllAsRead" parameterType="int">
         UPDATE notifications 
-        SET is_read = true, updated_at = NOW()
+        SET is_read = true, read_at = NOW()
         WHERE user_id = #{userId} AND is_read = false
     </update>
     
@@ -34,8 +36,8 @@
     </delete>
     
     <insert id="insert" parameterType="Notification" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO notifications (user_id, title, content, type, is_read, created_at, updated_at)
-        VALUES (#{userId}, #{title}, #{content}, #{type}, #{isRead}, NOW(), NOW())
+        INSERT INTO notifications (user_id, title, content, type, action_url, is_read)
+        VALUES (#{userId}, #{title}, #{content}, #{type}, #{actionUrl}, #{isRead})
     </insert>
     
     <select id="getUnreadCount" parameterType="int" resultType="long">
