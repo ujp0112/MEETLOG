@@ -5,14 +5,10 @@
 
 <mapper namespace="dao.UserDAO">
 
-    <resultMap id="userResultMap" type="User">
+    <resultMap id="userResultMap" type="model.User" autoMapping="true">
         <id property="id" column="id" />
-        <result property="email" column="email"/>
-        <result property="nickname" column="nickname"/>
-        <result property="password" column="password"/>
         <result property="userType" column="user_type"/>
         <result property="profileImage" column="profile_image"/>
-        <result property="level" column="level"/>
         <result property="followerCount" column="follower_count"/>
         <result property="followingCount" column="following_count"/>
         <result property="isActive" column="is_active"/>
@@ -36,16 +32,21 @@
         SELECT * FROM users WHERE is_active = true
     </select>
 
-    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users (email, nickname, password, user_type, profile_image, created_at, updated_at)
-        VALUES (#{email}, #{nickname}, #{password}, #{userType}, #{profileImage}, NOW(), NOW())
+    <insert id="insert" parameterType="model.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users 
+            (email, nickname, password, user_type, name, phone, address, profile_image, created_at, updated_at)
+        VALUES 
+            (#{email}, #{nickname}, #{password}, #{userType}, #{name}, #{phone}, #{address}, #{profileImage}, NOW(), NOW())
     </insert>
 
-    <update id="update" parameterType="User">
+    <update id="update" parameterType="model.User">
         UPDATE users SET 
             nickname = #{nickname}, 
             user_type = #{userType}, 
-            profile_image = #{profileImage}, 
+            profile_image = #{profileImage},
+            name = #{name},
+            phone = #{phone},
+            address = #{address},
             updated_at = NOW() 
         WHERE id = #{id}
     </update>

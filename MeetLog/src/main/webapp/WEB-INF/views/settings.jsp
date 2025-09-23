@@ -17,7 +17,6 @@
 <body class="bg-slate-100">
     <div id="app" class="flex flex-col min-h-screen">
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
-
         <main class="flex-grow">
             <div class="container mx-auto p-4 md:p-8">
                 <div class="max-w-4xl mx-auto">
@@ -25,7 +24,6 @@
                         <h2 class="text-2xl md:text-3xl font-bold mb-2">설정</h2>
                         <p class="text-slate-600">계정 정보를 관리하세요.</p>
                     </div>
-
                     <c:choose>
                         <c:when test="${not empty sessionScope.user}">
                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -33,15 +31,18 @@
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-xl font-bold text-slate-800 mb-4">프로필 정보</h3>
                                         
-                                        <c:if test="${not empty errorMessage}">
+                                        <%-- [MERGE CONFLICT RESOLVED] 오류 및 성공 메시지 블록 모두 반영 --%>
+                                        <c:if test="${not empty sessionScope.errorMessage}">
                                             <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                                                ${errorMessage}
+                                                ${sessionScope.errorMessage}
                                             </div>
+                                            <c:remove var="errorMessage" scope="session"/>
                                         </c:if>
-                                        <c:if test="${not empty successMessage}">
+                                        <c:if test="${not empty sessionScope.successMessage}">
                                             <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                                                ${successMessage}
+                                                ${sessionScope.successMessage}
                                             </div>
+                                            <c:remove var="successMessage" scope="session"/>
                                         </c:if>
 
                                         <form action="${pageContext.request.contextPath}/mypage/settings" method="post" enctype="multipart/form-data" class="space-y-4">
@@ -81,7 +82,6 @@
                                             </button>
                                         </form>
                                     </div>
-
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-xl font-bold text-slate-800 mb-4">비밀번호 변경</h3>
                                         <form action="${pageContext.request.contextPath}/mypage/settings" method="post" class="space-y-4">
@@ -107,7 +107,6 @@
                                         </form>
                                     </div>
                                 </div>
-
                                 <div class="space-y-6">
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-lg font-bold text-slate-800 mb-4">계정 정보</h3>
@@ -161,7 +160,6 @@
         
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
-
     <script>
         $(document).ready(function() {
             $('#imageUpload').on('change', function(event) {
@@ -177,11 +175,9 @@
                 }
             });
         });
-
         function exportData() {
             alert('데이터 내보내기 기능은 준비 중입니다.');
         }
-
         function deleteAccount() {
             if (confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                 if (confirm('모든 데이터가 영구적으로 삭제됩니다. 계속하시겠습니까?')) {
@@ -189,11 +185,9 @@
                 }
             }
         }
-
         document.addEventListener('DOMContentLoaded', function() {
             const newPasswordInput = document.querySelector('input[name="newPassword"]');
             const confirmPasswordInput = document.querySelector('input[name="confirmPassword"]');
-
             if (confirmPasswordInput) {
                  confirmPasswordInput.addEventListener('input', function() {
                      if (newPasswordInput.value !== this.value) {

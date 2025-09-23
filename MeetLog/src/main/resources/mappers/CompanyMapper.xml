@@ -5,8 +5,8 @@
 <mapper namespace="dao.CompanyDAO">
 
     <insert id="insert" parameterType="model.Company" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO companies (name)
-        VALUES (#{name})
+        INSERT INTO companies (name, created_at, updated_at)
+        VALUES (#{name}, NOW(), NOW())
     </insert>
 
     <select id="existsById" parameterType="int" resultType="int">

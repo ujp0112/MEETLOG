@@ -50,7 +50,7 @@
 				<property name="url"
 					value="jdbc:mariadb://localhost:3306/meetlog?characterEncoding=UTF-8&amp;autoCommit=false" />
 				<property name="username" value="root" />
-				<property name="password" value="789456" />
+				<property name="password" value="7564" />
 			</dataSource>
 		</environment>
 	</environments>

@@ -108,7 +108,7 @@
 
             <div class="mt-6 pt-6 border-t border-slate-200">
                 <div class="text-center text-sm text-slate-500">
-                    <p>혹시 기업 회원이신가요? <a href="${pageContext.request.contextPath}/register?type=business" class="font-bold text-sky-600 hover:text-sky-500">사업자 회원가입</a></p>
+                    <p>혹시 기업 회원이신가요? <a href="${pageContext.request.contextPath}/business-register" class="font-bold text-sky-600 hover:text-sky-500">사업자 회원가입</a></p>
                 </div>
             </div>
 

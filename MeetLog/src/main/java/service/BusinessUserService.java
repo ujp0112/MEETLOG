@@ -1,153 +1,72 @@
 package service;
 
-import dao.BusinessUserDAO;
-import dao.UserDAO;
-import model.BusinessUser;
-import model.User;
-import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
-import java.util.List;
+import util.MyBatisSqlSessionFactory;
+import dao.UserDAO;
+import dao.BusinessUserDAO;
+import dao.RestaurantDAO;
+import dao.CompanyDAO; // CompanyDAO import
+import model.User;
+import model.BusinessUser;
+import model.Restaurant;
+import model.Company; // Company 모델 import
 
 public class BusinessUserService {
-    private BusinessUserDAO businessUserDAO = new BusinessUserDAO();
-    private UserDAO userDAO = new UserDAO();
+    private final UserDAO userDAO = new UserDAO();
+    private final BusinessUserDAO businessUserDAO = new BusinessUserDAO();
+    private final RestaurantDAO restaurantDAO = new RestaurantDAO();
+    private final CompanyDAO companyDAO = new CompanyDAO(); // CompanyDAO 객체 생성
 
-    /**
-     * 비즈니스 사용자 등록
-     * @param businessUser 비즈니스 사용자 정보
-     * @return 등록 성공 여부
-     */
-    public boolean registerBusinessUser(User user, BusinessUser businessUser) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            try {
-                // 1. 사용자 정보 먼저 등록
-                int userResult = userDAO.insert(user, sqlSession);
-                if (userResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                // 2. 비즈니스 사용자 정보 등록
-                businessUser.setUserId(user.getId());
-                int businessResult = businessUserDAO.insert(businessUser, sqlSession);
-                if (businessResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                sqlSession.commit();
-                return true;
-            } catch (Exception e) {
-                sqlSession.rollback();
-                e.printStackTrace();
-                return false;
-            }
+    // [수정] Company 객체를 파라미터로 받아 4개 테이블을 트랜잭션으로 처리
+    public void registerHqUser(User user, BusinessUser businessUser, Restaurant restaurant, Company company) throws Exception {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. User 저장
+            if (userDAO.insert(user, sqlSession) == 0) throw new Exception("사용자 정보 생성 실패");
+            
+            // 2. Company 저장
+            if (companyDAO.insert(sqlSession, company) == 0) throw new Exception("회사 정보 생성 실패");
+            
+            // 3. BusinessUser에 생성된 ID들 설정 후 저장
+            businessUser.setUserId(user.getId());
+            businessUser.setCompanyId(company.getId()); // 생성된 Company ID 설정
+            if (businessUserDAO.insert(businessUser, sqlSession) == 0) throw new Exception("사업자 정보 생성 실패");
+            
+            // 4. Restaurant 저장
+            restaurant.setOwnerId(user.getId());
+            if (restaurantDAO.insert(sqlSession, restaurant) == 0) throw new Exception("식당 정보 생성 실패");
+            
+            sqlSession.commit();
+        } catch (Exception e) {
+            sqlSession.rollback();
+            // 에러 원인을 포함하여 예외를 다시 던짐
+            throw new Exception("본사 회원 등록 중 오류가 발생했습니다: " + e.getMessage(), e);
+        } finally {
+            sqlSession.close();
         }
     }
 
-    /**
-     * 사용자 ID로 비즈니스 사용자 정보 조회
-     * @param userId 사용자 ID
-     * @return 비즈니스 사용자 정보
-     */
-    public BusinessUser getBusinessUserByUserId(int userId) {
-        return businessUserDAO.findByUserId(userId);
-    }
+    public void registerBranchUser(User user, BusinessUser businessUser, Restaurant restaurant) throws Exception {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            if (userDAO.insert(user, sqlSession) == 0) throw new Exception("사용자 정보 생성 실패");
+            
+            businessUser.setUserId(user.getId());
+            if (businessUserDAO.insert(businessUser, sqlSession) == 0) throw new Exception("사업자 정보 생성 실패");
 
-    /**
-     * 비즈니스 사용자 정보 수정
-     * @param user 수정할 사용자 정보
-     * @param businessUser 수정할 비즈니스 사용자 정보
-     * @return 수정 성공 여부
-     */
-    public boolean updateBusinessUser(User user, BusinessUser businessUser) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            try {
-                // 1. 사용자 정보 수정
-                int userResult = userDAO.update(user, sqlSession);
-                if (userResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                // 2. 비즈니스 사용자 정보 수정
-                int businessResult = businessUserDAO.update(businessUser, sqlSession);
-                if (businessResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                sqlSession.commit();
-                return true;
-            } catch (Exception e) {
-                sqlSession.rollback();
-                e.printStackTrace();
-                return false;
-            }
+            restaurant.setOwnerId(user.getId());
+            if (restaurantDAO.insert(sqlSession, restaurant) == 0) throw new Exception("식당 정보 생성 실패");
+            
+            sqlSession.commit();
+        } catch (Exception e) {
+            sqlSession.rollback();
+            throw new Exception("지점 회원 등록 중 오류가 발생했습니다: " + e.getMessage(), e);
+        } finally {
+            sqlSession.close();
         }
     }
 
-    /**
-     * 비즈니스 사용자 삭제
-     * @param userId 사용자 ID
-     * @return 삭제 성공 여부
-     */
-    public boolean deleteBusinessUser(int userId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            try {
-                // 1. 비즈니스 사용자 정보 삭제
-                int businessResult = businessUserDAO.deleteByUserId(userId, sqlSession);
-                if (businessResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                // 2. 사용자 정보 삭제
-                int userResult = userDAO.delete(userId, sqlSession);
-                if (userResult <= 0) {
-                    sqlSession.rollback();
-                    return false;
-                }
-                
-                sqlSession.commit();
-                return true;
-            } catch (Exception e) {
-                sqlSession.rollback();
-                e.printStackTrace();
-                return false;
-            }
-        }
-    }
-
-    /**
-     * 사업자 등록번호 중복 확인
-     * @param businessNumber 사업자 등록번호
-     * @return 중복 여부
-     */
-    public boolean isBusinessNumberExists(String businessNumber) {
-        return businessUserDAO.findByBusinessNumber(businessNumber) != null;
-    }
-
-    /**
-     * 비즈니스 사용자 목록 조회 (관리자용)
-     * @return 비즈니스 사용자 목록
-     */
-    public List<BusinessUser> getAllBusinessUsers() {
-        return businessUserDAO.findAll();
-    }
-
-    /**
-     * 비즈니스 사용자 인증
-     * @param email 이메일
-     * @param password 비밀번호
-     * @return 인증된 비즈니스 사용자 정보
-     */
-    public BusinessUser authenticateBusinessUser(String email, String password) {
-        User user = userDAO.findByEmail(email);
-        if (user != null && "BUSINESS".equals(user.getUserType())) {
-            // 비즈니스 사용자 정보 조회
-            return getBusinessUserByUserId(user.getId());
-        }
-        return null;
+    public BusinessUser findHqByIdentifier(String identifier) {
+        return businessUserDAO.findHqByIdentifier(identifier);
     }
 }

@@ -59,7 +59,6 @@
 
             <div class="p-8 md:p-12 flex flex-col justify-center">
                 <h2 class="text-3xl font-bold text-slate-800 mb-6">로그인</h2>
-
                 <c:if test="${not empty successMessage}">
                     <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 text-sm rounded-lg">${successMessage}</div>
                 </c:if>
@@ -76,7 +75,6 @@
 
                 <div id="login-personal-content">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-                        
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
@@ -98,11 +96,11 @@
 
                 <div id="login-business-content" class="hidden">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-                        <input type="hidden" name="userType" value="BUSINESS">
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
                         </c:if>
+                        <input type="hidden" name="userType" value="BUSINESS">
                         <div>
                             <label for="business-email" class="block text-sm font-medium text-slate-700">이메일</label>
                             <input type="email" id="business-email" name="email" class="form-input mt-1" required>
@@ -138,9 +136,9 @@
 <a id="signup-link" href="${pageContext.request.contextPath}/register" class="font-bold text-sky-600 hover:text-sky-500">회원가입</a></p>
                 </div>
             </div>
+
         </div>
     </main>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tabs = document.querySelectorAll('#login-tabs button');
@@ -165,7 +163,7 @@
                     } else {
                         personalContent.classList.add('hidden');
                         businessContent.classList.remove('hidden');
-                        signupLink.href = '${pageContext.request.contextPath}/register?type=business';
+                        signupLink.href = '${pageContext.request.contextPath}/business-register';
                     }
                 });
             });

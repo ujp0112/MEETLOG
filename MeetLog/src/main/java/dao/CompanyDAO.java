@@ -7,9 +7,9 @@ import util.MyBatisSqlSessionFactory;
 public class CompanyDAO {
     private static final String NAMESPACE = "dao.CompanyDAO";
 
-    public void insert(SqlSession sqlSession, Company company) {
-        // 이 메소드가 실행되면 company 객체의 id 필드에 DB에 생성된 ID가 채워집니다.
-        sqlSession.insert(NAMESPACE + ".insert", company);
+    public int insert(SqlSession sqlSession, Company company) {
+        // [수정] 반환 타입을 int로 변경하여 Service 계층에서 성공 여부 확인
+        return sqlSession.insert(NAMESPACE + ".insert", company);
     }
 
     public boolean existsById(int companyId) {
