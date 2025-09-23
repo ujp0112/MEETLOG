@@ -1,3 +1,4 @@
+
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -340,7 +341,7 @@ table.sheet {
 	<main>
 		<section class="panel" aria-labelledby="pageTitle">
 			<div class="hd">
-				<h1 id="pageTitle" class="title">레시피 관리</h1>
+				<h1 id="pageTitle" class="title">레시피 관리 - 테스트</h1>
 				<span class="pill">HQ</span>
 				<div style="flex: 1 1 auto"></div>
 			</div>
@@ -444,23 +445,44 @@ const menuIdInput = document.getElementById('menuId');
 
 // 모달 열기
 document.querySelectorAll('button[data-action="edit"]').forEach(button => {
-    button.addEventListener('click', async () => {
-        const menuId = button.dataset.id;
+    button.addEventListener('click', async (event) => {
+        event.preventDefault(); // 기본 버튼 동작 방지
+        
+        // [수정] 버튼 대신 버튼이 속한 행(tr)에서 ID를 가져오는 방식으로 변경
+        const tr = button.closest('tr');
+        const menuId = tr ? tr.dataset.id : null;
+        
+        console.log("1. 클릭된 메뉴의 ID:", menuId); 
+        
+        if (!menuId && menuId !== 0) {
+            alert("오류: 메뉴 ID를 찾을 수 없습니다.");
+            return;
+        }
+        
+        // [수정] URL을 템플릿 리터럴 대신 문자열 덧셈 방식으로 생성
+        const url = contextPath + '/hq/recipe?action=getDetails&id=' + menuId;
+
+        console.log("2. 서버에 요청하는 최종 URL:", url);
+
         try {
-            const response = await fetch(`${contextPath}/hq/recipe/${menuId}`);
-            if (!response.ok) throw new Error('데이터 로딩 실패');
+            const response = await fetch(url);
             
-            const data = await response.json(); // {menu, ingredients}
+            if (!response.ok) {
+                throw new Error(`데이터 로딩 실패: 서버가 ${response.status} 상태로 응답했습니다.`);
+            }
             
-            modalTitle.textContent = `'${data.menu.name}' 레시피 수정`;
+            const data = await response.json();
+            
+            modalTitle.textContent = data.menu.name + "레시피 수정";
             menuIdInput.value = data.menu.id;
             recipeText.value = data.menu.recipe || '';
             
             ingredientList.innerHTML = '';
             if (data.ingredients && data.ingredients.length > 0) {
                 data.ingredients.forEach(ing => {
+                	console.log(ing);
                     const li = document.createElement('li');
-                    li.textContent = `• ${ing.materialName}: ${ing.qty} ${ing.unit}`;
+                    li.textContent = '• ' + ing.materialName + ' : ' + ing.qty +  " " + ing.unit;
                     ingredientList.appendChild(li);
                 });
             } else {
@@ -468,7 +490,9 @@ document.querySelectorAll('button[data-action="edit"]').forEach(button => {
             }
             
             recipeModal.classList.add('show');
+
         } catch (error) {
+            console.error("Fetch Error:", error);
             alert(error.message);
         }
     });
