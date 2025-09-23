@@ -388,6 +388,12 @@
                 font-size: 1.75rem;
             }
         }
+    .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+    .gallery-main img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .gallery-side { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
+    .gallery-side .img-wrap { position: relative; }
+    .gallery-side img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 12px; cursor: pointer;}
     </style>
 </head>
 <body class="bg-slate-100">
@@ -402,15 +408,28 @@
                             <div class="lg:col-span-2 space-y-8">
                                 <!-- 🖼️ 메인 이미지 섹션 -->
                                 <section class="glass-card p-8 rounded-3xl fade-in">
-                                    <div class="relative group overflow-hidden rounded-2xl">
-                                        <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="w-full h-80 object-cover image-hover" />
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                        <div class="absolute bottom-4 left-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                            <h2 class="text-2xl font-bold text-shadow">${restaurant.name}</h2>
-                                            <p class="text-sm text-shadow">${restaurant.category} • ${restaurant.location}</p>
-                                        </div>
-                                    </div>
-                                </section>
+								    <div class="gallery" id="restaurantGallery">
+								        <div class="gallery-main">
+								            <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="" />
+								        </div>
+								        <div class="gallery-side">
+								            <c:choose>
+								                <c:when test="${fn:length(restaurant.additionalImages) >= 2}">
+								                    <div class="img-wrap"><mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="" /></div>
+								                    <div class="img-wrap">
+								                        <mytag:image fileName="${restaurant.additionalImages[1]}" altText="${restaurant.name}" cssClass="" />
+								                        <c:if test="${fn:length(restaurant.additionalImages) > 2}">
+								                            <div class="more-overlay" onclick="showMoreImages()">+${fn:length(restaurant.additionalImages) - 1}</div>
+								                        </c:if>
+								                    </div>
+								                </c:when>
+								                <c:when test="${fn:length(restaurant.additionalImages) == 1}">
+								                    <div class="img-wrap"><mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="" /></div>
+								                </c:when>
+								            </c:choose>
+								        </div>
+								    </div>
+								</section>
 
                                 <!-- 🏪 가게 정보 헤더 섹션 -->
                                 <section class="glass-card p-8 rounded-3xl slide-up">
@@ -965,5 +984,19 @@
             }
         });
     </script>
+    <script>
+    const allImages = [
+        "${restaurant.image}",
+        <c:forEach var="img" items="${restaurant.additionalImages}">'${img}',</c:forEach>
+    ];
+    let currentImageIndex = 0;
+
+    function showMoreImages() {
+        // 간단한 예시: 클릭 시 메인 이미지를 다음 이미지로 변경
+        currentImageIndex = (currentImageIndex + 1) % allImages.length;
+        const mainImageEl = document.querySelector('#restaurantGallery .gallery-main img');
+        mainImageEl.src = '${contextPath}/images/' + allImages[currentImageIndex];
+    }
+	</script>
 </body>
 </html>

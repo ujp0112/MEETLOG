@@ -174,9 +174,10 @@
                         </div>
                     </div>
                     <div>
-                        <label for="restaurantImage" class="block text-sm font-medium text-gray-700">대표 이미지 파일</label>
-                        <input type="file" id="restaurantImage" name="restaurantImage" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <img id="imagePreview" src="" alt="이미지 미리보기" class="mt-4 rounded-lg shadow-sm" style="display:none; max-width:300px; max-height:200px;">
+                        <label for="restaurantImage" class="block text-sm font-medium text-gray-700">대표 이미지 파일 (여러 개 선택 가능)</label>
+                        <input type="file" id="restaurantImage" name="restaurantImage" accept="image/*" multiple class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <!-- <img id="imagePreview" src="" alt="이미지 미리보기" class="mt-4 rounded-lg shadow-sm" style="display:none; max-width:300px; max-height:200px;"> -->
+                        <div id="imagePreviewContainer" class="mt-4 flex flex-wrap gap-4"></div>
                     </div>
                 </div>
 
@@ -332,12 +333,20 @@
             });
 
             $('#restaurantImage').on('change', function(event) {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        $('#imagePreview').attr('src', e.target.result).show();
-                    };
-                    reader.readAsDataURL(this.files[0]);
+                const previewContainer = $('#imagePreviewContainer');
+                previewContainer.empty(); // 기존 미리보기 삭제
+                if (this.files) {
+                    Array.from(this.files).forEach(file => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            // 미리보기 이미지 생성
+                            const img = $('<img>').attr('src', e.target.result)
+                                                  .addClass('rounded-lg shadow-sm')
+                                                  .css({width: '120px', height: '120px', objectFit: 'cover'});
+                            previewContainer.append(img);
+                        };
+                        reader.readAsDataURL(file);
+                    });
                 }
             });
 

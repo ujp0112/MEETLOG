@@ -69,11 +69,6 @@ public class RestaurantService {
         }
     }
 
-    // --- Write Operations with Service-Layer Transaction Management ---
-    public boolean createRestaurant(Restaurant restaurant) {
-        return createRestaurant(restaurant, null);
-    }
-
     public boolean createRestaurant(Restaurant restaurant, List<OperatingHour> hoursList) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             try {

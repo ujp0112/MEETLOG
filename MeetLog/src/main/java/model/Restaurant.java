@@ -28,6 +28,7 @@ public class Restaurant {
 	private boolean isActive;
 	private int ownerId; // 사업자 ID 추가
 
+
 	// 상세 정보 필드들 추가
 	private int priceRange; // 1: ~1만원, 2: 1-2만원, 3: 2-4만원, 4: 4만원+
 	private String atmosphere; // "데이트", "비즈니스", "가족", "혼밥", "친구모임"
@@ -40,6 +41,7 @@ public class Restaurant {
 	private List<Coupon> coupons;
 	private List<QnA> qna;
 	private List<Reservation> reservationList;
+	private List<String> additionalImages;
 
 	public Restaurant() {
 		// Default constructor
@@ -301,5 +303,13 @@ public class Restaurant {
 
 	public void setDetailedRatings(DetailedRatings detailedRatings) {
 		this.detailedRatings = detailedRatings;
+	}
+	
+	public List<String> getAdditionalImages() {
+		return additionalImages;
+	}
+	
+	public void setAdditionalImages(List<String> additionalImages) {
+		this.additionalImages = additionalImages;
 	}
 }

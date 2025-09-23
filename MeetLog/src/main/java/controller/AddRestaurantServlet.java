@@ -57,32 +57,36 @@ public class AddRestaurantServlet extends HttpServlet {
         Restaurant restaurant = new Restaurant();
         List<OperatingHour> hoursList = new ArrayList<>();
         Map<String, String> formFields = new HashMap<>();
-        String imagePath = null;
+        
+        String mainImageFileName = null;
+        List<String> additionalImageFileNames = new ArrayList<>();
 
         if (ServletFileUpload.isMultipartContent(request)) {
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            factory.setRepository(new File(System.getProperty("java.io.tmpdir")));
             ServletFileUpload upload = new ServletFileUpload(factory);
             upload.setHeaderEncoding("UTF-8");
 
             try {
                 List<FileItem> formItems = upload.parseRequest(request);
+                boolean isFirstImage = true;
 
-                if (formItems != null && !formItems.isEmpty()) {
-                    for (FileItem item : formItems) {
-                        if (item.isFormField()) {
-                            formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                for (FileItem item : formItems) {
+                    if (item.isFormField()) {
+                        formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                    } else if ("restaurantImage".equals(item.getFieldName()) && item.getSize() > 0) {
+                        // 여러 이미지 처리
+                        String originalFileName = new File(item.getName()).getName();
+                        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+                        
+                        String uploadPath = AppConfig.getUploadPath();
+                        File storeFile = new File(uploadPath, uniqueFileName);
+                        item.write(storeFile);
+
+                        if (isFirstImage) {
+                            mainImageFileName = uniqueFileName;
+                            isFirstImage = false;
                         } else {
-                            String fileName = new File(item.getName()).getName();
-                            if (fileName != null && !fileName.isEmpty()) {
-                                String uniqueFileName = UUID.randomUUID().toString() + "_" + fileName;
-                                String uploadPath = AppConfig.getUploadPath();
-                                File uploadDir = new File(uploadPath);
-                                if (!uploadDir.exists()) uploadDir.mkdirs();
-                                File storeFile = new File(uploadPath + File.separator + uniqueFileName);
-                                item.write(storeFile);
-                                imagePath = "images/" + uniqueFileName;
-                            }
+                            additionalImageFileNames.add(uniqueFileName);
                         }
                     }
                 }
@@ -93,9 +97,10 @@ public class AddRestaurantServlet extends HttpServlet {
                 restaurant.setDescription(formFields.get("description"));
                 restaurant.setCategory(formFields.get("category"));
                 restaurant.setOwnerId(owner.getId());
-                if (imagePath != null) {
-                    restaurant.setImageUrl(imagePath);
-                }
+//                if (imagePath != null) {
+//                    restaurant.setImageUrl(imagePath);
+//                }
+                restaurant.setImage(mainImageFileName);
 
                 // Operating hours processing
                 for (int i = 0; i < 7; i++) { // 7 days a week
@@ -125,7 +130,7 @@ public class AddRestaurantServlet extends HttpServlet {
         }
 
         try {
-            boolean success = restaurantService.createRestaurant(restaurant, hoursList);
+            boolean success = restaurantService.createRestaurant(restaurant, additionalImageFileNames, hoursList);
             
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/business/restaurants?status=add_success");
