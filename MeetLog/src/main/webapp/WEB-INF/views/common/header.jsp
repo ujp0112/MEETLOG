@@ -171,6 +171,9 @@
 											href="${pageContext.request.contextPath}/business/reservation-management"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📅
 											예약 관리</a>
+										<a href="${pageContext.request.contextPath}/reservation-settings"
+											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">⚙️
+											예약 설정</a>
 										<a href="${pageContext.request.contextPath}/branch/inventory"
 											class="brand block px-4 py-2 text-slate-700 hover:bg-slate-100">🏪
 											MeetERP<span class="badge">BRANCH</span>
@@ -241,7 +244,13 @@
 										<span
 											class="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">${unreadCount}</span>
 									</c:if>
-								</a> <a href="${pageContext.request.contextPath}/mypage"
+								</a> <a href="${pageContext.request.contextPath}/feed"
+									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📱
+									팔로우 피드								</a> <a href="${pageContext.request.contextPath}/my-courses"
+									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🗺️
+									내 코스</a> <a href="${pageContext.request.contextPath}/wishlist"
+									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">💖
+									내가 찜한 목록</a> <a href="${pageContext.request.contextPath}/mypage"
 									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">👤
 									내 프로필</a> <a
 									href="${pageContext.request.contextPath}/mypage/reviews"

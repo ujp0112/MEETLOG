@@ -66,4 +66,19 @@
         ORDER BY created_at DESC
         LIMIT #{limit}
     </select>
+    
+    <!-- 특정 사용자의 최근 칼럼 조회 (피드용) -->
+    <select id="getRecentColumnsByUser" parameterType="map" resultMap="columnResultMap">
+        SELECT * FROM columns 
+        WHERE user_id = #{userId} AND is_active = true 
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+    
+    <!-- 특정 사용자의 칼럼 개수 조회 (피드용) -->
+    <select id="getColumnCountByUser" parameterType="int" resultType="int">
+        SELECT COUNT(*) 
+        FROM columns 
+        WHERE user_id = #{userId} AND is_active = true
+    </select>
 </mapper>

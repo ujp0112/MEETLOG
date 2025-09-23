@@ -3,14 +3,19 @@ package model;
 import java.time.LocalDateTime;
 
 /**
- * 팔로우 관계를 나타내는 모델 클래스
+ * 팔로우 관계 모델 클래스
  */
 public class Follow {
-    private int id;
-    private int followerId; // 팔로우하는 사용자
-    private int followingId; // 팔로우받는 사용자
+    private int followId;
+    private int followerId; // 팔로우하는 사용자 ID
+    private int followingId; // 팔로우당하는 사용자 ID
     private LocalDateTime createdAt;
-    private boolean isActive;
+    
+    // 조인된 사용자 정보
+    private String followerNickname;
+    private String followerProfileImage;
+    private String followingNickname;
+    private String followingProfileImage;
 
     public Follow() {
     }
@@ -18,16 +23,15 @@ public class Follow {
     public Follow(int followerId, int followingId) {
         this.followerId = followerId;
         this.followingId = followingId;
-        this.isActive = true;
     }
 
     // Getters and Setters
-    public int getId() {
-        return id;
+    public int getFollowId() {
+        return followId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setFollowId(int followId) {
+        this.followId = followId;
     }
 
     public int getFollowerId() {
@@ -54,11 +58,35 @@ public class Follow {
         this.createdAt = createdAt;
     }
 
-    public boolean isActive() {
-        return isActive;
+    public String getFollowerNickname() {
+        return followerNickname;
     }
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setFollowerNickname(String followerNickname) {
+        this.followerNickname = followerNickname;
+    }
+
+    public String getFollowerProfileImage() {
+        return followerProfileImage;
+    }
+
+    public void setFollowerProfileImage(String followerProfileImage) {
+        this.followerProfileImage = followerProfileImage;
+    }
+
+    public String getFollowingNickname() {
+        return followingNickname;
+    }
+
+    public void setFollowingNickname(String followingNickname) {
+        this.followingNickname = followingNickname;
+    }
+
+    public String getFollowingProfileImage() {
+        return followingProfileImage;
+    }
+
+    public void setFollowingProfileImage(String followingProfileImage) {
+        this.followingProfileImage = followingProfileImage;
     }
 }

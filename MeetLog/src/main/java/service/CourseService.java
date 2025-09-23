@@ -10,6 +10,7 @@ import dao.CourseDAO;
 import model.CommunityCourse;
 import model.OfficialCourse;
 import model.CourseStep;
+import model.Course;
 import model.Paging; 
 
 public class CourseService {
@@ -85,5 +86,44 @@ public class CourseService {
 
     public List<OfficialCourse> getOfficialCourses() {
         return courseDAO.selectOfficialCourses();
+    }
+    
+    /**
+     * 사용자가 작성한 코스 목록 조회 (페이징)
+     */
+    public List<Course> getCoursesByAuthor(int authorId, int limit, int offset) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("authorId", authorId);
+        params.put("limit", limit);
+        params.put("offset", offset);
+        return courseDAO.getCoursesByAuthor(params);
+    }
+    
+    /**
+     * 사용자가 작성한 코스 개수 조회
+     */
+    public int getCourseCountByAuthor(int authorId) {
+        return courseDAO.getCourseCountByAuthor(authorId);
+    }
+    
+    /**
+     * 코스 ID로 코스 조회
+     */
+    public Course getCourseById(int courseId) {
+        return courseDAO.getCourseById(courseId);
+    }
+    
+    /**
+     * 코스 공개/비공개 토글
+     */
+    public boolean toggleCoursePublic(int courseId) {
+        return courseDAO.toggleCoursePublic(courseId) > 0;
+    }
+    
+    /**
+     * 코스 삭제
+     */
+    public boolean deleteCourse(int courseId) {
+        return courseDAO.deleteCourse(courseId) > 0;
     }
 }

@@ -83,6 +83,8 @@
         <mapper resource="mappers/BusinessQnAMapper.xml" />
         <mapper resource="mappers/NotificationMapper.xml" />
         <mapper resource="mappers/CompanyMapper.xml" />
+        <mapper resource="mappers/FollowMapper.xml" />
+        <mapper resource="mappers/UserStorageMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

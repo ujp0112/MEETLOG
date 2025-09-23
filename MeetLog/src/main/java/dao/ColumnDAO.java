@@ -74,4 +74,26 @@ public class ColumnDAO {
 			return sqlSession.update(NAMESPACE + ".likeColumn", columnId);
 		}
 	}
+	
+	/**
+	 * 특정 사용자의 최근 칼럼 조회 (피드용)
+	 */
+	public List<Column> getRecentColumnsByUser(int userId, int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> params = new java.util.HashMap<>();
+			params.put("userId", userId);
+			params.put("limit", limit);
+			return sqlSession.selectList(NAMESPACE + ".getRecentColumnsByUser", params);
+		}
+	}
+	
+	/**
+	 * 특정 사용자의 칼럼 개수 조회 (피드용)
+	 */
+	public int getColumnCountByUser(int userId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			Integer count = sqlSession.selectOne(NAMESPACE + ".getColumnCountByUser", userId);
+			return count != null ? count : 0;
+		}
+	}
 }

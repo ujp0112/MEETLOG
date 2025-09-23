@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.UserStorageDAO">
+    <resultMap id="userStorageResultMap" type="UserStorage" autoMapping="true">
+        <id property="storageId" column="storage_id" />
+        <result property="userId" column="user_id" />
+        <result property="colorClass" column="color_class" />
+        <result property="itemCount" column="item_count" />
+    </resultMap>
+
+    <resultMap id="userStorageItemResultMap" type="UserStorageItem" autoMapping="true">
+        <id property="itemId" column="item_id" />
+        <result property="storageId" column="storage_id" />
+        <result property="itemType" column="item_type" />
+        <result property="contentId" column="content_id" />
+        <result property="addedAt" column="added_at" />
+        <result property="contentTitle" column="content_title" />
+        <result property="contentImage" column="content_image" />
+        <result property="contentDescription" column="content_description" />
+        <result property="contentAuthor" column="content_author" />
+        <result property="contentRating" column="content_rating" />
+    </resultMap>
+
+    <select id="findByUserId" parameterType="int" resultMap="userStorageResultMap">
+        SELECT 
+            us.*,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.user_id = #{userId}
+        ORDER BY us.storage_id ASC
+    </select>
+    
+    <select id="findById" parameterType="int" resultMap="userStorageResultMap">
+        SELECT 
+            us.*,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.storage_id = #{storageId}
+    </select>
+    
+    <select id="findDefaultStorage" parameterType="int" resultMap="userStorageResultMap">
+        SELECT 
+            us.*,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.user_id = #{userId}
+        ORDER BY us.storage_id ASC
+        LIMIT 1
+    </select>
+    
+    <insert id="insert" parameterType="UserStorage" useGeneratedKeys="true" keyProperty="storageId">
+        INSERT INTO user_storages (user_id, name, color_class)
+        VALUES (#{userId}, #{name}, #{colorClass})
+    </insert>
+    
+    <update id="update" parameterType="UserStorage">
+        UPDATE user_storages
+        SET name = #{name}, color_class = #{colorClass}
+        WHERE storage_id = #{storageId}
+    </update>
+    
+    <delete id="delete" parameterType="int">
+        DELETE FROM user_storages WHERE storage_id = #{storageId}
+    </delete>
+    
+    <insert id="addItem" parameterType="UserStorageItem">
+        INSERT INTO user_storage_items (storage_id, item_type, content_id)
+        VALUES (#{storageId}, #{itemType}, #{contentId})
+        ON DUPLICATE KEY UPDATE added_at = NOW()
+    </insert>
+    
+    <delete id="removeItem" parameterType="map">
+        DELETE FROM user_storage_items 
+        WHERE storage_id = #{storageId} 
+        AND item_type = #{itemType} 
+        AND content_id = #{contentId}
+    </delete>
+    
+    <select id="findItemsByStorageId" parameterType="int" resultMap="userStorageItemResultMap">
+        SELECT 
+            usi.*,
+            CASE 
+                WHEN usi.item_type = 'RESTAURANT' THEN r.name
+                WHEN usi.item_type = 'COURSE' THEN c.title
+                WHEN usi.item_type = 'COLUMN' THEN col.title
+            END as content_title,
+            CASE 
+                WHEN usi.item_type = 'RESTAURANT' THEN r.image
+                WHEN usi.item_type = 'COURSE' THEN c.preview_image
+                WHEN usi.item_type = 'COLUMN' THEN col.image
+            END as content_image,
+            CASE 
+                WHEN usi.item_type = 'RESTAURANT' THEN r.description
+                WHEN usi.item_type = 'COURSE' THEN c.description
+                WHEN usi.item_type = 'COLUMN' THEN col.content
+            END as content_description,
+            CASE 
+                WHEN usi.item_type = 'RESTAURANT' THEN ''
+                WHEN usi.item_type = 'COURSE' THEN u1.nickname
+                WHEN usi.item_type = 'COLUMN' THEN col.author
+            END as content_author,
+            CASE 
+                WHEN usi.item_type = 'RESTAURANT' THEN r.rating
+                ELSE NULL
+            END as content_rating
+        FROM user_storage_items usi
+        LEFT JOIN restaurants r ON usi.item_type = 'RESTAURANT' AND usi.content_id = r.id
+        LEFT JOIN courses c ON usi.item_type = 'COURSE' AND usi.content_id = c.course_id
+        LEFT JOIN users u1 ON c.author_id = u1.id
+        LEFT JOIN columns col ON usi.item_type = 'COLUMN' AND usi.content_id = col.id
+        WHERE usi.storage_id = #{storageId}
+        ORDER BY usi.added_at DESC
+    </select>
+    
+    <select id="countItem" parameterType="map" resultType="int">
+        SELECT COUNT(*) 
+        FROM user_storage_items 
+        WHERE storage_id = #{storageId} 
+        AND item_type = #{itemType} 
+        AND content_id = #{contentId}
+    </select>
+</mapper>

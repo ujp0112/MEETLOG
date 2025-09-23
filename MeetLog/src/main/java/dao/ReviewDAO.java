@@ -76,4 +76,26 @@ public class ReviewDAO {
     public int likeReview(SqlSession session, int id) {
         return session.update(NAMESPACE + ".likeReview", id);
     }
+    
+    /**
+     * 특정 사용자의 최근 리뷰 조회 (피드용)
+     */
+    public List<Review> getRecentReviewsByUser(int userId, int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            return sqlSession.selectList(NAMESPACE + ".getRecentReviewsByUser", params);
+        }
+    }
+    
+    /**
+     * 특정 사용자의 리뷰 개수 조회
+     */
+    public int getReviewCountByUser(int userId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Integer count = sqlSession.selectOne(NAMESPACE + ".getReviewCountByUser", userId);
+            return count != null ? count : 0;
+        }
+    }
 }

@@ -5,7 +5,7 @@
 
     <!-- Course 결과 매핑 -->
     <resultMap id="CourseResultMap" type="model.Course">
-        <id property="id" column="course_id"/>
+        <id property="id" column="id"/>
         <result property="courseId" column="course_id"/>
         <result property="title" column="title"/>
         <result property="description" column="description"/>
@@ -24,7 +24,8 @@
     <!-- 사용자가 작성한 코스 목록 조회 -->
     <select id="getCoursesByAuthor" parameterType="map" resultMap="CourseResultMap">
         SELECT 
-            c.course_id,
+            c.id,
+            c.id as course_id,
             c.title,
             c.description,
             c.duration,
@@ -33,15 +34,16 @@
             c.author_id,
             c.preview_image,
             c.created_at,
-            CASE WHEN c.status = 'ACTIVE' THEN 1 ELSE 0 END as is_public,
-            COUNT(DISTINCT cs.course_step_id) as restaurant_count,
-            0 as like_count,
+            c.is_public,
+            COUNT(DISTINCT cs.id) as restaurant_count,
+            COUNT(DISTINCT cl.id) as like_count,
             '🎓' as icon
         FROM courses c
-        LEFT JOIN course_reviews cr ON c.course_id = cr.course_id
-        LEFT JOIN course_steps cs ON c.course_id = cs.course_id
+        LEFT JOIN course_reviews cr ON c.id = cr.course_id
+        LEFT JOIN course_steps cs ON c.id = cs.course_id
+        LEFT JOIN course_likes cl ON c.id = cl.course_id
         WHERE c.author_id = #{authorId}
-        GROUP BY c.course_id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.status
+        GROUP BY c.id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.is_public
         ORDER BY c.created_at DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
@@ -56,7 +58,8 @@
     <!-- 코스 ID로 코스 조회 -->
     <select id="getCourseById" parameterType="int" resultMap="CourseResultMap">
         SELECT 
-            c.course_id,
+            c.id,
+            c.id as course_id,
             c.title,
             c.description,
             c.duration,
@@ -65,37 +68,36 @@
             c.author_id,
             c.preview_image,
             c.created_at,
-            CASE WHEN c.status = 'ACTIVE' THEN 1 ELSE 0 END as is_public,
-            COUNT(DISTINCT cs.course_step_id) as restaurant_count,
-            0 as like_count,
+            c.is_public,
+            COUNT(DISTINCT cs.id) as restaurant_count,
+            COUNT(DISTINCT cl.id) as like_count,
             '🎓' as icon
         FROM courses c
-        LEFT JOIN course_reviews cr ON c.course_id = cr.course_id
-        LEFT JOIN course_steps cs ON c.course_id = cs.course_id
-        WHERE c.course_id = #{courseId}
-        GROUP BY c.course_id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.status
+        LEFT JOIN course_reviews cr ON c.id = cr.course_id
+        LEFT JOIN course_steps cs ON c.id = cs.course_id
+        LEFT JOIN course_likes cl ON c.id = cl.course_id
+        WHERE c.id = #{courseId}
+        GROUP BY c.id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.is_public
     </select>
 
     <!-- 코스 공개/비공개 토글 -->
     <update id="toggleCoursePublic" parameterType="int">
         UPDATE courses 
-        SET status = CASE 
-            WHEN status = 'ACTIVE' THEN 'PENDING'
-            ELSE 'ACTIVE'
-        END
-        WHERE course_id = #{courseId}
+        SET is_public = NOT is_public 
+        WHERE id = #{courseId}
     </update>
 
     <!-- 코스 삭제 -->
     <delete id="deleteCourse" parameterType="int">
         DELETE FROM courses 
-        WHERE course_id = #{courseId}
+        WHERE id = #{courseId}
     </delete>
 
     <!-- 특정 사용자의 최근 코스 조회 (피드용) -->
     <select id="getRecentCoursesByUser" parameterType="map" resultMap="CourseResultMap">
         SELECT 
-            c.course_id,
+            c.id,
+            c.id as course_id,
             c.title,
             c.description,
             c.duration,
@@ -104,15 +106,16 @@
             c.author_id,
             c.preview_image,
             c.created_at,
-            CASE WHEN c.status = 'ACTIVE' THEN 1 ELSE 0 END as is_public,
-            COUNT(DISTINCT cs.course_step_id) as restaurant_count,
-            0 as like_count,
+            c.is_public,
+            COUNT(DISTINCT cs.id) as restaurant_count,
+            COUNT(DISTINCT cl.id) as like_count,
             '🎓' as icon
         FROM courses c
-        LEFT JOIN course_reviews cr ON c.course_id = cr.course_id
-        LEFT JOIN course_steps cs ON c.course_id = cs.course_id
-        WHERE c.author_id = #{userId} AND c.status = 'ACTIVE'
-        GROUP BY c.course_id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.status
+        LEFT JOIN course_reviews cr ON c.id = cr.course_id
+        LEFT JOIN course_steps cs ON c.id = cs.course_id
+        LEFT JOIN course_likes cl ON c.id = cl.course_id
+        WHERE c.author_id = #{userId} AND c.is_public = true
+        GROUP BY c.id, c.title, c.description, c.duration, c.price, c.author_id, c.preview_image, c.created_at, c.is_public
         ORDER BY c.created_at DESC
         LIMIT #{limit}
     </select>
@@ -121,7 +124,7 @@
     <select id="getCourseCountByUser" parameterType="int" resultType="int">
         SELECT COUNT(*) 
         FROM courses 
-        WHERE author_id = #{userId} AND status = 'ACTIVE'
+        WHERE author_id = #{userId} AND is_public = true
     </select>
 
 </mapper>
