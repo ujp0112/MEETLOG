@@ -76,14 +76,11 @@
 
                 <div id="login-personal-content">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-<<<<<<< HEAD
-=======
+                        
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
-                        </c:if>
-                        
->>>>>>> origin/my-feature
+                        </c:if>>>>>>>> origin/my-feature
                         <input type="hidden" name="userType" value="PERSONAL">
                         <div>
                             <label for="personal-email" class="block text-sm font-medium text-slate-700">이메일</label>
@@ -101,20 +98,16 @@
 
                 <div id="login-business-content" class="hidden">
                     <form action="${pageContext.request.contextPath}/login" method="post" class="space-y-5">
-<<<<<<< HEAD
 =======
                         <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
                         <c:if test="${not empty redirectUrlValue}">
                             <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
                         </c:if>
-                        
->>>>>>> origin/my-feature
-                        <input type="hidden" name="userType" value="BUSINESS">
-                        <div>
-                            <label for="business-email" class="block text-sm font-medium text-slate-700">사업자 이메일</label>
-                            <input type="email" id="business-email" name="email" class="form-input mt-1" required>
                         </div>
-                        <div>
+                        <c:set var="redirectUrlValue" value="${not empty sessionScope.redirectUrl ? sessionScope.redirectUrl : requestScope.redirectUrl}" />
+                        <c:if test="${not empty redirectUrlValue}">
+                            <input type="hidden" name="redirectUrl" value="<c:out value='${redirectUrlValue}' />" />
+                        </c:if>                        <div>
                             <label for="business-password" class="block text-sm font-medium text-slate-700">비밀번호</label>
                             <input type="password" id="business-password" name="password" class="form-input mt-1" required>
                         </div>

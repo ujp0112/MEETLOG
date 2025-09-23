@@ -48,11 +48,7 @@
                                             <input type="hidden" name="author" value="${sessionScope.user.nickname}">
 
                                             <div>
-<<<<<<< HEAD
                                                 <label class="block text-sm font-medium text-slate-700 mb-3">전체 평점</label>
-=======
-                                                <label class="block text-sm font-medium text-slate-700 mb-3">평점</label>
->>>>>>> origin/my-feature
                                                 <div class="flex items-center space-x-2" id="rating-container">
                                                     <input type="hidden" name="rating" id="rating" value="5" required>
                                                     <button type="button" class="text-3xl text-yellow-400 hover:text-yellow-500 rating-star" data-rating="1">★</button>
@@ -64,7 +60,6 @@
                                                 </div>
                                             </div>
 
-<<<<<<< HEAD
                                             <!-- 상세 평점 섹션 -->
                                             <div class="bg-slate-50 p-4 rounded-lg">
                                                 <h4 class="text-lg font-semibold text-slate-800 mb-4">상세 평점</h4>
@@ -169,8 +164,6 @@
                                                 </div>
                                             </div>
 
-=======
->>>>>>> origin/my-feature
                                             <div>
                                                 <label for="content" class="block text-sm font-medium text-slate-700 mb-2">리뷰 내용</label>
                                                 <textarea id="content" name="content" rows="6" required
@@ -238,17 +231,12 @@
     </div>
 
     <script>
-<<<<<<< HEAD
         document.addEventListener('DOMContentLoaded', function() {
             // 오늘 날짜를 기본값으로 설정
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('visitDate').value = today;
 
             // 전체 평점 처리
-=======
-        // This client-side script remains the same as it contains no JSP code.
-        document.addEventListener('DOMContentLoaded', function() {
->>>>>>> origin/my-feature
             const ratingStars = document.querySelectorAll('.rating-star');
             const ratingInput = document.getElementById('rating');
             const ratingText = document.getElementById('rating-text');
@@ -274,7 +262,6 @@
                 });
             });
 
-<<<<<<< HEAD
             // 상세 평점 처리 함수
             function setupDetailedRating(starClass, inputId, textId) {
                 const stars = document.querySelectorAll('.' + starClass);
@@ -309,8 +296,6 @@
             setupDetailedRating('atmosphere-star', 'atmosphereRating', 'atmosphere-rating-text');
             setupDetailedRating('price-star', 'priceRating', 'price-rating-text');
 
-=======
->>>>>>> origin/my-feature
             // Form validation on submit
             document.querySelector('form').addEventListener('submit', function(e) {
                 const content = document.getElementById('content').value.trim();
@@ -319,7 +304,6 @@
                     alert('리뷰 내용을 10자 이상 작성해주세요.');
                     return false;
                 }
-<<<<<<< HEAD
 
                 // 상세 평점 검증
                 const tasteRating = document.getElementById('tasteRating').value;
@@ -332,8 +316,6 @@
                     alert('모든 상세 평점을 선택해주세요.');
                     return false;
                 }
-=======
->>>>>>> origin/my-feature
             });
         });
     </script>

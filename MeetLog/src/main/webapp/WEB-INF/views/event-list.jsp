@@ -34,33 +34,18 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <c:forEach var="event" items="${ongoingEvents}">
-<<<<<<< HEAD
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
-                                <a href="${pageContext.request.contextPath}/event/detail?id=${event.id}">
-                                    
-                                    <img src="${event.image}" alt="${event.title}" class="w-full h-48 object-cover">
-
-                                </a>
-                                <div class="p-6">
-                                    <h4 class="text-xl font-bold mb-2 truncate">${event.title}</h4>
-                                    <p class="text-slate-600 mb-4 h-20 overflow-hidden text-ellipsis">${event.summary}</p>
-                                    <div class="flex justify-between items-center text-sm text-slate-500">
-                                        <span>시작: <fmt:formatDate value="${event.startDate}" pattern="yyyy.MM.dd"/></span>
-                                        <span>종료: <fmt:formatDate value="${event.endDate}" pattern="yyyy.MM.dd"/></span>
-=======
-         
-                                                 <%-- [수정] 카드 전체를 클릭할 수 있도록 <a> 태그가 div를 감싸도록 변경 --%>
+                            <%-- [수정] 카드 전체를 클릭할 수 있도록 <a> 태그가 div를 감싸도록 변경 --%>
                             <a href="${pageContext.request.contextPath}/event/detail?id=${event.id}" class="block hover:shadow-xl transition-shadow rounded-lg">
                                 <div class="bg-white rounded-lg shadow-md overflow-hidden h-full">
                                     <mytag:image fileName="${event.image}" altText="${event.title}" cssClass="w-full h-48 object-cover" />
                                     <div class="p-6">
-                     
-                                         <h4 class="text-xl font-bold mb-2 truncate">${event.title}</h4>
+                                        <h4 class="text-xl font-bold mb-2 truncate">${event.title}</h4>
                                         <p class="text-slate-600 mb-4 h-20 overflow-hidden text-ellipsis">${event.summary}</p>
-                                
-                                         <div class="flex justify-between items-center text-sm text-slate-500">
+                                        <div class="flex justify-between items-center text-sm text-slate-500">
                                             <span>시작: <fmt:formatDate value="${event.startDate}" pattern="yyyy.MM.dd"/></span>
-                                        
+                                            <span>종료: <fmt:formatDate value="${event.endDate}" pattern="yyyy.MM.dd"/></span>
+                                        </div>
+                                        <%-- "자세히 보기" 버튼은 이 자리에서 삭제되었습니다. --%>                                        
                                              <span>종료: <fmt:formatDate value="${event.endDate}" pattern="yyyy.MM.dd"/></span>
                                         </div>
                                         <%-- "자세히 보기" 버튼은 이 자리에서 삭제되었습니다. --%>

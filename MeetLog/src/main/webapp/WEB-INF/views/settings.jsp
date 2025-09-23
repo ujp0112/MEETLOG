@@ -117,11 +117,7 @@
                                                 <span class="text-slate-800">
                                                     <c:choose>
                                                         <c:when test="${not empty sessionScope.user.createdAt}">
-<<<<<<< HEAD
-                                                            ${sessionScope.user.createdAt}
-=======
                                                             ${sessionScope.user.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))}
->>>>>>> origin/my-feature
                                                         </c:when>
                                                         <c:otherwise>정보 없음</c:otherwise>
                                                     </c:choose>
