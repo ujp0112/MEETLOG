@@ -216,6 +216,14 @@
 	</update>
 
 <resultMap id="restaurantDetailResultMap" type="model.Restaurant" extends="restaurantResultMap">
+<id property="id" column="id" />
+		<result property="ownerId" column="owner_id" />
+		<result property="image" column="image" />
+		<result property="jibunAddress" column="jibun_address" />
+		<result property="reviewCount" column="review_count" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
         <collection property="additionalImages" ofType="java.lang.String">
             <result column="additional_image_path"/>
         </collection>

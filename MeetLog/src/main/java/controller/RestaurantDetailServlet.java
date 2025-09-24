@@ -62,13 +62,14 @@ public class RestaurantDetailServlet extends HttpServlet {
             logger.info("레스토랑 상세 정보 조회 시작 - ID: " + restaurantId);
             
             // 레스토랑 기본 정보 조회
-            Restaurant restaurant = restaurantService.getRestaurantDetailById(restaurantId);
+            Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
+            Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
             if (restaurant == null) {
                 logger.warning("레스토랑을 찾을 수 없음 - ID: " + restaurantId);
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "음식점을 찾을 수 없습니다.");
                 return;
             }
-            
+            restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
             logger.info("레스토랑 정보 조회 완료 - 이름: " + restaurant.getName());
             
             // 관련 데이터들을 안전하게 조회

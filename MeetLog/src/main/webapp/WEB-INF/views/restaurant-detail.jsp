@@ -388,17 +388,114 @@
                 font-size: 1.75rem;
             }
         }
-    .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; height: 400px; /* 갤러리 높이 고정 */ }
-    .gallery-main img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .gallery { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; height: 400px;/* 갤러리 높이 고정 */ }
+    .gallery-main img {/*  width: 100%; */ height: 100%; object-fit: contain; border-radius: 12px; }
     .gallery-side { display: grid; grid-template-rows: 1fr 1fr; gap: 8px; }
-    .gallery-side .img-wrap { position: relative; }
-    .gallery-side img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+    .gallery-side .img-wrap { position: relative; max-height:200px;}
+    .gallery-side img {/*  width: 100%;  */height: 100%; object-fit: contain; border-radius: 12px; }
     .more-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; border-radius: 12px; cursor: pointer;}
 	.gallery-image {
         width: 100%;
         height: 100%;
+        object-fit: contain;
+        background-color: transparent;
+        border-radius: 12px;
+    }
+    .gallery-main, .gallery-side .img-wrap {
+        height: 100%;
+        min-height: 0; /* flex/grid 아이템이 수축할 수 있도록 허용 */
+    }
+    /* ▼▼▼ 아래의 새로운 오버레이 스타일을 추가합니다 ▼▼▼ */
+    .panel-overlay {
+        display: none; /* 평소엔 숨김 */
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1.5rem; /* 24px */
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        margin-top: -1.5rem; /* 갤러리와 살짝 겹치게 */
+        padding: 1.5rem;
+        animation: fadeIn 0.4s ease-out;
+    }
+    .panel-overlay.show {
+        display: block; /* show 클래스가 붙으면 보임 */
+    }
+    .overlay-hd {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .overlay-bd {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 반응형 2열 이상 */
+        gap: 1rem;
+        max-height: 600px; /* 최대 높이 지정 후 스크롤 */
+        overflow-y: auto;
+        padding-right: 8px; /* 스크롤바 공간 */
+    }
+    .overlay-bd .gallery-image {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 4 / 3;
         object-fit: cover;
         border-radius: 12px;
+    }
+    .close-x {
+        border: 0;
+        background: transparent;
+        font-size: 24px;
+        cursor: pointer;
+        color: #64748b;
+    }
+     /* ▼▼▼ 이미지 확대 모달 스타일 추가 ▼▼▼ */
+    .zoom-modal-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4); /* 어두운 반투명 배경 */
+        display: none; /* 평소엔 숨김 */
+        align-items: center;
+        justify-content: center;
+        z-index: 2000; /* 모든 오버레이 위에 표시 */
+    }
+    .zoom-modal-mask.show {
+        display: flex; /* show 클래스가 추가되면 표시 */
+    }
+    .zoom-modal-content {
+        position: relative;
+        max-width: 90%;
+        max-height: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .zoomed-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* 이미지 전체가 보이도록 */
+        border-radius: 8px;
+    }
+    .zoom-close-x {
+        position: absolute;
+        top: -40px; /* 모달 상단 바깥쪽 */
+        right: -40px; /* 모달 우측 바깥쪽 */
+        color: #ffffff; /* 흰색 X 버튼 */
+        font-size: 40px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+    }
+    /* 작은 화면에서는 X 버튼 위치 조정 */
+    @media (max-width: 768px) {
+        .zoom-close-x {
+            top: 10px;
+            right: 10px;
+            color: #ffffff;
+            font-size: 30px;
+        }
     }
 	</style>
 </head>
@@ -428,7 +525,7 @@
 								                    </div>
 								                </c:when>
 								                <c:otherwise>
-								                    <div class="img-wrap" style="background:#f1f5f9; border-radius:12px;"></div>
+								                    <div class="img-wrap" style="background:#transparent; border-radius:12px;"></div>
 								                </c:otherwise>
 								            </c:choose>
 								
@@ -444,12 +541,21 @@
 								                    </div>
 								                </c:when>
 								                <c:otherwise>
-								                    <div class="img-wrap" style="background:#f1f5f9; border-radius:12px;"></div>
+								                    <div class="img-wrap" style="background:#transparent; border-radius:12px;"></div>
 								                </c:otherwise>
 								            </c:choose>
 								        </div>
 								    </div>
 								</section>
+								
+								<section id="imageOverlay" class="panel-overlay">
+                                    <div class="overlay-hd">
+                                        <h2 class="title">전체 사진 보기</h2>
+                                        <button id="closeOverlayBtn" class="close-x" type="button">×</button>
+                                    </div>
+                                    <div class="overlay-bd" id="overlayGrid">
+                                        </div>
+                                </section>
 
                                 <!-- 🏪 가게 정보 헤더 섹션 -->
                                 <section class="glass-card p-8 rounded-3xl slide-up">
@@ -883,6 +989,12 @@
             </a>
         </c:if>
     </div>
+    <div id="imageZoomModal" class="zoom-modal-mask">
+        <div class="zoom-modal-content">
+            <button id="closeZoomModalBtn" class="close-x zoom-close-x" type="button">×</button>
+            <img id="zoomedImage" src="" alt="확대 이미지" class="zoomed-image">
+        </div>
+    </div>
 
     <c:if test="${not empty restaurant and restaurant.latitude != 0 and restaurant.longitude != 0}">
     <script>
@@ -1004,47 +1116,89 @@
             }
         });
     </script>
+    
+	
     <script>
-    // 상세 페이지용 이미지 목록 (대표 이미지 + 추가 이미지)
+ // ▼▼▼ 갤러리 및 오버레이 스크립트 ▼▼▼
     const allImageFiles = [
-        "${restaurant.image}", // 대표 이미지
-        // 추가 이미지 목록 (JSTL로 배열 생성)
-        <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>
-    ].filter(Boolean); // null이나 빈 문자열 값은 배열에서 제거
+            "${restaurant.image}",
+            <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>
+        ].filter(Boolean);
 
-    // 화면에 표시될 이미지 엘리먼트들
-    const galleryImages = document.querySelectorAll('#restaurantGallery img');
-    const mainImageEl = galleryImages[0];
-    const sideImageEl1 = galleryImages[1];
-    const sideImageEl2 = galleryImages[2];
+        const overlaySection = document.getElementById('imageOverlay');
+        const overlayGrid = document.getElementById('overlayGrid');
+        const closeOverlayBtn = document.getElementById('closeOverlayBtn');
 
-    let currentIndex = 0; // 현재 메인 이미지의 인덱스
+        // ▼▼▼ 이미지 확대 모달 관련 요소들 ▼▼▼
+        const imageZoomModal = document.getElementById('imageZoomModal');
+        const zoomedImage = document.getElementById('zoomedImage');
+        const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
 
-    function cycleImages() {
-        // 인덱스를 순환시킴 (0 -> 1 -> 2 -> ... -> 마지막 -> 0)
-        currentIndex = (currentIndex + 1) % allImageFiles.length;
-        
-        updateGallery();
-    }
+        // '더보기' 버튼 클릭 시 오버레이 토글
+        function cycleImages() {
+            if (overlaySection.classList.contains('show')) {
+                closeImageOverlay();
+            } else {
+                showImageOverlay();
+            }
+        }
 
-    function updateGallery() {
-        const ctx = '${pageContext.request.contextPath}';
+        // 전체 이미지 오버레이 표시
+        function showImageOverlay() {
+            if (!overlaySection || !overlayGrid) return;
+            overlayGrid.innerHTML = ''; 
 
-        // 1. 메인 이미지 업데이트
-        mainImageEl.src = ctx + '/images/' + encodeURIComponent(allImageFiles[currentIndex]);
+            allImageFiles.forEach(fileName => {
+                const img = document.createElement('img');
+                img.className = 'gallery-image';
+                img.alt = '전체 이미지';
+                img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
+                
+                // [추가] 이미지 클릭 이벤트 리스너
+                img.addEventListener('click', () => {
+                    openZoomModal(img.src);
+                });
 
-        // 2. 첫 번째 사이드 이미지 업데이트 (메인 이미지의 다음 이미지)
-        if (sideImageEl1) {
-            const nextIndex1 = (currentIndex + 1) % allImageFiles.length;
-            sideImageEl1.src = ctx + '/images/' + encodeURIComponent(allImageFiles[nextIndex1]);
+                overlayGrid.appendChild(img);
+            });
+            
+            overlaySection.classList.add('show');
+        }
+
+        // 전체 이미지 오버레이 닫기
+        function closeImageOverlay() {
+            if (overlaySection) overlaySection.classList.remove('show');
+        }
+
+        // [추가] 이미지 확대 모달 열기
+        function openZoomModal(imageSrc) {
+            if (!imageZoomModal || !zoomedImage) return;
+            zoomedImage.src = imageSrc;
+            imageZoomModal.classList.add('show');
+        }
+
+        // [추가] 이미지 확대 모달 닫기
+        function closeZoomModal() {
+            if (imageZoomModal) imageZoomModal.classList.remove('show');
         }
         
-        // 3. 두 번째 사이드 이미지 업데이트 (메인 이미지의 다다음 이미지)
-        if (sideImageEl2) {
-            const nextIndex2 = (currentIndex + 2) % allImageFiles.length;
-            sideImageEl2.src = ctx + '/images/' + encodeURIComponent(allImageFiles[nextIndex2]);
+        // 이벤트 리스너 연결
+        if (closeOverlayBtn) {
+            closeOverlayBtn.addEventListener('click', closeImageOverlay);
         }
-    }
+        // [추가] 이미지 확대 모달 닫기 버튼 및 배경 클릭 리스너
+        if (closeZoomModalBtn) {
+            closeZoomModalBtn.addEventListener('click', closeZoomModal);
+        }
+        if (imageZoomModal) {
+            imageZoomModal.addEventListener('click', (e) => {
+                if (e.target === imageZoomModal) { // 어두운 배경 클릭 시 닫기
+                    closeZoomModal();
+                }
+            });
+        }
 	</script>
+	
+	
 </body>
 </html>
