@@ -116,10 +116,6 @@ public class ColumnServlet extends HttpServlet {
 
             User user = (User) session.getAttribute("user");
             column.setUserId(user.getId());
-            column.setAuthor(user.getNickname());
-            
-            // [수정] 아래 주석을 제거하여 작성자의 프로필 이미지도 함께 저장합니다.
-            column.setAuthorImage(user.getProfileImage());
 
             boolean success = columnService.createColumn(column);
 

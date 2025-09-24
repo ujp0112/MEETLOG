@@ -22,10 +22,10 @@
 
     <div class="flex flex-col min-h-screen">
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
-        
+
         <main class="flex-grow">
             <div class="page-content container mx-auto p-4 md:p-8">
-                
+
                 <div class="relative text-center mb-8 py-4">
                     <h2 class="text-3xl font-bold">🗺️ 모두의 코스 둘러보기</h2>
                     <p class="text-slate-500 mt-2">다른 사람들은 어떤 멋진 하루를 계획했을까요?</p>
@@ -33,7 +33,7 @@
                         ➕ 나만의 코스 만들기
                     </a>
                 </div>
-                
+
                 <div class="mb-8 p-4 bg-white rounded-lg shadow-md">
                     <form action="${pageContext.request.contextPath}/course/search" method="GET">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
@@ -53,7 +53,7 @@
                         </div>
                     </form>
                 </div>
-                
+
                 <div id="community-course-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[500px]">
                     <c:forEach var="course" items="${communityCourses}">
                         <a href="${pageContext.request.contextPath}/course/detail?id=${course.id}" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 block">
@@ -67,8 +67,8 @@
                                 </div>
                                 <div class="flex items-center justify-between mt-4 pt-4 border-t">
                                     <div class="flex items-center">
-                                        <mytag:image fileName="${course.authorImage}" altText="${course.authorName}" cssClass="w-8 h-8 rounded-full mr-2" />
-                                        <span class="text-sm font-semibold text-slate-700">${course.authorName}</span>
+                                        <mytag:image fileName="${course.profileImage}" altText="${course.author}" cssClass="w-8 h-8 rounded-full mr-2" />
+                                        <span class="text-sm font-semibold text-slate-700">${course.author}</span>
                                     </div>
                                     <span class="text-sm text-slate-500 flex items-center gap-1">
                                         <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
@@ -79,7 +79,7 @@
                         </a>
                     </c:forEach>
                 </div>
-                
+
                 <footer class="mt-12 flex justify-center">
                     <jsp:include page="/WEB-INF/views/common/pagination.jsp" />
                 </footer>
@@ -90,7 +90,7 @@
                     <h2 class="text-3xl font-bold">✨ 오늘의 추천코스</h2>
                     <p class="text-slate-500 mt-2">미식과 즐거움이 함께하는 완벽한 하루를 만나보세요.</p>
                 </div>
-                
+
                 <div id="official-course-list" class="space-y-12">
                     <c:forEach var="course" items="${officialCourses}">
                         <a href="${pageContext.request.contextPath}/course/detail?id=${course.id}" class="block rounded-2xl transition-shadow hover:shadow-2xl">
@@ -123,9 +123,9 @@
 
             </div>
         </main>
-        
+
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
-    
+
 </body>
 </html>

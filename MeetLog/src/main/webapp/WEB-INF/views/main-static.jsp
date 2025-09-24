@@ -11,7 +11,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <style>
-        /* 페이지 로드 시 부드러운 애니메이션 효과 */
         .page-content { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -23,7 +22,7 @@
 
         <main id="main-content" class="flex-grow">
             <div class="page-content container mx-auto p-4 md:p-8">
-                
+
                 <section class="mb-12">
                     <h2 class="text-2xl md:text-3xl font-bold mb-6">🏆 실시간 맛집 랭킹 TOP 10</h2>
                     <div class="flex space-x-4 overflow-x-auto pb-4 -mx-4 px-4 horizontal-scroll">
@@ -53,7 +52,7 @@
                 <section class="mb-12">
                     <h2 class="text-2xl md:text-3xl font-bold mb-6">🔍 나에게 꼭 맞는 맛집 찾기</h2>
                     <div class="bg-white p-8 rounded-2xl shadow-lg">
-                        <form "${pageContext.request.contextPath}.do/restaurant/search" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        <form action="${pageContext.request.contextPath}/restaurant/search" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                             <div>
                                 <label class="block text-sm font-semibold mb-2">만나는 장소</label>
                                 <input type="text" name="location" placeholder="예: 강남역" class="w-full p-3 border rounded-lg">
@@ -87,7 +86,7 @@
                                     <option value="30001">3만원 이상</option>
                                 </select>
                             </div>
-                             <div class="lg:col-span-1">
+                            <div class="lg:col-span-1">
                                 <button type="submit" class="w-full bg-sky-500 text-white py-3 px-4 rounded-lg font-bold text-lg hover:bg-sky-600 transition-colors">
                                     맛집 찾기
                                 </button>
@@ -127,7 +126,7 @@
                         <c:forEach var="column" items="${latestColumns}">
                             <a href="${pageContext.request.contextPath}/column/${column.id}" class="bg-white p-6 rounded-2xl shadow-lg block hover:shadow-xl transition">
                                 <div class="flex items-center mb-4">
-                                    <img src="${not empty column.authorImage ? column.authorImage : 'https://placehold.co/50x50/45b7d1/ffffff?text=ME'}" alt="${column.author}" class="w-10 h-10 rounded-full mr-3">
+                                    <img src="${not empty column.profileImage ? column.profileImage : 'https://placehold.co/50x50/45b7d1/ffffff?text=ME'}" alt="${column.author}" class="w-10 h-10 rounded-full mr-3">
                                     <div>
                                         <h4 class="font-semibold">${column.author}</h4>
                                         <p class="text-sm text-slate-500"><fmt:formatDate value="${column.createdAt}" pattern="yyyy.MM.dd"/></p>
@@ -141,7 +140,7 @@
                 </section>
             </div>
         </main>
-        
+
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
 

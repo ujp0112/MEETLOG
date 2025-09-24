@@ -7,13 +7,14 @@
         <id property="id" column="id" />
         <result property="reviewId" column="review_id" />
         <result property="userId" column="user_id" />
+        <result property="profileImage" column="profile_image" />
         <result property="isOwnerReply" column="is_owner_reply" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
     </resultMap>
 
     <select id="findByReviewId" parameterType="int" resultMap="reviewCommentResultMap">
-        SELECT rc.*, u.nickname as author_name
+        SELECT rc.*, u.nickname AS author, u.profile_image
         FROM review_comments rc
         JOIN users u ON rc.user_id = u.id
         WHERE rc.review_id = #{reviewId}
@@ -21,7 +22,7 @@
     </select>
     
     <select id="findById" parameterType="int" resultMap="reviewCommentResultMap">
-        SELECT rc.*, u.nickname as author_name
+        SELECT rc.*, u.nickname AS author, u.profile_image
         FROM review_comments rc
         JOIN users u ON rc.user_id = u.id
         WHERE rc.id = #{commentId}

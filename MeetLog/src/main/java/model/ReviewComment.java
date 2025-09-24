@@ -11,7 +11,7 @@ public class ReviewComment {
     private int reviewId;
     private int userId;
     private String author;
-    private String authorImage;
+    private String profileImage;
     private String content;
     private int parentId; // 대댓글의 경우 부모 댓글 ID
     private int likeCount;
@@ -63,14 +63,6 @@ public class ReviewComment {
 
     public void setAuthor(String author) {
         this.author = author;
-    }
-
-    public String getAuthorImage() {
-        return authorImage;
-    }
-
-    public void setAuthorImage(String authorImage) {
-        this.authorImage = authorImage;
     }
 
     public String getContent() {
@@ -128,4 +120,12 @@ public class ReviewComment {
     public void setIsOwnerReply(boolean isOwnerReply) {
         this.isOwnerReply = isOwnerReply;
     }
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
 }

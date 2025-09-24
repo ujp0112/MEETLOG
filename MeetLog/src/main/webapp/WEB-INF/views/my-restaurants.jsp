@@ -1,8 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -65,19 +65,13 @@
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center space-x-2">
                                         <div class="flex items-center">
-                                            <c:forEach begin="1" end="5">
+                                            <c:forEach begin="1" end="5" varStatus="loop">
                                                 <c:choose>
-                                                    <c:when test="${restaurant.rating >= 4.5}">
+                                                    <c:when test="${restaurant.rating >= loop.index}">
                                                         <span class="text-yellow-400 text-lg">★</span>
                                                     </c:when>
-                                                    <c:when test="${restaurant.rating >= 3.5}">
-                                                        <span class="text-yellow-400 text-lg">★</span>
-                                                    </c:when>
-                                                    <c:when test="${restaurant.rating >= 2.5}">
-                                                        <span class="text-yellow-400 text-lg">★</span>
-                                                    </c:when>
-                                                    <c:when test="${restaurant.rating >= 1.5}">
-                                                        <span class="text-yellow-400 text-lg">★</span>
+                                                    <c:when test="${restaurant.rating > (loop.index - 1) && restaurant.rating < loop.index}">
+                                                        <span class="text-yellow-400 text-lg">⯨</span>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <span class="text-slate-300 text-lg">☆</span>
@@ -85,7 +79,7 @@
                                                 </c:choose>
                                             </c:forEach>
                                         </div>
-                                        <span class="text-slate-600 font-semibold">${restaurant.rating}</span>
+                                        <span class="text-slate-600 font-semibold"><fmt:formatNumber value="${restaurant.rating}" pattern="#,##0.0"/></span>
                                         <span class="text-slate-500 text-sm">(${restaurant.reviewCount})</span>
                                     </div>
                                 </div>
@@ -130,38 +124,29 @@
     
     <script>
         function deleteRestaurant(restaurantId) {
-            if (confirm('정말로 이 음식점을 삭제하시겠습니까?')) {
-                fetch('${pageContext.request.contextPath}/business/restaurants/delete/' + restaurantId, {
-                    method: 'DELETE'
+            if (confirm('정말로 이 음식점을 삭제하시겠습니까? 관련 메뉴, 리뷰 등 모든 데이터가 비활성화됩니다.')) {
+                fetch('${pageContext.request.contextPath}/business/restaurants/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: restaurantId })
                 })
-                .then(response => {
-                    if (response.ok) {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('음식점이 삭제되었습니다.');
                         location.reload();
                     } else {
-                        alert('삭제 중 오류가 발생했습니다.');
+                        alert('삭제 중 오류가 발생했습니다: ' + data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('삭제 중 오류가 발생했습니다.');
+                    alert('네트워크 오류로 삭제에 실패했습니다.');
                 });
             }
         }
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            // 카드 호버 효과
-            document.querySelectorAll('.card-hover').forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-4px)';
-                    this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-                });
-            });
-        });
     </script>
 </body>
 </html>

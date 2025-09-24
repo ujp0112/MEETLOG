@@ -13,7 +13,7 @@ public class ReviewInfo {
     private LocalDateTime createdAt;
     private String userName;
     private String author;
-    private String authorImage;
+    private String profileImage;
     private String restaurantName;
 
     // 기본 생성자
@@ -100,14 +100,6 @@ public class ReviewInfo {
         this.author = author;
     }
 
-    public String getAuthorImage() {
-        return authorImage;
-    }
-
-    public void setAuthorImage(String authorImage) {
-        this.authorImage = authorImage;
-    }
-
     public String getRestaurantName() {
         return restaurantName;
     }
@@ -115,4 +107,12 @@ public class ReviewInfo {
     public void setRestaurantName(String restaurantName) {
         this.restaurantName = restaurantName;
     }
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
 }

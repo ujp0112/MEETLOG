@@ -337,10 +337,17 @@ CREATE TABLE restaurant_images (
   CONSTRAINT fk_res_images_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
-UPDATE columns c
-JOIN users u ON c.user_id = u.id
-SET c.author_image = u.profile_image
-WHERE c.author_image IS NULL OR c.author_image = '';
+-- reviews 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE reviews DROP COLUMN author_image;
+
+-- columns 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE `columns` DROP COLUMN author_image;
+
+-- review_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE review_comments DROP COLUMN author_image;
+
+-- column_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE column_comments DROP COLUMN author_image;
 
 -- ===================================================================
 -- 3. 인덱스 생성 (Create Indexes)

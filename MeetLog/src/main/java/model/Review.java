@@ -10,7 +10,7 @@ public class Review {
 	private int userId;
 	private String author;
 	private String restaurantName;
-	private String authorImage;
+	private String profileImage;
 	private int rating;
 	private String content;
 	private List<String> images;
@@ -83,14 +83,6 @@ public class Review {
 
 	public void setRestaurantName(String restaurantName) {
 		this.restaurantName = restaurantName;
-	}
-
-	public String getAuthorImage() {
-		return authorImage;
-	}
-
-	public void setAuthorImage(String authorImage) {
-		this.authorImage = authorImage;
 	}
 
 	public int getRating() {
@@ -220,5 +212,13 @@ public class Review {
 	
 	public void setComments(List<ReviewComment> comments) {
 		this.comments = comments;
+	}
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
 	}
 }

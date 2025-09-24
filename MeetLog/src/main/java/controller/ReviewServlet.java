@@ -120,8 +120,6 @@ public class ReviewServlet extends HttpServlet {
             Review review = new Review();
             review.setRestaurantId(restaurantId);
             review.setUserId(user.getId());
-            review.setAuthor(user.getNickname());
-            review.setAuthorImage(user.getProfileImage());
             review.setRating(rating);
             review.setContent(content);
             review.setKeywords(keywordsList); // 키워드 리스트 설정

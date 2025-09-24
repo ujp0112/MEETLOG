@@ -4,91 +4,102 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.ReviewDAO">
 
-	<resultMap id="reviewResultMap" type="model.Review" autoMapping="true">
-		<id property="id" column="id" />
-		<result property="restaurantId" column="restaurant_id" />
-		<result property="userId" column="user_id" />
-		<result property="authorImage" column="author_image" />
-		<result property="images" column="images" typeHandler="typehandler.JsonArrayTypeHandler" />
-		<result property="keywords" column="keywords" typeHandler="typehandler.JsonArrayTypeHandler" />
-		<result property="isActive" column="is_active" />
-		<result property="createdAt" column="created_at" />
-		<result property="updatedAt" column="updated_at" />
-	</resultMap>
+    <resultMap id="reviewResultMap" type="model.Review" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id" />
+        <result property="userId" column="user_id" />
+        <result property="profileImage" column="profile_image" />
+        <result property="images" column="images" typeHandler="typehandler.JsonArrayTypeHandler" />
+        <result property="keywords" column="keywords" typeHandler="typehandler.JsonArrayTypeHandler" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="selectReviewWithUser">
+        SELECT
+            r.*,
+            u.nickname AS author,
+            u.profile_image,
+            res.name AS restaurantName
+        FROM
+            reviews r
+        JOIN
+            users u ON r.user_id = u.id
+        LEFT JOIN
+            restaurants res ON r.restaurant_id = res.id
+    </sql>
 
     <select id="findAll" resultMap="reviewResultMap">
-        SELECT r.*, r.author as user_name, res.name as restaurant_name
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        <include refid="selectReviewWithUser" />
         WHERE r.is_active = true
         ORDER BY r.created_at DESC
     </select>
 
     <select id="findById" parameterType="int" resultMap="reviewResultMap">
-        SELECT r.*, r.author as user_name, res.name as restaurant_name
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        <include refid="selectReviewWithUser" />
         WHERE r.id = #{id} AND r.is_active = true
     </select>
 
     <select id="findByRestaurantId" parameterType="int" resultMap="reviewResultMap">
-        SELECT * FROM reviews WHERE restaurant_id = #{restaurantId}
-        AND is_active = true ORDER BY created_at DESC
+        <include refid="selectReviewWithUser" />
+        WHERE r.restaurant_id = #{restaurantId}
+        AND r.is_active = true ORDER BY r.created_at DESC
     </select>
 
     <select id="findByUserId" parameterType="int" resultMap="reviewResultMap">
-        SELECT * FROM reviews WHERE user_id = #{userId} AND
-        is_active = true ORDER
-        BY created_at DESC
+        <include refid="selectReviewWithUser" />
+        WHERE r.user_id = #{userId} AND
+        r.is_active = true ORDER
+        BY r.created_at DESC
     </select>
 
     <select id="findRecentByUserId" parameterType="map" resultMap="reviewResultMap">
-        SELECT * FROM reviews 
-        WHERE user_id = #{userId} AND is_active = true 
-        ORDER BY created_at DESC
+        <include refid="selectReviewWithUser" />
+        WHERE r.user_id = #{userId} AND r.is_active = true
+        ORDER BY r.created_at DESC
         LIMIT #{limit}
     </select>
 
     <select id="findRecentReviewsByOwnerId" parameterType="map" resultMap="reviewResultMap">
-        SELECT r.*, res.name as restaurant_name 
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        <include refid="selectReviewWithUser" />
         WHERE res.owner_id = #{ownerId} AND r.is_active = true
         ORDER BY r.created_at DESC
         LIMIT #{limit}
     </select>
 
     <select id="getRecentReviewsWithInfo" parameterType="int" resultType="model.ReviewInfo">
-		SELECT
-		r.id,
-		r.content,
-		r.rating,
-		r.author,
-		r.created_at AS createdAt,
-		r.author_image AS authorImage,
-		res.id AS restaurantId,
-		res.name AS restaurantName
-		FROM
-		reviews r
-		JOIN
-		restaurants res ON r.restaurant_id = res.id
-		WHERE
-		r.is_active = true
-		ORDER BY
-		r.created_at DESC
-		LIMIT #{limit}
-	</select>
+        SELECT
+            r.id,
+            r.content,
+            r.rating,
+            u.nickname AS author,
+            r.created_at AS createdAt,
+            u.profile_image AS profileImage,
+            res.id AS restaurantId,
+            res.name AS restaurantName
+        FROM
+            reviews r
+        JOIN
+            restaurants res ON r.restaurant_id = res.id
+        JOIN
+            users u ON r.user_id = u.id
+        WHERE
+            r.is_active = true
+        ORDER BY
+            r.created_at DESC
+        LIMIT #{limit}
+    </select>
 
-	<select id="findRecentReviews" parameterType="int" resultMap="reviewResultMap">
-		SELECT * FROM reviews WHERE is_active = true ORDER BY
-		created_at DESC LIMIT
-		#{limit}
-	</select>
+    <select id="findRecentReviews" parameterType="int" resultMap="reviewResultMap">
+        <include refid="selectReviewWithUser" />
+        WHERE r.is_active = true ORDER BY
+        r.created_at DESC LIMIT
+        #{limit}
+    </select>
 
     <select id="searchReviews" parameterType="map" resultMap="reviewResultMap">
-        SELECT r.*, r.author as user_name, res.name as restaurant_name
-        FROM reviews r
-        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        <include refid="selectReviewWithUser" />
         WHERE r.is_active = true
         <if test="restaurantId != null">
             AND r.restaurant_id = #{restaurantId}
@@ -108,34 +119,30 @@
         ORDER BY r.created_at DESC
     </select>
 
-	<insert id="insert" parameterType="model.Review" useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO reviews
-		(restaurant_id, user_id, author, author_image, rating,
-		content, images,
-		keywords, created_at, updated_at)
-		VALUES (#{restaurantId}, #{userId},
-		#{author}, #{authorImage}, #{rating},
-		#{content},
-		#{images, typeHandler=typehandler.JsonArrayTypeHandler},
-		#{keywords, typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
-	</insert>
+    <insert id="insert" parameterType="model.Review" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reviews
+        (restaurant_id, user_id, rating, content, images, keywords, created_at, updated_at)
+        VALUES (#{restaurantId}, #{userId}, #{rating}, #{content},
+        #{images, typeHandler=typehandler.JsonArrayTypeHandler},
+        #{keywords, typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
+    </insert>
 
-	<update id="update" parameterType="model.Review">
-		UPDATE reviews SET
-		rating = #{rating},
-		content = #{content},
-		images = #{images, typeHandler=typehandler.JsonArrayTypeHandler},
+    <update id="update" parameterType="model.Review">
+        UPDATE reviews SET
+        rating = #{rating},
+        content = #{content},
+        images = #{images, typeHandler=typehandler.JsonArrayTypeHandler},
         keywords = #{keywords, typeHandler=typehandler.JsonArrayTypeHandler},
-		updated_at = NOW()
-		WHERE id = #{id}
-	</update>
+        updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 
-	<update id="delete" parameterType="int">
-		UPDATE reviews SET is_active = false, updated_at = NOW() WHERE id = #{id}
-	</update>
+    <update id="delete" parameterType="int">
+        UPDATE reviews SET is_active = false, updated_at = NOW() WHERE id = #{id}
+    </update>
 
-	<update id="likeReview" parameterType="int">
-		UPDATE reviews SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
-	</update>
+    <update id="likeReview" parameterType="int">
+        UPDATE reviews SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
+    </update>
 
 </mapper>

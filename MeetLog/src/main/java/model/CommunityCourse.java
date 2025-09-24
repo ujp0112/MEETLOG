@@ -6,8 +6,8 @@ public class CommunityCourse {
 	private int id;
 	private String title;
 	private String previewImage;
-	private String authorName;
-	private String authorImage;
+	private String author;
+	private String profileImage;
 	private int likes;
 	private List<String> tags;
 	private int userId;
@@ -26,6 +26,22 @@ public class CommunityCourse {
 		return title;
 	}
 
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
@@ -36,22 +52,6 @@ public class CommunityCourse {
 
 	public void setPreviewImage(String previewImage) {
 		this.previewImage = previewImage;
-	}
-
-	public String getAuthorName() {
-		return authorName;
-	}
-
-	public void setAuthorName(String authorName) {
-		this.authorName = authorName;
-	}
-
-	public String getAuthorImage() {
-		return authorImage;
-	}
-
-	public void setAuthorImage(String authorImage) {
-		this.authorImage = authorImage;
 	}
 
 	public int getLikes() {

@@ -10,88 +10,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>지점 · 판매 메뉴 설정</title>
 <style>
-:root{--bg:#f6faf8;--surface:#ffffff;--border:#e5e7eb;--muted:#6b7280;--title:#0f172a;--primary:#2f855a;--primary-600:#27764f;--ring:#93c5aa}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--title);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-.panel{max-width:1100px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 20px rgba(16,24,40,.05);margin:20px auto;}
-.panel .hd{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--border)}
-.panel .bd{padding:16px 18px}
-.title{margin:0;font-size:20px;font-weight:800}
-.pill{padding:6px 10px;border-radius:999px;background:#eef7f0;border:1px solid #ddeee1;color:#246b45;font-weight:700}
-.field{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 10px}
-.field>input{border:0;outline:0;min-width:220px}
-.btn{appearance:none;border:1px solid var(--border);background:#fff;padding:10px 14px;border-radius:999px;font-weight:700;cursor:pointer;text-decoration:none;color:#111827}
-.btn:hover{background:#f8fafc}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+/* 이 페이지 전용 스타일 */
+.field { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:4px 10px; }
+.field > span { font-size: 13px; color: var(--text-muted); }
+.field > input { border:0; outline:0; min-width:220px; background: transparent; padding: 6px 4px; }
+
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 @media (max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.grid{grid-template-columns:1fr}}
-.card{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;cursor:pointer}
+.card{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface);cursor:pointer; transition: .2s;}
+.card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(15,23,42,.08); }
 .card .thumb{width:100%;aspect-ratio:16/10;object-fit:cover;background:#f3f4f6}
-.card .body{padding:12px 14px;display:grid;gap:8px}
-.card .name{font-weight:800}
-.card .meta{display:flex;justify-content:space-between;color:#374151}
-.switch{display:inline-flex;align-items:center;gap:10px}
+.card .body{padding:14px 16px;display:grid;gap:8px}
+.card .name{font-weight:800; font-size: 16px;}
+.card .meta{display:flex;justify-content:space-between;align-items: center; color:#374151}
+
+.switch{display:inline-flex;align-items:center;gap:10px; cursor: pointer;}
 .switch input{position:absolute;opacity:0;width:0;height:0}
 .switch .track{width:44px;height:24px;border-radius:999px;background:#e5e7eb;position:relative;transition:.2s}
 .switch .dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:.2s}
-.switch input:checked + .track{background:var(--primary)}
+.switch input:checked + .track{background:var(--brand-700)}
 .switch input:checked + .track .dot{transform:translateX(20px)}
-.badge{padding:2px 8px;border-radius:999px;font-weight:700;font-size:12px;border:1px solid var(--border)}
-.badge.on{color:#065f46;background:#ecfdf5;border-color:#a7f3d0}
-.badge.off{color:#991b1b;background:#fef2f2;border-color:#fecaca}
-.empty{color:var(--muted);text-align:center;padding:24px}
 
-/* Popover (가운데 뜨는 경량 모달) */
+.badge.on{color:var(--status-green-text);background:var(--status-green-bg);border-color:var(--status-green-border)}
+.badge.off{color:var(--status-red-text);background:var(--status-red-bg);border-color:var(--status-red-border)}
+.empty{color:var(--text-muted);text-align:center;padding:48px}
+
+/* Popover */
 .popover-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200}
 .popover-mask.show{display:flex}
-.popover{width:100%;max-width:560px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.popover .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border)}
-.popover .bd{padding:12px 14px}
-.close-x{border:0;background:transparent;font-size:22px;cursor:pointer}
-.table-wrap{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fff}
-table.sheet{width:100%;border-collapse:separate;border-spacing:0}
-.sheet thead th{background:#fff;border-bottom:1px solid var(--border);font-weight:800;text-align:left;padding:10px}
-.sheet tbody td{padding:10px;border-bottom:1px solid #f1f5f9}
-.cell-num{text-align:right}
-.total{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.popover{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.popover .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.popover .hd > strong { font-size: 16px; font-weight: 700; }
+.popover .bd{padding:16px}
+.close-x{border:0;background:transparent;font-size:24px;cursor:pointer; color: var(--text-muted);}
+.total{display:flex;justify-content:flex-end;gap:8px;margin-top:12px; font-size: 15px;}
+
 .recipe-cell {
-  margin-top: 8px;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background-color: #f9fafb; /* 살짝 다른 배경색 */
-  white-space: pre-wrap;     /* 줄바꿈 유지를 위해 기존 스타일 포함 */
-  line-height: 1.6;
-  max-height: 300px;
-  overflow-y: auto;
-  min-height: 150px;
-  color: #374151; /* 기본 텍스트보다 살짝 연한 색 */
+  margin-top: 8px; padding: 12px 14px; border: 1px solid var(--border);
+  border-radius: 8px; background-color: #f9fafb; white-space: pre-wrap;
+  line-height: 1.6; max-height: 300px; overflow-y: auto;
+  min-height: 150px; color: #374151;
 }
 </style>
 </head>
 <body>
 <%@ include file="/WEB-INF/layout/branchheader.jspf" %>
+<div class="container">
+    <section class="panel" aria-labelledby="pageTitle">
+      <div class="hd">
+        <h1 id="pageTitle" class="title">판매 메뉴 설정</h1>
+        <div class="spacer"></div>
+        <form id="searchForm" class="field" onsubmit="event.preventDefault(); reload();">
+          <span>검색</span>
+          <input id="q" placeholder="메뉴명"/>
+          <button class="btn sm" type="submit">적용</button>
+          <button class="btn sm" type="button" onclick="document.getElementById('q').value=''; reload();">초기화</button>
+        </form>
+      </div>
 
-<section class="panel" aria-labelledby="pageTitle">
-  <div class="hd">
-    <h1 id="pageTitle" class="title">판매 메뉴 설정</h1>
-    <span class="pill">BRANCH</span>
-    <div style="flex:1 1 auto"></div>
-    <form id="searchForm" class="field" onsubmit="event.preventDefault(); reload();">
-      <span style="color:var(--muted)">검색</span>
-      <input id="q" placeholder="메뉴명"/>
-      <button class="btn" type="submit">적용</button>
-      <button class="btn" type="button" onclick="document.getElementById('q').value=''; reload();">초기화</button>
-    </form>
-  </div>
-
-  <div class="bd">
-    <div id="grid" class="grid" aria-live="polite"></div>
-    <div id="empty" class="empty" style="display:none">메뉴가 없습니다.</div>
-  </div>
-</section>
-
-<!-- Popover -->
+      <div class="bd">
+        <div id="grid" class="grid" aria-live="polite"></div>
+        <div id="empty" class="empty" style="display:none">메뉴가 없습니다.</div>
+      </div>
+    </section>
+</div>
 <div id="popMask" class="popover-mask" aria-hidden="true">
   <div class="popover" role="dialog" aria-modal="true" aria-labelledby="popTitle">
     <div class="hd">
@@ -104,9 +87,9 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0}
           <thead>
             <tr>
               <th>재료명</th>
-              <th style="width:120px">수량</th>
-              <th style="width:120px">단가</th>
-              <th style="width:120px">단위</th>
+              <th class="cell-num" style="width:120px">수량</th>
+              <th class="cell-num" style="width:120px">단가</th>
+              <th style="width:100px">단위</th>
             </tr>
           </thead>
           <tbody id="popRows"></tbody>
@@ -114,7 +97,8 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0}
       </div>
       <div class="total"><span class="hint">원가 합계:</span> <strong><span id="popSum">0</span>원</strong></div>
       <h4 style="margin-top: 16px;">레시피</h4>
-      <div id="popRecipe" class="recipe-cell"></div> </div>
+      <div id="popRecipe" class="recipe-cell"></div>
+    </div>
   </div>
 </div>
 
@@ -130,12 +114,12 @@ function escapeHtml(s){
 	    .replace(/</g,'&lt;')
 	    .replace(/>/g,'&gt;')
 	    .replace(/"/g,'&quot;')
-	    .replace(/'/g,'&#39;');
+	    .replace(/'/g,'&#039;');
 	}
 
 function cardTpl(m){
 	  console.log(m);
-	  var img = m.imgPath ? (CTX + '/images/' + encodeURIComponent(m.imgPath)) : (CTX + '/img/placeholder-menu.png');
+	  var img = m.imgPath ? (CTX + '/images/' + encodeURIComponent(m.imgPath)) : 'https://placehold.co/600x400/e0e7ff/4338ca?text=No+Image';
 	  var checked = (m.enabled === 'Y');
 	  return ''
 	    + '<article class="card" data-id="' + m.id + '" data-name="' + escapeHtml(m.name||'') + '">'
@@ -159,12 +143,11 @@ async function fetchList(q){
   const url = CTX + '/branch/menus/list' + (q? ('?q=' + encodeURIComponent(q)) : '');
   const res = await fetch(url);
   if(!res.ok) throw new Error('목록 로딩 실패');
-  return await res.json(); // [{id,name,price,imgPath,enabled}, ...]
+  return await res.json();
 }
 
 async function saveToggle(menuId, enabled){
   const body = new URLSearchParams();
-  console.log(CTX);
   body.set('enabled', enabled ? 'Y' : 'N');
   const res = await fetch(CTX + '/branch/menus/' + encodeURIComponent(String(menuId)) + '/toggle', {
     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body
@@ -187,7 +170,6 @@ async function reload(){
   }
 }
 
-// 카드 클릭 → 팝오버
 document.addEventListener('click', async (e)=>{
   const card = e.target.closest('.card');
   if(card){
@@ -198,22 +180,18 @@ document.addEventListener('click', async (e)=>{
     await fillPopover(id);
   }
 });
-
-// 스위치 변경 → 즉시 저장 (버블링 막혀있음)
 document.addEventListener('change', async (e)=>{
   const card = e.target.closest('.card'); if(!card) return;
   if(e.target.matches('.switch input[type="checkbox"]')){
     const id = card.dataset.id;
     const checked = e.target.checked;
     const badge = card.querySelector('.badge');
-    // 낙관적 업데이트
     badge.textContent = checked ? '판매중' : '미판매';
     badge.classList.toggle('on', checked);
     badge.classList.toggle('off', !checked);
     try{
       await saveToggle(id, checked);
     }catch(err){
-      // 실패 시 롤백
       e.target.checked = !checked;
       badge.textContent = !checked ? '판매중' : '미판매';
       badge.classList.toggle('on', !checked);
@@ -222,22 +200,18 @@ document.addEventListener('change', async (e)=>{
     }
   }
 });
-
 function openPop(){ $('#popMask').classList.add('show'); $('#popMask').setAttribute('aria-hidden','false'); }
 function closePop(){ $('#popMask').classList.remove('show'); $('#popMask').setAttribute('aria-hidden','true'); $('#popRows').innerHTML=''; $('#popSum').textContent='0'; }
 $('#popMask').addEventListener('click', (e)=>{ if(e.target.id==='popMask') closePop(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && $('#popMask').classList.contains('show')) closePop(); });
 
-// 팝오버 데이터 채우기
 async function fillPopover(menuId){
   try{
     const res = await fetch(CTX + '/branch/menus/' + encodeURIComponent(String(menuId)) + '/ingredients');
     if(!res.ok) throw new Error();
-    
-    // [수정] 이제 응답은 { ingredients: [...], recipe: "..." } 형태의 객체입니다.
     const data = await res.json();
-    const ingredients = data.ingredients; // 재료 목록
-    const recipeText = data.recipe;       // 레시피 텍스트
+    const ingredients = data.ingredients; 
+    const recipeText = data.recipe;
     
     const tbody = document.getElementById('popRows');
     tbody.innerHTML = '';
@@ -257,22 +231,17 @@ async function fillPopover(menuId){
       }
     }else{
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td colspan="4" style="text-align:center;color:#6b7280">등록된 재료가 없습니다.</td>';
+      tr.innerHTML = '<td colspan="4" class="empty-row" style="padding: 24px;">등록된 재료가 없습니다.</td>';
       tbody.appendChild(tr);
     }
     document.getElementById('popSum').textContent = nf.format(Math.round(sum));
-    
-    // [추가] 레시피 텍스트를 popRecipe div에 채워넣습니다.
     document.getElementById('popRecipe').textContent = recipeText || '등록된 레시피가 없습니다.';
-
   }catch(e){
     document.getElementById('popRows').innerHTML =
-      '<tr><td colspan="4" style="text-align:center;color:#b91c1c">불러오기에 실패했습니다.</td></tr>';
+      '<tr><td colspan="4" style="text-align:center;color:#b91c1c; padding: 24px;">불러오기에 실패했습니다.</td></tr>';
   }
 }
 
-
-// 초기 로드
 reload();
 </script>
 </body>
