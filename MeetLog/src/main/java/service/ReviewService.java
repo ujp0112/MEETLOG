@@ -7,6 +7,7 @@ import org.apache.ibatis.session.SqlSession;
 import dao.ReviewDAO;
 import model.Review;
 import model.ReviewInfo;
+import model.ReviewReply;
 import util.MyBatisSqlSessionFactory;
 
 public class ReviewService {
@@ -49,7 +50,12 @@ public class ReviewService {
     }
 
     public List<Review> searchReviews(Map<String, Object> searchParams) {
-        return reviewDAO.findAll(); // 임시로 모든 리뷰 반환
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList("dao.ReviewDAO.searchReviews", searchParams);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return reviewDAO.findAll(); // 검색 실패 시 모든 리뷰 반환
+        }
     }
 
     // --- Write Operations with Service-Layer Transaction Management ---
@@ -115,5 +121,53 @@ public class ReviewService {
             }
         }
         return false;
+    }
+
+    // --- AJAX 기능을 위한 새로운 메서드들 ---
+
+    /**
+     * 리뷰 답글 추가 (AJAX용)
+     */
+    public boolean addReviewReply(ReviewReply reply) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            try {
+                int result = reviewDAO.insertReviewReply(sqlSession, reply);
+                if (result > 0) {
+                    sqlSession.commit();
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sqlSession.rollback();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 최근 N분 이내의 비즈니스 사용자용 새 리뷰 조회
+     */
+    public List<Review> getRecentReviewsForBusiness(int businessUserId, int minutesAgo) {
+        try {
+            java.util.Date cutoffTime = new java.util.Date(System.currentTimeMillis() - (minutesAgo * 60 * 1000L));
+            return reviewDAO.findRecentReviewsForBusiness(businessUserId, cutoffTime);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    /**
+     * 답글이 필요한 리뷰 수 조회 (답글이 없는 리뷰)
+     */
+    public int getPendingReplyCount(int businessUserId) {
+        try {
+            return reviewDAO.getPendingReplyCount(businessUserId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

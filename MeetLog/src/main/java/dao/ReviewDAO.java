@@ -98,4 +98,44 @@ public class ReviewDAO {
             return count != null ? count : 0;
         }
     }
+
+    /**
+     * 특정 시간 이후의 비즈니스용 리뷰 조회
+     */
+    public List<Review> findRecentReviewsForBusiness(int businessUserId, java.util.Date cutoffTime) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("businessUserId", businessUserId);
+            params.put("cutoffTime", cutoffTime);
+            return sqlSession.selectList(NAMESPACE + ".findRecentReviewsForBusiness", params);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    /**
+     * 답글이 없는 리뷰 개수 조회
+     */
+    public int getPendingReplyCount(int businessUserId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Integer count = sqlSession.selectOne(NAMESPACE + ".getPendingReplyCount", businessUserId);
+            return count != null ? count : 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * 리뷰 답글 추가
+     */
+    public int insertReviewReply(SqlSession session, model.ReviewReply reply) {
+        try {
+            return session.insert(NAMESPACE + ".insertReviewReply", reply);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }

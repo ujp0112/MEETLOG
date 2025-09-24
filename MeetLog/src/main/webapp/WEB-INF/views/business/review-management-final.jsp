@@ -50,6 +50,17 @@
                     </button>
                 </div>
             </div>
+
+            <!-- 실시간 알림 바 -->
+            <div id="review-notification-bar" class="hidden mb-6 p-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-2xl shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">🔔</span>
+                        <span id="notification-message" class="font-semibold"></span>
+                    </div>
+                    <button id="close-notification" class="text-white/80 hover:text-white text-xl">&times;</button>
+                </div>
+            </div>
             
             <div class="space-y-6">
                 <c:choose>
@@ -137,16 +148,36 @@
                                     </div>
                                 </c:if>
                                 
-                                <!-- 답글 작성 폼 -->
+                                <!-- 답글 작성 폼 (AJAX 버전) -->
                                 <div class="mt-4">
-                                    <form method="post" action="${pageContext.request.contextPath}/business/review/add-reply" class="flex space-x-2">
-                                        <input type="hidden" name="reviewId" value="${review.id}">
-                                        <input type="text" name="content" placeholder="리뷰에 답글을 작성하세요..." 
-                                               class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <button type="submit" class="btn-secondary text-white px-6 py-2 rounded-lg">
-                                            답글 작성
+                                    <div class="reply-form flex space-x-2" data-review-id="${review.id}">
+                                        <input type="text" name="content" placeholder="리뷰에 답글을 작성하세요..."
+                                               class="reply-input flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <button type="button" class="reply-submit btn-secondary text-white px-6 py-2 rounded-lg">
+                                            <span class="button-text">답글 작성</span>
+                                            <span class="loading-spinner hidden">⏳</span>
                                         </button>
-                                    </form>
+                                    </div>
+                                    <div class="reply-message mt-2 text-sm hidden"></div>
+                                </div>
+
+                                <!-- 기존 답글 목록 -->
+                                <div class="replies-container mt-4" data-review-id="${review.id}">
+                                    <c:if test="${not empty review.replies}">
+                                        <div class="ml-8 space-y-3">
+                                            <c:forEach var="reply" items="${review.replies}">
+                                                <div class="reply-item bg-slate-50 p-4 rounded-lg border-l-4 border-blue-500">
+                                                    <div class="flex justify-between items-start mb-2">
+                                                        <div class="flex items-center space-x-2">
+                                                            <span class="text-blue-600 font-semibold text-sm">사장님</span>
+                                                            <span class="text-slate-500 text-xs">${reply.createdAt}</span>
+                                                        </div>
+                                                    </div>
+                                                    <p class="text-slate-700">${reply.content}</p>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:if>
                                 </div>
                                 
                                 <div class="flex items-center justify-between mt-4">
@@ -180,38 +211,208 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
     <script>
+        const contextPath = '${pageContext.request.contextPath}';
+        let notificationCheckInterval;
+
+        // DOM 로드 후 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeReviewManagement();
+            startNotificationCheck();
+        });
+
+        function initializeReviewManagement() {
+            // 필터링 기능
+            const filterSelect = document.querySelector('select');
+            if (filterSelect) {
+                filterSelect.addEventListener('change', handleRatingFilter);
+            }
+
+            // 답글 작성 폼 이벤트 리스너
+            document.querySelectorAll('.reply-submit').forEach(button => {
+                button.addEventListener('click', handleReplySubmission);
+            });
+
+            // 알림 닫기 기능
+            const closeNotification = document.getElementById('close-notification');
+            if (closeNotification) {
+                closeNotification.addEventListener('click', hideNotification);
+            }
+        }
+
         // 필터링 기능
-        document.querySelector('select').addEventListener('change', function() {
+        function handleRatingFilter() {
             const selectedRating = this.value;
             const reviewCards = document.querySelectorAll('.glass-card');
-            
+
             reviewCards.forEach(card => {
                 if (selectedRating === '전체') {
                     card.style.display = 'block';
                 } else {
-                    const rating = card.querySelector('.rating-stars').children.length;
-                    if (rating.toString() === selectedRating) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
+                    const ratingStars = card.querySelector('.rating-stars');
+                    if (ratingStars) {
+                        const filledStars = ratingStars.querySelectorAll('span[class*="text-yellow-400"]').length;
+                        if (filledStars.toString() === selectedRating.charAt(0)) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
                     }
                 }
             });
-        });
-        
-        // 답글 작성 폼 제출
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const content = this.querySelector('input[name="content"]').value;
-                if (content.trim() === '') {
-                    alert('답글 내용을 입력해주세요.');
-                    return;
+        }
+
+        // 답글 작성 처리 (AJAX)
+        async function handleReplySubmission(event) {
+            const button = event.target;
+            const form = button.closest('.reply-form');
+            const reviewId = form.dataset.reviewId;
+            const input = form.querySelector('.reply-input');
+            const content = input.value.trim();
+            const messageDiv = form.parentElement.querySelector('.reply-message');
+
+            if (!content) {
+                showMessage(messageDiv, '답글 내용을 입력해주세요.', 'error');
+                return;
+            }
+
+            // 로딩 상태 표시
+            showLoading(button, true);
+
+            try {
+                const response = await fetch(contextPath + '/business/review/reply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        reviewId: parseInt(reviewId),
+                        content: content
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // 성공 메시지 표시
+                    showMessage(messageDiv, '답글이 성공적으로 등록되었습니다.', 'success');
+
+                    // 입력 필드 초기화
+                    input.value = '';
+
+                    // 답글 목록에 새 답글 추가
+                    addReplyToDOM(reviewId, result.reply);
+
+                } else {
+                    showMessage(messageDiv, result.message || '답글 등록에 실패했습니다.', 'error');
                 }
-                // 실제 답글 작성 로직은 서버에서 처리
-                alert('답글이 작성되었습니다.');
-                this.querySelector('input[name="content"]').value = '';
-            });
+            } catch (error) {
+                console.error('답글 등록 오류:', error);
+                showMessage(messageDiv, '서버 연결에 실패했습니다.', 'error');
+            } finally {
+                showLoading(button, false);
+            }
+        }
+
+        // DOM에 새 답글 추가
+        function addReplyToDOM(reviewId, reply) {
+            const repliesContainer = document.querySelector(`[data-review-id="${reviewId}"].replies-container`);
+            if (!repliesContainer) return;
+
+            let repliesList = repliesContainer.querySelector('.ml-8');
+            if (!repliesList) {
+                repliesList = document.createElement('div');
+                repliesList.className = 'ml-8 space-y-3';
+                repliesContainer.appendChild(repliesList);
+            }
+
+            const replyElement = document.createElement('div');
+            replyElement.className = 'reply-item bg-slate-50 p-4 rounded-lg border-l-4 border-blue-500 fade-in';
+            replyElement.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-blue-600 font-semibold text-sm">사장님</span>
+                        <span class="text-slate-500 text-xs">방금 전</span>
+                    </div>
+                </div>
+                <p class="text-slate-700">${reply.content}</p>
+            `;
+
+            repliesList.appendChild(replyElement);
+        }
+
+        // 실시간 새 리뷰 알림 체크
+        function startNotificationCheck() {
+            notificationCheckInterval = setInterval(checkNewReviews, 30000); // 30초마다 체크
+        }
+
+        async function checkNewReviews() {
+            try {
+                const response = await fetch(contextPath + '/business/review/notifications');
+                const result = await response.json();
+
+                if (result.success && result.hasNewReviews) {
+                    showNotification(result.message);
+                }
+            } catch (error) {
+                console.error('새 리뷰 알림 체크 오류:', error);
+            }
+        }
+
+        // 알림 표시
+        function showNotification(message) {
+            const notificationBar = document.getElementById('review-notification-bar');
+            const messageSpan = document.getElementById('notification-message');
+
+            if (notificationBar && messageSpan) {
+                messageSpan.textContent = message;
+                notificationBar.classList.remove('hidden');
+
+                // 5초 후 자동 숨김
+                setTimeout(hideNotification, 5000);
+            }
+        }
+
+        // 알림 숨김
+        function hideNotification() {
+            const notificationBar = document.getElementById('review-notification-bar');
+            if (notificationBar) {
+                notificationBar.classList.add('hidden');
+            }
+        }
+
+        // 로딩 상태 표시
+        function showLoading(button, isLoading) {
+            const buttonText = button.querySelector('.button-text');
+            const loadingSpinner = button.querySelector('.loading-spinner');
+
+            if (isLoading) {
+                buttonText.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                button.disabled = true;
+            } else {
+                buttonText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                button.disabled = false;
+            }
+        }
+
+        // 메시지 표시
+        function showMessage(messageDiv, message, type) {
+            messageDiv.textContent = message;
+            messageDiv.className = `mt-2 text-sm ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+            messageDiv.classList.remove('hidden');
+
+            // 3초 후 메시지 숨김
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 3000);
+        }
+
+        // 페이지 언로드 시 정리
+        window.addEventListener('beforeunload', function() {
+            if (notificationCheckInterval) {
+                clearInterval(notificationCheckInterval);
+            }
         });
     </script>
 </body>

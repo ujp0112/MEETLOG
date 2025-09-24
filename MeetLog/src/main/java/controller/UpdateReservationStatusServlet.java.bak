@@ -12,7 +12,7 @@ import service.ReservationService;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 
-@WebServlet("/business/reservation/update-status")
+@WebServlet("/business/reservation/update-status-form")
 public class UpdateReservationStatusServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
