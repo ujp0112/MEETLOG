@@ -143,7 +143,7 @@ public class AddRestaurantServlet extends HttpServlet {
             // --- 서비스 호출 ---
             // 참고: RestaurantService의 addRestaurant 메서드가 추가 이미지 목록을 처리하도록 수정되어야 합니다.
             // boolean success = restaurantService.addRestaurant(restaurant, additionalImageFileNames, hoursList);
-            boolean success = restaurantService.addRestaurant(restaurant, hoursList); // 기존 메서드 시그니처 유지
+            boolean success = restaurantService.addRestaurant(restaurant, additionalImageFileNames, hoursList);
 
             if (success) {
                 response.sendRedirect(request.getContextPath() + "/business/restaurants");

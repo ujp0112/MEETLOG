@@ -135,6 +135,8 @@ public class RestaurantServlet extends HttpServlet {
 	private void fetchDetailDataAndForward(HttpServletRequest request, HttpServletResponse response, int restaurantId)
 			throws ServletException, IOException {
         Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+        Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
+        restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
         if (restaurant == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "맛집 정보를 찾을 수 없습니다.");
             return;
