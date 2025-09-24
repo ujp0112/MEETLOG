@@ -258,6 +258,11 @@
 								<a
 									href="${pageContext.request.contextPath}/column/detail?id=${column.id}"
 									class="bg-white p-6 rounded-2xl shadow-lg block hover:shadow-xl transition-shadow duration-300">
+									<div class="relative mb-4">
+                                    <mytag:image fileName="${column.image}" altText="${column.title}" cssClass="w-full h-48 object-cover rounded-xl" />
+                                    <div class="absolute top-3 right-3">
+                                    </div>
+                                </div>
 									<div class="flex items-center mb-4">
 										<mytag:image fileName="${column.authorImage}"
 											altText="${column.author}"
@@ -270,7 +275,7 @@
 									<h3
 										class="font-bold text-lg mb-2 h-14 overflow-hidden line-clamp-2">${column.title}</h3>
 									<p
-										class="text-slate-600 text-sm h-10 overflow-hidden line-clamp-2">${column.content}</p>
+										class="text-slate-600 text-sm h-10 overflow-hidden line-clamp-2">${column.summary}</p>
 								</a>
 							</c:forEach>
 						</c:when>

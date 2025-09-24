@@ -17,7 +17,8 @@ public class Column {
 	private Timestamp createdAt;
 	private Timestamp updatedAt;
 	private boolean isActive;
-
+	private transient String summary;
+	
 	public Column() {
 	}
 
@@ -29,8 +30,18 @@ public class Column {
 	}
 
 	// --- 모든 Getters and Setters ---
+	
+	
 	public int getId() {
 		return id;
+	}
+
+	public String getSummary() {
+		return summary;
+	}
+
+	public void setSummary(String summary) {
+		this.summary = summary;
 	}
 
 	public void setId(int id) {

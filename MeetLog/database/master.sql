@@ -296,7 +296,7 @@ CREATE TABLE promotion_file (
   file_size BIGINT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_promo_file_promo FOREIGN KEY (promotion_id) REFERENCES promotion(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 -- (이하 모든 테이블 생성 구문은 생략 없이 올바르게 포함됩니다)
 CREATE TABLE `menus` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `price` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `is_popular` tinyint(1) DEFAULT '0', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

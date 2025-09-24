@@ -14,6 +14,14 @@
         body { font-family: 'Noto Sans KR', sans-serif; }
         /* JSTL/EL로 렌더링될 때 줄바꿈 문자를 HTML <br> 태그처럼 보이게 합니다. */
         .prose-content { white-space: pre-wrap; }
+        .prose-content img {
+		    max-width: 100%;
+		    height: auto;
+		    margin-top: 1.5em;
+		    margin-bottom: 1.5em;
+		    border-radius: 0.5rem; /* 이미지 모서리를 살짝 둥글게 */
+		    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 그림자 효과 */
+		}
     </style>
 </head>
 <body class="bg-slate-100">

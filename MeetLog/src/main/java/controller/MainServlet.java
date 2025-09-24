@@ -2,8 +2,8 @@ package controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.HashMap; 
 import java.util.Map;
 
 import javax.servlet.ServletContext;
@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import javax.servlet.http.HttpSession;
 
 import model.Column;
 import model.Restaurant;
@@ -22,7 +22,7 @@ import service.ColumnService;
 import service.RecommendationService;
 import service.RestaurantService;
 import service.ReviewService;
-import javax.servlet.http.HttpSession;
+import util.StringUtil;
 
 public class MainServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -69,6 +69,11 @@ public class MainServlet extends HttpServlet {
                 topColumns = columnService.getTopColumns(3);
                 application.setAttribute("latestColumns", topColumns);
                 application.setAttribute("lastUpdateTopColumns", currentTime);
+            }
+            // 태그 삭제 및 요약문 객체에 추가
+            for( Column column : topColumns) {
+            	String summary = StringUtil.stripHtmlAndTruncate(column.getContent(), 80); // 80자로 제한
+                column.setSummary(summary);
             }
 
             // 4. 개인화 추천 (로그인한 사용자만, 30분 캐시)
