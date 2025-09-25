@@ -307,7 +307,19 @@ CREATE TABLE restaurant_qna ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id I
 CREATE TABLE rating_distributions ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, rating_1 INT DEFAULT 0, rating_2 INT DEFAULT 0, rating_3 INT DEFAULT 0, rating_4 INT DEFAULT 0, rating_5 INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 CREATE TABLE detailed_ratings ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, taste DECIMAL(3,1) DEFAULT 0.0, price DECIMAL(3,1) DEFAULT 0.0, service DECIMAL(3,1) DEFAULT 0.0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 CREATE TABLE reservations ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, user_id INT NOT NULL, restaurant_name VARCHAR(200) NOT NULL, user_name VARCHAR(100) NOT NULL, reservation_time TIMESTAMP NOT NULL, party_size INT NOT NULL, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', special_requests TEXT, contact_phone VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE follows ( id INT AUTO_INCREMENT PRIMARY KEY, follower_id INT NOT NULL, following_id INT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE, UNIQUE KEY unique_follow (follower_id, following_id) );
+-- Fixed follows table creation with proper syntax
+CREATE TABLE follows (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    follower_id INT NOT NULL,
+    following_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_follow (follower_id, following_id),
+    INDEX idx_follows_follower_id (follower_id),
+    INDEX idx_follows_following_id (following_id),
+    INDEX idx_follows_created_at (created_at DESC)
+);
 CREATE TABLE review_comments ( id INT AUTO_INCREMENT PRIMARY KEY, review_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE column_comments ( id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE EVENTS ( ID BIGINT PRIMARY KEY AUTO_INCREMENT, TITLE VARCHAR(255) NOT NULL, SUMMARY VARCHAR(500), CONTENT TEXT, IMAGE VARCHAR(1000), START_DATE DATE, END_DATE DATE );
@@ -318,8 +330,8 @@ CREATE TABLE course_steps ( step_id INT PRIMARY KEY AUTO_INCREMENT, course_id IN
 CREATE TABLE course_likes ( course_id INT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (course_id, user_id), FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE course_reservations ( reservation_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, participant_name VARCHAR(100), phone VARCHAR(20), email VARCHAR(255), reservation_date DATE, reservation_time VARCHAR(50), participant_count INT DEFAULT 1, total_price INT DEFAULT 0, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE course_reviews ( review_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, rating INT DEFAULT 5, content TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, response_content TEXT, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE user_storages ( storage_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100) NOT NULL, color_class VARCHAR(50), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE user_storage_items ( item_id INT AUTO_INCREMENT PRIMARY KEY, storage_id INT NOT NULL, item_type ENUM('RESTAURANT', 'COURSE') NOT NULL, content_id INT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (storage_id) REFERENCES user_storages(storage_id) ON DELETE CASCADE, UNIQUE KEY uk_storage_item (storage_id, item_type, content_id) );
+CREATE TABLE user_storages ( storage_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100) NOT NULL,  color_class VARCHAR(50) DEFAULT 'bg-blue-100', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, INDEX idx_user_storages_user_id (user_id), INDEX idx_user_storages_created_at (created_at DESC));
+CREATE TABLE user_storage_items (item_id INT AUTO_INCREMENT PRIMARY KEY, storage_id INT NOT NULL, item_type ENUM('RESTAURANT', 'COURSE', 'COLUMN') NOT NULL, content_id INT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (storage_id) REFERENCES user_storages(storage_id) ON DELETE CASCADE, INDEX idx_storage_items_storage_id (storage_id), INDEX idx_storage_items_type_content (item_type, content_id), INDEX idx_storage_items_added_at (added_at DESC), UNIQUE KEY unique_storage_item (storage_id, item_type, content_id));
 CREATE TABLE badges ( badge_id INT AUTO_INCREMENT PRIMARY KEY, icon VARCHAR(10), name VARCHAR(100) NOT NULL, description VARCHAR(255) );
 CREATE TABLE user_badges ( user_id INT NOT NULL, badge_id INT NOT NULL, earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (user_id, badge_id), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (badge_id) REFERENCES badges(badge_id) ON DELETE CASCADE );
 CREATE TABLE notices ( notice_id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, content TEXT, created_at DATE );
@@ -335,6 +347,26 @@ CREATE TABLE restaurant_images (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_res_images_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- notifications 테이블 생성
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    type VARCHAR(50) NOT NULL COMMENT 'follow, like, comment, review, collection, etc.',
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    action_url VARCHAR(500) COMMENT '클릭 시 이동할 URL',
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    read_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_notifications_user_id (user_id),
+    INDEX idx_notifications_is_read (is_read),
+    INDEX idx_notifications_created_at (created_at DESC)
+) COMMENT '사용자 알림 테이블';
+CREATE INDEX idx_notifications_type ON notifications(type);
+
 
 -- reviews 테이블에서 중복된 author_image 컬럼 삭제
 ALTER TABLE reviews DROP COLUMN author_image;
@@ -413,3 +445,10 @@ INSERT INTO user_storage_items (storage_id, item_type, content_id) VALUES (1, 'R
 INSERT INTO EVENTS (TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE) VALUES ('MEET LOG 가을맞이! 5성급 호텔 뷔페 30% 할인', '선선한 가을, MEET LOG가 추천하는 최고의 호텔 뷔페에서 특별한 미식을 경험하세요. MEET LOG 회원 전용 특별 할인을 놓치지 마세요.', '이벤트 내용 본문입니다. 상세한 약관과 참여 방법이 여기에 들어갑니다.', 'https://placehold.co/800x400/f97316/ffffff?text=Hotel+Buffet+Event', '2025-09-01', '2025-10-31'), ("신규 맛집 '파스타 팩토리' 리뷰 이벤트", "홍대 '파스타 팩토리' 방문 후 MEET LOG에 리뷰를 남겨주세요! 추첨을 통해 2인 식사권을 드립니다!", '상세 내용: 1. 파스타 팩토리 방문 2. 사진과 함께 정성스러운 리뷰 작성 3. 자동 응모 완료!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', '2025-09-10', '2025-09-30'), ('[종료] 여름맞이 치맥 하우스! 수제맥주 1+1', '무더운 여름 밤, 종로 ''치맥 하우스''에서 시원한 수제맥주 1+1 이벤트를 즐겨보세요. MEET LOG 회원이라면 누구나!', '본 이벤트는 8월 31일부로 종료되었습니다. 성원에 감사드립니다.', 'https://placehold.co/800x400/fbbf24/ffffff?text=Beer+Event+(Finished)', '2025-07-01', '2025-08-31'), ('이번 주 최고의 리뷰 선정', '정성스러운 맛집 리뷰를 작성하고 10,000 포인트를 받으세요!', '매주 3명을 선정하여 10,000 포인트를 드립니다. 사진 3장 이상, 200자 이상의 리뷰가 대상입니다. 당첨자는 매주 월요일 공지됩니다.', 'https://example.com/images/events/best_review_contest.jpg', '2025-09-15', '2025-09-21'), ('신규 오픈 \'강남 이탈리안 키친\' 방문 챌린지', '\'강남 이탈리안 키친\' 방문 리뷰 작성 시, 참여자 전원 3,000 포인트 증정!', '강남역 10번 출구에 새로 오픈한 \'이탈리안 키친\'에 방문하고 #강남이탈리안키친 태그와 함께 인증샷, 리뷰를 남겨주세요. (1인 1회 한정)', 'https://example.com/images/restaurants/gangnam_italian_promo.png', '2025-09-10', '2025-10-10'), ('\'나만의 가을 맛집\' 추천 이벤트', '가을 분위기 물씬 나는 나만 아는 맛집을 공유해주세요. 5분께 백화점 상품권 증정!', '#가을맛집 태그를 달아 커뮤니티에 글을 작성해주세요. 추첨을 통해 5분께 백화점 상품권 5만원권을 드립니다.', '/static/images/events/autumn_food_challenge.gif', '2025-09-16', '2025-09-30'), ('맛zip 커뮤니티 10만 회원 달성!', '감사하는 마음으로 이벤트 기간 동안 로그인하는 모든 회원님께 1,000 포인트를 드립니다.', NULL, 'https://example.com/images/events/100k_members_party.jpg', '2025-10-01', '2025-10-07'), ('첫 리뷰 작성 100% 선물', '가입 후 첫 맛집 리뷰를 작성하시면 스타벅스 기프티콘 증정!', '정성스러운 첫 리뷰를 작성해주시는 모든 신규 회원님께 감사의 의미로 스타벅스 아메리카노 기프티콘을 드립니다. (본 이벤트는 별도 공지 시까지 계속됩니다)', NULL, '2025-01-01', NULL);
 INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time, closing_time) VALUES (1, 1, '11:30:00', '22:00:00'), (1, 2, '11:30:00', '22:00:00'), (1, 3, '11:30:00', '22:00:00'), (1, 4, '11:30:00', '22:00:00'), (1, 5, '11:30:00', '22:00:00'), (1, 6, '11:30:00', '22:00:00'), (1, 7, '11:30:00', '22:00:00');
 
+-- 기본 저장소 생성 (모든 기존 사용자에 대해)
+INSERT INTO user_storages (user_id, name, color_class)
+SELECT id, '내가 찜한 로그', 'bg-blue-100'
+FROM users 
+WHERE NOT EXISTS (
+    SELECT 1 FROM user_storages WHERE user_storages.user_id = users.id
+);
