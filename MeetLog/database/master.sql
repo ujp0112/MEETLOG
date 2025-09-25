@@ -14,7 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. 기존 테이블 삭제 (Drop Existing Tables)
 -- ===================================================================
 -- (DROP DATABASE로 이미 모두 삭제되었지만, 안전을 위해 구문 유지)
-DROP TABLE IF EXISTS review_comments, column_comments, follows, reservations, detailed_ratings, rating_distributions, restaurant_qna, restaurant_news, coupons, `columns`, reviews, menus, business_users, restaurant_operating_hours, restaurants, course_reviews, course_reservations, course_likes, course_steps, course_tags, tags, courses, user_storage_items, user_storages, user_badges, badges, notices, feed_items, alerts, users, companies, EVENTS;
+DROP TABLE IF EXISTS comment_likes, column_likes, review_comments, column_comments, follows, reservations, detailed_ratings, rating_distributions, restaurant_qna, restaurant_news, coupons, `columns`, reviews, menus, business_users, restaurant_operating_hours, restaurants, course_reviews, course_reservations, course_likes, course_steps, course_tags, tags, courses, user_storage_items, user_storages, user_badges, badges, notices, feed_items, alerts, users, companies, EVENTS;
 
 
 -- ===================================================================
@@ -322,7 +322,33 @@ CREATE TABLE follows (
     INDEX idx_follows_created_at (created_at DESC)
 );
 CREATE TABLE review_comments ( id INT AUTO_INCREMENT PRIMARY KEY, review_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE column_comments ( id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
+CREATE TABLE column_comments ( id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, user_id INT NOT NULL, content TEXT NOT NULL, parent_id INT NULL, like_count INT DEFAULT 0, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX idx_column_id (column_id), INDEX idx_user_id (user_id), INDEX idx_parent_id (parent_id), FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
+
+-- 칼럼 좋아요 테이블 생성
+CREATE TABLE column_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    column_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_column_user (column_id, user_id),
+    INDEX idx_column_likes_column_id (column_id),
+    INDEX idx_column_likes_user_id (user_id),
+    FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 댓글 좋아요 테이블 생성
+CREATE TABLE comment_likes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    comment_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_comment_user (comment_id, user_id),
+    INDEX idx_comment_likes_comment_id (comment_id),
+    INDEX idx_comment_likes_user_id (user_id),
+    FOREIGN KEY (comment_id) REFERENCES column_comments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 CREATE TABLE EVENTS ( ID BIGINT PRIMARY KEY AUTO_INCREMENT, TITLE VARCHAR(255) NOT NULL, SUMMARY VARCHAR(500), CONTENT TEXT, IMAGE VARCHAR(1000), START_DATE DATE, END_DATE DATE );
 CREATE TABLE courses ( course_id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, description TEXT, area VARCHAR(100), duration VARCHAR(100), price INT DEFAULT 0, max_participants INT DEFAULT 0, status ENUM('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, type ENUM('OFFICIAL', 'COMMUNITY') DEFAULT 'COMMUNITY', preview_image VARCHAR(1000), author_id INT NULL, FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL );
 CREATE TABLE tags ( tag_id INT PRIMARY KEY AUTO_INCREMENT, tag_name VARCHAR(50) NOT NULL UNIQUE );
@@ -378,16 +404,11 @@ ALTER TABLE `columns` DROP COLUMN author_image;
 -- review_comments 테이블에서 중복된 author_image 컬럼 삭제
 ALTER TABLE review_comments DROP COLUMN author_image;
 
--- column_comments 테이블에서 중복된 author_image 컬럼 삭제
-ALTER TABLE column_comments DROP COLUMN author_image;
-
 ALTER TABLE reviews DROP COLUMN author;
 
 ALTER TABLE `columns` DROP COLUMN author;
 
 ALTER TABLE review_comments DROP COLUMN author;
-
-ALTER TABLE column_comments DROP COLUMN author;
 
 
 -- 외래 키 제약 조건을 일시적으로 비활성화합니다.
@@ -499,3 +520,11 @@ FROM users
 WHERE NOT EXISTS (
     SELECT 1 FROM user_storages WHERE user_storages.user_id = users.id
 );
+
+-- ===================================================================
+-- sang0925.sql 통합 완료
+-- 좋아요 토글 기능 구현을 위한 테이블들이 추가됨:
+-- - column_likes: 칼럼 좋아요 관리
+-- - comment_likes: 댓글 좋아요 관리
+-- - column_comments 테이블에 like_count, parent_id, is_active, updated_at 컬럼 추가
+-- ===================================================================
