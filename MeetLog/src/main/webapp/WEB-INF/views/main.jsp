@@ -213,24 +213,31 @@
                         <c:when test="${not empty hotReviews}">
                             <c:forEach var="review" items="${hotReviews}">
                                 <div
-                                    class="bg-white p-5 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
-                                    <div class="flex items-center mb-3">
-                                        <mytag:image fileName="${review.profileImage}"
-                                            altText="${review.author}"
-                                            cssClass="w-12 h-12 rounded-full mr-4 object-cover" />
-                                        <div>
-                                            <p class="font-bold text-slate-800">${review.author}</p>
-                                            <p class="text-sm text-yellow-500">
-                                                <c:forEach begin="1" end="${review.rating}">★</c:forEach>
-                                                <c:forEach begin="${review.rating + 1}" end="5">☆</c:forEach>
-                                            </p>
+                                    class="bg-white rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300 overflow-hidden">
+                                    
+                                    <%-- 리뷰 대표 이미지 추가 --%>
+                                    <mytag:image fileName="${review.image}" altText="${review.restaurantName}" cssClass="w-full h-48 object-cover"/>
+                                    
+                                    <%-- 기존 콘텐츠를 div로 감싸고 padding 적용 --%>
+                                    <div class="p-5">
+                                        <div class="flex items-center mb-3">
+                                            <mytag:image fileName="${review.profileImage}"
+                                                altText="${review.author}"
+                                                cssClass="w-12 h-12 rounded-full mr-4 object-cover" />
+                                            <div>
+                                                <p class="font-bold text-slate-800">${review.author}</p>
+                                                <p class="text-sm text-yellow-500">
+                                                    <c:forEach begin="1" end="${review.rating}">★</c:forEach>
+                                                    <c:forEach begin="${review.rating + 1}" end="5">☆</c:forEach>
+                                                </p>
+                                            </div>
                                         </div>
+                                        <p class="text-slate-700 h-16 overflow-hidden line-clamp-3">${review.content}</p>
+                                        <a
+                                            href="${pageContext.request.contextPath}/restaurant/detail/${review.restaurantId}"
+                                            class="block mt-3 pt-3 border-t border-slate-100 text-sm font-semibold text-sky-600 hover:underline">
+                                            '${review.restaurantName}' 리뷰 더보기 </a>
                                     </div>
-                                    <p class="text-slate-700 h-16 overflow-hidden line-clamp-3">${review.content}</p>
-                                    <a
-                                        href="${pageContext.request.contextPath}/restaurant/detail/${review.restaurantId}"
-                                        class="block mt-3 pt-3 border-t border-slate-100 text-sm font-semibold text-sky-600 hover:underline">
-                                        '${review.restaurantName}' 리뷰 더보기 </a>
                                 </div>
                             </c:forEach>
                         </c:when>

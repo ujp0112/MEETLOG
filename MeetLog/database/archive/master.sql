@@ -258,6 +258,26 @@ ADD COLUMN view_count INT NOT NULL DEFAULT 0 AFTER content;
 ALTER TABLE menu
 ADD COLUMN recipe TEXT NULL COMMENT '메뉴 레시피' AFTER price;
 
+-- reviews 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE reviews DROP COLUMN author_image;
+
+-- columns 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE `columns` DROP COLUMN author_image;
+
+-- review_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE review_comments DROP COLUMN author_image;
+
+-- column_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE column_comments DROP COLUMN author_image;
+
+ALTER TABLE reviews DROP COLUMN author;
+
+ALTER TABLE `columns` DROP COLUMN author;
+
+ALTER TABLE review_comments DROP COLUMN author;
+
+ALTER TABLE column_comments DROP COLUMN author;
+
 -- (이하 모든 테이블 생성 구문은 생략 없이 올바르게 포함됩니다)
 CREATE TABLE `menus` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `price` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `is_popular` tinyint(1) DEFAULT '0', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `reviews` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `user_id` int NOT NULL, `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `author_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `rating` int NOT NULL, `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `images` json DEFAULT NULL, `keywords` json DEFAULT NULL, `likes` int DEFAULT '0', `is_active` tinyint(1) DEFAULT '1', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), KEY `user_id` (`user_id`), CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_chk_1` CHECK ((`rating` >= 1) and (`rating` <= 5)) ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -287,11 +307,14 @@ CREATE TABLE feed_items ( feed_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NO
 CREATE TABLE alerts ( alert_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, content VARCHAR(500) NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE restaurant_operating_hours ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, day_of_week INT NOT NULL, opening_time TIME NOT NULL, closing_time TIME NOT NULL, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 
-
-UPDATE columns c
-JOIN users u ON c.user_id = u.id
-SET c.author_image = u.profile_image
-WHERE c.author_image IS NULL OR c.author_image = '';
+ALTER TABLE reviews
+ADD COLUMN taste_rating INT DEFAULT 0 COMMENT '맛 평점',
+ADD COLUMN service_rating INT DEFAULT 0 COMMENT '서비스 평점',
+ADD COLUMN atmosphere_rating INT DEFAULT 0 COMMENT '분위기 평점',
+ADD COLUMN price_rating INT DEFAULT 0 COMMENT '가격 평점',
+ADD COLUMN visit_date DATE COMMENT '방문 날짜',
+ADD COLUMN party_size INT COMMENT '인원수',
+ADD COLUMN visit_purpose VARCHAR(50) COMMENT '방문 목적';
 
 -- ===================================================================
 -- 3. 인덱스 생성 (Create Indexes)

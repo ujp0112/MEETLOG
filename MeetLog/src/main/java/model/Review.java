@@ -4,221 +4,196 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class Review {
-	// IDE Cache Refresh - v2.0
-	private int id;
-	private int restaurantId;
-	private int userId;
-	private String author;
-	private String restaurantName;
-	private String profileImage;
-	private int rating;
-	private String content;
-	private List<String> images;
-	private List<String> keywords;
-	private int likes;
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
-	private boolean isActive;
 
-	// 상세 평점 필드들 추가
-	private int tasteRating; // 맛 평점 (1-5)
-	private int serviceRating; // 서비스 평점 (1-5)
-	private int atmosphereRating; // 분위기 평점 (1-5)
-	private int priceRating; // 가격 평점 (1-5)
-	private String visitDate; // 방문 날짜
-	private int partySize; // 인원수
-	private String visitPurpose; // 방문 목적 ("데이트", "비즈니스", "가족모임", "친구모임", "혼밥")
-	
-	// 답글 목록
-	private List<ReviewComment> comments;
+    // reviews 테이블의 컬럼과 직접 매핑되는 필드들
+    private int id;
+    private int restaurantId;
+    private int userId;
+    private int rating;
+    private String content;
+    private int likes;
+    private boolean isActive;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
+    // 추가 평점 필드
+    private int tasteRating;
+    private int serviceRating;
+    private int atmosphereRating;
+    private int priceRating;
+    
+    // 방문 정보 필드
+    private LocalDateTime visitDate;
+    private int partySize;
+    private String visitPurpose;
+    
+    // JSON 또는 분리된 문자열로 관리되는 필드
+    private List<String> images;
+    private List<String> keywords;
 
-	public Review() {
-		// Default constructor
-	}
+    // Users 테이블과 JOIN하여 가져올 데이터를 담는 필드 (DTO 역할)
+    private String author; // users.nickname 값이 여기에 매핑됩니다.
+    private String profileImage; // users.profile_image 값이 여기에 매핑됩니다.
 
-	public Review(int restaurantId, int userId, String author, int rating, String content) {
-		this.restaurantId = restaurantId;
-		this.userId = userId;
-		this.author = author;
-		this.rating = rating;
-		this.content = content;
-	}
+    // --- Getter and Setter ---
 
-	// --- 모든 Getters and Setters ---
-	public int getId() {
-		return id;
-	}
+    public int getId() {
+        return id;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public void setId(int id) {
+        this.id = id;
+    }
 
-	public int getRestaurantId() {
-		return restaurantId;
-	}
+    public int getRestaurantId() {
+        return restaurantId;
+    }
 
-	public void setRestaurantId(int restaurantId) {
-		this.restaurantId = restaurantId;
-	}
+    public void setRestaurantId(int restaurantId) {
+        this.restaurantId = restaurantId;
+    }
 
-	public int getUserId() {
-		return userId;
-	}
+    public int getUserId() {
+        return userId;
+    }
 
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-	public String getAuthor() {
-		return author;
-	}
+    public int getRating() {
+        return rating;
+    }
 
-	public void setAuthor(String author) {
-		this.author = author;
-	}
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
 
-	public String getRestaurantName() {
-		return restaurantName;
-	}
+    public String getContent() {
+        return content;
+    }
 
-	public void setRestaurantName(String restaurantName) {
-		this.restaurantName = restaurantName;
-	}
+    public void setContent(String content) {
+        this.content = content;
+    }
 
-	public int getRating() {
-		return rating;
-	}
+    public int getLikes() {
+        return likes;
+    }
 
-	public void setRating(int rating) {
-		this.rating = rating;
-	}
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
 
-	public String getContent() {
-		return content;
-	}
+    public boolean isActive() {
+        return isActive;
+    }
 
-	public void setContent(String content) {
-		this.content = content;
-	}
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
+    }
 
-	public List<String> getImages() {
-		return images;
-	}
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-	public void setImages(List<String> images) {
-		this.images = images;
-	}
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-	public List<String> getKeywords() {
-		return keywords;
-	}
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
-	public void setKeywords(List<String> keywords) {
-		this.keywords = keywords;
-	}
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
-	public int getLikes() {
-		return likes;
-	}
+    public int getTasteRating() {
+        return tasteRating;
+    }
 
-	public void setLikes(int likes) {
-		this.likes = likes;
-	}
+    public void setTasteRating(int tasteRating) {
+        this.tasteRating = tasteRating;
+    }
 
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
+    public int getServiceRating() {
+        return serviceRating;
+    }
 
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
+    public void setServiceRating(int serviceRating) {
+        this.serviceRating = serviceRating;
+    }
 
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
+    public int getAtmosphereRating() {
+        return atmosphereRating;
+    }
 
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
+    public void setAtmosphereRating(int atmosphereRating) {
+        this.atmosphereRating = atmosphereRating;
+    }
 
-	public boolean isActive() {
-		return isActive;
-	}
+    public int getPriceRating() {
+        return priceRating;
+    }
 
-	public void setActive(boolean active) {
-		isActive = active;
-	}
+    public void setPriceRating(int priceRating) {
+        this.priceRating = priceRating;
+    }
 
-	// 상세 평점 필드들의 Getter/Setter
-	public int getTasteRating() {
-		return tasteRating;
-	}
+    public LocalDateTime getVisitDate() {
+        return visitDate;
+    }
 
-	public void setTasteRating(int tasteRating) {
-		this.tasteRating = tasteRating;
-	}
+    public void setVisitDate(LocalDateTime visitDate) {
+        this.visitDate = visitDate;
+    }
 
-	public int getServiceRating() {
-		return serviceRating;
-	}
+    public int getPartySize() {
+        return partySize;
+    }
 
-	public void setServiceRating(int serviceRating) {
-		this.serviceRating = serviceRating;
-	}
+    public void setPartySize(int partySize) {
+        this.partySize = partySize;
+    }
 
-	public int getAtmosphereRating() {
-		return atmosphereRating;
-	}
+    public String getVisitPurpose() {
+        return visitPurpose;
+    }
 
-	public void setAtmosphereRating(int atmosphereRating) {
-		this.atmosphereRating = atmosphereRating;
-	}
+    public void setVisitPurpose(String visitPurpose) {
+        this.visitPurpose = visitPurpose;
+    }
 
-	public int getPriceRating() {
-		return priceRating;
-	}
+    public List<String> getImages() {
+        return images;
+    }
 
-	public void setPriceRating(int priceRating) {
-		this.priceRating = priceRating;
-	}
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
 
-	public String getVisitDate() {
-		return visitDate;
-	}
+    public List<String> getKeywords() {
+        return keywords;
+    }
 
-	public void setVisitDate(String visitDate) {
-		this.visitDate = visitDate;
-	}
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
 
-	public int getPartySize() {
-		return partySize;
-	}
+    public String getAuthor() {
+        return author;
+    }
 
-	public void setPartySize(int partySize) {
-		this.partySize = partySize;
-	}
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
-	public String getVisitPurpose() {
-		return visitPurpose;
-	}
+    public String getProfileImage() {
+        return profileImage;
+    }
 
-	public void setVisitPurpose(String visitPurpose) {
-		this.visitPurpose = visitPurpose;
-	}
-	
-	public List<ReviewComment> getComments() {
-		return comments;
-	}
-	
-	public void setComments(List<ReviewComment> comments) {
-		this.comments = comments;
-	}
-
-	public String getProfileImage() {
-		return profileImage;
-	}
-
-	public void setProfileImage(String profileImage) {
-		this.profileImage = profileImage;
-	}
+    public void setProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 }

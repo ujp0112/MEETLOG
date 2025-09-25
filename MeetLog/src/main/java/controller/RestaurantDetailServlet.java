@@ -1,6 +1,8 @@
 package controller;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -11,6 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import model.Coupon;
 import model.Menu;
@@ -25,24 +30,27 @@ import service.OperatingHourService;
 import service.QnAService;
 import service.RestaurantService;
 import service.ReviewService;
+import util.LocalDateTimeAdapter; // Gson이 LocalDate를 처리하기 위한 유틸리티 클래스
 
 /**
- * 레스토랑 상세 정보를 조회하고 표시하는 서블릿
- * - /restaurant/detail/{id} : 레스토랑 상세 페이지
- * - 레스토랑 정보, 메뉴, 리뷰, 쿠폰, Q&A, 운영시간 등 모든 관련 데이터 제공
+ * 레스토랑 상세 정보를 조회하고 표시하는 서블릿 (JSON 처리 기능 추가)
  */
 @WebServlet("/restaurant/detail/*")
 public class RestaurantDetailServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(RestaurantDetailServlet.class.getName());
     
-    private RestaurantService restaurantService = new RestaurantService();
-    private MenuService menuService = new MenuService();
-    private ReviewService reviewService = new ReviewService();
-    private CouponService couponService = new CouponService();
-    private QnAService qnaService = new QnAService();
-    private OperatingHourService operatingHourService = new OperatingHourService();
-
+    private final RestaurantService restaurantService = new RestaurantService();
+    private final MenuService menuService = new MenuService();
+    private final ReviewService reviewService = new ReviewService();
+    private final CouponService couponService = new CouponService();
+    private final QnAService qnaService = new QnAService();
+    private final OperatingHourService operatingHourService = new OperatingHourService();
+    
+    // Gson 객체를 한 번만 생성하여 재사용 (LocalDate 타입을 처리하도록 설정)
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+            .create();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -61,15 +69,14 @@ public class RestaurantDetailServlet extends HttpServlet {
             
             logger.info("레스토랑 상세 정보 조회 시작 - ID: " + restaurantId);
             
-            // 레스토랑 기본 정보 조회
-            Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
-            Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+            // 레스토랑 정보와 추가 이미지를 한 번에 조회
+            Restaurant restaurant = restaurantService.getRestaurantDetailById(restaurantId);
             if (restaurant == null) {
                 logger.warning("레스토랑을 찾을 수 없음 - ID: " + restaurantId);
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "음식점을 찾을 수 없습니다.");
+                request.setAttribute("restaurant", null);
+                request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
                 return;
             }
-            restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
             logger.info("레스토랑 정보 조회 완료 - 이름: " + restaurant.getName());
             
             // 관련 데이터들을 안전하게 조회
@@ -79,17 +86,20 @@ public class RestaurantDetailServlet extends HttpServlet {
             List<QnA> qnas = safeGetQnAs(restaurantId);
             List<OperatingHour> operatingHours = safeGetOperatingHours(restaurantId);
             
-            // 사용자 권한 확인
+            // 사용자 권한 확인 (사장님 여부)
             boolean isOwner = checkOwnership(request, restaurant);
             
-            // 데이터를 request에 설정
-            setRequestAttributes(request, restaurant, menus, reviews, coupons, qnas, operatingHours, isOwner);
+            // 리뷰 목록을 JSON 문자열로 변환
+            String reviewsJson = gson.toJson(reviews);
+            
+            // 조회된 모든 데이터를 request에 설정
+            setRequestAttributes(request, restaurant, menus, reviews, coupons, qnas, operatingHours, isOwner, reviewsJson);
             
             logger.info("레스토랑 상세 정보 조회 완료 - restaurant-detail.jsp로 포워딩");
             request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
-            logger.log(Level.WARNING, "레스토랑 ID 파싱 오류", e);
+            logger.log(Level.WARNING, "레스토랑 ID 파싱 오류: " + pathInfo, e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "올바르지 않은 음식점 ID 형식입니다.");
         } catch (Exception e) {
             logger.log(Level.SEVERE, "RestaurantDetailServlet 처리 중 예상치 못한 오류", e);
@@ -97,144 +107,96 @@ public class RestaurantDetailServlet extends HttpServlet {
         }
     }
     
-    /**
-     * pathInfo에서 레스토랑 ID 추출
-     */
     private int extractRestaurantId(String pathInfo) throws NumberFormatException {
         if (pathInfo == null || pathInfo.length() <= 1) {
             throw new NumberFormatException("pathInfo가 null이거나 비어있음");
         }
-        
-        // "/11" -> "11" 추출
         String idString = pathInfo.substring(1);
-        
-        // 숫자만 허용
         if (!idString.matches("\\d+")) {
             throw new NumberFormatException("ID가 숫자가 아님: " + idString);
         }
-        
         return Integer.parseInt(idString);
     }
-    
-    /**
-     * 메뉴 목록 안전 조회
-     */
+
     private List<Menu> safeGetMenus(int restaurantId) {
         try {
             List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
-            if (menus == null) menus = new java.util.ArrayList<>();
-            logger.info("메뉴 " + menus.size() + "개 조회 완료");
-            return menus;
+            logger.info("메뉴 " + (menus != null ? menus.size() : 0) + "개 조회 완료");
+            return menus != null ? menus : Collections.emptyList();
         } catch (Exception e) {
             logger.log(Level.WARNING, "메뉴 조회 중 오류", e);
-            return new java.util.ArrayList<>();
+            return Collections.emptyList();
         }
     }
-    
-    /**
-     * 리뷰 목록 안전 조회
-     */
+
     private List<Review> safeGetReviews(int restaurantId) {
         try {
             List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId);
-            if (reviews == null) reviews = new java.util.ArrayList<>();
-            logger.info("리뷰 " + reviews.size() + "개 조회 완료");
-            return reviews;
+            logger.info("리뷰 " + (reviews != null ? reviews.size() : 0) + "개 조회 완료");
+            return reviews != null ? reviews : Collections.emptyList();
         } catch (Exception e) {
             logger.log(Level.WARNING, "리뷰 조회 중 오류", e);
-            return new java.util.ArrayList<>();
+            return Collections.emptyList();
         }
     }
     
-    /**
-     * 쿠폰 목록 안전 조회
-     */
     private List<Coupon> safeGetCoupons(int restaurantId) {
         try {
             List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
-            if (coupons == null) coupons = new java.util.ArrayList<>();
-            logger.info("쿠폰 " + coupons.size() + "개 조회 완료");
-            return coupons;
+            logger.info("쿠폰 " + (coupons != null ? coupons.size() : 0) + "개 조회 완료");
+            return coupons != null ? coupons : Collections.emptyList();
         } catch (Exception e) {
             logger.log(Level.WARNING, "쿠폰 조회 중 오류", e);
-            return new java.util.ArrayList<>();
+            return Collections.emptyList();
         }
     }
-    
-    /**
-     * Q&A 목록 안전 조회
-     */
+
     private List<QnA> safeGetQnAs(int restaurantId) {
         try {
             List<QnA> qnas = qnaService.getQnAsByRestaurantId(restaurantId);
-            if (qnas == null) qnas = new java.util.ArrayList<>();
-            logger.info("Q&A " + qnas.size() + "개 조회 완료");
-            return qnas;
+            logger.info("Q&A " + (qnas != null ? qnas.size() : 0) + "개 조회 완료");
+            return qnas != null ? qnas : Collections.emptyList();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Q&A 조회 중 오류", e);
-            return new java.util.ArrayList<>();
+            return Collections.emptyList();
         }
     }
-    
-    /**
-     * 운영시간 목록 안전 조회
-     */
+
     private List<OperatingHour> safeGetOperatingHours(int restaurantId) {
         try {
-            List<OperatingHour> operatingHours = operatingHourService.getOperatingHoursByRestaurantId(restaurantId);
-            if (operatingHours == null) operatingHours = new java.util.ArrayList<>();
-            logger.info("운영시간 " + operatingHours.size() + "개 조회 완료");
-            return operatingHours;
+            List<OperatingHour> hours = operatingHourService.getOperatingHoursByRestaurantId(restaurantId);
+            logger.info("운영시간 " + (hours != null ? hours.size() : 0) + "개 조회 완료");
+            return hours != null ? hours : Collections.emptyList();
         } catch (Exception e) {
             logger.log(Level.WARNING, "운영시간 조회 중 오류", e);
-            return new java.util.ArrayList<>();
+            return Collections.emptyList();
         }
     }
-    
-    /**
-     * 사용자가 레스토랑 소유자인지 확인
-     */
+
     private boolean checkOwnership(HttpServletRequest request, Restaurant restaurant) {
-        try {
-            HttpSession session = request.getSession(false);
-            if (session == null || session.getAttribute("user") == null) {
-                return false;
-            }
-            
-            User user = (User) session.getAttribute("user");
-            boolean isOwner = user.getId() == restaurant.getOwnerId() && "BUSINESS".equals(user.getUserType());
-            
-            logger.info("소유자 확인 - 사용자 ID: " + user.getId() + ", 소유자 ID: " + restaurant.getOwnerId() + ", 소유자 여부: " + isOwner);
-            return isOwner;
-            
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "소유자 확인 중 오류", e);
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
             return false;
         }
+        User user = (User) session.getAttribute("user");
+        boolean isOwner = "BUSINESS".equals(user.getUserType()) && user.getId() == restaurant.getOwnerId();
+        logger.info("소유자 확인 - 사용자 ID: " + user.getId() + ", 소유자 ID: " + restaurant.getOwnerId() + ", 소유자 여부: " + isOwner);
+        return isOwner;
     }
     
-    /**
-     * request에 모든 속성 설정
-     */
-    private void setRequestAttributes(HttpServletRequest request, Restaurant restaurant, 
-            List<Menu> menus, List<Review> reviews, List<Coupon> coupons, 
-            List<QnA> qnas, List<OperatingHour> operatingHours, boolean isOwner) {
+    private void setRequestAttributes(HttpServletRequest request, Restaurant r, 
+            List<Menu> m, List<Review> rev, List<Coupon> c, 
+            List<QnA> q, List<OperatingHour> oh, boolean owner, String reviewsJson) {
         
-        request.setAttribute("restaurant", restaurant);
-        request.setAttribute("menus", menus);
-        request.setAttribute("reviews", reviews);
-        request.setAttribute("coupons", coupons);
-        request.setAttribute("qnas", qnas);
-        request.setAttribute("operatingHours", operatingHours);
-        request.setAttribute("isOwner", isOwner);
+        request.setAttribute("restaurant", r);
+        request.setAttribute("menus", m);
+        request.setAttribute("reviews", rev);
+        request.setAttribute("coupons", c);
+        request.setAttribute("qnas", q);
+        request.setAttribute("operatingHours", oh);
+        request.setAttribute("isOwner", owner);
+        request.setAttribute("reviewsJson", reviewsJson); // JavaScript에서 사용할 JSON 데이터
         
-        // 통계 정보 추가
-        request.setAttribute("menuCount", menus.size());
-        request.setAttribute("reviewCount", reviews.size());
-        request.setAttribute("couponCount", coupons.size());
-        request.setAttribute("qnaCount", qnas.size());
-        
-        logger.info("Request 속성 설정 완료 - 메뉴: " + menus.size() + ", 리뷰: " + reviews.size() + 
-                   ", 쿠폰: " + coupons.size() + ", Q&A: " + qnas.size());
+        logger.info("Request 속성 설정 완료 - 메뉴: " + m.size() + ", 리뷰: " + rev.size());
     }
 }

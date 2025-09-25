@@ -8,7 +8,7 @@ public class ReviewInfo {
     private int userId;
     private double rating;
     private String content;
-    private String imageUrl;
+    private String image; // [수정] imageUrl -> image
     private int likes;
     private LocalDateTime createdAt;
     private String userName;
@@ -60,12 +60,13 @@ public class ReviewInfo {
         this.content = content;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    // [수정] getter/setter 이름 변경
+    public String getImage() {
+        return image;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public int getLikes() {
