@@ -27,4 +27,9 @@
             (#{hour.restaurantId}, #{hour.dayOfWeek}, #{hour.openingTime}, #{hour.closingTime})
         </foreach>
     </insert>
+    
+    <delete id="deleteOperatingHoursByRestaurantId" parameterType="int">
+    DELETE FROM restaurant_operating_hours
+    WHERE restaurant_id = #{restaurantId}
+    </delete>
 </mapper>

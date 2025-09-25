@@ -1,11 +1,15 @@
 package dao;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.session.SqlSession;
+
 import model.Restaurant;
 import model.RestaurantSummaryDTO;
 import util.MyBatisSqlSessionFactory;
-import org.apache.ibatis.session.SqlSession;
-import java.util.List;
-import java.util.Map;
+
 
 public class RestaurantDAO {
 	private static final String NAMESPACE = "dao.RestaurantDAO";
@@ -73,5 +77,21 @@ public class RestaurantDAO {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             return sqlSession.selectOne(NAMESPACE + ".findDetailById", id);
         }
+    }
+	
+	public int deleteRestaurantImages(SqlSession session, int restaurantId) {
+        return session.delete(NAMESPACE + ".deleteRestaurantImages", restaurantId);
+    }
+
+    public int deleteOperatingHours(SqlSession session, int restaurantId) {
+        return session.delete(NAMESPACE + ".deleteOperatingHours", restaurantId);
+    }
+    
+ // --- ▼▼▼ [추가] 아래 메소드를 추가합니다. ▼▼▼ ---
+    public int deleteRestaurantImagesByNames(SqlSession session, int restaurantId, List<String> imageList) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("restaurantId", restaurantId);
+        params.put("imageList", imageList);
+        return session.delete(NAMESPACE + ".deleteRestaurantImagesByNames", params);
     }
 }

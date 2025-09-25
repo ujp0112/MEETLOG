@@ -389,6 +389,19 @@ ALTER TABLE review_comments DROP COLUMN author;
 
 ALTER TABLE column_comments DROP COLUMN author;
 
+
+-- 외래 키 제약 조건을 일시적으로 비활성화합니다.
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- RESTAURANTS 테이블에 3개의 컬럼을 추가합니다.
+ALTER TABLE restaurants
+    ADD COLUMN operating_days VARCHAR(100) NULL COMMENT '대표 운영요일 목록 (예: 월,화,수,목,금)',
+    ADD COLUMN operating_times_text VARCHAR(255) NULL COMMENT '대표 운영시간 목록 (예: 09:00~18:00)',
+    ADD COLUMN break_time_text VARCHAR(100) NULL COMMENT '브레이크타임 텍스트 (예: 15:00~17:00)';
+
+-- 외래 키 제약 조건을 다시 활성화합니다.
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- ===================================================================
 -- 3. 인덱스 생성 (Create Indexes)
 -- ===================================================================
