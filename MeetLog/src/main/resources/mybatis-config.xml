@@ -86,6 +86,7 @@
         <mapper resource="mappers/FeedMapper.xml" />
         <mapper resource="mappers/FollowMapper.xml" />
         <mapper resource="mappers/UserCollectionMapper.xml" />
+        <mapper resource="mappers/UserStorageMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

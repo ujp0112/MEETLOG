@@ -48,13 +48,11 @@
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 mb-6">
-                        <a href="${pageContext.request.contextPath}/follow/following/${sessionScope.user.id}" 
-                           class="text-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+                        <a class="text-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
                             <div class="text-2xl font-bold text-blue-600">${followingCount}</div>
                             <div class="text-sm text-slate-600">팔로잉</div>
                         </a>
-                        <a href="${pageContext.request.contextPath}/follow/followers/${sessionScope.user.id}" 
-                           class="text-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
+                        <a class="text-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors">
                             <div class="text-2xl font-bold text-purple-600">${followerCount}</div>
                             <div class="text-sm text-slate-600">팔로워</div>
                         </a>

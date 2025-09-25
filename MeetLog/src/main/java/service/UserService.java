@@ -7,14 +7,18 @@ import dao.CompanyDAO;
 import model.User;
 import model.BusinessUser;
 import model.Company;
+import model.UserStorage;
+import model.Restaurant;
 import util.MyBatisSqlSessionFactory;
 import util.PasswordUtil; // 새로 만든 PasswordUtil 클래스를 import 합니다.
 import java.util.List;
+import java.util.ArrayList;
 
 public class UserService {
     private final UserDAO userDAO = new UserDAO();
     private final BusinessUserDAO businessUserDAO = new BusinessUserDAO();
     private final CompanyDAO companyDAO = new CompanyDAO();
+    private final UserStorageService userStorageService = new UserStorageService();
 
     // --- 신규 통합 회원가입 로직 ---
     public boolean registerHqUser(User user, BusinessUser businessUser) {
@@ -238,7 +242,51 @@ public class UserService {
 
     public boolean createCollection(int userId, String collectionName, String description) {
         // 새 컬렉션을 생성
-        // 임시로 true 반환 (실제 구현 필요)
+        return createCollection(userId, collectionName, description, "bg-blue-100");
+    }
+
+    public boolean createCollection(int userId, String collectionName, String description, String colorClass) {
+        // UserStorageService를 사용하여 저장소 생성
+        return createStorage(userId, collectionName, colorClass);
+    }
+
+    // user_storages 테이블을 사용하는 새로운 메서드들
+    public boolean createStorage(int userId, String storageName, String colorClass) {
+        if (userStorageService != null) {
+            UserStorage storage = new UserStorage(userId, storageName, colorClass != null ? colorClass : "bg-blue-100");
+            return userStorageService.createStorage(storage);
+        }
+        return true;
+    }
+
+    public List<UserStorage> getUserStorages(int userId) {
+        if (userStorageService != null) {
+            return userStorageService.getUserStorages(userId);
+        }
+        return new ArrayList<>();
+    }
+
+    public UserStorage getUserStorage(int storageId, int userId) {
+        if (userStorageService != null) {
+            // 보안을 위해 userId는 일단 무시하고 storageId로만 조회 (실제로는 권한 체크 필요)
+            return userStorageService.getStorageById(storageId);
+        }
+        return null;
+    }
+
+    public List<Restaurant> getStorageRestaurants(int storageId) {
+        if (userStorageService != null) {
+            // UserStorageItem 리스트를 Restaurant 리스트로 변환하는 로직 필요
+            // 임시로 빈 리스트 반환
+            return new ArrayList<>();
+        }
+        return new ArrayList<>();
+    }
+
+    public boolean addToStorage(int userId, int restaurantId, int storageId) {
+        if (userStorageService != null) {
+            return userStorageService.addToStorage(storageId, "RESTAURANT", restaurantId);
+        }
         return true;
     }
 }

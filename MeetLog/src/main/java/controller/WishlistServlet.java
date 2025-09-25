@@ -12,6 +12,7 @@ import javax.servlet.http.HttpSession;
 import model.User;
 import model.Restaurant;
 import model.UserCollection;
+import model.UserStorage;
 import service.UserService;
 
 public class WishlistServlet extends HttpServlet {
@@ -35,24 +36,24 @@ public class WishlistServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // 위시리스트 메인 페이지
                 List<Restaurant> wishlistRestaurants = userService.getWishlistRestaurants(user.getId());
-                List<UserCollection> collections = userService.getUserCollections(user.getId());
+                List<UserStorage> storages = userService.getUserStorages(user.getId());
 
                 request.setAttribute("wishlistRestaurants", wishlistRestaurants);
-                request.setAttribute("collections", collections);
+                request.setAttribute("storages", storages);
                 request.getRequestDispatcher("/WEB-INF/views/wishlist.jsp").forward(request, response);
 
-            } else if (pathInfo.startsWith("/detail/")) {
-                // 위시리스트 상세 페이지
-                String collectionIdStr = pathInfo.substring("/detail/".length());
+            } else if (pathInfo.startsWith("/storage/")) {
+                // 저장소 상세 페이지
+                String storageIdStr = pathInfo.substring("/storage/".length());
                 try {
-                    int collectionId = Integer.parseInt(collectionIdStr);
-                    UserCollection collection = userService.getUserCollection(collectionId, user.getId());
+                    int storageId = Integer.parseInt(storageIdStr);
+                    UserStorage storage = userService.getUserStorage(storageId, user.getId());
 
-                    if (collection != null) {
-                        List<Restaurant> collectionRestaurants = userService.getCollectionRestaurants(collectionId);
+                    if (storage != null) {
+                        List<Restaurant> storageRestaurants = userService.getStorageRestaurants(storageId);
 
-                        request.setAttribute("collection", collection);
-                        request.setAttribute("collectionRestaurants", collectionRestaurants);
+                        request.setAttribute("storage", storage);
+                        request.setAttribute("storageRestaurants", storageRestaurants);
                         request.getRequestDispatcher("/WEB-INF/views/wishlist-detail.jsp").forward(request, response);
                     } else {
                         response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -86,13 +87,13 @@ public class WishlistServlet extends HttpServlet {
 
         try {
             if ("add".equals(action)) {
-                // 레스토랑을 위시리스트에 추가
+                // 레스토랑을 저장소에 추가
                 int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
-                String collectionIdStr = request.getParameter("collectionId");
+                String storageIdStr = request.getParameter("storageId");
 
-                if (collectionIdStr != null && !collectionIdStr.isEmpty()) {
-                    int collectionId = Integer.parseInt(collectionIdStr);
-                    userService.addToCollection(user.getId(), restaurantId, collectionId);
+                if (storageIdStr != null && !storageIdStr.isEmpty()) {
+                    int storageId = Integer.parseInt(storageIdStr);
+                    userService.addToStorage(user.getId(), restaurantId, storageId);
                 } else {
                     userService.addToWishlist(user.getId(), restaurantId);
                 }
@@ -105,12 +106,15 @@ public class WishlistServlet extends HttpServlet {
                 userService.removeFromWishlist(user.getId(), restaurantId);
                 response.sendRedirect(request.getContextPath() + "/wishlist");
 
-            } else if ("createCollection".equals(action)) {
-                // 새 컬렉션 생성
-                String collectionName = request.getParameter("collectionName");
-                String description = request.getParameter("description");
+            } else if ("createCollection".equals(action) || "createStorage".equals(action)) {
+                // 새 저장소 생성
+                String storageName = request.getParameter("name");
+                if (storageName == null) {
+                    storageName = request.getParameter("collectionName"); // 이전 호환성
+                }
+                String colorClass = request.getParameter("colorClass");
 
-                userService.createCollection(user.getId(), collectionName, description);
+                userService.createStorage(user.getId(), storageName, colorClass);
                 response.sendRedirect(request.getContextPath() + "/wishlist");
 
             } else {

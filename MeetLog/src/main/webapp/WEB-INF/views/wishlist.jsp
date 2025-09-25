@@ -38,7 +38,7 @@
                         <p class="text-slate-600">나만의 찜 폴더로 맛집, 코스, 칼럼을 정리해보세요</p>
                     </div>
                     <button onclick="openCreateStorageModal()" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-                        ✨ 새 폴더 만들기
+                        📁 새 폴더 만들기
                     </button>
                 </div>
             </div>
