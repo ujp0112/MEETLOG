@@ -48,7 +48,7 @@ public class MyCoursesServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "코스를 불러오는 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         }
     }
 
@@ -82,7 +82,7 @@ public class MyCoursesServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "작업을 처리하는 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         }
     }
 }

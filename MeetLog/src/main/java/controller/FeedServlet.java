@@ -55,7 +55,7 @@ public class FeedServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "피드를 불러오는 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         }
     }
 

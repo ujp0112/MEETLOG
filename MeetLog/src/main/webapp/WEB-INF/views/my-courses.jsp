@@ -85,17 +85,17 @@
                                         
                                         <!-- 상태 배지 -->
                                         <div class="absolute top-3 left-3">
-                                            <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${course.public ? 'bg-green-500' : 'bg-gray-500'}">
-                                                ${course.public ? '공개' : '비공개'}
+                                            <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${course['public'] ? 'bg-green-500' : 'bg-gray-500'}">
+                                                ${course['public'] ? '공개' : '비공개'}
                                             </span>
                                         </div>
                                         
                                         <!-- 액션 버튼들 -->
                                         <div class="absolute top-3 right-3 flex space-x-2">
                                             <button data-course-id="${course.courseId}" 
-                                                    data-is-public="${course.public}"
+                                                    data-is-public="${course['public']}"
                                                     class="toggle-public-btn w-8 h-8 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full flex items-center justify-center transition-all">
-                                                ${course.public ? '🔓' : '🔒'}
+                                                ${course['public'] ? '🔓' : '🔒'}
                                             </button>
                                             <button data-course-id="${course.courseId}"
                                                     class="delete-course-btn w-8 h-8 bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white rounded-full flex items-center justify-center transition-all">
