@@ -1,4 +1,4 @@
 /.metadata/
-
+/.claude/
 MeetLog/src/main/resources/api.properties
-MeetLog/src/main/webapp/WEB-INF/api.properties
+/MeetLog/CLAUDE.md

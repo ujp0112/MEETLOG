@@ -142,16 +142,17 @@
                                                         <div class="flex-1">
                                                             <div class="flex items-center justify-between mb-2">
                                                                 <h4 class="font-semibold text-slate-800">${comment.author}</h4>
-                                                                <div class="flex items-center space-x-2">
+                                                                <div class="flex items-center space-x-2 comment-actions">
                                                                     <span class="text-sm text-slate-500">
                                                                         ${comment.createdAt.toString().substring(0, 16).replace('T', ' ')}
                                                                     </span>
                                                                     <c:if test="${not empty sessionScope.user and sessionScope.user.id == comment.userId}">
+                                                                        <button onclick="editComment(${comment.id})" class="text-blue-500 hover:text-blue-700 text-sm">수정</button>
                                                                         <button onclick="deleteComment(${comment.id})" class="text-red-500 hover:text-red-700 text-sm">삭제</button>
                                                                     </c:if>
                                                                 </div>
                                                             </div>
-                                                            <p class="text-slate-700 leading-relaxed">${comment.content}</p>
+                                                            <p id="comment-content-${comment.id}" class="text-slate-700 leading-relaxed">${comment.content}</p>
                                                             <div class="mt-2 flex items-center space-x-4">
                                                                 <button id="comment-like-btn-${comment.id}" onclick="likeComment(${comment.id})" class="flex items-center space-x-1 text-slate-600 hover:text-red-500 transition-colors">
                                                                     <span>❤️</span>
@@ -216,8 +217,14 @@
                 },
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('네트워크 응답이 올바르지 않습니다.');
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('서버 응답:', data);
                 if (data.success) {
                     // 댓글 입력창 초기화
                     document.getElementById('comment-content').value = '';
@@ -232,7 +239,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('댓글 등록 중 오류가 발생했습니다.');
+                alert('댓글 등록 중 네트워크 오류가 발생했습니다.');
             });
         }
 
@@ -263,6 +270,166 @@
         function refreshComments() {
             // 페이지 새로고침 대신 AJAX로 댓글 목록만 업데이트
             location.reload();
+        }
+
+        // 전역 변수로 원본 내용 저장
+        let originalCommentContent = {};
+
+        function editComment(commentId) {
+            const commentElement = document.getElementById('comment-content-' + commentId);
+            const currentContent = commentElement.textContent.trim();
+
+            console.log('수정 모드 진입:', commentId, currentContent);
+
+            // 원본 내용 저장
+            originalCommentContent[commentId] = currentContent;
+
+            // textarea 생성
+            const textarea = document.createElement('textarea');
+            textarea.id = 'edit-textarea-' + commentId;
+            textarea.className = 'w-full p-3 border border-slate-300 rounded-lg resize-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500';
+            textarea.rows = 3;
+            textarea.value = currentContent;
+
+            // 버튼 컨테이너 생성
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'mt-2 flex space-x-2';
+
+            // 저장 버튼 생성
+            const saveButton = document.createElement('button');
+            saveButton.className = 'px-4 py-2 bg-sky-600 text-white font-semibold rounded-lg hover:bg-sky-700 text-sm';
+            saveButton.textContent = '저장';
+            saveButton.onclick = function() { saveComment(commentId); };
+
+            // 취소 버튼 생성
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'px-4 py-2 bg-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-400 text-sm';
+            cancelButton.textContent = '취소';
+            cancelButton.onclick = function() { cancelEdit(commentId); };
+
+            // 버튼들을 컨테이너에 추가
+            buttonContainer.appendChild(saveButton);
+            buttonContainer.appendChild(cancelButton);
+
+            // 기존 내용을 교체
+            commentElement.innerHTML = '';
+            commentElement.appendChild(textarea);
+            commentElement.appendChild(buttonContainer);
+
+            // 기존 수정/삭제 버튼 숨기기
+            const actionButtons = commentElement.parentElement.querySelector('.comment-actions');
+            if (actionButtons) {
+                actionButtons.style.display = 'none';
+            }
+
+            // textarea에 포커스
+            textarea.focus();
+        }
+
+        function cancelEdit(commentId) {
+            console.log('수정 취소:', commentId, originalCommentContent[commentId]);
+
+            const commentElement = document.getElementById('comment-content-' + commentId);
+
+            // 원본 내용으로 복원
+            commentElement.innerHTML = '';
+            commentElement.textContent = originalCommentContent[commentId];
+
+            // 기존 수정/삭제 버튼 다시 보이기
+            const actionButtons = commentElement.parentElement.querySelector('.comment-actions');
+            if (actionButtons) {
+                actionButtons.style.display = 'flex';
+            }
+
+            // 저장된 원본 내용 정리
+            delete originalCommentContent[commentId];
+        }
+
+        function saveComment(commentId) {
+            const textarea = document.getElementById('edit-textarea-' + commentId);
+            if (!textarea) {
+                alert('수정할 수 없습니다.');
+                return;
+            }
+
+            const newContent = textarea.value.trim();
+            console.log('댓글 저장 시도:', commentId, newContent);
+
+            if (!newContent) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            // 저장 중 버튼 비활성화
+            const saveButton = textarea.parentElement.querySelector('button');
+            if (saveButton) {
+                saveButton.disabled = true;
+                saveButton.textContent = '저장 중...';
+            }
+
+            fetch('${pageContext.request.contextPath}/api/column/comment/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    commentId: commentId,
+                    content: newContent
+                })
+            })
+            .then(response => {
+                console.log('HTTP 응답 상태:', response.status, response.statusText);
+                console.log('응답 헤더:', response.headers.get('content-type'));
+
+                if (!response.ok) {
+                    throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
+                }
+                return response.text().then(text => {
+                    console.log('원본 응답 텍스트:', text);
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('JSON 파싱 오류:', e);
+                        throw new Error('서버 응답을 JSON으로 파싱할 수 없습니다: ' + text);
+                    }
+                });
+            })
+            .then(data => {
+                console.log('파싱된 서버 응답:', data);
+                if (data.success) {
+                    // 댓글 내용 업데이트 (페이지 새로고침 대신)
+                    const commentElement = document.getElementById('comment-content-' + commentId);
+                    commentElement.innerHTML = '';
+                    commentElement.textContent = newContent;
+
+                    // 수정/삭제 버튼 다시 보이기
+                    const actionButtons = commentElement.parentElement.querySelector('.comment-actions');
+                    if (actionButtons) {
+                        actionButtons.style.display = 'flex';
+                    }
+
+                    // 저장된 원본 내용 정리
+                    delete originalCommentContent[commentId];
+
+                    alert('댓글이 수정되었습니다.');
+                } else {
+                    alert(data.message || '댓글 수정에 실패했습니다.');
+                    // 버튼 복원
+                    if (saveButton) {
+                        saveButton.disabled = false;
+                        saveButton.textContent = '저장';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('댓글 수정 중 오류가 발생했습니다.');
+                // 버튼 복원
+                if (saveButton) {
+                    saveButton.disabled = false;
+                    saveButton.textContent = '저장';
+                }
+            });
         }
 
         function likeComment(commentId) {

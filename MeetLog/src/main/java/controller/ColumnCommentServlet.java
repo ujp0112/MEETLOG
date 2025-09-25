@@ -89,7 +89,7 @@ public class ColumnCommentServlet extends HttpServlet {
             ColumnComment comment = new ColumnComment();
             comment.setColumnId(columnId);
             comment.setUserId(user.getId());
-            comment.setAuthor(user.getNickname() != null ? user.getNickname() : user.getName());
+            comment.setAuthor(user.getNickname());
             comment.setContent(content.trim());
             comment.setProfileImage(user.getProfileImage());
 
@@ -99,10 +99,7 @@ public class ColumnCommentServlet extends HttpServlet {
             if (success) {
                 result.put("success", true);
                 result.put("message", "댓글이 등록되었습니다.");
-
-                // 최신 댓글 목록 반환
-                List<ColumnComment> comments = columnCommentService.getCommentsByColumnId(columnId);
-                result.put("comments", comments);
+                result.put("commentId", comment.getId()); // 새로 생성된 댓글 ID만 반환
             } else {
                 result.put("success", false);
                 result.put("message", "댓글 등록에 실패했습니다.");
@@ -173,6 +170,94 @@ public class ColumnCommentServlet extends HttpServlet {
         }
 
         out.print(gson.toJson(result));
+        out.flush();
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json; charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        Map<String, Object> result = new HashMap<>();
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            result.put("success", false);
+            result.put("message", "로그인이 필요합니다.");
+            out.print(gson.toJson(result));
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+
+        // JSON 데이터 읽기
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = request.getReader().readLine()) != null) {
+            sb.append(line);
+        }
+
+        try {
+            System.out.println("DEBUG PUT: 받은 JSON 데이터 = " + sb.toString());
+
+            Map<String, Object> jsonData = gson.fromJson(sb.toString(), Map.class);
+            int commentId = ((Double) jsonData.get("commentId")).intValue();
+            String newContent = (String) jsonData.get("content");
+
+            System.out.println("DEBUG PUT: commentId = " + commentId + ", newContent = " + newContent);
+
+            if (newContent == null || newContent.trim().isEmpty()) {
+                result.put("success", false);
+                result.put("message", "댓글 내용을 입력해주세요.");
+                out.print(gson.toJson(result));
+                return;
+            }
+
+            // 기존 댓글 확인 및 권한 체크
+            ColumnComment existingComment = columnCommentService.getCommentById(commentId);
+            if (existingComment == null) {
+                result.put("success", false);
+                result.put("message", "댓글을 찾을 수 없습니다.");
+                out.print(gson.toJson(result));
+                return;
+            }
+
+            if (existingComment.getUserId() != user.getId()) {
+                result.put("success", false);
+                result.put("message", "자신의 댓글만 수정할 수 있습니다.");
+                out.print(gson.toJson(result));
+                return;
+            }
+
+            // 댓글 수정
+            existingComment.setContent(newContent.trim());
+            boolean success = columnCommentService.updateColumnComment(existingComment);
+
+            System.out.println("DEBUG PUT: 수정 결과 = " + success);
+
+            if (success) {
+                result.put("success", true);
+                result.put("message", "댓글이 수정되었습니다.");
+                // comment 객체 전체를 보내지 말고 필요한 정보만 보내기
+                result.put("commentId", existingComment.getId());
+                result.put("content", existingComment.getContent());
+                System.out.println("DEBUG PUT: 성공 응답 준비 완료");
+            } else {
+                result.put("success", false);
+                result.put("message", "댓글 수정에 실패했습니다.");
+                System.out.println("DEBUG PUT: 실패 응답 준비 완료");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "댓글 수정 중 오류가 발생했습니다.");
+        }
+
+        String jsonResponse = gson.toJson(result);
+        System.out.println("DEBUG PUT: 최종 JSON 응답 = " + jsonResponse);
+
+        out.print(jsonResponse);
         out.flush();
     }
 }
