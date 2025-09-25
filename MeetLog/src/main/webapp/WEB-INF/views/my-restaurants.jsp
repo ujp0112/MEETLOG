@@ -93,6 +93,10 @@
                                        class="flex-1 btn-primary text-white py-2 px-4 rounded-xl font-semibold text-center">
                                         메뉴관리
                                     </a>
+                                    <a href="${pageContext.request.contextPath}/business/restaurants/edit?id=${restaurant.id}" 
+								       class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-xl font-semibold text-center card-hover">
+								        수정하기
+								    </a>
                                 </div>
                                 
                                 <div class="mt-4 pt-4 border-t border-slate-200">

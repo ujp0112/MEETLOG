@@ -197,7 +197,7 @@
     NOW(), NOW())
 </insert>
 
-	<update id="update" parameterType="model.Restaurant">
+	<!-- <update id="update" parameterType="model.Restaurant">
 		UPDATE restaurants
 		<set>
 			<if test="name != null">name = #{name},</if>
@@ -209,7 +209,40 @@
 			updated_at = NOW()
 		</set>
 		WHERE id = #{id}
-	</update>
+	</update> -->
+	
+    <update id="update" parameterType="model.Restaurant">
+        UPDATE restaurants
+        SET
+            name = #{name},
+            category = #{category},
+            location = #{location},
+            address = #{address},
+            jibun_address = #{jibunAddress},
+            phone = #{phone},
+            description = #{description},
+            parking = #{parking},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            operating_days = #{operatingDays},
+            operating_times_text = #{operatingTimesText},
+            break_time_text = #{breakTimeText},
+            <if test="image != null">
+            image = #{image},
+        </if>
+            updated_at = NOW()
+        WHERE id = #{id} AND owner_id = #{ownerId}
+    </update>
+
+
+    <delete id="deleteRestaurantImages" parameterType="int">
+        DELETE FROM restaurant_images WHERE restaurant_id = #{restaurantId}
+    </delete>
+
+    <delete id="deleteOperatingHours" parameterType="int">
+        DELETE FROM restaurant_operating_hours WHERE restaurant_id = #{restaurantId}
+    </delete>
+
 
 	<update id="delete" parameterType="int">
 		UPDATE restaurants SET
@@ -248,6 +281,13 @@
         </foreach>
     </insert>
     
-    
+<delete id="deleteRestaurantImagesByNames" parameterType="map">
+    DELETE FROM restaurant_images
+    WHERE restaurant_id = #{restaurantId}
+    AND image_path IN
+    <foreach collection="imageList" item="imageName" open="(" separator="," close=")">
+        #{imageName}
+    </foreach>
+</delete>
 
 </mapper>

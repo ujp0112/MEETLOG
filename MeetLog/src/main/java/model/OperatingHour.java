@@ -11,6 +11,12 @@ public class OperatingHour {
 
 	public OperatingHour() {
 	}
+	
+	public OperatingHour(int dayOfWeek, LocalTime openingTime, LocalTime closingTime) {
+        this.dayOfWeek = dayOfWeek;
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
+    }
 
 	// Getters and Setters
 	public int getId() {
