@@ -12,6 +12,7 @@ public class RestaurantRecommendation {
     private String recommendationReason; // 추천 이유
     private List<String> matchingFactors; // 매칭된 요소들 (카테고리, 가격대, 분위기 등)
     private boolean isPersonalized; // 개인화된 추천인지 여부
+    private double predictedRating; // 예측 평점 (0.0 ~ 5.0)
 
     public RestaurantRecommendation() {
     }
@@ -61,5 +62,22 @@ public class RestaurantRecommendation {
 
     public void setPersonalized(boolean personalized) {
         isPersonalized = personalized;
+    }
+
+    public double getPredictedRating() {
+        return predictedRating;
+    }
+
+    public void setPredictedRating(double predictedRating) {
+        this.predictedRating = predictedRating;
+    }
+
+    // 별칭 메소드들 (IntelligentRecommendationService와의 호환성을 위해)
+    public String getReason() {
+        return getRecommendationReason();
+    }
+
+    public void setReason(String reason) {
+        setRecommendationReason(reason);
     }
 }

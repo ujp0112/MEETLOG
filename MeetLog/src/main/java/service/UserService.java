@@ -191,4 +191,54 @@ public class UserService {
     public boolean rejectBranch(int branchUserId) {
         return userDAO.delete(branchUserId) > 0;
     }
+
+    // --- 위시리스트 관련 메소드들 ---
+
+    public List<model.Restaurant> getWishlistRestaurants(int userId) {
+        // UserCollectionDAO를 통해 사용자의 위시리스트 레스토랑들을 가져옴
+        // 임시로 빈 리스트 반환 (실제 구현 필요)
+        return new java.util.ArrayList<>();
+    }
+
+    public List<model.UserCollection> getUserCollections(int userId) {
+        // 사용자의 컬렉션 목록을 가져옴
+        // 임시로 빈 리스트 반환 (실제 구현 필요)
+        return new java.util.ArrayList<>();
+    }
+
+    public model.UserCollection getUserCollection(int collectionId, int userId) {
+        // 특정 컬렉션 정보를 가져옴 (권한 확인 포함)
+        // 임시로 null 반환 (실제 구현 필요)
+        return null;
+    }
+
+    public List<model.Restaurant> getCollectionRestaurants(int collectionId) {
+        // 컬렉션에 속한 레스토랑들을 가져옴
+        // 임시로 빈 리스트 반환 (실제 구현 필요)
+        return new java.util.ArrayList<>();
+    }
+
+    public boolean addToCollection(int userId, int restaurantId, int collectionId) {
+        // 컬렉션에 레스토랑을 추가
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
+
+    public boolean addToWishlist(int userId, int restaurantId) {
+        // 기본 위시리스트에 레스토랑을 추가
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
+
+    public boolean removeFromWishlist(int userId, int restaurantId) {
+        // 위시리스트에서 레스토랑을 제거
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
+
+    public boolean createCollection(int userId, String collectionName, String description) {
+        // 새 컬렉션을 생성
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
 }

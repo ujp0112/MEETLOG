@@ -707,4 +707,39 @@
     <!-- HqRecipeServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
     <!-- HqSalesOrdersServlet은 @WebServlet 어노테이션으로 매핑됨 -->
+
+    <!-- ===== 새로 추가된 사용자 페이지 서블릿들 ===== -->
+
+    <!-- 피드 관련 서블릿 -->
+    <servlet>
+        <servlet-name>FeedServlet</servlet-name>
+        <servlet-class>controller.FeedServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FeedServlet</servlet-name>
+        <url-pattern>/feed</url-pattern>
+        <url-pattern>/feed/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- 내 코스 관련 서블릿 -->
+    <servlet>
+        <servlet-name>MyCoursesServlet</servlet-name>
+        <servlet-class>controller.MyCoursesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MyCoursesServlet</servlet-name>
+        <url-pattern>/my-courses</url-pattern>
+        <url-pattern>/my-courses/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- 위시리스트 관련 서블릿 -->
+    <servlet>
+        <servlet-name>WishlistServlet</servlet-name>
+        <servlet-class>controller.WishlistServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WishlistServlet</servlet-name>
+        <url-pattern>/wishlist</url-pattern>
+        <url-pattern>/wishlist/*</url-pattern>
+    </servlet-mapping>
 </web-app>

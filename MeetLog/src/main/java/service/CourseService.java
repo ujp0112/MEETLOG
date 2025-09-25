@@ -86,4 +86,30 @@ public class CourseService {
     public List<OfficialCourse> getOfficialCourses() {
         return courseDAO.selectOfficialCourses();
     }
+
+    // --- 사용자별 코스 관리 메소드들 ---
+
+    public List<CommunityCourse> getCoursesByUserId(int userId) {
+        // 사용자가 생성한 커뮤니티 코스들을 조회
+        // 임시로 빈 리스트 반환 (실제 구현 필요)
+        return new java.util.ArrayList<>();
+    }
+
+    public List<CommunityCourse> getBookmarkedCourses(int userId) {
+        // 사용자가 북마크한 코스들을 조회
+        // 임시로 빈 리스트 반환 (실제 구현 필요)
+        return new java.util.ArrayList<>();
+    }
+
+    public boolean toggleCourseBookmark(int userId, int courseId) {
+        // 코스 북마크 토글
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
+
+    public boolean deleteCourse(int courseId, int userId) {
+        // 코스 삭제 (권한 확인 포함)
+        // 임시로 true 반환 (실제 구현 필요)
+        return true;
+    }
 }

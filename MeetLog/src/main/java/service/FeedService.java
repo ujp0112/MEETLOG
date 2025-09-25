@@ -24,6 +24,13 @@ public class FeedService {
     }
 
     /**
+     * 특정 사용자의 피드 아이템들을 가져옴 (간편 메소드)
+     */
+    public List<FeedItem> getFeedItems(int userId) {
+        return getUserFeed(userId, 20, 0); // 기본값: 20개, 첫 페이지
+    }
+
+    /**
      * 특정 사용자의 활동 피드 조회
      */
     public List<FeedItem> getUserActivityFeed(int userId, int limit, int offset) {

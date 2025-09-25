@@ -120,6 +120,20 @@ public class FollowService {
     }
 
     /**
+     * 팔로잉 목록 조회 (간편 메소드)
+     */
+    public List<User> getFollowingUsers(int userId) {
+        return getFollowing(userId, 50, 0); // 기본값: 50개, 첫 페이지
+    }
+
+    /**
+     * 팔로워 목록 조회 (간편 메소드 오버로드)
+     */
+    public List<User> getFollowers(int userId) {
+        return getFollowers(userId, 50, 0); // 기본값: 50개, 첫 페이지
+    }
+
+    /**
      * 팔로우 피드 아이템 생성
      */
     private void createFollowFeedItem(int followerId, int followingId) {
