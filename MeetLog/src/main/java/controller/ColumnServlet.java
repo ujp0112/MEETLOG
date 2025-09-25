@@ -19,8 +19,10 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import model.Column;
+import model.ColumnComment;
 import model.User;
 import service.ColumnService;
+import service.ColumnCommentService;
 import util.AppConfig; // AppConfig 임포트
 
 // web.xml에 매핑했으므로 주석 처리
@@ -28,6 +30,7 @@ import util.AppConfig; // AppConfig 임포트
 public class ColumnServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ColumnService columnService = new ColumnService();
+    private ColumnCommentService columnCommentService = new ColumnCommentService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -43,7 +46,14 @@ public class ColumnServlet extends HttpServlet {
                 int columnId = Integer.parseInt(request.getParameter("id"));
                 columnService.incrementViews(columnId);
                 Column column = columnService.getColumnById(columnId);
+
+                // 댓글 목록 조회
+                List<ColumnComment> comments = columnCommentService.getCommentsByColumnId(columnId);
+                int commentCount = columnCommentService.getCommentCount(columnId);
+
                 request.setAttribute("column", column);
+                request.setAttribute("comments", comments);
+                request.setAttribute("commentCount", commentCount);
                 request.getRequestDispatcher("/WEB-INF/views/column-detail.jsp").forward(request, response);
 
             } else if ("/write".equals(pathInfo)) {

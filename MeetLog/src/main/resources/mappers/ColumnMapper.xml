@@ -83,4 +83,23 @@
     <update id="likeColumn" parameterType="int">
         UPDATE columns SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
     </update>
+
+    <update id="incrementLikes" parameterType="int">
+        UPDATE columns SET likes = likes + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikes" parameterType="int">
+        UPDATE columns SET likes = GREATEST(likes - 1, 0) WHERE id = #{id}
+    </update>
+
+    <select id="searchColumns" parameterType="map" resultMap="columnResultMap">
+        <include refid="selectColumnWithUser" />
+        WHERE c.is_active = true
+        <if test="keyword != null and keyword != ''">
+            AND (c.title LIKE CONCAT('%', #{keyword}, '%')
+                OR c.content LIKE CONCAT('%', #{keyword}, '%')
+                OR u.nickname LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY c.created_at DESC
+    </select>
 </mapper>

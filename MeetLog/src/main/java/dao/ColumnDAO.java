@@ -74,4 +74,10 @@ public class ColumnDAO {
 			return sqlSession.update(NAMESPACE + ".likeColumn", columnId);
 		}
 	}
+
+	public List<Column> searchColumns(Map<String, Object> searchParams) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".searchColumns", searchParams);
+		}
+	}
 }

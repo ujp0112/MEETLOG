@@ -84,7 +84,7 @@
                                     <div class="mt-8 pt-6 border-t border-slate-200">
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center space-x-3">
-                                                <button onclick="likeColumn(${column.id})"
+                                                <button id="column-like-btn-${column.id}" onclick="likeColumn(${column.id})"
                                                     class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors">
                                                     <span>❤️</span> <span>좋아요</span>
                                                 </button>
@@ -109,13 +109,66 @@
                                 </div>
                             </article>
                             <div class="mt-8">
-                                <h3 class="text-xl font-bold text-slate-800 mb-4">댓글</h3>
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <textarea class="form-input w-full mb-4"
-                                        placeholder="따뜻한 댓글을 남겨주세요." rows="3"></textarea>
-                                    <div class="text-right">
-                                        <button class="form-btn-primary">댓글 등록</button>
-                                    </div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-4">댓글 (<span id="comment-count">${commentCount}</span>)</h3>
+
+                                <!-- 댓글 입력 폼 -->
+                                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                                    <c:choose>
+                                        <c:when test="${not empty sessionScope.user}">
+                                            <textarea id="comment-content" class="form-input w-full mb-4"
+                                                placeholder="따뜻한 댓글을 남겨주세요." rows="3"></textarea>
+                                            <div class="text-right">
+                                                <button id="submit-comment" class="form-btn-primary">댓글 등록</button>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <p class="text-slate-500 text-center py-4">
+                                                <a href="${pageContext.request.contextPath}/login" class="text-sky-600 hover:text-sky-700">로그인</a>하시면 댓글을 작성할 수 있습니다.
+                                            </p>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+
+                                <!-- 댓글 목록 -->
+                                <div id="comments-list" class="space-y-4">
+                                    <c:choose>
+                                        <c:when test="${not empty comments}">
+                                            <c:forEach var="comment" items="${comments}">
+                                                <div class="bg-white rounded-xl shadow-sm p-6 comment-item" data-comment-id="${comment.id}">
+                                                    <div class="flex items-start space-x-3">
+                                                        <mytag:image fileName="${comment.profileImage}"
+                                                            altText="${comment.author}"
+                                                            cssClass="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                                                        <div class="flex-1">
+                                                            <div class="flex items-center justify-between mb-2">
+                                                                <h4 class="font-semibold text-slate-800">${comment.author}</h4>
+                                                                <div class="flex items-center space-x-2">
+                                                                    <span class="text-sm text-slate-500">
+                                                                        ${comment.createdAt.toString().substring(0, 16).replace('T', ' ')}
+                                                                    </span>
+                                                                    <c:if test="${not empty sessionScope.user and sessionScope.user.id == comment.userId}">
+                                                                        <button onclick="deleteComment(${comment.id})" class="text-red-500 hover:text-red-700 text-sm">삭제</button>
+                                                                    </c:if>
+                                                                </div>
+                                                            </div>
+                                                            <p class="text-slate-700 leading-relaxed">${comment.content}</p>
+                                                            <div class="mt-2 flex items-center space-x-4">
+                                                                <button id="comment-like-btn-${comment.id}" onclick="likeComment(${comment.id})" class="flex items-center space-x-1 text-slate-600 hover:text-red-500 transition-colors">
+                                                                    <span>❤️</span>
+                                                                    <span id="comment-like-count-${comment.id}">${comment.likeCount > 0 ? comment.likeCount : 0}</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="text-center py-8 text-slate-500">
+                                                <p>아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </div>
                         </c:when>
@@ -137,6 +190,117 @@
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
     <script>
+        // 댓글 등록 기능
+        document.addEventListener('DOMContentLoaded', function() {
+            const submitBtn = document.getElementById('submit-comment');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', submitComment);
+            }
+        });
+
+        function submitComment() {
+            const content = document.getElementById('comment-content').value.trim();
+            if (!content) {
+                alert('댓글 내용을 입력해주세요.');
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('columnId', ${column.id});
+            formData.append('content', content);
+
+            fetch('${pageContext.request.contextPath}/api/column/comment/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 댓글 입력창 초기화
+                    document.getElementById('comment-content').value = '';
+
+                    // 댓글 목록 새로고침
+                    refreshComments();
+
+                    alert('댓글이 등록되었습니다.');
+                } else {
+                    alert(data.message || '댓글 등록에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('댓글 등록 중 오류가 발생했습니다.');
+            });
+        }
+
+        function deleteComment(commentId) {
+            if (!confirm('댓글을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            fetch('${pageContext.request.contextPath}/api/column/comment/delete/' + commentId, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 댓글 목록 새로고침
+                    refreshComments();
+                    alert('댓글이 삭제되었습니다.');
+                } else {
+                    alert(data.message || '댓글 삭제에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
+            });
+        }
+
+        function refreshComments() {
+            // 페이지 새로고침 대신 AJAX로 댓글 목록만 업데이트
+            location.reload();
+        }
+
+        function likeComment(commentId) {
+            fetch('${pageContext.request.contextPath}/api/column/comment/like', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'commentId=' + commentId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const likeElement = document.getElementById('comment-like-count-' + commentId);
+                    const buttonElement = document.getElementById('comment-like-btn-' + commentId);
+                    if (likeElement) {
+                        likeElement.textContent = data.likeCount;
+                    }
+                    if (buttonElement) {
+                        // 좋아요 토글 UI 업데이트
+                        if (data.isLiked) {
+                            buttonElement.classList.add('text-red-600');
+                            buttonElement.classList.remove('text-slate-600');
+                        } else {
+                            buttonElement.classList.add('text-slate-600');
+                            buttonElement.classList.remove('text-red-600');
+                        }
+                    }
+                } else {
+                    alert(data.message || '좋아요 처리에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('좋아요 처리 중 오류가 발생했습니다.');
+            });
+        }
+
         // 좋아요 기능 (비동기 처리)
         function likeColumn(columnId) {
             fetch('${pageContext.request.contextPath}/api/column/like', {
@@ -148,8 +312,19 @@
             .then(data => {
                 if (data.success) {
                      const likeElement = document.getElementById('like-count-' + columnId);
+                     const buttonElement = document.getElementById('column-like-btn-' + columnId);
                      if (likeElement) {
                         likeElement.textContent = data.likes; // 서버에서 받은 최신 좋아요 수로 업데이트
+                    }
+                    if (buttonElement) {
+                        // 좋아요 토글 UI 업데이트
+                        if (data.isLiked) {
+                            buttonElement.classList.add('bg-red-100', 'text-red-600');
+                            buttonElement.classList.remove('bg-slate-100');
+                        } else {
+                            buttonElement.classList.add('bg-slate-100');
+                            buttonElement.classList.remove('bg-red-100', 'text-red-600');
+                        }
                     }
                 } else {
                     alert(data.message || '처리 중 오류가 발생했습니다.');

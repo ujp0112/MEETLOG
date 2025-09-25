@@ -59,4 +59,8 @@ public class ColumnService {
 	public boolean likeColumn(int columnId) {
 		return columnDAO.likeColumn(columnId) > 0;
 	}
+
+	public List<Column> searchColumns(Map<String, Object> searchParams) {
+		return columnDAO.searchColumns(searchParams);
+	}
 }

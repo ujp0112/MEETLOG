@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ColumnCommentDAO">
+    <resultMap id="columnCommentResultMap" type="ColumnComment" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="columnId" column="column_id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="parentId" column="parent_id" />
+        <result property="likeCount" column="like_count" />
+        <result property="profileImage" column="profile_image" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="findByColumnId" parameterType="int" resultMap="columnCommentResultMap">
+        SELECT cc.*, u.nickname AS author, u.profile_image
+        FROM column_comments cc
+        JOIN users u ON cc.user_id = u.id
+        WHERE cc.column_id = #{columnId}
+        ORDER BY cc.created_at ASC
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="columnCommentResultMap">
+        SELECT cc.*, u.nickname AS author, u.profile_image
+        FROM column_comments cc
+        JOIN users u ON cc.user_id = u.id
+        WHERE cc.id = #{commentId}
+    </select>
+
+    <select id="getCommentCount" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM column_comments
+        WHERE column_id = #{columnId}
+    </select>
+
+    <insert id="insert" parameterType="ColumnComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO column_comments (column_id, user_id, content, created_at)
+        VALUES (#{columnId}, #{userId}, #{content}, NOW())
+    </insert>
+
+    <update id="update" parameterType="ColumnComment">
+        UPDATE column_comments
+        SET content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM column_comments WHERE id = #{id}
+    </delete>
+
+    <update id="likeComment" parameterType="int">
+        UPDATE column_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="incrementLikes" parameterType="int">
+        UPDATE column_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikes" parameterType="int">
+        UPDATE column_comments SET like_count = GREATEST(COALESCE(like_count, 1) - 1, 0) WHERE id = #{id}
+    </update>
+</mapper>
