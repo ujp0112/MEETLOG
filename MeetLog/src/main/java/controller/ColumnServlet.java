@@ -21,8 +21,10 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import model.Column;
 import model.ColumnComment;
 import model.User;
+import model.FeedItem;
 import service.ColumnService;
 import service.ColumnCommentService;
+import service.FeedService;
 import util.AppConfig; // AppConfig 임포트
 
 // web.xml에 매핑했으므로 주석 처리
@@ -31,6 +33,7 @@ public class ColumnServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ColumnService columnService = new ColumnService();
     private ColumnCommentService columnCommentService = new ColumnCommentService();
+    private FeedService feedService = new FeedService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -130,6 +133,26 @@ public class ColumnServlet extends HttpServlet {
             boolean success = columnService.createColumn(column);
 
             if (success) {
+                // 피드 아이템 생성
+                try {
+                    FeedItem feedItem = new FeedItem();
+                    feedItem.setUserId(user.getId());
+                    feedItem.setUserNickname(user.getNickname());
+                    feedItem.setUserProfileImage(user.getProfileImage());
+                    feedItem.setActionType("column");
+                    feedItem.setContent("새 칼럼을 작성했습니다.");
+                    feedItem.setTargetType("column");
+                    feedItem.setTargetId(column.getId()); // Column 객체에서 생성된 ID 사용
+                    feedItem.setTargetName(column.getTitle());
+                    feedItem.setTargetImage(column.getImage());
+
+                    feedService.createFeedItem(feedItem);
+                    System.out.println("DEBUG: 칼럼 피드 아이템 생성 완료 - 칼럼 ID: " + column.getId());
+                } catch (Exception e) {
+                    System.err.println("피드 아이템 생성 실패: " + e.getMessage());
+                    e.printStackTrace();
+                }
+
                 response.sendRedirect(request.getContextPath() + "/column");
             } else {
                 request.setAttribute("errorMessage", "칼럼 등록에 실패했습니다.");

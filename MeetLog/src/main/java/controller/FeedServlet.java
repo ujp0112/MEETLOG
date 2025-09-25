@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,6 +17,7 @@ import service.FeedService;
 import service.FollowService;
 import java.util.ArrayList;
 
+// web.xml에 이미 매핑되어 있으므로 @WebServlet 어노테이션 제거
 public class FeedServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private final FeedService feedService = new FeedService();
@@ -38,13 +40,16 @@ public class FeedServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // 메인 피드 페이지
                 List<FeedItem> feedItems = feedService.getFeedItems(user.getId());
+                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 피드 아이템 수: " + feedItems.size());
 
                 // FeedItem을 Activity로 변환
                 List<Activity> activities = convertFeedItemsToActivities(feedItems);
+                System.out.println("DEBUG 피드: 변환된 Activity 수: " + activities.size());
 
                 // 팔로잉/팔로워 인원 조회
                 List<User> followingUsers = followService.getFollowingUsers(user.getId());
                 List<User> followers = followService.getFollowers(user.getId());
+                System.out.println("DEBUG 피드: 팔로잉 " + followingUsers.size() + "명, 팔로워 " + followers.size() + "명");
 
                 // JSP에서 사용할 속성 설정
                 request.setAttribute("activities", activities);

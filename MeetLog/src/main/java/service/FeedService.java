@@ -55,6 +55,18 @@ public class FeedService {
     }
 
     /**
+     * 범용 피드 아이템 생성
+     */
+    public void createFeedItem(FeedItem feedItem) {
+        try {
+            feedDAO.createFeedItem(feedItem);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("피드 아이템 생성 실패", e);
+        }
+    }
+
+    /**
      * 리뷰 작성 피드 아이템 생성
      */
     public void createReviewFeedItem(int userId, String userNickname, String userProfileImage, 

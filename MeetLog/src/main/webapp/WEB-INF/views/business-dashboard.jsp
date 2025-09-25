@@ -41,12 +41,42 @@
                     </c:if>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-card p-6 rounded-2xl slide-up"><dl><dt class="text-sm font-medium text-gray-500 truncate">총 예약 수</dt><dd class="text-3xl font-semibold text-gray-900 mt-1">${totalReservations}</dd></dl></div>
-                    <div class="glass-card p-6 rounded-2xl slide-up"><dl><dt class="text-sm font-medium text-gray-500 truncate">오늘 예약</dt><dd class="text-3xl font-semibold text-gray-900 mt-1">${todayReservations}</dd></dl></div>
-                    <div class="glass-card p-6 rounded-2xl slide-up"><dl><dt class="text-slate-600 text-sm font-medium">총 음식점</dt><dd class="text-3xl font-bold text-slate-800">${restaurantCount}</dd></dl></div>
-                    <div class="glass-card p-6 rounded-2xl slide-up"><dl><dt class="text-slate-600 text-sm font-medium">총 리뷰</dt><dd class="text-3xl font-bold text-slate-800">${reviewCount}</dd></dl></div>
-                    <div class="glass-card p-6 rounded-2xl slide-up"><dl><dt class="text-slate-600 text-sm font-medium">평균 평점</dt><dd class="text-3xl font-bold text-slate-800">${averageRating}</dd></dl></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="glass-card p-6 rounded-2xl slide-up">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-600 text-sm font-medium">총 음식점</p>
+                                <p class="text-3xl font-bold text-slate-800">${restaurantCount}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <span class="text-2xl">🏪</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl slide-up">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-600 text-sm font-medium">총 리뷰</p>
+                                <p class="text-3xl font-bold text-slate-800">${reviewCount}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <span class="text-2xl">⭐</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-2xl slide-up">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-slate-600 text-sm font-medium">평균 평점</p>
+                                <p class="text-3xl font-bold text-slate-800">${averageRating}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <span class="text-2xl">📊</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="glass-card p-8 rounded-3xl slide-up mb-8">
@@ -59,34 +89,39 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="glass-card p-8 rounded-3xl slide-up">
-                        <h2 class="text-2xl font-bold gradient-text mb-6">최근 예약</h2>
-                        <div class="space-y-4">
-                            <c:if test="${empty recentReservations}"><p class="text-center text-gray-500 py-8">최근 예약이 없습니다.</p></c:if>
-                            <c:forEach var="reservation" items="${recentReservations}">
-                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <p class="text-sm font-medium text-gray-900">${reservation.customerName}</p>
-                                        <p class="text-sm text-gray-500">${reservation.reservationDate} ${reservation.reservationTime} (${reservation.partySize}명)</p>
-                                    </div>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${reservation.status == '확정' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">${reservation.status}</span>
-                                </div>
-                            </c:forEach>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 gap-6">
                     <div class="glass-card p-8 rounded-3xl slide-up">
                         <h2 class="text-2xl font-bold gradient-text mb-6">최근 리뷰</h2>
                         <div class="space-y-4">
-                            <c:if test="${empty recentReviews}"><p class="text-center text-gray-500 py-8">아직 등록된 리뷰가 없습니다.</p></c:if>
-                            <c:forEach var="review" items="${recentReviews}">
-                                <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-2xl card-hover">
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold text-slate-800">${review.author}</h4>
-                                        <p class="text-slate-600 text-sm">${review.content}</p>
+                            <c:choose>
+                                <c:when test="${empty recentReviews}">
+                                    <div class="text-center py-12">
+                                        <div class="text-6xl mb-4">💬</div>
+                                        <h3 class="text-xl font-bold text-slate-600 mb-2">아직 리뷰가 없습니다</h3>
+                                        <p class="text-slate-500">고객들의 첫 번째 리뷰를 기다리고 있습니다!</p>
                                     </div>
-                                </div>
-                            </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="review" items="${recentReviews}">
+                                        <div class="flex items-start space-x-4 p-4 bg-slate-50 rounded-2xl card-hover">
+                                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <span class="text-sm">👤</span>
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-1">
+                                                    <h4 class="font-semibold text-slate-800">${review.author}</h4>
+                                                    <div class="flex items-center">
+                                                        <span class="text-yellow-500 text-sm">⭐</span>
+                                                        <span class="text-sm font-medium">${review.rating}</span>
+                                                    </div>
+                                                </div>
+                                                <p class="text-slate-600 text-sm leading-relaxed">${review.content}</p>
+                                                <p class="text-slate-400 text-xs mt-2">${review.createdAt}</p>
+                                            </div>
+                                        </div>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                 </div>

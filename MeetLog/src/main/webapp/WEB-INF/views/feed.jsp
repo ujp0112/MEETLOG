@@ -113,7 +113,7 @@
                                                 </span>
                                             </div>
                                             <p class="text-slate-500 text-sm">
-                                                ${activity.createdAt.format(DateTimeFormatter.ofPattern('MM월 dd일 HH:mm'))}
+                                                ${activity.createdAt.toString().substring(0, 16).replace('T', ' ')}
                                             </p>
                                         </div>
                                     </div>
