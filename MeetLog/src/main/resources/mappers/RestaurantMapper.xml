@@ -183,18 +183,19 @@
     </select>
 
 	<insert id="insert" parameterType="model.Restaurant" useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO restaurants
-		(owner_id,
-		name, category, location, address, jibun_address, phone, hours,
-		description, image, parking, latitude, longitude, created_at,
-		updated_at)
-		VALUES
-		(#{ownerId}, #{name}, #{category}, #{location},
-		#{address},
-		#{jibunAddress}, #{phone}, #{hours}, #{description},
-		#{image},
-		#{parking}, #{latitude}, #{longitude}, NOW(), NOW())
-	</insert>
+    INSERT INTO restaurants
+    (owner_id,
+    name, category, location, address, jibun_address, phone, hours,
+    description, image, parking, latitude, longitude, 
+    operating_days, operating_times_text, break_time_text,
+    created_at, updated_at)
+    VALUES
+    (#{ownerId}, #{name}, #{category}, #{location},
+    #{address}, #{jibunAddress}, #{phone}, #{hours}, #{description},
+    #{image}, #{parking}, #{latitude}, #{longitude},
+    #{operatingDays}, #{operatingTimesText}, #{breakTimeText},
+    NOW(), NOW())
+</insert>
 
 	<update id="update" parameterType="model.Restaurant">
 		UPDATE restaurants
@@ -246,5 +247,7 @@
             (#{restaurantId}, #{image}, #{index})
         </foreach>
     </insert>
+    
+    
 
 </mapper>
