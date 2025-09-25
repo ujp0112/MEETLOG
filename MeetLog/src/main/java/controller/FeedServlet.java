@@ -36,7 +36,14 @@ public class FeedServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // 메인 피드 페이지
                 List<FeedItem> feedItems = feedService.getFeedItems(user.getId());
+                
+                // 팔로잉/팔로워 인원 조회
+                List<User> followingUsers = followService.getFollowingUsers(user.getId());
+                List<User> followers = followService.getFollowers(user.getId());
+                
                 request.setAttribute("feedItems", feedItems);
+                request.setAttribute("followingCount", followingUsers.size());
+                request.setAttribute("followerCount", followers.size());
                 request.getRequestDispatcher("/WEB-INF/views/feed.jsp").forward(request, response);
 
             } else if (pathInfo.equals("/follow-list")) {

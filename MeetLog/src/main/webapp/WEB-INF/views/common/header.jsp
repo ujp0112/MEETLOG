@@ -249,7 +249,7 @@
 									팔로우 피드								</a> <a href="${pageContext.request.contextPath}/my-courses"
 									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🗺️
 									내 코스</a> <a href="${pageContext.request.contextPath}/wishlist"
-									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">💖
+									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">❤️
 									내가 찜한 목록</a> <a
 									href="${pageContext.request.contextPath}/mypage/reviews"
 									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✨

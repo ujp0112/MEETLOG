@@ -258,9 +258,9 @@
                                 </p>
                                 <div class="flex justify-center space-x-4">
                                     <c:if test="${followingCount == 0}">
-                                        <a href="${pageContext.request.contextPath}/user/search" 
+                                        <a href="${pageContext.request.contextPath}/column" 
                                            class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-                                            사람 찾기
+                                            칼럼 보기
                                         </a>
                                     </c:if>
                                     <a href="${pageContext.request.contextPath}/restaurant/list" 
