@@ -27,7 +27,9 @@ public class Restaurant {
 	private LocalDateTime updatedAt;
 	private boolean isActive;
 	private int ownerId; // 사업자 ID 추가
-
+	private String operatingDays;
+    private String operatingTimesText;
+    private String breakTimeText;
 
 	// 상세 정보 필드들 추가
 	private int priceRange; // 1: ~1만원, 2: 1-2만원, 3: 2-4만원, 4: 4만원+
@@ -311,5 +313,29 @@ public class Restaurant {
 	
 	public void setAdditionalImages(List<String> additionalImages) {
 		this.additionalImages = additionalImages;
+	}
+	
+	public String getOperatingDays() {
+		return operatingDays;
+	}
+
+	public void setOperatingDays(String operatingDays) {
+		this.operatingDays = operatingDays;
+	}
+
+	public String getOperatingTimesText() {
+		return operatingTimesText;
+	}
+
+	public void setOperatingTimesText(String operatingTimesText) {
+		this.operatingTimesText = operatingTimesText;
+	}
+
+	public String getBreakTimeText() {
+		return breakTimeText;
+	}
+
+	public void setBreakTimeText(String breakTimeText) {
+		this.breakTimeText = breakTimeText;
 	}
 }

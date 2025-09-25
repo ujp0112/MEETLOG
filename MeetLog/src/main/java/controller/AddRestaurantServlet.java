@@ -109,6 +109,26 @@ public class AddRestaurantServlet extends HttpServlet {
 
             restaurant.setParking("true".equals(formFields.get("parking")));
             restaurant.setImage(mainImageFileName);
+            restaurant.setBreakTimeText(formFields.get("break_time_text"));
+            
+            List<String> operatingDaysList = new ArrayList<>();
+            List<String> operatingTimesList = new ArrayList<>();
+            String[] dayNames = {"월", "화", "수", "목", "금", "토", "일"};
+            
+            for (int i = 1; i <= 7; i++) {
+                if (formFields.get("main_is_closed_" + i) == null) {
+                    // select 값을 변환한 hidden input 값을 가져옴
+                    String openTime = formFields.get("main_day_" + i + "_open_1");
+                    String closeTime = formFields.get("main_day_" + i + "_close_1");
+                    
+                    if (openTime != null && !openTime.isEmpty() && closeTime != null && !closeTime.isEmpty()) {
+                        operatingDaysList.add(dayNames[i-1]);
+                        operatingTimesList.add(openTime + "~" + closeTime);
+                    }
+                }
+            }
+            restaurant.setOperatingDays(String.join(",", operatingDaysList));
+            restaurant.setOperatingTimesText(String.join(",", operatingTimesList));
 
             try {
                 restaurant.setLatitude(Double.parseDouble(formFields.get("latitude")));
@@ -146,9 +166,10 @@ public class AddRestaurantServlet extends HttpServlet {
             boolean success = restaurantService.addRestaurant(restaurant, additionalImageFileNames, hoursList);
 
             if (success) {
-                response.sendRedirect(request.getContextPath() + "/business/restaurants");
+            	response.setStatus(HttpServletResponse.SC_OK);
             } else {
-                throw new Exception("가게 등록에 실패했습니다. 서비스 로직을 확인해주세요.");
+            	response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "가게 등록에 실패했습니다.");
+//                throw new Exception("가게 등록에 실패했습니다. 서비스 로직을 확인해주세요.");
             }
 
         } catch (Exception e) {

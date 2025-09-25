@@ -125,12 +125,13 @@
     <script>
         function deleteRestaurant(restaurantId) {
             if (confirm('정말로 이 음식점을 삭제하시겠습니까? 관련 메뉴, 리뷰 등 모든 데이터가 비활성화됩니다.')) {
-                fetch('${pageContext.request.contextPath}/business/restaurants/delete', {
+            	fetch('${pageContext.request.contextPath}/business/restaurants/delete', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/x-www-form-urlencoded' // 1. Content-Type 변경
                     },
-                    body: JSON.stringify({ id: restaurantId })
+                    // 2. 'restaurantId=값' 형태의 폼 데이터로 변경
+                    body: 'restaurantId=' + restaurantId 
                 })
                 .then(response => response.json())
                 .then(data => {
