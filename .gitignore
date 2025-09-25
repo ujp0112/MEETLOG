@@ -1,3 +1,4 @@
 /.metadata/
 
 MeetLog/src/main/resources/api.properties
+MeetLog/src/main/webapp/WEB-INF/api.properties
