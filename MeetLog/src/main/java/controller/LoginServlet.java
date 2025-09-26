@@ -49,8 +49,14 @@ public class LoginServlet extends HttpServlet {
                 session.setAttribute("user", user);
                 
                 // 비즈니스 회원이면 businessUser 정보도 세션에 저장
-                if ("BUSINESS".equals(user.getUserType().toUpperCase())) {
-                     session.setAttribute("businessUser", userService.getBusinessUserByUserId(user.getId()));
+                if ("BUSINESS".equals(user.getUserType())) {
+                    BusinessUser businessUser = userService.getBusinessUserByUserId(user.getId());
+                    if (businessUser != null) {
+                        session.setAttribute("businessUser", businessUser);
+                        System.out.println("BusinessUser 세션 저장 완료: " + businessUser.getRole());
+                    } else {
+                        System.out.println("BusinessUser 정보를 찾을 수 없음: userId=" + user.getId());
+                    }
                 }
                 
                 session.setMaxInactiveInterval(30 * 60);

@@ -237,7 +237,7 @@
     // 팔로우/언팔로우 토글 함수
     function toggleFollow(targetUserId, isFollow) {
         const action = isFollow ? 'follow' : 'unfollow';
-        const url = '${pageContext.request.contextPath}/api/follow';
+        const url = '${pageContext.request.contextPath}/feed/toggle-follow';
 
         fetch(url, {
             method: 'POST',

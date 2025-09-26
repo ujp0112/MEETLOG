@@ -91,7 +91,7 @@
 								class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2 inline-flex items-center">
 								비즈니스 메뉴 ▼ </a>
 							<div
-								class="dropdown-content absolute right-0 top-full pt-4 hidden group-hover:block z-50">
+								class="absolute right-0 top-full pt-4 hidden group-hover:block z-50 opacity-0 group-hover:opacity-100 transition-all duration-200">
 								<div
 									class="min-w-[200px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
 									<%-- <div class="px-4 py-2 text-sm font-semibold text-slate-500">사업자 메뉴</div>
@@ -230,7 +230,7 @@
 								${sessionScope.user.nickname}님 ▼</span>
 						</button>
 						<div
-							class="dropdown-content absolute right-0 top-full pt-4 hidden group-hover:block z-50">
+							class="absolute right-0 top-full pt-4 hidden group-hover:block z-50 opacity-0 group-hover:opacity-100 transition-all duration-200">
 							<div
 								class="min-w-[240px] bg-white rounded-md shadow-lg py-2 border border-slate-200">
 								<div class="px-4 py-2 text-sm font-semibold text-slate-500">사용자

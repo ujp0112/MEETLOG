@@ -17,6 +17,8 @@ import service.FeedService;
 import service.FollowService;
 import service.UserService;
 import java.util.ArrayList;
+import java.util.Date;
+import java.time.ZoneId;
 
 // web.xml에 이미 매핑되어 있으므로 @WebServlet 어노테이션 제거
 public class FeedServlet extends HttpServlet {
@@ -124,7 +126,44 @@ public class FeedServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        doGet(request, response);
+        String pathInfo = request.getPathInfo();
+
+        if ("/toggle-follow".equals(pathInfo)) {
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            HttpSession session = request.getSession(false);
+            if (session == null || session.getAttribute("user") == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+                return;
+            }
+
+            try {
+                User user = (User) session.getAttribute("user");
+                String action = request.getParameter("action");
+                int targetUserId = Integer.parseInt(request.getParameter("targetUserId"));
+
+                boolean success = false;
+                if ("follow".equals(action)) {
+                    success = followService.followUser(user.getId(), targetUserId);
+                } else if ("unfollow".equals(action)) {
+                    success = followService.unfollowUser(user.getId(), targetUserId);
+                }
+
+                if (success) {
+                    response.getWriter().write("{\"success\": true}");
+                } else {
+                    response.getWriter().write("{\"success\": false, \"message\": \"작업을 완료할 수 없습니다.\"}");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+            }
+        } else {
+            doGet(request, response);
+        }
     }
 
     /**
@@ -136,6 +175,11 @@ public class FeedServlet extends HttpServlet {
 
         for (FeedItem feedItem : feedItems) {
             Activity activity = new Activity(feedItem);
+
+            // LocalDateTime을 Date로 변환
+            if (feedItem.getCreatedAt() != null) {
+                activity.setCreatedAt(Date.from(feedItem.getCreatedAt().atZone(ZoneId.systemDefault()).toInstant()));
+            }
 
             // 활동 타입에 따라 targetUrl 설정
             String targetUrl = "";

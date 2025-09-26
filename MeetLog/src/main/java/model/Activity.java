@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 피드 화면에서 사용할 활동 데이터 DTO
@@ -24,7 +25,7 @@ public class Activity {
     private int commentCount;
     private String targetUrl;
 
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     public Activity() {
     }
@@ -33,7 +34,7 @@ public class Activity {
     public Activity(FeedItem feedItem) {
         this.userNickname = feedItem.getUserNickname();
         this.userProfileImage = feedItem.getUserProfileImage();
-        this.createdAt = feedItem.getCreatedAt();
+        // createdAt은 서블릿에서 변환 후 설정
         this.contentId = feedItem.getTargetId();
 
         // actionType을 activityType으로 변환
@@ -138,11 +139,11 @@ public class Activity {
         this.restaurantName = restaurantName;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
