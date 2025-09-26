@@ -1,0 +1,149 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
+
+<section class="glass-card p-8 rounded-3xl slide-up">
+	<div class="flex items-start justify-between mb-6">
+		<div class="flex-1">
+			<h1 class="text-4xl font-bold gradient-text mb-3">${restaurant.name}</h1>
+			<div class="flex items-center space-x-3 mb-4">
+				<span class="info-badge">${restaurant.category}</span> <span
+					class="location-badge">📍 ${restaurant.location}</span>
+			</div>
+		</div>
+		<div class="text-right">
+			<div class="text-5xl font-black rating-badge mb-2">
+				<fmt:formatNumber value="${restaurant.rating}" maxFractionDigits="1" />
+			</div>
+			<div class="flex items-center justify-center mb-2">
+				<div class="rating-stars flex space-x-1">
+					<c:forEach begin="1" end="5" var="star">
+						<c:choose>
+							<c:when test="${restaurant.rating >= star}">
+								<span class="text-yellow-400 text-2xl">★</span>
+							</c:when>
+							<c:otherwise>
+								<span class="text-slate-300 text-2xl">☆</span>
+							</c:otherwise>
+						</c:choose>
+					</c:forEach>
+				</div>
+			</div>
+			<div class="text-sm text-slate-500">${restaurant.reviewCount}개 리뷰</div>
+		</div>
+	</div>
+	<div class="flex space-x-4">
+		<button class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️ 찜하기</button>
+		<button class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤 공유하기</button>
+	</div>
+</section>
+
+<section class="glass-card p-8 rounded-3xl slide-up">
+	<h3 class="text-2xl font-bold gradient-text mb-6">상세 정보</h3>
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+		<div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl card-hover">
+			<div class="text-2xl">🏠</div>
+			<div>
+				<span class="font-bold text-slate-700">주소</span>
+				<p class="text-slate-600 mt-1">${restaurant.address}</p>
+			</div>
+		</div>
+		<div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl card-hover">
+			<div class="text-2xl">📞</div>
+			<div>
+				<span class="font-bold text-slate-700">전화번호</span>
+				<p class="text-slate-600 mt-1">${not empty restaurant.phone ? restaurant.phone : "정보 없음"}</p>
+			</div>
+		</div>
+		<div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
+			<div class="text-2xl">🕒</div>
+			<div class="flex-1">
+				<span class="font-bold text-slate-700">영업시간</span>
+				<c:choose>
+					<c:when test="${not empty operatingHours}">
+						<div class="mt-2 space-y-1">
+							<c:forEach var="hour" items="${operatingHours}">
+								<div class="flex justify-between text-sm">
+									<span class="text-slate-600"> 
+										<c:choose>
+											<c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
+											<c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
+											<c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
+											<c:when test="${hour.dayOfWeek == 4}">목요일</c:when>
+											<c:when test="${hour.dayOfWeek == 5}">금요일</c:when>
+											<c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
+											<c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
+										</c:choose>
+									</span> 
+									<span class="text-slate-600">
+										<c:choose>
+											<c:when test="${empty hour.openingTime}">
+												<span class="text-red-500">휴무</span>
+											</c:when>
+											<c:otherwise>
+                                                ${hour.openingTime} - ${hour.closingTime}
+                                            </c:otherwise>
+										</c:choose>
+									</span>
+								</div>
+							</c:forEach>
+						</div>
+					</c:when>
+					<c:otherwise>
+						<p class="text-slate-600 mt-1">영업시간 정보 없음</p>
+					</c:otherwise>
+				</c:choose>
+			</div>
+		</div>
+		<div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
+			<div class="text-2xl">🚗</div>
+			<div>
+				<span class="font-bold text-slate-700">주차</span>
+				<p class="text-slate-600 mt-1">${restaurant.parking ? "가능" : "불가"}</p>
+			</div>
+		</div>
+	</div>
+	<c:if test="${not empty restaurant.description}">
+		<div class="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl">
+			<h3 class="font-bold text-slate-700 mb-2">📝 설명</h3>
+			<p class="text-slate-600 leading-relaxed">${restaurant.description}</p>
+		</div>
+	</c:if>
+</section>
+
+<c:if test="${not empty menus}">
+	<section class="glass-card p-8 rounded-3xl slide-up">
+		<h2 class="text-2xl font-bold gradient-text mb-6">🍽️ 메뉴</h2>
+		<div class="space-y-4">
+			<c:forEach var="menu" items="${menus}">
+				<div class="menu-item flex justify-between items-center p-6 border-gradient rounded-2xl bg-white/50 backdrop-blur-sm">
+					<div class="flex-1">
+						<div class="flex items-center space-x-3">
+							<h3 class="font-bold text-slate-800 text-lg">${menu.name}</h3>
+							<c:if test="${menu.popular}">
+								<span class="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full font-semibold">🔥 인기</span>
+							</c:if>
+						</div>
+						<c:if test="${not empty menu.description}">
+							<p class="text-sm text-slate-600 mt-1">${menu.description}</p>
+						</c:if>
+					</div>
+					<div class="text-right">
+						<span class="text-2xl font-bold text-sky-600">
+							<c:choose>
+								<c:when test="${fn:contains(menu.price, '원')}">
+                                    ${menu.price}
+                                </c:when>
+								<c:otherwise>
+									<fmt:formatNumber value="${menu.price}" type="currency" currencySymbol="₩" />
+								</c:otherwise>
+							</c:choose>
+						</span>
+					</div>
+				</div>
+			</c:forEach>
+		</div>
+	</section>
+</c:if>

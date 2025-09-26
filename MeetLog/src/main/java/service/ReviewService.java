@@ -4,10 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionException;
 import dao.ReviewDAO;
 import model.Review;
 import model.ReviewInfo;
 import util.MyBatisSqlSessionFactory;
+
 
 public class ReviewService {
     private final ReviewDAO reviewDAO = new ReviewDAO();
@@ -52,21 +54,34 @@ public class ReviewService {
         return reviewDAO.findAll(); // 임시로 모든 리뷰 반환
     }
 
-    // --- Write Operations with Service-Layer Transaction Management ---
     public boolean addReview(Review review) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+        // SqlSession을 try-with-resources 구문으로 사용하여 자동 close를 보장합니다.
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             try {
-                int result = reviewDAO.insert(sqlSession, review);
-                if (result > 0) {
-                    sqlSession.commit();
-                    return true;
+                // 1. 리뷰 기본 정보 저장 (성공 시 review 객체에 새로 생성된 ID가 담김)
+                reviewDAO.insertReview(session, review);
+
+                List<String> imageList = review.getImages();
+                
+                // 2. 저장할 이미지가 있을 경우에만 이미지 정보를 별도 테이블에 저장
+                if (imageList != null && !imageList.isEmpty()) {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("reviewId", review.getId()); // 1번에서 생성된 리뷰 ID
+                    params.put("imageList", imageList);     // 서블릿에서 전달받은 이미지 파일명 리스트
+                    reviewDAO.insertReviewImages(session, params);
                 }
+
+                // 모든 DB 작업이 성공적으로 끝나면 commit
+                session.commit();
+                return true;
+
             } catch (Exception e) {
+                // DB 작업 중 하나라도 실패하면 모든 작업을 취소 (rollback)
+                session.rollback();
                 e.printStackTrace();
-                sqlSession.rollback();
+                return false;
             }
         }
-        return false;
     }
 
     public boolean updateReview(Review review) {

@@ -1,0 +1,89 @@
+<%@ page import="model.OperatingHour, java.time.LocalTime, java.time.LocalDate, java.time.format.DateTimeFormatter, java.util.*" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<section class="glass-card p-8 rounded-3xl slide-up">
+	<div id="map" class="w-full h-64 rounded-2xl border"></div>
+</section>
+
+<section class="glass-card p-8 rounded-3xl slide-up">
+	<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
+
+	<%
+	List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
+	int todayDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
+	List<String> timeSlots = new ArrayList<>();
+
+	if (operatingHours != null) {
+		for (OperatingHour oh : operatingHours) {
+			if (oh.getDayOfWeek() == todayDayOfWeek) {
+		LocalTime startTime = oh.getOpeningTime();
+		LocalTime endTime = oh.getClosingTime().minusMinutes(30);
+		LocalTime currentTime = startTime;
+		while (!currentTime.isAfter(endTime)) {
+			timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+			currentTime = currentTime.plusMinutes(30);
+		}
+			}
+		}
+	}
+	Collections.sort(timeSlots);
+	pageContext.setAttribute("timeSlots", timeSlots);
+	pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
+	pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
+	%>
+
+	<div class="space-y-6">
+		<div>
+			<label class="block text-sm font-bold mb-3 text-slate-700">📅 날짜</label> 
+			<input type="date" value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>" class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+		</div>
+		<div>
+			<label class="block text-sm font-bold mb-3 text-slate-700">👥 인원</label> 
+			<select class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+				<option>1명</option>
+				<option selected>2명</option>
+				<option>3명</option>
+				<option>4명</option>
+				<option>5명</option>
+				<option>6명 이상</option>
+			</select>
+		</div>
+		<div>
+			<label class="block text-sm font-bold mb-3 text-slate-700">⏰ 예약가능시간</label>
+			<c:choose>
+				<c:when test="${not empty timeSlots}">
+					<div class="grid grid-cols-3 gap-2">
+						<c:set var="lastCategory" value="" />
+						<c:forEach var="time" items="${timeSlots}">
+							<c:set var="currentTime" value="${LocalTime.parse(time)}" />
+							<c:set var="currentCategory" value="" />
+							<c:if test="${currentTime.isBefore(lunchStart)}"><c:set var="currentCategory" value="오전" /></c:if>
+							<c:if test="${not currentTime.isBefore(lunchStart) and currentTime.isBefore(dinnerStart)}"><c:set var="currentCategory" value="점심" /></c:if>
+							<c:if test="${not currentTime.isBefore(dinnerStart)}"><c:set var="currentCategory" value="저녁" /></c:if>
+							<c:if test="${empty lastCategory}"><c:set var="lastCategory" value="${currentCategory}" /></c:if>
+							<c:if test="${lastCategory ne currentCategory}">
+								<div class="col-span-3 flex items-center my-2">
+									<hr class="flex-grow border-t border-gray-200">
+									<span class="px-2 text-sm text-gray-500">${currentCategory}</span>
+									<hr class="flex-grow border-t border-gray-200">
+								</div>
+							</c:if>
+							<button type="button" class="btn-reserve-time" onclick="selectTime(this, '${time}')">${time}</button>
+							<c:set var="lastCategory" value="${currentCategory}" />
+						</c:forEach>
+					</div>
+				</c:when>
+				<c:otherwise>
+					<div class="grid grid-cols-2 gap-3">
+						<button class="time-slot time-slot-available" onclick="selectTime(this, '17:00')">17:00</button>
+						<button class="time-slot time-slot-available" onclick="selectTime(this, '18:00')">18:00</button>
+						<button class="time-slot time-slot-closing" onclick="selectTime(this, '19:00')">19:00</button>
+						<button class="time-slot time-slot-full">20:00</button>
+					</div>
+				</c:otherwise>
+			</c:choose>
+		</div>
+		<a href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}" class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">🎯 예약하기</a>
+	</div>
+</section>
