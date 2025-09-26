@@ -89,8 +89,7 @@ body {
 	animation: fadeIn 0.6s ease-out;
 }
 
-@
-keyframes fadeIn {from { opacity:0;
+@keyframes fadeIn {from { opacity:0;
 	transform: translateY(20px);
 }
 
@@ -104,8 +103,7 @@ to {
 	animation: slideUp 0.8s ease-out;
 }
 
-@
-keyframes slideUp {from { opacity:0;
+@keyframes slideUp {from { opacity:0;
 	transform: translateY(30px);
 }
 
@@ -119,13 +117,11 @@ to {
 	animation: pulseGlow 2s ease-in-out infinite;
 }
 
-@
-keyframes pulseGlow { 0%, 100% {
+@keyframes pulseGlow { 0%, 100% {
 	box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
-50
-%
+50%
 {
 box-shadow
 :
@@ -149,13 +145,11 @@ rgba(
 	animation: shimmer 2s infinite;
 }
 
-@
-keyframes shimmer { 0% {
+@keyframes shimmer { 0% {
 	background-position: -200% 0;
 }
 
-100
-%
+100%
 {
 background-position
 :
@@ -202,13 +196,11 @@ background-position
 	animation: couponGlow 3s ease-in-out infinite;
 }
 
-@
-keyframes couponGlow { 0%, 100% {
+@keyframes couponGlow { 0%, 100% {
 	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
-50
-%
+50%
 {
 box-shadow
 :
@@ -281,13 +273,11 @@ rgba(
 	animation: float 3s ease-in-out infinite;
 }
 
-@
-keyframes float { 0%, 100% {
+@keyframes float { 0%, 100% {
 	transform: translateY(0px);
 }
 
-50
-%
+50%
 {
 transform
 :

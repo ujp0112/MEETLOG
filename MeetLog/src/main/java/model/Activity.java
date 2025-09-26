@@ -20,6 +20,10 @@ public class Activity {
     private String contentLocation;
     private String restaurantName;
 
+    private int likeCount;
+    private int commentCount;
+    private String targetUrl;
+
     private LocalDateTime createdAt;
 
     public Activity() {
@@ -33,19 +37,24 @@ public class Activity {
         this.contentId = feedItem.getTargetId();
 
         // actionType을 activityType으로 변환
-        if ("review".equalsIgnoreCase(feedItem.getActionType())) {
+        String actionType = feedItem.getActionType();
+        if (actionType == null) {
+            this.activityType = "UNKNOWN";
+        } else if ("review".equalsIgnoreCase(actionType)) {
             this.activityType = "REVIEW";
-        } else if ("course".equalsIgnoreCase(feedItem.getActionType())) {
+        } else if ("course".equalsIgnoreCase(actionType)) {
             this.activityType = "COURSE";
-        } else if ("column".equalsIgnoreCase(feedItem.getActionType())) {
+        } else if ("column".equalsIgnoreCase(actionType)) {
             this.activityType = "COLUMN";
         } else {
-            this.activityType = feedItem.getActionType().toUpperCase();
+            this.activityType = actionType.toUpperCase();
         }
 
         this.contentTitle = feedItem.getTargetName();
         this.contentDescription = feedItem.getContent();
         this.contentImage = feedItem.getTargetImage();
+        this.likeCount = feedItem.getLikeCount();
+        this.commentCount = feedItem.getCommentCount();
     }
 
     // Getters and Setters
@@ -135,5 +144,29 @@ public class Activity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
+    }
+
+    public String getTargetUrl() {
+        return targetUrl;
+    }
+
+    public void setTargetUrl(String targetUrl) {
+        this.targetUrl = targetUrl;
     }
 }

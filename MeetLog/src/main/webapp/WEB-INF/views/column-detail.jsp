@@ -55,11 +55,13 @@
                                     <div
                                         class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
                                         <div class="flex items-center space-x-3">
-                                            <mytag:image fileName="${column.profileImage}"
-                                                altText="${column.author}"
-                                                cssClass="w-10 h-10 rounded-full object-cover" />
+                                            <a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="flex-shrink-0">
+                                                <mytag:image fileName="${column.profileImage}"
+                                                    altText="${column.author}"
+                                                    cssClass="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" />
+                                            </a>
                                             <div>
-                                                <p class="font-semibold text-slate-800">${column.author}</p>
+                                                <a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${column.author}</a>
                                                 <p class="text-sm text-slate-500">
                                                     <fmt:formatDate value="${column.createdAt}"
                                                         pattern="yyyy. MM. dd." />
@@ -136,12 +138,14 @@
                                             <c:forEach var="comment" items="${comments}">
                                                 <div class="bg-white rounded-xl shadow-sm p-6 comment-item" data-comment-id="${comment.id}">
                                                     <div class="flex items-start space-x-3">
-                                                        <mytag:image fileName="${comment.profileImage}"
-                                                            altText="${comment.author}"
-                                                            cssClass="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                                                        <a href="${pageContext.request.contextPath}/feed/user/${comment.userId}" class="flex-shrink-0">
+                                                            <mytag:image fileName="${comment.profileImage}"
+                                                                altText="${comment.author}"
+                                                                cssClass="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" />
+                                                        </a>
                                                         <div class="flex-1">
                                                             <div class="flex items-center justify-between mb-2">
-                                                                <h4 class="font-semibold text-slate-800">${comment.author}</h4>
+                                                                <a href="${pageContext.request.contextPath}/feed/user/${comment.userId}" class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${comment.author}</a>
                                                                 <div class="flex items-center space-x-2 comment-actions">
                                                                     <span class="text-sm text-slate-500">
                                                                         ${comment.createdAt.toString().substring(0, 16).replace('T', ' ')}

@@ -16,6 +16,8 @@ public class FeedItem {
     private int targetId;
     private String targetName; // 맛집명, 리뷰 내용 등
     private String targetImage;
+    private int likeCount;
+    private int commentCount;
     private LocalDateTime createdAt;
     private boolean isActive;
 
@@ -58,6 +60,8 @@ public class FeedItem {
     public String getUserProfileImage() {
         return userProfileImage;
     }
+
+
 
     public void setUserProfileImage(String userProfileImage) {
         this.userProfileImage = userProfileImage;
@@ -109,6 +113,22 @@ public class FeedItem {
 
     public void setTargetImage(String targetImage) {
         this.targetImage = targetImage;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public void setCommentCount(int commentCount) {
+        this.commentCount = commentCount;
     }
 
     public LocalDateTime getCreatedAt() {

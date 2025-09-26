@@ -15,6 +15,7 @@ import model.FeedItem;
 import model.Activity;
 import service.FeedService;
 import service.FollowService;
+import service.UserService;
 import java.util.ArrayList;
 
 // web.xml에 이미 매핑되어 있으므로 @WebServlet 어노테이션 제거
@@ -67,6 +68,48 @@ public class FeedServlet extends HttpServlet {
                 request.setAttribute("followers", followers);
                 request.getRequestDispatcher("/WEB-INF/views/follow-list.jsp").forward(request, response);
 
+            } else if (pathInfo.startsWith("/user/")) {
+                // 특정 사용자의 개별 피드 페이지
+                String userIdStr = pathInfo.substring(6); // "/user/" 제거
+                try {
+                    int targetUserId = Integer.parseInt(userIdStr);
+
+                    // 대상 사용자 정보 조회
+                    UserService userService = new UserService();
+                    User targetUser = userService.getUserById(targetUserId);
+
+                    if (targetUser == null) {
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND, "사용자를 찾을 수 없습니다.");
+                        return;
+                    }
+
+                    // 대상 사용자의 활동 피드 조회
+                    List<FeedItem> userFeedItems = feedService.getUserActivityFeed(targetUserId, 20, 0);
+                    List<Activity> userActivities = convertFeedItemsToActivities(userFeedItems);
+
+                    // 팔로우 관계 확인
+                    boolean isFollowing = followService.isFollowing(user.getId(), targetUserId);
+                    boolean isOwnProfile = (user.getId() == targetUserId);
+
+                    // 대상 사용자의 팔로잉/팔로워 수 조회
+                    List<User> targetFollowingUsers = followService.getFollowingUsers(targetUserId);
+                    List<User> targetFollowers = followService.getFollowers(targetUserId);
+
+                    // JSP에서 사용할 속성 설정
+                    request.setAttribute("targetUser", targetUser);
+                    request.setAttribute("activities", userActivities);
+                    request.setAttribute("hasActivities", !userActivities.isEmpty());
+                    request.setAttribute("followingCount", targetFollowingUsers.size());
+                    request.setAttribute("followerCount", targetFollowers.size());
+                    request.setAttribute("isFollowing", isFollowing);
+                    request.setAttribute("isOwnProfile", isOwnProfile);
+
+                    request.getRequestDispatcher("/WEB-INF/views/user-feed.jsp").forward(request, response);
+
+                } catch (NumberFormatException e) {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 사용자 ID입니다.");
+                }
+
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -89,17 +132,26 @@ public class FeedServlet extends HttpServlet {
      */
     private List<Activity> convertFeedItemsToActivities(List<FeedItem> feedItems) {
         List<Activity> activities = new ArrayList<>();
+        String contextPath = getServletContext().getContextPath();
 
         for (FeedItem feedItem : feedItems) {
             Activity activity = new Activity(feedItem);
 
-            // 추가적인 데이터 설정 (필요시)
-            if ("REVIEW".equals(activity.getActivityType())) {
-                // 리뷰의 경우 추가 정보 설정 가능
-                // activity.setContentRating(...);
-                // activity.setContentLocation(...);
-                // activity.setRestaurantName(...);
+            // 활동 타입에 따라 targetUrl 설정
+            String targetUrl = "";
+            switch (activity.getActivityType()) {
+                case "REVIEW":
+                    // 리뷰 상세 페이지 URL (가정)
+                    // targetUrl = contextPath + "/review/detail?id=" + activity.getContentId();
+                    break;
+                case "COURSE":
+                    targetUrl = contextPath + "/course/detail?id=" + activity.getContentId();
+                    break;
+                case "COLUMN":
+                    targetUrl = contextPath + "/column/detail?id=" + activity.getContentId();
+                    break;
             }
+            activity.setTargetUrl(targetUrl);
 
             activities.add(activity);
         }
