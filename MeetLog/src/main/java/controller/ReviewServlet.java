@@ -138,13 +138,30 @@ public class ReviewServlet extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "리뷰 등록 중 오류가 발생했습니다.");
-            String restaurantId = request.getParameter("restaurantId");
-            if(restaurantId != null && !restaurantId.isEmpty()){
-                response.sendRedirect(request.getContextPath() + "/review/write?restaurantId=" + restaurantId);
-            } else {
+            request.setAttribute("errorMessage", "리뷰 등록 중 오류가 발생했습니다. 입력한 내용을 확인해주세요.");
+
+            // 사용자가 입력한 데이터를 보존하기 위해 forward 방식으로 전환합니다.
+            // forward하기 전에, write-review.jsp 페이지가 렌더링되기 위해 필요한 데이터를 다시 조회하여 request에 담아줍니다.
+            try {
+                String restaurantIdStr = request.getParameter("restaurantId");
+                if (restaurantIdStr != null && !restaurantIdStr.isEmpty()) {
+                    int restaurantId = Integer.parseInt(restaurantIdStr);
+                    Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+                    request.setAttribute("restaurant", restaurant);
+                    if (restaurant != null) {
+                        request.setAttribute("keywordCategories", getKeywordsForCategory(restaurant.getCategory()));
+                    }
+                }
+            } catch (NumberFormatException nfe) {
+                // restaurantId가 올바르지 않은 경우, 여기서 추가적인 오류 처리를 할 수 있습니다.
+                // 예를 들어, 사용자를 에러 페이지로 보내거나, 홈페이지로 리다이렉트 할 수 있습니다.
+                // 현재는 기존 로직과 유사하게 홈페이지로 보냅니다.
                 response.sendRedirect(request.getContextPath() + "/");
+                return;
             }
+            
+            // 입력 데이터를 유지한 채, 리뷰 작성 페이지로 다시 포워딩합니다.
+            request.getRequestDispatcher("/WEB-INF/views/write-review.jsp").forward(request, response);
         }
     }
 

@@ -32,6 +32,14 @@
 
             <form id="review-form" action="${pageContext.request.contextPath}/review/write" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="restaurantId" value="${restaurant.id}">
+
+                <%-- [수정] 오류 메시지 표시 --%>
+                <c:if test="${not empty errorMessage}">
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <strong class="font-bold">오류!</strong>
+                        <span class="block sm:inline">${errorMessage}</span>
+                    </div>
+                </c:if>
                 
                 <div class="mb-6">
                     <h2 class="text-lg font-semibold text-gray-700 mb-3">별점</h2>
@@ -43,7 +51,7 @@
                         <span class="rating-star text-3xl" data-rating="5">★</span>
                         <span id="rating-text" class="ml-4 text-lg font-bold text-blue-600">0점</span>
                     </div>
-                    <input type="hidden" name="rating" id="rating" value="0">
+                    <input type="hidden" name="rating" id="rating" value="${not empty param.rating ? param.rating : 0}">
                 </div>
 
                 <div class="mb-6">
@@ -63,12 +71,12 @@
                             </div>
                         </c:forEach>
                     </div>
-                    <input type="hidden" name="keywords" id="keywords-input">
+                    <input type="hidden" name="keywords" id="keywords-input" value="${param.keywords}">
                 </div>
 
                 <div class="mb-6">
                     <label for="content" class="block text-lg font-semibold text-gray-700 mb-2">리뷰 내용</label>
-                    <textarea id="content" name="content" rows="8" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="상세한 리뷰를 남겨주세요."></textarea>
+                    <textarea id="content" name="content" rows="8" class="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="상세한 리뷰를 남겨주세요.">${param.content}</textarea>
                 </div>
 
                 <div class="mb-8">
@@ -148,23 +156,62 @@
             return true;
         });
         
-        $('.keyword-tag').on('click', function() { $(this).toggleClass('selected'); updateKeywordsInput(); });
+        $('.keyword-tag').on('click', function() {
+            const selectedCount = $('.keyword-tag.selected').length;
+            const isSelected = $(this).hasClass('selected');
+
+            if (!isSelected && selectedCount >= 5) {
+                alert('키워드는 최대 5개까지 선택할 수 있습니다.');
+                return; // 5개가 넘으면 더 이상 선택할 수 없도록 중단
+            }
+
+            $(this).toggleClass('selected'); 
+            updateKeywordsInput(); 
+        });
         $('.accordion-header').on('click', function() { $(this).next('.accordion-content').slideToggle(200); $(this).find('span').toggleClass('rotate-180'); });
+        
         function updateKeywordsInput() {
             const selectedKeywords = [];
             $('.keyword-tag.selected').each(function() { selectedKeywords.push($(this).text()); });
             $('#keywords-input').val(selectedKeywords.join(','));
         }
-        let currentRating = 0;
-        $('.rating-star').on('mouseenter', function() { updateStars($(this).data('rating')); })
-            .on('mouseleave', function() { updateStars(currentRating); })
-            .on('click', function() { currentRating = $(this).data('rating'); $('#rating').val(currentRating); $('#rating-text').text(currentRating + '점'); });
+
+        let currentRating = parseInt($('#rating').val()) || 0;
+        
         function updateStars(rating) {
             $('.rating-star').each(function() {
                 $(this).toggleClass('text-yellow-400', $(this).data('rating') <= rating)
                        .toggleClass('text-gray-300', $(this).data('rating') > rating);
             });
+            $('#rating-text').text(rating + '점');
         }
+
+        $('.rating-star').on('mouseenter', function() { updateStars($(this).data('rating')); })
+            .on('mouseleave', function() { updateStars(currentRating); })
+            .on('click', function() { 
+                currentRating = $(this).data('rating'); 
+                $('#rating').val(currentRating); 
+                updateStars(currentRating);
+            });
+
+        // 페이지 로드 시 기존 값으로 UI 초기화
+        function initializeForm() {
+            // 1. 별점 초기화
+            updateStars(currentRating);
+
+            // 2. 키워드 초기화
+            const initialKeywords = $('#keywords-input').val();
+            if (initialKeywords) {
+                const keywordsArray = initialKeywords.split(',');
+                $('.keyword-tag').each(function() {
+                    if (keywordsArray.includes($(this).text().trim())) {
+                        $(this).addClass('selected');
+                    }
+                });
+            }
+        }
+
+        initializeForm();
     });
     </script>
 </body>

@@ -338,11 +338,15 @@ rgba(
 }
 
 .review-keyword-tag {
-	background-color: #f1f5f9;
-	color: #475569;
-	padding: 4px 12px;
+	display: inline-flex;
+	align-items: center;
+	background-color: #e0f2fe;
+	color: #0c4a6e;
+	padding: 6px 12px;
 	border-radius: 9999px;
 	font-size: 0.8rem;
+	font-weight: 500;
+	border: 1px solid #bae6fd;
 }
 
 @media ( min-width : 1024px) {
@@ -1415,6 +1419,17 @@ translateY(
             // 마커를 생성합니다
             var marker = new kakao.maps.Marker({
                 position: markerPosition
+            });
+
+            // 마커가 지도 위에 표시되도록 설정합니다
+            marker.setMap(map);
+        });
+        // --- ▲▲▲ [추가] 코드 끝 ▲▲▲ ---
+        
+    });
+</script>
+</body>
+</html>ion: markerPosition
             });
 
             // 마커가 지도 위에 표시되도록 설정합니다
