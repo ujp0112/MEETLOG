@@ -106,6 +106,15 @@ public class Column {
         this.likes = likes;
     }
 
+    // JSP 호환성을 위한 별칭 메서드
+    public int getLikeCount() {
+        return likes;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likes = likeCount;
+    }
+
     public int getViews() {
         return views;
     }

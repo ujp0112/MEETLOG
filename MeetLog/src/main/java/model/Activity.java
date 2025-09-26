@@ -8,6 +8,7 @@ import java.util.Date;
  */
 public class Activity {
     private String activityType; // REVIEW, COURSE, COLUMN
+    private int userId;
     private String userNickname;
     private String userProfileImage;
 
@@ -32,6 +33,7 @@ public class Activity {
 
     // FeedItem으로부터 Activity 생성하는 생성자
     public Activity(FeedItem feedItem) {
+        this.userId = feedItem.getUserId();
         this.userNickname = feedItem.getUserNickname();
         this.userProfileImage = feedItem.getUserProfileImage();
         // createdAt은 서블릿에서 변환 후 설정
@@ -65,6 +67,14 @@ public class Activity {
 
     public void setActivityType(String activityType) {
         this.activityType = activityType;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     public String getUserNickname() {

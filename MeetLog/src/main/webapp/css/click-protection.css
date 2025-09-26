@@ -1,0 +1,235 @@
+/**
+ * 중복 클릭 방지 및 로딩 상태 표시 CSS
+ * MEETLOG 프로젝트용
+ */
+
+/* 로딩 상태 버튼 */
+.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+    cursor: not-allowed !important;
+}
+
+.loading::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s linear infinite;
+}
+
+/* 스피너 애니메이션 */
+@keyframes button-loading-spinner {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 성공 상태 */
+.success {
+    background-color: #10b981 !important;
+    color: white !important;
+    border-color: #10b981 !important;
+    transition: all 0.3s ease;
+}
+
+.success:hover {
+    background-color: #059669 !important;
+}
+
+/* 오류 상태 */
+.error {
+    background-color: #ef4444 !important;
+    color: white !important;
+    border-color: #ef4444 !important;
+    transition: all 0.3s ease;
+    animation: shake 0.5s ease-in-out;
+}
+
+.error:hover {
+    background-color: #dc2626 !important;
+}
+
+/* 흔들림 애니메이션 */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* 좋아요 버튼 상태 */
+.liked {
+    color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+.liked:hover {
+    background-color: #fee2e2 !important;
+}
+
+/* 팔로우 버튼 상태 */
+.following {
+    background-color: #374151 !important;
+    color: white !important;
+    border-color: #374151 !important;
+}
+
+.following:hover {
+    background-color: #1f2937 !important;
+}
+
+/* 비활성화 상태 버튼 */
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* 펄스 효과 (로딩 중 표시용) */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* 성공 체크마크 효과 */
+.success-checkmark {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background-color: #10b981;
+    position: relative;
+}
+
+.success-checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 3px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* 오류 X 마크 효과 */
+.error-xmark {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    border-radius: 50%;
+    background-color: #ef4444;
+    position: relative;
+}
+
+.error-xmark::before,
+.error-xmark::after {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 3px;
+    width: 2px;
+    height: 10px;
+    background-color: white;
+}
+
+.error-xmark::before {
+    transform: rotate(45deg);
+}
+
+.error-xmark::after {
+    transform: rotate(-45deg);
+}
+
+/* 로딩 점들 효과 (대안 로딩 표시) */
+.loading-dots::after {
+    content: '';
+    animation: loading-dots 1.5s infinite;
+}
+
+@keyframes loading-dots {
+    0%, 20% {
+        content: '.';
+    }
+    40% {
+        content: '..';
+    }
+    60%, 100% {
+        content: '...';
+    }
+}
+
+/* 작은 버튼용 로딩 스피너 */
+.loading.btn-sm::before {
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-width: 1px;
+}
+
+/* 큰 버튼용 로딩 스피너 */
+.loading.btn-lg::before {
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border-width: 3px;
+}
+
+/* 원형 버튼 로딩 */
+.loading.btn-circle {
+    padding: 0;
+}
+
+.loading.btn-circle::before {
+    position: static;
+    margin: 0;
+    display: block;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .loading::before {
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+    }
+
+    .success-checkmark,
+    .error-xmark {
+        width: 14px;
+        height: 14px;
+    }
+
+    .success-checkmark::after {
+        left: 4px;
+        width: 2px;
+        height: 6px;
+    }
+
+    .error-xmark::before,
+    .error-xmark::after {
+        left: 6px;
+        width: 1.5px;
+        height: 8px;
+    }
+}
