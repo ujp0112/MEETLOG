@@ -758,7 +758,7 @@ translateY(
 																				altText="${review.author}"
 																				cssClass="w-12 h-12 rounded-full object-cover mr-4" />
 																			<div>
-																				<span class="font-bold text-slate-800">${review.author}</span>
+																				<a href="${pageContext.request.contextPath}/feed/user/${review.userId}" class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
 																				<div
 																					class="flex items-center text-sm text-slate-500 mt-1">
 																					<div class="flex">

@@ -56,7 +56,7 @@
                                         </c:choose>
                                         <img src="${authorImageUrl}" alt="${course.author}" class="w-10 h-10 rounded-full mr-3 object-cover">
                                         <div>
-                                            <p class="font-semibold">${course.author}</p>
+                                            <p><a href="${pageContext.request.contextPath}/feed/user/${course.userId}" class="font-semibold hover:text-blue-600 transition-colors">${course.author}</a></p>
                                             <p class="text-sm text-slate-500">작성자</p>
                                         </div>
                                     </c:if>

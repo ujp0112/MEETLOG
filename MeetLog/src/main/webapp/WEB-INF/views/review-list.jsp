@@ -39,7 +39,7 @@
 													src="${not empty review.profileImage ? review.profileImage : 'https://placehold.co/40x40/94a3b8/ffffff?text=U'}"
 													class="w-10 h-10 rounded-full mr-3" alt="작성자">
 												<div>
-													<h3 class="font-bold text-slate-800">${review.author}</h3>
+													<h3><a href="${pageContext.request.contextPath}/feed/user/${review.userId}" class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a></h3>
 													<div class="text-yellow-500 text-sm">
 														<%-- Replaced scriptlet loop with JSTL for star rating --%>
 														<c:forEach begin="1" end="${review.rating}">★</c:forEach>

@@ -92,7 +92,7 @@ layer utilities { .line-clamp-2 { display:-webkit-box;
 												<mytag:image fileName="${column.profileImage}"
 													altText="${column.author}"
 													cssClass="w-6 h-6 rounded-full object-cover" />
-												<span>${column.author}</span>
+												<a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="hover:text-blue-600 transition-colors">${column.author}</a>
 											</div>
 											<span><fmt:formatDate value="${column.createdAt}"
 													pattern="yyyy.MM.dd" /></span>

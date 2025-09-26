@@ -96,7 +96,7 @@
                                                    cssClass="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md" />
                                         <div class="flex-1">
                                             <div class="flex items-center space-x-2">
-                                                <h3 class="text-lg font-bold text-slate-800">${activity.userNickname}</h3>
+                                                <h3><a href="${pageContext.request.contextPath}/feed/user/${activity.userId}" class="text-lg font-bold text-slate-800 hover:text-blue-600 transition-colors">${activity.userNickname}</a></h3>
                                                 <span class="px-2 py-1 rounded-full text-xs font-semibold
                                                     <c:choose>
                                                         <c:when test="${activity.activityType == 'REVIEW'}">bg-orange-100 text-orange-700</c:when>
