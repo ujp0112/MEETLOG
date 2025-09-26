@@ -43,11 +43,18 @@ public class BusinessReservationManagementServlet extends HttpServlet {
             // 예약 서비스 초기화
             ReservationService reservationService = new ReservationService();
             
-            // 각 음식점의 예약 목록 가져오기
+//            // 각 음식점의 예약 목록 가져오기
+//            for (Restaurant restaurant : myRestaurants) {
+//                List<Reservation> reservations = reservationService.getReservationsByRestaurantId(restaurant.getId());
+//                // Restaurant 모델에 setReservationList 메서드가 없다면 주석 처리
+//                // restaurant.setReservationList(reservations);
+//            }
+//            
+            
+         // --- ▼▼▼ [수정] 각 음식점 객체에 예약 목록을 직접 저장 ▼▼▼ ---
             for (Restaurant restaurant : myRestaurants) {
                 List<Reservation> reservations = reservationService.getReservationsByRestaurantId(restaurant.getId());
-                // Restaurant 모델에 setReservationList 메서드가 없다면 주석 처리
-                // restaurant.setReservationList(reservations);
+                restaurant.setReservationList(reservations); // Restaurant 객체에 예약 리스트 설정
             }
             
             // 예약 통계 계산

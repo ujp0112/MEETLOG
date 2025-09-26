@@ -61,14 +61,14 @@
                                                         </span>
                                                     </div>
                                                     <p class="text-slate-600 text-sm mb-2">맛집 ID: ${reservation.restaurantId}</p>
-                                                    <p class="text-slate-700 mb-2">예약 날짜: ${reservation.formattedReservationTime}</p>
+                                                    <p class="text-slate-700 mb-2">예약 날짜: ${reservation.reservationTime}</p>
                                                     <p class="text-slate-700">인원: ${reservation.partySize}명</p>
                                                     <c:if test="${not empty reservation.specialRequests}">
                                                         <p class="text-slate-600 text-sm mt-2">특별 요청: ${reservation.specialRequests}</p>
                                                     </c:if>
                                                 </div>
                                                 <div class="text-right">
-                                                    <p class="text-sm text-slate-500 mb-2">예약일: <fmt:formatDate value="${reservation.createdAt}" pattern="yyyy-MM-dd HH:mm" /></p>
+                                                    <p class="text-sm text-slate-500 mb-2">예약일: <fmt:formatDate value="${reservation.createdAtAsDate}" pattern="yyyy-MM-dd HH:mm" /></p>
                                                     <c:if test="${reservation.status == 'CONFIRMED'}">
                                                         <p class="text-sm text-green-600 font-medium">예약 확정됨</p>
                                                     </c:if>
@@ -132,19 +132,20 @@
         function cancelReservation(reservationId) {
             if (confirm('정말로 이 예약을 취소하시겠습니까?')) {
                 // This JavaScript logic remains the same as it contains no JSP scriptlets.
-                fetch('${pageContext.request.contextPath}/reservation', {
+                fetch('${pageContext.request.contextPath}/reservation/cancel', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: 'action=cancel&reservationId=' + reservationId
+                    body: 'reservationId=' + reservationId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                    	alert('예약이 성공적으로 취소되었습니다.');
                         location.reload();
                     } else {
-                        alert('예약 취소 중 오류가 발생했습니다.');
+                        alert('예약 취소 중 오류가 발생했습니다.'+ (data.message || '알 수 없는 오류'));
                     }
                 })
                 .catch(error => {

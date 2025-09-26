@@ -19,6 +19,7 @@ String kakaoApiKey = ApiKeyLoader.getApiKey("kakao.api.key");
 <title>MEET LOG - <c:out value="${restaurant.name}"
 		default="맛집 상세" /></title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <link
 	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap"
 	rel="stylesheet">
@@ -1049,7 +1050,7 @@ translateY(
 																	<hr class="flex-grow border-t border-gray-200">
 																</div>
 															</c:if>
-															<button type="button" class="btn-reserve-time"
+															<button type="button" class="btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400"
 																onclick="selectTime(this, '${time}')">${time}</button>
 															<c:set var="lastCategory" value="${currentCategory}" />
 														</c:forEach>
@@ -1085,13 +1086,17 @@ translateY(
 
 	<script>
 		// ==================== ▼▼▼ 기존 스크립트 ▼▼▼ ====================
-		function selectTime(button, time) { 
-		    // 모든 버튼에서 'selected' 클래스 제거
-		    document.querySelectorAll('.btn-reserve-time').forEach(btn => btn.classList.remove('selected'));
-		    // 클릭된 버튼에만 'selected' 클래스 추가
-		    button.classList.add('selected'); 
-		    // hidden input에 선택된 시간 값을 설정
-		    document.getElementById('selectedTime').value = time;
+		function selectTime(element, time) {
+		    // 1. 모든 버튼을 기본 스타일(Tailwind 클래스)로 되돌립니다.
+		    $('.btn-reserve-time').removeClass('bg-blue-500 text-white border-blue-600') // 선택 스타일 제거
+		                         .addClass('bg-slate-100 text-slate-700 border-slate-200'); // 기본 스타일 추가
+		
+		    // 2. 클릭된 버튼에만 선택 스타일(Tailwind 클래스)을 적용합니다.
+		    $(element).removeClass('bg-slate-100 text-slate-700 border-slate-200') // 기본 스타일 제거
+		              .addClass('bg-blue-500 text-white border-blue-600'); // 선택 스타일 추가
+		    
+		    // 3. hidden input에 선택된 시간 값을 저장합니다.
+		    $('#selectedTime').val(time);
 		}
 		
 		document.addEventListener('DOMContentLoaded', function() { 

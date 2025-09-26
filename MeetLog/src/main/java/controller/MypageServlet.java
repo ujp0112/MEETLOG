@@ -2,6 +2,8 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,7 +207,19 @@ public class MypageServlet extends HttpServlet {
     }
     
     private void handleMyReservations(HttpServletRequest request, int userId) {
-        request.setAttribute("reservations", reservationService.getReservationsByUserId(userId));
+    	List<Reservation> reservations = reservationService.getReservationsByUserId(userId);
+
+    	// [추가] Reservation 객체의 LocalDateTime을 Date로 변환하여 JSP에서 사용 가능하게 함
+    	for (Reservation r : reservations) {
+    	    if (r.getCreatedAt() != null) {
+    	        // JSP에서 사용할 수 있도록 Date 객체로 변환
+    	        Date createdAtAsDate = Timestamp.valueOf(r.getCreatedAt());
+    	        r.setCreatedAtAsDate(createdAtAsDate); // Reservation 모델에 새로운 Date 타입 필드와 setter 추가 필요
+    	    }
+    	    // updatedAt, reservationTime 등 다른 LocalDateTime 필드도 동일하게 처리
+    	}
+
+    	request.setAttribute("reservations", reservations);
     }
     
     private void handleMyReviews(HttpServletRequest request, int userId) {

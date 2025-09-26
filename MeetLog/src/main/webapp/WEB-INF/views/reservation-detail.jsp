@@ -81,7 +81,7 @@
                                             </div>
                                             <div class="bg-slate-50 p-4 rounded-lg">
                                                 <h3 class="font-medium text-slate-700 mb-2">예약 시간</h3>
-                                                <p class="text-slate-800">${reservation.reservationTimeString}</p>
+                                                <p class="text-slate-800">${reservation.reservationTimeStr}</p>
                                             </div>
                                             <div class="bg-slate-50 p-4 rounded-lg">
                                                 <h3 class="font-medium text-slate-700 mb-2">인원 수</h3>
@@ -108,12 +108,12 @@
                                         <div class="space-y-2 text-sm">
                                             <div class="flex justify-between">
                                                 <span class="text-slate-600">예약 신청:</span>
-                                                <span class="text-slate-800"><fmt:formatDate value="${reservation.createdAt}" pattern="yyyy-MM-dd HH:mm" /></span>
+                                                <span class="text-slate-800"><fmt:formatDate value="${reservation.createdAtAsDate}" pattern="yyyy-MM-dd HH:mm" /></span>
                                             </div>
                                             <c:if test="${not empty reservation.updatedAt}">
                                                 <div class="flex justify-between">
                                                     <span class="text-slate-600">마지막 수정:</span>
-                                                    <span class="text-slate-800"><fmt:formatDate value="${reservation.updatedAt}" pattern="yyyy-MM-dd HH:mm" /></span>
+                                                    <span class="text-slate-800"><fmt:formatDate value="${reservation.updatedAtAsDate}" pattern="yyyy-MM-dd HH:mm" /></span>
                                                 </div>
                                             </c:if>
                                         </div>
