@@ -1,10 +1,11 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Arrays; // Arrays 임포트 추가
+import java.util.Collections; // Collections 임포트 추가
 import java.util.List;
 
 public class Review {
-	// IDE Cache Refresh - v2.0
 	private int id;
 	private int restaurantId;
 	private int userId;
@@ -43,8 +44,34 @@ public class Review {
 		this.rating = rating;
 		this.content = content;
 	}
+	
+	// ======================== [수정된 부분 시작] ========================
+	
+	/**
+	 * 쉼표로 구분된 문자열을 받아서 키워드 리스트로 변환하고 저장합니다.
+	 * Servlet에서 request.getParameter("keywords")로 받은 값을 바로 사용할 수 있습니다.
+	 * @param keywords "데이트,친구,가족" 형태의 문자열
+	 */
+	public void setKeywords(String keywords) {
+	    if (keywords != null && !keywords.trim().isEmpty()) {
+	        this.keywords = Arrays.asList(keywords.split("\\s*,\\s*"));
+	    } else {
+	        this.keywords = Collections.emptyList();
+	    }
+	}
 
-	// --- 모든 Getters and Setters ---
+	/**
+	 * 기존의 List<String>을 받는 메서드는 그대로 유지합니다.
+	 * @param keywords 키워드 리스트
+	 */
+	public void setKeywords(List<String> keywords) {
+		this.keywords = keywords;
+	}
+
+	// ======================== [수정된 부분 끝] ========================
+
+	// --- 이하 기존 Getter, Setter 메서드들 (수정 없음) ---
+	
 	public int getId() {
 		return id;
 	}
@@ -68,21 +95,13 @@ public class Review {
 	public void setUserId(int userId) {
 		this.userId = userId;
 	}
-
+	
 	public String getAuthor() {
 		return author;
 	}
 
 	public void setAuthor(String author) {
 		this.author = author;
-	}
-
-	public String getRestaurantName() {
-		return restaurantName;
-	}
-
-	public void setRestaurantName(String restaurantName) {
-		this.restaurantName = restaurantName;
 	}
 
 	public int getRating() {
@@ -108,13 +127,9 @@ public class Review {
 	public void setImages(List<String> images) {
 		this.images = images;
 	}
-
+	
 	public List<String> getKeywords() {
 		return keywords;
-	}
-
-	public void setKeywords(List<String> keywords) {
-		this.keywords = keywords;
 	}
 
 	public int getLikes() {
@@ -141,15 +156,22 @@ public class Review {
 		this.updatedAt = updatedAt;
 	}
 
+	public String getRestaurantName() {
+		return restaurantName;
+	}
+
+	public void setRestaurantName(String restaurantName) {
+		this.restaurantName = restaurantName;
+	}
+
 	public boolean isActive() {
 		return isActive;
 	}
 
-	public void setActive(boolean active) {
-		isActive = active;
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
-	// 상세 평점 필드들의 Getter/Setter
 	public int getTasteRating() {
 		return tasteRating;
 	}
@@ -218,7 +240,10 @@ public class Review {
 		return profileImage;
 	}
 
+
+
 	public void setProfileImage(String profileImage) {
 		this.profileImage = profileImage;
 	}
+
 }

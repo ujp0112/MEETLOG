@@ -8,72 +8,79 @@ import model.ReviewInfo;
 import util.MyBatisSqlSessionFactory;
 
 public class ReviewDAO {
-    private static final String NAMESPACE = "dao.ReviewDAO";
+	private static final String NAMESPACE = "dao.ReviewDAO";
 
-    public List<Review> findAll() {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".findAll");
-        }
-    }
+	public List<Review> findAll() {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findAll");
+		}
+	}
 
-    public Review findById(int id) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectOne(NAMESPACE + ".findById", id);
-        }
-    }
+	public Review findById(int id) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectOne(NAMESPACE + ".findById", id);
+		}
+	}
 
-    public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".getRecentReviewsWithInfo", limit);
-        }
-    }
+	public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".getRecentReviewsWithInfo", limit);
+		}
+	}
 
-    public List<Review> findRecentReviews(int limit) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".findRecentReviews", limit);
-        }
-    }
+	public List<Review> findRecentReviews(int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findRecentReviews", limit);
+		}
+	}
 
-    public List<Review> findByRestaurantId(int restaurantId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", restaurantId);
-        }
-    }
+	// 리뷰 목록을 가져올 때 이미지도 함께 가져오도록 수정됩니다.
+	public List<Review> findByRestaurantId(int restaurantId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", restaurantId);
+		}
+	}
 
-    public List<Review> findByUserId(int userId) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".findByUserId", userId);
-        }
-    }
+	public List<Review> findByUserId(int userId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findByUserId", userId);
+		}
+	}
 
-    public List<Review> findRecentByUserId(Map<String, Object> params) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            return sqlSession.selectList(NAMESPACE + ".findRecentByUserId", params);
-        }
-    }
+	public List<Review> findRecentByUserId(Map<String, Object> params) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findRecentByUserId", params);
+		}
+	}
 
-    public List<Review> findRecentReviewsByOwnerId(int ownerId, int limit) {
-        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            java.util.Map<String, Object> params = new java.util.HashMap<>();
-            params.put("ownerId", ownerId);
-            params.put("limit", limit);
-            return sqlSession.selectList(NAMESPACE + ".findRecentReviewsByOwnerId", params);
-        }
-    }
+	public List<Review> findRecentReviewsByOwnerId(int ownerId, int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			java.util.Map<String, Object> params = new java.util.HashMap<>();
+			params.put("ownerId", ownerId);
+			params.put("limit", limit);
+			return sqlSession.selectList(NAMESPACE + ".findRecentReviewsByOwnerId", params);
+		}
+	}
 
-    public int insert(SqlSession session, Review review) {
-        return session.insert(NAMESPACE + ".insert", review);
-    }
+	// [수정] 리뷰 기본 정보를 저장하는 메소드
+	public int insertReview(SqlSession session, Review review) {
+		return session.insert(NAMESPACE + ".insertReview", review);
+	}
 
-    public int update(SqlSession session, Review review) {
-        return session.update(NAMESPACE + ".update", review);
-    }
+	// [추가] 리뷰 이미지 목록을 저장하는 메소드
+	public int insertReviewImages(SqlSession session, Map<String, Object> params) {
+		return session.insert(NAMESPACE + ".insertReviewImages", params);
+	}
 
-    public int delete(SqlSession session, int id) {
-        return session.delete(NAMESPACE + ".delete", id);
-    }
+	public int update(SqlSession session, Review review) {
+		return session.update(NAMESPACE + ".update", review);
+	}
 
-    public int likeReview(SqlSession session, int id) {
-        return session.update(NAMESPACE + ".likeReview", id);
-    }
+	public int delete(SqlSession session, int id) {
+		return session.delete(NAMESPACE + ".delete", id);
+	}
+
+	public int likeReview(SqlSession session, int id) {
+		return session.update(NAMESPACE + ".likeReview", id);
+	}
 }

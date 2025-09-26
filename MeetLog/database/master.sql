@@ -339,6 +339,14 @@ CREATE TABLE feed_items ( feed_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NO
 CREATE TABLE alerts ( alert_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, content VARCHAR(500) NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE restaurant_operating_hours ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, day_of_week INT NOT NULL, opening_time TIME NOT NULL, closing_time TIME NOT NULL, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 
+CREATE TABLE review_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    review_id INT NOT NULL COMMENT '리뷰 테이블(reviews)의 ID',
+    image_path VARCHAR(255) NOT NULL COMMENT '저장된 이미지 파일명',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+) COMMENT '리뷰에 첨부된 이미지 정보';
+
 CREATE TABLE restaurant_images (
   id INT PRIMARY KEY AUTO_INCREMENT,
   restaurant_id INT NOT NULL,

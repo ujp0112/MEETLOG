@@ -27,7 +27,24 @@ String kakaoApiKey = ApiKeyLoader.getApiKey("kakao.api.key");
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/css/style.css">
 <style>
-:root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #8b5cf6; --accent: #f59e0b; --success: #10b981; --warning: #f59e0b; --error: #ef4444; --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-400: #94a3b8; --gray-500: #64748b; --gray-600: #475569; --gray-700: #334155; --gray-800: #1e293b; --gray-900: #0f172a;
+:root {
+	--primary: #3b82f6;
+	--primary-dark: #2563eb;
+	--secondary: #8b5cf6;
+	--accent: #f59e0b;
+	--success: #10b981;
+	--warning: #f59e0b;
+	--error: #ef4444;
+	--gray-50: #f8fafc;
+	--gray-100: #f1f5f9;
+	--gray-200: #e2e8f0;
+	--gray-300: #cbd5e1;
+	--gray-400: #94a3b8;
+	--gray-500: #64748b;
+	--gray-600: #475569;
+	--gray-700: #334155;
+	--gray-800: #1e293b;
+	--gray-900: #0f172a;
 }
 
 * {
@@ -53,8 +70,8 @@ body {
 }
 
 .gradient-text {
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
+	background: linear-gradient(135deg, var(--primary) 0%, var(--secondary)
+		100%);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -71,283 +88,225 @@ body {
 	box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
 }
 
-.btn-secondary {
-	background: linear-gradient(135deg, var(--secondary) 0%, #7c3aed 100%);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.gallery {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 8px;
+	height: 400px;
 }
 
-.btn-secondary:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+.gallery.gallery-full {
+	grid-template-columns: 1fr;
 }
 
-.rating-stars {
-	filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+.gallery.gallery-full .gallery-main {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	border-radius: 12px;
 }
 
-.fade-in {
-	animation: fadeIn 0.6s ease-out;
+.gallery-background {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	image-rendering: pixelated;
+	transform: scale(5);
+	opacity: 0.5;
+	z-index: 1;
+	border-radius: 12px;
 }
 
-@
-keyframes fadeIn {from { opacity:0;
-	transform: translateY(20px);
+.gallery-main .gallery-image {
+	position: relative;
+	z-index: 2;
+	max-height: 100%;
+}
+/* 리뷰 캐러셀 스타일 */
+.review-carousel-container {
+	position: relative;
 }
 
-to {
-	opacity: 1;
-	transform: translateY(0);
+.review-carousel-viewport {
+	overflow: hidden;
 }
 
-}
-.slide-up {
-	animation: slideUp 0.8s ease-out;
-}
-
-@
-keyframes slideUp {from { opacity:0;
-	transform: translateY(30px);
+.review-carousel-track {
+	display: flex;
+	transition: transform 0.5s ease-in-out;
 }
 
-to {
-	opacity: 1;
-	transform: translateY(0);
+.review-card-wrapper {
+	flex-shrink: 0;
+	width: calc(100%/ 3);
+	padding: 0 8px;
+	box-sizing: border-box;
 }
 
-}
-.pulse-glow {
-	animation: pulseGlow 2s ease-in-out infinite;
-}
-
-@
-keyframes pulseGlow { 0%, 100% {
-	box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-50
-%
-{
-box-shadow
-:
-0
-0
-30px
-rgba(
-59
-,
-130
-,
-246
-,
-0.5
-);
-}
-}
-.shimmer {
-	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-	background-size: 200% 100%;
-	animation: shimmer 2s infinite;
-}
-
-@
-keyframes shimmer { 0% {
-	background-position: -200% 0;
-}
-
-100
-%
-{
-background-position
-:
-200%
-0;
-}
-}
-.progress-bar {
-	background: linear-gradient(90deg, var(--accent) 0%, #fbbf24 100%);
-	transition: width 1s ease-out;
-}
-
-.image-hover {
-	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.image-hover:hover {
-	transform: scale(1.05);
-}
-
-.card-hover {
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card-hover:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.text-shadow {
-	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.border-gradient {
-	border: 2px solid transparent;
-	background: linear-gradient(white, white) padding-box,
-		linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
-}
-
-.coupon-glow {
-	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-	border: 2px solid #f59e0b;
-	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-	animation: couponGlow 3s ease-in-out infinite;
-}
-
-@
-keyframes couponGlow { 0%, 100% {
-	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-}
-
-50
-%
-{
-box-shadow
-:
-0
-0
-30px
-rgba(
-245
-,
-158
-,
-11
-,
-0.5
-);
-}
-}
-.review-card {
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%,
-		rgba(248, 250, 252, 0.9) 100%);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	backdrop-filter: blur(10px);
-}
-
-.menu-item {
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.menu-item:hover {
-	transform: translateX(4px);
-	background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
-
-.info-badge {
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
-	color: white;
-	padding: 0.5rem 1rem;
-	border-radius: 9999px;
-	font-weight: 600;
-	font-size: 0.875rem;
-	display: inline-block;
-}
-
-.location-badge {
-	background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-	color: white;
-	padding: 0.5rem 1rem;
-	border-radius: 9999px;
-	font-weight: 600;
-	font-size: 0.875rem;
-	display: inline-block;
-}
-
-.rating-badge {
-	background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
-	color: white;
-	padding: 0.5rem 1rem;
-	border-radius: 9999px;
-	font-weight: 600;
-	font-size: 0.875rem;
-	display: inline-block;
-}
-
-.floating-action {
-	position: fixed;
-	bottom: 2rem;
-	right: 2rem;
-	z-index: 50;
-	animation: float 3s ease-in-out infinite;
-}
-
-@
-keyframes float { 0%, 100% {
-	transform: translateY(0px);
-}
-
-50
-%
-{
-transform
-:
-translateY(
--10px
-);
-}
-}
-.section-divider {
-	height: 1px;
-	background: linear-gradient(90deg, transparent 0%, var(--gray-300) 50%,
-		transparent 100%);
-	margin: 2rem 0;
-}
-
-.loading-skeleton {
-	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-	background-size: 200% 100%;
-	animation: shimmer 1.5s infinite;
-}
-
-.time-slot {
-	padding: 0.75rem;
-	border-radius: 0.75rem;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	font-weight: 600;
-	border: 2px solid transparent;
-}
-
-.time-slot-available {
+.carousel-arrow {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: rgba(255, 255, 255, 0.9);
+	border-radius: 50%;
+	width: 48px;
+	height: 48px;
+	z-index: 10;
 	cursor: pointer;
-	color: white;
-	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-	border-color: #10b981;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	color: #334155;
 }
 
-.time-slot-available:hover {
-	transform: scale(1.05);
-	box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-}
-
-.time-slot-closing {
-	cursor: pointer;
-	color: white;
-	background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-	border-color: #f59e0b;
-}
-
-.time-slot-closing:hover {
-	transform: scale(1.05);
-	box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
-}
-
-.time-slot-full {
+.carousel-arrow:disabled {
+	opacity: 0.3;
 	cursor: not-allowed;
-	color: #94a3b8;
-	background: #f1f5f9;
-	border-color: #e2e8f0;
 }
 
+.carousel-arrow.prev {
+	left: -24px;
+}
+
+.carousel-arrow.next {
+	right: -24px;
+}
+
+.review-photo-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 4px;
+	height: 200px;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.review-photo-item {
+	position: relative;
+	cursor: pointer;
+}
+
+.review-photo-item img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.review-photo-more {
+	position: absolute;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.review-keyword-tag {
+	background-color: #f1f5f9;
+	color: #475569;
+	padding: 4px 12px;
+	border-radius: 9999px;
+	font-size: 0.8rem;
+}
+
+@media ( max-width : 1024px) {
+	.review-card-wrapper {
+		width: 50%;
+	}
+}
+
+@media ( max-width : 768px) {
+	.review-card-wrapper {
+		width: 100%;
+	}
+	.carousel-arrow.prev {
+		left: 0;
+	}
+	.carousel-arrow.next {
+		right: 0;
+	}
+}
+/* 리뷰 사진 모달 스타일 */
+.review-photo-modal {
+	position: fixed;
+	inset: 0;
+	background-color: rgba(0, 0, 0, 0.7);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+	animation: fadeIn 0.3s;
+}
+
+.review-photo-modal.show {
+	display: flex;
+}
+
+.review-photo-modal-content {
+	position: relative;
+	background-color: white;
+	padding: 16px;
+	border-radius: 16px;
+	max-width: 80vw;
+	max-height: 80vh;
+	display: flex;
+	flex-direction: column;
+	animation: slideUp 0.4s;
+}
+
+.review-photo-modal-main-image {
+	max-width: 100%;
+	max-height: 70vh;
+	object-fit: contain;
+}
+
+.review-photo-modal-thumbnails {
+	display: flex;
+	gap: 8px;
+	margin-top: 16px;
+	overflow-x: auto;
+	padding-bottom: 8px;
+}
+
+.review-photo-modal-thumbnail {
+	width: 80px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 8px;
+	cursor: pointer;
+	border: 2px solid transparent;
+	transition: border-color 0.2s;
+}
+
+.review-photo-modal-thumbnail.active {
+	border-color: var(--primary);
+}
+
+.review-photo-modal-close {
+	position: absolute;
+	top: -16px;
+	right: -16px;
+	background-color: white;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	border: none;
+	cursor: pointer;
+	font-size: 1.5rem;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+/* 예약 시간 버튼 CSS */
 .btn-reserve-time {
 	background-color: #f0f7ff;
 	color: #2575fc;
@@ -371,299 +330,117 @@ translateY(
 	transform: scale(1.05);
 	box-shadow: 0 4px 12px rgba(37, 117, 252, 0.4);
 }
-
-.floating-action-btn {
-	position: fixed;
-	bottom: 2rem;
-	right: 2rem;
-	z-index: 50;
-	animation: float 3s ease-in-out infinite;
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
-	color: white;
-	padding: 1rem 1.5rem;
-	border-radius: 50px;
-	font-weight: 600;
-	box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* 더보기 기능 CSS */
+.review-text.truncated {
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3; /* 3줄 후 생략 */
+	-webkit-box-orient: vertical;
 }
 
-.floating-action-btn:hover {
-	transform: translateY(-5px) scale(1.05);
-	box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+.read-more-btn {
+	color: #94a3b8; /* 글자색을 더 연하게 변경 */
+	font-weight: 500; /* 폰트 두께를 중간으로 변경 */
+	font-size: 0.875rem; /* 폰트 크기 축소 */
+	cursor: pointer;
+	transition: color 0.2s; /* 색상 변경 애니메이션 효과 */
 }
 
-@media ( max-width : 768px) {
-	.glass-card {
-		margin: 0.5rem;
-		border-radius: 1rem;
-		padding: 1.5rem;
-	}
-	.floating-action-btn {
-		bottom: 1rem;
-		right: 1rem;
-		padding: 0.75rem 1.25rem;
-	}
-	.text-4xl {
-		font-size: 2rem;
-	}
-	.text-5xl {
-		font-size: 2.5rem;
-	}
-	.grid-cols-2 {
-		grid-template-columns: 1fr;
-	}
+.read-more-btn:hover {
+	color: #334155; /* 마우스 올렸을 때 색상을 진하게 변경 */
 }
-
-@media ( max-width : 480px) {
-	.glass-card {
-		margin: 0.25rem;
-		padding: 1rem;
-	}
-	.text-2xl {
-		font-size: 1.5rem;
-	}
-	.text-3xl {
-		font-size: 1.75rem;
-	}
-}
-
-.gallery {
-	display: grid;
-	grid-template-columns: 2fr 1fr;
-	gap: 8px;
-	height: 400px; /* 갤러리 높이 고정 */
-}
-
-.gallery-main img { /*  width: 100%; */
-	height: 100%;
-	object-fit: contain;
-	border-radius: 12px;
-}
-
-.gallery-side {
-	display: grid;
-	grid-template-rows: 1fr 1fr;
-	gap: 8px;
-}
-
-.gallery-side .img-wrap {
+/* 리뷰 카드 내 이미지 캐러셀 스타일 */
+.review-image-carousel {
 	position: relative;
-	max-height: 200px;
-}
-
-.gallery-side img { /*  width: 100%;  */
-	height: 100%;
-	object-fit: contain;
+	width: 100%;
+	height: 250px; /* 캐러셀 높이 지정 */
 	border-radius: 12px;
+	overflow: hidden;
+	margin-bottom: 1rem; /* 하단 여백 */
 }
 
-.more-overlay {
-	position: absolute;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.5);
-	color: white;
+.review-image-track {
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-size: 24px;
-	font-weight: bold;
-	border-radius: 12px;
+	height: 100%;
+	transition: transform 0.3s ease-in-out;
+}
+
+.review-image-item {
+	flex-shrink: 0;
+	width: 100%;
+	height: 100%;
 	cursor: pointer;
 }
 
-.gallery-image {
+.review-image-item img {
 	width: 100%;
 	height: 100%;
-	object-fit: contain;
-	background-color: transparent;
-	border-radius: 12px;
+	object-fit: cover; /* 이미지가 잘리지 않고 꽉 차도록 설정 */
 }
 
-.gallery-main, .gallery-side .img-wrap {
-	height: 100%;
-	min-height: 0; /* flex/grid 아이템이 수축할 수 있도록 허용 */
-}
-/* ▼▼▼ 아래의 새로운 오버레이 스타일을 추가합니다 ▼▼▼ */
-.panel-overlay {
-	display: none; /* 평소엔 숨김 */
-	background: #ffffff;
-	border: 1px solid #e2e8f0;
-	border-radius: 1.5rem; /* 24px */
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	margin-top: -1.5rem; /* 갤러리와 살짝 겹치게 */
-	padding: 1.5rem;
-	animation: fadeIn 0.4s ease-out;
-}
-
-.panel-overlay.show {
-	display: block; /* show 클래스가 붙으면 보임 */
-}
-
-.overlay-hd {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding-bottom: 1rem;
-	margin-bottom: 1rem;
-	border-bottom: 1px solid #e2e8f0;
-}
-
-.overlay-bd {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	/* 반응형 2열 이상 */
-	gap: 1rem;
-	max-height: 600px; /* 최대 높이 지정 후 스크롤 */
-	overflow-y: auto;
-	padding-right: 8px; /* 스크롤바 공간 */
-}
-
-.overlay-bd .gallery-image {
-	width: 100%;
-	height: auto;
-	aspect-ratio: 4/3;
-	object-fit: cover;
-	border-radius: 12px;
-}
-
-.close-x {
-	border: 0;
-	background: transparent;
-	font-size: 24px;
-	cursor: pointer;
-	color: #64748b;
-}
-/* ▼▼▼ 이미지 확대 모달 스타일 추가 ▼▼▼ */
-.zoom-modal-mask {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, 0.4); /* 어두운 반투명 배경 */
-	display: none; /* 평소엔 숨김 */
-	align-items: center;
-	justify-content: center;
-	z-index: 2000; /* 모든 오버레이 위에 표시 */
-}
-
-.zoom-modal-mask.show {
-	display: flex; /* show 클래스가 추가되면 표시 */
-}
-
-.zoom-modal-content {
-	position: relative;
-	max-width: 90%;
-	max-height: 90%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.zoomed-image {
-	max-width: 100%;
-	max-height: 100%;
-	object-fit: contain; /* 이미지 전체가 보이도록 */
-	border-radius: 8px;
-}
-
-.zoom-close-x {
+.review-image-arrow {
 	position: absolute;
-	top: -40px; /* 모달 상단 바깥쪽 */
-	right: -40px; /* 모달 우측 바깥쪽 */
-	color: #ffffff; /* 흰색 X 버튼 */
-	font-size: 40px;
-	background: none;
+	top: 50%;
+	transform: translateY(-50%);
+	background-color: rgba(0, 0, 0, 0.4);
+	color: white;
 	border: none;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	font-size: 1.2rem;
 	cursor: pointer;
-	line-height: 1;
-	padding: 0;
-}
-/* 작은 화면에서는 X 버튼 위치 조정 */
-@media ( max-width : 768px) {
-	.zoom-close-x {
-		top: 10px;
-		right: 10px;
-		color: #ffffff;
-		font-size: 30px;
-	}
-}
-
-/* restaurant-detail.jsp의 <style> 태그 안에 추가 */
-.gallery {
-	display: grid;
-	grid-template-columns: 2fr 1fr; /* 기존 스타일 유지 */
-	gap: 8px;
-	height: 400px;
-}
-
-/* ▼▼▼ 아래 새로운 스타일을 추가하세요 ▼▼▼ */
-.gallery.gallery-full {
-	grid-template-columns: 1fr; /* 이미지가 하나일 때 1개의 컬럼만 사용 */
-}
-
-/* .gallery.gallery-full 클래스 바로 아래에 추가하면 좋습니다. */
-.gallery.gallery-full .gallery-main {
-	position: relative; /* 자식 요소를 위한 기준점 */
+	z-index: 10;
+	opacity: 0; /* 평소에는 숨김 */
+	transition: opacity 0.2s, background-color 0.2s;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	overflow: hidden; /* [추가] 자식 요소가 부모 영역을 벗어나지 않도록 설정 */
-	border-radius: 12px;
-	/* [추가] 부모에도 border-radius를 적용해 잘려나간 부분이 깔끔하게 보이도록 함 */
 }
 
-.gallery-background {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	/* [수정] 이미지를 강제로 픽셀화하여 모자이크 효과를 냅니다. */
-	image-rendering: -moz-crisp-edges; /* Firefox */
-	image-rendering: pixelated; /* Chrome, Edge, Opera */
-	/* [수정] 이미지를 아주 작게 축소했다가 크게 확대하여 픽셀을 돋보이게 합니다. */
-	transform: scale(5);
-	opacity: 0.5; /* 배경이 너무 튀지 않도록 투명도 조절 */
-	z-index: 1;
-	border-radius: 12px;
+.review-image-carousel:hover .review-image-arrow {
+	opacity: 1; /* 마우스를 올렸을 때 버튼 표시 */
 }
 
-.gallery-main .gallery-image {
-	position: relative;
-	z-index: 2; /* 앞쪽으로 보내기 */
-	max-height: 100%; /* 부모 높이를 넘지 않도록 */
+.review-image-arrow:hover {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+
+.review-image-arrow.prev {
+	left: 8px;
+}
+
+.review-image-arrow.next {
+	right: 8px;
+}
+
+.review-image-arrow:disabled {
+	opacity: 0.2;
+	cursor: not-allowed;
 }
 </style>
 </head>
 <body class="bg-slate-100">
 	<div id="app" class="min-h-screen flex flex-col">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
-
 		<main class="flex-grow">
 			<div class="container mx-auto p-4 md:p-8">
 				<c:choose>
 					<c:when test="${not empty restaurant}">
 						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
 							<div class="lg:col-span-2 space-y-8">
-								<!-- 🖼️ 메인 이미지 섹션 -->
 								<section class="glass-card p-8 rounded-3xl fade-in">
-									<%-- [수정] 추가 이미지가 없으면 'gallery-full' 클래스를 추가 --%>
 									<div
 										class="gallery ${empty restaurant.additionalImages ? 'gallery-full' : ''}"
 										id="restaurantGallery">
 										<div class="gallery-main">
-											<%-- [추가] 이미지가 하나일 때만 흐릿한 배경 이미지를 생성 --%>
 											<c:if test="${empty restaurant.additionalImages}">
 												<mytag:image fileName="${restaurant.image}" altText=""
 													cssClass="gallery-background" />
 											</c:if>
-
-											<%-- 원본 이미지는 항상 표시 --%>
 											<mytag:image fileName="${restaurant.image}"
 												altText="${restaurant.name}" cssClass="gallery-image" />
 										</div>
-
-										<%-- [수정] 추가 이미지가 있을 때만 gallery-side 영역을 렌더링 --%>
 										<c:if test="${not empty restaurant.additionalImages}">
 											<div class="gallery-side">
 												<c:choose>
@@ -676,10 +453,9 @@ translateY(
 													</c:when>
 													<c:otherwise>
 														<div class="img-wrap"
-															style="background: #transparent; border-radius: 12px;"></div>
+															style="background: transparent; border-radius: 12px;"></div>
 													</c:otherwise>
 												</c:choose>
-
 												<c:choose>
 													<c:when
 														test="${fn:length(restaurant.additionalImages) >= 2}">
@@ -694,7 +470,7 @@ translateY(
 													</c:when>
 													<c:otherwise>
 														<div class="img-wrap"
-															style="background: #transparent; border-radius: 12px;"></div>
+															style="background: transparent; border-radius: 12px;"></div>
 													</c:otherwise>
 												</c:choose>
 											</div>
@@ -702,15 +478,6 @@ translateY(
 									</div>
 								</section>
 
-								<section id="imageOverlay" class="panel-overlay">
-									<div class="overlay-hd">
-										<h2 class="title">전체 사진 보기</h2>
-										<button id="closeOverlayBtn" class="close-x" type="button">×</button>
-									</div>
-									<div class="overlay-bd" id="overlayGrid"></div>
-								</section>
-
-								<!-- 🏪 가게 정보 헤더 섹션 -->
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div class="flex items-start justify-between mb-6">
 										<div class="flex-1">
@@ -743,18 +510,16 @@ translateY(
 												리뷰</div>
 										</div>
 									</div>
-
 									<div class="flex space-x-4">
 										<button
-											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">
-											❤️ 찜하기</button>
+											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
+											찜하기</button>
 										<button
-											class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">
-											📤 공유하기</button>
+											class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
+											공유하기</button>
 									</div>
 								</section>
 
-								<!-- 📍 상세 정보 섹션 -->
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<h3 class="text-2xl font-bold gradient-text mb-6">상세 정보</h3>
 									<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -784,7 +549,7 @@ translateY(
 														<div class="mt-2 space-y-1">
 															<c:forEach var="hour" items="${operatingHours}">
 																<div class="flex justify-between text-sm">
-																	<span class="text-slate-600"> <c:choose>
+																	<span class="text-slate-600"><c:choose>
 																			<c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
@@ -792,16 +557,12 @@ translateY(
 																			<c:when test="${hour.dayOfWeek == 5}">금요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
-																		</c:choose>
-																	</span> <span class="text-slate-600"> <c:choose>
+																		</c:choose></span><span class="text-slate-600"><c:choose>
 																			<c:when test="${empty hour.openingTime}">
 																				<span class="text-red-500">휴무</span>
 																			</c:when>
-																			<c:otherwise>
-                                                                                ${hour.openingTime} - ${hour.closingTime}
-                                                                            </c:otherwise>
-																		</c:choose>
-																	</span>
+																			<c:otherwise>${hour.openingTime} - ${hour.closingTime}</c:otherwise>
+																		</c:choose></span>
 																</div>
 															</c:forEach>
 														</div>
@@ -821,7 +582,6 @@ translateY(
 											</div>
 										</div>
 									</div>
-
 									<c:if test="${not empty restaurant.description}">
 										<div
 											class="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl">
@@ -831,7 +591,6 @@ translateY(
 									</c:if>
 								</section>
 
-								<!-- 🍽️ 메뉴 섹션 -->
 								<c:if test="${not empty menus}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
 										<h2 class="text-2xl font-bold gradient-text mb-6">🍽️ 메뉴</h2>
@@ -853,16 +612,13 @@ translateY(
 														</c:if>
 													</div>
 													<div class="text-right">
-														<span class="text-2xl font-bold text-sky-600"> <c:choose>
-																<c:when test="${fn:contains(menu.price, '원')}">
-                                                                    ${menu.price}
-                                                                </c:when>
+														<span class="text-2xl font-bold text-sky-600"><c:choose>
+																<c:when test="${fn:contains(menu.price, '원')}">${menu.price}</c:when>
 																<c:otherwise>
 																	<fmt:formatNumber value="${menu.price}" type="currency"
 																		currencySymbol="₩" />
 																</c:otherwise>
-															</c:choose>
-														</span>
+															</c:choose></span>
 													</div>
 												</div>
 											</c:forEach>
@@ -870,49 +626,107 @@ translateY(
 									</section>
 								</c:if>
 
-								<!-- 💬 리뷰 섹션 -->
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div class="flex justify-between items-center mb-6">
 										<h2 class="text-2xl font-bold gradient-text">리뷰
 											(${fn:length(reviews)})</h2>
 										<a
 											href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
-											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
-											✍️ 리뷰 작성 </a>
+											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">✍️
+											리뷰 작성</a>
 									</div>
 									<c:choose>
 										<c:when test="${not empty reviews}">
-											<div class="space-y-6">
-												<c:forEach var="review" items="${reviews}">
-													<div class="review-card p-6 rounded-2xl card-hover">
-														<div class="flex items-center mb-4">
-															<div
-																class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg mr-4">
-																${review.author.charAt(0)}</div>
-															<div class="flex-1">
-																<div class="flex items-center space-x-2">
-																	<span class="font-bold text-slate-800">${review.author}</span>
-																	<div class="flex space-x-1">
-																		<c:forEach begin="1" end="${review.rating}">
-																			<span class="text-yellow-400 text-lg rating-stars">★</span>
+											<div class="review-carousel-container">
+												<div class="review-carousel-viewport">
+													<div id="reviewCarouselTrack"
+														class="review-carousel-track -mx-2">
+														<c:forEach var="review" items="${reviews}">
+															<div class="review-card-wrapper">
+																<div
+																	class="bg-white p-6 rounded-2xl shadow-lg h-full flex flex-col">
+																	<div class="flex justify-between items-start mb-4">
+																		<div class="flex items-start">
+																			<mytag:image fileName="${review.profileImage}"
+																				altText="${review.author}"
+																				cssClass="w-12 h-12 rounded-full object-cover mr-4" />
+																			<div>
+																				<span class="font-bold text-slate-800">${review.author}</span>
+																				<div
+																					class="flex items-center text-sm text-slate-500 mt-1">
+																					<div class="flex">
+																						<c:forEach begin="1" end="5" var="i">
+																							<span
+																								class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★</span>
+																						</c:forEach>
+																					</div>
+																					<span class="mx-2">·</span> <span>${review.createdAt.format(DateTimeFormatter.ofPattern('yy.MM.dd'))}</span>
+																				</div>
+																			</div>
+																		</div>
+																		<button
+																			class="text-sm text-sky-600 font-semibold border border-sky-600 rounded-full px-4 py-1 hover:bg-sky-50 transition whitespace-nowrap flex-shrink-0">팔로우</button>
+																	</div>
+																	<c:if
+																		test="${not empty review.images and not empty review.images[0]}">
+																		<%--
+        [수정] fn:join 함수가 ArrayList<String>을 처리하지 못하는 문제를 해결하기 위해
+        c:forEach를 사용해 직접 쉼표로 구분된 문자열(imageListAsString)을 만듭니다.
+    --%>
+																		<c:set var="imageListAsString" value="" />
+																		<c:forEach var="imgName" items="${review.images}"
+																			varStatus="loop">
+																			<c:set var="imageListAsString"
+																				value="${imageListAsString}${imgName}${!loop.last ? ',' : ''}" />
 																		</c:forEach>
-																		<c:forEach begin="${review.rating + 1}" end="5">
-																			<span class="text-slate-300 text-lg">☆</span>
-																		</c:forEach>
+
+																		<div class="review-image-carousel">
+																			<div class="review-image-track">
+																				<c:forEach var="img" items="${review.images}"
+																					varStatus="status">
+																					<div class="review-image-item"
+																						onclick="openReviewPhotoModal(this)"
+																						data-images="${imageListAsString}"
+																						data-index="${status.index}">
+																						<mytag:image fileName="${img}"
+																							cssClass="w-full h-full object-cover"
+																							altText="리뷰 사진 ${status.count}" />
+																					</div>
+																				</c:forEach>
+																			</div>
+																			<c:if test="${fn:length(review.images) > 1}">
+																				<button class="review-image-arrow prev">‹</button>
+																				<button class="review-image-arrow next">›</button>
+																			</c:if>
+																		</div>
+																	</c:if>
+																	<div class="review-content-wrapper mb-4 flex-grow">
+																		<p
+																			class="review-text text-slate-700 leading-relaxed truncated">${review.content}</p>
+																		<span
+																			class="read-more-btn mt-2 inline-block cursor-pointer">더
+																			보기</span>
+																	</div>
+																	<c:if test="${not empty review.keywords}">
+																		<div class="flex flex-wrap gap-2 mb-4">
+																			<c:forEach var="keyword" items="${review.keywords}">
+																				<span class="review-keyword-tag">${keyword}</span>
+																			</c:forEach>
+																		</div>
+																	</c:if>
+																	<div class="border-t pt-3 text-sm text-slate-500">
+																		<span>${review.likes > 0 ? review.likes : 0}명이
+																			좋아합니다</span>
 																	</div>
 																</div>
-																<span class="text-sm text-slate-500">${review.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))}</span>
 															</div>
-														</div>
-														<p class="text-slate-700 leading-relaxed mb-4">${review.content}</p>
-														<div class="flex items-center justify-between">
-															<button
-																class="text-sky-600 hover:text-sky-700 text-sm font-semibold flex items-center space-x-1">
-																<span>❤️</span> <span>${review.likes > 0 ? review.likes : 0}</span>
-															</button>
-														</div>
+														</c:forEach>
 													</div>
-												</c:forEach>
+												</div>
+												<c:if test="${fn:length(reviews) > 3}">
+													<button id="prevReviewBtn" class="carousel-arrow prev">‹</button>
+													<button id="nextReviewBtn" class="carousel-arrow next">›</button>
+												</c:if>
 											</div>
 										</c:when>
 										<c:otherwise>
@@ -925,8 +739,6 @@ translateY(
 										</c:otherwise>
 									</c:choose>
 								</section>
-
-								<!-- 🎫 쿠폰 섹션 -->
 								<c:if test="${not empty coupons}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
 										<h2 class="text-2xl font-bold gradient-text mb-6">🎫 MEET
@@ -950,8 +762,8 @@ translateY(
 															<div class="text-right">
 																<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
 																<button
-																	class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">
-																	🎁 쿠폰받기</button>
+																	class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
+																	쿠폰받기</button>
 															</div>
 														</div>
 													</div>
@@ -959,18 +771,20 @@ translateY(
 											</c:forEach>
 										</div>
 									</section>
+
+									<c:if test="${not empty coupons}">
+										<section class="glass-card p-8 rounded-3xl slide-up">...</section>
+									</c:if>
+									<section class="glass-card p-8 rounded-3xl slide-up">...</section>
 								</c:if>
 
-								<!-- ❓ Q&A 섹션 -->
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div class="flex justify-between items-center mb-6">
 										<h2 class="text-2xl font-bold gradient-text">❓ Q&A</h2>
 										<button onclick="toggleQnAForm()"
-											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
-											💬 문의하기</button>
+											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">💬
+											문의하기</button>
 									</div>
-
-									<!-- Q&A 등록 폼 -->
 									<div id="qnaForm" class="hidden mb-8">
 										<div
 											class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
@@ -992,17 +806,14 @@ translateY(
 												</div>
 												<div class="flex space-x-3">
 													<button type="submit"
-														class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-														문의 등록</button>
+														class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">문의
+														등록</button>
 													<button type="button" onclick="toggleQnAForm()"
-														class="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">
-														취소</button>
+														class="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">취소</button>
 												</div>
 											</form>
 										</div>
 									</div>
-
-									<!-- Q&A 목록 -->
 									<c:choose>
 										<c:when test="${not empty qnas}">
 											<div class="space-y-6">
@@ -1012,15 +823,13 @@ translateY(
 														<div class="mb-4">
 															<div class="flex items-center mb-3">
 																<span
-																	class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Q</span>
-																<span class="ml-3 text-sm text-slate-500 font-medium">고객</span>
+																	class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Q</span><span
+																	class="ml-3 text-sm text-slate-500 font-medium">고객</span>
 																<span
-																	class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full">
-																	<c:choose>
+																	class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"><c:choose>
 																		<c:when test="${empty qna.answer}">답변 대기</c:when>
 																		<c:otherwise>답변 완료</c:otherwise>
-																	</c:choose>
-																</span>
+																	</c:choose></span>
 															</div>
 															<p class="text-slate-800 font-medium">${qna.question}</p>
 														</div>
@@ -1029,12 +838,10 @@ translateY(
 																<div class="flex items-center mb-3">
 																	<span
 																		class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">A</span>
-																	<span class="ml-3 text-sm text-slate-500 font-medium">
-																		<c:choose>
+																	<span class="ml-3 text-sm text-slate-500 font-medium"><c:choose>
 																			<c:when test="${qna.owner}">사장님</c:when>
 																			<c:otherwise>관리자</c:otherwise>
-																		</c:choose>
-																	</span>
+																		</c:choose></span>
 																</div>
 																<p class="text-slate-800">${qna.answer}</p>
 															</div>
@@ -1055,22 +862,18 @@ translateY(
 								</section>
 							</div>
 
-							<!-- 📱 사이드바 -->
 							<div class="space-y-8">
-								<!-- 🗺️ 위치 섹션 -->
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div id="map" class="w-full h-64 rounded-2xl border"></div>
 								</section>
 
-								<!-- 📅 예약 섹션 -->
+
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
-
 									<%
 									List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
 									int todayDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
 									List<String> timeSlots = new ArrayList<>();
-
 									if (operatingHours != null) {
 										for (OperatingHour oh : operatingHours) {
 											if (oh.getDayOfWeek() == todayDayOfWeek) {
@@ -1089,25 +892,22 @@ translateY(
 									pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
 									pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
 									%>
-
 									<div class="space-y-6">
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">📅
-												날짜</label> <input type="date"
+												날짜</label><input type="date"
 												value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>"
 												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
 										</div>
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">👥
-												인원</label> <select
-												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
-												<option>1명</option>
+												인원</label><select
+												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300"><option>1명</option>
 												<option selected>2명</option>
 												<option>3명</option>
 												<option>4명</option>
 												<option>5명</option>
-												<option>6명 이상</option>
-											</select>
+												<option>6명 이상</option></select>
 										</div>
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">⏰
@@ -1139,7 +939,6 @@ translateY(
 																	<hr class="flex-grow border-t border-gray-200">
 																</div>
 															</c:if>
-
 															<button type="button" class="btn-reserve-time"
 																onclick="selectTime(this, '${time}')">${time}</button>
 															<c:set var="lastCategory" value="${currentCategory}" />
@@ -1147,263 +946,254 @@ translateY(
 													</div>
 												</c:when>
 												<c:otherwise>
-													<div class="grid grid-cols-2 gap-3">
-														<button class="time-slot time-slot-available"
-															onclick="selectTime(this, '17:00')">17:00</button>
-														<button class="time-slot time-slot-available"
-															onclick="selectTime(this, '18:00')">18:00</button>
-														<button class="time-slot time-slot-closing"
-															onclick="selectTime(this, '19:00')">19:00</button>
-														<button class="time-slot time-slot-full">20:00</button>
+													<div class="text-center p-4 bg-slate-100 rounded-xl">
+														<p class="text-slate-500">오늘 예약 가능한 시간이 없습니다.</p>
 													</div>
 												</c:otherwise>
 											</c:choose>
 										</div>
 										<a
 											href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}"
-											class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">
-											🎯 예약하기 </a>
+											class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">🎯
+											예약하기</a>
 									</div>
 								</section>
 							</div>
 						</div>
 					</c:when>
 					<c:otherwise>
-						<div class="glass-card p-12 rounded-3xl text-center fade-in">
-							<div class="text-8xl mb-6">😔</div>
-							<h2 class="text-3xl font-bold gradient-text mb-4">맛집 정보를 찾을
-								수 없습니다</h2>
-							<p class="text-slate-600 mb-8">요청하신 맛집 정보가 존재하지 않거나 삭제되었습니다.</p>
-							<a href="${pageContext.request.contextPath}/main"
-								class="btn-primary text-white px-8 py-4 rounded-2xl font-semibold inline-block">
-								🏠 메인 페이지로 돌아가기 </a>
-						</div>
+						<div class="glass-card p-12 rounded-3xl text-center fade-in">...</div>
 					</c:otherwise>
 				</c:choose>
 			</div>
 		</main>
-
 		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
-
-		<!-- 플로팅 액션 버튼 -->
 		<c:if test="${not empty restaurant}">
-			<a
-				href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}"
-				class="floating-action-btn"> 🎯 예약하기 </a>
+			<a href="..." class="floating-action-btn">🎯 예약하기</a>
 		</c:if>
 	</div>
-	<div id="imageZoomModal" class="zoom-modal-mask">
-		<div class="zoom-modal-content">
-			<button id="closeZoomModalBtn" class="close-x zoom-close-x"
-				type="button">×</button>
-			<img id="zoomedImage" src="" alt="확대 이미지" class="zoomed-image">
-		</div>
-	</div>
-
-	<c:if
-		test="${not empty restaurant and restaurant.latitude != 0 and restaurant.longitude != 0}">
-		<script>
-        // 카카오맵 초기화
-        var restaurantLat = <c:out value="${restaurant.latitude}" />;
-        var restaurantLng = <c:out value="${restaurant.longitude}" />;
-        
-        kakao.maps.load(function() {
-            var mapContainer = document.getElementById('map');
-            var mapOption = { 
-                center: new kakao.maps.LatLng(restaurantLat, restaurantLng),
-                    level: 3
-                };
-            var map = new kakao.maps.Map(mapContainer, mapOption); 
-            var marker = new kakao.maps.Marker({ 
-                position: new kakao.maps.LatLng(restaurantLat, restaurantLng)
-            });
-                marker.setMap(map);
-        });
-    </script>
-	</c:if>
 
 	<script>
+		// ==================== ▼▼▼ 기존 스크립트 ▼▼▼ ====================
+		function selectTime(button, time) { 
+			document.querySelectorAll('.btn-reserve-time, .time-slot-available, .time-slot-closing').forEach(btn => btn.classList.remove('selected')); 
+			button.classList.add('selected'); 
+			window.selectedTime = time; 
+		}
+		
+		document.addEventListener('DOMContentLoaded', function() { 
+			const observer = new IntersectionObserver((entries) => { 
+				entries.forEach(entry => { 
+					if (entry.isIntersecting) { 
+						entry.target.style.opacity = '1'; 
+						entry.target.style.transform = 'translateY(0)'; 
+					} 
+				}); 
+			}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }); 
+			
+			document.querySelectorAll('.glass-card').forEach(card => { 
+				card.style.opacity = '0'; 
+				card.style.transform = 'translateY(30px)'; 
+				card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out'; 
+				observer.observe(card); 
+			}); 
+		});
+		
+		function toggleQnAForm() { 
+			const form = document.getElementById('qnaForm'); 
+			if (form.classList.contains('hidden')) { 
+				form.classList.remove('hidden'); 
+				form.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+			} else { 
+				form.classList.add('hidden'); 
+			} 
+		}
+		
+		document.addEventListener('DOMContentLoaded', function() { 
+			const urlParams = new URLSearchParams(window.location.search); 
+			if (urlParams.get('success') === 'qna_added') { 
+				alert('문의가 성공적으로 등록되었습니다!'); 
+				window.history.replaceState({}, document.title, window.location.pathname); 
+			} 
+			
+			document.querySelectorAll('.review-card-wrapper').forEach(card => {
+		        const textElement = card.querySelector('.review-text');
+		        const readMoreBtn = card.querySelector('.read-more-btn');
 
-        // 시간 선택 함수 (클릭 가능하도록 수정)
-        function selectTime(button, time) {
-            // 모든 시간 버튼에서 선택 상태 제거
-            document.querySelectorAll('.btn-reserve-time, .time-slot-available, .time-slot-closing').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            // 클릭된 버튼에 선택 상태 추가
-            button.classList.add('selected');
-            
-            // 선택된 시간 저장 (예약 시 사용)
-            window.selectedTime = time;
-            console.log('선택된 시간:', time);
-        }
+		        if (textElement && readMoreBtn) {
+		            // textElement의 높이가 clientHeight보다 클 때만 "더 보기" 버튼 표시
+		            if (textElement.scrollHeight <= textElement.clientHeight) {
+		                readMoreBtn.style.display = 'none';
+		            }
 
-        // 페이지 로드 시 애니메이션 효과
-        document.addEventListener('DOMContentLoaded', function() {
-            // 스크롤 애니메이션
-            const observerOptions = {
-                threshold: 0.1,
-                rootMargin: '0px 0px -50px 0px'
-            };
-            
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, observerOptions);
-            
-            // 모든 섹션에 애니메이션 적용
-            document.querySelectorAll('.glass-card').forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-                observer.observe(card);
-            });
-            
-            // 이미지 호버 효과
-            document.querySelectorAll('.image-hover').forEach(img => {
-                img.addEventListener('mouseenter', function() {
-                    this.style.transform = 'scale(1.05)';
-                });
-                
-                img.addEventListener('mouseleave', function() {
-                    this.style.transform = 'scale(1)';
-                });
-            });
-            
-            // 카드 호버 효과
-            document.querySelectorAll('.card-hover').forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-2px)';
-                    this.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.1)';
-                });
-            });
-        });
-        
-        // Q&A 폼 토글 함수
-        function toggleQnAForm() {
-            const form = document.getElementById('qnaForm');
-            if (form.classList.contains('hidden')) {
-                form.classList.remove('hidden');
-                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                form.classList.add('hidden');
-            }
-        }
-        
-        // URL 파라미터 확인하여 성공/오류 메시지 표시
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const success = urlParams.get('success');
-            const error = urlParams.get('error');
-            
-            if (success === 'qna_added') {
-                alert('문의가 성공적으로 등록되었습니다!');
-                // URL에서 파라미터 제거
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } else if (error === 'missing_info') {
-                alert('문의 내용을 입력해주세요.');
-            } else if (error === 'qna_failed') {
-                alert('문의 등록에 실패했습니다. 다시 시도해주세요.');
-            } else if (error === 'invalid_id') {
-                alert('올바르지 않은 음식점 ID입니다.');
-            } else if (error === 'server_error') {
-                alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-            }
-        });
-    </script>
+		            readMoreBtn.addEventListener('click', () => {
+		                textElement.classList.toggle('truncated');
+		                if (textElement.classList.contains('truncated')) {
+		                    readMoreBtn.textContent = '더 보기';
+		                } else {
+		                    readMoreBtn.textContent = '접기';
+		                }
+		            });
+		        }
+		    });
+			document.querySelectorAll('.review-image-carousel').forEach(carousel => {
+		        const track = carousel.querySelector('.review-image-track');
+		        const prevBtn = carousel.querySelector('.prev');
+		        const nextBtn = carousel.querySelector('.next');
+		        const items = track.querySelectorAll('.review-image-item');
+		        const totalItems = items.length;
+		        let currentIndex = 0;
 
+		        if (totalItems <= 1) return; // 이미지가 하나 이하면 실행 안함
 
-	<script>
- // ▼▼▼ 갤러리 및 오버레이 스크립트 ▼▼▼
-    const allImageFiles = [
-            "${restaurant.image}",
-            <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>
-        ].filter(Boolean);
+		        function updateCarousel() {
+		            track.style.transform = `translateX(-${currentIndex * 100}%)`;
+		            prevBtn.disabled = currentIndex === 0;
+		            nextBtn.disabled = currentIndex === totalItems - 1;
+		        }
 
-        const overlaySection = document.getElementById('imageOverlay');
-        const overlayGrid = document.getElementById('overlayGrid');
-        const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+		        prevBtn.addEventListener('click', (e) => {
+		            e.stopPropagation(); // 모달 열림 방지
+		            if (currentIndex > 0) {
+		                currentIndex--;
+		                updateCarousel();
+		            }
+		        });
 
-        // ▼▼▼ 이미지 확대 모달 관련 요소들 ▼▼▼
-        const imageZoomModal = document.getElementById('imageZoomModal');
-        const zoomedImage = document.getElementById('zoomedImage');
+		        nextBtn.addEventListener('click', (e) => {
+		            e.stopPropagation(); // 모달 열림 방지
+		            if (currentIndex < totalItems - 1) {
+		                currentIndex++;
+		                updateCarousel();
+		            }
+		        });
+
+		        updateCarousel(); // 초기 상태 설정
+		    });
+		});
+
+    	const allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
+        const overlaySection = document.getElementById('imageOverlay'); 
+        const overlayGrid = document.getElementById('overlayGrid'); 
+        const closeOverlayBtn = document.getElementById('closeOverlayBtn'); 
+        const imageZoomModal = document.getElementById('imageZoomModal'); 
+        const zoomedImage = document.getElementById('zoomedImage'); 
         const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
-
-        // '더보기' 버튼 클릭 시 오버레이 토글
-        function cycleImages() {
-            if (overlaySection.classList.contains('show')) {
-                closeImageOverlay();
-            } else {
-                showImageOverlay();
-            }
-        }
-
-        // 전체 이미지 오버레이 표시
-        function showImageOverlay() {
-            if (!overlaySection || !overlayGrid) return;
-            overlayGrid.innerHTML = ''; 
-
-            allImageFiles.forEach(fileName => {
-                const img = document.createElement('img');
-                img.className = 'gallery-image';
-                img.alt = '전체 이미지';
-                img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
-                
-                // [추가] 이미지 클릭 이벤트 리스너
-                img.addEventListener('click', () => {
-                    openZoomModal(img.src);
-                });
-
-                overlayGrid.appendChild(img);
-            });
-            
-            overlaySection.classList.add('show');
-        }
-
-        // 전체 이미지 오버레이 닫기
-        function closeImageOverlay() {
-            if (overlaySection) overlaySection.classList.remove('show');
-        }
-
-        // [추가] 이미지 확대 모달 열기
-        function openZoomModal(imageSrc) {
-            if (!imageZoomModal || !zoomedImage) return;
-            zoomedImage.src = imageSrc;
-            imageZoomModal.classList.add('show');
-        }
-
-        // [추가] 이미지 확대 모달 닫기
-        function closeZoomModal() {
-            if (imageZoomModal) imageZoomModal.classList.remove('show');
+        
+        function cycleImages() { 
+        	if (overlaySection.classList.contains('show')) { 
+        		closeImageOverlay(); 
+        	} else { 
+        		showImageOverlay(); 
+        	} 
         }
         
-        // 이벤트 리스너 연결
-        if (closeOverlayBtn) {
-            closeOverlayBtn.addEventListener('click', closeImageOverlay);
+        function showImageOverlay() { 
+        	if (!overlaySection || !overlayGrid) return; 
+        	overlayGrid.innerHTML = ''; 
+        	allImageFiles.forEach(fileName => { 
+        		const img = document.createElement('img'); 
+        		img.className = 'gallery-image'; 
+        		img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName); 
+        		img.addEventListener('click', () => openZoomModal(img.src)); 
+        		overlayGrid.appendChild(img); 
+        	}); 
+        	overlaySection.classList.add('show'); 
         }
-        // [추가] 이미지 확대 모달 닫기 버튼 및 배경 클릭 리스너
-        if (closeZoomModalBtn) {
-            closeZoomModalBtn.addEventListener('click', closeZoomModal);
+
+        function closeImageOverlay() { 
+        	if (overlaySection) overlaySection.classList.remove('show'); 
         }
-        if (imageZoomModal) {
-            imageZoomModal.addEventListener('click', (e) => {
-                if (e.target === imageZoomModal) { // 어두운 배경 클릭 시 닫기
-                    closeZoomModal();
-                }
-            });
+        
+        function openZoomModal(imageSrc) { 
+        	if (!imageZoomModal || !zoomedImage) return; 
+        	zoomedImage.src = imageSrc; 
+        	imageZoomModal.classList.add('show'); 
         }
+        
+        function closeZoomModal() { 
+        	if (imageZoomModal) imageZoomModal.classList.remove('show'); 
+        }
+        
+        if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeImageOverlay);
+        if (closeZoomModalBtn) closeZoomModalBtn.addEventListener('click', closeZoomModal);
+        if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => { if (e.target === imageZoomModal) closeZoomModal(); });
+
+		// ==================== ▼▼▼ NEW: 리뷰 캐러셀 및 이미지 모달 스크립트 ▼▼▼ ====================
+		const track = document.getElementById('reviewCarouselTrack');
+		if (track) {
+			const prevBtn = document.getElementById('prevReviewBtn');
+			const nextBtn = document.getElementById('nextReviewBtn');
+			const reviews = track.querySelectorAll('.review-card-wrapper');
+			const totalReviews = reviews.length;
+			let reviewsPerPage = 3;
+			let currentIndex = 0;
+			
+			const updateCarouselView = () => {
+				if (window.innerWidth <= 768) { reviewsPerPage = 1; }
+				else if (window.innerWidth <= 1024) { reviewsPerPage = 2; }
+				else { reviewsPerPage = 3; }
+
+				const trackWidth = track.parentElement.offsetWidth;
+				const cardWidth = trackWidth / reviewsPerPage;
+				track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+
+				if (prevBtn) prevBtn.disabled = currentIndex === 0;
+				if (nextBtn) nextBtn.disabled = currentIndex >= totalReviews - reviewsPerPage;
+			};
+	
+			if (nextBtn) {
+				nextBtn.addEventListener('click', () => {
+					if (currentIndex < totalReviews - reviewsPerPage) {
+						currentIndex++;
+						updateCarouselView();
+					}
+				});
+			}
+	
+			if (prevBtn) {
+				prevBtn.addEventListener('click', () => {
+					if (currentIndex > 0) {
+						currentIndex--;
+						updateCarouselView();
+					}
+				});
+			}
+	
+			window.addEventListener('resize', updateCarouselView);
+			updateCarouselView();
+		}
+	
+		const reviewModal = document.getElementById('reviewPhotoModal');
+		const mainImage = document.getElementById('reviewModalMainImage');
+		const thumbnailsContainer = document.getElementById('reviewModalThumbnails');
+		
+		window.openReviewPhotoModal = function(element) {
+			const images = element.dataset.images.split(',').map(s => s.trim()).filter(Boolean);
+			const startIndex = parseInt(element.dataset.index, 10);
+			const imageUrlPrefix = '${pageContext.request.contextPath}/images/';
+			
+			mainImage.src = imageUrlPrefix + images[startIndex];
+			thumbnailsContainer.innerHTML = '';
+			
+			images.forEach((img, index) => {
+				const thumb = document.createElement('img');
+				thumb.src = imageUrlPrefix + img;
+				thumb.className = 'review-photo-modal-thumbnail';
+				if (index === startIndex) thumb.classList.add('active');
+				thumb.onclick = () => {
+					mainImage.src = thumb.src;
+					document.querySelectorAll('.review-photo-modal-thumbnail').forEach(t => t.classList.remove('active'));
+					thumb.classList.add('active');
+				};
+				thumbnailsContainer.appendChild(thumb);
+			});
+			reviewModal.classList.add('show');
+		}
+	
+		window.closeReviewPhotoModal = function() {
+			reviewModal.classList.remove('show');
+		}
 	</script>
-
-
 </body>
 </html>

@@ -1,37 +1,145 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
-<%@ page isELIgnored="false" %>
+<%@ page isELIgnored="false"%>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>MEET LOG - ${isEditMode ? '가게 정보 수정' : '새 가게 등록'}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <style>
-        /* (이전과 동일한 CSS 스타일) */
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .form-input, .form-select { display: block; width: 100%; border-radius: 0.5rem; border: 1px solid #cbd5e1; padding: 0.75rem 1rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none; }
-        .form-input:focus, .form-select:focus { outline: 2px solid transparent; outline-offset: 2px; border-color: #38bdf8; box-shadow: 0 0 0 2px #7dd3fc; }
-        .form-btn-primary { display: inline-flex; justify-content: center; border-radius: 0.5rem; background-color: #0284c7; padding: 0.75rem 1rem; font-weight: 600; color: white; transition: background-color 0.2s; }
-        .form-btn-primary:hover { background-color: #0369a1; }
-        .day-disabled { background-color: #f3f4f6 !important; opacity: 0.7; }
-        .day-disabled select, .day-disabled button, .day-disabled input { cursor: not-allowed !important; }
-        .image-add-btn { width: 120px; height: 120px; border: 2px dashed #cbd5e1; border-radius: 0.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #64748b; transition: all 0.2s; }
-        .image-add-btn:hover { border-color: #38bdf8; color: #0284c7; }
-        .plus-icon { font-size: 2.5rem; line-height: 1; font-weight: 300; }
-        .add-text { font-size: 0.8rem; margin-top: 0.25rem; }
-        .accordion-header { cursor: pointer; padding: 1rem; background-color: #f8fafc; border-radius: 0.5rem; transition: background-color 0.2s; }
-        .accordion-header:hover { background-color: #f1f5f9; }
-        .accordion-content { display: none; padding: 1.5rem; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 0.5rem 0.5rem; }
-        .image-preview-wrapper { position: relative; }
-        .delete-preview-btn { position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background-color: rgba(0, 0, 0, 0.6); color: white; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; line-height: 1; }
-    </style>
+<meta charset="UTF-8">
+<title>MEET LOG - ${isEditMode ? '가게 정보 수정' : '새 가게 등록'}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script
+	src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script
+	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false"></script>
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+	rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<style>
+/* (이전과 동일한 CSS 스타일) */
+body {
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.form-input, .form-select {
+	display: block;
+	width: 100%;
+	border-radius: 0.5rem;
+	border: 1px solid #cbd5e1;
+	padding: 0.75rem 1rem;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: none;
+}
+
+.form-input:focus, .form-select:focus {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	border-color: #38bdf8;
+	box-shadow: 0 0 0 2px #7dd3fc;
+}
+
+.form-btn-primary {
+	display: inline-flex;
+	justify-content: center;
+	border-radius: 0.5rem;
+	background-color: #0284c7;
+	padding: 0.75rem 1rem;
+	font-weight: 600;
+	color: white;
+	transition: background-color 0.2s;
+}
+
+.form-btn-primary:hover {
+	background-color: #0369a1;
+}
+
+.day-disabled {
+	background-color: #f3f4f6 !important;
+	opacity: 0.7;
+}
+
+.day-disabled select, .day-disabled button, .day-disabled input {
+	cursor: not-allowed !important;
+}
+
+.image-add-btn {
+	width: 120px;
+	height: 120px;
+	border: 2px dashed #cbd5e1;
+	border-radius: 0.5rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: #64748b;
+	transition: all 0.2s;
+}
+
+.image-add-btn:hover {
+	border-color: #38bdf8;
+	color: #0284c7;
+}
+
+.plus-icon {
+	font-size: 2.5rem;
+	line-height: 1;
+	font-weight: 300;
+}
+
+.add-text {
+	font-size: 0.8rem;
+	margin-top: 0.25rem;
+}
+
+.accordion-header {
+	cursor: pointer;
+	padding: 1rem;
+	background-color: #f8fafc;
+	border-radius: 0.5rem;
+	transition: background-color 0.2s;
+}
+
+.accordion-header:hover {
+	background-color: #f1f5f9;
+}
+
+.accordion-content {
+	display: none;
+	padding: 1.5rem;
+	border: 1px solid #e2e8f0;
+	border-top: none;
+	border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.image-preview-wrapper {
+	position: relative;
+}
+
+.delete-preview-btn {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	width: 24px;
+	height: 24px;
+	background-color: rgba(0, 0, 0, 0.6);
+	color: white;
+	border: 2px solid white;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	font-weight: bold;
+	cursor: pointer;
+	line-height: 1;
+}
+</style>
 </head>
 <body class="bg-gray-100">
 	<div class="max-w-4xl mx-auto py-12 px-4">
@@ -47,116 +155,205 @@
 				<%-- 기본 정보 --%>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
 					<div>
-						<label for="name" class="block text-sm font-medium text-gray-700">가게 이름</label>
-                        <input type="text" id="name" name="name" required class="form-input mt-1" value="${restaurant.name}">
+						<label for="name" class="block text-sm font-medium text-gray-700">가게
+							이름</label> <input type="text" id="name" name="name" required
+							class="form-input mt-1" value="${restaurant.name}">
 					</div>
 					<div>
-						<label for="category" class="block text-sm font-medium text-gray-700">카테고리</label>
-                        <select id="category" name="category" required class="form-select mt-1">
+						<label for="category"
+							class="block text-sm font-medium text-gray-700">카테고리</label> <select
+							id="category" name="category" required class="form-select mt-1">
 							<option value="">선택하세요</option>
-							<option value="한식" ${restaurant.category == '한식' ? 'selected' : ''}>한식</option>
-							<option value="중식" ${restaurant.category == '중식' ? 'selected' : ''}>중식</option>
-							<option value="일식" ${restaurant.category == '일식' ? 'selected' : ''}>일식</option>
-							<option value="양식" ${restaurant.category == '양식' ? 'selected' : ''}>양식</option>
-							<option value="아시안" ${restaurant.category == '아시안' ? 'selected' : ''}>아시안</option>
-							<option value="카페" ${restaurant.category == '카페' ? 'selected' : ''}>카페</option>
-							<option value="주점" ${restaurant.category == '주점' ? 'selected' : ''}>주점</option>
-							<option value="기타" ${restaurant.category == '기타' ? 'selected' : ''}>기타</option>
+							<optgroup label="한식">
+								<option value="고기/구이"
+									${restaurant.category == '고기/구이' ? 'selected' : ''}>고기/구이</option>
+								<option value="찌개/전골"
+									${restaurant.category == '찌개/전골' ? 'selected' : ''}>찌개/전골</option>
+								<option value="백반/국밥"
+									${restaurant.category == '백반/국밥' ? 'selected' : ''}>백반/국밥</option>
+								<option value="족발/보쌈"
+									${restaurant.category == '족발/보쌈' ? 'selected' : ''}>족발/보쌈</option>
+								<option value="분식"
+									${restaurant.category == '분식' ? 'selected' : ''}>분식</option>
+								<option value="한식 기타"
+									${restaurant.category == '한식 기타' ? 'selected' : ''}>한식
+									기타</option>
+							</optgroup>
+							<optgroup label="일식">
+								<option value="스시/오마카세"
+									${restaurant.category == '스시/오마카세' ? 'selected' : ''}>스시/오마카세</option>
+								<option value="라멘/돈부리"
+									${restaurant.category == '라멘/돈부리' ? 'selected' : ''}>라멘/돈부리</option>
+								<option value="돈까스/튀김"
+									${restaurant.category == '돈까스/튀김' ? 'selected' : ''}>돈까스/튀김</option>
+								<option value="이자카야"
+									${restaurant.category == '이자카야' ? 'selected' : ''}>이자카야</option>
+								<option value="일식 기타"
+									${restaurant.category == '일식 기타' ? 'selected' : ''}>일식
+									기타</option>
+							</optgroup>
+							<optgroup label="중식">
+								<option value="중식"
+									${restaurant.category == '중식' ? 'selected' : ''}>중식</option>
+							</optgroup>
+							<optgroup label="양식">
+								<option value="이탈리안"
+									${restaurant.category == '이탈리안' ? 'selected' : ''}>이탈리안</option>
+								<option value="프렌치"
+									${restaurant.category == '프렌치' ? 'selected' : ''}>프렌치</option>
+								<option value="스테이크/바베큐"
+									${restaurant.category == '스테이크/바베큐' ? 'selected' : ''}>스테이크/바베큐</option>
+								<option value="햄버거/피자"
+									${restaurant.category == '햄버거/피자' ? 'selected' : ''}>햄버거/피자</option>
+								<option value="양식 기타"
+									${restaurant.category == '양식 기타' ? 'selected' : ''}>양식
+									기타</option>
+							</optgroup>
+							<optgroup label="아시안">
+								<option value="태국/베트남"
+									${restaurant.category == '태국/베트남' ? 'selected' : ''}>태국/베트남</option>
+								<option value="인도/중동"
+									${restaurant.category == '인도/중동' ? 'selected' : ''}>인도/중동</option>
+								<option value="아시안 기타"
+									${restaurant.category == '아시안 기타' ? 'selected' : ''}>아시안
+									기타</option>
+							</optgroup>
+							<optgroup label="카페 & 주점">
+								<option value="카페"
+									${restaurant.category == '카페' ? 'selected' : ''}>카페</option>
+								<option value="베이커리/디저트"
+									${restaurant.category == '베이커리/디저트' ? 'selected' : ''}>베이커리/디저트</option>
+								<option value="주점"
+									${restaurant.category == '주점' ? 'selected' : ''}>주점</option>
+							</optgroup>
+							<optgroup label="기타">
+								<option value="퓨전/세계음식"
+									${restaurant.category == '퓨전/세계음식' ? 'selected' : ''}>퓨전/세계음식</option>
+								<option value="기타"
+									${restaurant.category == '기타' ? 'selected' : ''}>기타</option>
+							</optgroup>
 						</select>
 					</div>
 				</div>
 
 				<%-- [수정] 주소 정보 (상세주소 복원) --%>
 				<div class="border-t pt-6 space-y-2">
-					<label class="block text-sm font-medium text-gray-700">주소 정보</label>
+					<label class="block text-sm font-medium text-gray-700">주소
+						정보</label>
 					<div class="flex items-center gap-2">
-						<input type="text" id="address" name="address" required class="form-input" placeholder="오른쪽 '주소 검색' 버튼을 클릭하세요" readonly value="${restaurant.address}">
-						<button type="button" id="searchAddressBtn" class="form-btn-primary whitespace-nowrap px-4 py-2 text-sm">주소 검색</button>
+						<input type="text" id="address" name="address" required
+							class="form-input" placeholder="오른쪽 '주소 검색' 버튼을 클릭하세요" readonly
+							value="${restaurant.address}">
+						<button type="button" id="searchAddressBtn"
+							class="form-btn-primary whitespace-nowrap px-4 py-2 text-sm">주소
+							검색</button>
 					</div>
 					<div>
-						<label for="location" class="block text-sm font-medium text-gray-700 mt-2">지역 (자동 입력)</label>
-                        <input type="text" id="location" name="location" required class="form-input mt-1 bg-gray-100" readonly value="${restaurant.location}">
+						<label for="location"
+							class="block text-sm font-medium text-gray-700 mt-2">지역
+							(자동 입력)</label> <input type="text" id="location" name="location" required
+							class="form-input mt-1 bg-gray-100" readonly
+							value="${restaurant.location}">
 					</div>
-                    <input type="text" id="detail_address" name="detail_address" class="form-input" placeholder="상세 주소를 입력하세요"> <%-- 상세주소 복원 --%>
-                    <input type="hidden" id="jibun_address" name="jibun_address" value="${restaurant.jibunAddress}">
-                    <input type="hidden" id="latitude" name="latitude" value="${restaurant.latitude}">
-                    <input type="hidden" id="longitude" name="longitude" value="${restaurant.longitude}">
+					<input type="text" id="detail_address" name="detail_address"
+						class="form-input" placeholder="상세 주소를 입력하세요">
+					<%-- 상세주소 복원 --%>
+					<input type="hidden" id="jibun_address" name="jibun_address"
+						value="${restaurant.jibunAddress}"> <input type="hidden"
+						id="latitude" name="latitude" value="${restaurant.latitude}">
+					<input type="hidden" id="longitude" name="longitude"
+						value="${restaurant.longitude}">
 				</div>
 
 				<%-- [수정] 상세 정보 및 운영시간 구조 정리 --%>
 				<div class="border-t pt-6 space-y-6">
 					<div>
 						<label for="phone" class="block text-sm font-medium text-gray-700">전화번호</label>
-						<input type="text" id="phone" name="phone" class="form-input mt-1" placeholder="예: 02-1234-5678" value="${restaurant.phone}">
+						<input type="text" id="phone" name="phone" class="form-input mt-1"
+							placeholder="예: 02-1234-5678" value="${restaurant.phone}">
 					</div>
 					<div>
-						<label for="description" class="block text-sm font-medium text-gray-700">가게 설명</label>
-						<textarea id="description" name="description" rows="4" class="form-input mt-1" placeholder="가게에 대한 상세한 설명을 입력해주세요. (예: 주차 정보, 가게 특징 등)">${restaurant.description}</textarea>
+						<label for="description"
+							class="block text-sm font-medium text-gray-700">가게 설명</label>
+						<textarea id="description" name="description" rows="4"
+							class="form-input mt-1"
+							placeholder="가게에 대한 상세한 설명을 입력해주세요. (예: 주차 정보, 가게 특징 등)">${restaurant.description}</textarea>
 					</div>
 					<%-- <div>
 						<input type="checkbox" id="parking" name="parking" value="true" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${restaurant.parking ? 'checked' : ''}>
                         <label for="parking" class="ml-2 text-sm font-medium text-gray-700">주차 가능</label>
 					</div> --%>
 					<div>
-                                <label for="break_time_text" class="block text-sm font-medium text-gray-700">브레이크 타임 (고객 안내용)</label>
-                                <input type="text" id="break_time_text" name="break_time_text" class="form-input mt-1" placeholder="예: 15:00 ~ 17:00" value="${restaurant.breakTimeText}">
-                            </div>
-                </div>
-                
-                <%-- 운영 시간 / 예약 시간 설정 --%>
-                <div class="space-y-4 border-t pt-6">
-                    <%-- 대표 운영시간 --%>
-                    <div>
-                        <div class="accordion-header flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800">🕒 가게 대표 운영시간 설정</h3>
-                            <span class="transform transition-transform duration-300">▼</span>
-                        </div>
-                        <div class="accordion-content space-y-4">
-                            <div id="main-hours-container" class="space-y-4">
-                                <%-- JS로 동적 생성 --%>
-                            </div>
-                        </div>
-                    </div>
-                    <%-- 온라인 예약 시간 --%>
-                    <div>
-                        <div class="accordion-header flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800">📅 온라인 예약 시간 설정</h3>
-                            <span class="transform transition-transform duration-300">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <div class="flex justify-between items-center mb-2">
-                                <p class="text-sm text-gray-600">온라인 예약을 받을 시간대를 설정합니다.</p>
-                                <button type="button" id="applyToAllBtn" class="text-sm bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300">월요일 기준으로 전체 적용</button>
-                            </div>
-                            <div id="hours-container" class="space-y-4 mt-2">
-                                <%-- JS로 동적 생성 --%>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+						<label for="break_time_text"
+							class="block text-sm font-medium text-gray-700">브레이크 타임
+							(고객 안내용)</label> <input type="text" id="break_time_text"
+							name="break_time_text" class="form-input mt-1"
+							placeholder="예: 15:00 ~ 17:00"
+							value="${restaurant.breakTimeText}">
+					</div>
+				</div>
+
+				<%-- 운영 시간 / 예약 시간 설정 --%>
+				<div class="space-y-4 border-t pt-6">
+					<%-- 대표 운영시간 --%>
+					<div>
+						<div class="accordion-header flex justify-between items-center">
+							<h3 class="text-lg font-semibold text-gray-800">🕒 가게 대표
+								운영시간 설정</h3>
+							<span class="transform transition-transform duration-300">▼</span>
+						</div>
+						<div class="accordion-content space-y-4">
+							<div id="main-hours-container" class="space-y-4">
+								<%-- JS로 동적 생성 --%>
+							</div>
+						</div>
+					</div>
+					<%-- 온라인 예약 시간 --%>
+					<div>
+						<div class="accordion-header flex justify-between items-center">
+							<h3 class="text-lg font-semibold text-gray-800">📅 온라인 예약 시간
+								설정</h3>
+							<span class="transform transition-transform duration-300">▼</span>
+						</div>
+						<div class="accordion-content">
+							<div class="flex justify-between items-center mb-2">
+								<p class="text-sm text-gray-600">온라인 예약을 받을 시간대를 설정합니다.</p>
+								<button type="button" id="applyToAllBtn"
+									class="text-sm bg-gray-200 px-3 py-1 rounded-md hover:bg-gray-300">월요일
+									기준으로 전체 적용</button>
+							</div>
+							<div id="hours-container" class="space-y-4 mt-2">
+								<%-- JS로 동적 생성 --%>
+							</div>
+						</div>
+					</div>
+				</div>
 
 				<%-- 이미지 업로드 --%>
 				<div>
-					<label class="block text-sm font-medium text-gray-700">대표 이미지 파일 (여러 개 선택 가능)</label>
-					<input type="file" id="restaurantImage" name="restaurantImage" accept="image/*" multiple class="hidden">
-					<div id="imagePreviewContainer" class="mt-4 flex flex-wrap gap-4 items-center">
-						<label for="restaurantImage" class="image-add-btn">
-							<span class="plus-icon">+</span>
-							<span class="add-text">이미지 추가</span>
+					<label class="block text-sm font-medium text-gray-700">대표
+						이미지 파일 (여러 개 선택 가능)</label> <input type="file" id="restaurantImage"
+						name="restaurantImage" accept="image/*" multiple class="hidden">
+					<div id="imagePreviewContainer"
+						class="mt-4 flex flex-wrap gap-4 items-center">
+						<label for="restaurantImage" class="image-add-btn"> <span
+							class="plus-icon">+</span> <span class="add-text">이미지 추가</span>
 						</label>
 					</div>
 				</div>
 
 				<div class="flex justify-end space-x-4 border-t pt-6">
-					<a href="${pageContext.request.contextPath}/business/restaurants" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300">취소</a>
-					<button type="button" id="submitBtn" class="form-btn-primary px-6 py-2">${isEditMode ? '가게 수정' : '가게 등록'}</button>
+					<a href="${pageContext.request.contextPath}/business/restaurants"
+						class="bg-gray-200 text-gray-800 px-6 py-2 rounded-md hover:bg-gray-300">취소</a>
+					<button type="button" id="submitBtn"
+						class="form-btn-primary px-6 py-2">${isEditMode ? '가게 수정' : '가게 등록'}</button>
 				</div>
 			</form>
 		</div>
 	</div>
 
-<%-- body 태그 맨 아래, 기존 <script>...</script>를 모두 지우고 아래 코드로 교체 --%>
-<script>
+	<%-- body 태그 맨 아래, 기존 <script>...</script>를 모두 지우고 아래 코드로 교체 --%>
+	<script>
 	//--- 전역 변수 ---
 	var uploadedFiles = [];
 	var filesToDelete = [];
