@@ -7,10 +7,7 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <%@ page isELIgnored="false"%>
-<%
-ApiKeyLoader.load(application);
-String kakaoApiKey = ApiKeyLoader.getApiKey("kakao.api.key");
-%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -24,8 +21,8 @@ String kakaoApiKey = ApiKeyLoader.getApiKey("kakao.api.key");
 	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap"
 	rel="stylesheet">
 <script type="text/javascript"
-	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=<%=kakaoApiKey%>&libraries=services&autoload=false"></script>
-<link rel="stylesheet"
+	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false"></script>
+	<link rel="stylesheet"
 	href="${pageContext.request.contextPath}/css/style.css">
 <style>
 :root {
@@ -1391,7 +1388,39 @@ translateY(
         if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => {
             if (e.target === imageZoomModal) closeZoomModal();
         });
-        
+     // --- ▼▼▼ [추가] 카카오맵 초기화 및 생성 코드 ▼▼▼ ---
+        kakao.maps.load(function() {
+            // 위도와 경도 값이 유효한지 확인
+            var lat = parseFloat("${restaurant.latitude}");
+            var lon = parseFloat("${restaurant.longitude}");
+
+            // 유효하지 않은 좌표일 경우, 서울 시청을 기본 위치로 설정
+            if (isNaN(lat) || isNaN(lon) || lat === 0 || lon === 0) {
+                lat = 37.566826; // 서울 시청 위도
+                lon = 126.9786567; // 서울 시청 경도
+            }
+            
+            var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+                mapOption = {
+                    center: new kakao.maps.LatLng(lat, lon), // 가게의 위도, 경도
+                    level: 3 // 지도의 확대 레벨
+                };  
+
+            // 지도를 생성합니다    
+            var map = new kakao.maps.Map(mapContainer, mapOption); 
+
+            // 마커가 표시될 위치입니다 
+            var markerPosition  = new kakao.maps.LatLng(lat, lon); 
+
+            // 마커를 생성합니다
+            var marker = new kakao.maps.Marker({
+                position: markerPosition
+            });
+
+            // 마커가 지도 위에 표시되도록 설정합니다
+            marker.setMap(map);
+        });
+        // --- ▲▲▲ [추가] 코드 끝 ▲▲▲ ---
         
     });
 </script>
