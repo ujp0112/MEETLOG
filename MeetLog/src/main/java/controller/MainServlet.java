@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 import model.Column;
 import model.Restaurant;
 import model.RestaurantRecommendation;
-import model.ReviewInfo;
+import model.Review; // Review 모델 임포트
 import model.User;
 import service.ColumnService;
 import service.RecommendationService;
@@ -40,28 +40,27 @@ public class MainServlet extends HttpServlet {
             params.put("limit", 10);
             params.put("offset", 0);
             List<Restaurant> topRestaurants = restaurantService.getPaginatedRestaurants(params);
-
-            // 2. 최신 리뷰 조회
-            List<ReviewInfo> recentReviews = reviewService.getRecentReviewsWithInfo(3);
-
-            // 3. 인기 칼럼 조회 및 요약 생성
+            
+            // 2. 생생한 최신 리뷰 조회
+            int reviewLimit = 10;
+            List<Review> recentReviews = reviewService.getRecentReviews(reviewLimit);
+            
+            // 3. 최신 칼럼 조회 (기존과 동일)
             List<Column> topColumns = columnService.getTopColumns(3);
             for (Column column : topColumns) {
-                String summary = StringUtil.stripHtmlAndTruncate(column.getContent(), 80); // 80자로 제한
+                String summary = StringUtil.stripHtmlAndTruncate(column.getContent(), 80);
                 column.setSummary(summary);
             }
 
-            // 4. 개인화 추천 (로그인한 사용자만)
+            // 4. 개인화 추천 (기존과 동일)
             HttpSession session = request.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
-            
-            // 개인화 추천 시스템은 현재 임시로 비활성화
             List<RestaurantRecommendation> personalizedRecommendations = new ArrayList<>();
             System.out.println("추천 시스템이 임시로 비활성화되었습니다.");
 
             // JSP로 데이터 전달
             request.setAttribute("topRankedRestaurants", topRestaurants);
-            request.setAttribute("hotReviews", recentReviews);
+            request.setAttribute("recentReviews", recentReviews);
             request.setAttribute("latestColumns", topColumns);
             request.setAttribute("personalizedRecommendations", personalizedRecommendations);
             request.setAttribute("user", user);
