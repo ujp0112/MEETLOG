@@ -238,9 +238,9 @@ public class ColumnCommentServlet extends HttpServlet {
             if (success) {
                 result.put("success", true);
                 result.put("message", "댓글이 수정되었습니다.");
-                // comment 객체 전체를 보내지 말고 필요한 정보만 보내기
-                result.put("commentId", existingComment.getId());
-                result.put("content", existingComment.getContent());
+                result.put("commentId", commentId);
+                result.put("content", newContent.trim());
+                result.put("updatedAt", "방금 전");
                 System.out.println("DEBUG PUT: 성공 응답 준비 완료");
             } else {
                 result.put("success", false);

@@ -15,7 +15,6 @@ public class ColumnComment {
     private int parentId; // 대댓글의 경우 부모 댓글 ID
     private int likeCount;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private boolean isActive;
 
     public ColumnComment() {
@@ -103,13 +102,6 @@ public class ColumnComment {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public boolean isActive() {
         return isActive;

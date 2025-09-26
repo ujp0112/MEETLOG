@@ -834,7 +834,7 @@ translateY(
 								<!-- 🍽️ 메뉴 섹션 -->
 								<c:if test="${not empty menus}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
-										<h2 class="text-2xl font-bold gradient-text mb-6">🍽️ 메뉴</h2>
+										<h2 class="text-2xl font-bold gradient-text mb-6">메뉴</h2>
 										<div class="space-y-4">
 											<c:forEach var="menu" items="${menus}">
 												<div
@@ -878,7 +878,7 @@ translateY(
 										<a
 											href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
 											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
-											✍️ 리뷰 작성 </a>
+											리뷰 작성 </a>
 									</div>
 									<c:choose>
 										<c:when test="${not empty reviews}">
@@ -929,7 +929,7 @@ translateY(
 								<!-- 🎫 쿠폰 섹션 -->
 								<c:if test="${not empty coupons}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
-										<h2 class="text-2xl font-bold gradient-text mb-6">🎫 MEET
+										<h2 class="text-2xl font-bold gradient-text mb-6">MEET
 											LOG 단독 쿠폰</h2>
 										<div class="space-y-4">
 											<c:forEach var="coupon" items="${coupons}">
@@ -1162,7 +1162,7 @@ translateY(
 										<a
 											href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}"
 											class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">
-											🎯 예약하기 </a>
+											예약하기 </a>
 									</div>
 								</section>
 							</div>

@@ -433,6 +433,19 @@
         }
 
         function likeComment(commentId) {
+            const buttonElement = document.getElementById('comment-like-btn-' + commentId);
+
+            // 중복 클릭 방지: 이미 처리 중이면 리턴
+            if (buttonElement && buttonElement.disabled) {
+                return;
+            }
+
+            // 버튼 비활성화 및 로딩 상태 표시
+            if (buttonElement) {
+                buttonElement.disabled = true;
+                buttonElement.style.opacity = '0.6';
+            }
+
             fetch('${pageContext.request.contextPath}/api/column/comment/like', {
                 method: 'POST',
                 headers: {
@@ -444,7 +457,6 @@
             .then(data => {
                 if (data.success) {
                     const likeElement = document.getElementById('comment-like-count-' + commentId);
-                    const buttonElement = document.getElementById('comment-like-btn-' + commentId);
                     if (likeElement) {
                         likeElement.textContent = data.likeCount;
                     }
@@ -465,11 +477,31 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('좋아요 처리 중 오류가 발생했습니다.');
+            })
+            .finally(() => {
+                // 버튼 재활성화
+                if (buttonElement) {
+                    buttonElement.disabled = false;
+                    buttonElement.style.opacity = '1';
+                }
             });
         }
 
         // 좋아요 기능 (비동기 처리)
         function likeColumn(columnId) {
+            const buttonElement = document.getElementById('column-like-btn-' + columnId);
+
+            // 중복 클릭 방지: 이미 처리 중이면 리턴
+            if (buttonElement && buttonElement.disabled) {
+                return;
+            }
+
+            // 버튼 비활성화 및 로딩 상태 표시
+            if (buttonElement) {
+                buttonElement.disabled = true;
+                buttonElement.style.opacity = '0.6';
+            }
+
             fetch('${pageContext.request.contextPath}/api/column/like', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -479,7 +511,6 @@
             .then(data => {
                 if (data.success) {
                      const likeElement = document.getElementById('like-count-' + columnId);
-                     const buttonElement = document.getElementById('column-like-btn-' + columnId);
                      if (likeElement) {
                         likeElement.textContent = data.likes; // 서버에서 받은 최신 좋아요 수로 업데이트
                     }
@@ -495,10 +526,20 @@
                     }
                 } else {
                     alert(data.message || '처리 중 오류가 발생했습니다.');
-                 }
+                }
             })
-            .catch(error => console.error('Error:', error));
-         }
+            .catch(error => {
+                console.error('Error:', error);
+                alert('좋아요 처리 중 오류가 발생했습니다.');
+            })
+            .finally(() => {
+                // 버튼 재활성화
+                if (buttonElement) {
+                    buttonElement.disabled = false;
+                    buttonElement.style.opacity = '1';
+                }
+            });
+        }
         // 공유 기능
         function shareColumn() {
             if (navigator.share) {
