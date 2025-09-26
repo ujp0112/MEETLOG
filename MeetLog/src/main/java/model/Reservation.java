@@ -2,6 +2,8 @@ package model;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 
 public class Reservation {
 	// IDE Cache Refresh - v2.0
@@ -21,6 +23,50 @@ public class Reservation {
 	private String reservationTimeStr;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private transient Date reservationTimeAsDate;
+	private transient Date createdAtAsDate;
+	private transient Date updatedAtAsDate;
+	private transient List<Reservation> reservations;
+	
+	public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
+    }
+	
+	public Date getReservationTimeAsDate() {
+		return reservationTimeAsDate;
+	}
+
+	public void setReservationTimeAsDate(Date reservationTimeAsDate) {
+		this.reservationTimeAsDate = reservationTimeAsDate;
+	}
+
+	public Date getUpdatedAtAsDate() {
+		return updatedAtAsDate;
+	}
+
+	public void setUpdatedAtAsDate(Date updatedAtAsDate) {
+		this.updatedAtAsDate = updatedAtAsDate;
+	}
+
+	public String getReservationTimeStr() {
+		return reservationTimeStr;
+	}
+
+	public void setReservationTimeStr(String reservationTimeStr) {
+		this.reservationTimeStr = reservationTimeStr;
+	}
+
+	public void setReservationTime(LocalDateTime reservationTime) {
+		this.reservationTime = reservationTime;
+	}
+
+	public Date getCreatedAtAsDate() {
+		return createdAtAsDate;
+	}
 
 	public Reservation() {
 		// Default constructor - IDE cache refresh
@@ -151,8 +197,8 @@ public class Reservation {
 		this.reservationDate = reservationDate;
 	}
 
-	public String getReservationTime() {
-		return reservationTimeStr;
+	public LocalDateTime getReservationTime() {
+		return reservationTime;
 	}
 
 	public void setReservationTime(String reservationTime) {
@@ -164,5 +210,10 @@ public class Reservation {
 		if (reservationTime == null)
 			return "";
 		return reservationTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+	}
+
+	public void setCreatedAtAsDate(Date createdAtAsDate) {
+		// TODO Auto-generated method stub
+		this.createdAtAsDate = createdAtAsDate;
 	}
 }
