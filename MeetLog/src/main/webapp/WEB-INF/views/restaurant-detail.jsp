@@ -1025,9 +1025,9 @@ translateY(
 								</section>
 								<input type="hidden" name="restaurantId" value="${restaurant.id}">
 								<input type="hidden" id="selectedTime" name="reservationTime" value="">
-    
+    							
 
-								<section class="glass-card p-8 rounded-3xl slide-up">
+								<section class="glass-card p-8 rounded-3xl slide-up" style="margin-top:32px">
 									<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
 									<%
 									List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
@@ -1133,165 +1133,105 @@ translateY(
 	</div>
 
 	<script>
-		// ==================== ▼▼▼ 기존 스크립트 ▼▼▼ ====================
-		function selectTime(element, time) {
-		    // 1. 모든 버튼을 기본 스타일(Tailwind 클래스)로 되돌립니다.
-		    $('.btn-reserve-time').removeClass('bg-blue-500 text-white border-blue-600') // 선택 스타일 제거
-		                         .addClass('bg-slate-100 text-slate-700 border-slate-200'); // 기본 스타일 추가
-		
-		    // 2. 클릭된 버튼에만 선택 스타일(Tailwind 클래스)을 적용합니다.
-		    $(element).removeClass('bg-slate-100 text-slate-700 border-slate-200') // 기본 스타일 제거
-		              .addClass('bg-blue-500 text-white border-blue-600'); // 선택 스타일 추가
-		    
-		    // 3. hidden input에 선택된 시간 값을 저장합니다.
-		    $('#selectedTime').val(time);
-		}
-		
-		document.addEventListener('DOMContentLoaded', function() { 
-		    var reservationForm = document.getElementById('reservationForm');
-		    if (reservationForm) {
-		        reservationForm.addEventListener('submit', function(event) {
-		            var selectedTime = document.getElementById('selectedTime').value;
-		            if (!selectedTime) {
-		                alert('예약 시간을 선택해주세요.');
-		                event.preventDefault(); // 폼 제출 중단
-		            }
-		        });
-		    }
-			const observer = new IntersectionObserver((entries) => { 
-				entries.forEach(entry => { 
-					if (entry.isIntersecting) { 
-						entry.target.style.opacity = '1'; 
-						entry.target.style.transform = 'translateY(0)'; 
-					} 
-				}); 
-			}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }); 
-			
-			document.querySelectorAll('.glass-card').forEach(card => { 
-				card.style.opacity = '0'; 
-				card.style.transform = 'translateY(30px)'; 
-				card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out'; 
-				observer.observe(card); 
-			}); 
-		});
-		
-		function toggleQnAForm() { 
-			const form = document.getElementById('qnaForm'); 
-			if (form.classList.contains('hidden')) { 
-				form.classList.remove('hidden'); 
-				form.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
-			} else { 
-				form.classList.add('hidden'); 
-			} 
-		}
-		
-		document.addEventListener('DOMContentLoaded', function() { 
-			const urlParams = new URLSearchParams(window.location.search); 
-			if (urlParams.get('success') === 'qna_added') { 
-				alert('문의가 성공적으로 등록되었습니다!'); 
-				window.history.replaceState({}, document.title, window.location.pathname); 
-			} 
-			
-			document.querySelectorAll('.review-card-wrapper').forEach(card => {
-		        const textElement = card.querySelector('.review-text');
-		        const readMoreBtn = card.querySelector('.read-more-btn');
-
-    // 전역 변수 선언
-    let selectedTime;
+    // =========================================================================
+    // 헬퍼 함수 (DOM 로드 전에도 선언 가능)
+    // =========================================================================
 
     // 예약 시간 선택 함수
-    function selectTime(button, time) {
-        document.querySelectorAll('.btn-reserve-time, .time-slot-available, .time-slot-closing').forEach(btn => btn.classList.remove('selected'));
-        button.classList.add('selected');
-        selectedTime = time;
+    function selectTime(element, time) {
+        $('.btn-reserve-time').removeClass('bg-blue-500 text-white border-blue-600')
+                             .addClass('bg-slate-100 text-slate-700 border-slate-200');
+        $(element).removeClass('bg-slate-100 text-slate-700 border-slate-200')
+                  .addClass('bg-blue-500 text-white border-blue-600');
+        $('#selectedTime').val(time);
     }
 
     // Q&A 폼 토글 함수
     function toggleQnAForm() {
         const form = document.getElementById('qnaForm');
-        if (form.classList.contains('hidden')) {
-            form.classList.remove('hidden');
-            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            form.classList.add('hidden');
+        if (form) {
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
-    }
-
-    // --- 레스토랑 전체 이미지 갤러리 관련 변수 및 함수 ---
-    const allImageFiles = ["${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>].filter(Boolean);
-    const overlaySection = document.getElementById('imageOverlay');
-    const overlayGrid = document.getElementById('overlayGrid');
-    const closeOverlayBtn = document.getElementById('closeOverlayBtn');
-    const imageZoomModal = document.getElementById('imageZoomModal');
-    const zoomedImage = document.getElementById('zoomedImage');
-    const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
-
-    function cycleImages() {
-        if (overlaySection.classList.contains('show')) {
-            closeImageOverlay();
-        } else {
-            showImageOverlay();
-        }
-    }
-
-    function showImageOverlay() {
-        if (!overlaySection || !overlayGrid) return;
-        overlayGrid.innerHTML = '';
-        allImageFiles.forEach(fileName => {
-            const img = document.createElement('img');
-            img.className = 'gallery-image';
-            img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
-            img.addEventListener('click', () => openZoomModal(img.src));
-            overlayGrid.appendChild(img);
-        });
-        overlaySection.classList.add('show');
-    }
-
-    function closeImageOverlay() {
-        if (overlaySection) overlaySection.classList.remove('show');
-    }
-
-    function openZoomModal(imageSrc) {
-        if (!imageZoomModal || !zoomedImage) return;
-        zoomedImage.src = imageSrc;
-        imageZoomModal.classList.add('show');
-    }
-
-    function closeZoomModal() {
-        if (imageZoomModal) imageZoomModal.classList.remove('show');
     }
     
-    // --- 리뷰 이미지 모달 관련 변수 및 함수 ---
+    // --- 레스토랑 전체 이미지 갤러리 관련 함수 ---
+    const allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
+    const overlaySection = document.getElementById('imageOverlay'); 
+    const overlayGrid = document.getElementById('overlayGrid'); 
+    const closeOverlayBtn = document.getElementById('closeOverlayBtn'); 
+    const imageZoomModal = document.getElementById('imageZoomModal'); 
+    const zoomedImage = document.getElementById('zoomedImage'); 
+    const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
+    
+    function cycleImages() { 
+        if (overlaySection && overlaySection.classList.contains('show')) { 
+            closeImageOverlay(); 
+        } else { 
+            showImageOverlay(); 
+        } 
+    }
+    
+    function showImageOverlay() { 
+        if (!overlaySection || !overlayGrid) return; 
+        overlayGrid.innerHTML = ''; 
+        allImageFiles.forEach(fileName => { 
+            const img = document.createElement('img'); 
+            img.className = 'gallery-image'; 
+            img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName); 
+            img.addEventListener('click', () => openZoomModal(img.src)); 
+            overlayGrid.appendChild(img); 
+        }); 
+        overlaySection.classList.add('show'); 
+    }
+
+    function closeImageOverlay() { 
+        if (overlaySection) overlaySection.classList.remove('show'); 
+    }
+    
+    function openZoomModal(imageSrc) { 
+        if (!imageZoomModal || !zoomedImage) return; 
+        zoomedImage.src = imageSrc; 
+        imageZoomModal.classList.add('show'); 
+    }
+    
+    function closeZoomModal() { 
+        if (imageZoomModal) imageZoomModal.classList.remove('show'); 
+    }
+    
+    // --- 리뷰 이미지 모달 관련 함수 ---
     const reviewModal = document.getElementById('reviewPhotoModal');
-	const mainImage = document.getElementById('reviewModalMainImage');
-	const thumbnailsContainer = document.getElementById('reviewModalThumbnails');
+    const mainImage = document.getElementById('reviewModalMainImage');
+    const thumbnailsContainer = document.getElementById('reviewModalThumbnails');
 
-	window.openReviewPhotoModal = function(element) {
-		const images = element.dataset.images.split(',').map(s => s.trim()).filter(Boolean);
-		const startIndex = parseInt(element.dataset.index, 10);
-		const imageUrlPrefix = '${pageContext.request.contextPath}/images/';
-		
-		mainImage.src = imageUrlPrefix + images[startIndex];
-		thumbnailsContainer.innerHTML = '';
-		
-		images.forEach((img, index) => {
-			const thumb = document.createElement('img');
-			thumb.src = imageUrlPrefix + img;
-			thumb.className = 'review-photo-modal-thumbnail';
-			if (index === startIndex) thumb.classList.add('active');
-			thumb.onclick = () => {
-				mainImage.src = thumb.src;
-				document.querySelectorAll('.review-photo-modal-thumbnail').forEach(t => t.classList.remove('active'));
-				thumb.classList.add('active');
-			};
-			thumbnailsContainer.appendChild(thumb);
-		});
-		reviewModal.classList.add('show');
-	}
+    window.openReviewPhotoModal = function(element) {
+        const images = element.dataset.images.split(',').map(s => s.trim()).filter(Boolean);
+        const startIndex = parseInt(element.dataset.index, 10);
+        const imageUrlPrefix = '${pageContext.request.contextPath}/images/';
+        
+        mainImage.src = imageUrlPrefix + images[startIndex];
+        thumbnailsContainer.innerHTML = '';
+        
+        images.forEach((img, index) => {
+            const thumb = document.createElement('img');
+            thumb.src = imageUrlPrefix + img;
+            thumb.className = 'review-photo-modal-thumbnail';
+            if (index === startIndex) thumb.classList.add('active');
+            thumb.onclick = () => {
+                mainImage.src = thumb.src;
+                document.querySelectorAll('.review-photo-modal-thumbnail').forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+            };
+            thumbnailsContainer.appendChild(thumb);
+        });
+        reviewModal.classList.add('show');
+    }
 
-	window.closeReviewPhotoModal = function() {
-		reviewModal.classList.remove('show');
-	}
+    window.closeReviewPhotoModal = function() {
+        reviewModal.classList.remove('show');
+    }
 
 
     // =========================================================================
@@ -1299,7 +1239,19 @@ translateY(
     // =========================================================================
     document.addEventListener('DOMContentLoaded', function() {
     
-        // 1. 글래스 카드 등장 애니메이션
+        // 1. 예약 폼 유효성 검사
+        var reservationForm = document.getElementById('reservationForm');
+        if (reservationForm) {
+            reservationForm.addEventListener('submit', function(event) {
+                var selectedTime = document.getElementById('selectedTime').value;
+                if (!selectedTime) {
+                    alert('예약 시간을 선택해주세요.');
+                    event.preventDefault(); // 폼 제출 중단
+                }
+            });
+        }
+    
+        // 2. 글래스 카드 등장 애니메이션
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -1316,23 +1268,21 @@ translateY(
             observer.observe(card);
         });
 
-        // 2. Q&A 등록 성공 알림 처리
+        // 3. Q&A 등록 성공 알림 처리
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('success') === 'qna_added') {
             alert('문의가 성공적으로 등록되었습니다!');
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // 3. 리뷰 텍스트 "더 보기/접기" 기능 초기화
+        // 4. 리뷰 텍스트 "더 보기/접기" 기능 초기화
         document.querySelectorAll('.review-card-wrapper').forEach(card => {
             const textElement = card.querySelector('.review-text');
             const readMoreBtn = card.querySelector('.read-more-btn');
-
             if (textElement && readMoreBtn) {
                 if (textElement.scrollHeight <= textElement.clientHeight) {
                     readMoreBtn.style.display = 'none';
                 }
-
                 readMoreBtn.addEventListener('click', () => {
                     textElement.classList.toggle('truncated');
                     readMoreBtn.textContent = textElement.classList.contains('truncated') ? '더 보기' : '접기';
@@ -1340,7 +1290,7 @@ translateY(
             }
         });
 
-        // 4. [수정됨] 각 리뷰 카드 내 이미지 슬라이드(캐러셀) 기능 초기화
+        // 5. 각 리뷰 카드 내 이미지 슬라이드(캐러셀) 기능 초기화
         document.querySelectorAll('.review-image-carousel').forEach(carousel => {
             const track = carousel.querySelector('.review-image-track');
             const prevBtn = carousel.querySelector('.review-image-arrow.prev');
@@ -1357,9 +1307,8 @@ translateY(
             const totalItems = items.length;
 
             function updateCarousel() {
-                const itemWidth = items[0].offsetWidth; // 첫 번째 아이템의 실제 너비를 기준으로 계산
+                const itemWidth = items[0].offsetWidth;
                 track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
-                
                 if(prevBtn) prevBtn.disabled = currentIndex === 0;
                 if(nextBtn) nextBtn.disabled = currentIndex === totalItems - 1;
             }
@@ -1373,7 +1322,6 @@ translateY(
                     }
                 });
             }
-
             if(nextBtn) {
                 nextBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1386,7 +1334,7 @@ translateY(
             updateCarousel();
         });
 
-        // 5. [수정됨] 리뷰 섹션 전체를 좌우로 넘기는 캐러셀 기능
+        // 6. 리뷰 섹션 전체를 좌우로 넘기는 캐러셀 기능
         const reviewTrack = document.getElementById('reviewCarouselTrack');
         if (reviewTrack) {
             const prevBtn = document.getElementById('prevReviewBtn');
@@ -1395,26 +1343,27 @@ translateY(
             
             if (reviews.length > 0) {
                 let currentIndex = 0;
-
                 const updateReviewCarousel = () => {
-                    const cardWidth = reviews[0].offsetWidth; // 카드의 실제 너비
-                    const cardMargin = parseInt(window.getComputedStyle(reviews[0]).marginRight); // 카드 오른쪽 마진
-                    const totalMove = cardWidth + cardMargin; // 한 번에 이동할 총 거리
-
+                    const cardWidth = reviews[0].offsetWidth;
+                    const cardMargin = parseInt(window.getComputedStyle(reviews[0]).marginRight);
+                    const totalMove = cardWidth + cardMargin;
+                    
+                    let reviewsPerPage = Math.floor(reviewTrack.parentElement.offsetWidth / totalMove);
+                    if (window.innerWidth <= 768) { reviewsPerPage = 1; }
+                    else if (window.innerWidth <= 1024) { reviewsPerPage = 2; }
+                    else { reviewsPerPage = 3; }
+					
                     reviewTrack.style.transform = `translateX(-${currentIndex * totalMove}px)`;
 
-                    // 버튼 활성화/비활성화 로직
-                    let reviewsPerPage = Math.floor(reviewTrack.parentElement.offsetWidth / totalMove);
-                    if (window.innerWidth <= 1024) { reviewsPerPage = 1; }
-					
                     if (prevBtn) prevBtn.disabled = currentIndex === 0;
                     if (nextBtn) nextBtn.disabled = currentIndex >= reviews.length - reviewsPerPage;
                 };
 
                 if (nextBtn) {
                     nextBtn.addEventListener('click', () => {
-                        let reviewsPerPage = Math.floor(reviewTrack.parentElement.offsetWidth / (reviews[0].offsetWidth + parseInt(window.getComputedStyle(reviews[0]).marginRight)));
-                         if (window.innerWidth <= 1024) { reviewsPerPage = 1; }
+                        let reviewsPerPage = 3; // 이 값을 동적으로 계산해야 합니다.
+                        if (window.innerWidth <= 768) { reviewsPerPage = 1; }
+                        else if (window.innerWidth <= 1024) { reviewsPerPage = 2; }
                         if (currentIndex < reviews.length - reviewsPerPage) {
                             currentIndex++;
                             updateReviewCarousel();
@@ -1435,15 +1384,16 @@ translateY(
                 updateReviewCarousel();
             }
         }
-    }); // DOMContentLoaded 이벤트 리스너 종료
-
-    // --- 이벤트 리스너 바인딩 ---
-    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeImageOverlay);
-    if (closeZoomModalBtn) closeZoomModalBtn.addEventListener('click', closeZoomModal);
-    if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => {
-        if (e.target === imageZoomModal) closeZoomModal();
+        
+        // 7. 모달창 닫기 등 전역 이벤트 리스너 바인딩
+        if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeImageOverlay);
+        if (closeZoomModalBtn) closeZoomModalBtn.addEventListener('click', closeZoomModal);
+        if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => {
+            if (e.target === imageZoomModal) closeZoomModal();
+        });
+        
+        
     });
-
 </script>
 </body>
 </html>
