@@ -969,10 +969,14 @@ translateY(
 							</div>
 
 							<div class="space-y-8">
+							<form id="reservationForm" action="${pageContext.request.contextPath}/reservation/create" method="GET">
+							
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div id="map" class="w-full h-64 rounded-2xl border"></div>
 								</section>
-
+								<input type="hidden" name="restaurantId" value="${restaurant.id}">
+								<input type="hidden" id="selectedTime" name="reservationTime" value="">
+    
 
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
@@ -1001,19 +1005,19 @@ translateY(
 									<div class="space-y-6">
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">📅
-												날짜</label><input type="date"
+												날짜</label><input type="date" name="reservationDate"
 												value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>"
 												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
 										</div>
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">👥
-												인원</label><select
-												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300"><option>1명</option>
-												<option selected>2명</option>
-												<option>3명</option>
-												<option>4명</option>
-												<option>5명</option>
-												<option>6명 이상</option></select>
+												인원</label><select name="partySize"
+												class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300"><option value="1">1명</option>
+												<option value="2" selected>2명</option>
+												<option value="3">3명</option>
+												<option value="4">4명</option>
+												<option value="5">5명</option>
+												<option value="6">6명 이상</option></select>
 										</div>
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">⏰
@@ -1058,12 +1062,12 @@ translateY(
 												</c:otherwise>
 											</c:choose>
 										</div>
-										<a
-											href="${pageContext.request.contextPath}/reservation/create?restaurantId=${restaurant.id}"
+										<button type="submit"
 											class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">
-											예약하기 </a>
+											예약하기 </button>
 									</div>
 								</section>
+								</form>
 							</div>
 						</div>
 					</c:when>
@@ -1082,12 +1086,25 @@ translateY(
 	<script>
 		// ==================== ▼▼▼ 기존 스크립트 ▼▼▼ ====================
 		function selectTime(button, time) { 
-			document.querySelectorAll('.btn-reserve-time, .time-slot-available, .time-slot-closing').forEach(btn => btn.classList.remove('selected')); 
-			button.classList.add('selected'); 
-			window.selectedTime = time; 
+		    // 모든 버튼에서 'selected' 클래스 제거
+		    document.querySelectorAll('.btn-reserve-time').forEach(btn => btn.classList.remove('selected'));
+		    // 클릭된 버튼에만 'selected' 클래스 추가
+		    button.classList.add('selected'); 
+		    // hidden input에 선택된 시간 값을 설정
+		    document.getElementById('selectedTime').value = time;
 		}
 		
 		document.addEventListener('DOMContentLoaded', function() { 
+		    var reservationForm = document.getElementById('reservationForm');
+		    if (reservationForm) {
+		        reservationForm.addEventListener('submit', function(event) {
+		            var selectedTime = document.getElementById('selectedTime').value;
+		            if (!selectedTime) {
+		                alert('예약 시간을 선택해주세요.');
+		                event.preventDefault(); // 폼 제출 중단
+		            }
+		        });
+		    }
 			const observer = new IntersectionObserver((entries) => { 
 				entries.forEach(entry => { 
 					if (entry.isIntersecting) { 

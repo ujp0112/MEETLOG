@@ -54,30 +54,40 @@
                                             <input type="hidden" name="restaurantName" value="${restaurant.name}">
                                             
                                             <div>
-                                                <label for="reservationDate" class="block text-sm font-medium text-slate-700 mb-2">예약 날짜</label>
-                                                <input type="date" id="reservationDate" name="reservationDate" required class="form-input">
-                                            </div>
+											    <label for="reservationDate" class="block text-sm font-medium text-slate-700 mb-2">예약 날짜</label>
+											    <%-- [수정] param.reservationDate 값을 기본값으로 설정 --%>
+											    <input type="date" id="reservationDate" name="reservationDate" value="${param.reservationDate}" required class="form-input">
+											</div>
 
                                             <div>
-                                                <label for="reservationTime" class="block text-sm font-medium text-slate-700 mb-2">예약 시간</label>
-                                                <select id="reservationTime" name="reservationTime" required class="form-input">
-                                                    <option value="">시간을 선택하세요</option>
-                                                    <option value="11:30">11:30</option> <option value="12:00">12:00</option> <option value="12:30">12:30</option>
-                                                    <option value="13:00">13:00</option> <option value="13:30">13:30</option>
-                                                    <option value="17:30">17:30</option> <option value="18:00">18:00</option> <option value="18:30">18:30</option>
-                                                    <option value="19:00">19:00</option> <option value="19:30">19:30</option> <option value="20:00">20:00</option>
-                                                </select>
-                                            </div>
+											    <label for="reservationTime" class="block text-sm font-medium text-slate-700 mb-2">예약 시간</label>
+											    <select id="reservationTime" name="reservationTime" required class="form-input">
+											        <option value="">시간을 선택하세요</option>
+											        <%-- [수정] param.reservationTime 값과 일치하는 옵션을 'selected'로 설정 --%>
+											        <option value="11:30" ${param.reservationTime == '11:30' ? 'selected' : ''}>11:30</option>
+											        <option value="12:00" ${param.reservationTime == '12:00' ? 'selected' : ''}>12:00</option>
+											        <option value="12:30" ${param.reservationTime == '12:30' ? 'selected' : ''}>12:30</option>
+											        <option value="13:00" ${param.reservationTime == '13:00' ? 'selected' : ''}>13:00</option>
+											        <option value="13:30" ${param.reservationTime == '13:30' ? 'selected' : ''}>13:30</option>
+											        <option value="17:30" ${param.reservationTime == '17:30' ? 'selected' : ''}>17:30</option>
+											        <option value="18:00" ${param.reservationTime == '18:00' ? 'selected' : ''}>18:00</option>
+											        <option value="18:30" ${param.reservationTime == '18:30' ? 'selected' : ''}>18:30</option>
+											        <option value="19:00" ${param.reservationTime == '19:00' ? 'selected' : ''}>19:00</option>
+											        <option value="19:30" ${param.reservationTime == '19:30' ? 'selected' : ''}>19:30</option>
+											        <option value="20:00" ${param.reservationTime == '20:00' ? 'selected' : ''}>20:00</option>
+											    </select>
+											</div>
 
                                             <div>
-                                                <label for="partySize" class="block text-sm font-medium text-slate-700 mb-2">인원 수</label>
-                                                <select id="partySize" name="partySize" required class="form-input">
-                                                    <option value="">인원을 선택하세요</option>
-                                                    <c:forEach var="i" begin="1" end="10">
-                                                        <option value="${i}">${i}명</option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
+											    <label for="partySize" class="block text-sm font-medium text-slate-700 mb-2">인원 수</label>
+											    <select id="partySize" name="partySize" required class="form-input">
+											        <option value="">인원을 선택하세요</option>
+											        <c:forEach var="i" begin="1" end="10">
+											            <%-- [수정] param.partySize 값과 일치하는 옵션을 'selected'로 설정 --%>
+											            <option value="${i}" ${param.partySize == i ? 'selected' : ''}>${i}명</option>
+											        </c:forEach>
+											    </select>
+											</div>
 
                                             <div>
                                                 <label for="contactPhone" class="block text-sm font-medium text-slate-700 mb-2">연락처</label>
