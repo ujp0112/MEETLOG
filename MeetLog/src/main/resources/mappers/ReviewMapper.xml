@@ -4,7 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dao.ReviewDAO">
 
-	<resultMap id="reviewResultMap" type="model.Review" autoMapping="true">
+    <resultMap id="reviewResultMap" type="model.Review" autoMapping="true">
         <id property="id" column="id" />
         <result property="restaurantId" column="restaurant_id" />
         <result property="userId" column="user_id" />
@@ -13,123 +13,88 @@
         <result property="isActive" column="is_active" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
-        <collection property="images" ofType="java.lang.String">
-            <result column="image_path"/>
-        </collection>
+        <collection property="images" ofType="java.lang.String"
+                    select="findImagesByReviewId" column="id" />
     </resultMap>
-
-	<sql id="selectReviewWithUser">
+    
+    
+   <select id="findImagesByReviewId" resultType="java.lang.String">
+        SELECT image_path FROM review_images WHERE review_id = #{id}
+    </select>
+    
+    <sql id="selectReviewWithUser">
 		SELECT
-		r.*,
-		u.nickname AS author,
-		u.profile_image,
-		res.name AS
-		restaurantName
+		    r.*,
+		    u.nickname AS author,
+		    u.profile_image,
+		    res.name AS restaurantName
 		FROM
-		reviews r
+		    reviews r
 		JOIN
-		users u ON r.user_id = u.id
+		    users u ON r.user_id = u.id
 		LEFT JOIN
-		restaurants res ON r.restaurant_id = res.id
+		    restaurants res ON r.restaurant_id = res.id
 	</sql>
-
-	<select id="findAll" resultMap="reviewResultMap">
+    
+    <select id="findByRestaurantId" resultMap="reviewResultMap">
 		<include refid="selectReviewWithUser" />
-		WHERE r.is_active = true
+		WHERE r.restaurant_id = #{restaurantId} AND r.is_active = true
 		ORDER BY r.created_at DESC
 	</select>
 
-	<select id="findById" parameterType="int"
-		resultMap="reviewResultMap">
+	<select id="findById" resultMap="reviewResultMap">
 		<include refid="selectReviewWithUser" />
 		WHERE r.id = #{id} AND r.is_active = true
 	</select>
 
-	 <select id="findByRestaurantId" resultMap="reviewResultMap">
-        SELECT 
-            r.*, 
-            u.nickname AS author, 
-            u.profile_image, 
-            ri.image_path
-        FROM reviews r
-        JOIN users u ON r.user_id = u.id
-        LEFT JOIN review_images ri ON r.id = ri.review_id
-        WHERE r.restaurant_id = #{restaurantId} AND r.is_active = true
-        ORDER BY r.created_at DESC;
-    </select>
-
-
-	<select id="findByUserId" parameterType="int"
-		resultMap="reviewResultMap">
+	<select id="findAll" resultMap="reviewResultMap">
 		<include refid="selectReviewWithUser" />
-		WHERE r.user_id = #{userId} AND
-		r.is_active = true ORDER
-		BY r.created_at
-		DESC
+		ORDER BY r.created_at DESC
 	</select>
-
-	<select id="findRecentByUserId" parameterType="map"
-		resultMap="reviewResultMap">
-		<include refid="selectReviewWithUser" />
-		WHERE r.user_id = #{userId} AND r.is_active = true
-		ORDER BY
-		r.created_at DESC
-		LIMIT #{limit}
-	</select>
-
-	<select id="findRecentReviewsByOwnerId" parameterType="map"
-		resultMap="reviewResultMap">
-		<include refid="selectReviewWithUser" />
-		WHERE res.owner_id = #{ownerId} AND r.is_active = true
-		ORDER BY
-		r.created_at DESC
-		LIMIT #{limit}
-	</select>
-
-	<select id="getRecentReviewsWithInfo" parameterType="int"
-		resultType="model.ReviewInfo">
+    
+     <select id="getRecentReviewsWithInfo" resultType="model.ReviewInfo">
 		SELECT
-		r.id,
-		r.content,
-		r.rating,
-		u.nickname AS author,
-		r.created_at AS createdAt,
-		u.profile_image AS profileImage,
-		res.id AS
-		restaurantId,
-		res.name AS restaurantName
-		FROM
-		reviews r
-		JOIN
-		restaurants
-		res ON r.restaurant_id = res.id
-		JOIN
-		users u ON r.user_id = u.id
-		WHERE
-		r.is_active = true
-		ORDER BY
-		r.created_at DESC
+		    r.id, r.content, r.rating, r.created_at, res.name as restaurantName,
+		    u.nickname as author
+		FROM reviews r
+		JOIN restaurants res ON r.restaurant_id = res.id
+		JOIN users u ON r.user_id = u.id
+		WHERE r.is_active = true
+		ORDER BY r.created_at DESC
 		LIMIT #{limit}
 	</select>
-
-	<select id="findRecentReviews" parameterType="int"
-		resultMap="reviewResultMap">
-		<include refid="selectReviewWithUser" />
-		WHERE r.is_active = true ORDER BY
-		r.created_at DESC LIMIT
-		#{limit}
-	</select>
-
-	<select id="searchReviews" parameterType="map"
-		resultMap="reviewResultMap">
+    <select id="findRecentReviews" resultMap="reviewResultMap">
 		<include refid="selectReviewWithUser" />
 		WHERE r.is_active = true
-		<if test="restaurantId != null">
-			AND r.restaurant_id = #{restaurantId}
-		</if>
-		<if test="userId != null">
-			AND r.user_id = #{userId}
-		</if>
+		ORDER BY r.created_at DESC
+		LIMIT #{limit}
+	</select>
+    
+   <select id="findByUserId" resultMap="reviewResultMap">
+		<include refid="selectReviewWithUser" />
+		WHERE r.user_id = #{userId} AND r.is_active = true
+		ORDER BY r.created_at DESC
+	</select>
+	<select id="findRecentByUserId" resultMap="reviewResultMap"
+		parameterType="map">
+		<include refid="selectReviewWithUser" />
+		WHERE r.user_id = #{userId} AND r.is_active = true
+		ORDER BY r.created_at DESC
+		LIMIT #{limit}
+	</select>
+
+	<select id="findRecentReviewsByOwnerId" resultMap="reviewResultMap"
+		parameterType="map">
+		<include refid="selectReviewWithUser" />
+		WHERE res.owner_id = #{ownerId} AND r.is_active = true
+		ORDER BY r.created_at DESC
+		LIMIT #{limit}
+	</select>
+
+	<select id="search" resultMap="reviewResultMap"
+		parameterType="map">
+		<include refid="selectReviewWithUser" />
+		WHERE r.is_active = true
 		<if test="minRating != null">
 			AND r.rating >= #{minRating}
 		</if>
@@ -156,20 +121,20 @@
 
 	<update id="update" parameterType="model.Review">
         UPDATE reviews SET
-        rating = #{rating},
-        content = #{content},
-        keywords = #{keywords, typeHandler=typehandler.JsonArrayTypeHandler},
-        updated_at = NOW()
+            rating = #{rating},
+            content = #{content},
+            keywords = #{keywords, typeHandler=typehandler.JsonArrayTypeHandler},
+            updated_at = NOW()
         WHERE id = #{id}
     </update>
 
     <update id="delete" parameterType="int">
-        UPDATE reviews SET is_active = false, updated_at = NOW() WHERE id = #{id}
+        UPDATE reviews SET is_active = false WHERE id = #{id}
     </update>
 
 	<update id="likeReview" parameterType="int">
 		UPDATE reviews SET likes =
-		likes + 1, updated_at = NOW() WHERE id = #{id}
+		likes + 1 WHERE id = #{id}
 	</update>
 
 </mapper>

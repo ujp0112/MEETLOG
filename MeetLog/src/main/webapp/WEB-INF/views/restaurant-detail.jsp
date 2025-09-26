@@ -133,6 +133,36 @@ body {
 /* 리뷰 캐러셀 스타일 */
 .review-carousel-container {
 	position: relative;
+	width: 100%;
+	overflow: hidden; /* 중요: 옆으로 삐져나온 카드들을 숨김 */
+}
+
+#reviewCarouselTrack {
+	display: flex;
+	transition: transform 0.5s ease-in-out;
+	padding-bottom: 20px; /* 스크롤바 공간 확보 */
+	overflow-x: auto; /* 가로 스크롤바 생성 */
+	scroll-snap-type: x mandatory; /* 스크롤 시 카드에 딱 맞게 멈춤 */
+	-ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+	scrollbar-width: thin; /* Firefox 스크롤바 스타일 */
+}
+
+#reviewCarouselTrack::-webkit-scrollbar {
+	height: 8px;
+}
+
+#reviewCarouselTrack::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 10px;
+}
+
+#reviewCarouselTrack::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 10px;
+}
+
+#reviewCarouselTrack::-webkit-scrollbar-thumb:hover {
+	background: #555;
 }
 
 .review-carousel-viewport {
@@ -147,9 +177,9 @@ body {
 }
 
 .review-card-wrapper {
-	flex-shrink: 0;
-	width: calc(100%/ 3);
-	padding: 0 8px;
+	flex: 0 0 90%; /* 한 번에 카드 1개가 보이도록 너비 조정 (90%로 설정해 다음 카드 살짝 보이게 함) */
+	scroll-snap-align: start; /* 스크롤 시 카드가 시작점에 맞춰 정렬됨 */
+	margin-right: 20px;
 	box-sizing: border-box;
 }
 
@@ -318,9 +348,9 @@ rgba(
 	font-size: 0.8rem;
 }
 
-@media ( max-width : 1024px) {
+@media ( min-width : 1024px) {
 	.review-card-wrapper {
-		width: 50%;
+		flex-basis: calc(50% - 10px); /* 넓은 화면에서는 2개씩 보이도록 조정 */
 	}
 }
 
@@ -458,31 +488,49 @@ translateY(
 }
 /* 리뷰 카드 내 이미지 캐러셀 스타일 */
 .review-image-carousel {
-	position: relative;
-	width: 100%;
-	height: 250px; /* 캐러셀 높이 지정 */
-	border-radius: 12px;
-	overflow: hidden;
-	margin-bottom: 1rem; /* 하단 여백 */
+    display: flex; /* 내부 트랙을 flex로 정렬 */
+    position: relative;
+    width: 100%;
+    overflow-x: auto; /* [핵심] 숨김(hidden) 대신 가로 스크롤(auto) 적용 */
+    scroll-snap-type: x mandatory; /* 스크롤 시 이미지 경계에 딱 맞게 멈춤 */
+    scroll-behavior: smooth; /* JS로 스크롤 시 부드럽게 이동 */
+    padding-bottom: 15px; /* 스크롤바 공간 확보 */
+    -ms-overflow-style: none; /* IE, Edge 스크롤바 숨김 */
+    scrollbar-width: thin; /* Firefox 스크롤바 스타일 */
+}
+
+.review-image-carousel::-webkit-scrollbar {
+    height: 8px;
+}
+.review-image-carousel::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.review-image-carousel::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+.review-image-carousel::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }
 
 .review-image-track {
 	display: flex;
-	height: 100%;
-	transition: transform 0.3s ease-in-out;
 }
 
 .review-image-item {
-	flex-shrink: 0;
-	width: 100%;
-	height: 100%;
-	cursor: pointer;
+    flex: 0 0 90%; /* [핵심] 너비를 90%로 하여 다음 이미지가 살짝 보이게 함 */
+    scroll-snap-align: start; /* 스크롤 시 이 아이템의 시작점에 맞춰 정렬 */
+    height: 200px;
+    padding-right: 10px;
+    box-sizing: border-box;
 }
 
 .review-image-item img {
 	width: 100%;
 	height: 100%;
-	object-fit: cover; /* 이미지가 잘리지 않고 꽉 차도록 설정 */
+	object-fit: cover;
+	border-radius: 8px;
 }
 
 .review-image-arrow {
@@ -789,22 +837,22 @@ translateY(
 
 																		<div class="review-image-carousel">
 																			<div class="review-image-track">
-																				<c:forEach var="img" items="${review.images}"
-																					varStatus="status">
+																				<%-- [핵심 수정] c:forEach를 사용해 review.images에 있는 모든 이미지를 반복 출력 --%>
+																				<c:forEach var="imagePath" items="${review.images}"
+																					varStatus="loop">
 																					<div class="review-image-item"
 																						onclick="openReviewPhotoModal(this)"
-																						data-images="${imageListAsString}"
-																						data-index="${status.index}">
-																						<mytag:image fileName="${img}"
-																							cssClass="w-full h-full object-cover"
-																							altText="리뷰 사진 ${status.count}" />
+																						data-images="<c:forEach var='img' items='${review.images}' varStatus='status'>${img}<c:if test='${!status.last}'>,</c:if></c:forEach>"
+																						data-index="${loop.index}">
+
+																						<img
+																							src="${pageContext.request.contextPath}/images/${imagePath}"
+																							alt="리뷰 사진 ${loop.count}" class="review-image">
 																					</div>
 																				</c:forEach>
 																			</div>
-																			<c:if test="${fn:length(review.images) > 1}">
-																				<button class="review-image-arrow prev">‹</button>
-																				<button class="review-image-arrow next">›</button>
-																			</c:if>
+																			<button class="review-image-arrow prev">&lt;</button>
+																			<button class="review-image-arrow next">&gt;</button>
 																		</div>
 																	</c:if>
 																	<div class="review-content-wrapper mb-4 flex-grow">
@@ -1148,180 +1196,254 @@ translateY(
 		        const textElement = card.querySelector('.review-text');
 		        const readMoreBtn = card.querySelector('.read-more-btn');
 
-		        if (textElement && readMoreBtn) {
-		            // textElement의 높이가 clientHeight보다 클 때만 "더 보기" 버튼 표시
-		            if (textElement.scrollHeight <= textElement.clientHeight) {
-		                readMoreBtn.style.display = 'none';
-		            }
+    // 전역 변수 선언
+    let selectedTime;
 
-		            readMoreBtn.addEventListener('click', () => {
-		                textElement.classList.toggle('truncated');
-		                if (textElement.classList.contains('truncated')) {
-		                    readMoreBtn.textContent = '더 보기';
-		                } else {
-		                    readMoreBtn.textContent = '접기';
-		                }
-		            });
-		        }
-		    });
-			document.querySelectorAll('.review-image-carousel').forEach(carousel => {
-		        const track = carousel.querySelector('.review-image-track');
-		        const prevBtn = carousel.querySelector('.prev');
-		        const nextBtn = carousel.querySelector('.next');
-		        const items = track.querySelectorAll('.review-image-item');
-		        const totalItems = items.length;
-		        let currentIndex = 0;
+    // 예약 시간 선택 함수
+    function selectTime(button, time) {
+        document.querySelectorAll('.btn-reserve-time, .time-slot-available, .time-slot-closing').forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        selectedTime = time;
+    }
 
-		        if (totalItems <= 1) return; // 이미지가 하나 이하면 실행 안함
-
-		        function updateCarousel() {
-		            track.style.transform = `translateX(-${currentIndex * 100}%)`;
-		            prevBtn.disabled = currentIndex === 0;
-		            nextBtn.disabled = currentIndex === totalItems - 1;
-		        }
-
-		        prevBtn.addEventListener('click', (e) => {
-		            e.stopPropagation(); // 모달 열림 방지
-		            if (currentIndex > 0) {
-		                currentIndex--;
-		                updateCarousel();
-		            }
-		        });
-
-		        nextBtn.addEventListener('click', (e) => {
-		            e.stopPropagation(); // 모달 열림 방지
-		            if (currentIndex < totalItems - 1) {
-		                currentIndex++;
-		                updateCarousel();
-		            }
-		        });
-
-		        updateCarousel(); // 초기 상태 설정
-		    });
-		});
-
-    	const allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
-        const overlaySection = document.getElementById('imageOverlay'); 
-        const overlayGrid = document.getElementById('overlayGrid'); 
-        const closeOverlayBtn = document.getElementById('closeOverlayBtn'); 
-        const imageZoomModal = document.getElementById('imageZoomModal'); 
-        const zoomedImage = document.getElementById('zoomedImage'); 
-        const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
-        
-        function cycleImages() { 
-        	if (overlaySection.classList.contains('show')) { 
-        		closeImageOverlay(); 
-        	} else { 
-        		showImageOverlay(); 
-        	} 
+    // Q&A 폼 토글 함수
+    function toggleQnAForm() {
+        const form = document.getElementById('qnaForm');
+        if (form.classList.contains('hidden')) {
+            form.classList.remove('hidden');
+            form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            form.classList.add('hidden');
         }
-        
-        function showImageOverlay() { 
-        	if (!overlaySection || !overlayGrid) return; 
-        	overlayGrid.innerHTML = ''; 
-        	allImageFiles.forEach(fileName => { 
-        		const img = document.createElement('img'); 
-        		img.className = 'gallery-image'; 
-        		img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName); 
-        		img.addEventListener('click', () => openZoomModal(img.src)); 
-        		overlayGrid.appendChild(img); 
-        	}); 
-        	overlaySection.classList.add('show'); 
-        }
+    }
 
-        function closeImageOverlay() { 
-        	if (overlaySection) overlaySection.classList.remove('show'); 
-        }
-        
-        function openZoomModal(imageSrc) { 
-        	if (!imageZoomModal || !zoomedImage) return; 
-        	zoomedImage.src = imageSrc; 
-        	imageZoomModal.classList.add('show'); 
-        }
-        
-        function closeZoomModal() { 
-        	if (imageZoomModal) imageZoomModal.classList.remove('show'); 
-        }
-        
-        if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeImageOverlay);
-        if (closeZoomModalBtn) closeZoomModalBtn.addEventListener('click', closeZoomModal);
-        if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => { if (e.target === imageZoomModal) closeZoomModal(); });
+    // --- 레스토랑 전체 이미지 갤러리 관련 변수 및 함수 ---
+    const allImageFiles = ["${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach>].filter(Boolean);
+    const overlaySection = document.getElementById('imageOverlay');
+    const overlayGrid = document.getElementById('overlayGrid');
+    const closeOverlayBtn = document.getElementById('closeOverlayBtn');
+    const imageZoomModal = document.getElementById('imageZoomModal');
+    const zoomedImage = document.getElementById('zoomedImage');
+    const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
 
-		// ==================== ▼▼▼ NEW: 리뷰 캐러셀 및 이미지 모달 스크립트 ▼▼▼ ====================
-		const track = document.getElementById('reviewCarouselTrack');
-		if (track) {
-			const prevBtn = document.getElementById('prevReviewBtn');
-			const nextBtn = document.getElementById('nextReviewBtn');
-			const reviews = track.querySelectorAll('.review-card-wrapper');
-			const totalReviews = reviews.length;
-			let reviewsPerPage = 3;
-			let currentIndex = 0;
-			
-			const updateCarouselView = () => {
-				if (window.innerWidth <= 768) { reviewsPerPage = 1; }
-				else if (window.innerWidth <= 1024) { reviewsPerPage = 2; }
-				else { reviewsPerPage = 3; }
+    function cycleImages() {
+        if (overlaySection.classList.contains('show')) {
+            closeImageOverlay();
+        } else {
+            showImageOverlay();
+        }
+    }
 
-				const trackWidth = track.parentElement.offsetWidth;
-				const cardWidth = trackWidth / reviewsPerPage;
-				track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+    function showImageOverlay() {
+        if (!overlaySection || !overlayGrid) return;
+        overlayGrid.innerHTML = '';
+        allImageFiles.forEach(fileName => {
+            const img = document.createElement('img');
+            img.className = 'gallery-image';
+            img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
+            img.addEventListener('click', () => openZoomModal(img.src));
+            overlayGrid.appendChild(img);
+        });
+        overlaySection.classList.add('show');
+    }
 
-				if (prevBtn) prevBtn.disabled = currentIndex === 0;
-				if (nextBtn) nextBtn.disabled = currentIndex >= totalReviews - reviewsPerPage;
-			};
-	
-			if (nextBtn) {
-				nextBtn.addEventListener('click', () => {
-					if (currentIndex < totalReviews - reviewsPerPage) {
-						currentIndex++;
-						updateCarouselView();
-					}
-				});
-			}
-	
-			if (prevBtn) {
-				prevBtn.addEventListener('click', () => {
-					if (currentIndex > 0) {
-						currentIndex--;
-						updateCarouselView();
-					}
-				});
-			}
-	
-			window.addEventListener('resize', updateCarouselView);
-			updateCarouselView();
-		}
-	
-		const reviewModal = document.getElementById('reviewPhotoModal');
-		const mainImage = document.getElementById('reviewModalMainImage');
-		const thumbnailsContainer = document.getElementById('reviewModalThumbnails');
+    function closeImageOverlay() {
+        if (overlaySection) overlaySection.classList.remove('show');
+    }
+
+    function openZoomModal(imageSrc) {
+        if (!imageZoomModal || !zoomedImage) return;
+        zoomedImage.src = imageSrc;
+        imageZoomModal.classList.add('show');
+    }
+
+    function closeZoomModal() {
+        if (imageZoomModal) imageZoomModal.classList.remove('show');
+    }
+    
+    // --- 리뷰 이미지 모달 관련 변수 및 함수 ---
+    const reviewModal = document.getElementById('reviewPhotoModal');
+	const mainImage = document.getElementById('reviewModalMainImage');
+	const thumbnailsContainer = document.getElementById('reviewModalThumbnails');
+
+	window.openReviewPhotoModal = function(element) {
+		const images = element.dataset.images.split(',').map(s => s.trim()).filter(Boolean);
+		const startIndex = parseInt(element.dataset.index, 10);
+		const imageUrlPrefix = '${pageContext.request.contextPath}/images/';
 		
-		window.openReviewPhotoModal = function(element) {
-			const images = element.dataset.images.split(',').map(s => s.trim()).filter(Boolean);
-			const startIndex = parseInt(element.dataset.index, 10);
-			const imageUrlPrefix = '${pageContext.request.contextPath}/images/';
-			
-			mainImage.src = imageUrlPrefix + images[startIndex];
-			thumbnailsContainer.innerHTML = '';
-			
-			images.forEach((img, index) => {
-				const thumb = document.createElement('img');
-				thumb.src = imageUrlPrefix + img;
-				thumb.className = 'review-photo-modal-thumbnail';
-				if (index === startIndex) thumb.classList.add('active');
-				thumb.onclick = () => {
-					mainImage.src = thumb.src;
-					document.querySelectorAll('.review-photo-modal-thumbnail').forEach(t => t.classList.remove('active'));
-					thumb.classList.add('active');
-				};
-				thumbnailsContainer.appendChild(thumb);
-			});
-			reviewModal.classList.add('show');
-		}
-	
-		window.closeReviewPhotoModal = function() {
-			reviewModal.classList.remove('show');
-		}
-	</script>
+		mainImage.src = imageUrlPrefix + images[startIndex];
+		thumbnailsContainer.innerHTML = '';
+		
+		images.forEach((img, index) => {
+			const thumb = document.createElement('img');
+			thumb.src = imageUrlPrefix + img;
+			thumb.className = 'review-photo-modal-thumbnail';
+			if (index === startIndex) thumb.classList.add('active');
+			thumb.onclick = () => {
+				mainImage.src = thumb.src;
+				document.querySelectorAll('.review-photo-modal-thumbnail').forEach(t => t.classList.remove('active'));
+				thumb.classList.add('active');
+			};
+			thumbnailsContainer.appendChild(thumb);
+		});
+		reviewModal.classList.add('show');
+	}
+
+	window.closeReviewPhotoModal = function() {
+		reviewModal.classList.remove('show');
+	}
+
+
+    // =========================================================================
+    // DOM이 모두 로드된 후 실행될 스크립트들을 하나로 통합
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+    
+        // 1. 글래스 카드 등장 애니메이션
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(card);
+        });
+
+        // 2. Q&A 등록 성공 알림 처리
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'qna_added') {
+            alert('문의가 성공적으로 등록되었습니다!');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // 3. 리뷰 텍스트 "더 보기/접기" 기능 초기화
+        document.querySelectorAll('.review-card-wrapper').forEach(card => {
+            const textElement = card.querySelector('.review-text');
+            const readMoreBtn = card.querySelector('.read-more-btn');
+
+            if (textElement && readMoreBtn) {
+                if (textElement.scrollHeight <= textElement.clientHeight) {
+                    readMoreBtn.style.display = 'none';
+                }
+
+                readMoreBtn.addEventListener('click', () => {
+                    textElement.classList.toggle('truncated');
+                    readMoreBtn.textContent = textElement.classList.contains('truncated') ? '더 보기' : '접기';
+                });
+            }
+        });
+
+        // 4. [수정됨] 각 리뷰 카드 내 이미지 슬라이드(캐러셀) 기능 초기화
+        document.querySelectorAll('.review-image-carousel').forEach(carousel => {
+            const track = carousel.querySelector('.review-image-track');
+            const prevBtn = carousel.querySelector('.review-image-arrow.prev');
+            const nextBtn = carousel.querySelector('.review-image-arrow.next');
+            const items = carousel.querySelectorAll('.review-image-item');
+            
+            if (!track || items.length <= 1) {
+                if (prevBtn) prevBtn.style.display = 'none';
+                if (nextBtn) nextBtn.style.display = 'none';
+                return;
+            }
+
+            let currentIndex = 0;
+            const totalItems = items.length;
+
+            function updateCarousel() {
+                const itemWidth = items[0].offsetWidth; // 첫 번째 아이템의 실제 너비를 기준으로 계산
+                track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+                
+                if(prevBtn) prevBtn.disabled = currentIndex === 0;
+                if(nextBtn) nextBtn.disabled = currentIndex === totalItems - 1;
+            }
+
+            if(prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        updateCarousel();
+                    }
+                });
+            }
+
+            if(nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (currentIndex < totalItems - 1) {
+                        currentIndex++;
+                        updateCarousel();
+                    }
+                });
+            }
+            updateCarousel();
+        });
+
+        // 5. [수정됨] 리뷰 섹션 전체를 좌우로 넘기는 캐러셀 기능
+        const reviewTrack = document.getElementById('reviewCarouselTrack');
+        if (reviewTrack) {
+            const prevBtn = document.getElementById('prevReviewBtn');
+            const nextBtn = document.getElementById('nextReviewBtn');
+            const reviews = reviewTrack.querySelectorAll('.review-card-wrapper');
+            
+            if (reviews.length > 0) {
+                let currentIndex = 0;
+
+                const updateReviewCarousel = () => {
+                    const cardWidth = reviews[0].offsetWidth; // 카드의 실제 너비
+                    const cardMargin = parseInt(window.getComputedStyle(reviews[0]).marginRight); // 카드 오른쪽 마진
+                    const totalMove = cardWidth + cardMargin; // 한 번에 이동할 총 거리
+
+                    reviewTrack.style.transform = `translateX(-${currentIndex * totalMove}px)`;
+
+                    // 버튼 활성화/비활성화 로직
+                    let reviewsPerPage = Math.floor(reviewTrack.parentElement.offsetWidth / totalMove);
+                    if (window.innerWidth <= 1024) { reviewsPerPage = 1; }
+					
+                    if (prevBtn) prevBtn.disabled = currentIndex === 0;
+                    if (nextBtn) nextBtn.disabled = currentIndex >= reviews.length - reviewsPerPage;
+                };
+
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', () => {
+                        let reviewsPerPage = Math.floor(reviewTrack.parentElement.offsetWidth / (reviews[0].offsetWidth + parseInt(window.getComputedStyle(reviews[0]).marginRight)));
+                         if (window.innerWidth <= 1024) { reviewsPerPage = 1; }
+                        if (currentIndex < reviews.length - reviewsPerPage) {
+                            currentIndex++;
+                            updateReviewCarousel();
+                        }
+                    });
+                }
+
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', () => {
+                        if (currentIndex > 0) {
+                            currentIndex--;
+                            updateReviewCarousel();
+                        }
+                    });
+                }
+
+                window.addEventListener('resize', updateReviewCarousel);
+                updateReviewCarousel();
+            }
+        }
+    }); // DOMContentLoaded 이벤트 리스너 종료
+
+    // --- 이벤트 리스너 바인딩 ---
+    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeImageOverlay);
+    if (closeZoomModalBtn) closeZoomModalBtn.addEventListener('click', closeZoomModal);
+    if (imageZoomModal) imageZoomModal.addEventListener('click', (e) => {
+        if (e.target === imageZoomModal) closeZoomModal();
+    });
+
+</script>
 </body>
 </html>
