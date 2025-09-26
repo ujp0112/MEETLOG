@@ -51,6 +51,9 @@ public class ReviewServlet extends HttpServlet {
             case "write":
                 showWriteReviewForm(request, response);
                 break;
+            case "edit":
+                showEditReviewForm(request, response);
+                break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -60,7 +63,10 @@ public class ReviewServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo == null || !pathInfo.equals("/write")) {
+        String[] pathParts = pathInfo != null ? pathInfo.split("/") : new String[0];
+        String action = pathParts.length > 1 ? pathParts[1] : "";
+
+        if (pathInfo == null || (!pathInfo.equals("/write") && !pathInfo.equals("/edit"))) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -71,7 +77,16 @@ public class ReviewServlet extends HttpServlet {
             return;
         }
 
+        if ("/write".equals(pathInfo)) {
+            handleWriteReview(request, response);
+        } else if ("/edit".equals(pathInfo)) {
+            handleEditReview(request, response);
+        }
+    }
+
+    private void handleWriteReview(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
             int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
             int rating = Integer.parseInt(request.getParameter("rating"));
@@ -124,10 +139,91 @@ public class ReviewServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "리뷰 등록 중 오류가 발생했습니다.");
-            // 오류 발생 시, 다시 리뷰 작성 페이지로 이동하되, 어떤 음식점인지 정보를 유지합니다.
             String restaurantId = request.getParameter("restaurantId");
             if(restaurantId != null && !restaurantId.isEmpty()){
                 response.sendRedirect(request.getContextPath() + "/review/write?restaurantId=" + restaurantId);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/");
+            }
+        }
+    }
+
+    private void handleEditReview(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+            int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+
+            // 기존 리뷰 조회해서 권한 확인
+            Review existingReview = reviewService.findById(reviewId);
+            if (existingReview == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (existingReview.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "본인의 리뷰만 수정할 수 있습니다.");
+                return;
+            }
+
+            int rating = Integer.parseInt(request.getParameter("rating"));
+            String content = request.getParameter("content");
+            String keywords = request.getParameter("keywords");
+
+            List<String> imageFileNames = new ArrayList<>();
+            Collection<Part> parts = request.getParts();
+
+            String uploadPath = AppConfig.getUploadPath();
+            if (uploadPath == null || uploadPath.isEmpty()) {
+                throw new ServletException("Upload path is not configured in config.properties.");
+            }
+
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            for (Part part : parts) {
+                if (part.getName().equals("images") && part.getSize() > 0) {
+                    String submittedFileName = part.getSubmittedFileName();
+                    if (submittedFileName != null && !submittedFileName.isEmpty()) {
+                        String fileExtension = submittedFileName.substring(submittedFileName.lastIndexOf("."));
+                        String fileName = UUID.randomUUID().toString() + fileExtension;
+
+                        part.write(uploadPath + File.separator + fileName);
+                        imageFileNames.add(fileName);
+                    }
+                }
+            }
+
+            Review review = new Review();
+            review.setId(reviewId);
+            review.setUserId(user.getId());
+            review.setRestaurantId(existingReview.getRestaurantId());
+            review.setRating(rating);
+            review.setContent(content);
+            review.setKeywords(keywords);
+
+            // 새 이미지가 업로드된 경우에만 이미지 업데이트
+            if (!imageFileNames.isEmpty()) {
+                review.setImages(imageFileNames);
+            }
+
+            boolean success = reviewService.updateReview(review);
+
+            if (success) {
+                response.sendRedirect(request.getContextPath() + "/restaurant/detail/" + existingReview.getRestaurantId());
+            } else {
+                request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
+                showEditReviewForm(request, response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "리뷰 수정 중 오류가 발생했습니다.");
+            String reviewId = request.getParameter("reviewId");
+            if(reviewId != null && !reviewId.isEmpty()){
+                response.sendRedirect(request.getContextPath() + "/review/edit?reviewId=" + reviewId);
             } else {
                 response.sendRedirect(request.getContextPath() + "/");
             }
@@ -151,6 +247,49 @@ public class ReviewServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/write-review.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 음식점 ID입니다.");
+        }
+    }
+
+    private void showEditReviewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/user/login");
+            return;
+        }
+
+        try {
+            User user = (User) session.getAttribute("user");
+            int reviewId = Integer.parseInt(request.getParameter("reviewId"));
+
+            Review review = reviewService.findById(reviewId);
+            if (review == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (review.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "본인의 리뷰만 수정할 수 있습니다.");
+                return;
+            }
+
+            Restaurant restaurant = restaurantService.getRestaurantById(review.getRestaurantId());
+            if (restaurant == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "음식점 정보를 찾을 수 없습니다.");
+                return;
+            }
+
+            Map<String, List<String>> keywordCategories = getKeywordsForCategory(restaurant.getCategory());
+
+            request.setAttribute("review", review);
+            request.setAttribute("restaurant", restaurant);
+            request.setAttribute("keywordCategories", keywordCategories);
+            request.getRequestDispatcher("/WEB-INF/views/edit-review.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 리뷰 ID입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
