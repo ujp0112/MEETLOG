@@ -1,0 +1,1 @@
+ALTER TABLE feed_items MODIFY feed_type ENUM('COLUMN', 'REVIEW', 'COURSE') NOT NULL;

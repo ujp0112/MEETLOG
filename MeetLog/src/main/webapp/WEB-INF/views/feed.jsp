@@ -178,7 +178,7 @@
                                                     </c:if>--%>
                                                 </c:when>
                                                 <c:when test="${activity.activityType == 'COURSE'}">
-                                                    <a href="${pageContext.request.contextPath}/course/detail/${activity.contentId}" 
+                                                    <a href="${pageContext.request.contextPath}/course/detail?id=${activity.contentId}" 
                                                        class="text-green-600 hover:text-green-700 font-semibold text-sm">
                                                         코스 보기
                                                     </a>

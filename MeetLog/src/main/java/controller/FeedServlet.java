@@ -98,8 +98,8 @@ public class FeedServlet extends HttpServlet {
                     }
 
                     // 대상 사용자의 활동 피드 조회
-                    List<FeedItem> userFeedItems = feedService.getUserActivityFeed(targetUserId, 20, 0);
-                    List<Activity> userActivities = convertFeedItemsToActivities(userFeedItems);
+                    List<Map<String, Object>> userFeedData = feedService.getUserActivityFeedWithDetails(targetUserId, 20, 0);
+                    List<Activity> userActivities = convertMapDataToActivities(userFeedData);
 
                     // 팔로우 관계 확인
                     boolean isFollowing = followService.isFollowing(user.getId(), targetUserId);

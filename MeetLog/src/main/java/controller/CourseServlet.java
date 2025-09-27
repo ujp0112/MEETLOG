@@ -29,6 +29,7 @@ import model.User;
 import model.CourseStep;
 import model.Restaurant;
 import service.CourseService;
+import service.FeedService;
 import service.RestaurantService;
 import util.AppConfig;
 
@@ -172,6 +173,17 @@ public class CourseServlet extends HttpServlet {
             boolean success = courseService.createCourseWithSteps(course, steps);
             
             if (success) {
+                // 피드 아이템 생성
+                try {
+                    FeedService feedService = new FeedService();
+                    feedService.createSimpleCourseFeedItem(user.getId(), course.getId());
+                    System.out.println("DEBUG: 코스 피드 아이템 생성 완료 - 코스 ID: " + course.getId());
+                } catch (Exception e) {
+                    System.err.println("피드 아이템 생성 실패: " + e.getMessage());
+                    e.printStackTrace();
+                    // 피드 아이템 생성 실패는 코스 작성을 막지 않음
+                }
+                
                 response.sendRedirect(request.getContextPath() + "/course/detail?id=" + course.getId());
             } else {
                 throw new Exception("코스 등록 실패");

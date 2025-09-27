@@ -56,6 +56,18 @@ public class FeedService {
     }
 
     /**
+     * 특정 사용자의 활동 피드 조회 (Map 형태 - 상세 정보 포함)
+     */
+    public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset) {
+        try {
+            return feedDAO.getUserActivityFeedWithDetails(userId, limit, offset);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
+    /**
      * 전체 공개 피드 조회
      */
     public List<FeedItem> getPublicFeed(int limit, int offset) {
@@ -166,6 +178,20 @@ public class FeedService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("칼럼 피드 아이템 생성 실패", e);
+        }
+    }
+
+    /**
+     * 간단한 코스 피드 아이템 생성 (현재 DB 스키마에 맞춤)
+     */
+    public void createSimpleCourseFeedItem(int userId, int courseId) {
+        try {
+            // 현재 DB 스키마에 맞는 간단한 피드 아이템 생성
+            feedDAO.createSimpleFeedItem(userId, "COURSE", courseId);
+            System.out.println("DEBUG: 간단한 코스 피드 아이템 생성 완료 - 사용자: " + userId + ", 코스: " + courseId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("코스 피드 아이템 생성 실패", e);
         }
     }
 
