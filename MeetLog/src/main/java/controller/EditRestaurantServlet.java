@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -36,25 +37,34 @@ public class EditRestaurantServlet extends HttpServlet {
         OperatingHourService operatingHourService = new OperatingHourService();
         HttpSession session = request.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
-        Gson gson = new Gson();
 
         if (user == null || !"BUSINESS".equals(user.getUserType())) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "로그인이 필요하거나 권한이 없습니다.");
             return;
         }
-        
-     // --- [수정] LocalTime을 "HH:mm" 형식으로 변환하는 커스텀 Gson 객체 생성 ---
-        Gson gson1 = new GsonBuilder()
+
+        // LocalTime과 LocalDateTime을 위한 커스텀 Gson 객체 생성
+        Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalTime.class, new TypeAdapter<LocalTime>() {
                 private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
                 @Override
                 public void write(JsonWriter out, LocalTime value) throws IOException {
-                    out.value(value.format(formatter));
+                    out.value(value != null ? value.format(formatter) : null);
                 }
                 @Override
                 public LocalTime read(JsonReader in) throws IOException {
-                    // 이 프로젝트에서는 JSON -> LocalTime 변환이 필요 없으므로 null을 반환합니다.
                     return LocalTime.parse(in.nextString(), formatter);
+                }
+            })
+            .registerTypeAdapter(LocalDateTime.class, new TypeAdapter<LocalDateTime>() {
+                private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                @Override
+                public void write(JsonWriter out, LocalDateTime value) throws IOException {
+                    out.value(value != null ? value.format(formatter) : null);
+                }
+                @Override
+                public LocalDateTime read(JsonReader in) throws IOException {
+                    return LocalDateTime.parse(in.nextString(), formatter);
                 }
             })
             .create();
@@ -67,9 +77,8 @@ public class EditRestaurantServlet extends HttpServlet {
             Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
             restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
             String restaurantJson = gson.toJson(restaurant);
-//            String operatingHours = gson.toJson(operatingDAO.findByRestaurantId(restaurant.getId()));
             List<OperatingHour> operatingHours = operatingHourService.findByRestaurantId(restaurantId);
-            String operatingHoursJson = gson1.toJson(operatingHours);
+            String operatingHoursJson = gson.toJson(operatingHours);
             
             // [권한 체크] 가게가 존재하고, 현재 로그인한 사용자가 가게 주인인지 확인
             if (restaurant != null && restaurant.getOwnerId() == user.getId()) {

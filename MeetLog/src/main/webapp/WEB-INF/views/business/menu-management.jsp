@@ -33,25 +33,30 @@
     
     <main class="container mx-auto p-4 md:p-8">
         <div class="glass-card p-8 rounded-3xl fade-in">
+            <c:if test="${param.error == 'update_failed'}">
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                    메뉴 수정 중 오류가 발생했습니다. 다시 시도해주세요.
+                </div>
+            </c:if>
+            
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold gradient-text">메뉴 관리</h1>
-                <button class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
+                <button onclick="openAddMenuModal(${restaurant.id})" class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">
                     ➕ 새 메뉴 추가
                 </button>
             </div>
             
             <div class="space-y-6">
-                <c:forEach var="restaurant" items="${myRestaurants}">
-                    <div class="glass-card p-6 rounded-2xl card-hover">
-                        <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-xl font-bold text-slate-800">${restaurant.name}</h2>
-                            <span class="text-slate-500">${restaurant.category}</span>
-                        </div>
-                        
-                        <c:choose>
-                            <c:when test="${not empty restaurant.menuList}">
-                                <div class="space-y-3">
-                                    <c:forEach var="menu" items="${restaurant.menuList}">
+                <div class="glass-card p-6 rounded-2xl card-hover">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-slate-800">${restaurant.name}</h2>
+                        <span class="text-slate-500">${restaurant.category}</span>
+                    </div>
+                    
+                    <c:choose>
+                        <c:when test="${not empty menus}">
+                            <div class="space-y-3">
+                                <c:forEach var="menu" items="${menus}">
                                         <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
                                             <div class="flex-1">
                                                 <h3 class="font-bold text-slate-800">${menu.name}</h3>
@@ -67,8 +72,8 @@
                                                     <span class="text-xs bg-red-500 text-white px-2 py-1 rounded-full">인기</span>
                                                 </c:if>
                                                 <div class="flex space-x-2">
-                                                    <button onclick="openEditMenuModal(${menu.id}, '${menu.name}', ${menu.price}, '${menu.description}', ${menu.popular})" 
-                                                            class="btn-secondary text-white px-4 py-2 rounded-lg text-sm">수정</button>
+                                                    <a href="${pageContext.request.contextPath}/business/menus/edit/${restaurant.id}/${menu.id}" 
+                                                       class="btn-secondary text-white px-4 py-2 rounded-lg text-sm inline-block">수정</a>
                                                     <form method="post" action="${pageContext.request.contextPath}/business/menu/delete" style="display: inline;">
                                                         <input type="hidden" name="menuId" value="${menu.id}">
                                                         <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')" 
@@ -78,19 +83,18 @@
                                             </div>
                                         </div>
                                     </c:forEach>
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <div class="text-center py-8">
-                                    <div class="text-4xl mb-4">🍽️</div>
-                                    <p class="text-slate-600">등록된 메뉴가 없습니다</p>
-                                    <button onclick="openAddMenuModal(${restaurant.id})" 
-                                            class="btn-primary text-white px-4 py-2 rounded-lg text-sm mt-4">메뉴 추가</button>
-                                </div>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </c:forEach>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="text-center py-8">
+                                <div class="text-4xl mb-4">🍽️</div>
+                                <p class="text-slate-600">등록된 메뉴가 없습니다</p>
+                                <button onclick="openAddMenuModal(${restaurant.id})" 
+                                        class="btn-primary text-white px-4 py-2 rounded-lg text-sm mt-4">메뉴 추가</button>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
             </div>
         </div>
     </main>
@@ -163,16 +167,6 @@
             document.getElementById('menuModal').classList.remove('hidden');
         }
         
-        function openEditMenuModal(menuId, name, price, description, popular) {
-            document.getElementById('modalTitle').textContent = '메뉴 수정';
-            document.getElementById('menuForm').action = '${pageContext.request.contextPath}/business/menu/update';
-            document.getElementById('menuId').value = menuId;
-            document.getElementById('menuName').value = name;
-            document.getElementById('menuPrice').value = price;
-            document.getElementById('menuDescription').value = description || '';
-            document.getElementById('menuPopular').checked = popular;
-            document.getElementById('menuModal').classList.remove('hidden');
-        }
         
         function closeMenuModal() {
             document.getElementById('menuModal').classList.add('hidden');

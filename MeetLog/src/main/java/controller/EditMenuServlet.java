@@ -160,9 +160,14 @@ public class EditMenuServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "메뉴 수정 중 오류가 발생했습니다. 다시 시도해주세요.");
-            request.setAttribute("restaurant", restaurantService.findById(restaurantId));
-            request.setAttribute("menu", menuService.findById(menuId)); // menu 객체도 다시 설정
-            request.getRequestDispatcher("/WEB-INF/views/edit-menu.jsp").forward(request, response);
+            try {
+                request.setAttribute("restaurant", restaurantService.findById(restaurantId));
+                request.setAttribute("menu", menuService.findById(menuId));
+                request.getRequestDispatcher("/WEB-INF/views/edit-menu.jsp").forward(request, response);
+            } catch (Exception ex) {
+                // 에러 페이지로 리다이렉트하거나 메뉴 관리 페이지로 돌아가기
+                response.sendRedirect(request.getContextPath() + "/business/menus/" + restaurantId + "?error=update_failed");
+            }
         }
     }
 }

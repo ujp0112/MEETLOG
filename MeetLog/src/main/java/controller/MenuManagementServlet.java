@@ -69,7 +69,7 @@ public class MenuManagementServlet extends HttpServlet {
             request.setAttribute("restaurant", restaurant);
             request.setAttribute("menus", menus);
             
-            request.getRequestDispatcher("/WEB-INF/views/menu-management.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/business/menu-management.jsp").forward(request, response);
             
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "올바르지 않은 레스토랑 ID입니다.");

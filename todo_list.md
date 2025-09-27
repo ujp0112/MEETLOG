@@ -1,8 +1,8 @@
 9월 5주차 todo list
 
-1.  MAVEN 제거
+~~1.  MAVEN 제거
     이전에 java21 사용했을 때 썼던 maven 설정 전부 제거
-    Spring, Firebase, Selenium 전부 사용 안하고 있어서 maven 제거해도 무방
+    Spring, Firebase, Selenium 전부 사용 안하고 있어서 maven 제거해도 무방 ~~
 
 2.  기능 완성
   - 사용자 피드 시스템 완성 (ㅇ)
