@@ -114,6 +114,34 @@ public class FeedService {
     }
 
     /**
+     * 간단한 리뷰 피드 아이템 생성 (현재 DB 스키마에 맞춤)
+     */
+    public void createSimpleReviewFeedItem(int userId, int reviewId) {
+        try {
+            // 현재 DB 스키마에 맞는 간단한 피드 아이템 생성
+            feedDAO.createSimpleFeedItem(userId, "REVIEW", reviewId);
+            System.out.println("DEBUG: 간단한 리뷰 피드 아이템 생성 완료 - 사용자: " + userId + ", 리뷰: " + reviewId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("리뷰 피드 아이템 생성 실패", e);
+        }
+    }
+
+    /**
+     * 간단한 칼럼 피드 아이템 생성 (현재 DB 스키마에 맞춤)
+     */
+    public void createSimpleColumnFeedItem(int userId, int columnId) {
+        try {
+            // 현재 DB 스키마에 맞는 간단한 피드 아이템 생성
+            feedDAO.createSimpleFeedItem(userId, "COLUMN", columnId);
+            System.out.println("DEBUG: 간단한 칼럼 피드 아이템 생성 완료 - 사용자: " + userId + ", 칼럼: " + columnId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("칼럼 피드 아이템 생성 실패", e);
+        }
+    }
+
+    /**
      * 피드 아이템 삭제
      */
     public boolean deleteFeedItem(int feedItemId) {

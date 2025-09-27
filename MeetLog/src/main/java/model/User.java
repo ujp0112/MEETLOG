@@ -114,6 +114,7 @@ public class User {
     private int followerCount;
     private int followingCount;
     private boolean isActive;
+    private boolean isFollowing; // 현재 사용자가 이 사용자를 팔로우하고 있는지 여부 (UI용)
 
     public String getNickname() {
         return nickname;
@@ -169,5 +170,13 @@ public class User {
 
     public void setActive(boolean isActive) {
         this.isActive = isActive;
+    }
+
+    public boolean getIsFollowing() {
+        return isFollowing;
+    }
+
+    public void setIsFollowing(boolean isFollowing) {
+        this.isFollowing = isFollowing;
     }
 }

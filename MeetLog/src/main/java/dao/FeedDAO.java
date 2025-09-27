@@ -5,6 +5,7 @@ import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * 소셜 피드 시스템을 위한 DAO 클래스
@@ -24,12 +25,29 @@ public class FeedDAO {
     }
 
     /**
+     * 간단한 피드 아이템 생성 (현재 DB 스키마에 맞춤)
+     */
+    public int createSimpleFeedItem(int userId, String feedType, int contentId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of(
+                "userId", userId,
+                "feedType", feedType,
+                "contentId", contentId
+            );
+            int result = sqlSession.insert(NAMESPACE + ".createSimpleFeedItem", params);
+            sqlSession.commit();
+            return result;
+        }
+    }
+
+    /**
      * 사용자의 피드 조회 (팔로우한 사용자들의 활동)
      */
     public List<FeedItem> getUserFeed(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
-            return sqlSession.selectList(NAMESPACE + ".getUserFeed", params);
+            List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getUserFeed", params);
+            return convertMapListToFeedItems(results);
         }
     }
 
@@ -39,7 +57,8 @@ public class FeedDAO {
     public List<FeedItem> getUserActivityFeed(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
-            return sqlSession.selectList(NAMESPACE + ".getUserActivityFeed", params);
+            List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getUserActivityFeed", params);
+            return convertMapListToFeedItems(results);
         }
     }
 
@@ -49,8 +68,39 @@ public class FeedDAO {
     public List<FeedItem> getPublicFeed(int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             Map<String, Object> params = Map.of("limit", limit, "offset", offset);
-            return sqlSession.selectList(NAMESPACE + ".getPublicFeed", params);
+            List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getPublicFeed", params);
+            return convertMapListToFeedItems(results);
         }
+    }
+
+    /**
+     * Map 결과를 FeedItem 리스트로 변환
+     */
+    private List<FeedItem> convertMapListToFeedItems(List<Map<String, Object>> results) {
+        List<FeedItem> feedItems = new ArrayList<>();
+        for (Map<String, Object> result : results) {
+            FeedItem item = new FeedItem();
+            item.setId(((Number) result.get("id")).intValue());
+            item.setUserId(((Number) result.get("userId")).intValue());
+            item.setUserNickname((String) result.get("userNickname"));
+            item.setUserProfileImage((String) result.get("userProfileImage"));
+            item.setActionType((String) result.get("actionType"));
+            item.setTargetId(((Number) result.get("targetId")).intValue());
+            
+            // Timestamp를 LocalDateTime으로 변환
+            Object createdAtObj = result.get("createdAt");
+            if (createdAtObj instanceof java.sql.Timestamp) {
+                item.setCreatedAt(((java.sql.Timestamp) createdAtObj).toLocalDateTime());
+            }
+            
+            // 기본값 설정
+            item.setContent("활동");
+            item.setTargetType(item.getActionType().toLowerCase());
+            item.setActive(true);
+            
+            feedItems.add(item);
+        }
+        return feedItems;
     }
 
     /**
@@ -79,7 +129,8 @@ public class FeedDAO {
     public List<FeedItem> getFollowingActivity(int userId, int limit) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             Map<String, Object> params = Map.of("userId", userId, "limit", limit);
-            return sqlSession.selectList(NAMESPACE + ".getFollowingActivity", params);
+            List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getFollowingActivity", params);
+            return convertMapListToFeedItems(results);
         }
     }
 }

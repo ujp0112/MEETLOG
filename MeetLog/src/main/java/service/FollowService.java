@@ -11,9 +11,10 @@ import java.util.List;
  * 팔로우 시스템을 위한 서비스 클래스
  */
 public class FollowService {
-    
+
     private FollowDAO followDAO = new FollowDAO();
     private FeedDAO feedDAO = new FeedDAO();
+    private UserService userService = new UserService();
 
     /**
      * 사용자 팔로우
@@ -138,19 +139,52 @@ public class FollowService {
      */
     private void createFollowFeedItem(int followerId, int followingId) {
         try {
-            // TODO: 사용자 정보 조회하여 닉네임 등 가져오기
+            // 사용자 정보 조회
+            User follower = userService.getUserById(followerId);
+            User following = userService.getUserById(followingId);
+
+            if (follower == null || following == null) {
+                System.err.println("사용자 정보를 찾을 수 없습니다. followerId: " + followerId + ", followingId: " + followingId);
+                return;
+            }
+
             FeedItem feedItem = new FeedItem();
             feedItem.setUserId(followerId);
-            feedItem.setUserNickname("사용자"); // 실제로는 DB에서 조회
+            feedItem.setUserNickname(follower.getNickname() != null ? follower.getNickname() : "사용자");
             feedItem.setActionType("follow");
-            feedItem.setContent("새로운 사용자를 팔로우했습니다");
+            feedItem.setContent(following.getNickname() + "님을 팔로우했습니다");
             feedItem.setTargetType("user");
             feedItem.setTargetId(followingId);
-            feedItem.setTargetName("사용자"); // 실제로는 DB에서 조회
-            
+            feedItem.setTargetName(following.getNickname() != null ? following.getNickname() : "사용자");
+
             feedDAO.createFeedItem(feedItem);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 특정 사용자 정보 조회 (FollowService에서 필요한 경우)
+     */
+    public User getUserInfo(int userId) {
+        try {
+            return userService.getUserById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 사용자 닉네임 조회 (편의 메서드)
+     */
+    public String getUserNickname(int userId) {
+        try {
+            User user = userService.getUserById(userId);
+            return user != null ? user.getNickname() : "사용자";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "사용자";
         }
     }
 }

@@ -65,9 +65,20 @@ public class FeedServlet extends HttpServlet {
                 // 팔로우 리스트 페이지
                 List<User> followingUsers = followService.getFollowingUsers(user.getId());
                 List<User> followers = followService.getFollowers(user.getId());
+                
+                // 각 팔로워에 대해 내가 팔로우하고 있는지 확인
+                for (User follower : followers) {
+                    boolean isFollowingBack = followService.isFollowing(user.getId(), follower.getId());
+                    follower.setIsFollowing(isFollowingBack);
+                }
 
+                // 페이지 타입 결정 (기본값은 팔로잉)
+                String pageType = request.getParameter("type");
+                boolean isFollowingPage = !"followers".equals(pageType);
+                
                 request.setAttribute("followingUsers", followingUsers);
                 request.setAttribute("followers", followers);
+                request.setAttribute("isFollowingPage", isFollowingPage);
                 request.getRequestDispatcher("/WEB-INF/views/follow-list.jsp").forward(request, response);
 
             } else if (pathInfo.startsWith("/user/")) {

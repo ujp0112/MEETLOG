@@ -52,7 +52,7 @@
                             <p class="text-slate-600 mt-1">
                                 <c:choose>
                                     <c:when test="${isFollowingPage}">
-                                        👥 ${fn:length(followings)}명을 팔로우하고 있습니다
+                                        👥 ${fn:length(followingUsers)}명을 팔로우하고 있습니다
                                     </c:when>
                                     <c:otherwise>
                                         👥 ${fn:length(followers)}명이 팔로우하고 있습니다
@@ -69,38 +69,34 @@
                 <c:choose>
                     <c:when test="${isFollowingPage}">
                         <c:choose>
-                            <c:when test="${not empty followings}">
+                            <c:when test="${not empty followingUsers}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <c:forEach var="follow" items="${followings}">
+                                    <c:forEach var="user" items="${followingUsers}">
                                         <div class="card-hover rounded-2xl p-6 bg-white border border-slate-200">
                                             <div class="flex items-center space-x-4 mb-4">
                                                 <div class="relative">
-                                                    <mytag:image fileName="${follow.followingProfileImage}" 
-                                                               altText="${follow.followingNickname}" 
+                                                    <mytag:image fileName="${user.profileImage}" 
+                                                               altText="${user.nickname}" 
                                                                cssClass="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg" />
                                                     <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <h3 class="text-lg font-bold text-slate-800">${follow.followingNickname}</h3>
+                                                    <h3 class="text-lg font-bold text-slate-800">${user.nickname}</h3>
                                                     <p class="text-slate-500 text-sm">
-                                                        ${follow.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))} 팔로우
+                                                        팔로잉 중
                                                     </p>
                                                 </div>
                                             </div>
                                             
                                             <div class="flex space-x-3">
-                                                <a href="${pageContext.request.contextPath}/user/profile/${follow.followingId}" 
+                                                <a href="${pageContext.request.contextPath}/feed/user/${user.id}" 
                                                    class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                                                     프로필 보기
                                                 </a>
-                                                <c:if test="${follow.followingId != sessionScope.user.id}">
-                                                    <button data-target-user-id="${follow.followingId}"
-                                                            data-is-following="${follow.followerId == 1}"
-                                                            class="toggle-follow-btn px-4 py-2 rounded-lg font-semibold transition-colors ${follow.followerId == 1 ? 'btn-secondary text-white' : 'btn-primary text-white'}">
-                                                        <c:choose>
-                                                            <c:when test="${follow.followerId == 1}">언팔로우</c:when>
-                                                            <c:otherwise>팔로우</c:otherwise>
-                                                        </c:choose>
+                                                <c:if test="${user.id != sessionScope.user.id}">
+                                                    <button data-target-user-id="${user.id}"
+                                                            class="toggle-follow-btn px-4 py-2 rounded-lg font-semibold transition-colors btn-secondary text-white">
+                                                        언팔로우
                                                     </button>
                                                 </c:if>
                                             </div>
@@ -125,35 +121,34 @@
                         <c:choose>
                             <c:when test="${not empty followers}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <c:forEach var="follow" items="${followers}">
+                                    <c:forEach var="user" items="${followers}">
                                         <div class="card-hover rounded-2xl p-6 bg-white border border-slate-200">
                                             <div class="flex items-center space-x-4 mb-4">
                                                 <div class="relative">
-                                                    <mytag:image fileName="${follow.followerProfileImage}" 
-                                                               altText="${follow.followerNickname}" 
+                                                    <mytag:image fileName="${user.profileImage}" 
+                                                               altText="${user.nickname}" 
                                                                cssClass="w-16 h-16 rounded-full object-cover border-2 border-white shadow-lg" />
                                                     <div class="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white"></div>
                                                 </div>
                                                 <div class="flex-1">
-                                                    <h3 class="text-lg font-bold text-slate-800">${follow.followerNickname}</h3>
+                                                    <h3 class="text-lg font-bold text-slate-800">${user.nickname}</h3>
                                                     <p class="text-slate-500 text-sm">
-                                                        ${follow.createdAt.format(DateTimeFormatter.ofPattern('yyyy.MM.dd'))} 팔로우
+                                                        나를 팔로우 중
                                                     </p>
                                                 </div>
                                             </div>
                                             
                                             <div class="flex space-x-3">
-                                                <a href="${pageContext.request.contextPath}/user/profile/${follow.followerId}" 
+                                                <a href="${pageContext.request.contextPath}/feed/user/${user.id}" 
                                                    class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                                                     프로필 보기
                                                 </a>
-                                                <c:if test="${follow.followerId != sessionScope.user.id}">
-                                                    <button data-target-user-id="${follow.followerId}"
-                                                            data-is-following="${follow.followingId == 1}"
-                                                            class="toggle-follow-btn px-4 py-2 rounded-lg font-semibold transition-colors ${follow.followingId == 1 ? 'btn-secondary text-white' : 'btn-primary text-white'}">
+                                                <c:if test="${user.id != sessionScope.user.id}">
+                                                    <button data-target-user-id="${user.id}"
+                                                            class="toggle-follow-btn px-4 py-2 rounded-lg font-semibold transition-colors ${user.isFollowing ? 'btn-secondary text-white' : 'btn-primary text-white'}">
                                                         <c:choose>
-                                                            <c:when test="${follow.followingId == 1}">언팔로우</c:when>
-                                                            <c:otherwise>팔로우</c:otherwise>
+                                                            <c:when test="${user.isFollowing}">언팔로우</c:when>
+                                                            <c:otherwise>맞팔로우</c:otherwise>
                                                         </c:choose>
                                                     </button>
                                                 </c:if>
@@ -190,20 +185,21 @@
     
     <script>
         function toggleFollow(targetUserId, button) {
-            fetch('${pageContext.request.contextPath}/follow', {
+            // 현재 버튼 상태를 기반으로 action 결정
+            const isCurrentlyFollowing = button.textContent.trim() === '언팔로우';
+            const action = isCurrentlyFollowing ? 'unfollow' : 'follow';
+            
+            fetch('${pageContext.request.contextPath}/feed/toggle-follow', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    action: 'toggle',
-                    followingId: targetUserId
-                })
+                body: 'action=' + action + '&targetUserId=' + targetUserId
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    if (data.isFollowing) {
+                    if (action === 'follow') {
                         button.textContent = '언팔로우';
                         button.className = 'toggle-follow-btn px-4 py-2 rounded-lg font-semibold transition-colors btn-secondary text-white';
                     } else {

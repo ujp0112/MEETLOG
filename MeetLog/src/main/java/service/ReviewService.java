@@ -71,6 +71,17 @@ public class ReviewService {
                     reviewDAO.insertReviewImages(session, params);
                 }
 
+                // 3. 피드 아이템 생성 (리뷰 작성 활동을 피드에 추가)
+                try {
+                    FeedService feedService = new FeedService();
+                    feedService.createSimpleReviewFeedItem(review.getUserId(), review.getId());
+                    System.out.println("DEBUG: 리뷰 피드 아이템 생성 완료 - 리뷰 ID: " + review.getId());
+                } catch (Exception e) {
+                    System.err.println("피드 아이템 생성 실패: " + e.getMessage());
+                    e.printStackTrace();
+                    // 피드 아이템 생성 실패는 리뷰 작성을 막지 않음
+                }
+
                 // 모든 DB 작업이 성공적으로 끝나면 commit
                 session.commit();
                 return true;

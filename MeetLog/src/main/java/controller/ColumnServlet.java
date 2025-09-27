@@ -147,18 +147,7 @@ public class ColumnServlet extends HttpServlet {
             if (success) {
                 // 피드 아이템 생성
                 try {
-                    FeedItem feedItem = new FeedItem();
-                    feedItem.setUserId(user.getId());
-                    feedItem.setUserNickname(user.getNickname());
-                    feedItem.setUserProfileImage(user.getProfileImage());
-                    feedItem.setActionType("column");
-                    feedItem.setContent("새 칼럼을 작성했습니다.");
-                    feedItem.setTargetType("column");
-                    feedItem.setTargetId(column.getId()); // Column 객체에서 생성된 ID 사용
-                    feedItem.setTargetName(column.getTitle());
-                    feedItem.setTargetImage(column.getImage());
-
-                    feedService.createFeedItem(feedItem);
+                    feedService.createSimpleColumnFeedItem(user.getId(), column.getId());
                     System.out.println("DEBUG: 칼럼 피드 아이템 생성 완료 - 칼럼 ID: " + column.getId());
                 } catch (Exception e) {
                     System.err.println("피드 아이템 생성 실패: " + e.getMessage());
