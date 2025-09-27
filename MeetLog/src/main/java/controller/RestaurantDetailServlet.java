@@ -74,6 +74,8 @@ public class RestaurantDetailServlet extends HttpServlet {
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "해당 레스토랑 정보를 찾을 수 없습니다.");
 				return;
 			}
+			Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
+			restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
 
 			List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
 			List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId);

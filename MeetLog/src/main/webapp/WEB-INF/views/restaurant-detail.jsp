@@ -574,6 +574,627 @@ translateY(
 	opacity: 0.2;
 	cursor: not-allowed;
 }
+.more-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+	font-weight: bold;
+	border-radius: 12px;
+	cursor: pointer;
+}
+</style>
+<style>
+:root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #8b5cf6; --accent: #f59e0b; --success: #10b981; --warning: #f59e0b; --error: #ef4444; --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-400: #94a3b8; --gray-500: #64748b; --gray-600: #475569; --gray-700: #334155; --gray-800: #1e293b; --gray-900: #0f172a;
+}
+
+* {
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+body {
+	background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+	min-height: 100vh;
+}
+
+.glass-card {
+	background: rgba(255, 255, 255, 0.9);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.gradient-text {
+	background: linear-gradient(135deg, var(--primary) 0%,
+		var(--secondary) 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.btn-primary {
+	background: linear-gradient(135deg, var(--primary) 0%,
+		var(--primary-dark) 100%);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+	background: linear-gradient(135deg, var(--secondary) 0%, #7c3aed 100%);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+}
+
+.rating-stars {
+	filter: drop-shadow(0 2px 4px rgba(251, 191, 36, 0.3));
+}
+
+.fade-in {
+	animation: fadeIn 0.6s ease-out;
+}
+
+@
+keyframes fadeIn {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+}
+.slide-up {
+	animation: slideUp 0.8s ease-out;
+}
+
+@
+keyframes slideUp {from { opacity:0;
+	transform: translateY(30px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+}
+.pulse-glow {
+	animation: pulseGlow 2s ease-in-out infinite;
+}
+
+@
+keyframes pulseGlow { 0%, 100% {
+	box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+50
+%
+{
+box-shadow
+:
+0
+0
+30px
+rgba(
+59
+,
+130
+,
+246
+,
+0.5
+);
+}
+}
+.shimmer {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+	background-size: 200% 100%;
+	animation: shimmer 2s infinite;
+}
+
+@
+keyframes shimmer { 0% {
+	background-position: -200% 0;
+}
+
+100
+%
+{
+background-position
+:
+200%
+0;
+}
+}
+.progress-bar {
+	background: linear-gradient(90deg, var(--accent) 0%, #fbbf24 100%);
+	transition: width 1s ease-out;
+}
+
+.image-hover {
+	transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.image-hover:hover {
+	transform: scale(1.05);
+}
+
+.card-hover {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.text-shadow {
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.border-gradient {
+	border: 2px solid transparent;
+	background: linear-gradient(white, white) padding-box,
+		linear-gradient(135deg, var(--primary), var(--secondary)) border-box;
+}
+
+.coupon-glow {
+	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+	border: 2px solid #f59e0b;
+	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+	animation: couponGlow 3s ease-in-out infinite;
+}
+
+@
+keyframes couponGlow { 0%, 100% {
+	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+50
+%
+{
+box-shadow
+:
+0
+0
+30px
+rgba(
+245
+,
+158
+,
+11
+,
+0.5
+);
+}
+}
+.review-card {
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%,
+		rgba(248, 250, 252, 0.9) 100%);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	backdrop-filter: blur(10px);
+}
+
+.menu-item {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-item:hover {
+	transform: translateX(4px);
+	background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.info-badge {
+	background: linear-gradient(135deg, var(--primary) 0%,
+		var(--secondary) 100%);
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 9999px;
+	font-weight: 600;
+	font-size: 0.875rem;
+	display: inline-block;
+}
+
+.location-badge {
+	background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 9999px;
+	font-weight: 600;
+	font-size: 0.875rem;
+	display: inline-block;
+}
+
+.rating-badge {
+	background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 9999px;
+	font-weight: 600;
+	font-size: 0.875rem;
+	display: inline-block;
+}
+
+.floating-action {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	z-index: 50;
+	animation: float 3s ease-in-out infinite;
+}
+
+@
+keyframes float { 0%, 100% {
+	transform: translateY(0px);
+}
+
+50
+%
+{
+transform
+:
+translateY(
+-10px
+);
+}
+}
+.section-divider {
+	height: 1px;
+	background: linear-gradient(90deg, transparent 0%, var(--gray-300) 50%,
+		transparent 100%);
+	margin: 2rem 0;
+}
+
+.loading-skeleton {
+	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+	background-size: 200% 100%;
+	animation: shimmer 1.5s infinite;
+}
+
+.time-slot {
+	padding: 0.75rem;
+	border-radius: 0.75rem;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	font-weight: 600;
+	border: 2px solid transparent;
+}
+
+.time-slot-available {
+	cursor: pointer;
+	color: white;
+	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+	border-color: #10b981;
+}
+
+.time-slot-available:hover {
+	transform: scale(1.05);
+	box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.time-slot-closing {
+	cursor: pointer;
+	color: white;
+	background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+	border-color: #f59e0b;
+}
+
+.time-slot-closing:hover {
+	transform: scale(1.05);
+	box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+}
+
+.time-slot-full {
+	cursor: not-allowed;
+	color: #94a3b8;
+	background: #f1f5f9;
+	border-color: #e2e8f0;
+}
+
+.btn-reserve-time {
+	background-color: #f0f7ff;
+	color: #2575fc;
+	border: 1px solid #cce1ff;
+	padding: 8px 16px;
+	border-radius: 8px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.btn-reserve-time:hover {
+	background-color: #e0f2fe;
+	transform: scale(1.02);
+}
+
+.btn-reserve-time.selected {
+	background-color: #2575fc;
+	color: white;
+	border-color: #2575fc;
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(37, 117, 252, 0.4);
+}
+
+.floating-action-btn {
+	position: fixed;
+	bottom: 2rem;
+	right: 2rem;
+	z-index: 50;
+	animation: float 3s ease-in-out infinite;
+	background: linear-gradient(135deg, var(--primary) 0%,
+		var(--secondary) 100%);
+	color: white;
+	padding: 1rem 1.5rem;
+	border-radius: 50px;
+	font-weight: 600;
+	box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-action-btn:hover {
+	transform: translateY(-5px) scale(1.05);
+	box-shadow: 0 20px 40px rgba(59, 130, 246, 0.6);
+}
+
+@media ( max-width : 768px) {
+	.glass-card {
+		margin: 0.5rem;
+		border-radius: 1rem;
+		padding: 1.5rem;
+	}
+	.floating-action-btn {
+		bottom: 1rem;
+		right: 1rem;
+		padding: 0.75rem 1.25rem;
+	}
+	.text-4xl {
+		font-size: 2rem;
+	}
+	.text-5xl {
+		font-size: 2.5rem;
+	}
+	.grid-cols-2 {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media ( max-width : 480px) {
+	.glass-card {
+		margin: 0.25rem;
+		padding: 1rem;
+	}
+	.text-2xl {
+		font-size: 1.5rem;
+	}
+	.text-3xl {
+		font-size: 1.75rem;
+	}
+}
+
+.gallery {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 8px;
+	height: 400px; /* 갤러리 높이 고정 */
+}
+
+.gallery-main img { /*  width: 100%; */
+	height: 100%;
+	object-fit: contain;
+	border-radius: 12px;
+}
+
+.gallery-side {
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	gap: 8px;
+}
+
+.gallery-side .img-wrap {
+	position: relative;
+	max-height: 200px;
+}
+
+.gallery-side img { /*  width: 100%;  */
+	height: 100%;
+	object-fit: contain;
+	border-radius: 12px;
+}
+
+.more-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+	font-weight: bold;
+	border-radius: 12px;
+	cursor: pointer;
+}
+
+.gallery-image {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	background-color: transparent;
+	border-radius: 12px;
+}
+
+.gallery-main, .gallery-side .img-wrap {
+	height: 100%;
+	min-height: 0; /* flex/grid 아이템이 수축할 수 있도록 허용 */
+}
+/* ▼▼▼ 아래의 새로운 오버레이 스타일을 추가합니다 ▼▼▼ */
+.panel-overlay {
+	display: none; /* 평소엔 숨김 */
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: 1.5rem; /* 24px */
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	margin-top: -1.5rem; /* 갤러리와 살짝 겹치게 */
+	padding: 1.5rem;
+	animation: fadeIn 0.4s ease-out;
+}
+
+.panel-overlay.show {
+	display: block; /* show 클래스가 붙으면 보임 */
+}
+
+.overlay-hd {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding-bottom: 1rem;
+	margin-bottom: 1rem;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.overlay-bd {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	/* 반응형 2열 이상 */
+	gap: 1rem;
+	max-height: 600px; /* 최대 높이 지정 후 스크롤 */
+	overflow-y: auto;
+	padding-right: 8px; /* 스크롤바 공간 */
+}
+
+.overlay-bd .gallery-image {
+	width: 100%;
+	height: auto;
+	aspect-ratio: 4/3;
+	object-fit: cover;
+	border-radius: 12px;
+}
+
+.close-x {
+	border: 0;
+	background: transparent;
+	font-size: 24px;
+	cursor: pointer;
+	color: #64748b;
+}
+/* ▼▼▼ 이미지 확대 모달 스타일 추가 ▼▼▼ */
+.zoom-modal-mask {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4); /* 어두운 반투명 배경 */
+	display: none; /* 평소엔 숨김 */
+	align-items: center;
+	justify-content: center;
+	z-index: 2000; /* 모든 오버레이 위에 표시 */
+}
+
+.zoom-modal-mask.show {
+	display: flex; /* show 클래스가 추가되면 표시 */
+}
+
+.zoom-modal-content {
+	position: relative;
+	max-width: 90%;
+	max-height: 90%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.zoomed-image {
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: contain; /* 이미지 전체가 보이도록 */
+	border-radius: 8px;
+}
+
+.zoom-close-x {
+	position: absolute;
+	top: -40px; /* 모달 상단 바깥쪽 */
+	right: -40px; /* 모달 우측 바깥쪽 */
+	color: #ffffff; /* 흰색 X 버튼 */
+	font-size: 40px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	line-height: 1;
+	padding: 0;
+}
+/* 작은 화면에서는 X 버튼 위치 조정 */
+@media ( max-width : 768px) {
+	.zoom-close-x {
+		top: 10px;
+		right: 10px;
+		color: #ffffff;
+		font-size: 30px;
+	}
+}
+
+/* restaurant-detail.jsp의 <style> 태그 안에 추가 */
+.gallery {
+	display: grid;
+	grid-template-columns: 2fr 1fr; /* 기존 스타일 유지 */
+	gap: 8px;
+	height: 400px;
+}
+
+/* ▼▼▼ 아래 새로운 스타일을 추가하세요 ▼▼▼ */
+.gallery.gallery-full {
+	grid-template-columns: 1fr; /* 이미지가 하나일 때 1개의 컬럼만 사용 */
+}
+
+/* .gallery.gallery-full 클래스 바로 아래에 추가하면 좋습니다. */
+.gallery.gallery-full .gallery-main {
+	position: relative; /* 자식 요소를 위한 기준점 */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden; /* [추가] 자식 요소가 부모 영역을 벗어나지 않도록 설정 */
+	border-radius: 12px;
+	/* [추가] 부모에도 border-radius를 적용해 잘려나간 부분이 깔끔하게 보이도록 함 */
+}
+
+.gallery-background {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	/* [수정] 이미지를 강제로 픽셀화하여 모자이크 효과를 냅니다. */
+	image-rendering: -moz-crisp-edges; /* Firefox */
+	image-rendering: pixelated; /* Chrome, Edge, Opera */
+	/* [수정] 이미지를 아주 작게 축소했다가 크게 확대하여 픽셀을 돋보이게 합니다. */
+	transform: scale(5);
+	opacity: 0.5; /* 배경이 너무 튀지 않도록 투명도 조절 */
+	z-index: 1;
+	border-radius: 12px;
+}
+
+.gallery-main .gallery-image {
+	position: relative;
+	z-index: 2; /* 앞쪽으로 보내기 */
+	max-height: 100%; /* 부모 높이를 넘지 않도록 */
+}
 </style>
 </head>
 <body class="bg-slate-100">
@@ -586,17 +1207,23 @@ translateY(
 						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
 							<div class="lg:col-span-2 space-y-8">
 								<section class="glass-card p-8 rounded-3xl fade-in">
+									<%-- [수정] 추가 이미지가 없으면 'gallery-full' 클래스를 추가 --%>
 									<div
 										class="gallery ${empty restaurant.additionalImages ? 'gallery-full' : ''}"
 										id="restaurantGallery">
 										<div class="gallery-main">
+											<%-- [추가] 이미지가 하나일 때만 흐릿한 배경 이미지를 생성 --%>
 											<c:if test="${empty restaurant.additionalImages}">
 												<mytag:image fileName="${restaurant.image}" altText=""
 													cssClass="gallery-background" />
 											</c:if>
+
+											<%-- 원본 이미지는 항상 표시 --%>
 											<mytag:image fileName="${restaurant.image}"
 												altText="${restaurant.name}" cssClass="gallery-image" />
 										</div>
+
+										<%-- [수정] 추가 이미지가 있을 때만 gallery-side 영역을 렌더링 --%>
 										<c:if test="${not empty restaurant.additionalImages}">
 											<div class="gallery-side">
 												<c:choose>
@@ -609,9 +1236,10 @@ translateY(
 													</c:when>
 													<c:otherwise>
 														<div class="img-wrap"
-															style="background: transparent; border-radius: 12px;"></div>
+															style="background: #transparent; border-radius: 12px;"></div>
 													</c:otherwise>
 												</c:choose>
+
 												<c:choose>
 													<c:when
 														test="${fn:length(restaurant.additionalImages) >= 2}">
@@ -626,12 +1254,20 @@ translateY(
 													</c:when>
 													<c:otherwise>
 														<div class="img-wrap"
-															style="background: transparent; border-radius: 12px;"></div>
+															style="background: #transparent; border-radius: 12px;"></div>
 													</c:otherwise>
 												</c:choose>
 											</div>
 										</c:if>
 									</div>
+								</section>
+
+								<section id="imageOverlay" class="panel-overlay">
+									<div class="overlay-hd">
+										<h2 class="title">전체 사진 보기</h2>
+										<button id="closeOverlayBtn" class="close-x" type="button">×</button>
+									</div>
+									<div class="overlay-bd" id="overlayGrid"></div>
 								</section>
 
 								<section class="glass-card p-8 rounded-3xl slide-up">
