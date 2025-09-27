@@ -36,6 +36,10 @@ public class CourseCommentService {
         return courseCommentDAO.softDelete(commentId, userId) > 0;
     }
 
+    public boolean updateComment(int commentId, int userId, String content) {
+        return courseCommentDAO.update(commentId, userId, content) > 0;
+    }
+
     private void applyDisplayFormatting(CourseComment comment) {
         if (comment == null) {
             return;

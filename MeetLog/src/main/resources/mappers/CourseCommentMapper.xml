@@ -62,4 +62,13 @@
           AND user_id = #{userId}
     </update>
 
+    <update id="update" parameterType="map">
+        UPDATE course_comments
+        SET content = #{content},
+            updated_at = NOW()
+        WHERE comment_id = #{commentId}
+          AND user_id = #{userId}
+          AND is_active = TRUE
+    </update>
+
 </mapper>

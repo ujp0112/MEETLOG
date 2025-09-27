@@ -83,9 +83,8 @@ public class CourseService {
             session.commit();
             return !isLiked; // 새로운 상태 반환
         } catch (Exception e) {
-            e.printStackTrace();
             session.rollback();
-            return false;
+            throw new RuntimeException("코스 좋아요 토글 처리 중 오류", e);
         } finally {
             session.close();
         }

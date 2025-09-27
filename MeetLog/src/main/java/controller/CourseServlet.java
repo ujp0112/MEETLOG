@@ -107,6 +107,8 @@ public class CourseServlet extends HttpServlet {
             handleAddCourseComment(request, response);
         } else if ("/comment/delete".equals(path)) {
             handleDeleteCourseComment(request, response);
+        } else if ("/comment/update".equals(path)) {
+            handleUpdateCourseComment(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
@@ -290,7 +292,22 @@ public class CourseServlet extends HttpServlet {
         }
         
         CommunityCourse course = courseService.getCourseDetail(courseId);
+        if (course == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND, "코스를 찾을 수 없습니다.");
+            return;
+        }
+
         List<CourseStep> steps = courseService.getCourseSteps(courseId);
+        if (steps == null) {
+            steps = java.util.Collections.emptyList();
+        }
+
+        // 최신 좋아요 수 반영 (상세 조회 쿼리에 포함됐더라도 서버에서 한 번 더 보정)
+        try {
+            course.setLikes(courseService.getCourseLikeCount(courseId));
+        } catch (Exception e) {
+            System.err.println("코스 좋아요 수 조회 실패: " + e.getMessage());
+        }
         
         // 현재 사용자의 좋아요 상태 및 찜 상태 확인
         HttpSession session = request.getSession(false);
@@ -892,6 +909,68 @@ public class CourseServlet extends HttpServlet {
             writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
                     "success", false,
                     "message", "댓글 삭제 중 오류가 발생했습니다."
+            ));
+        }
+    }
+
+    private void handleUpdateCourseComment(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String commentIdParam = request.getParameter("commentId");
+        String content = request.getParameter("content");
+
+        if (commentIdParam == null || commentIdParam.trim().isEmpty()) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "댓글 ID가 필요합니다."
+            ));
+            return;
+        }
+
+        if (content == null || content.trim().isEmpty()) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "댓글 내용을 입력해주세요."
+            ));
+            return;
+        }
+
+        try {
+            int commentId = Integer.parseInt(commentIdParam.trim());
+            boolean updated = courseCommentService.updateComment(commentId, user.getId(), content.trim());
+            if (updated) {
+                writeJson(response, HttpServletResponse.SC_OK, Map.of(
+                        "success", true,
+                        "message", "댓글이 수정되었습니다."
+                ));
+            } else {
+                writeJson(response, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "댓글을 수정할 수 없습니다."
+                ));
+            }
+        } catch (NumberFormatException e) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "잘못된 댓글 ID입니다."
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "댓글 수정 중 오류가 발생했습니다."
             ));
         }
     }

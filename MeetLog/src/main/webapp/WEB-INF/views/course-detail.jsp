@@ -131,10 +131,20 @@
                                                                     <span class="font-semibold text-slate-800"><c:out value="${comment.nickname}"/></span>
                                                                     <span class="text-xs text-slate-500"><c:out value="${comment.createdAtFormatted}"/></span>
                                                                 </div>
-                                                                <p class="mt-2 text-slate-700 whitespace-pre-line"><c:out value="${comment.content}"/></p>
+                                                                <p class="mt-2 text-slate-700 whitespace-pre-line comment-content"><c:out value="${comment.content}"/></p>
+                                                                <div class="comment-edit-form hidden mt-2">
+                                                                    <textarea class="w-full min-h-[80px] border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 comment-edit-textarea" maxlength="500"><c:out value="${comment.content}"/></textarea>
+                                                                    <div class="flex gap-2 mt-2">
+                                                                        <button type="button" class="px-3 py-1 bg-sky-600 text-white text-sm rounded hover:bg-sky-700 save-edit-btn" data-comment-id="${comment.id}">저장</button>
+                                                                        <button type="button" class="px-3 py-1 bg-slate-400 text-white text-sm rounded hover:bg-slate-500 cancel-edit-btn">취소</button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                             <c:if test="${not empty sessionScope.user && sessionScope.user.id == comment.userId}">
-                                                                <button type="button" class="delete-comment-btn text-xs text-slate-400 hover:text-red-500" data-comment-id="${comment.id}">삭제</button>
+                                                                <div class="flex flex-col gap-1">
+                                                                    <button type="button" class="edit-comment-btn text-xs text-slate-400 hover:text-blue-500" data-comment-id="${comment.id}">수정</button>
+                                                                    <button type="button" class="delete-comment-btn text-xs text-slate-400 hover:text-red-500" data-comment-id="${comment.id}">삭제</button>
+                                                                </div>
                                                             </c:if>
                                                         </div>
                                                     </li>
@@ -259,6 +269,9 @@
             const commentForm = document.getElementById('comment-form');
             const commentContentInput = document.getElementById('comment-content');
             const deleteCommentButtons = document.querySelectorAll('.delete-comment-btn');
+            const editCommentButtons = document.querySelectorAll('.edit-comment-btn');
+            const saveEditButtons = document.querySelectorAll('.save-edit-btn');
+            const cancelEditButtons = document.querySelectorAll('.cancel-edit-btn');
 
             // URL 복사 기능
             if (copyBtn) {
@@ -292,6 +305,12 @@
 
                     if (!Number.isInteger(courseId) || courseId <= 0) {
                         alert('코스 정보를 불러오지 못했습니다. 페이지를 새로고침 해주세요.');
+                        return;
+                    }
+                    if (!isUserLoggedIn) {
+                        alert('로그인이 필요합니다.');
+                        const redirectPath = '/login?redirectURL=' + encodeURIComponent('/course/detail?id=' + courseId);
+                        window.location.href = buildUrl(redirectPath);
                         return;
                     }
                     
@@ -330,7 +349,8 @@
                         } else {
                             if (response.status === 401) {
                                 alert('로그인이 필요합니다.');
-                                window.location.href = buildUrl('/user/login');
+                                const redirectPath = '/login?redirectURL=' + encodeURIComponent('/course/detail?id=' + courseId);
+                                window.location.href = buildUrl(redirectPath);
                             } else {
                                 alert(data.message || '오류가 발생했습니다.');
                             }
@@ -367,7 +387,8 @@
                     // 로그인 체크
                     if (!isUserLoggedIn) {
                         alert('로그인이 필요합니다.');
-                        window.location.href = buildUrl('/user/login');
+                        const redirectPath = '/login?redirectURL=' + encodeURIComponent('/course/detail?id=' + courseData.id);
+                        window.location.href = buildUrl(redirectPath);
                         return;
                     }
 
@@ -641,6 +662,88 @@
                         } catch (error) {
                             console.error('댓글 삭제 실패:', error);
                             alert(error.message || '댓글 삭제 중 오류가 발생했습니다.');
+                        }
+                    });
+                });
+            }
+
+            // 댓글 수정 기능
+            if (editCommentButtons) {
+                editCommentButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const commentItem = button.closest('li');
+                        const commentContent = commentItem.querySelector('.comment-content');
+                        const editForm = commentItem.querySelector('.comment-edit-form');
+
+                        // 댓글 내용 숨기고 수정 폼 보이기
+                        commentContent.classList.add('hidden');
+                        editForm.classList.remove('hidden');
+
+                        // 수정 버튼 숨기기
+                        button.style.display = 'none';
+                    });
+                });
+            }
+
+            if (cancelEditButtons) {
+                cancelEditButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const commentItem = button.closest('li');
+                        const commentContent = commentItem.querySelector('.comment-content');
+                        const editForm = commentItem.querySelector('.comment-edit-form');
+                        const editButton = commentItem.querySelector('.edit-comment-btn');
+
+                        // 수정 폼 숨기고 댓글 내용 보이기
+                        editForm.classList.add('hidden');
+                        commentContent.classList.remove('hidden');
+
+                        // 수정 버튼 다시 보이기
+                        editButton.style.display = 'block';
+                    });
+                });
+            }
+
+            if (saveEditButtons) {
+                saveEditButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const commentId = button.getAttribute('data-comment-id');
+                        const commentItem = button.closest('li');
+                        const textarea = commentItem.querySelector('.comment-edit-textarea');
+                        const newContent = textarea.value.trim();
+
+                        if (!newContent) {
+                            alert('댓글 내용을 입력해주세요.');
+                            textarea.focus();
+                            return;
+                        }
+
+                        try {
+                            const params = new URLSearchParams();
+                            params.append('commentId', commentId);
+                            params.append('content', newContent);
+
+                            const response = await fetch(buildUrl('/course/comment/update'), {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: params.toString()
+                            });
+
+                            const result = await parseJsonResponse(response);
+                            const data = result.data;
+
+                            if (data.success) {
+                                showMessage(data.message || '댓글이 수정되었습니다.');
+                                window.location.reload();
+                            } else {
+                                alert(data.message || '댓글 수정에 실패했습니다.');
+                            }
+                        } catch (error) {
+                            console.error('댓글 수정 실패:', error);
+                            alert(error.message || '댓글 수정 중 오류가 발생했습니다.');
                         }
                     });
                 });

@@ -43,4 +43,17 @@ public class CourseCommentDAO {
             return result;
         }
     }
+
+    public int update(int commentId, int userId, String content) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of(
+                    "commentId", commentId,
+                    "userId", userId,
+                    "content", content
+            );
+            int result = session.update(NAMESPACE + ".update", params);
+            session.commit();
+            return result;
+        }
+    }
 }
