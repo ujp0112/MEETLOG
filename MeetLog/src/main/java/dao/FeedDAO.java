@@ -163,4 +163,14 @@ public class FeedDAO {
             return convertMapListToFeedItems(results);
         }
     }
+
+    /**
+     * 메인 피드 조회 (자신의 활동 + 팔로우한 사용자들의 활동)
+     */
+    public List<Map<String, Object>> getMainFeed(int userId, int limit, int offset) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            return sqlSession.selectList(NAMESPACE + ".getMainFeed", params);
+        }
+    }
 }

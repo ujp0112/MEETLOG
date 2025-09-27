@@ -9,11 +9,13 @@
 		type="model.CommunityCourse">
 		<id property="id" column="course_id" />
 		<result property="title" column="title" />
+		<result property="description" column="description" />
 		<result property="previewImage" column="preview_image" />
 		<result property="userId" column="user_id" />
 		<result property="author" column="author" />
 		<result property="profileImage" column="profile_image" />
 		<result property="likes" column="likes" />
+		<result property="createdAt" column="created_at" />
 		<collection property="tags" javaType="java.util.ArrayList"
 			select="selectTagsForCourse" column="course_id" />
 	</resultMap>
@@ -72,6 +74,19 @@
 		resultMap="communityCourseResult">
 		SELECT
 		c.course_id, c.title, c.preview_image, c.author_id AS user_id,
+		u.nickname AS author,
+		u.profile_image,
+		(SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS
+		likes
+		FROM courses c
+		LEFT JOIN users u ON c.author_id = u.id
+		WHERE c.course_id = #{id}
+	</select>
+
+	<select id="findById" parameterType="int"
+		resultMap="communityCourseResult">
+		SELECT
+		c.course_id, c.title, c.description, c.preview_image, c.author_id AS user_id, c.created_at,
 		u.nickname AS author,
 		u.profile_image,
 		(SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS

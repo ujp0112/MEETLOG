@@ -8,7 +8,12 @@ import model.User;
 import model.BusinessUser;
 import model.Company;
 import model.UserStorage;
+import model.UserStorageItem;
 import model.Restaurant;
+import model.CommunityCourse;
+import model.Column;
+import model.StorageItemDto;
+import java.sql.Timestamp;
 import util.MyBatisSqlSessionFactory;
 import util.PasswordUtil; // 새로 만든 PasswordUtil 클래스를 import 합니다.
 import java.util.List;
@@ -19,6 +24,9 @@ public class UserService {
     private final BusinessUserDAO businessUserDAO = new BusinessUserDAO();
     private final CompanyDAO companyDAO = new CompanyDAO();
     private final UserStorageService userStorageService = new UserStorageService();
+    private RestaurantService restaurantService;
+    private CourseService courseService;
+    private ColumnService columnService;
 
     // --- 신규 통합 회원가입 로직 ---
     public boolean registerHqUser(User user, BusinessUser businessUser) {
@@ -87,7 +95,22 @@ public class UserService {
         
         String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
-        return userDAO.insert(user) > 0;
+        
+        boolean userCreated = userDAO.insert(user) > 0;
+        
+        if (userCreated) {
+            // 사용자 등록 성공 시 기본 저장소 생성
+            try {
+                createStorage(user.getId(), "내 찜 목록", "bg-red-100");
+                System.out.println("DEBUG: 사용자 " + user.getId() + "의 기본 저장소 생성 완료");
+            } catch (Exception e) {
+                System.err.println("기본 저장소 생성 실패: " + e.getMessage());
+                e.printStackTrace();
+                // 저장소 생성 실패는 사용자 등록을 막지 않음
+            }
+        }
+        
+        return userCreated;
     }
 
     // --- 기존 서비스 메소드들 ---
@@ -276,9 +299,167 @@ public class UserService {
 
     public List<Restaurant> getStorageRestaurants(int storageId) {
         if (userStorageService != null) {
-            // UserStorageItem 리스트를 Restaurant 리스트로 변환하는 로직 필요
-            // 임시로 빈 리스트 반환
-            return new ArrayList<>();
+            List<UserStorageItem> items = userStorageService.getStorageItems(storageId);
+            List<Restaurant> restaurants = new ArrayList<>();
+
+            // 레스토랑 타입만 필터링해서 실제 레스토랑 정보 조회
+            for (UserStorageItem item : items) {
+                if ("RESTAURANT".equals(item.getItemType())) {
+                    try {
+                        if (restaurantService == null) {
+                            restaurantService = new RestaurantService();
+                        }
+                        Restaurant restaurant = restaurantService.getRestaurantById(item.getContentId());
+                        if (restaurant != null) {
+                            restaurants.add(restaurant);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("레스토랑 조회 실패 (ID: " + item.getContentId() + "): " + e.getMessage());
+                    }
+                }
+            }
+            return restaurants;
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * 저장소의 모든 아이템들을 DTO로 변환하여 조회 (코스, 칼럼, 레스토랑 포함)
+     */
+    public List<StorageItemDto> getStorageItemsAsDto(int storageId) {
+        if (userStorageService != null) {
+            List<UserStorageItem> items = userStorageService.getStorageItems(storageId);
+            List<StorageItemDto> dtoItems = new ArrayList<>();
+
+            for (UserStorageItem item : items) {
+                try {
+                    StorageItemDto dto = null;
+
+                    switch (item.getItemType()) {
+                        case "RESTAURANT":
+                            if (restaurantService == null) {
+                                restaurantService = new RestaurantService();
+                            }
+                            Restaurant restaurant = restaurantService.getRestaurantById(item.getContentId());
+                            if (restaurant != null) {
+                                dto = new StorageItemDto();
+                                dto.setItemType("RESTAURANT");
+                                dto.setContentId(restaurant.getId());
+                                dto.setTitle(restaurant.getName());
+                                dto.setDescription(restaurant.getDescription());
+                                dto.setImageUrl(restaurant.getMainImage());
+                                dto.setLinkUrl("/restaurant/detail/" + restaurant.getId());
+                                dto.setAdditionalInfo("⭐ " + restaurant.getAverageRating());
+                            }
+                            break;
+
+                        case "COURSE":
+                            if (courseService == null) {
+                                courseService = new CourseService();
+                            }
+                            try {
+                                CommunityCourse course = courseService.getCourseById(item.getContentId());
+                                if (course != null) {
+                                    dto = new StorageItemDto();
+                                    dto.setItemType("COURSE");
+                                    dto.setContentId(course.getId());
+                                    dto.setTitle(course.getTitle());
+                                    dto.setDescription(course.getDescription());
+                                    dto.setImageUrl(course.getPreviewImage());
+                                    dto.setLinkUrl("/course/detail?id=" + course.getId());
+                                    dto.setAuthorName(course.getAuthor());
+                                    dto.setCreatedAt(course.getCreatedAt());
+                                    dto.setAdditionalInfo("❤️ " + course.getLikes());
+                                    System.out.println("DEBUG: 코스 데이터 로드 성공 - ID: " + course.getId() + ", 제목: " + course.getTitle());
+                                } else {
+                                    System.out.println("DEBUG: 코스 데이터가 null입니다 - contentId: " + item.getContentId());
+                                }
+                            } catch (Exception e) {
+                                System.err.println("DEBUG: 코스 조회 실패 - contentId: " + item.getContentId() + ", 오류: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                            break;
+
+                        case "COLUMN":
+                            if (columnService == null) {
+                                columnService = new ColumnService();
+                            }
+                            Column column = columnService.getColumnById(item.getContentId());
+                            if (column != null) {
+                                dto = new StorageItemDto();
+                                dto.setItemType("COLUMN");
+                                dto.setContentId(column.getId());
+                                dto.setTitle(column.getTitle());
+                                dto.setDescription(column.getContent() != null && column.getContent().length() > 100
+                                    ? column.getContent().substring(0, 100) + "..."
+                                    : column.getContent());
+                                dto.setImageUrl(column.getImage());
+                                dto.setLinkUrl("/column/detail?id=" + column.getId());
+                                dto.setAuthorName(column.getAuthor());
+                                dto.setCreatedAt(column.getCreatedAt().toLocalDateTime());
+                                dto.setAdditionalInfo("👀 " + column.getViews());
+                            }
+                            break;
+                    }
+
+                    if (dto != null) {
+                        dtoItems.add(dto);
+                    }
+                } catch (Exception e) {
+                    System.err.println("아이템 조회 실패 (" + item.getItemType() + " ID: " + item.getContentId() + "): " + e.getMessage());
+                }
+            }
+
+            return dtoItems;
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * 저장소의 모든 아이템들을 상세 정보와 함께 조회 (코스, 칼럼, 레스토랑 포함)
+     * @deprecated getStorageItemsAsDto 사용 권장
+     */
+    public List<Object> getStorageItemsWithDetails(int storageId) {
+        if (userStorageService != null) {
+            List<UserStorageItem> items = userStorageService.getStorageItems(storageId);
+            List<Object> detailedItems = new ArrayList<>();
+
+            for (UserStorageItem item : items) {
+                try {
+                    Object detailedItem = null;
+
+                    switch (item.getItemType()) {
+                        case "RESTAURANT":
+                            if (restaurantService == null) {
+                                restaurantService = new RestaurantService();
+                            }
+                            detailedItem = restaurantService.getRestaurantById(item.getContentId());
+                            break;
+
+                        case "COURSE":
+                            if (courseService == null) {
+                                courseService = new CourseService();
+                            }
+                            detailedItem = courseService.getCourseById(item.getContentId());
+                            break;
+
+                        case "COLUMN":
+                            if (columnService == null) {
+                                columnService = new ColumnService();
+                            }
+                            detailedItem = columnService.getColumnById(item.getContentId());
+                            break;
+                    }
+
+                    if (detailedItem != null) {
+                        detailedItems.add(detailedItem);
+                    }
+                } catch (Exception e) {
+                    System.err.println("아이템 조회 실패 (" + item.getItemType() + " ID: " + item.getContentId() + "): " + e.getMessage());
+                }
+            }
+
+            return detailedItems;
         }
         return new ArrayList<>();
     }

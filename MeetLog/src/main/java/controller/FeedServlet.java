@@ -42,9 +42,9 @@ public class FeedServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // 메인 피드 페이지
-                List<Map<String, Object>> feedData = feedService.getFeedItemsWithDetails(user.getId());
-                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 피드 아이템 수: " + feedData.size());
+                // 메인 피드 페이지 (자신의 활동 + 팔로우한 사용자들의 활동)
+                List<Map<String, Object>> feedData = feedService.getMainFeedWithDetails(user.getId(), 20, 0);
+                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 메인 피드 아이템 수: " + feedData.size());
 
                 // Map 데이터를 Activity로 변환
                 List<Activity> activities = convertMapDataToActivities(feedData);

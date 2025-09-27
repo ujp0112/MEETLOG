@@ -62,11 +62,16 @@
                                     </c:if>
 
                                     <div class="ml-auto flex items-center gap-4">
-                                        <button id="like-btn" class="flex items-center gap-1 font-semibold transition ${isLiked ? 'text-red-500' : 'text-slate-600 hover:text-red-500'}" data-course-id="${course.id}">
-                                            <svg class="w-5 h-5" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                                            <span id="like-count">${course.likes}</span>
+                                        <button id="like-btn" class="flex items-center gap-1 font-semibold transition <c:choose><c:when test='${isLiked}'>text-red-500</c:when><c:otherwise>text-slate-600 hover:text-red-500</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
+                                            <svg class="w-5 h-5" fill="<c:choose><c:when test='${isLiked}'>currentColor</c:when><c:otherwise>none</c:otherwise></c:choose>" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                                            <span id="like-count"><c:out value="${course.likes}"/></span>
                                         </button>
-                                        <button id="save-btn" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full text-sm hover:bg-sky-600" data-course-id="${course.id}">❤️ 코스 찜</button>
+                                        <button id="wishlist-btn" class="flex items-center gap-1 font-semibold py-2 px-4 rounded-full text-sm transition <c:choose><c:when test='${isWishlisted}'>bg-red-500 text-white hover:bg-red-600</c:when><c:otherwise>bg-gray-200 text-gray-700 hover:bg-gray-300</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
+                                            <svg class="w-4 h-4" fill="<c:choose><c:when test='${isWishlisted}'>currentColor</c:when><c:otherwise>none</c:otherwise></c:choose>" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                            <span id="wishlist-text"><c:choose><c:when test='${isWishlisted}'>찜 완료</c:when><c:otherwise>찜하기</c:otherwise></c:choose></span>
+                                        </button>
                                     </div>
                                 </div>
 
@@ -109,21 +114,75 @@
 
             </div>
         </main>
+
+        <!-- 찜하기 폴더 선택 모달 -->
+        <div id="wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+            <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold">저장할 폴더 선택</h2>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- 로딩 상태 -->
+                <div id="modal-loading" class="text-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto"></div>
+                    <p class="mt-2 text-gray-600">폴더를 불러오는 중...</p>
+                </div>
+
+                <!-- 폴더 목록 -->
+                <div id="storage-list" class="hidden space-y-3">
+                    <!-- 폴더들이 여기에 동적으로 추가됩니다 -->
+                </div>
+
+                <!-- 새 폴더 생성 버튼 -->
+                <div id="create-folder-section" class="hidden border-t pt-4 mt-4">
+                    <button id="show-create-form" class="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        새 폴더 만들기
+                    </button>
+
+                    <!-- 새 폴더 생성 폼 -->
+                    <div id="create-form" class="hidden mt-4">
+                        <input type="text" id="folder-name" placeholder="폴더 이름을 입력하세요"
+                               class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                        <div class="flex gap-2">
+                            <button id="create-folder" class="flex-1 py-2 px-4 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition">
+                                생성
+                            </button>
+                            <button id="cancel-create" class="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+                                취소
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
+
 
     <script>
         // JSP에서 JavaScript로 안전하게 데이터 전달
         const courseData = {
-            id: ${course.id != null ? course.id : 0},
+            id: <c:out value="${course.id}" default="0"/>,
             title: '<c:out value="${course.title}" escapeXml="true"/>',
             author: '<c:out value="${course.author}" escapeXml="true"/>'
         };
+        
+        // 로그인 상태 체크
+        const isUserLoggedIn = <c:out value="${not empty sessionScope.user}" default="false"/>;
 
         document.addEventListener('DOMContentLoaded', function() {
             const copyBtn = document.getElementById('copy-url-btn');
             const likeBtn = document.getElementById('like-btn');
-            const saveBtn = document.getElementById('save-btn');
+            const wishlistBtn = document.getElementById('wishlist-btn');
 
             // URL 복사 기능
             if (copyBtn) {
@@ -150,7 +209,7 @@
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: `courseId=${courseId}`
+                            body: 'courseId=' + courseId
                         });
                         
                         const data = await response.json();
@@ -204,12 +263,199 @@
                 });
             }
 
-            // 코스 저장 기능 (추후 구현)
-            if (saveBtn) {
-                saveBtn.addEventListener('click', function() {
-                    alert('코스 저장 기능은 준비 중입니다.');
+            // 코스 찜 기능 - 모달 버전
+            if (wishlistBtn) {
+                wishlistBtn.addEventListener('click', function() {
+                    // 로그인 체크
+                    if (!isUserLoggedIn) {
+                        alert('로그인이 필요합니다.');
+                        window.location.href = '${pageContext.request.contextPath}/user/login';
+                        return;
+                    }
+
+                    const isCurrentlyWishlisted = this.classList.contains('bg-red-500');
+
+                    if (isCurrentlyWishlisted) {
+                        // 이미 찜한 상태면 찜 해제
+                        removeFromWishlist();
+                    } else {
+                        // 찜하지 않은 상태면 모달 띄워서 폴더 선택
+                        openWishlistModal();
+                    }
                 });
             }
+
+            // 찜하기 모달 관련 함수들
+            function openWishlistModal() {
+                const modal = document.getElementById('wishlist-modal');
+                const loading = document.getElementById('modal-loading');
+                const storageList = document.getElementById('storage-list');
+                const createSection = document.getElementById('create-folder-section');
+
+                // 모달 보이기
+                modal.classList.remove('hidden');
+
+                // 로딩 상태 보이기
+                loading.classList.remove('hidden');
+                storageList.classList.add('hidden');
+                createSection.classList.add('hidden');
+
+                // 사용자의 저장소 목록 가져오기
+                loadUserStorages();
+            }
+
+            async function loadUserStorages() {
+                try {
+                    const response = await fetch('${pageContext.request.contextPath}/course/storages');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        displayStorages(data.storages);
+                    } else {
+                        alert(data.message || '저장소 목록을 불러오는데 실패했습니다.');
+                        closeModal();
+                    }
+                } catch (error) {
+                    console.error('저장소 목록 조회 실패:', error);
+                    alert('네트워크 오류가 발생했습니다.');
+                    closeModal();
+                }
+            }
+
+            function displayStorages(storages) {
+                const loading = document.getElementById('modal-loading');
+                const storageList = document.getElementById('storage-list');
+                const createSection = document.getElementById('create-folder-section');
+
+                // 로딩 숨기고 리스트 보이기
+                loading.classList.add('hidden');
+                storageList.classList.remove('hidden');
+                createSection.classList.remove('hidden');
+
+                // 저장소 리스트 초기화
+                storageList.innerHTML = '';
+
+                // 각 저장소를 버튼으로 추가
+                storages.forEach(storage => {
+                    const storageBtn = document.createElement('button');
+                    storageBtn.className = `w-full p-4 text-left rounded-lg border-2 border-gray-200 hover:border-sky-300 hover:bg-sky-50 transition ${storage.colorClass || 'bg-white'}`;
+                    storageBtn.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-4 h-4 rounded ${storage.colorClass || 'bg-blue-100'}"></div>
+                            <span class="font-medium">${storage.name}</span>
+                        </div>
+                    `;
+
+                    storageBtn.addEventListener('click', () => {
+                        addToStorage(storage.id, storage.name);
+                    });
+
+                    storageList.appendChild(storageBtn);
+                });
+            }
+
+            async function addToStorage(storageId, storageName) {
+                const courseId = courseData.id;
+
+                try {
+                    const response = await fetch('${pageContext.request.contextPath}/course/wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `courseId=${courseId}&action=add&storageId=${storageId}`
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // 모달 닫기
+                        closeModal();
+
+                        // 찜하기 버튼 상태 업데이트
+                        updateWishlistButton(true);
+
+                        // 성공 메시지
+                        showMessage(`"${storageName}" 폴더에 저장되었습니다.`);
+                    } else {
+                        alert(data.message || '저장에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('저장 실패:', error);
+                    alert('네트워크 오류가 발생했습니다.');
+                }
+            }
+
+            async function removeFromWishlist() {
+                const courseId = courseData.id;
+
+                try {
+                    const response = await fetch('${pageContext.request.contextPath}/course/wishlist', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `courseId=${courseId}&action=remove`
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        updateWishlistButton(false);
+                        showMessage('찜 목록에서 제거되었습니다.');
+                    } else {
+                        alert(data.message || '제거에 실패했습니다.');
+                    }
+                } catch (error) {
+                    console.error('찜 제거 실패:', error);
+                    alert('네트워크 오류가 발생했습니다.');
+                }
+            }
+
+            function updateWishlistButton(isWishlisted) {
+                const svg = wishlistBtn.querySelector('svg');
+                const textSpan = document.getElementById('wishlist-text');
+
+                if (isWishlisted) {
+                    wishlistBtn.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    wishlistBtn.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600');
+                    svg.setAttribute('fill', 'currentColor');
+                    textSpan.textContent = '찜 완료';
+                } else {
+                    wishlistBtn.classList.remove('bg-red-500', 'text-white', 'hover:bg-red-600');
+                    wishlistBtn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    svg.setAttribute('fill', 'none');
+                    textSpan.textContent = '찜하기';
+                }
+            }
+
+            function showMessage(message) {
+                // 간단한 토스트 메시지 표시
+                const toast = document.createElement('div');
+                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('wishlist-modal');
+                modal.classList.add('hidden');
+            }
+
+            // 모달 닫기 이벤트
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+
+            // 모달 외부 클릭 시 닫기
+            document.getElementById('wishlist-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
         });
     </script>
 </body>

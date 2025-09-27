@@ -50,10 +50,11 @@ public class WishlistServlet extends HttpServlet {
                     UserStorage storage = userService.getUserStorage(storageId, user.getId());
 
                     if (storage != null) {
-                        List<Restaurant> storageRestaurants = userService.getStorageRestaurants(storageId);
+                        // 모든 타입의 아이템들을 DTO로 가져옴 (코스, 칼럼, 레스토랑)
+                        List<model.StorageItemDto> storageItems = userService.getStorageItemsAsDto(storageId);
 
                         request.setAttribute("storage", storage);
-                        request.setAttribute("storageRestaurants", storageRestaurants);
+                        request.setAttribute("storageItems", storageItems);
                         request.getRequestDispatcher("/WEB-INF/views/wishlist-detail.jsp").forward(request, response);
                     } else {
                         response.sendError(HttpServletResponse.SC_NOT_FOUND);

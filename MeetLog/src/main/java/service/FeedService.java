@@ -231,4 +231,16 @@ public class FeedService {
             return List.of();
         }
     }
+
+    /**
+     * 메인 피드 조회 (자신의 활동 + 팔로우한 사용자들의 활동)
+     */
+    public List<Map<String, Object>> getMainFeedWithDetails(int userId, int limit, int offset) {
+        try {
+            return feedDAO.getMainFeed(userId, limit, offset);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
 }

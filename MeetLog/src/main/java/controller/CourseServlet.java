@@ -31,6 +31,7 @@ import model.Restaurant;
 import service.CourseService;
 import service.FeedService;
 import service.RestaurantService;
+import service.UserStorageService;
 import util.AppConfig;
 
 @MultipartConfig(
@@ -44,6 +45,7 @@ public class CourseServlet extends HttpServlet {
     
     private CourseService courseService = new CourseService();
     private RestaurantService restaurantService = new RestaurantService();
+    private UserStorageService userStorageService = new UserStorageService();
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -67,6 +69,10 @@ public class CourseServlet extends HttpServlet {
                 handleSearchPlaces(request, response);
             } else if ("/like".equals(path)) {
                 handleCourseLike(request, response);
+            } else if ("/wishlist".equals(path)) {
+                handleCourseWishlist(request, response);
+            } else if ("/storages".equals(path)) {
+                handleGetUserStorages(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -86,6 +92,8 @@ public class CourseServlet extends HttpServlet {
             handleCreateCourseSubmit(request, response);
         } else if ("/edit".equals(path)) {
             handleUpdateCourse(request, response);
+        } else if ("/wishlist".equals(path)) {
+            handleCourseWishlist(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
@@ -241,17 +249,29 @@ public class CourseServlet extends HttpServlet {
         CommunityCourse course = courseService.getCourseDetail(courseId);
         List<CourseStep> steps = courseService.getCourseSteps(courseId);
         
-        // 현재 사용자의 좋아요 상태 확인
+        // 현재 사용자의 좋아요 상태 및 찜 상태 확인
         HttpSession session = request.getSession(false);
         boolean isLiked = false;
+        boolean isWishlisted = false;
         if (session != null && session.getAttribute("user") != null) {
             User user = (User) session.getAttribute("user");
             isLiked = courseService.isCourseLiked(user.getId(), courseId);
+
+            // 사용자의 기본 저장소에 코스가 있는지 확인
+            try {
+                var defaultStorage = userStorageService.getOrCreateDefaultStorage(user.getId());
+                if (defaultStorage != null) {
+                    isWishlisted = userStorageService.isItemInStorage(defaultStorage.getStorageId(), "COURSE", courseId);
+                }
+            } catch (Exception e) {
+                System.err.println("찜 상태 확인 중 오류: " + e.getMessage());
+            }
         }
-        
+
         request.setAttribute("course", course);
         request.setAttribute("steps", steps);
         request.setAttribute("isLiked", isLiked);
+        request.setAttribute("isWishlisted", isWishlisted);
 
         request.getRequestDispatcher("/WEB-INF/views/course-detail.jsp").forward(request, response);
     }
@@ -486,6 +506,137 @@ public class CourseServlet extends HttpServlet {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 코스 찜하기/찜 해제 처리
+     */
+    private void handleCourseWishlist(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        System.out.println("DEBUG: handleCourseWishlist 메서드 호출됨");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            System.out.println("DEBUG: 로그인되지 않은 사용자");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        System.out.println("DEBUG: 사용자 ID: " + user.getId());
+
+        try {
+            String courseIdParam = request.getParameter("courseId");
+            String action = request.getParameter("action");
+            String storageIdParam = request.getParameter("storageId");
+
+            System.out.println("DEBUG: courseId 파라미터: " + courseIdParam);
+            System.out.println("DEBUG: action 파라미터: " + action);
+            System.out.println("DEBUG: storageId 파라미터: " + storageIdParam);
+
+            int courseId = Integer.parseInt(courseIdParam);
+
+            boolean success = false;
+            boolean isWishlisted = false;
+
+            if ("add".equals(action)) {
+                System.out.println("DEBUG: 찜 추가 시도 - 사용자: " + user.getId() + ", 코스: " + courseId);
+
+                if (storageIdParam != null && !storageIdParam.trim().isEmpty()) {
+                    // 특정 저장소에 추가
+                    int storageId = Integer.parseInt(storageIdParam);
+                    System.out.println("DEBUG: 특정 저장소에 추가 - 저장소 ID: " + storageId);
+                    success = userStorageService.addToStorage(storageId, "COURSE", courseId);
+                } else {
+                    // 기본 저장소에 추가
+                    System.out.println("DEBUG: 기본 저장소에 추가");
+                    success = userStorageService.addToWishlist(user.getId(), "COURSE", courseId);
+                }
+
+                isWishlisted = true;
+                System.out.println("DEBUG: 찜 추가 결과: " + success);
+            } else if ("remove".equals(action)) {
+                System.out.println("DEBUG: 찜 제거 시도 - 사용자: " + user.getId() + ", 코스: " + courseId);
+                success = userStorageService.removeFromWishlist(user.getId(), "COURSE", courseId);
+                isWishlisted = false;
+                System.out.println("DEBUG: 찜 제거 결과: " + success);
+            } else {
+                System.out.println("DEBUG: 유효하지 않은 액션: " + action);
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"유효하지 않은 액션입니다.\"}");
+                return;
+            }
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            if (success) {
+                String jsonResponse = String.format(
+                    "{\"success\": true, \"isWishlisted\": %b, \"message\": \"%s\"}",
+                    isWishlisted,
+                    isWishlisted ? "찜 목록에 추가되었습니다." : "찜 목록에서 제거되었습니다."
+                );
+                System.out.println("DEBUG: 성공 응답: " + jsonResponse);
+                response.getWriter().write(jsonResponse);
+            } else {
+                System.out.println("DEBUG: 찜 처리 실패");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"찜 처리에 실패했습니다.\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("DEBUG: 숫자 형식 오류: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 코스 ID입니다.\"}");
+        } catch (Exception e) {
+            System.out.println("DEBUG: 예외 발생: " + e.getMessage());
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자의 저장소 목록을 JSON으로 반환
+     */
+    private void handleGetUserStorages(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            return;
+        }
+
+        try {
+            User user = (User) session.getAttribute("user");
+            List<model.UserStorage> storages = userStorageService.getUserStorages(user.getId());
+
+            // JSON 형태로 변환할 데이터 준비
+            List<Map<String, Object>> storageList = new ArrayList<>();
+            for (model.UserStorage storage : storages) {
+                Map<String, Object> storageMap = new HashMap<>();
+                storageMap.put("id", storage.getStorageId());
+                storageMap.put("name", storage.getName());
+                storageMap.put("colorClass", storage.getColorClass());
+                storageList.add(storageMap);
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("storages", storageList);
+
+            response.getWriter().write(objectMapper.writeValueAsString(result));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"저장소 목록을 가져오는데 실패했습니다.\"}");
         }
     }
 }
