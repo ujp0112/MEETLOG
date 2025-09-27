@@ -10,7 +10,8 @@
 		<id property="id" column="course_id" />
 		<result property="title" column="title" />
 		<result property="previewImage" column="preview_image" />
-		<result property="authorName" column="author_name" />
+		<result property="userId" column="user_id" />
+		<result property="author" column="author" />
 		<result property="profileImage" column="profile_image" />
 		<result property="likes" column="likes" />
 		<collection property="tags" javaType="java.util.ArrayList"
@@ -70,7 +71,7 @@
 	<select id="findDetailById" parameterType="int"
 		resultMap="communityCourseResult">
 		SELECT
-		c.course_id, c.title, c.preview_image,
+		c.course_id, c.title, c.preview_image, c.author_id AS user_id,
 		u.nickname AS author,
 		u.profile_image,
 		(SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS
