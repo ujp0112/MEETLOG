@@ -104,6 +104,63 @@
                                     <button id="kakao-share-btn" class="w-full max-w-xs bg-yellow-400 text-black font-bold py-3 rounded-full hover:bg-yellow-500">카카오톡으로 공유하기</button>
                                     <button id="copy-url-btn" class="w-full max-w-xs bg-slate-700 text-white font-bold py-3 rounded-full hover:bg-slate-800">URL 복사하기</button>
                                 </div>
+
+                                <div id="course-comments" class="mt-12">
+                                    <h3 class="text-2xl font-bold mb-4">댓글 <span class="text-slate-500 text-base">(<c:out value="${courseCommentCount}" default="0"/>)</span></h3>
+
+                                    <c:choose>
+                                        <c:when test="${not empty courseComments}">
+                                            <ul class="space-y-4">
+                                                <c:forEach var="comment" items="${courseComments}">
+                                                    <c:choose>
+                                                        <c:when test="${not empty comment.profileImage && fn:startsWith(comment.profileImage, 'http')}">
+                                                            <c:set var="commentProfileImageUrl" value="${comment.profileImage}" />
+                                                        </c:when>
+                                                        <c:when test="${not empty comment.profileImage}">
+                                                            <c:set var="commentProfileImageUrl" value="${pageContext.request.contextPath}/${comment.profileImage}" />
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <c:set var="commentProfileImageUrl" value="https://placehold.co/48x48/94a3b8/ffffff?text=U" />
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    <li class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm" data-comment-id="${comment.id}">
+                                                        <div class="flex gap-3">
+                                                            <img src="${commentProfileImageUrl}" alt="${comment.nickname}" class="w-10 h-10 rounded-full object-cover">
+                                                            <div class="flex-1">
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="font-semibold text-slate-800"><c:out value="${comment.nickname}"/></span>
+                                                                    <span class="text-xs text-slate-500"><c:out value="${comment.createdAtFormatted}"/></span>
+                                                                </div>
+                                                                <p class="mt-2 text-slate-700 whitespace-pre-line"><c:out value="${comment.content}"/></p>
+                                                            </div>
+                                                            <c:if test="${not empty sessionScope.user && sessionScope.user.id == comment.userId}">
+                                                                <button type="button" class="delete-comment-btn text-xs text-slate-400 hover:text-red-500" data-comment-id="${comment.id}">삭제</button>
+                                                            </c:if>
+                                                        </div>
+                                                    </li>
+                                                </c:forEach>
+                                            </ul>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <p class="text-slate-500 bg-slate-100 rounded-xl p-6 text-center">아직 댓글이 없습니다. 첫 댓글을 남겨보세요!</p>
+                                        </c:otherwise>
+                                    </c:choose>
+
+                                    <c:if test="${not empty sessionScope.user}">
+                                        <form id="comment-form" class="mt-8 space-y-3">
+                                            <textarea id="comment-content" class="w-full min-h-[110px] border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500" maxlength="500" placeholder="댓글을 입력해주세요."></textarea>
+                                            <div class="flex justify-end">
+                                                <button type="submit" class="px-5 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition">댓글 등록</button>
+                                            </div>
+                                        </form>
+                                    </c:if>
+
+                                    <c:if test="${empty sessionScope.user}">
+                                        <p class="mt-6 text-sm text-slate-500 text-center">
+                                            댓글을 작성하려면 <a href="${pageContext.request.contextPath}/login" class="text-sky-600 font-semibold hover:underline">로그인</a>이 필요합니다.
+                                        </p>
+                                    </c:if>
+                                </div>
                             </div>
                         </div>
                     </c:when>
@@ -199,6 +256,9 @@
             const createFolderBtn = document.getElementById('create-folder');
             const folderNameInput = document.getElementById('folder-name');
             const defaultCreateButtonText = createFolderBtn ? createFolderBtn.textContent.trim() : '';
+            const commentForm = document.getElementById('comment-form');
+            const commentContentInput = document.getElementById('comment-content');
+            const deleteCommentButtons = document.querySelectorAll('.delete-comment-btn');
 
             // URL 복사 기능
             if (copyBtn) {
@@ -239,15 +299,18 @@
                         const params = new URLSearchParams();
                         params.append('courseId', courseId);
 
-                        const response = await fetch(`${contextPath}/course/like`, {
+                        const response = await fetch(buildUrl('/course/like'), {
                             method: 'POST',
+                            credentials: 'same-origin',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
                             },
                             body: params.toString()
                         });
                         
-                        const data = await response.json();
+                        const result = await parseJsonResponse(response);
+                        const data = result.data;
                         
                         if (data.success) {
                             const svg = this.querySelector('svg');
@@ -267,14 +330,14 @@
                         } else {
                             if (response.status === 401) {
                                 alert('로그인이 필요합니다.');
-                                window.location.href = `${contextPath}/user/login`;
+                                window.location.href = buildUrl('/user/login');
                             } else {
                                 alert(data.message || '오류가 발생했습니다.');
                             }
                         }
                     } catch (error) {
                         console.error('좋아요 요청 실패:', error);
-                        alert('네트워크 오류가 발생했습니다.');
+                        alert(error.message || '요청 처리 중 오류가 발생했습니다.');
                     }
                 });
             }
@@ -304,7 +367,7 @@
                     // 로그인 체크
                     if (!isUserLoggedIn) {
                         alert('로그인이 필요합니다.');
-                        window.location.href = `${contextPath}/user/login`;
+                        window.location.href = buildUrl('/user/login');
                         return;
                     }
 
@@ -494,6 +557,92 @@
                             createFolderBtn.textContent = defaultCreateButtonText || '생성';
                         }
                     }
+                });
+            }
+
+            if (commentForm && commentContentInput) {
+                commentForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+
+                    const content = commentContentInput.value.trim();
+                    if (!content) {
+                        alert('댓글 내용을 입력해주세요.');
+                        commentContentInput.focus();
+                        return;
+                    }
+
+                    try {
+                        const params = new URLSearchParams();
+                        params.append('courseId', courseData.id);
+                        params.append('content', content);
+
+                        const response = await fetch(buildUrl('/course/comment'), {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: params.toString()
+                        });
+
+                        const result = await parseJsonResponse(response);
+                        const data = result.data;
+
+                        if (data.success) {
+                            commentForm.reset();
+                            showMessage(data.message || '댓글이 등록되었습니다.');
+                            window.location.reload();
+                        } else {
+                            alert(data.message || '댓글 등록에 실패했습니다.');
+                        }
+                    } catch (error) {
+                        console.error('댓글 등록 실패:', error);
+                        alert(error.message || '댓글 등록 중 오류가 발생했습니다.');
+                    }
+                });
+            }
+
+            if (deleteCommentButtons) {
+                deleteCommentButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const commentId = button.getAttribute('data-comment-id');
+                        if (!commentId) {
+                            return;
+                        }
+
+                        if (!confirm('댓글을 삭제하시겠습니까?')) {
+                            return;
+                        }
+
+                        try {
+                            const params = new URLSearchParams();
+                            params.append('commentId', commentId);
+
+                            const response = await fetch(buildUrl('/course/comment/delete'), {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: params.toString()
+                            });
+
+                            const result = await parseJsonResponse(response);
+                            const data = result.data;
+
+                            if (data.success) {
+                                showMessage(data.message || '댓글이 삭제되었습니다.');
+                                window.location.reload();
+                            } else {
+                                alert(data.message || '댓글 삭제에 실패했습니다.');
+                            }
+                        } catch (error) {
+                            console.error('댓글 삭제 실패:', error);
+                            alert(error.message || '댓글 삭제 중 오류가 발생했습니다.');
+                        }
+                    });
                 });
             }
 

@@ -29,6 +29,7 @@ import model.User;
 import model.CourseStep;
 import model.Restaurant;
 import model.UserStorage;
+import service.CourseCommentService;
 import service.CourseService;
 import service.FeedService;
 import service.RestaurantService;
@@ -47,6 +48,7 @@ public class CourseServlet extends HttpServlet {
     private CourseService courseService = new CourseService();
     private RestaurantService restaurantService = new RestaurantService();
     private UserStorageService userStorageService = new UserStorageService();
+    private CourseCommentService courseCommentService = new CourseCommentService();
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -99,9 +101,22 @@ public class CourseServlet extends HttpServlet {
             handleCourseWishlist(request, response);
         } else if ("/storages".equals(path)) {
             handleCreateUserStorage(request, response);
+        } else if ("/like".equals(path)) {
+            handleCourseLike(request, response);
+        } else if ("/comment".equals(path)) {
+            handleAddCourseComment(request, response);
+        } else if ("/comment/delete".equals(path)) {
+            handleDeleteCourseComment(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
+    }
+
+    private void writeJson(HttpServletResponse response, int status, Map<String, Object> body) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 
     private String normalizePath(String path) {
@@ -296,10 +311,14 @@ public class CourseServlet extends HttpServlet {
             }
         }
 
+        List<model.CourseComment> comments = courseCommentService.getCommentsByCourse(courseId);
+
         request.setAttribute("course", course);
         request.setAttribute("steps", steps);
         request.setAttribute("isLiked", isLiked);
         request.setAttribute("isWishlisted", isWishlisted);
+        request.setAttribute("courseComments", comments);
+        request.setAttribute("courseCommentCount", comments.size());
 
         request.getRequestDispatcher("/WEB-INF/views/course-detail.jsp").forward(request, response);
     }
@@ -509,8 +528,10 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
             return;
         }
 
@@ -521,19 +542,22 @@ public class CourseServlet extends HttpServlet {
             boolean isLiked = courseService.toggleCourseLike(user.getId(), courseId);
             int likeCount = courseService.getCourseLikeCount(courseId);
             
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(String.format(
-                "{\"success\": true, \"isLiked\": %b, \"likeCount\": %d}", 
-                isLiked, likeCount
+            writeJson(response, HttpServletResponse.SC_OK, Map.of(
+                    "success", true,
+                    "isLiked", isLiked,
+                    "likeCount", likeCount
             ));
         } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 코스 ID입니다.\"}");
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "잘못된 코스 ID입니다."
+            ));
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "서버 오류가 발생했습니다."
+            ));
         }
     }
 
@@ -544,14 +568,13 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         System.out.println("DEBUG: handleCourseWishlist 메서드 호출됨");
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             System.out.println("DEBUG: 로그인되지 않은 사용자");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
             return;
         }
 
@@ -572,8 +595,10 @@ public class CourseServlet extends HttpServlet {
 
             if (courseIdParam == null || courseIdParam.trim().isEmpty()) {
                 System.out.println("DEBUG: courseId 파라미터 누락");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"success\": false, \"message\": \"코스 ID가 누락되었습니다.\"}");
+                writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                        "success", false,
+                        "message", "코스 ID가 누락되었습니다."
+                ));
                 return;
             }
 
@@ -605,34 +630,40 @@ public class CourseServlet extends HttpServlet {
                 System.out.println("DEBUG: 찜 제거 결과: " + success);
             } else {
                 System.out.println("DEBUG: 유효하지 않은 액션: " + action);
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write("{\"success\": false, \"message\": \"유효하지 않은 액션입니다.\"}");
+                writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                        "success", false,
+                        "message", "유효하지 않은 액션입니다."
+                ));
                 return;
             }
 
             if (success) {
-                String jsonResponse = String.format(
-                    "{\"success\": true, \"isWishlisted\": %b, \"message\": \"%s\"}",
-                    isWishlisted,
-                    isWishlisted ? "찜 목록에 추가되었습니다." : "찜 목록에서 제거되었습니다."
-                );
-                System.out.println("DEBUG: 성공 응답: " + jsonResponse);
-                response.getWriter().write(jsonResponse);
+                Map<String, Object> body = new HashMap<>();
+                body.put("success", true);
+                body.put("isWishlisted", isWishlisted);
+                body.put("message", isWishlisted ? "찜 목록에 추가되었습니다." : "찜 목록에서 제거되었습니다.");
+                writeJson(response, HttpServletResponse.SC_OK, body);
             } else {
                 System.out.println("DEBUG: 찜 처리 실패");
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"success\": false, \"message\": \"찜 처리에 실패했습니다.\"}");
+                writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                        "success", false,
+                        "message", "찜 처리에 실패했습니다."
+                ));
             }
 
         } catch (NumberFormatException e) {
             System.out.println("DEBUG: 숫자 형식 오류: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 요청입니다.\"}");
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "잘못된 요청입니다."
+            ));
         } catch (Exception e) {
             System.out.println("DEBUG: 예외 발생: " + e.getMessage());
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "서버 오류가 발생했습니다."
+            ));
         }
     }
 
@@ -641,13 +672,12 @@ public class CourseServlet extends HttpServlet {
      */
     private void handleGetUserStorages(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
             return;
         }
 
@@ -666,16 +696,17 @@ public class CourseServlet extends HttpServlet {
                 storageList.add(storageMap);
             }
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("success", true);
-            result.put("storages", storageList);
-
-            response.getWriter().write(objectMapper.writeValueAsString(result));
+            writeJson(response, HttpServletResponse.SC_OK, Map.of(
+                    "success", true,
+                    "storages", storageList
+            ));
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false, \"message\": \"저장소 목록을 가져오는데 실패했습니다.\"}");
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "저장소 목록을 가져오는데 실패했습니다."
+            ));
         }
     }
 
@@ -684,13 +715,12 @@ public class CourseServlet extends HttpServlet {
      */
     private void handleCreateUserStorage(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
             return;
         }
 
@@ -699,8 +729,10 @@ public class CourseServlet extends HttpServlet {
         String colorClass = request.getParameter("colorClass");
 
         if (name == null || name.trim().isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\": false, \"message\": \"폴더 이름을 입력해주세요.\"}");
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "폴더 이름을 입력해주세요."
+            ));
             return;
         }
 
@@ -719,19 +751,148 @@ public class CourseServlet extends HttpServlet {
                 storageMap.put("colorClass", storage.getColorClass());
                 storageMap.put("itemCount", 0);
 
-                Map<String, Object> result = new HashMap<>();
-                result.put("success", true);
-                result.put("storage", storageMap);
-
-                response.getWriter().write(objectMapper.writeValueAsString(result));
+                writeJson(response, HttpServletResponse.SC_OK, Map.of(
+                        "success", true,
+                        "storage", storageMap
+                ));
             } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("{\"success\": false, \"message\": \"폴더 생성에 실패했습니다.\"}");
+                writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                        "success", false,
+                        "message", "폴더 생성에 실패했습니다."
+                ));
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false, \"message\": \"폴더 생성 중 오류가 발생했습니다.\"}");
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "폴더 생성 중 오류가 발생했습니다."
+            ));
+        }
+    }
+
+    private void handleAddCourseComment(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String courseIdParam = request.getParameter("courseId");
+        String content = request.getParameter("content");
+
+        if (courseIdParam == null || courseIdParam.trim().isEmpty()) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "코스 ID가 필요합니다."
+            ));
+            return;
+        }
+
+        if (content == null || content.trim().isEmpty()) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "댓글 내용을 입력해주세요."
+            ));
+            return;
+        }
+
+        try {
+            int courseId = Integer.parseInt(courseIdParam.trim());
+            var savedComment = courseCommentService.addComment(courseId, user.getId(), content.trim());
+            if (savedComment != null) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", savedComment.getId());
+                commentData.put("courseId", savedComment.getCourseId());
+                commentData.put("userId", savedComment.getUserId());
+                commentData.put("nickname", savedComment.getNickname());
+                commentData.put("profileImage", savedComment.getProfileImage());
+                commentData.put("content", savedComment.getContent());
+                commentData.put("createdAt", savedComment.getCreatedAtFormatted());
+
+                Map<String, Object> body = new HashMap<>();
+                body.put("success", true);
+                body.put("message", "댓글이 등록되었습니다.");
+                body.put("comment", commentData);
+
+                writeJson(response, HttpServletResponse.SC_OK, body);
+            } else {
+                writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                        "success", false,
+                        "message", "댓글 저장에 실패했습니다."
+                ));
+            }
+        } catch (NumberFormatException e) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "잘못된 코스 ID입니다."
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "댓글 등록 중 오류가 발생했습니다."
+            ));
+        }
+    }
+
+    private void handleDeleteCourseComment(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, Map.of(
+                    "success", false,
+                    "message", "로그인이 필요합니다."
+            ));
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String commentIdParam = request.getParameter("commentId");
+
+        if (commentIdParam == null || commentIdParam.trim().isEmpty()) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "댓글 ID가 필요합니다."
+            ));
+            return;
+        }
+
+        try {
+            int commentId = Integer.parseInt(commentIdParam.trim());
+            boolean deleted = courseCommentService.deleteComment(commentId, user.getId());
+            if (deleted) {
+                writeJson(response, HttpServletResponse.SC_OK, Map.of(
+                        "success", true,
+                        "message", "댓글이 삭제되었습니다."
+                ));
+            } else {
+                writeJson(response, HttpServletResponse.SC_FORBIDDEN, Map.of(
+                        "success", false,
+                        "message", "댓글을 삭제할 수 없습니다."
+                ));
+            }
+        } catch (NumberFormatException e) {
+            writeJson(response, HttpServletResponse.SC_BAD_REQUEST, Map.of(
+                    "success", false,
+                    "message", "잘못된 댓글 ID입니다."
+            ));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of(
+                    "success", false,
+                    "message", "댓글 삭제 중 오류가 발생했습니다."
+            ));
         }
     }
 }
