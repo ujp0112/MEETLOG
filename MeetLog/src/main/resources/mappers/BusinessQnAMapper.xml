@@ -22,49 +22,72 @@
     </resultMap>
     
     <select id="findByOwnerId" parameterType="int" resultMap="businessQnAResultMap">
-        SELECT 
+        SELECT
             q.id,
             q.restaurant_id,
             r.name as restaurant_name,
-            q.user_id,
-            u.name as user_name,
-            u.email as user_email,
+            0 as user_id,
+            '' as user_name,
+            '' as user_email,
             q.question,
             q.answer,
-            q.status,
+            'PENDING' as status,
             q.is_owner,
             q.is_active,
             q.created_at,
-            q.answered_at,
-            q.updated_at
+            NULL as answered_at,
+            NULL as updated_at
         FROM restaurant_qna q
         LEFT JOIN restaurants r ON q.restaurant_id = r.id
-        LEFT JOIN users u ON q.user_id = u.id
         WHERE r.owner_id = #{ownerId}
         AND q.is_active = 1
         ORDER BY q.created_at DESC
     </select>
+
+    <select id="findByRestaurantId" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            0 as user_id,
+            '' as user_name,
+            '' as user_email,
+            q.question,
+            q.answer,
+            'PENDING' as status,
+            q.is_owner,
+            q.is_active,
+            q.created_at,
+            NULL as answered_at,
+            NULL as updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE q.restaurant_id = #{restaurantId}
+        AND q.is_active = 1
+        ORDER BY q.created_at DESC
+    </select>
+
+    <insert id="insert" parameterType="model.BusinessQnA" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_qna (restaurant_id, question, answer, is_owner, is_active)
+        VALUES (#{restaurantId}, #{question}, #{answer}, #{isOwner}, #{isActive})
+    </insert>
     
-    <update id="updateAnswer" parameterType="model.BusinessQnA">
-        UPDATE restaurant_qna 
-        SET answer = #{answer}, 
-            status = #{status},
-            answered_at = NOW(),
-            updated_at = NOW()
-        WHERE id = #{id}
+    <update id="updateAnswer" parameterType="map">
+        UPDATE restaurant_qna
+        SET answer = #{answer}
+        WHERE id = #{qnaId}
     </update>
-    
-    <update id="updateStatus" parameterType="model.BusinessQnA">
-        UPDATE restaurant_qna 
-        SET status = #{status},
-            updated_at = NOW()
-        WHERE id = #{id}
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE restaurant_qna
+        SET is_active = #{status}
+        WHERE id = #{qnaId}
     </update>
-    
+
     <delete id="delete" parameterType="int">
-        UPDATE restaurant_qna 
-        SET is_active = 0, updated_at = NOW()
-        WHERE id = #{id}
+        UPDATE restaurant_qna
+        SET is_active = 0
+        WHERE id = #{qnaId}
     </delete>
     
 </mapper>
