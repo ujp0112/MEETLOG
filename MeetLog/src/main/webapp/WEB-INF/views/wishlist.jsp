@@ -239,15 +239,30 @@
             e.preventDefault();
             
             const formData = new FormData(this);
+            const params = new URLSearchParams();
+            formData.forEach((value, key) => {
+                params.append(key, value);
+            });
             
             fetch('${pageContext.request.contextPath}/wishlist', {
                 method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            }).then(async response => {
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (err) {
+                    console.error('JSON 파싱 실패:', err);
+                }
+
+                if (response.ok && data && data.success) {
                     window.location.reload();
                 } else {
-                    alert('오류가 발생했습니다.');
+                    alert((data && data.message) || '오류가 발생했습니다.');
                 }
             }).catch(error => {
                 console.error('Error:', error);

@@ -28,6 +28,7 @@ import model.Paging;
 import model.User;
 import model.CourseStep;
 import model.Restaurant;
+import model.UserStorage;
 import service.CourseService;
 import service.FeedService;
 import service.RestaurantService;
@@ -53,7 +54,8 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         
         try {
-            String path = request.getPathInfo();
+            String path = normalizePath(request.getPathInfo());
+            System.out.println("[CourseServlet][GET] path=" + path);
 
             if (path == null || path.equals("/") || "/list".equals(path)) {
                 showCourseList(request, response);
@@ -87,16 +89,42 @@ public class CourseServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        String path = request.getPathInfo();
+        String path = normalizePath(request.getPathInfo());
+        System.out.println("[CourseServlet][POST] path=" + path);
         if ("/create".equals(path)) {
             handleCreateCourseSubmit(request, response);
         } else if ("/edit".equals(path)) {
             handleUpdateCourse(request, response);
         } else if ("/wishlist".equals(path)) {
             handleCourseWishlist(request, response);
+        } else if ("/storages".equals(path)) {
+            handleCreateUserStorage(request, response);
         } else {
             response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
+    }
+
+    private String normalizePath(String path) {
+        if (path == null) {
+            return null;
+        }
+        if (path.length() == 0) {
+            return "/";
+        }
+
+        String normalized = path;
+
+        // strip out any matrix parameters (e.g., ;jsessionid=...)
+        int semicolonIndex = normalized.indexOf(';');
+        if (semicolonIndex != -1) {
+            normalized = normalized.substring(0, semicolonIndex);
+        }
+
+        // remove trailing slashes (except when path is just "/")
+        while (normalized.endsWith("/") && normalized.length() > 1) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+        return normalized;
     }
 
     private void handleSearchPlaces(HttpServletRequest request, HttpServletResponse response)
@@ -516,6 +544,9 @@ public class CourseServlet extends HttpServlet {
             throws ServletException, IOException {
         System.out.println("DEBUG: handleCourseWishlist 메서드 호출됨");
 
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
             System.out.println("DEBUG: 로그인되지 않은 사용자");
@@ -530,13 +561,23 @@ public class CourseServlet extends HttpServlet {
         try {
             String courseIdParam = request.getParameter("courseId");
             String action = request.getParameter("action");
+            if (action != null) {
+                action = action.trim().toLowerCase();
+            }
             String storageIdParam = request.getParameter("storageId");
 
             System.out.println("DEBUG: courseId 파라미터: " + courseIdParam);
             System.out.println("DEBUG: action 파라미터: " + action);
             System.out.println("DEBUG: storageId 파라미터: " + storageIdParam);
 
-            int courseId = Integer.parseInt(courseIdParam);
+            if (courseIdParam == null || courseIdParam.trim().isEmpty()) {
+                System.out.println("DEBUG: courseId 파라미터 누락");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"코스 ID가 누락되었습니다.\"}");
+                return;
+            }
+
+            int courseId = Integer.parseInt(courseIdParam.trim());
 
             boolean success = false;
             boolean isWishlisted = false;
@@ -569,9 +610,6 @@ public class CourseServlet extends HttpServlet {
                 return;
             }
 
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-
             if (success) {
                 String jsonResponse = String.format(
                     "{\"success\": true, \"isWishlisted\": %b, \"message\": \"%s\"}",
@@ -589,7 +627,7 @@ public class CourseServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             System.out.println("DEBUG: 숫자 형식 오류: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 코스 ID입니다.\"}");
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 요청입니다.\"}");
         } catch (Exception e) {
             System.out.println("DEBUG: 예외 발생: " + e.getMessage());
             e.printStackTrace();
@@ -624,6 +662,7 @@ public class CourseServlet extends HttpServlet {
                 storageMap.put("id", storage.getStorageId());
                 storageMap.put("name", storage.getName());
                 storageMap.put("colorClass", storage.getColorClass());
+                storageMap.put("itemCount", storage.getItemCount());
                 storageList.add(storageMap);
             }
 
@@ -637,6 +676,62 @@ public class CourseServlet extends HttpServlet {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"저장소 목록을 가져오는데 실패했습니다.\"}");
+        }
+    }
+
+    /**
+     * 사용자의 저장소를 새로 생성
+     */
+    private void handleCreateUserStorage(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String name = request.getParameter("name");
+        String colorClass = request.getParameter("colorClass");
+
+        if (name == null || name.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"폴더 이름을 입력해주세요.\"}");
+            return;
+        }
+
+        if (colorClass == null || colorClass.trim().isEmpty()) {
+            colorClass = "bg-blue-100";
+        }
+
+        try {
+            UserStorage storage = new UserStorage(user.getId(), name.trim(), colorClass.trim());
+            boolean created = userStorageService.createStorage(storage);
+
+            if (created) {
+                Map<String, Object> storageMap = new HashMap<>();
+                storageMap.put("id", storage.getStorageId());
+                storageMap.put("name", storage.getName());
+                storageMap.put("colorClass", storage.getColorClass());
+                storageMap.put("itemCount", 0);
+
+                Map<String, Object> result = new HashMap<>();
+                result.put("success", true);
+                result.put("storage", storageMap);
+
+                response.getWriter().write(objectMapper.writeValueAsString(result));
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"폴더 생성에 실패했습니다.\"}");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"폴더 생성 중 오류가 발생했습니다.\"}");
         }
     }
 }

@@ -354,24 +354,32 @@
         
         function removeFromStorage(storageId, itemType, contentId) {
             if (confirm('이 아이템을 폴더에서 제거하시겠습니까?')) {
+                const params = new URLSearchParams();
+                params.append('action', 'removeItem');
+                params.append('storageId', storageId);
+                params.append('itemType', itemType);
+                params.append('contentId', contentId);
+
                 fetch('${pageContext.request.contextPath}/wishlist', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: new URLSearchParams({
-                        action: 'removeItem',
-                        storageId: storageId,
-                        itemType: itemType,
-                        contentId: contentId
-                    })
+                    body: params.toString()
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(async response => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (err) {
+                        console.error('JSON 파싱 실패:', err);
+                    }
+
+                    if (response.ok && data && data.success) {
                         window.location.reload();
                     } else {
-                        alert('아이템 제거에 실패했습니다.');
+                        alert((data && data.message) || '아이템 제거에 실패했습니다.');
                     }
                 })
                 .catch(error => {
@@ -397,15 +405,30 @@
             e.preventDefault();
             
             const formData = new FormData(this);
+            const params = new URLSearchParams();
+            formData.forEach((value, key) => {
+                params.append(key, value);
+            });
             
             fetch('${pageContext.request.contextPath}/wishlist', {
                 method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            }).then(async response => {
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (err) {
+                    console.error('JSON 파싱 실패:', err);
+                }
+
+                if (response.ok && data && data.success) {
                     window.location.reload();
                 } else {
-                    alert('오류가 발생했습니다.');
+                    alert((data && data.message) || '오류가 발생했습니다.');
                 }
             }).catch(error => {
                 console.error('Error:', error);

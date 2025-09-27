@@ -273,13 +273,59 @@ public class UserService {
         return createStorage(userId, collectionName, colorClass);
     }
 
+    public UserStorage createStorageAndReturn(int userId, String storageName, String colorClass) {
+        if (userStorageService == null) {
+            return null;
+        }
+
+        if (storageName == null || storageName.trim().isEmpty()) {
+            return null;
+        }
+
+        String resolvedColor = (colorClass != null && !colorClass.trim().isEmpty()) ? colorClass.trim() : "bg-blue-100";
+        UserStorage storage = new UserStorage(userId, storageName.trim(), resolvedColor);
+        boolean created = userStorageService.createStorage(storage);
+        return created ? storage : null;
+    }
+
     // user_storages 테이블을 사용하는 새로운 메서드들
     public boolean createStorage(int userId, String storageName, String colorClass) {
-        if (userStorageService != null) {
-            UserStorage storage = new UserStorage(userId, storageName, colorClass != null ? colorClass : "bg-blue-100");
-            return userStorageService.createStorage(storage);
+        return createStorageAndReturn(userId, storageName, colorClass) != null;
+    }
+
+    public UserStorage updateStorage(int userId, int storageId, String storageName, String colorClass) {
+        if (userStorageService == null) {
+            return null;
         }
-        return true;
+
+        UserStorage storage = userStorageService.getStorageById(storageId);
+        if (storage == null || storage.getUserId() != userId) {
+            return null;
+        }
+
+        if (storageName != null && !storageName.trim().isEmpty()) {
+            storage.setName(storageName.trim());
+        }
+
+        if (colorClass != null && !colorClass.trim().isEmpty()) {
+            storage.setColorClass(colorClass.trim());
+        }
+
+        boolean updated = userStorageService.updateStorage(storage);
+        return updated ? storage : null;
+    }
+
+    public boolean deleteStorage(int userId, int storageId) {
+        if (userStorageService == null) {
+            return false;
+        }
+
+        UserStorage storage = userStorageService.getStorageById(storageId);
+        if (storage == null || storage.getUserId() != userId) {
+            return false;
+        }
+
+        return userStorageService.deleteStorage(storageId);
     }
 
     public List<UserStorage> getUserStorages(int userId) {
@@ -469,5 +515,18 @@ public class UserService {
             return userStorageService.addToStorage(storageId, "RESTAURANT", restaurantId);
         }
         return true;
+    }
+
+    public boolean removeItemFromStorage(int userId, int storageId, String itemType, int contentId) {
+        if (userStorageService == null) {
+            return false;
+        }
+
+        UserStorage storage = userStorageService.getStorageById(storageId);
+        if (storage == null || storage.getUserId() != userId) {
+            return false;
+        }
+
+        return userStorageService.removeFromStorage(storageId, itemType, contentId);
     }
 }

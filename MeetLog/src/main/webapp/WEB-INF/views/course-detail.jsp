@@ -62,11 +62,11 @@
                                     </c:if>
 
                                     <div class="ml-auto flex items-center gap-4">
-                                        <button id="like-btn" class="flex items-center gap-1 font-semibold transition <c:choose><c:when test='${isLiked}'>text-red-500</c:when><c:otherwise>text-slate-600 hover:text-red-500</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
+                                        <button type="button" id="like-btn" class="flex items-center gap-1 font-semibold transition <c:choose><c:when test='${isLiked}'>text-red-500</c:when><c:otherwise>text-slate-600 hover:text-red-500</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
                                             <svg class="w-5 h-5" fill="<c:choose><c:when test='${isLiked}'>currentColor</c:when><c:otherwise>none</c:otherwise></c:choose>" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                                             <span id="like-count"><c:out value="${course.likes}"/></span>
                                         </button>
-                                        <button id="wishlist-btn" class="flex items-center gap-1 font-semibold py-2 px-4 rounded-full text-sm transition <c:choose><c:when test='${isWishlisted}'>bg-red-500 text-white hover:bg-red-600</c:when><c:otherwise>bg-gray-200 text-gray-700 hover:bg-gray-300</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
+                                        <button type="button" id="wishlist-btn" class="flex items-center gap-1 font-semibold py-2 px-4 rounded-full text-sm transition <c:choose><c:when test='${isWishlisted}'>bg-red-500 text-white hover:bg-red-600</c:when><c:otherwise>bg-gray-200 text-gray-700 hover:bg-gray-300</c:otherwise></c:choose>" data-course-id="<c:out value='${course.id}'/>">
                                             <svg class="w-4 h-4" fill="<c:choose><c:when test='${isWishlisted}'>currentColor</c:when><c:otherwise>none</c:otherwise></c:choose>" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                             </svg>
@@ -171,18 +171,34 @@
     <script>
         // JSP에서 JavaScript로 안전하게 데이터 전달
         const courseData = {
-            id: <c:out value="${course.id}" default="0"/>,
+            id: Number('<c:out value="${course.id}" default="0"/>'),
             title: '<c:out value="${course.title}" escapeXml="true"/>',
             author: '<c:out value="${course.author}" escapeXml="true"/>'
         };
         
         // 로그인 상태 체크
         const isUserLoggedIn = <c:out value="${not empty sessionScope.user}" default="false"/>;
+        const rawContextPath = '<c:out value="${pageContext.request.contextPath}"/>';
+        const derivedContextPath = (() => {
+            const courseIndex = window.location.pathname.indexOf('/course');
+            if (courseIndex > 0) {
+                return window.location.pathname.substring(0, courseIndex);
+            }
+            return '';
+        })();
+        const contextPath = rawContextPath && rawContextPath !== '/' ? rawContextPath : derivedContextPath;
+        const buildUrl = (path) => (contextPath ? contextPath + path : path);
 
         document.addEventListener('DOMContentLoaded', function() {
             const copyBtn = document.getElementById('copy-url-btn');
             const likeBtn = document.getElementById('like-btn');
             const wishlistBtn = document.getElementById('wishlist-btn');
+            const showCreateFormBtn = document.getElementById('show-create-form');
+            const createForm = document.getElementById('create-form');
+            const cancelCreateBtn = document.getElementById('cancel-create');
+            const createFolderBtn = document.getElementById('create-folder');
+            const folderNameInput = document.getElementById('folder-name');
+            const defaultCreateButtonText = createFolderBtn ? createFolderBtn.textContent.trim() : '';
 
             // URL 복사 기능
             if (copyBtn) {
@@ -198,18 +214,37 @@
                 });
             }
 
+            if (wishlistBtn) {
+                const datasetCourseId = parseInt(wishlistBtn.dataset.courseId || '0', 10);
+                if (!Number.isNaN(datasetCourseId) && datasetCourseId > 0) {
+                    courseData.id = datasetCourseId;
+                }
+            }
+
+            if (!Number.isInteger(courseData.id) || courseData.id <= 0) {
+                console.error('코스 ID를 확인할 수 없습니다.', courseData.id);
+            }
+
             // 좋아요 기능
             if (likeBtn) {
                 likeBtn.addEventListener('click', async function() {
                     const courseId = courseData.id;
+
+                    if (!Number.isInteger(courseId) || courseId <= 0) {
+                        alert('코스 정보를 불러오지 못했습니다. 페이지를 새로고침 해주세요.');
+                        return;
+                    }
                     
                     try {
-                        const response = await fetch('${pageContext.request.contextPath}/course/like', {
+                        const params = new URLSearchParams();
+                        params.append('courseId', courseId);
+
+                        const response = await fetch(`${contextPath}/course/like`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            body: 'courseId=' + courseId
+                            body: params.toString()
                         });
                         
                         const data = await response.json();
@@ -232,7 +267,7 @@
                         } else {
                             if (response.status === 401) {
                                 alert('로그인이 필요합니다.');
-                                window.location.href = '${pageContext.request.contextPath}/user/login';
+                                window.location.href = `${contextPath}/user/login`;
                             } else {
                                 alert(data.message || '오류가 발생했습니다.');
                             }
@@ -269,7 +304,7 @@
                     // 로그인 체크
                     if (!isUserLoggedIn) {
                         alert('로그인이 필요합니다.');
-                        window.location.href = '${pageContext.request.contextPath}/user/login';
+                        window.location.href = `${contextPath}/user/login`;
                         return;
                     }
 
@@ -299,18 +334,26 @@
                 loading.classList.remove('hidden');
                 storageList.classList.add('hidden');
                 createSection.classList.add('hidden');
+                resetCreateForm();
 
                 // 사용자의 저장소 목록 가져오기
                 loadUserStorages();
             }
 
-            async function loadUserStorages() {
+            async function loadUserStorages(highlightStorageId) {
                 try {
-                    const response = await fetch('${pageContext.request.contextPath}/course/storages');
-                    const data = await response.json();
+                    const response = await fetch(buildUrl('/course/storages'), {
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const result = await parseJsonResponse(response);
+                    const data = result.data;
 
                     if (data.success) {
-                        displayStorages(data.storages);
+                        displayStorages(data.storages, highlightStorageId);
                     } else {
                         alert(data.message || '저장소 목록을 불러오는데 실패했습니다.');
                         closeModal();
@@ -322,7 +365,7 @@
                 }
             }
 
-            function displayStorages(storages) {
+            function displayStorages(storages, highlightStorageId) {
                 const loading = document.getElementById('modal-loading');
                 const storageList = document.getElementById('storage-list');
                 const createSection = document.getElementById('create-folder-section');
@@ -335,38 +378,153 @@
                 // 저장소 리스트 초기화
                 storageList.innerHTML = '';
 
+                if (!storages || storages.length === 0) {
+                    storageList.innerHTML = '<p class="text-center text-sm text-gray-500">폴더가 없습니다. 새 폴더를 만들어보세요.</p>';
+                    return;
+                }
+
                 // 각 저장소를 버튼으로 추가
                 storages.forEach(storage => {
                     const storageBtn = document.createElement('button');
-                    storageBtn.className = `w-full p-4 text-left rounded-lg border-2 border-gray-200 hover:border-sky-300 hover:bg-sky-50 transition ${storage.colorClass || 'bg-white'}`;
-                    storageBtn.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-4 h-4 rounded ${storage.colorClass || 'bg-blue-100'}"></div>
-                            <span class="font-medium">${storage.name}</span>
-                        </div>
-                    `;
+                    const colorClass = storage.colorClass || 'bg-blue-100';
+                    const itemCount = storage.itemCount != null ? storage.itemCount : 0;
+                    storageBtn.className = 'w-full p-4 text-left rounded-lg border-2 border-gray-200 hover:border-sky-300 hover:bg-sky-50 transition';
+                    storageBtn.innerHTML = ''
+                        + '<div class="flex items-center gap-3">'
+                        + '<div class="w-4 h-4 rounded ' + colorClass + '"></div>'
+                        + '<span class="font-medium text-slate-700">' + storage.name + '</span>'
+                        + '<span class="ml-auto text-xs text-slate-500">' + itemCount + '개</span>'
+                        + '</div>';
+                    storageBtn.dataset.storageId = storage.id;
 
                     storageBtn.addEventListener('click', () => {
                         addToStorage(storage.id, storage.name);
                     });
 
+                    if (highlightStorageId && storage.id === highlightStorageId) {
+                        storageBtn.classList.add('border-sky-500', 'ring-2', 'ring-sky-200');
+                    }
+
                     storageList.appendChild(storageBtn);
+                });
+            }
+
+            function resetCreateForm() {
+                if (createForm && showCreateFormBtn) {
+                    createForm.classList.add('hidden');
+                    showCreateFormBtn.classList.remove('hidden');
+                }
+                if (folderNameInput) {
+                    folderNameInput.value = '';
+                }
+                if (createFolderBtn) {
+                    createFolderBtn.disabled = false;
+                    createFolderBtn.textContent = defaultCreateButtonText || '생성';
+                }
+            }
+
+            if (showCreateFormBtn) {
+                showCreateFormBtn.addEventListener('click', () => {
+                    showCreateFormBtn.classList.add('hidden');
+                    if (createForm) {
+                        createForm.classList.remove('hidden');
+                    }
+                    if (folderNameInput) {
+                        folderNameInput.focus();
+                    }
+                });
+            }
+
+            if (cancelCreateBtn) {
+                cancelCreateBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    resetCreateForm();
+                });
+            }
+
+            if (createFolderBtn) {
+                createFolderBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+
+                    if (!folderNameInput) {
+                        return;
+                    }
+
+                    const folderName = folderNameInput.value.trim();
+                    if (!folderName) {
+                        alert('폴더 이름을 입력해주세요.');
+                        folderNameInput.focus();
+                        return;
+                    }
+
+                    try {
+                        createFolderBtn.disabled = true;
+                        createFolderBtn.textContent = '생성 중...';
+
+                        const params = new URLSearchParams();
+                        params.append('name', folderName);
+                        params.append('colorClass', 'bg-blue-100');
+
+                        const response = await fetch(buildUrl('/course/storages'), {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: params.toString()
+                        });
+
+                        const result = await parseJsonResponse(response);
+                        const data = result.data;
+
+                        if (data.success && data.storage) {
+                            resetCreateForm();
+                            showMessage('"' + data.storage.name + '" 폴더가 생성되었습니다.');
+                            await loadUserStorages(data.storage.id);
+                        } else {
+                            alert((data && data.message) || '폴더 생성에 실패했습니다.');
+                        }
+                    } catch (error) {
+                        console.error('폴더 생성 실패:', error);
+                        alert('폴더 생성 중 오류가 발생했습니다.');
+                    } finally {
+                        if (createFolderBtn) {
+                            createFolderBtn.disabled = false;
+                            createFolderBtn.textContent = defaultCreateButtonText || '생성';
+                        }
+                    }
                 });
             }
 
             async function addToStorage(storageId, storageName) {
                 const courseId = courseData.id;
 
+                if (!Number.isInteger(courseId) || courseId <= 0) {
+                    alert('코스 정보를 불러오지 못했습니다. 페이지를 새로고침 해주세요.');
+                    return;
+                }
+
                 try {
-                    const response = await fetch('${pageContext.request.contextPath}/course/wishlist', {
+                    const params = new URLSearchParams();
+                    params.append('courseId', courseId);
+                    params.append('action', 'add');
+                    if (storageId) {
+                        params.append('storageId', storageId);
+                    }
+
+                    const response = await fetch(buildUrl('/course/wishlist'), {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: `courseId=${courseId}&action=add&storageId=${storageId}`
+                        body: params.toString()
                     });
 
-                    const data = await response.json();
+                    const result = await parseJsonResponse(response);
+                    const data = result.data;
 
                     if (data.success) {
                         // 모달 닫기
@@ -376,29 +534,41 @@
                         updateWishlistButton(true);
 
                         // 성공 메시지
-                        showMessage(`"${storageName}" 폴더에 저장되었습니다.`);
+                        showMessage('"' + storageName + '" 폴더에 저장되었습니다.');
                     } else {
                         alert(data.message || '저장에 실패했습니다.');
                     }
                 } catch (error) {
                     console.error('저장 실패:', error);
-                    alert('네트워크 오류가 발생했습니다.');
+                    alert(error.message || '요청 처리 중 오류가 발생했습니다.');
                 }
             }
 
             async function removeFromWishlist() {
                 const courseId = courseData.id;
 
+                if (!Number.isInteger(courseId) || courseId <= 0) {
+                    alert('코스 정보를 불러오지 못했습니다. 페이지를 새로고침 해주세요.');
+                    return;
+                }
+
                 try {
-                    const response = await fetch('${pageContext.request.contextPath}/course/wishlist', {
+                    const params = new URLSearchParams();
+                    params.append('courseId', courseId);
+                    params.append('action', 'remove');
+
+                    const response = await fetch(buildUrl('/course/wishlist'), {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-Requested-With': 'XMLHttpRequest'
                         },
-                        body: `courseId=${courseId}&action=remove`
+                        body: params.toString()
                     });
 
-                    const data = await response.json();
+                    const result = await parseJsonResponse(response);
+                    const data = result.data;
 
                     if (data.success) {
                         updateWishlistButton(false);
@@ -408,7 +578,7 @@
                     }
                 } catch (error) {
                     console.error('찜 제거 실패:', error);
-                    alert('네트워크 오류가 발생했습니다.');
+                    alert(error.message || '요청 처리 중 오류가 발생했습니다.');
                 }
             }
 
@@ -444,6 +614,7 @@
             function closeModal() {
                 const modal = document.getElementById('wishlist-modal');
                 modal.classList.add('hidden');
+                resetCreateForm();
             }
 
             // 모달 닫기 이벤트
@@ -457,6 +628,26 @@
             });
 
         });
+
+        async function parseJsonResponse(response) {
+            const contentType = response.headers.get('content-type') || '';
+            const text = await response.text();
+
+            let data = null;
+            if (contentType.includes('application/json')) {
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error('응답을 파싱할 수 없습니다.');
+                }
+            }
+
+            if (!data) {
+                throw new Error(text || '알 수 없는 응답이 반환되었습니다.');
+            }
+
+            return { data, raw: text, status: response.status };
+        }
     </script>
 </body>
 </html>
