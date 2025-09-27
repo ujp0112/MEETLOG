@@ -3,6 +3,7 @@ package service;
 import dao.FeedDAO;
 import model.FeedItem;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 소셜 피드 시스템을 위한 서비스 클래스
@@ -28,6 +29,18 @@ public class FeedService {
      */
     public List<FeedItem> getFeedItems(int userId) {
         return getUserFeed(userId, 20, 0); // 기본값: 20개, 첫 페이지
+    }
+
+    /**
+     * 특정 사용자의 피드 아이템들을 상세 정보와 함께 가져옴 (Map 형태)
+     */
+    public List<Map<String, Object>> getFeedItemsWithDetails(int userId) {
+        try {
+            return feedDAO.getUserFeedWithDetails(userId, 20, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
     }
 
     /**
@@ -121,6 +134,21 @@ public class FeedService {
             // 현재 DB 스키마에 맞는 간단한 피드 아이템 생성
             feedDAO.createSimpleFeedItem(userId, "REVIEW", reviewId);
             System.out.println("DEBUG: 간단한 리뷰 피드 아이템 생성 완료 - 사용자: " + userId + ", 리뷰: " + reviewId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("리뷰 피드 아이템 생성 실패", e);
+        }
+    }
+
+    /**
+     * 음식점 정보를 포함한 리뷰 피드 아이템 생성
+     */
+    public void createSimpleReviewFeedItemWithRestaurant(int userId, int reviewId, int restaurantId) {
+        try {
+            // 현재 DB 스키마에서는 음식점 ID를 별도로 저장할 수 없으므로 기존 방식 사용
+            // 추후 피드 조회 시 리뷰 테이블과 조인해서 음식점 정보를 가져올 예정
+            feedDAO.createSimpleFeedItem(userId, "REVIEW", reviewId);
+            System.out.println("DEBUG: 음식점 정보 포함 리뷰 피드 아이템 생성 완료 - 사용자: " + userId + ", 리뷰: " + reviewId + ", 음식점: " + restaurantId);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("리뷰 피드 아이템 생성 실패", e);

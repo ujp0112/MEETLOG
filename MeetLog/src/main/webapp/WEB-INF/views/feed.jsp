@@ -164,16 +164,18 @@
                                         <div class="flex space-x-4">
                                             <c:choose>
                                                 <c:when test="${activity.activityType == 'REVIEW'}">
-                                                    <a href="${pageContext.request.contextPath}/review/detail/${activity.contentId}" 
-                                                       class="text-orange-600 hover:text-orange-700 font-semibold text-sm">
-                                                        리뷰 보기
-                                                    </a>
-                                                    <c:if test="${not empty activity.restaurantName}">
+                                                    <c:if test="${not empty activity.contentLocation}">
+                                                        <a href="${pageContext.request.contextPath}/restaurant/detail/${activity.contentLocation}#reviews" 
+                                                           class="text-orange-600 hover:text-orange-700 font-semibold text-sm">
+                                                            리뷰 보기
+                                                        </a>
+                                                    </c:if>
+                                                    <%--<c:if test="${not empty activity.restaurantName}">
                                                         <a href="${pageContext.request.contextPath}/restaurant/search?keyword=${activity.restaurantName}" 
                                                            class="text-slate-600 hover:text-slate-700 font-semibold text-sm">
                                                             음식점 보기
                                                         </a>
-                                                    </c:if>
+                                                    </c:if>--%>
                                                 </c:when>
                                                 <c:when test="${activity.activityType == 'COURSE'}">
                                                     <a href="${pageContext.request.contextPath}/course/detail/${activity.contentId}" 
@@ -182,7 +184,7 @@
                                                     </a>
                                                 </c:when>
                                                 <c:when test="${activity.activityType == 'COLUMN'}">
-                                                    <a href="${pageContext.request.contextPath}/column/detail/${activity.contentId}" 
+                                                    <a href="${pageContext.request.contextPath}/column/detail?id=${activity.contentId}" 
                                                        class="text-purple-600 hover:text-purple-700 font-semibold text-sm">
                                                         칼럼 보기
                                                     </a>
@@ -191,12 +193,12 @@
                                         </div>
                                         
                                         <div class="flex items-center space-x-3 text-slate-500">
-                                            <button class="hover:text-red-500 transition-colors">
+                                        <%--<button class="hover:text-red-500 transition-colors">
                                                 ❤️ 좋아요
                                             </button>
                                             <button class="hover:text-blue-500 transition-colors">
                                                 💬 댓글
-                                            </button>
+                                            </button> --%>
                                             <button class="hover:text-green-500 transition-colors">
                                                 📤 공유
                                             </button>

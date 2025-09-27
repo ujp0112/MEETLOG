@@ -52,6 +52,16 @@ public class FeedDAO {
     }
 
     /**
+     * 사용자의 피드 조회 (Map 형태로 반환 - 음식점 정보 포함)
+     */
+    public List<Map<String, Object>> getUserFeedWithDetails(int userId, int limit, int offset) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            return sqlSession.selectList(NAMESPACE + ".getUserFeed", params);
+        }
+    }
+
+    /**
      * 특정 사용자의 활동 피드 조회
      */
     public List<FeedItem> getUserActivityFeed(int userId, int limit, int offset) {
@@ -86,6 +96,16 @@ public class FeedDAO {
             item.setUserProfileImage((String) result.get("userProfileImage"));
             item.setActionType((String) result.get("actionType"));
             item.setTargetId(((Number) result.get("targetId")).intValue());
+            
+            // 리뷰의 경우 음식점 정보 설정
+            if ("REVIEW".equals(result.get("actionType"))) {
+                Object contentLocationObj = result.get("contentLocation");
+                if (contentLocationObj != null) {
+                    // contentLocation에 음식점 ID 저장
+                    item.setTargetName(String.valueOf(((Number) contentLocationObj).intValue()));
+                }
+                // restaurantName은 Activity 변환 시 사용
+            }
             
             // Timestamp를 LocalDateTime으로 변환
             Object createdAtObj = result.get("createdAt");

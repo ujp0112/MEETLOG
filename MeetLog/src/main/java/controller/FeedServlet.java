@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -42,11 +43,11 @@ public class FeedServlet extends HttpServlet {
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 // 메인 피드 페이지
-                List<FeedItem> feedItems = feedService.getFeedItems(user.getId());
-                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 피드 아이템 수: " + feedItems.size());
+                List<Map<String, Object>> feedData = feedService.getFeedItemsWithDetails(user.getId());
+                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 피드 아이템 수: " + feedData.size());
 
-                // FeedItem을 Activity로 변환
-                List<Activity> activities = convertFeedItemsToActivities(feedItems);
+                // Map 데이터를 Activity로 변환
+                List<Activity> activities = convertMapDataToActivities(feedData);
                 System.out.println("DEBUG 피드: 변환된 Activity 수: " + activities.size());
 
                 // 팔로잉/팔로워 인원 조회
@@ -196,8 +197,8 @@ public class FeedServlet extends HttpServlet {
             String targetUrl = "";
             switch (activity.getActivityType()) {
                 case "REVIEW":
-                    // 리뷰 상세 페이지 URL (가정)
-                    // targetUrl = contextPath + "/review/detail?id=" + activity.getContentId();
+                    // 리뷰는 음식점 상세 페이지의 리뷰 섹션으로 연결
+                    // contentLocation에 음식점 ID를 저장해야 함 (현재는 FeedItem에서 제공되지 않으므로 추후 개선 필요)
                     break;
                 case "COURSE":
                     targetUrl = contextPath + "/course/detail?id=" + activity.getContentId();
@@ -208,6 +209,58 @@ public class FeedServlet extends HttpServlet {
             }
             activity.setTargetUrl(targetUrl);
 
+            activities.add(activity);
+        }
+
+        return activities;
+    }
+
+    /**
+     * Map 데이터를 Activity 목록으로 변환 (음식점 정보 포함)
+     */
+    private List<Activity> convertMapDataToActivities(List<Map<String, Object>> feedData) {
+        List<Activity> activities = new ArrayList<>();
+        String contextPath = getServletContext().getContextPath();
+
+        for (Map<String, Object> data : feedData) {
+            Activity activity = new Activity();
+            
+            // 기본 정보 설정
+            activity.setUserId(((Number) data.get("userId")).intValue());
+            activity.setUserNickname((String) data.get("userNickname"));
+            activity.setUserProfileImage((String) data.get("userProfileImage"));
+            activity.setActivityType((String) data.get("actionType"));
+            activity.setContentId(((Number) data.get("targetId")).intValue());
+            
+            // 날짜 변환
+            Object createdAtObj = data.get("createdAt");
+            if (createdAtObj instanceof java.sql.Timestamp) {
+                activity.setCreatedAt(new Date(((java.sql.Timestamp) createdAtObj).getTime()));
+            }
+            
+            // 활동 타입에 따라 추가 정보 설정
+            String activityType = activity.getActivityType();
+            String targetUrl = "";
+            
+            switch (activityType) {
+                case "REVIEW":
+                    Object contentLocationObj = data.get("contentLocation");
+                    if (contentLocationObj != null) {
+                        String restaurantId = String.valueOf(((Number) contentLocationObj).intValue());
+                        activity.setContentLocation(restaurantId);
+                        targetUrl = contextPath + "/restaurant/detail/" + restaurantId + "#reviews";
+                    }
+                    activity.setRestaurantName((String) data.get("restaurantName"));
+                    break;
+                case "COURSE":
+                    targetUrl = contextPath + "/course/detail?id=" + activity.getContentId();
+                    break;
+                case "COLUMN":
+                    targetUrl = contextPath + "/column/detail?id=" + activity.getContentId();
+                    break;
+            }
+            
+            activity.setTargetUrl(targetUrl);
             activities.add(activity);
         }
 

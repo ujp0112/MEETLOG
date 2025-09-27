@@ -74,8 +74,8 @@ public class ReviewService {
                 // 3. 피드 아이템 생성 (리뷰 작성 활동을 피드에 추가)
                 try {
                     FeedService feedService = new FeedService();
-                    feedService.createSimpleReviewFeedItem(review.getUserId(), review.getId());
-                    System.out.println("DEBUG: 리뷰 피드 아이템 생성 완료 - 리뷰 ID: " + review.getId());
+                    feedService.createSimpleReviewFeedItemWithRestaurant(review.getUserId(), review.getId(), review.getRestaurantId());
+                    System.out.println("DEBUG: 리뷰 피드 아이템 생성 완료 - 리뷰 ID: " + review.getId() + ", 음식점 ID: " + review.getRestaurantId());
                 } catch (Exception e) {
                     System.err.println("피드 아이템 생성 실패: " + e.getMessage());
                     e.printStackTrace();

@@ -23,10 +23,20 @@
     <select id="getUserFeed" parameterType="map" resultType="map">
         SELECT fi.feed_id as id, fi.user_id as userId, fi.feed_type as actionType, 
                fi.content_id as targetId, fi.created_at as createdAt,
-               u.nickname as userNickname, u.profile_image as userProfileImage
+               u.nickname as userNickname, u.profile_image as userProfileImage,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN r.restaurant_id
+                   ELSE NULL 
+               END as contentLocation,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.name
+                   ELSE NULL 
+               END as restaurantName
         FROM feed_items fi
         JOIN follows f ON fi.user_id = f.following_id
         JOIN users u ON fi.user_id = u.id
+        LEFT JOIN reviews r ON fi.feed_type = 'REVIEW' AND fi.content_id = r.id
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.id
         WHERE f.follower_id = #{userId}
         AND f.is_active = true
         AND fi.is_active = true
@@ -38,9 +48,19 @@
     <select id="getUserActivityFeed" parameterType="map" resultType="map">
         SELECT fi.feed_id as id, fi.user_id as userId, fi.feed_type as actionType, 
                fi.content_id as targetId, fi.created_at as createdAt,
-               u.nickname as userNickname, u.profile_image as userProfileImage
+               u.nickname as userNickname, u.profile_image as userProfileImage,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN r.restaurant_id
+                   ELSE NULL 
+               END as contentLocation,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.name
+                   ELSE NULL 
+               END as restaurantName
         FROM feed_items fi
         JOIN users u ON fi.user_id = u.id
+        LEFT JOIN reviews r ON fi.feed_type = 'REVIEW' AND fi.content_id = r.id
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.id
         WHERE fi.user_id = #{userId}
         AND fi.is_active = true
         ORDER BY fi.created_at DESC
@@ -51,9 +71,19 @@
     <select id="getPublicFeed" parameterType="map" resultType="map">
         SELECT fi.feed_id as id, fi.user_id as userId, fi.feed_type as actionType, 
                fi.content_id as targetId, fi.created_at as createdAt,
-               u.nickname as userNickname, u.profile_image as userProfileImage
+               u.nickname as userNickname, u.profile_image as userProfileImage,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN r.restaurant_id
+                   ELSE NULL 
+               END as contentLocation,
+               CASE 
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.name
+                   ELSE NULL 
+               END as restaurantName
         FROM feed_items fi
         JOIN users u ON fi.user_id = u.id
+        LEFT JOIN reviews r ON fi.feed_type = 'REVIEW' AND fi.content_id = r.id
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.id
         WHERE fi.is_active = true
         AND u.is_active = true
         ORDER BY fi.created_at DESC
