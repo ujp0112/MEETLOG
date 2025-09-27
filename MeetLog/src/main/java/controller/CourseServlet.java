@@ -65,6 +65,8 @@ public class CourseServlet extends HttpServlet {
                 handleDeleteCourse(request, response);
             } else if ("/search-places".equals(path)) {
                 handleSearchPlaces(request, response);
+            } else if ("/like".equals(path)) {
+                handleCourseLike(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -239,8 +241,17 @@ public class CourseServlet extends HttpServlet {
         CommunityCourse course = courseService.getCourseDetail(courseId);
         List<CourseStep> steps = courseService.getCourseSteps(courseId);
         
+        // 현재 사용자의 좋아요 상태 확인
+        HttpSession session = request.getSession(false);
+        boolean isLiked = false;
+        if (session != null && session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            isLiked = courseService.isCourseLiked(user.getId(), courseId);
+        }
+        
         request.setAttribute("course", course);
         request.setAttribute("steps", steps);
+        request.setAttribute("isLiked", isLiked);
 
         request.getRequestDispatcher("/WEB-INF/views/course-detail.jsp").forward(request, response);
     }
@@ -442,6 +453,38 @@ public class CourseServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
+    }
+
+    private void handleCourseLike(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        
+        try {
+            int courseId = Integer.parseInt(request.getParameter("courseId"));
+            boolean isLiked = courseService.toggleCourseLike(user.getId(), courseId);
+            int likeCount = courseService.getCourseLikeCount(courseId);
+            
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(String.format(
+                "{\"success\": true, \"isLiked\": %b, \"likeCount\": %d}", 
+                isLiked, likeCount
+            ));
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 코스 ID입니다.\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
         }
     }

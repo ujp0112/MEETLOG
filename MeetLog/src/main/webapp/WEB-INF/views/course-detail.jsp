@@ -62,11 +62,11 @@
                                     </c:if>
 
                                     <div class="ml-auto flex items-center gap-4">
-                                        <button class="flex items-center gap-1 text-slate-600 font-semibold hover:text-red-500 transition">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                                            <span>${course.likes}</span>
+                                        <button id="like-btn" class="flex items-center gap-1 font-semibold transition ${isLiked ? 'text-red-500' : 'text-slate-600 hover:text-red-500'}" data-course-id="${course.id}">
+                                            <svg class="w-5 h-5" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                                            <span id="like-count">${course.likes}</span>
                                         </button>
-                                        <button class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full text-sm hover:bg-sky-600">❤️ 코스 저장</button>
+                                        <button id="save-btn" class="bg-sky-500 text-white font-bold py-2 px-5 rounded-full text-sm hover:bg-sky-600" data-course-id="${course.id}">❤️ 코스 찜</button>
                                     </div>
                                 </div>
 
@@ -96,7 +96,7 @@
                                 </div>
 
                                 <div class="mt-10 pt-6 border-t flex flex-col items-center gap-3">
-                                    <button class="w-full max-w-xs bg-yellow-400 text-black font-bold py-3 rounded-full hover:bg-yellow-500">카카오톡으로 공유하기</button>
+                                    <button id="kakao-share-btn" class="w-full max-w-xs bg-yellow-400 text-black font-bold py-3 rounded-full hover:bg-yellow-500">카카오톡으로 공유하기</button>
                                     <button id="copy-url-btn" class="w-full max-w-xs bg-slate-700 text-white font-bold py-3 rounded-full hover:bg-slate-800">URL 복사하기</button>
                                 </div>
                             </div>
@@ -113,8 +113,19 @@
     </div>
 
     <script>
+        // JSP에서 JavaScript로 안전하게 데이터 전달
+        const courseData = {
+            id: ${course.id != null ? course.id : 0},
+            title: '<c:out value="${course.title}" escapeXml="true"/>',
+            author: '<c:out value="${course.author}" escapeXml="true"/>'
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
             const copyBtn = document.getElementById('copy-url-btn');
+            const likeBtn = document.getElementById('like-btn');
+            const saveBtn = document.getElementById('save-btn');
+
+            // URL 복사 기능
             if (copyBtn) {
                 copyBtn.addEventListener('click', (e) => {
                     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -125,6 +136,78 @@
                     }).catch(err => {
                         alert('URL 복사에 실패했습니다.');
                     });
+                });
+            }
+
+            // 좋아요 기능
+            if (likeBtn) {
+                likeBtn.addEventListener('click', async function() {
+                    const courseId = courseData.id;
+                    
+                    try {
+                        const response = await fetch('${pageContext.request.contextPath}/course/like', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `courseId=${courseId}`
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            const svg = this.querySelector('svg');
+                            const countSpan = document.getElementById('like-count');
+                            
+                            if (data.isLiked) {
+                                this.classList.remove('text-slate-600');
+                                this.classList.add('text-red-500');
+                                svg.setAttribute('fill', 'currentColor');
+                            } else {
+                                this.classList.remove('text-red-500');
+                                this.classList.add('text-slate-600');
+                                svg.setAttribute('fill', 'none');
+                            }
+                            
+                            countSpan.textContent = data.likeCount;
+                        } else {
+                            if (response.status === 401) {
+                                alert('로그인이 필요합니다.');
+                                window.location.href = '${pageContext.request.contextPath}/user/login';
+                            } else {
+                                alert(data.message || '오류가 발생했습니다.');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('좋아요 요청 실패:', error);
+                        alert('네트워크 오류가 발생했습니다.');
+                    }
+                });
+            }
+
+            // 카카오톡 공유 기능
+            const kakaoShareBtn = document.getElementById('kakao-share-btn');
+            if (kakaoShareBtn) {
+                kakaoShareBtn.addEventListener('click', function() {
+                    const url = window.location.href;
+                    const title = courseData.title;
+                    const author = courseData.author;
+                    const description = author + "님의 맛집 코스를 확인해보세요!";
+                    
+                    // 카카오톡 공유 URL 생성
+                    const kakaoUrl = 'https://sharer.kakao.com/talk/friends/?url=' + encodeURIComponent(url) + 
+                                   '&title=' + encodeURIComponent(title) + 
+                                   '&description=' + encodeURIComponent(description);
+                    
+                    // 새 창으로 카카오톡 공유 페이지 열기
+                    window.open(kakaoUrl, 'kakao-share', 'width=500,height=600');
+                });
+            }
+
+            // 코스 저장 기능 (추후 구현)
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    alert('코스 저장 기능은 준비 중입니다.');
                 });
             }
         });

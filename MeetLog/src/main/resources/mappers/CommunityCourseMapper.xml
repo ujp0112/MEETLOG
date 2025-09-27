@@ -95,6 +95,29 @@
 		ORDER BY step_order ASC
 	</select>
 
+	<!-- 코스 좋아요 관련 쿼리들 -->
+	<select id="checkCourseLike" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM course_likes
+		WHERE course_id = #{courseId} AND user_id = #{userId}
+	</select>
+
+	<insert id="insertCourseLike" parameterType="map">
+		INSERT INTO course_likes (course_id, user_id)
+		VALUES (#{courseId}, #{userId})
+	</insert>
+
+	<delete id="deleteCourseLike" parameterType="map">
+		DELETE FROM course_likes
+		WHERE course_id = #{courseId} AND user_id = #{userId}
+	</delete>
+
+	<select id="getCourseLikeCount" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM course_likes
+		WHERE course_id = #{courseId}
+	</select>
+
 	<insert id="insertCourse" parameterType="model.CommunityCourse"
 		useGeneratedKeys="true" keyProperty="id">
 		INSERT INTO courses (author_id, title, preview_image, type)
