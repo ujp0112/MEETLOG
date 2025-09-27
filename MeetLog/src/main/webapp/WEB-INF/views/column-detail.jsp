@@ -63,8 +63,12 @@
                                             <div>
                                                 <a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${column.author}</a>
                                                 <p class="text-sm text-slate-500">
-                                                    <fmt:formatDate value="${column.createdAt}"
-                                                        pattern="yyyy. MM. dd." />
+                                                    <c:choose>
+                                                        <c:when test="${column.createdAt != null}">
+                                                            ${column.createdAt.toString().substring(0, 10).replace('-', '. ').concat('.')}
+                                                        </c:when>
+                                                        <c:otherwise>-</c:otherwise>
+                                                    </c:choose>
                                                 </p>
                                             </div>
                                         </div>

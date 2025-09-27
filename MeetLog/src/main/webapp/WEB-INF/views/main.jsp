@@ -623,8 +623,12 @@ to {
 										<div>
 											<p class="font-bold text-slate-800">${column.author}</p>
 											<p class="text-sm text-slate-500">
-												<fmt:formatDate value="${column.createdAt}"
-													pattern="yyyy.MM.dd" />
+												<c:choose>
+													<c:when test="${column.createdAt != null}">
+														${column.createdAt.toString().substring(0, 10).replace('-', '.')}
+													</c:when>
+													<c:otherwise>-</c:otherwise>
+												</c:choose>
 											</p>
 										</div>
 									</div>

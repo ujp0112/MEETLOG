@@ -61,7 +61,13 @@ public class ColumnServlet extends HttpServlet {
 
             } else if ("/write".equals(pathInfo)) {
                 request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
-                
+
+            } else if ("/edit".equals(pathInfo)) {
+                showEditColumnForm(request, response);
+
+            } else if ("/delete".equals(pathInfo)) {
+                handleDeleteColumn(request, response);
+
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -74,6 +80,12 @@ public class ColumnServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();
+
+        if ("/edit".equals(pathInfo)) {
+            handleUpdateColumn(request, response);
+            return;
+        }
+
         if (!"/write".equals(pathInfo)) {
             response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             return;
@@ -163,6 +175,193 @@ public class ColumnServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("errorMessage", "오류가 발생했습니다: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
+        }
+    }
+
+    private void showEditColumnForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        String columnIdStr = request.getParameter("id");
+        if (columnIdStr == null || columnIdStr.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "칼럼 ID가 필요합니다.");
+            return;
+        }
+
+        try {
+            int columnId = Integer.parseInt(columnIdStr);
+            Column column = columnService.getColumnById(columnId);
+
+            if (column == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "칼럼을 찾을 수 없습니다.");
+                return;
+            }
+
+            User user = (User) session.getAttribute("user");
+            if (column.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "자신의 칼럼만 수정할 수 있습니다.");
+                return;
+            }
+
+            request.setAttribute("column", column);
+            request.setAttribute("isEditMode", true);
+            request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 칼럼 ID입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void handleUpdateColumn(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        try {
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            ServletFileUpload upload = new ServletFileUpload(factory);
+            upload.setHeaderEncoding("UTF-8");
+
+            Map<String, String> formFields = new HashMap<>();
+            FileItem imageFileItem = null;
+
+            List<FileItem> formItems = upload.parseRequest(request);
+
+            for (FileItem item : formItems) {
+                if (item.isFormField()) {
+                    formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                } else {
+                    if ("thumbnail".equals(item.getFieldName()) && item.getSize() > 0) {
+                        imageFileItem = item;
+                    }
+                }
+            }
+
+            String columnIdStr = formFields.get("columnId");
+            if (columnIdStr == null || columnIdStr.trim().isEmpty()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "칼럼 ID가 필요합니다.");
+                return;
+            }
+
+            int columnId = Integer.parseInt(columnIdStr);
+            Column existingColumn = columnService.getColumnById(columnId);
+
+            if (existingColumn == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "칼럼을 찾을 수 없습니다.");
+                return;
+            }
+
+            User user = (User) session.getAttribute("user");
+            if (existingColumn.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "자신의 칼럼만 수정할 수 있습니다.");
+                return;
+            }
+
+            // 이미지 처리
+            String imageFileName = existingColumn.getImage(); // 기존 이미지 유지
+            if (imageFileItem != null) {
+                String uploadPath = AppConfig.getUploadPath();
+                if (uploadPath == null || uploadPath.isEmpty()) {
+                    throw new Exception("업로드 경로가 설정되지 않았습니다.");
+                }
+
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) uploadDir.mkdirs();
+
+                String originalFileName = new File(imageFileItem.getName()).getName();
+                imageFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+
+                File storeFile = new File(uploadPath, imageFileName);
+                imageFileItem.write(storeFile);
+            }
+
+            // 칼럼 정보 업데이트
+            existingColumn.setTitle(formFields.get("title"));
+            existingColumn.setContent(formFields.get("content"));
+            existingColumn.setImage(imageFileName);
+
+            boolean success = columnService.updateColumn(existingColumn);
+
+            if (success) {
+                response.sendRedirect(request.getContextPath() + "/column/detail?id=" + columnId);
+            } else {
+                request.setAttribute("errorMessage", "칼럼 수정에 실패했습니다.");
+                request.setAttribute("column", existingColumn);
+                request.setAttribute("isEditMode", true);
+                request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 칼럼 ID입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("errorMessage", "오류가 발생했습니다: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
+        }
+    }
+
+    private void handleDeleteColumn(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String columnIdStr = request.getParameter("id");
+
+        if (columnIdStr == null || columnIdStr.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "칼럼 ID가 필요합니다.");
+            return;
+        }
+
+        try {
+            int columnId = Integer.parseInt(columnIdStr);
+
+            // 칼럼 소유권 확인
+            Column column = columnService.getColumnById(columnId);
+            if (column == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "칼럼을 찾을 수 없습니다.");
+                return;
+            }
+
+            if (column.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "자신의 칼럼만 삭제할 수 있습니다.");
+                return;
+            }
+
+            // 칼럼 삭제
+            boolean success = columnService.deleteColumn(columnId);
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"칼럼이 삭제되었습니다.\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"칼럼 삭제에 실패했습니다.\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 칼럼 ID입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
         }
     }
 }

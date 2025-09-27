@@ -68,12 +68,12 @@
                                         <c:set var="isSelected" value="false" />
                                         <c:if test="${not empty review.keywords}">
                                             <c:forEach var="selectedKeyword" items="${review.keywords}">
-                                                <c:if test="${keyword == selectedKeyword}">
+                                                <c:if test="${keyword eq selectedKeyword}">
                                                     <c:set var="isSelected" value="true" />
                                                 </c:if>
                                             </c:forEach>
                                         </c:if>
-                                        <span class="keyword-tag ${isSelected ? 'selected' : ''}">${keyword}</span>
+                                        <span class="keyword-tag ${isSelected eq 'true' ? 'selected' : ''}">${keyword}</span>
                                     </c:forEach>
                                 </div>
                             </div>
@@ -81,7 +81,12 @@
                     </div>
                     <c:set var="keywordsValue" value="" />
                     <c:if test="${not empty review.keywords}">
-                        <c:set var="keywordsValue" value="${fn:join(review.keywords, ',')}" />
+                        <c:forEach var="keyword" items="${review.keywords}" varStatus="status">
+                            <c:set var="keywordsValue" value="${keywordsValue}${keyword}" />
+                            <c:if test="${!status.last}">
+                                <c:set var="keywordsValue" value="${keywordsValue}," />
+                            </c:if>
+                        </c:forEach>
                     </c:if>
                     <input type="hidden" name="keywords" id="keywords-input" value="${keywordsValue}">
                 </div>

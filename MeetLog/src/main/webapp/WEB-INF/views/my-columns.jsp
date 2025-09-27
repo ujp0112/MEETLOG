@@ -47,7 +47,14 @@
                                     <div class="p-5 flex flex-col flex-grow">
                                         <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2 h-14">${column.title}</h3>
                                         <div class="flex items-center justify-between text-xs text-slate-500 mb-4">
-                                            <span><fmt:formatDate value="${column.createdAt}" pattern="yyyy.MM.dd" /></span>
+                                            <span>
+                                                <c:choose>
+                                                    <c:when test="${column.createdAt != null}">
+                                                        ${column.createdAt.toString().substring(0, 10).replace('-', '.')}
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
+                                            </span>
                                             <div class="flex items-center space-x-3">
                                                 <span>👁️ <fmt:formatNumber value="${column.views}" type="number" /></span>
                                                 <span>❤️ <fmt:formatNumber value="${column.likes}" type="number" /></span>

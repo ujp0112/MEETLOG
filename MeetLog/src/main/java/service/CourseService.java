@@ -112,4 +112,39 @@ public class CourseService {
         // 임시로 true 반환 (실제 구현 필요)
         return true;
     }
+
+    public CommunityCourse getCourseById(int courseId) {
+        return courseDAO.findById(courseId);
+    }
+
+    /**
+     * 코스와 경로를 업데이트하는 메소드
+     */
+    public boolean updateCourseWithSteps(CommunityCourse course, List<CourseStep> steps) {
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. 코스 정보 업데이트
+            courseDAO.updateCourse(course, session);
+
+            // 2. 기존 경로들 삭제
+            courseDAO.deleteCourseStepsByCourseId(course.getId(), session);
+
+            // 3. 새로운 경로들 삽입
+            for (int i = 0; i < steps.size(); i++) {
+                CourseStep step = steps.get(i);
+                step.setCourseId(course.getId());
+                step.setOrder(i + 1);
+                courseDAO.insertCourseStep(step, session);
+            }
+
+            session.commit();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.rollback();
+            return false;
+        } finally {
+            session.close();
+        }
+    }
 }

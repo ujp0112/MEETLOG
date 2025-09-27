@@ -45,7 +45,12 @@
                                                 </div>
                                                 <div class="flex items-center space-x-2">
                                                     <span class="text-sm text-slate-500">
-                                                        <fmt:formatDate value="${review.createdAt}" pattern="yyyy.MM.dd HH:mm" />
+                                                        <c:choose>
+                                                            <c:when test="${review.createdAt != null}">
+                                                                ${review.createdAt.toString().substring(0, 10)} ${review.createdAt.toString().substring(11, 16)}
+                                                            </c:when>
+                                                            <c:otherwise>-</c:otherwise>
+                                                        </c:choose>
                                                     </span>
                                                     <div class="flex items-center text-sky-600">
                                                         <span class="text-sm">❤️ ${review.likes}</span>
@@ -102,25 +107,26 @@
 
     <script>
         function editReview(reviewId) {
-            // This JavaScript logic remains the same as it contains no JSP scriptlets.
-            alert('리뷰 수정 기능은 준비 중입니다.');
+            // 리뷰 수정 페이지로 이동 (파라미터명을 reviewId로 변경)
+            window.location.href = '${pageContext.request.contextPath}/review/edit?reviewId=' + reviewId;
         }
 
         function deleteReview(reviewId) {
             if (confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-                fetch('${pageContext.request.contextPath}/review', {
+                fetch('${pageContext.request.contextPath}/review/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: 'action=delete&reviewId=' + reviewId
+                    body: 'id=' + reviewId
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        alert('리뷰가 성공적으로 삭제되었습니다.');
                         location.reload();
                     } else {
-                        alert('리뷰 삭제 중 오류가 발생했습니다.');
+                        alert(data.message || '리뷰 삭제 중 오류가 발생했습니다.');
                     }
                 })
                 .catch(error => {

@@ -20,8 +20,18 @@
             <div class="container mx-auto p-4 md:p-8">
                 <div class="max-w-4xl mx-auto">
                     <div class="mb-6">
-                        <h2 class="text-2xl md:text-3xl font-bold mb-2">칼럼 작성</h2>
-                        <p class="text-slate-600">맛집에 대한 칼럼을 작성해주세요.</p>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">
+                            <c:choose>
+                                <c:when test="${isEditMode}">칼럼 수정</c:when>
+                                <c:otherwise>칼럼 작성</c:otherwise>
+                            </c:choose>
+                        </h2>
+                        <p class="text-slate-600">
+                            <c:choose>
+                                <c:when test="${isEditMode}">칼럼을 수정해주세요.</c:when>
+                                <c:otherwise>맛집에 대한 칼럼을 작성해주세요.</c:otherwise>
+                            </c:choose>
+                        </p>
                     </div>
 
                     <c:choose>
@@ -33,8 +43,11 @@
                                     </div>
                                 </c:if>
 
-                                <form action="${pageContext.request.contextPath}/column/write" method="post" enctype="multipart/form-data" class="space-y-6">
-                                    <input type="hidden" name="action" value="create">
+                                <form action="${pageContext.request.contextPath}/column/<c:choose><c:when test="${isEditMode}">edit</c:when><c:otherwise>write</c:otherwise></c:choose>" method="post" enctype="multipart/form-data" class="space-y-6">
+                                    <c:if test="${isEditMode}">
+                                        <input type="hidden" name="columnId" value="${column.id}">
+                                    </c:if>
+                                    <input type="hidden" name="action" value="<c:choose><c:when test="${isEditMode}">update</c:when><c:otherwise>create</c:otherwise></c:choose>">
                                     <input type="hidden" name="userId" value="${sessionScope.user.id}">
                                     <input type="hidden" name="author" value="${sessionScope.user.nickname}">
 
@@ -42,13 +55,20 @@
                                         <label for="title" class="block text-sm font-medium text-slate-700 mb-2">제목</label>
                                         <input type="text" id="title" name="title" required
                                                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                                               placeholder="칼럼 제목을 입력하세요">
+                                               placeholder="칼럼 제목을 입력하세요"
+                                               value="<c:if test="${isEditMode}">${column.title}</c:if>">
                                     </div>
 
                                     <div>
                                         <label for="imageUpload" class="block text-sm font-medium text-slate-700 mb-2">썸네일 이미지 (선택사항)</label>
                                         <input type="file" id="imageUpload" name="thumbnail" accept="image/*"
                                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                        <c:if test="${isEditMode and not empty column.image}">
+                                            <div class="mt-4">
+                                                <p class="text-sm text-slate-600 mb-2">현재 이미지:</p>
+                                                <img src="${pageContext.request.contextPath}/uploads/${column.image}" alt="현재 썸네일" class="rounded-lg shadow-sm" style="max-width: 300px; max-height: 200px;">
+                                            </div>
+                                        </c:if>
                                         <img id="imagePreview" src="" alt="이미지 미리보기" class="mt-4 rounded-lg shadow-sm" style="display: none; max-width: 300px; max-height: 200px;">
                                    </div>
 
@@ -56,7 +76,7 @@
                                         <label for="content-editor" class="block text-sm font-medium text-slate-700 mb-2">내용</label>
                                         <textarea id="content-editor" name="content"
                                                   class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                                                  placeholder="맛집에 대한 칼럼을 작성해주세요. 음식의 특징, 분위기, 추천 메뉴, 방문 팁 등을 자유롭게 작성하세요."></textarea>
+                                                  placeholder="맛집에 대한 칼럼을 작성해주세요. 음식의 특징, 분위기, 추천 메뉴, 방문 팁 등을 자유롭게 작성하세요."><c:if test="${isEditMode}">${column.content}</c:if></textarea>
                                         <p class="text-sm text-slate-500 mt-1">최소 100자 이상 작성해주세요.</p>
                                     </div>
 
@@ -76,7 +96,10 @@
                                             취소
                                         </a>
                                         <button type="submit" class="px-6 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700">
-                                            칼럼 발행
+                                            <c:choose>
+                                                <c:when test="${isEditMode}">칼럼 수정</c:when>
+                                                <c:otherwise>칼럼 발행</c:otherwise>
+                                            </c:choose>
                                         </button>
                                     </div>
                                 </form>

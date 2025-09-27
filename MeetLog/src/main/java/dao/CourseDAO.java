@@ -54,4 +54,21 @@ public class CourseDAO {
             return session.selectList(OFFICIAL_MAPPER + ".selectOfficialCourses");
         }
     }
+
+    // 코스 업데이트
+    public int updateCourse(CommunityCourse course, SqlSession session) {
+        return session.update(COMMUNITY_MAPPER + ".updateCourse", course);
+    }
+
+    // 코스 ID로 경로들 삭제
+    public int deleteCourseStepsByCourseId(int courseId, SqlSession session) {
+        return session.delete(COMMUNITY_MAPPER + ".deleteCourseStepsByCourseId", courseId);
+    }
+
+    // 코스 ID로 단일 코스 조회
+    public CommunityCourse findById(int id) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(COMMUNITY_MAPPER + ".findById", id);
+        }
+    }
 }

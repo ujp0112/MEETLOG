@@ -54,6 +54,9 @@ public class ReviewServlet extends HttpServlet {
             case "edit":
                 showEditReviewForm(request, response);
                 break;
+            case "delete":
+                handleDeleteReview(request, response);
+                break;
             default:
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
@@ -66,21 +69,31 @@ public class ReviewServlet extends HttpServlet {
         String[] pathParts = pathInfo != null ? pathInfo.split("/") : new String[0];
         String action = pathParts.length > 1 ? pathParts[1] : "";
 
-        if (pathInfo == null || (!pathInfo.equals("/write") && !pathInfo.equals("/edit"))) {
+        if (pathInfo == null || (!pathInfo.equals("/write") && !pathInfo.equals("/edit") && !pathInfo.equals("/delete"))) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/user/login");
-            return;
+            if ("/delete".equals(pathInfo)) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\": false, \"message\": \"로그인이 필요합니다.\"}");
+                return;
+            } else {
+                response.sendRedirect(request.getContextPath() + "/user/login");
+                return;
+            }
         }
 
         if ("/write".equals(pathInfo)) {
             handleWriteReview(request, response);
         } else if ("/edit".equals(pathInfo)) {
             handleEditReview(request, response);
+        } else if ("/delete".equals(pathInfo)) {
+            handleDeleteReview(request, response);
         }
     }
 
@@ -349,5 +362,60 @@ public class ReviewServlet extends HttpServlet {
         categories.put("✨ 분위기 & 기타", commonAtmosphere);
 
         return categories;
+    }
+
+    private void handleDeleteReview(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인이 필요합니다.");
+            return;
+        }
+
+        User user = (User) session.getAttribute("user");
+        String reviewIdStr = request.getParameter("id");
+
+        if (reviewIdStr == null || reviewIdStr.trim().isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "리뷰 ID가 필요합니다.");
+            return;
+        }
+
+        try {
+            int reviewId = Integer.parseInt(reviewIdStr);
+
+            // 리뷰 소유권 확인
+            Review review = reviewService.findById(reviewId);
+            if (review == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (review.getUserId() != user.getId()) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "자신의 리뷰만 삭제할 수 있습니다.");
+                return;
+            }
+
+            // 리뷰 삭제
+            boolean success = reviewService.deleteReview(reviewId);
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"리뷰가 삭제되었습니다.\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"리뷰 삭제에 실패했습니다.\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 리뷰 ID입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
     }
 }

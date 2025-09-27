@@ -94,8 +94,14 @@ layer utilities { .line-clamp-2 { display:-webkit-box;
 													cssClass="w-6 h-6 rounded-full object-cover" />
 												<a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="hover:text-blue-600 transition-colors">${column.author}</a>
 											</div>
-											<span><fmt:formatDate value="${column.createdAt}"
-													pattern="yyyy.MM.dd" /></span>
+											<span>
+												<c:choose>
+													<c:when test="${column.createdAt != null}">
+														${column.createdAt.toString().substring(0, 10).replace('-', '.')}
+													</c:when>
+													<c:otherwise>-</c:otherwise>
+												</c:choose>
+											</span>
 
 										</div>
 									</div>

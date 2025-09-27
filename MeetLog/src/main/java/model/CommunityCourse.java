@@ -132,4 +132,13 @@ public class CommunityCourse {
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
+
+	// getThumbnail/setThumbnail 메서드 (previewImage와 동일)
+	public String getThumbnail() {
+		return previewImage;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.previewImage = thumbnail;
+	}
 }

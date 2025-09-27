@@ -145,7 +145,12 @@
                                                 </span>
                                             </div>
                                             <p class="text-sm text-slate-500">
-                                                <fmt:formatDate value="${activity.createdAt}" pattern="yyyy.MM.dd HH:mm" />
+                                                <c:choose>
+                                                    <c:when test="${activity.createdAt != null}">
+                                                        ${activity.createdAt.toString().substring(0, 10).replace('-', '.')} ${activity.createdAt.toString().substring(11, 16)}
+                                                    </c:when>
+                                                    <c:otherwise>-</c:otherwise>
+                                                </c:choose>
                                             </p>
                                         </div>
                                     </div>
