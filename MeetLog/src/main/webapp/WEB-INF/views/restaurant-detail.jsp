@@ -1206,61 +1206,68 @@ translateY(
 					<c:when test="${not empty restaurant}">
 						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
 							<div class="lg:col-span-2 space-y-8">
-								<section class="glass-card p-8 rounded-3xl fade-in">
-									<%-- [수정] 추가 이미지가 없으면 'gallery-full' 클래스를 추가 --%>
-									<div
-										class="gallery ${empty restaurant.additionalImages ? 'gallery-full' : ''}"
-										id="restaurantGallery">
-										<div class="gallery-main">
-											<%-- [추가] 이미지가 하나일 때만 흐릿한 배경 이미지를 생성 --%>
-											<c:if test="${empty restaurant.additionalImages}">
-												<mytag:image fileName="${restaurant.image}" altText=""
-													cssClass="gallery-background" />
-											</c:if>
-
-											<%-- 원본 이미지는 항상 표시 --%>
-											<mytag:image fileName="${restaurant.image}"
-												altText="${restaurant.name}" cssClass="gallery-image" />
-										</div>
-
-										<%-- [수정] 추가 이미지가 있을 때만 gallery-side 영역을 렌더링 --%>
-										<c:if test="${not empty restaurant.additionalImages}">
-											<div class="gallery-side">
-												<c:choose>
-													<c:when
-														test="${fn:length(restaurant.additionalImages) >= 1}">
-														<div class="img-wrap">
-															<mytag:image fileName="${restaurant.additionalImages[0]}"
-																altText="${restaurant.name}" cssClass="gallery-image" />
-														</div>
-													</c:when>
-													<c:otherwise>
-														<div class="img-wrap"
-															style="background: #transparent; border-radius: 12px;"></div>
-													</c:otherwise>
-												</c:choose>
-
-												<c:choose>
-													<c:when
-														test="${fn:length(restaurant.additionalImages) >= 2}">
-														<div class="img-wrap">
-															<mytag:image fileName="${restaurant.additionalImages[1]}"
-																altText="${restaurant.name}" cssClass="gallery-image" />
-															<c:if
-																test="${fn:length(restaurant.additionalImages) + 1 > 3}">
-																<div class="more-overlay" onclick="cycleImages()">+${fn:length(restaurant.additionalImages) - 1}</div>
-															</c:if>
-														</div>
-													</c:when>
-													<c:otherwise>
-														<div class="img-wrap"
-															style="background: #transparent; border-radius: 12px;"></div>
-													</c:otherwise>
-												</c:choose>
-											</div>
-										</c:if>
-									</div>
-								</section>
+								<%-- ▼▼▼ 1. 이 코드로 기존 갤러리 섹션을 교체하세요 ▼▼▼ --%>
+								<c:choose>
+								    <%-- 1-1. 외부 검색(Naver 이미지)일 경우 --%>
+								    <c:when test="${isExternal}">
+								        <section class="glass-card p-8 rounded-3xl fade-in">
+								            <c:choose>
+								                <c:when test="${not empty externalImages}">
+								                    <div class="gallery ${fn:length(externalImages) == 1 ? 'gallery-full' : ''}" id="restaurantGallery">
+								                        <div class="gallery-main">
+								                            <c:if test="${fn:length(externalImages) == 1}">
+								                                <img src="${externalImages[0]}" alt="${restaurant.name} 배경" class="gallery-background" />
+								                            </c:if>
+								                            <img src="${externalImages[0]}" alt="${restaurant.name}" class="gallery-image" />
+								                        </div>
+								                        <c:if test="${fn:length(externalImages) > 1}">
+								                            <div class="gallery-side">
+								                                <div class="img-wrap"><c:if test="${fn:length(externalImages) >= 2}"><img src="${externalImages[1]}" alt="${restaurant.name}" class="gallery-image" /></c:if></div>
+								                                <div class="img-wrap"><c:if test="${fn:length(externalImages) >= 3}"><img src="${externalImages[2]}" alt="${restaurant.name}" class="gallery-image" /><c:if test="${fn:length(externalImages) > 3}"><div class="more-overlay" onclick="cycleImages()">+${fn:length(externalImages) - 3}</div></c:if></c:if></div>
+								                            </div>
+								                        </c:if>
+								                    </div>
+								                </c:when>
+								                <c:otherwise>
+								                    <div class="text-center py-12"><p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p></div>
+								                </c:otherwise>
+								            </c:choose>
+								        </section>
+								        <section id="imageOverlay" class="panel-overlay">
+								            <div class="overlay-hd"><h2 class="title">전체 사진 보기</h2><button id="closeOverlayBtn" class="close-x" type="button">×</button></div>
+								            <div class="overlay-bd" id="overlayGrid"></div>
+								        </section>
+								    </c:when>
+								    
+								    <%-- 1-2. 내부 DB(기존 이미지)일 경우 --%>
+								    <c:otherwise>
+								        <section class="glass-card p-8 rounded-3xl fade-in">
+								            <div class="gallery ${empty restaurant.additionalImages ? 'gallery-full' : ''}" id="restaurantGallery">
+								                <div class="gallery-main">
+								                    <c:if test="${empty restaurant.additionalImages}"><mytag:image fileName="${restaurant.image}" altText="" cssClass="gallery-background" /></c:if>
+								                    <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="gallery-image" />
+								                </div>
+								                <c:if test="${not empty restaurant.additionalImages}">
+								                    <div class="gallery-side">
+								                        <div class="img-wrap">
+								                            <mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="gallery-image" />
+								                        </div>
+								                        <div class="img-wrap">
+								                            <c:if test="${fn:length(restaurant.additionalImages) >= 2}">
+								                                <mytag:image fileName="${restaurant.additionalImages[1]}" altText="${restaurant.name}" cssClass="gallery-image" />
+								                                <c:if test="${fn:length(restaurant.additionalImages) + 1 > 3}"><div class="more-overlay" onclick="cycleImages()">+${fn:length(restaurant.additionalImages) - 1}</div></c:if>
+								                            </c:if>
+								                        </div>
+								                    </div>
+								                </c:if>
+								            </div>
+								        </section>
+								        <section id="imageOverlay" class="panel-overlay">
+								            <div class="overlay-hd"><h2 class="title">전체 사진 보기</h2><button id="closeOverlayBtn" class="close-x" type="button">×</button></div>
+								            <div class="overlay-bd" id="overlayGrid"></div>
+								        </section>
+								    </c:otherwise>
+								</c:choose>
 
 								<section id="imageOverlay" class="panel-overlay">
 									<div class="overlay-hd">
@@ -1279,6 +1286,7 @@ translateY(
 													class="location-badge">📍 ${restaurant.location}</span>
 											</div>
 										</div>
+										<c:if test="${!isExternal}">
 										<div class="text-right">
 											<div class="text-5xl font-black rating-badge mb-2">
 												<fmt:formatNumber value="${restaurant.rating}"
@@ -1301,7 +1309,9 @@ translateY(
 											<div class="text-sm text-slate-500">${restaurant.reviewCount}개
 												리뷰</div>
 										</div>
+										</c:if>
 									</div>
+									<c:if test="${!isExternal}">
 									<div class="flex space-x-4">
 										<button
 											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
@@ -1310,6 +1320,7 @@ translateY(
 											class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
 											공유하기</button>
 									</div>
+									</c:if>
 								</section>
 
 								<section class="glass-card p-8 rounded-3xl slide-up">
@@ -1331,6 +1342,7 @@ translateY(
 												<p class="text-slate-600 mt-1">${not empty restaurant.phone ? restaurant.phone : "정보 없음"}</p>
 											</div>
 										</div>
+										<c:if test="${!isExternal}">
 										<div
 											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
 											<div class="text-2xl">🕒</div>
@@ -1373,6 +1385,7 @@ translateY(
 												<p class="text-slate-600 mt-1">${restaurant.parking ? "가능" : "불가"}</p>
 											</div>
 										</div>
+										</c:if>
 									</div>
 									<c:if test="${not empty restaurant.description}">
 										<div
@@ -1382,7 +1395,7 @@ translateY(
 										</div>
 									</c:if>
 								</section>
-
+								<c:if test="${!isExternal}">
 								<c:if test="${not empty menus}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
 										<h2 class="text-2xl font-bold gradient-text mb-6">메뉴</h2>
@@ -1652,14 +1665,16 @@ translateY(
 										</c:otherwise>
 									</c:choose>
 								</section>
+								</c:if>
 							</div>
 
 							<div class="space-y-8">
-							<form id="reservationForm" action="${pageContext.request.contextPath}/reservation/create" method="GET">
-							
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div id="map" class="w-full h-64 rounded-2xl border"></div>
 								</section>
+							<c:if test="${!isExternal}">
+							<form id="reservationForm" action="${pageContext.request.contextPath}/reservation/create" method="GET">
+							
 								<input type="hidden" name="restaurantId" value="${restaurant.id}">
 								<input type="hidden" id="selectedTime" name="reservationTime" value="">
     							
@@ -1754,6 +1769,7 @@ translateY(
 									</div>
 								</section>
 								</form>
+								</c:if>
 							</div>
 						</div>
 					</c:when>
@@ -1795,8 +1811,15 @@ translateY(
     }
     
     // --- 레스토랑 전체 이미지 갤러리 관련 함수 ---
-    const allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
-    const overlaySection = document.getElementById('imageOverlay'); 
+	let allImageFiles = [];
+	const isExternal = ${isExternal eq true};
+	
+	if (isExternal) {
+	    allImageFiles = [<c:forEach var="imgUrl" items="${externalImages}" varStatus="status">'${imgUrl}'<c:if test="${!status.last}">,</c:if></c:forEach>];
+	} else {
+	    allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
+	}
+	const overlaySection = document.getElementById('imageOverlay'); 
     const overlayGrid = document.getElementById('overlayGrid'); 
     const closeOverlayBtn = document.getElementById('closeOverlayBtn'); 
     const imageZoomModal = document.getElementById('imageZoomModal'); 
@@ -1817,7 +1840,7 @@ translateY(
         allImageFiles.forEach(fileName => { 
             const img = document.createElement('img'); 
             img.className = 'gallery-image'; 
-            img.src = '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName); 
+            img.src = isExternal ? fileName : '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
             img.addEventListener('click', () => openZoomModal(img.src)); 
             overlayGrid.appendChild(img); 
         }); 
@@ -2055,17 +2078,6 @@ translateY(
             // 마커를 생성합니다
             var marker = new kakao.maps.Marker({
                 position: markerPosition
-            });
-
-            // 마커가 지도 위에 표시되도록 설정합니다
-            marker.setMap(map);
-        });
-        // --- ▲▲▲ [추가] 코드 끝 ▲▲▲ ---
-        
-    });
-</script>
-</body>
-</html>ion: markerPosition
             });
 
             // 마커가 지도 위에 표시되도록 설정합니다
