@@ -323,6 +323,110 @@ to {
 	opacity: 0.3;
 	cursor: not-allowed;
 }
+.main-search-form {
+    display: flex;
+    flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
+    gap: 16px;
+    align-items: center; /* 요소들을 하단에 정렬 */
+}
+
+.search-inputs {
+    flex: 1; /* 남는 공간을 모두 차지 */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 반응형 그리드 */
+    gap: 16px;
+    min-width: 200px;
+}
+
+.search-inputs .input-group.keyword-group {
+    grid-column: 1 / -1; /* 키워드 입력창은 항상 한 줄 전체 차지 */
+    align-items: end;
+}
+
+@media (min-width: 1024px) {
+	.search-inputs .input-group.keyword-group {
+		grid-column: span 2; /* 넓은 화면에서는 키워드 입력창이 2칸 차지 */
+	}
+}
+
+
+.search-inputs .input-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569; /* slate-600 */
+    margin-bottom: 4px;
+}
+
+.search-inputs .input-group input,
+.search-inputs .input-group select {
+    width: 100%;
+    border-radius: 0.375rem; /* rounded-md */
+    border: 1px solid #cbd5e1; /* slate-300 */
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-inputs .input-group input:focus,
+.search-inputs .input-group select:focus {
+	border-color: #3b82f6; /* blue-500 */
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+	outline: none;
+}
+
+.search-actions {
+    display: flex;
+    flex-direction: column; /* 버튼을 수직으로 쌓음 */
+    gap: 8px;
+    width: 140px; /* 버튼 그룹 너비 고정 */
+}
+
+.search-actions button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem; /* rounded-lg */
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+/* "맛집 찾기" 버튼 (메인 액션) */
+.search-actions .btn-main-search {
+    background-color: #3b82f6; /* blue-600 */
+    color: white;
+    border: 2px solid #3b82f6;
+}
+.search-actions .btn-main-search:hover {
+    background-color: #2563eb; /* blue-700 */
+    border-color: #2563eb;
+}
+
+/* "지도로 검색" 버튼 (보조 액션) */
+.search-actions .btn-map-search {
+    background-color: white;
+    color: #3b82f6; /* blue-600 */
+    border: 2px solid #3b82f6;
+}
+.search-actions .btn-map-search:hover {
+    background-color: #eff6ff; /* blue-50 */
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 768px) {
+    .main-search-form {
+        flex-direction: column;
+        align-items: stretch; /* 요소들을 양 옆으로 꽉 채움 */
+    }
+    .search-actions {
+        flex-direction: row; /* 버튼을 수평으로 배치 */
+        width: 100%;
+    }
+    .search-actions button {
+        flex: 1; /* 버튼이 공간을 똑같이 나눠가짐 */
+    }
+}
 </style>
 </head>
 <body class="bg-slate-50">
@@ -457,49 +561,54 @@ to {
 				</section>
 			</c:if>
 			<section class="bg-white p-6 rounded-xl my-12 shadow-md">
-				<h2 class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기
-					🔎</h2>
-				<form action="${pageContext.request.contextPath}/restaurant/list"
-					method="get"
-					class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 items-end">
-					<div class="col-span-2 lg:col-span-2">
-						<label class="block text-sm font-medium text-slate-700">키워드</label>
-						<input name="keyword" type="text" class="form-input mt-1"
-							placeholder="맛집 이름, 지역, 메뉴 등">
+				<h2 class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기 🔎</h2>
+				
+				<%-- [수정] 폼 전체 구조 변경 --%>
+				<form id="detailSearchForm" action="${pageContext.request.contextPath}/restaurant/list" method="get" class="main-search-form">
+					
+					<%-- 1. 입력 필드 그룹 --%>
+					<div class="search-inputs">
+						<div class="input-group keyword-group">
+							<label for="mainSearchKeyword">키워드</label>
+							<input id="mainSearchKeyword" name="keyword" type="text" placeholder="맛집 이름, 지역, 메뉴 등">
+						</div>
+						<div class="input-group">
+							<label>음식 종류</label>
+							<select name="category">
+								<option value="">전체</option>
+								<option value="한식">한식</option>
+								<option value="양식">양식</option>
+								<option value="일식">일식</option>
+								<option value="중식">중식</option>
+								<option value="카페">카페</option>
+							</select>
+						</div>
+						<div class="input-group">
+							<label>가격대 (1인)</label>
+							<select name="price">
+								<option value="">전체</option>
+								<option value="1">~1만원</option>
+								<option value="2">1~2만원</option>
+								<option value="3">2~4만원</option>
+								<option value="4">4만원~</option>
+							</select>
+						</div>
+						<div class="input-group">
+							<label>주차 여부</label>
+							<select name="parking">
+								<option value="">전체</option>
+								<option value="true">가능</option>
+								<!-- <option value="false">불가</option> -->
+							</select>
+						</div>
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-slate-700">음식
-							종류</label> <select name="category" class="form-input mt-1">
-							<option value="">전체</option>
-							<option value="한식">한식</option>
-							<option value="양식">양식</option>
-							<option value="일식">일식</option>
-							<option value="중식">중식</option>
-							<option value="카페">카페</option>
-						</select>
+					
+					<%-- 2. 버튼 그룹 --%>
+					<div class="search-actions">
+						<button id="mapSearchBtn" type="button" class="btn-map-search">지도로 검색</button>
+						<button type="submit" class="btn-main-search">맛집 찾기</button>
 					</div>
-					<div>
-						<label class="block text-sm font-medium text-slate-700">가격대
-							(1인)</label> <select name="price" class="form-input mt-1">
-							<option value="">전체</option>
-							<option value="1">~1만원</option>
-							<option value="2">1~2만원</option>
-							<option value="3">2~4만원</option>
-							<option value="4">4만원~</option>
-						</select>
-					</div>
-					<div>
-						<label class="block text-sm font-medium text-slate-700">주차
-							여부</label> <select name="parking" class="form-input mt-1">
-							<option value="">전체</option>
-							<option value="true">가능</option>
-							<option value="false">불가</option>
-						</select>
-					</div>
-					<div class="col-span-2 md:col-span-1">
-						<button type="submit" class="form-btn-primary w-full">맛집
-							찾기</button>
-					</div>
+
 				</form>
 			</section>
 			<%-- 생생한 최신 리뷰 섹션 --%>
@@ -668,6 +777,56 @@ to {
 	</div>
 
 	<jsp:include page="/WEB-INF/views/common/loading.jsp" />
+	<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const mapSearchBtn = document.getElementById('mapSearchBtn');
+	const detailSearchForm = document.getElementById('detailSearchForm');
+	const keywordInput = document.getElementById('mainSearchKeyword');
+
+	// "지도로 검색" 버튼 클릭 이벤트
+	mapSearchBtn.addEventListener('click', function() {
+		// 폼 안의 모든 필드에서 값을 가져옵니다.
+		const keyword = keywordInput.value.trim();
+		const category = detailSearchForm.querySelector('select[name="category"]').value;
+		const parkingSelect = detailSearchForm.querySelector('select[name="parking"]');
+		const parkingKeyword = parkingSelect.value === 'true' ? '주차' : '';
+
+		// 검색어들을 배열에 담습니다.
+		const searchTerms = [];
+		if (keyword) {
+			searchTerms.push(keyword);
+		}
+		if (category) {
+			searchTerms.push(category);
+		}
+		if (parkingKeyword) {
+			searchTerms.push(parkingKeyword);
+		}
+
+		// 배열을 공백으로 합쳐 최종 검색어를 만듭니다.
+		const finalKeyword = searchTerms.join(' ').trim();
+
+		if (finalKeyword) {
+			// 조합된 최종 검색어로 지도 검색 서블릿 URL을 호출합니다.
+			const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?keyword=" + encodeURIComponent(finalKeyword);
+			window.location.href = searchUrl;
+		} else {
+			alert('검색할 키워드를 입력하거나 필터를 선택해주세요.');
+			keywordInput.focus();
+		}
+	});
+
+	// 키워드 입력창에서 Enter 키를 눌렀을 때도 지도 검색이 실행되도록 합니다.
+	keywordInput.addEventListener('keydown', function(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault(); // 기존 form의 submit 동작을 막습니다.
+			mapSearchBtn.click();   // "지도로 검색" 버튼의 클릭 이벤트를 강제로 실행합니다.
+		}
+	});
+
+    // --- (이 아래는 기존 캐러셀 및 모달 기능 코드들... 그대로 유지) ---
+});
+</script>
 	<script>
 document.addEventListener('DOMContentLoaded', function() {
 
