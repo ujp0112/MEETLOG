@@ -573,78 +573,222 @@
             });
         });
 
-        // 폼 제출 처리
+        // 폼 제출 처리 - 수정된 버전
         document.getElementById('reservationSettingsForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // 폼 데이터를 직접 구성
+            console.log('폼 제출 시작');
+
+            // 체크박스 상태 직접 확인
+            console.log('=== 직접 체크박스 상태 확인 ===');
+            const mondayCheckbox = document.querySelector('input[name="mondayEnabled"]');
+            const tuesdayCheckbox = document.querySelector('input[name="tuesdayEnabled"]');
+            console.log('월요일 체크박스:', mondayCheckbox, '체크 상태:', mondayCheckbox ? mondayCheckbox.checked : 'not found');
+            console.log('화요일 체크박스:', tuesdayCheckbox, '체크 상태:', tuesdayCheckbox ? tuesdayCheckbox.checked : 'not found');
+
+            // 시간 필드 직접 확인
+            console.log('=== 시간 필드 직접 확인 ===');
+            const mondayStartVisible = document.querySelector('input[name="mondayStartVisible"]');
+            const mondayEndVisible = document.querySelector('input[name="mondayEndVisible"]');
+            const tuesdayStartVisible = document.querySelector('input[name="tuesdayStartVisible"]');
+            const tuesdayEndVisible = document.querySelector('input[name="tuesdayEndVisible"]');
+
+            console.log('월요일 시작:', mondayStartVisible ? mondayStartVisible.value : 'not found');
+            console.log('월요일 종료:', mondayEndVisible ? mondayEndVisible.value : 'not found');
+            console.log('화요일 시작:', tuesdayStartVisible ? tuesdayStartVisible.value : 'not found');
+            console.log('화요일 종료:', tuesdayEndVisible ? tuesdayEndVisible.value : 'not found');
+
+            // 폼 데이터를 직접 수집
             const formData = new FormData();
 
             // 기본 설정들
-            const reservationEnabled = this.querySelector('input[name="reservationEnabled"]');
-            const autoAccept = this.querySelector('input[name="autoAccept"]');
+            const reservationEnabled = document.querySelector('input[name="reservationEnabled"]');
+            const autoAccept = document.querySelector('input[name="autoAccept"]');
 
-            formData.append('reservationEnabled', reservationEnabled && reservationEnabled.checked ? 'true' : 'false');
-            formData.append('autoAccept', autoAccept && autoAccept.checked ? 'true' : 'false');
+            formData.append('reservationEnabled', reservationEnabled ? reservationEnabled.checked.toString() : 'false');
+            formData.append('autoAccept', autoAccept ? autoAccept.checked.toString() : 'false');
 
-            // 기타 일반 필드들
-            ['minPartySize', 'maxPartySize', 'advanceBookingDays', 'minAdvanceHours', 'specialNotes'].forEach(field => {
-                const input = this.querySelector(`input[name="${field}"], textarea[name="${field}"]`);
-                if (input) {
-                    formData.append(field, input.value || '');
-                }
+            console.log('기본 설정:', {
+                reservationEnabled: reservationEnabled ? reservationEnabled.checked : false,
+                autoAccept: autoAccept ? autoAccept.checked : false
             });
 
-            // 요일별 설정
+            // 요일별 설정 직접 수집
             const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
+            // 먼저 보이는 필드에서 숨겨진 필드로 값 복사
             dayNames.forEach(day => {
-                // 요일 활성화 체크박스
-                const enabledCheckbox = this.querySelector(`input[name="${day}Enabled"]`);
-                formData.append(`${day}Enabled`, enabledCheckbox && enabledCheckbox.checked ? 'true' : 'false');
+                const visibleStart = document.querySelector(`input[name="${day}StartVisible"]`);
+                const visibleEnd = document.querySelector(`input[name="${day}EndVisible"]`);
+                const hiddenStart = document.querySelector(`input[name="${day}Start"]`);
+                const hiddenEnd = document.querySelector(`input[name="${day}End"]`);
 
-                // 시간 입력 필드 - hidden 필드에서 직접 읽기
-                const hiddenStartInput = this.querySelector(`input[name="${day}Start"]`);
-                const hiddenEndInput = this.querySelector(`input[name="${day}End"]`);
-
-                let startValue = '09:00';  // 기본값
-                let endValue = '22:00';    // 기본값
-
-                // hidden 필드에서 값 읽기 (현재 저장된 값)
-                if (hiddenStartInput && hiddenStartInput.value) {
-                    startValue = hiddenStartInput.value;
+                // 보이는 필드가 있고 값이 있으면 숨겨진 필드에 복사
+                if (visibleStart && visibleStart.value && hiddenStart) {
+                    hiddenStart.value = visibleStart.value;
+                    console.log(`${day} 시작 시간 업데이트: ${visibleStart.value}`);
                 }
-                if (hiddenEndInput && hiddenEndInput.value) {
-                    endValue = hiddenEndInput.value;
+                if (visibleEnd && visibleEnd.value && hiddenEnd) {
+                    hiddenEnd.value = visibleEnd.value;
+                    console.log(`${day} 종료 시간 업데이트: ${visibleEnd.value}`);
                 }
-
-                // visible 필드가 있고 값이 있으면 그 값을 우선 사용
-                const visibleStartInput = this.querySelector(`input[name="${day}StartVisible"]`);
-                const visibleEndInput = this.querySelector(`input[name="${day}EndVisible"]`);
-
-                if (visibleStartInput && visibleStartInput.value) {
-                    startValue = visibleStartInput.value;
-                }
-                if (visibleEndInput && visibleEndInput.value) {
-                    endValue = visibleEndInput.value;
-                }
-
-                formData.append(`${day}Start`, startValue);
-                formData.append(`${day}End`, endValue);
-
-                console.log(`${day}: enabled=${enabledCheckbox && enabledCheckbox.checked}, ${startValue} - ${endValue}`);
             });
 
-            // 블랙아웃 날짜 (달력)
-            const blackoutDates = this.querySelector('input[name="blackoutDates"]');
-            if (blackoutDates) {
-                formData.append('blackoutDates', blackoutDates.value || '');
-            }
+            // 요일별 데이터 수집
+            dayNames.forEach(day => {
+                const dayEnabled = document.querySelector(`input[name="${day}Enabled"]`);
+                const hiddenStart = document.querySelector(`input[name="${day}Start"]`);
+                const hiddenEnd = document.querySelector(`input[name="${day}End"]`);
 
-            // FormData 내용 확인
-            console.log('=== 최종 전송 데이터 ===');
+                const enabledValue = dayEnabled ? dayEnabled.checked.toString() : 'false';
+                const startValue = hiddenStart ? hiddenStart.value : '09:00';
+                const endValue = hiddenEnd ? hiddenEnd.value : '22:00';
+
+                formData.append(day + 'Enabled', enabledValue);
+                formData.append(day + 'Start', startValue);
+                formData.append(day + 'End', endValue);
+
+                console.log(`${day}:`, {
+                    enabled: enabledValue,
+                    start: startValue,
+                    end: endValue
+                });
+            });
+
+            // 기타 설정들
+            const minPartySize = document.querySelector('input[name="minPartySize"]');
+            const maxPartySize = document.querySelector('input[name="maxPartySize"]');
+            const advanceBookingDays = document.querySelector('input[name="advanceBookingDays"]');
+            const minAdvanceHours = document.querySelector('input[name="minAdvanceHours"]');
+            const specialNotes = document.querySelector('textarea[name="specialNotes"]');
+            const blackoutDates = document.querySelector('input[name="blackoutDates"]');
+
+            if (minPartySize) formData.append('minPartySize', minPartySize.value || '1');
+            if (maxPartySize) formData.append('maxPartySize', maxPartySize.value || '10');
+            if (advanceBookingDays) formData.append('advanceBookingDays', advanceBookingDays.value || '30');
+            if (minAdvanceHours) formData.append('minAdvanceHours', minAdvanceHours.value || '2');
+            if (specialNotes) formData.append('specialNotes', specialNotes.value || '');
+            if (blackoutDates) formData.append('blackoutDates', blackoutDates.value || '');
+
+            // FormData 크기 확인
+            console.log('FormData 항목 수:', Array.from(formData.entries()).length);
+
+            // 전송할 데이터 확인
+            console.log('=== 전송할 데이터 ===');
+            let count = 0;
             for (let [key, value] of formData.entries()) {
                 console.log(`${key}: ${value}`);
+                count++;
+            }
+            console.log(`총 ${count}개 항목 전송`);
+
+            // FormData를 무조건 URLSearchParams로 대체 (FormData 파라미터 인식 불가 문제)
+            if (true) {
+                console.log('FormData가 비어있음, URLSearchParams로 대체');
+                const params = new URLSearchParams();
+
+                params.append('reservationEnabled', reservationEnabled ? reservationEnabled.checked.toString() : 'false');
+                params.append('autoAccept', autoAccept ? autoAccept.checked.toString() : 'false');
+
+                // 요일별 체크박스 직접 처리
+                params.append('mondayEnabled', mondayCheckbox ? mondayCheckbox.checked.toString() : 'false');
+                params.append('tuesdayEnabled', tuesdayCheckbox ? tuesdayCheckbox.checked.toString() : 'false');
+
+                // 나머지 요일들
+                const wednesdayCheckbox = document.querySelector('input[name="wednesdayEnabled"]');
+                const thursdayCheckbox = document.querySelector('input[name="thursdayEnabled"]');
+                const fridayCheckbox = document.querySelector('input[name="fridayEnabled"]');
+                const saturdayCheckbox = document.querySelector('input[name="saturdayEnabled"]');
+                const sundayCheckbox = document.querySelector('input[name="sundayEnabled"]');
+
+                params.append('wednesdayEnabled', wednesdayCheckbox ? wednesdayCheckbox.checked.toString() : 'false');
+                params.append('thursdayEnabled', thursdayCheckbox ? thursdayCheckbox.checked.toString() : 'false');
+                params.append('fridayEnabled', fridayCheckbox ? fridayCheckbox.checked.toString() : 'false');
+                params.append('saturdayEnabled', saturdayCheckbox ? saturdayCheckbox.checked.toString() : 'false');
+                params.append('sundayEnabled', sundayCheckbox ? sundayCheckbox.checked.toString() : 'false');
+
+                // 시간 설정들 - 앞서 찾은 요소들 재사용
+                params.append('mondayStart', mondayStartVisible ? mondayStartVisible.value : '09:00');
+                params.append('mondayEnd', mondayEndVisible ? mondayEndVisible.value : '22:00');
+                params.append('tuesdayStart', tuesdayStartVisible ? tuesdayStartVisible.value : '09:00');
+                params.append('tuesdayEnd', tuesdayEndVisible ? tuesdayEndVisible.value : '22:00');
+
+                // 나머지 요일들 (체크 안 된 요일들은 기본값)
+                const wednesdayStartVisible = document.querySelector('input[name="wednesdayStartVisible"]');
+                const wednesdayEndVisible = document.querySelector('input[name="wednesdayEndVisible"]');
+                const thursdayStartVisible = document.querySelector('input[name="thursdayStartVisible"]');
+                const thursdayEndVisible = document.querySelector('input[name="thursdayEndVisible"]');
+                const fridayStartVisible = document.querySelector('input[name="fridayStartVisible"]');
+                const fridayEndVisible = document.querySelector('input[name="fridayEndVisible"]');
+                const saturdayStartVisible = document.querySelector('input[name="saturdayStartVisible"]');
+                const saturdayEndVisible = document.querySelector('input[name="saturdayEndVisible"]');
+                const sundayStartVisible = document.querySelector('input[name="sundayStartVisible"]');
+                const sundayEndVisible = document.querySelector('input[name="sundayEndVisible"]');
+
+                params.append('wednesdayStart', wednesdayStartVisible ? wednesdayStartVisible.value : '09:00');
+                params.append('wednesdayEnd', wednesdayEndVisible ? wednesdayEndVisible.value : '22:00');
+                params.append('thursdayStart', thursdayStartVisible ? thursdayStartVisible.value : '09:00');
+                params.append('thursdayEnd', thursdayEndVisible ? thursdayEndVisible.value : '22:00');
+                params.append('fridayStart', fridayStartVisible ? fridayStartVisible.value : '09:00');
+                params.append('fridayEnd', fridayEndVisible ? fridayEndVisible.value : '22:00');
+                params.append('saturdayStart', saturdayStartVisible ? saturdayStartVisible.value : '09:00');
+                params.append('saturdayEnd', saturdayEndVisible ? saturdayEndVisible.value : '22:00');
+                params.append('sundayStart', sundayStartVisible ? sundayStartVisible.value : '09:00');
+                params.append('sundayEnd', sundayEndVisible ? sundayEndVisible.value : '22:00');
+
+                console.log('시간 값 확인:', {
+                    mondayEnd: mondayEndVisible ? mondayEndVisible.value : 'not found',
+                    tuesdayEnd: tuesdayEndVisible ? tuesdayEndVisible.value : 'not found'
+                });
+
+                // 기타 설정들
+                const minPartySize = document.querySelector('input[name="minPartySize"]');
+                const maxPartySize = document.querySelector('input[name="maxPartySize"]');
+                const advanceBookingDays = document.querySelector('input[name="advanceBookingDays"]');
+                const minAdvanceHours = document.querySelector('input[name="minAdvanceHours"]');
+                const specialNotes = document.querySelector('textarea[name="specialNotes"]');
+                const blackoutDates = document.querySelector('input[name="blackoutDates"]');
+
+                if (minPartySize) params.append('minPartySize', minPartySize.value || '1');
+                if (maxPartySize) params.append('maxPartySize', maxPartySize.value || '10');
+                if (advanceBookingDays) params.append('advanceBookingDays', advanceBookingDays.value || '30');
+                if (minAdvanceHours) params.append('minAdvanceHours', minAdvanceHours.value || '2');
+                if (specialNotes) params.append('specialNotes', specialNotes.value || '');
+                if (blackoutDates) params.append('blackoutDates', blackoutDates.value || '');
+
+                console.log('URLSearchParams 데이터:', params.toString());
+
+                // 버튼 상태 관리
+                const submitBtn = this.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>저장 중...';
+                submitBtn.disabled = true;
+
+                // URLSearchParams로 전송
+                fetch(contextPath + '/reservation-settings/' + restaurantId + '/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('success', '예약 설정이 성공적으로 저장되었습니다!');
+                    } else {
+                        showNotification('error', '설정 저장 중 오류가 발생했습니다: ' + (data.message || '알 수 없는 오류'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('error', '네트워크 오류로 저장에 실패했습니다.');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+                return; // FormData 전송을 건너뜀
             }
 
             // 로딩 상태 표시
@@ -660,7 +804,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // 성공 알림
                     showNotification('success', '예약 설정이 성공적으로 저장되었습니다!');
                 } else {
                     showNotification('error', '설정 저장 중 오류가 발생했습니다: ' + (data.message || '알 수 없는 오류'));
@@ -671,7 +814,6 @@
                 showNotification('error', '네트워크 오류로 저장에 실패했습니다.');
             })
             .finally(() => {
-                // 버튼 상태 복원
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             });

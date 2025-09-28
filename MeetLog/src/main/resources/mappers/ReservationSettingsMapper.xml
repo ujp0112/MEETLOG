@@ -1,231 +1,224 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="dao.ReservationSettingsDAO">
 
-    <resultMap id="reservationSettingsResultMap" type="model.ReservationSettings">
-        <id property="id" column="id" />
-        <result property="restaurantId" column="restaurant_id" />
-        <result property="reservationEnabled" column="reservation_enabled" />
-        <result property="autoAccept" column="auto_accept" />
-        <result property="minPartySize" column="min_party_size" />
-        <result property="maxPartySize" column="max_party_size" />
-        <result property="advanceBookingDays" column="advance_booking_days" />
-        <result property="minAdvanceHours" column="min_advance_hours" />
-        <result property="reservationStartTime" column="reservation_start_time" />
-        <result property="reservationEndTime" column="reservation_end_time" />
-        <result property="availableDays" column="available_days" typeHandler="typehandler.JsonArrayTypeHandler" />
-        <result property="timeSlots" column="time_slots" typeHandler="typehandler.JsonArrayTypeHandler" />
-        <result property="blackoutDates" column="blackout_dates" typeHandler="typehandler.JsonArrayTypeHandler" />
-        <result property="specialNotes" column="special_notes" />
-        <result property="createdAt" column="created_at" />
-        <result property="updatedAt" column="updated_at" />
-
-        <!-- 요일별 설정 -->
-        <result property="mondayEnabled" column="monday_enabled" />
-        <result property="mondayStart" column="monday_start" />
-        <result property="mondayEnd" column="monday_end" />
-        <result property="tuesdayEnabled" column="tuesday_enabled" />
-        <result property="tuesdayStart" column="tuesday_start" />
-        <result property="tuesdayEnd" column="tuesday_end" />
-        <result property="wednesdayEnabled" column="wednesday_enabled" />
-        <result property="wednesdayStart" column="wednesday_start" />
-        <result property="wednesdayEnd" column="wednesday_end" />
-        <result property="thursdayEnabled" column="thursday_enabled" />
-        <result property="thursdayStart" column="thursday_start" />
-        <result property="thursdayEnd" column="thursday_end" />
-        <result property="fridayEnabled" column="friday_enabled" />
-        <result property="fridayStart" column="friday_start" />
-        <result property="fridayEnd" column="friday_end" />
-        <result property="saturdayEnabled" column="saturday_enabled" />
-        <result property="saturdayStart" column="saturday_start" />
-        <result property="saturdayEnd" column="saturday_end" />
-        <result property="sundayEnabled" column="sunday_enabled" />
-        <result property="sundayStart" column="sunday_start" />
-        <result property="sundayEnd" column="sunday_end" />
+    <!-- ReservationSettingsNew ResultMap -->
+    <resultMap id="ReservationSettingsResultMap" type="model.ReservationSettingsNew">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="autoAccept" column="auto_accept"/>
+        <result property="maxAdvanceDays" column="max_advance_days"/>
+        <result property="minAdvanceHours" column="min_advance_hours"/>
+        <result property="maxPartySize" column="max_party_size"/>
+        <result property="timeSlotInterval" column="time_slot_interval"/>
+        <result property="specialInstructions" column="special_instructions"/>
+        <result property="depositRequired" column="deposit_required"/>
+        <result property="depositAmount" column="deposit_amount"/>
+        <result property="allowWaitingList" column="allow_waiting_list"/>
+        <result property="maxWaitingList" column="max_waiting_list"/>
+        <result property="sendSmsConfirmation" column="send_sms_confirmation"/>
+        <result property="penaltyForNoshow" column="penalty_for_noshow"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="restaurantName" column="restaurant_name"/>
     </resultMap>
 
-    <!-- 음식점별 예약 설정 조회 -->
-    <select id="findByRestaurantId" parameterType="int" resultMap="reservationSettingsResultMap">
-        SELECT
-            id,
-            restaurant_id,
-            reservation_enabled,
-            auto_accept,
-            min_party_size,
-            max_party_size,
-            advance_booking_days,
-            min_advance_hours,
-            reservation_start_time,
-            reservation_end_time,
-            available_days,
-            time_slots,
-            blackout_dates,
-            special_notes,
-            created_at,
-            updated_at,
-            monday_enabled,
-            monday_start,
-            monday_end,
-            tuesday_enabled,
-            tuesday_start,
-            tuesday_end,
-            wednesday_enabled,
-            wednesday_start,
-            wednesday_end,
-            thursday_enabled,
-            thursday_start,
-            thursday_end,
-            friday_enabled,
-            friday_start,
-            friday_end,
-            saturday_enabled,
-            saturday_start,
-            saturday_end,
-            sunday_enabled,
-            sunday_start,
-            sunday_end
-        FROM restaurant_reservation_settings
-        WHERE restaurant_id = #{restaurantId}
+    <!-- ReservationOperatingHours ResultMap -->
+    <resultMap id="OperatingHoursResultMap" type="model.ReservationOperatingHours">
+        <id property="id" column="id"/>
+        <result property="settingsId" column="settings_id"/>
+        <result property="dayOfWeekString" column="day_of_week"/>
+        <result property="isEnabled" column="is_enabled"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="breakStartTime" column="break_start_time"/>
+        <result property="breakEndTime" column="break_end_time"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- ReservationBlackoutDate ResultMap -->
+    <resultMap id="BlackoutDateResultMap" type="model.ReservationBlackoutDate">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="blackoutDate" column="blackout_date"/>
+        <result property="reason" column="reason"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="restaurantName" column="restaurant_name"/>
+    </resultMap>
+
+    <!-- RestaurantTable ResultMap -->
+    <resultMap id="RestaurantTableResultMap" type="model.RestaurantTable">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="tableName" column="table_name"/>
+        <result property="tableNumber" column="table_number"/>
+        <result property="capacity" column="capacity"/>
+        <result property="tableTypeString" column="table_type"/>
+        <result property="isActive" column="is_active"/>
+        <result property="notes" column="notes"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="restaurantName" column="restaurant_name"/>
+    </resultMap>
+
+    <!-- 예약 설정 조회 -->
+    <select id="getByRestaurantId" parameterType="int" resultMap="ReservationSettingsResultMap">
+        SELECT rs.*,
+               r.name as restaurant_name
+        FROM reservation_settings rs
+        LEFT JOIN restaurants r ON rs.restaurant_id = r.id
+        WHERE rs.restaurant_id = #{restaurantId}
+          AND rs.is_active = true
     </select>
 
-    <!-- 예약 설정 등록 -->
-    <insert id="insert" parameterType="model.ReservationSettings" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO restaurant_reservation_settings (
-            restaurant_id,
-            reservation_enabled,
-            auto_accept,
-            min_party_size,
-            max_party_size,
-            advance_booking_days,
-            min_advance_hours,
-            reservation_start_time,
-            reservation_end_time,
-            available_days,
-            time_slots,
-            blackout_dates,
-            special_notes,
-            monday_enabled,
-            monday_start,
-            monday_end,
-            tuesday_enabled,
-            tuesday_start,
-            tuesday_end,
-            wednesday_enabled,
-            wednesday_start,
-            wednesday_end,
-            thursday_enabled,
-            thursday_start,
-            thursday_end,
-            friday_enabled,
-            friday_start,
-            friday_end,
-            saturday_enabled,
-            saturday_start,
-            saturday_end,
-            sunday_enabled,
-            sunday_start,
-            sunday_end
+    <!-- 예약 설정 저장 -->
+    <insert id="insert" parameterType="model.ReservationSettingsNew" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation_settings (
+            restaurant_id, auto_accept, max_advance_days, min_advance_hours,
+            max_party_size, time_slot_interval, special_instructions,
+            deposit_required, deposit_amount, allow_waiting_list, max_waiting_list,
+            send_sms_confirmation, penalty_for_noshow, is_active, created_at
         ) VALUES (
-            #{restaurantId},
-            #{reservationEnabled},
-            #{autoAccept},
-            #{minPartySize},
-            #{maxPartySize},
-            #{advanceBookingDays},
-            #{minAdvanceHours},
-            #{reservationStartTime},
-            #{reservationEndTime},
-            #{availableDays, typeHandler=typehandler.JsonArrayTypeHandler},
-            #{timeSlots, typeHandler=typehandler.JsonArrayTypeHandler},
-            #{blackoutDates, typeHandler=typehandler.JsonArrayTypeHandler},
-            #{specialNotes},
-            #{mondayEnabled},
-            #{mondayStart},
-            #{mondayEnd},
-            #{tuesdayEnabled},
-            #{tuesdayStart},
-            #{tuesdayEnd},
-            #{wednesdayEnabled},
-            #{wednesdayStart},
-            #{wednesdayEnd},
-            #{thursdayEnabled},
-            #{thursdayStart},
-            #{thursdayEnd},
-            #{fridayEnabled},
-            #{fridayStart},
-            #{fridayEnd},
-            #{saturdayEnabled},
-            #{saturdayStart},
-            #{saturdayEnd},
-            #{sundayEnabled},
-            #{sundayStart},
-            #{sundayEnd}
+            #{restaurantId}, #{autoAccept}, #{maxAdvanceDays}, #{minAdvanceHours},
+            #{maxPartySize}, #{timeSlotInterval}, #{specialInstructions},
+            #{depositRequired}, #{depositAmount}, #{allowWaitingList}, #{maxWaitingList},
+            #{sendSmsConfirmation}, #{penaltyForNoshow}, #{isActive}, NOW()
         )
     </insert>
 
-    <!-- 예약 설정 업데이트 -->
-    <update id="update" parameterType="model.ReservationSettings">
-        UPDATE restaurant_reservation_settings
-        SET
-            reservation_enabled = #{reservationEnabled},
+    <!-- 예약 설정 수정 -->
+    <update id="update" parameterType="model.ReservationSettingsNew">
+        UPDATE reservation_settings SET
             auto_accept = #{autoAccept},
-            min_party_size = #{minPartySize},
-            max_party_size = #{maxPartySize},
-            advance_booking_days = #{advanceBookingDays},
+            max_advance_days = #{maxAdvanceDays},
             min_advance_hours = #{minAdvanceHours},
-            reservation_start_time = #{reservationStartTime},
-            reservation_end_time = #{reservationEndTime},
-            available_days = #{availableDays, typeHandler=typehandler.JsonArrayTypeHandler},
-            time_slots = #{timeSlots, typeHandler=typehandler.JsonArrayTypeHandler},
-            blackout_dates = #{blackoutDates, typeHandler=typehandler.JsonArrayTypeHandler},
-            special_notes = #{specialNotes},
-            monday_enabled = #{mondayEnabled},
-            monday_start = #{mondayStart},
-            monday_end = #{mondayEnd},
-            tuesday_enabled = #{tuesdayEnabled},
-            tuesday_start = #{tuesdayStart},
-            tuesday_end = #{tuesdayEnd},
-            wednesday_enabled = #{wednesdayEnabled},
-            wednesday_start = #{wednesdayStart},
-            wednesday_end = #{wednesdayEnd},
-            thursday_enabled = #{thursdayEnabled},
-            thursday_start = #{thursdayStart},
-            thursday_end = #{thursdayEnd},
-            friday_enabled = #{fridayEnabled},
-            friday_start = #{fridayStart},
-            friday_end = #{fridayEnd},
-            saturday_enabled = #{saturdayEnabled},
-            saturday_start = #{saturdayStart},
-            saturday_end = #{saturdayEnd},
-            sunday_enabled = #{sundayEnabled},
-            sunday_start = #{sundayStart},
-            sunday_end = #{sundayEnd},
+            max_party_size = #{maxPartySize},
+            time_slot_interval = #{timeSlotInterval},
+            special_instructions = #{specialInstructions},
+            deposit_required = #{depositRequired},
+            deposit_amount = #{depositAmount},
+            allow_waiting_list = #{allowWaitingList},
+            max_waiting_list = #{maxWaitingList},
+            send_sms_confirmation = #{sendSmsConfirmation},
+            penalty_for_noshow = #{penaltyForNoshow},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
 
-    <!-- 예약 활성화/비활성화 -->
-    <update id="updateReservationEnabled" parameterType="map">
-        UPDATE restaurant_reservation_settings
-        SET reservation_enabled = #{enabled},
+    <!-- 예약 설정 삭제 (비활성화) -->
+    <update id="delete" parameterType="int">
+        UPDATE reservation_settings SET
+            is_active = false,
             updated_at = NOW()
-        WHERE restaurant_id = #{restaurantId}
+        WHERE id = #{id}
     </update>
 
-    <!-- 자동 승인 설정 변경 -->
-    <update id="updateAutoAccept" parameterType="map">
-        UPDATE restaurant_reservation_settings
-        SET auto_accept = #{autoAccept},
+    <!-- 운영시간 조회 -->
+    <select id="getOperatingHours" parameterType="int" resultMap="OperatingHoursResultMap">
+        SELECT *
+        FROM reservation_operating_hours
+        WHERE settings_id = #{settingsId}
+        ORDER BY FIELD(day_of_week, 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY')
+    </select>
+
+    <!-- 운영시간 저장 -->
+    <insert id="insertOperatingHours" parameterType="map">
+        INSERT INTO reservation_operating_hours (
+            settings_id, day_of_week, is_enabled, start_time, end_time,
+            break_start_time, break_end_time, created_at
+        ) VALUES (
+            #{settingsId}, #{dayOfWeek}, #{isEnabled}, #{startTime}, #{endTime},
+            #{breakStartTime}, #{breakEndTime}, NOW()
+        )
+    </insert>
+
+    <!-- 운영시간 수정 -->
+    <update id="updateOperatingHours" parameterType="model.ReservationOperatingHours">
+        UPDATE reservation_operating_hours SET
+            is_enabled = #{isEnabled},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            break_start_time = #{breakStartTime},
+            break_end_time = #{breakEndTime},
             updated_at = NOW()
-        WHERE restaurant_id = #{restaurantId}
+        WHERE id = #{id}
     </update>
 
-    <!-- 예약 설정 삭제 -->
-    <delete id="delete" parameterType="int">
-        DELETE FROM restaurant_reservation_settings
-        WHERE restaurant_id = #{restaurantId}
-    </delete>
+    <!-- 예약 불가 날짜 조회 -->
+    <select id="getBlackoutDates" parameterType="int" resultMap="BlackoutDateResultMap">
+        SELECT rbd.*,
+               r.name as restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.restaurant_id = #{restaurantId}
+          AND rbd.is_active = true
+          AND rbd.blackout_date >= CURDATE()
+        ORDER BY rbd.blackout_date ASC
+    </select>
+
+    <!-- 예약 불가 날짜 추가 -->
+    <insert id="insertBlackoutDate" parameterType="model.ReservationBlackoutDate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation_blackout_dates (
+            restaurant_id, blackout_date, reason, is_active, created_at
+        ) VALUES (
+            #{restaurantId}, #{blackoutDate}, #{reason}, #{isActive}, NOW()
+        )
+    </insert>
+
+    <!-- 예약 불가 날짜 삭제 (비활성화) -->
+    <update id="deleteBlackoutDate" parameterType="int">
+        UPDATE reservation_blackout_dates SET
+            is_active = false,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 테이블 목록 조회 -->
+    <select id="getTables" parameterType="int" resultMap="RestaurantTableResultMap">
+        SELECT rt.*,
+               r.name as restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+          AND rt.is_active = true
+        ORDER BY rt.table_number ASC
+    </select>
+
+    <!-- 테이블 추가 -->
+    <insert id="insertTable" parameterType="model.RestaurantTable" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_tables (
+            restaurant_id, table_name, table_number, capacity,
+            table_type, is_active, notes, created_at
+        ) VALUES (
+            #{restaurantId}, #{tableName}, #{tableNumber}, #{capacity},
+            #{tableTypeString}, #{isActive}, #{notes}, NOW()
+        )
+    </insert>
+
+    <!-- 테이블 수정 -->
+    <update id="updateTable" parameterType="model.RestaurantTable">
+        UPDATE restaurant_tables SET
+            table_name = #{tableName},
+            table_number = #{tableNumber},
+            capacity = #{capacity},
+            table_type = #{tableTypeString},
+            notes = #{notes},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 테이블 삭제 (비활성화) -->
+    <update id="deleteTable" parameterType="int">
+        UPDATE restaurant_tables SET
+            is_active = false,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
 
 </mapper>

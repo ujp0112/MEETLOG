@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ArrayList;
 
 @WebServlet("/reservation-settings/*")
 public class ReservationSettingsServlet extends HttpServlet {
@@ -314,6 +315,22 @@ public class ReservationSettingsServlet extends HttpServlet {
         // 특별 안내사항
         settings.setSpecialNotes(request.getParameter("specialNotes"));
 
+        // 예약 불가 날짜
+        String blackoutDates = request.getParameter("blackoutDates");
+        System.out.println("blackoutDates 파라미터: " + blackoutDates);
+        if (blackoutDates != null && !blackoutDates.trim().isEmpty()) {
+            // 쉼표로 구분된 날짜들을 리스트로 변환
+            String[] dates = blackoutDates.split(",");
+            List<String> dateList = new ArrayList<>();
+            for (String date : dates) {
+                String trimmedDate = date.trim();
+                if (!trimmedDate.isEmpty()) {
+                    dateList.add(trimmedDate);
+                }
+            }
+            settings.setBlackoutDates(dateList);
+        }
+
         // 예약 가능 요일
         String[] availableDays = request.getParameterValues("availableDays");
         if (availableDays != null) {
@@ -324,13 +341,24 @@ public class ReservationSettingsServlet extends HttpServlet {
     }
 
     private void parseWeeklySettings(HttpServletRequest request, ReservationSettings settings) {
+        System.out.println("=== parseWeeklySettings 시작 ===");
+
+        // 모든 파라미터 출력
+        System.out.println("=== 모든 파라미터 ===");
+        request.getParameterMap().forEach((key, values) -> {
+            System.out.println(key + ": " + String.join(", ", values));
+        });
+
         // 월요일
-        settings.setMondayEnabled(Boolean.parseBoolean(request.getParameter("mondayEnabled")));
+        boolean mondayEnabled = Boolean.parseBoolean(request.getParameter("mondayEnabled"));
+        settings.setMondayEnabled(mondayEnabled);
+        System.out.println("=== 월요일 파라미터 디버깅 ===");
+        System.out.println("mondayEnabled: " + mondayEnabled);
+
         try {
             String mondayStart = request.getParameter("mondayStart");
             String mondayEnd = request.getParameter("mondayEnd");
 
-            System.out.println("=== 월요일 파라미터 디버깅 ===");
             System.out.println("mondayStart: " + mondayStart);
             System.out.println("mondayEnd: " + mondayEnd);
 
@@ -346,16 +374,24 @@ public class ReservationSettingsServlet extends HttpServlet {
         }
 
         // 화요일
-        settings.setTuesdayEnabled(Boolean.parseBoolean(request.getParameter("tuesdayEnabled")));
+        boolean tuesdayEnabled = Boolean.parseBoolean(request.getParameter("tuesdayEnabled"));
+        settings.setTuesdayEnabled(tuesdayEnabled);
+        System.out.println("=== 화요일 파라미터 디버깅 ===");
+        System.out.println("tuesdayEnabled: " + tuesdayEnabled);
+
         try {
             String tuesdayStart = request.getParameter("tuesdayStart");
             String tuesdayEnd = request.getParameter("tuesdayEnd");
+
+            System.out.println("tuesdayStart: " + tuesdayStart);
+            System.out.println("tuesdayEnd: " + tuesdayEnd);
 
             settings.setTuesdayStart(tuesdayStart != null && !tuesdayStart.isEmpty() ?
                 LocalTime.parse(tuesdayStart) : LocalTime.of(9, 0));
             settings.setTuesdayEnd(tuesdayEnd != null && !tuesdayEnd.isEmpty() ?
                 LocalTime.parse(tuesdayEnd) : LocalTime.of(22, 0));
         } catch (Exception e) {
+            System.out.println("화요일 파싱 오류: " + e.getMessage());
             settings.setTuesdayStart(LocalTime.of(9, 0));
             settings.setTuesdayEnd(LocalTime.of(22, 0));
         }
