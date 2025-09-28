@@ -91,6 +91,7 @@
         <mapper resource="mappers/UserCollectionMapper.xml" />
 		<mapper resource="mappers/UserStorageMapper.xml" />
 		<mapper resource="mappers/CourseCommentMapper.xml" />
+		<mapper resource="mappers/ReservationSettingsMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

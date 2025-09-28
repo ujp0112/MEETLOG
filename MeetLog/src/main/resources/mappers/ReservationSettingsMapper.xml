@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ReservationSettingsDAO">
+
+    <resultMap id="reservationSettingsResultMap" type="model.ReservationSettings">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id" />
+        <result property="reservationEnabled" column="reservation_enabled" />
+        <result property="autoAccept" column="auto_accept" />
+        <result property="minPartySize" column="min_party_size" />
+        <result property="maxPartySize" column="max_party_size" />
+        <result property="advanceBookingDays" column="advance_booking_days" />
+        <result property="minAdvanceHours" column="min_advance_hours" />
+        <result property="reservationStartTime" column="reservation_start_time" />
+        <result property="reservationEndTime" column="reservation_end_time" />
+        <result property="availableDays" column="available_days" typeHandler="typehandler.JsonArrayTypeHandler" />
+        <result property="timeSlots" column="time_slots" typeHandler="typehandler.JsonArrayTypeHandler" />
+        <result property="blackoutDates" column="blackout_dates" typeHandler="typehandler.JsonArrayTypeHandler" />
+        <result property="specialNotes" column="special_notes" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+
+        <!-- 요일별 설정 -->
+        <result property="mondayEnabled" column="monday_enabled" />
+        <result property="mondayStart" column="monday_start" />
+        <result property="mondayEnd" column="monday_end" />
+        <result property="tuesdayEnabled" column="tuesday_enabled" />
+        <result property="tuesdayStart" column="tuesday_start" />
+        <result property="tuesdayEnd" column="tuesday_end" />
+        <result property="wednesdayEnabled" column="wednesday_enabled" />
+        <result property="wednesdayStart" column="wednesday_start" />
+        <result property="wednesdayEnd" column="wednesday_end" />
+        <result property="thursdayEnabled" column="thursday_enabled" />
+        <result property="thursdayStart" column="thursday_start" />
+        <result property="thursdayEnd" column="thursday_end" />
+        <result property="fridayEnabled" column="friday_enabled" />
+        <result property="fridayStart" column="friday_start" />
+        <result property="fridayEnd" column="friday_end" />
+        <result property="saturdayEnabled" column="saturday_enabled" />
+        <result property="saturdayStart" column="saturday_start" />
+        <result property="saturdayEnd" column="saturday_end" />
+        <result property="sundayEnabled" column="sunday_enabled" />
+        <result property="sundayStart" column="sunday_start" />
+        <result property="sundayEnd" column="sunday_end" />
+    </resultMap>
+
+    <!-- 음식점별 예약 설정 조회 -->
+    <select id="findByRestaurantId" parameterType="int" resultMap="reservationSettingsResultMap">
+        SELECT
+            id,
+            restaurant_id,
+            reservation_enabled,
+            auto_accept,
+            min_party_size,
+            max_party_size,
+            advance_booking_days,
+            min_advance_hours,
+            reservation_start_time,
+            reservation_end_time,
+            available_days,
+            time_slots,
+            blackout_dates,
+            special_notes,
+            created_at,
+            updated_at,
+            monday_enabled,
+            monday_start,
+            monday_end,
+            tuesday_enabled,
+            tuesday_start,
+            tuesday_end,
+            wednesday_enabled,
+            wednesday_start,
+            wednesday_end,
+            thursday_enabled,
+            thursday_start,
+            thursday_end,
+            friday_enabled,
+            friday_start,
+            friday_end,
+            saturday_enabled,
+            saturday_start,
+            saturday_end,
+            sunday_enabled,
+            sunday_start,
+            sunday_end
+        FROM restaurant_reservation_settings
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 예약 설정 등록 -->
+    <insert id="insert" parameterType="model.ReservationSettings" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_reservation_settings (
+            restaurant_id,
+            reservation_enabled,
+            auto_accept,
+            min_party_size,
+            max_party_size,
+            advance_booking_days,
+            min_advance_hours,
+            reservation_start_time,
+            reservation_end_time,
+            available_days,
+            time_slots,
+            blackout_dates,
+            special_notes,
+            monday_enabled,
+            monday_start,
+            monday_end,
+            tuesday_enabled,
+            tuesday_start,
+            tuesday_end,
+            wednesday_enabled,
+            wednesday_start,
+            wednesday_end,
+            thursday_enabled,
+            thursday_start,
+            thursday_end,
+            friday_enabled,
+            friday_start,
+            friday_end,
+            saturday_enabled,
+            saturday_start,
+            saturday_end,
+            sunday_enabled,
+            sunday_start,
+            sunday_end
+        ) VALUES (
+            #{restaurantId},
+            #{reservationEnabled},
+            #{autoAccept},
+            #{minPartySize},
+            #{maxPartySize},
+            #{advanceBookingDays},
+            #{minAdvanceHours},
+            #{reservationStartTime},
+            #{reservationEndTime},
+            #{availableDays, typeHandler=typehandler.JsonArrayTypeHandler},
+            #{timeSlots, typeHandler=typehandler.JsonArrayTypeHandler},
+            #{blackoutDates, typeHandler=typehandler.JsonArrayTypeHandler},
+            #{specialNotes},
+            #{mondayEnabled},
+            #{mondayStart},
+            #{mondayEnd},
+            #{tuesdayEnabled},
+            #{tuesdayStart},
+            #{tuesdayEnd},
+            #{wednesdayEnabled},
+            #{wednesdayStart},
+            #{wednesdayEnd},
+            #{thursdayEnabled},
+            #{thursdayStart},
+            #{thursdayEnd},
+            #{fridayEnabled},
+            #{fridayStart},
+            #{fridayEnd},
+            #{saturdayEnabled},
+            #{saturdayStart},
+            #{saturdayEnd},
+            #{sundayEnabled},
+            #{sundayStart},
+            #{sundayEnd}
+        )
+    </insert>
+
+    <!-- 예약 설정 업데이트 -->
+    <update id="update" parameterType="model.ReservationSettings">
+        UPDATE restaurant_reservation_settings
+        SET
+            reservation_enabled = #{reservationEnabled},
+            auto_accept = #{autoAccept},
+            min_party_size = #{minPartySize},
+            max_party_size = #{maxPartySize},
+            advance_booking_days = #{advanceBookingDays},
+            min_advance_hours = #{minAdvanceHours},
+            reservation_start_time = #{reservationStartTime},
+            reservation_end_time = #{reservationEndTime},
+            available_days = #{availableDays, typeHandler=typehandler.JsonArrayTypeHandler},
+            time_slots = #{timeSlots, typeHandler=typehandler.JsonArrayTypeHandler},
+            blackout_dates = #{blackoutDates, typeHandler=typehandler.JsonArrayTypeHandler},
+            special_notes = #{specialNotes},
+            monday_enabled = #{mondayEnabled},
+            monday_start = #{mondayStart},
+            monday_end = #{mondayEnd},
+            tuesday_enabled = #{tuesdayEnabled},
+            tuesday_start = #{tuesdayStart},
+            tuesday_end = #{tuesdayEnd},
+            wednesday_enabled = #{wednesdayEnabled},
+            wednesday_start = #{wednesdayStart},
+            wednesday_end = #{wednesdayEnd},
+            thursday_enabled = #{thursdayEnabled},
+            thursday_start = #{thursdayStart},
+            thursday_end = #{thursdayEnd},
+            friday_enabled = #{fridayEnabled},
+            friday_start = #{fridayStart},
+            friday_end = #{fridayEnd},
+            saturday_enabled = #{saturdayEnabled},
+            saturday_start = #{saturdayStart},
+            saturday_end = #{saturdayEnd},
+            sunday_enabled = #{sundayEnabled},
+            sunday_start = #{sundayStart},
+            sunday_end = #{sundayEnd},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 예약 활성화/비활성화 -->
+    <update id="updateReservationEnabled" parameterType="map">
+        UPDATE restaurant_reservation_settings
+        SET reservation_enabled = #{enabled},
+            updated_at = NOW()
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <!-- 자동 승인 설정 변경 -->
+    <update id="updateAutoAccept" parameterType="map">
+        UPDATE restaurant_reservation_settings
+        SET auto_accept = #{autoAccept},
+            updated_at = NOW()
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <!-- 예약 설정 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM restaurant_reservation_settings
+        WHERE restaurant_id = #{restaurantId}
+    </delete>
+
+</mapper>

@@ -1,97 +1,78 @@
 package model;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 /**
  * 예약 설정 모델 클래스
  */
 public class ReservationSettings {
-    private int settingsId;
+    private int id;
     private int restaurantId;
+    private boolean reservationEnabled; // 예약 기능 활성화 여부
     private boolean autoAccept; // 자동 승인 여부
-    private int maxAdvanceDays; // 최대 예약 가능 일수
-    private int minAdvanceHours; // 최소 예약 시간 (몇 시간 전까지)
+    private int minPartySize; // 최소 인원수
     private int maxPartySize; // 최대 인원수
-    private int timeSlotInterval; // 시간 간격 (분 단위)
-    private String specialInstructions; // 특별 안내사항
-    
-    // 요일별 운영 설정
+    private int advanceBookingDays; // 최대 예약 가능 일수
+    private int minAdvanceHours; // 최소 예약 시간 (몇 시간 전까지)
+    private LocalTime reservationStartTime; // 예약 시작 시간
+    private LocalTime reservationEndTime; // 예약 종료 시간
+    private List<String> availableDays; // 예약 가능 요일
+    private List<String> timeSlots; // 예약 가능 시간대
+    private List<String> blackoutDates; // 예약 불가 날짜
+    private String specialNotes; // 특별 안내사항
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+
+    // 요일별 설정 필드
     private boolean mondayEnabled;
     private LocalTime mondayStart;
     private LocalTime mondayEnd;
-    
     private boolean tuesdayEnabled;
     private LocalTime tuesdayStart;
     private LocalTime tuesdayEnd;
-    
     private boolean wednesdayEnabled;
     private LocalTime wednesdayStart;
     private LocalTime wednesdayEnd;
-    
     private boolean thursdayEnabled;
     private LocalTime thursdayStart;
     private LocalTime thursdayEnd;
-    
     private boolean fridayEnabled;
     private LocalTime fridayStart;
     private LocalTime fridayEnd;
-    
     private boolean saturdayEnabled;
     private LocalTime saturdayStart;
     private LocalTime saturdayEnd;
-    
     private boolean sundayEnabled;
     private LocalTime sundayStart;
     private LocalTime sundayEnd;
 
+    // 기본 생성자
     public ReservationSettings() {
         // 기본값 설정
+        this.reservationEnabled = true;
         this.autoAccept = false;
-        this.maxAdvanceDays = 30;
+        this.minPartySize = 1;
+        this.maxPartySize = 10;
+        this.advanceBookingDays = 30;
         this.minAdvanceHours = 2;
-        this.maxPartySize = 8;
-        this.timeSlotInterval = 30;
-        
-        // 기본 운영시간 설정 (오전 11시 ~ 오후 9시)
-        LocalTime defaultStart = LocalTime.of(11, 0);
-        LocalTime defaultEnd = LocalTime.of(21, 0);
-        
-        this.mondayEnabled = true;
-        this.mondayStart = defaultStart;
-        this.mondayEnd = defaultEnd;
-        
-        this.tuesdayEnabled = true;
-        this.tuesdayStart = defaultStart;
-        this.tuesdayEnd = defaultEnd;
-        
-        this.wednesdayEnabled = true;
-        this.wednesdayStart = defaultStart;
-        this.wednesdayEnd = defaultEnd;
-        
-        this.thursdayEnabled = true;
-        this.thursdayStart = defaultStart;
-        this.thursdayEnd = defaultEnd;
-        
-        this.fridayEnabled = true;
-        this.fridayStart = defaultStart;
-        this.fridayEnd = defaultEnd;
-        
-        this.saturdayEnabled = true;
-        this.saturdayStart = defaultStart;
-        this.saturdayEnd = defaultEnd;
-        
-        this.sundayEnabled = true;
-        this.sundayStart = defaultStart;
-        this.sundayEnd = defaultEnd;
+        this.reservationStartTime = LocalTime.of(9, 0);
+        this.reservationEndTime = LocalTime.of(22, 0);
+    }
+
+    public ReservationSettings(int restaurantId) {
+        this();
+        this.restaurantId = restaurantId;
     }
 
     // Getters and Setters
-    public int getSettingsId() {
-        return settingsId;
+    public int getId() {
+        return id;
     }
 
-    public void setSettingsId(int settingsId) {
-        this.settingsId = settingsId;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getRestaurantId() {
@@ -110,12 +91,28 @@ public class ReservationSettings {
         this.autoAccept = autoAccept;
     }
 
-    public int getMaxAdvanceDays() {
-        return maxAdvanceDays;
+    public boolean isReservationEnabled() {
+        return reservationEnabled;
     }
 
-    public void setMaxAdvanceDays(int maxAdvanceDays) {
-        this.maxAdvanceDays = maxAdvanceDays;
+    public void setReservationEnabled(boolean reservationEnabled) {
+        this.reservationEnabled = reservationEnabled;
+    }
+
+    public int getMinPartySize() {
+        return minPartySize;
+    }
+
+    public void setMinPartySize(int minPartySize) {
+        this.minPartySize = minPartySize;
+    }
+
+    public int getAdvanceBookingDays() {
+        return advanceBookingDays;
+    }
+
+    public void setAdvanceBookingDays(int advanceBookingDays) {
+        this.advanceBookingDays = advanceBookingDays;
     }
 
     public int getMinAdvanceHours() {
@@ -134,20 +131,68 @@ public class ReservationSettings {
         this.maxPartySize = maxPartySize;
     }
 
-    public int getTimeSlotInterval() {
-        return timeSlotInterval;
+    public LocalTime getReservationStartTime() {
+        return reservationStartTime;
     }
 
-    public void setTimeSlotInterval(int timeSlotInterval) {
-        this.timeSlotInterval = timeSlotInterval;
+    public void setReservationStartTime(LocalTime reservationStartTime) {
+        this.reservationStartTime = reservationStartTime;
     }
 
-    public String getSpecialInstructions() {
-        return specialInstructions;
+    public LocalTime getReservationEndTime() {
+        return reservationEndTime;
     }
 
-    public void setSpecialInstructions(String specialInstructions) {
-        this.specialInstructions = specialInstructions;
+    public void setReservationEndTime(LocalTime reservationEndTime) {
+        this.reservationEndTime = reservationEndTime;
+    }
+
+    public List<String> getAvailableDays() {
+        return availableDays;
+    }
+
+    public void setAvailableDays(List<String> availableDays) {
+        this.availableDays = availableDays;
+    }
+
+    public List<String> getTimeSlots() {
+        return timeSlots;
+    }
+
+    public void setTimeSlots(List<String> timeSlots) {
+        this.timeSlots = timeSlots;
+    }
+
+    public List<String> getBlackoutDates() {
+        return blackoutDates;
+    }
+
+    public void setBlackoutDates(List<String> blackoutDates) {
+        this.blackoutDates = blackoutDates;
+    }
+
+    public String getSpecialNotes() {
+        return specialNotes;
+    }
+
+    public void setSpecialNotes(String specialNotes) {
+        this.specialNotes = specialNotes;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     // 요일별 설정 Getters and Setters

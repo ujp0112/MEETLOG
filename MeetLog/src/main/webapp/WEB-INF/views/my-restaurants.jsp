@@ -84,18 +84,22 @@
                                     </div>
                                 </div>
                                 
-                                <div class="flex space-x-2">
-                                    <a href="${pageContext.request.contextPath}/restaurant/detail/${restaurant.id}" 
-                                       class="flex-1 btn-secondary text-white py-2 px-4 rounded-xl font-semibold text-center">
+                                <div class="grid grid-cols-2 gap-2 mb-3">
+                                    <a href="${pageContext.request.contextPath}/restaurant/detail/${restaurant.id}"
+                                       class="btn-secondary text-white py-2 px-4 rounded-xl font-semibold text-center">
                                         상세보기
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/business/menus/${restaurant.id}" 
-                                       class="flex-1 btn-primary text-white py-2 px-4 rounded-xl font-semibold text-center">
+                                    <a href="${pageContext.request.contextPath}/business/menus/${restaurant.id}"
+                                       class="btn-primary text-white py-2 px-4 rounded-xl font-semibold text-center">
                                         메뉴관리
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/business/restaurants/edit?id=${restaurant.id}" 
-								       class="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-xl font-semibold text-center card-hover">
+                                    <a href="${pageContext.request.contextPath}/business/restaurants/edit?id=${restaurant.id}"
+								       class="bg-gradient-to-r from-green-500 to-emerald-500 text-white py-2 px-4 rounded-xl font-semibold text-center card-hover">
 								        수정하기
+								    </a>
+                                    <a href="${pageContext.request.contextPath}/reservation-settings/${restaurant.id}"
+								       class="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-2 px-4 rounded-xl font-semibold text-center card-hover">
+								        ⚙️ 예약설정
 								    </a>
                                 </div>
                                 
