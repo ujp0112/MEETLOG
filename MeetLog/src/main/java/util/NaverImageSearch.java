@@ -14,64 +14,117 @@ import org.json.JSONObject;
 public class NaverImageSearch {
 
     /**
-     * Naver 이미지 검색 API를 호출하여 이미지 URL 목록을 반환합니다.
-     * @param query 검색할 키워드 (가게 이름 등)
-     * @param display 가져올 이미지 개수
-     * @return 이미지 링크(URL) 목록
+     * [개선] 장소 검색을 먼저 시도하고, 실패 시 이미지 검색을 실행하는 메인 메소드
+     */
+    public static String findBestImage(String query) {
+        String imageUrl = searchLocalAndGetThumbnail(query);
+
+        // [수정] 장소 검색 결과가 실제 이미지 URL이 아닐 경우(예: 블로그 링크)를 대비해 2순위 검색 실행
+        if (imageUrl == null || !isImageUrl(imageUrl)) {
+            List<String> images = searchImages(query, 1);
+            if (images != null && !images.isEmpty()) {
+                imageUrl = images.get(0);
+            }
+        }
+        return imageUrl;
+    }
+    
+    /**
+     * [기존] searchImages는 ExternalRestaurantDetailServlet에서 사용하므로 public 유지
      */
     public static List<String> searchImages(String query, int display) {
-        // ApiKeyLoader를 통해 api.properties 파일에서 네이버 API 키를 불러옵니다.
         String clientId = AppConfigListener.getApiKey("naverClientId");
         String clientSecret = AppConfigListener.getApiKey("naverClientSecret");
         List<String> imageLinks = new ArrayList<>();
-
-        if (clientId == null || clientSecret == null) {
-            System.err.println("Naver API credentials (naverClientId, naverClientSecret) not found in api.properties.");
-            return imageLinks;
-        }
+        if (clientId == null || clientSecret == null) return imageLinks;
 
         try {
             String encodedQuery = URLEncoder.encode(query, "UTF-8");
-            // sort=sim은 유사도순 정렬을 의미합니다.
             String apiURL = "https://openapi.naver.com/v1/search/image?query=" + encodedQuery + "&display=" + display + "&sort=sim";
+            JSONObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
+            if (jsonResponse != null && jsonResponse.has("items")) {
+                JSONArray items = jsonResponse.getJSONArray("items");
+                for (int i = 0; i < items.length(); i++) {
+                    imageLinks.add(items.getJSONObject(i).getString("link"));
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error during Naver Image Search: " + e.getMessage());
+        }
+        return imageLinks;
+    }
+
+    /**
+     * [신규] Naver 장소 검색 API를 호출하여 대표 썸네일 이미지 URL을 반환
+     */
+    private static String searchLocalAndGetThumbnail(String query) {
+        String clientId = AppConfigListener.getApiKey("naverClientId");
+        String clientSecret = AppConfigListener.getApiKey("naverClientSecret");
+        if (clientId == null || clientSecret == null) return null;
+
+        try {
+            String encodedQuery = URLEncoder.encode(query, "UTF-8");
+            String apiURL = "https://openapi.naver.com/v1/search/local.json?query=" + encodedQuery + "&display=1&sort=random";
             
-            URL url = new URL(apiURL);
+            JSONObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
+            if (jsonResponse != null && jsonResponse.has("items")) {
+                JSONArray items = jsonResponse.getJSONArray("items");
+                if (items.length() > 0) {
+                    JSONObject item = items.getJSONObject(0);
+                    // [수정] 장소 검색 결과에는 'thumbnail' 필드가 있습니다. 이것을 우선적으로 사용합니다.
+                    if (item.has("thumbnail") && !item.getString("thumbnail").isEmpty()) {
+                        return item.getString("thumbnail"); 
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error during Naver Local Search: " + e.getMessage());
+        }
+        return null;
+    }
+    
+    /**
+     * [신규] API 호출 로직 중복 제거를 위한 헬퍼 메소드
+     */
+    private static JSONObject executeApiCall(String apiUrl, String clientId, String clientSecret) {
+        try {
+            URL url = new URL(apiUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setRequestProperty("X-Naver-Client-Id", clientId);
             con.setRequestProperty("X-Naver-Client-Secret", clientSecret);
-
             int responseCode = con.getResponseCode();
-            BufferedReader br;
-            if (responseCode == 200) { // 정상 호출
-                br = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            } else { // 에러 발생
-                br = new BufferedReader(new InputStreamReader(con.getErrorStream()));
-            }
-
-            String inputLine;
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                responseCode == 200 ? con.getInputStream() : con.getErrorStream()
+            ));
             StringBuffer response = new StringBuffer();
+            String inputLine;
             while ((inputLine = br.readLine()) != null) {
                 response.append(inputLine);
             }
             br.close();
-
             if (responseCode == 200) {
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                JSONArray items = jsonResponse.getJSONArray("items");
-                for (int i = 0; i < items.length(); i++) {
-                    JSONObject item = items.getJSONObject(i);
-                    // 썸네일(thumbnail)이 아닌 원본 이미지(link)의 URL을 추가합니다.
-                    imageLinks.add(item.getString("link"));
-                }
+                return new JSONObject(response.toString());
             } else {
-                 System.err.println("Naver API Error: " + response.toString());
+                System.err.println("Naver API Error for URL (" + apiUrl + "): " + response.toString());
+                return null;
             }
-
         } catch (Exception e) {
-            System.err.println("Error during Naver Image Search: " + e.getMessage());
             e.printStackTrace();
+            return null;
         }
-        return imageLinks;
+    }
+
+    /**
+     * [신규] 반환된 URL이 실제 이미지 파일인지 간단하게 확인하는 헬퍼 메소드
+     */
+    private static boolean isImageUrl(String url) {
+        if (url == null || url.isEmpty()) return false;
+        String lowerCaseUrl = url.toLowerCase();
+        // 네이버 썸네일은 ?type=... 파라미터가 붙으므로, 파라미터 앞부분을 기준으로 확장자를 체크합니다.
+        String path = lowerCaseUrl.split("\\?")[0];
+        return path.endsWith(".jpg") || path.endsWith(".jpeg") || 
+               path.endsWith(".png") || path.endsWith(".gif");
     }
 }
+

@@ -1,8 +1,10 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.ibatis.session.SqlSession;
 
@@ -93,5 +95,54 @@ public class RestaurantDAO {
         params.put("restaurantId", restaurantId);
         params.put("imageList", imageList);
         return session.delete(NAMESPACE + ".deleteRestaurantImagesByNames", params);
+    }
+    /**
+     * 특정 위도/경도 주변의 레스토랑을 카테고리 필터와 함께 조회합니다.
+     * @param latitude 중심 위도
+     * @param longitude 중심 경도
+     * @param radiusKm 검색 반경 (km)
+     * @param categories 필터링할 카테고리 목록
+     * @return 조건에 맞는 레스토랑 목록
+     */
+    public List<Restaurant> findNearbyRestaurants(double latitude, double longitude, double radiusKm, List<String> categories) {
+        List<Restaurant> nearbyRestaurants = new ArrayList<>();
+        // 1. MyBatis를 통해 모든 레스토랑 정보를 가져옵니다. (위치 정보가 있는 레스토랑만)
+        try(SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()){
+        	
+        List<Restaurant> allRestaurants = sqlSession.selectList(NAMESPACE + ".findAllWithLocation");
+
+        // 2. Java 스트림을 사용하여 필터링합니다.
+        nearbyRestaurants = allRestaurants.stream()
+            .filter(r -> {
+                // 2-1. 거리 계산 (Haversine formula)
+                double distance = calculateDistance(latitude, longitude, r.getLatitude(), r.getLongitude());
+                return distance <= radiusKm;
+            })
+            .filter(r -> {
+                // 2-2. 카테고리 필터링 (categories 목록이 비어있으면 모든 카테고리 허용)
+                return categories == null || categories.isEmpty() || categories.contains(r.getCategory());
+            })
+            .collect(Collectors.toList());
+
+        }
+        return nearbyRestaurants;
+    }
+
+    /**
+     * 두 지점 간의 거리를 킬로미터(km) 단위로 계산합니다. (Haversine formula)
+     */
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        if (Double.isNaN(lat1) || Double.isNaN(lon1) || Double.isNaN(lat2) || Double.isNaN(lon2)) {
+            return Double.MAX_VALUE;
+        }
+        
+        final int R = 6371; // 지구의 반지름 (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
     }
 }
