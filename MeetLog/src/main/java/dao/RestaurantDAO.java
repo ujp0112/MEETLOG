@@ -167,7 +167,8 @@ public class RestaurantDAO {
             params.put("offset", offset);
             params.put("limit", limit);
             
+            // Mapper의 새로운 쿼리를 호출합니다.
             return sqlSession.selectList(NAMESPACE + ".findNearbyRestaurantsByPage", params);
-        } // finally 블록은 try-with-resources가 자동으로 처리하므로 제거합니다.
+        }
     }
 }

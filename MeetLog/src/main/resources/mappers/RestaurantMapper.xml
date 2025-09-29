@@ -276,7 +276,7 @@
     <select id="findAllWithLocation" resultType="model.Restaurant">
 	    SELECT * FROM restaurants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
 	</select>
-	<!-- [신규 추가] 지도 기반 맛집 검색을 위한 페이징 쿼리 -->
+	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. ▼▼▼ -->
 	<select id="findNearbyRestaurantsByPage" parameterType="map" resultType="model.Restaurant">
 	    SELECT 
 	        id, name, address, location, phone, category, description, 
@@ -287,7 +287,7 @@
 	            SIN(RADIANS(#{latitude})) * SIN(RADIANS(latitude))
 	        )) AS distance
 	    FROM
-	        RESTAURANTS
+	        restaurants
 	    WHERE
 	        latitude IS NOT NULL AND longitude IS NOT NULL
 	        <if test="categories != null and !categories.isEmpty()">

@@ -59,6 +59,8 @@
     $(document).ready(function() {
         const keyword = "<c:out value='${keyword}'/>";
         const contextPath = "${pageContext.request.contextPath}";
+        const category = "<c:out value='${category}'/>"; 
+        
         if (!keyword) { $('#result-count').text('검색어가 없습니다.'); return; }
 
         const mapContainer = document.getElementById('map');
@@ -66,10 +68,31 @@
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
         
-        ps.keywordSearch(keyword, (data, status, pagination) => {
-            placesSearchCB(data, status, pagination, contextPath);
-        }, { size: 10 });
+        // 💡 1. 최종 검색 키워드와 옵션을 설정할 변수 선언
+        let finalKeyword = keyword;
+        let searchOptions = {
+            size: 10,
+            category_group_code: 'FD6' // 💡 기본적으로 음식점(FD6)으로 설정
+        };
+        
+        // 💡 2. 카테고리가 '전체'일 경우, 키워드에 '맛집'을 추가
+        if (category === '전체') {
+            finalKeyword = keyword + " 맛집";
+        }
+        
+        // 💡 3. 수정된 키워드와 옵션으로 검색 요청
+        ps.keywordSearch(finalKeyword, (data, status, pagination) => {
+            // 만약 '독산역 맛집' 검색 결과가 없다면, 원래 키워드로 다시 검색 시도
+            if (status === kakao.maps.services.Status.ZERO_RESULT && finalKeyword !== keyword) {
+                 ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
+                    placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
+                }, searchOptions);
+            } else {
+                placesSearchCB(data, status, pagination, contextPath);
+            }
+        }, searchOptions);
     });
+
 
     function placesSearchCB(data, status, pagination, contextPath) {
         kakaoPagination = pagination;
@@ -251,4 +274,3 @@
     </script>
 </body>
 </html>
-
