@@ -141,6 +141,12 @@
                     <p id="result-count" class="text-sm text-gray-500 mt-1">지도를 검색하고 있습니다...</p>
                 </div>
                 <div id="results-list" class="flex-grow overflow-y-auto p-2"></div>
+                <%-- 💡 '더 보기' 버튼 컨테이너 추가 --%>
+                <div id="load-more-container" class="p-4 border-t text-center hidden">
+                    <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        더 보기
+                    </button>
+                </div>
             </div>
             <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full relative">
                 <div id="map" style="width:100%; height:100%;"></div>
@@ -165,7 +171,6 @@
     $(document).ready(function() {
         const keyword = "<c:out value='${keyword}'/>";
         const contextPath = "${pageContext.request.contextPath}";
-        // 💡 category 값을 안전하게 가져옵니다. 값이 없으면 '전체'가 기본값입니다.
         const category = "<c:out value='${category}' default='전체'/>"; 
         
         if (!keyword && category === '전체') { 
@@ -179,14 +184,12 @@
         ps = new kakao.maps.services.Places();
         
         let initialSearchKeyword = keyword;
-        // 💡 '전체' 카테고리일 때만 키워드에 '맛집'을 추가합니다.
-        if (category === '전체' && keyword) {
+        if ((category === '전체' || category === '') && keyword) {
             initialSearchKeyword = keyword + " 맛집";
-        } else if (!keyword && category !== '전체') {
+        } else if (!keyword && category !== '전체' && category !== '') {
             initialSearchKeyword = category;
         }
         
-        // 검색 결과 제목을 설정합니다.
         $('#result-panel h1').html('"<span class="text-blue-600">' + (keyword || category) + '</span>" 검색 결과');
 
         let searchOptions = {
@@ -211,6 +214,7 @@
         $('#research-button').on('click', function() {
             $(this).addClass('hidden');
             $('#results-list').empty().scrollTop(0);
+            $('#load-more-container').addClass('hidden'); // 💡 더 보기 버튼 숨기기
             g.overlays.forEach(overlay => overlay.setMap(null));
             g.overlays = [];
             g.listItems = [];
@@ -218,9 +222,8 @@
             isDbSearchEnd = false;
             isKakaoSearchEnd = false;
 
-            // 💡 '다시 검색' 시 사용할 키워드를 category 값으로 설정합니다.
             let researchKeyword = category;
-            if (category === '전체') {
+            if (category === '전체' || category === '') {
                 researchKeyword = '음식점';
             }
 
@@ -238,6 +241,23 @@
                 fetchDbAndDisplayCombined(1, data || [], contextPath, true);
             }, researchOptions);
         });
+
+        // 💡 '더 보기' 버튼 클릭 이벤트 리스너 추가
+        $('#load-more-btn').on('click', function() {
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (!isLoading && hasMoreData) {
+                isLoading = true;
+                $(this).text('불러오는 중...').prop('disabled', true);
+                currentPage++;
+                
+                if (!isKakaoSearchEnd) {
+                    kakaoPagination.nextPage(); // placesSearchCB가 자동으로 호출됨
+                } else {
+                    // 카카오 검색은 끝났지만 DB 검색이 남은 경우
+                    fetchDbAndDisplayCombined(currentPage, [], contextPath);
+                }
+            }
+        });
     });
 
     function placesSearchCB(data, status, pagination, contextPath) {
@@ -249,6 +269,7 @@
             g.overlays.forEach(overlay => overlay.setMap(null));
             g.listItems.forEach(item => item.el.remove());
             g.overlays = []; g.listItems = [];
+            $('#load-more-container').addClass('hidden'); // 💡 초기 검색 시 버튼 숨기기
 
             if (status === kakao.maps.services.Status.OK && data.length > 0) {
                 const firstPlace = data[0];
@@ -259,31 +280,17 @@
                 fetchDbAndDisplayCombined(currentPage, [], contextPath);
             }
         } else {
+            // '더 보기'로 다음 페이지 데이터가 왔을 때
             fetchDbAndDisplayCombined(currentPage, data || [], contextPath);
         }
     }
     
-    $('#results-list').on('scroll', function() {
-        const isScrollAtBottom = $(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight - 100;
-        const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
-
-        if (isScrollAtBottom && !isLoading && hasMoreData) {
-            isLoading = true;
-            currentPage++;
-            $('#results-list').append('<div id="loading-spinner" class="text-center p-4">결과를 더 불러오는 중...</div>');
-            
-            if (!isKakaoSearchEnd) {
-                kakaoPagination.nextPage(); 
-            } else {
-                fetchDbAndDisplayCombined(currentPage, [], "${pageContext.request.contextPath}");
-            }
-        }
-    });
+    // 💡 무한 스크롤 리스너 제거
+    // $('#results-list').on('scroll', function() { ... });
 
     function fetchDbAndDisplayCombined(page, kakaoDataForPage, contextPath, isResearch = false) {
         const center = map.getCenter();
         const level = map.getLevel();
-        // 💡 DB 검색 시에도 category 값을 사용합니다.
         const category = "<c:out value='${category}' default='전체'/>";
         const url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
         
@@ -305,9 +312,17 @@
             isDbSearchEnd = true;
             displayPlaces(kakaoDataForPage, contextPath);
         }).always(function() {
-            $('#loading-spinner').remove();
             isLoading = false;
             updateResultCount();
+            
+            // 💡 버튼 상태 업데이트 로직 추가
+            $('#load-more-btn').text('더 보기').prop('disabled', false);
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (hasMoreData) {
+                $('#load-more-container').removeClass('hidden');
+            } else {
+                $('#load-more-container').addClass('hidden');
+            }
             
             if (page === 1 && !isResearch && ( (kakaoDataForPage && kakaoDataForPage.length > 0) || (dbRestaurants && dbRestaurants.length > 0))) {
                  const bounds = new kakao.maps.LatLngBounds();
@@ -326,7 +341,7 @@
             const categoryName = place.category_name.split(' > ').pop();
             const uniqueId = "kakao-" + currentPage + "-" + i;
 
-            const markerIndex = g.listItems.filter(item => item.id.startsWith('kakao-')).length + g.listItems.filter(item => item.id.startsWith('db-')).length + 1;
+            const markerIndex = g.listItems.length + 1;
             
             const overlayEl = $(
                 '<div class="marker-overlay marker-kakao">' +
@@ -368,7 +383,7 @@
             g.listItems.push({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
 
             setTimeout(function() {
-                const searchQuery = place.place_name + " " + place.address_name.split(" ")[0];
+                const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
                 $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(imageUrl) {
                     if (imageUrl) $('#img-' + uniqueId).attr('src', imageUrl);
                 });
