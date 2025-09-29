@@ -269,6 +269,7 @@ body {
 	text-align: center;
 	z-index: 20;
 }
+
 .more-overlay {
 	position: absolute;
 	inset: 0;
@@ -284,7 +285,24 @@ body {
 }
 </style>
 <style>
-:root { --primary: #3b82f6; --primary-dark: #2563eb; --secondary: #8b5cf6; --accent: #f59e0b; --success: #10b981; --warning: #f59e0b; --error: #ef4444; --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0; --gray-300: #cbd5e1; --gray-400: #94a3b8; --gray-500: #64748b; --gray-600: #475569; --gray-700: #334155; --gray-800: #1e293b; --gray-900: #0f172a;
+:root {
+	--primary: #3b82f6;
+	--primary-dark: #2563eb;
+	--secondary: #8b5cf6;
+	--accent: #f59e0b;
+	--success: #10b981;
+	--warning: #f59e0b;
+	--error: #ef4444;
+	--gray-50: #f8fafc;
+	--gray-100: #f1f5f9;
+	--gray-200: #e2e8f0;
+	--gray-300: #cbd5e1;
+	--gray-400: #94a3b8;
+	--gray-500: #64748b;
+	--gray-600: #475569;
+	--gray-700: #334155;
+	--gray-800: #1e293b;
+	--gray-900: #0f172a;
 }
 
 * {
@@ -310,8 +328,8 @@ body {
 }
 
 .gradient-text {
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
+	background: linear-gradient(135deg, var(--primary) 0%, var(--secondary)
+		100%);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -382,22 +400,305 @@ keyframes pulseGlow { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %
 {
 box-shadow
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 30px
-rgba(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rgba
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 59
 ,
 130
 ,
 246
 ,
-0.5
-);
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;
 }
 }
 .shimmer {
@@ -412,12 +713,140 @@ keyframes shimmer { 0% {
 }
 
 100
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %
 {
 background-position
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 :
-200%
-0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+200
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;
 }
 }
 .progress-bar {
@@ -465,22 +894,305 @@ keyframes couponGlow { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %
 {
 box-shadow
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 :
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 30px
-rgba(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rgba
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 245
 ,
 158
 ,
 11
 ,
-0.5
-);
+0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;
 }
 }
 .review-card {
@@ -500,8 +1212,8 @@ rgba(
 }
 
 .info-badge {
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
+	background: linear-gradient(135deg, var(--primary) 0%, var(--secondary)
+		100%);
 	color: white;
 	padding: 0.5rem 1rem;
 	border-radius: 9999px;
@@ -544,13 +1256,193 @@ keyframes float { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 %
 {
 transform
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 :
-translateY(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+translateY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -10px
-);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;
 }
 }
 .section-divider {
@@ -635,8 +1527,8 @@ translateY(
 	right: 2rem;
 	z-index: 50;
 	animation: float 3s ease-in-out infinite;
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--secondary) 100%);
+	background: linear-gradient(135deg, var(--primary) 0%, var(--secondary)
+		100%);
 	color: white;
 	padding: 1rem 1.5rem;
 	border-radius: 50px;
@@ -890,6 +1782,29 @@ translateY(
 	z-index: 2; /* 앞쪽으로 보내기 */
 	max-height: 100%; /* 부모 높이를 넘지 않도록 */
 }
+/* 전체 사진 오버레이 그리드 스타일 (CSS Grid 방식) */
+#overlayGrid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr); /* 2개의 동일한 너비의 열을 생성합니다. */
+	gap: 8px; /* 이미지 사이의 간격을 설정합니다. */
+}
+
+/* 각 이미지를 감싸는 wrapper 스타일 */
+#overlayGrid .gallery-image-wrapper {
+	width: 100%;
+	aspect-ratio: 1/1;
+	/* 이미지 비율을 1:1 (정사각형)으로 고정합니다. (원하면 16/9 등으로 변경 가능) */
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+/* wrapper 안의 실제 이미지 스타일 */
+#overlayGrid .gallery-image {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center;
+}
 </style>
 </head>
 <body class="bg-slate-100">
@@ -901,69 +1816,137 @@ translateY(
 					<c:when test="${not empty restaurant}">
 						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
 							<div class="lg:col-span-2 space-y-8">
-								<%-- ▼▼▼ 1. 이 코드로 기존 갤러리 섹션을 교체하세요 ▼▼▼ --%>
+								<%-- ▼▼▼ 이 코드로 기존 갤러리 섹션 전체를 교체하세요 (스크립트는 절대 수정하지 마세요!) ▼▼▼ --%>
 								<c:choose>
-								    <%-- 1-1. 외부 검색(Naver 이미지)일 경우 --%>
-								    <c:when test="${isExternal}">
-								        <section class="glass-card p-8 rounded-3xl fade-in">
-								            <c:choose>
-								                <c:when test="${not empty externalImages}">
-								                    <div class="gallery ${fn:length(externalImages) == 1 ? 'gallery-full' : ''}" id="restaurantGallery">
-								                        <div class="gallery-main">
-								                            <c:if test="${fn:length(externalImages) == 1}">
-								                                <img src="${externalImages[0]}" alt="${restaurant.name} 배경" class="gallery-background" />
-								                            </c:if>
-								                            <img src="${externalImages[0]}" alt="${restaurant.name}" class="gallery-image" />
-								                        </div>
-								                        <c:if test="${fn:length(externalImages) > 1}">
-								                            <div class="gallery-side">
-								                                <div class="img-wrap"><c:if test="${fn:length(externalImages) >= 2}"><img src="${externalImages[1]}" alt="${restaurant.name}" class="gallery-image" /></c:if></div>
-								                                <div class="img-wrap"><c:if test="${fn:length(externalImages) >= 3}"><img src="${externalImages[2]}" alt="${restaurant.name}" class="gallery-image" /><c:if test="${fn:length(externalImages) > 3}"><div class="more-overlay" onclick="cycleImages()">+${fn:length(externalImages) - 3}</div></c:if></c:if></div>
-								                            </div>
-								                        </c:if>
-								                    </div>
-								                </c:when>
-								                <c:otherwise>
-								                    <div class="text-center py-12"><p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p></div>
-								                </c:otherwise>
-								            </c:choose>
-								        </section>
-								        <section id="imageOverlay" class="panel-overlay">
-								            <div class="overlay-hd"><h2 class="title">전체 사진 보기</h2><button id="closeOverlayBtn" class="close-x" type="button">×</button></div>
-								            <div class="overlay-bd" id="overlayGrid"></div>
-								        </section>
-								    </c:when>
-								    
-								    <%-- 1-2. 내부 DB(기존 이미지)일 경우 --%>
-								    <c:otherwise>
-								        <section class="glass-card p-8 rounded-3xl fade-in">
-								            <div class="gallery ${empty restaurant.additionalImages ? 'gallery-full' : ''}" id="restaurantGallery">
-								                <div class="gallery-main">
-								                    <c:if test="${empty restaurant.additionalImages}"><mytag:image fileName="${restaurant.image}" altText="" cssClass="gallery-background" /></c:if>
-								                    <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="gallery-image" />
-								                </div>
-								                <c:if test="${not empty restaurant.additionalImages}">
-								                    <div class="gallery-side">
-								                        <div class="img-wrap">
-								                            <mytag:image fileName="${restaurant.additionalImages[0]}" altText="${restaurant.name}" cssClass="gallery-image" />
-								                        </div>
-								                        <div class="img-wrap">
-								                            <c:if test="${fn:length(restaurant.additionalImages) >= 2}">
-								                                <mytag:image fileName="${restaurant.additionalImages[1]}" altText="${restaurant.name}" cssClass="gallery-image" />
-								                                <c:if test="${fn:length(restaurant.additionalImages) + 1 > 3}"><div class="more-overlay" onclick="cycleImages()">+${fn:length(restaurant.additionalImages) - 1}</div></c:if>
-								                            </c:if>
-								                        </div>
-								                    </div>
-								                </c:if>
-								            </div>
-								        </section>
-								        <section id="imageOverlay" class="panel-overlay">
-								            <div class="overlay-hd"><h2 class="title">전체 사진 보기</h2><button id="closeOverlayBtn" class="close-x" type="button">×</button></div>
-								            <div class="overlay-bd" id="overlayGrid"></div>
-								        </section>
-								    </c:otherwise>
+									<%-- =================================================================== --%>
+									<%-- 1. 외부 검색(Naver 이미지)일 경우                                        --%>
+									<%-- =================================================================== --%>
+									<c:when test="${isExternal}">
+										<section class="glass-card p-8 rounded-3xl fade-in">
+											<c:set var="images" value="${externalImages}" />
+											<c:set var="imageCount" value="${fn:length(images)}" />
+											<c:choose>
+												<c:when test="${imageCount == 0}">
+													<div class="text-center py-12">
+														<p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p>
+													</div>
+												</c:when>
+												<c:when test="${imageCount == 1}">
+													<div class="w-full aspect-video rounded-lg overflow-hidden">
+														<img src="${images[0]}" alt="${restaurant.name}"
+															class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+													</div>
+												</c:when>
+												<c:when test="${imageCount == 2}">
+													<div class="grid grid-cols-2 gap-2 aspect-video">
+														<div class="rounded-lg overflow-hidden">
+															<img src="${images[0]}" alt="${restaurant.name}"
+																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div class="rounded-lg overflow-hidden">
+															<img src="${images[1]}" alt="${restaurant.name}"
+																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+													</div>
+												</c:when>
+												<c:otherwise>
+													<div
+														class="grid grid-cols-3 grid-rows-2 gap-2 aspect-video">
+														<div
+															class="col-span-2 row-span-2 rounded-lg overflow-hidden">
+															<img src="${images[0]}" alt="${restaurant.name}"
+																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div class="rounded-lg overflow-hidden">
+															<img src="${images[1]}" alt="${restaurant.name}"
+																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div
+															class="relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer bg-gray-800"
+															onclick="cycleImages()">
+															<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
+															<img src="${images[2]}" alt="${restaurant.name}"
+																class="w-full h-full object-cover ${imageCount > 3 ? 'opacity-30' : ''}" />
+															<c:if test="${imageCount > 3}">
+																<span class="absolute text-white text-2xl font-bold">+${imageCount - 3}</span>
+															</c:if>
+														</div>
+													</div>
+												</c:otherwise>
+											</c:choose>
+										</section>
+									</c:when>
+
+									<%-- =================================================================== --%>
+									<%-- 2. 내부 DB(기존 이미지)일 경우                                         --%>
+									<%-- =================================================================== --%>
+									<c:otherwise>
+										<section class="glass-card p-8 rounded-3xl fade-in">
+											<c:set var="mainImage" value="${restaurant.image}" />
+											<c:set var="additionalImages"
+												value="${restaurant.additionalImages}" />
+											<c:set var="totalCount"
+												value="${(empty mainImage ? 0 : 1) + fn:length(additionalImages)}" />
+											<c:choose>
+												<c:when test="${totalCount == 0}">
+													<div class="text-center py-12">
+														<p class="text-slate-500">등록된 가게 이미지가 없습니다.</p>
+													</div>
+												</c:when>
+												<c:when test="${totalCount == 1}">
+													<div class="w-full aspect-video rounded-lg overflow-hidden">
+														<mytag:image fileName="${mainImage}"
+															altText="${restaurant.name}"
+															cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+													</div>
+												</c:when>
+												<c:when test="${totalCount == 2}">
+													<div class="grid grid-cols-2 gap-2 aspect-video">
+														<div class="rounded-lg overflow-hidden">
+															<mytag:image fileName="${mainImage}"
+																altText="${restaurant.name}"
+																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div class="rounded-lg overflow-hidden">
+															<mytag:image fileName="${additionalImages[0]}"
+																altText="${restaurant.name}"
+																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+													</div>
+												</c:when>
+												<c:otherwise>
+													<div
+														class="grid grid-cols-3 grid-rows-2 gap-2 aspect-video">
+														<div
+															class="col-span-2 row-span-2 rounded-lg overflow-hidden">
+															<mytag:image fileName="${mainImage}"
+																altText="${restaurant.name}"
+																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div class="rounded-lg overflow-hidden">
+															<mytag:image fileName="${additionalImages[0]}"
+																altText="${restaurant.name}"
+																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+														</div>
+														<div
+															class="relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer"
+															onclick="cycleImages()">
+															<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
+															<mytag:image fileName="${additionalImages[1]}"
+																altText="${restaurant.name}"
+																cssClass="w-full h-full object-cover ${totalCount > 3 ? 'opacity-30' : ''}" />
+															<c:if test="${totalCount > 3}">
+																<span class="absolute text-white text-2xl font-bold">+${totalCount - 3}</span>
+															</c:if>
+														</div>
+													</div>
+												</c:otherwise>
+											</c:choose>
+										</section>
+									</c:otherwise>
 								</c:choose>
 
+								<%-- ✨ X버튼 오류 해결: 기존 JS와 연동되도록 원래 클래스명으로 복원했습니다 --%>
 								<section id="imageOverlay" class="panel-overlay">
 									<div class="overlay-hd">
 										<h2 class="title">전체 사진 보기</h2>
@@ -971,7 +1954,6 @@ translateY(
 									</div>
 									<div class="overlay-bd" id="overlayGrid"></div>
 								</section>
-
 								<section class="glass-card p-8 rounded-3xl slide-up">
 									<div class="flex items-start justify-between mb-6">
 										<div class="flex-1">
@@ -982,39 +1964,39 @@ translateY(
 											</div>
 										</div>
 										<c:if test="${!isExternal}">
-										<div class="text-right">
-											<div class="text-5xl font-black rating-badge mb-2">
-												<fmt:formatNumber value="${restaurant.rating}"
-													maxFractionDigits="1" />
-											</div>
-											<div class="flex items-center justify-center mb-2">
-												<div class="rating-stars flex space-x-1">
-													<c:forEach begin="1" end="5" var="star">
-														<c:choose>
-															<c:when test="${restaurant.rating >= star}">
-																<span class="text-yellow-400 text-2xl">★</span>
-															</c:when>
-															<c:otherwise>
-																<span class="text-slate-300 text-2xl">☆</span>
-															</c:otherwise>
-														</c:choose>
-													</c:forEach>
+											<div class="text-right">
+												<div class="text-5xl font-black rating-badge mb-2">
+													<fmt:formatNumber value="${restaurant.rating}"
+														maxFractionDigits="1" />
 												</div>
+												<div class="flex items-center justify-center mb-2">
+													<div class="rating-stars flex space-x-1">
+														<c:forEach begin="1" end="5" var="star">
+															<c:choose>
+																<c:when test="${restaurant.rating >= star}">
+																	<span class="text-yellow-400 text-2xl">★</span>
+																</c:when>
+																<c:otherwise>
+																	<span class="text-slate-300 text-2xl">☆</span>
+																</c:otherwise>
+															</c:choose>
+														</c:forEach>
+													</div>
+												</div>
+												<div class="text-sm text-slate-500">${restaurant.reviewCount}개
+													리뷰</div>
 											</div>
-											<div class="text-sm text-slate-500">${restaurant.reviewCount}개
-												리뷰</div>
-										</div>
 										</c:if>
 									</div>
 									<c:if test="${!isExternal}">
-									<div class="flex space-x-4">
-										<button
-											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
-											찜하기</button>
-										<button
-											class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
-											공유하기</button>
-									</div>
+										<div class="flex space-x-4">
+											<button
+												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
+												찜하기</button>
+											<button
+												class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
+												공유하기</button>
+										</div>
 									</c:if>
 								</section>
 
@@ -1038,48 +2020,48 @@ translateY(
 											</div>
 										</div>
 										<c:if test="${!isExternal}">
-										<div
-											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
-											<div class="text-2xl">🕒</div>
-											<div class="flex-1">
-												<span class="font-bold text-slate-700">영업시간</span>
-												<c:choose>
-													<c:when test="${not empty operatingHours}">
-														<div class="mt-2 space-y-1">
-															<c:forEach var="hour" items="${operatingHours}">
-																<div class="flex justify-between text-sm">
-																	<span class="text-slate-600"><c:choose>
-																			<c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 4}">목요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 5}">금요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
-																			<c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
-																		</c:choose></span> <span class="text-slate-600"><c:choose>
-																			<c:when test="${empty hour.openingTime}">
-																				<span class="text-red-500">휴무</span>
-																			</c:when>
-																			<c:otherwise>${hour.openingTime} - ${hour.closingTime}</c:otherwise>
-																		</c:choose></span>
-																</div>
-															</c:forEach>
-														</div>
-													</c:when>
-													<c:otherwise>
-														<p class="text-slate-600 mt-1">영업시간 정보 없음</p>
-													</c:otherwise>
-												</c:choose>
+											<div
+												class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
+												<div class="text-2xl">🕒</div>
+												<div class="flex-1">
+													<span class="font-bold text-slate-700">영업시간</span>
+													<c:choose>
+														<c:when test="${not empty operatingHours}">
+															<div class="mt-2 space-y-1">
+																<c:forEach var="hour" items="${operatingHours}">
+																	<div class="flex justify-between text-sm">
+																		<span class="text-slate-600"><c:choose>
+																				<c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 4}">목요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 5}">금요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
+																				<c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
+																			</c:choose></span> <span class="text-slate-600"><c:choose>
+																				<c:when test="${empty hour.openingTime}">
+																					<span class="text-red-500">휴무</span>
+																				</c:when>
+																				<c:otherwise>${hour.openingTime} - ${hour.closingTime}</c:otherwise>
+																			</c:choose></span>
+																	</div>
+																</c:forEach>
+															</div>
+														</c:when>
+														<c:otherwise>
+															<p class="text-slate-600 mt-1">영업시간 정보 없음</p>
+														</c:otherwise>
+													</c:choose>
+												</div>
 											</div>
-										</div>
-										<div
-											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
-											<div class="text-2xl">🚗</div>
-											<div>
-												<span class="font-bold text-slate-700">주차</span>
-												<p class="text-slate-600 mt-1">${restaurant.parking ? "가능" : "불가"}</p>
+											<div
+												class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
+												<div class="text-2xl">🚗</div>
+												<div>
+													<span class="font-bold text-slate-700">주차</span>
+													<p class="text-slate-600 mt-1">${restaurant.parking ? "가능" : "불가"}</p>
+												</div>
 											</div>
-										</div>
 										</c:if>
 									</div>
 									<c:if test="${not empty restaurant.description}">
@@ -1091,358 +2073,359 @@ translateY(
 									</c:if>
 								</section>
 								<c:if test="${!isExternal}">
-								<c:if test="${not empty menus}">
-									<section class="glass-card p-8 rounded-3xl slide-up">
-										<h2 class="text-2xl font-bold gradient-text mb-6">메뉴</h2>
-										<div class="space-y-4">
-											<c:forEach var="menu" items="${menus}">
-												<div
-													class="menu-item flex justify-between items-center p-6 border-gradient rounded-2xl bg-white/50 backdrop-blur-sm">
-													<div class="flex-1">
-														<div class="flex items-center space-x-3">
-															<h3 class="font-bold text-slate-800 text-lg">${menu.name}</h3>
-															<c:if test="${menu.popular}">
-																<span
-																	class="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full font-semibold">🔥
-																	인기</span>
-															</c:if>
-														</div>
-														<c:if test="${not empty menu.description}">
-															<p class="text-sm text-slate-600 mt-1">${menu.description}</p>
-														</c:if>
-													</div>
-													<div class="text-right">
-														<span class="text-2xl font-bold text-sky-600"><c:choose>
-																<c:when test="${fn:contains(menu.price, '원')}">${menu.price}</c:when>
-																<c:otherwise>
-																	<fmt:formatNumber value="${menu.price}" type="currency"
-																		currencySymbol="₩" />
-																</c:otherwise>
-															</c:choose></span>
-													</div>
-												</div>
-											</c:forEach>
-										</div>
-									</section>
-								</c:if>
-
-								<section class="glass-card p-8 rounded-3xl slide-up">
-									<div class="flex justify-between items-center mb-6">
-										<h2 class="text-2xl font-bold gradient-text">리뷰
-											(${fn:length(reviews)})</h2>
-										<c:if test="${!isOwner and not empty sessionScope.user}">
-											<a
-												href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
-												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰
-												작성</a>
-										</c:if>
-									</div>
-									<c:choose>
-										<c:when test="${not empty reviews}">
-											<div id="review-list-container" class="space-y-6">
-												<c:forEach var="review" items="${reviews}">
-													<div>
-														<div
-															class="bg-white p-6 rounded-2xl shadow-lg h-full flex flex-col">
-															<div class="flex justify-between items-start mb-4">
-																<div class="flex items-start">
-																	<img
-																		src="${pageContext.request.contextPath}/images/profile/${review.profileImage}"
-																		alt="${review.author}"
-																		class="w-12 h-12 rounded-full object-cover mr-4">
-																	<div>
-																		<a
-																			href="${pageContext.request.contextPath}/feed/user/${review.userId}"
-																			class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
-																		<div
-																			class="flex items-center text-sm text-slate-500 mt-1">
-																			<div class="flex">
-																				<c:forEach begin="1" end="5" var="i">
-																					<span
-																						class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★</span>
-																				</c:forEach>
-																			</div>
-																			<%-- ▼▼▼ [수정 1] .createdAtAsDate 사용 ▼▼▼ --%>
-																			<span class="mx-2">·</span> <span><fmt:formatDate
-																					value="${review.createdAtAsDate}"
-																					pattern="yy.MM.dd" /></span>
-																		</div>
-																	</div>
-																</div>
-																<c:if
-																	test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
-																	<c:choose>
-																		<c:when test="${review.authorIsFollowedByCurrentUser}">
-																			<button
-																				class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-gray-200 text-gray-700 transition-colors"
-																				data-user-id="${review.userId}">팔로잉</button>
-																		</c:when>
-																		<c:otherwise>
-																			<button
-																				class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-																				data-user-id="${review.userId}">팔로우</button>
-																		</c:otherwise>
-																	</c:choose>
+									<c:if test="${not empty menus}">
+										<section class="glass-card p-8 rounded-3xl slide-up">
+											<h2 class="text-2xl font-bold gradient-text mb-6">메뉴</h2>
+											<div class="space-y-4">
+												<c:forEach var="menu" items="${menus}">
+													<div
+														class="menu-item flex justify-between items-center p-6 border-gradient rounded-2xl bg-white/50 backdrop-blur-sm">
+														<div class="flex-1">
+															<div class="flex items-center space-x-3">
+																<h3 class="font-bold text-slate-800 text-lg">${menu.name}</h3>
+																<c:if test="${menu.popular}">
+																	<span
+																		class="text-xs bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full font-semibold">🔥
+																		인기</span>
 																</c:if>
 															</div>
+															<c:if test="${not empty menu.description}">
+																<p class="text-sm text-slate-600 mt-1">${menu.description}</p>
+															</c:if>
+														</div>
+														<div class="text-right">
+															<span class="text-2xl font-bold text-sky-600"><c:choose>
+																	<c:when test="${fn:contains(menu.price, '원')}">${menu.price}</c:when>
+																	<c:otherwise>
+																		<fmt:formatNumber value="${menu.price}"
+																			type="currency" currencySymbol="₩" />
+																	</c:otherwise>
+																</c:choose></span>
+														</div>
+													</div>
+												</c:forEach>
+											</div>
+										</section>
+									</c:if>
 
-															<c:if test="${not empty review.images}">
-																<div class="review-image-container mb-4 rounded-lg">
-																	<div class="review-image-track">
-																		<c:forEach var="imagePath" items="${review.images}"
-																			varStatus="loop">
+									<section class="glass-card p-8 rounded-3xl slide-up">
+										<div class="flex justify-between items-center mb-6">
+											<h2 class="text-2xl font-bold gradient-text">리뷰
+												(${fn:length(reviews)})</h2>
+											<c:if test="${!isOwner and not empty sessionScope.user}">
+												<a
+													href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
+													class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰
+													작성</a>
+											</c:if>
+										</div>
+										<c:choose>
+											<c:when test="${not empty reviews}">
+												<div id="review-list-container" class="space-y-6">
+													<c:forEach var="review" items="${reviews}">
+														<div>
+															<div
+																class="bg-white p-6 rounded-2xl shadow-lg h-full flex flex-col">
+																<div class="flex justify-between items-start mb-4">
+																	<div class="flex items-start">
+																		<img
+																			src="${pageContext.request.contextPath}/images/profile/${review.profileImage}"
+																			alt="${review.author}"
+																			class="w-12 h-12 rounded-full object-cover mr-4">
+																		<div>
+																			<a
+																				href="${pageContext.request.contextPath}/feed/user/${review.userId}"
+																				class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
 																			<div
-																				class="review-image-item aspect-video bg-slate-100 rounded-lg">
+																				class="flex items-center text-sm text-slate-500 mt-1">
+																				<div class="flex">
+																					<c:forEach begin="1" end="5" var="i">
+																						<span
+																							class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★</span>
+																					</c:forEach>
+																				</div>
+																				<%-- ▼▼▼ [수정 1] .createdAtAsDate 사용 ▼▼▼ --%>
+																				<span class="mx-2">·</span> <span><fmt:formatDate
+																						value="${review.createdAtAsDate}"
+																						pattern="yy.MM.dd" /></span>
+																			</div>
+																		</div>
+																	</div>
+																	<c:if
+																		test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
+																		<c:choose>
+																			<c:when
+																				test="${review.authorIsFollowedByCurrentUser}">
+																				<button
+																					class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-gray-200 text-gray-700 transition-colors"
+																					data-user-id="${review.userId}">팔로잉</button>
+																			</c:when>
+																			<c:otherwise>
+																				<button
+																					class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+																					data-user-id="${review.userId}">팔로우</button>
+																			</c:otherwise>
+																		</c:choose>
+																	</c:if>
+																</div>
+
+																<c:if test="${not empty review.images}">
+																	<div class="review-image-container mb-4 rounded-lg">
+																		<div class="review-image-track">
+																			<c:forEach var="imagePath" items="${review.images}"
+																				varStatus="loop">
+																				<div
+																					class="review-image-item aspect-video bg-slate-100 rounded-lg">
+																					<img
+																						src="${pageContext.request.contextPath}/images/${imagePath}"
+																						alt="리뷰 사진"
+																						class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger">
+																				</div>
+																			</c:forEach>
+																		</div>
+																		<c:if test="${fn:length(review.images) > 1}">
+																			<button class="review-image-arrow prev">&lt;</button>
+																			<button class="review-image-arrow next">&gt;</button>
+																			<div class="review-image-pagination"></div>
+																		</c:if>
+																	</div>
+																</c:if>
+																<div class="review-content-wrapper mb-4 flex-grow">
+																	<p
+																		class="review-text text-slate-700 leading-relaxed truncated">${review.content}</p>
+																	<span
+																		class="read-more-btn mt-2 inline-block cursor-pointer">더
+																		보기</span>
+																</div>
+																<c:if test="${not empty review.keywords}">
+																	<div class="flex flex-wrap gap-2 mb-4">
+																		<c:forEach var="keyword" items="${review.keywords}">
+																			<span class="review-keyword-tag">${keyword}</span>
+																		</c:forEach>
+																	</div>
+																</c:if>
+																<div
+																	class="border-t pt-3 text-sm text-slate-500 flex items-center gap-2">
+																	<button type="button"
+																		class="like-btn text-2xl leading-none ${review.likedByCurrentUser ? 'text-red-500' : 'text-slate-300'} ${not empty sessionScope.user ? 'hover:text-red-400' : ''} transition-colors duration-200"
+																		data-review-id="${review.id}"
+																		${empty sessionScope.user ? 'disabled' : ''}>♥</button>
+																	<span
+																		class="likers-modal-trigger cursor-pointer hover:underline"
+																		data-review-id="${review.id}"><strong
+																		class="like-count">${review.likes > 0 ? review.likes : 0}</strong>명이
+																		좋아합니다</span>
+																</div>
+																<c:if test="${not empty review.replyContent}">
+																	<div
+																		class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
+																		<div class="flex items-start text-sm">
+																			<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
+																			<div class="flex-1">
+																				<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
+																				<c:if test="${not empty review.replyCreatedAt}">
+																					<%-- ▼▼▼ [수정 2] .replyCreatedAtAsDate 사용 및 변수명 오류 수정 ▼▼▼ --%>
+																					<span><fmt:formatDate
+																							value="${review.replyCreatedAtAsDate}"
+																							pattern="yy.MM.dd" /></span>
+																				</c:if>
+																			</div>
+																		</div>
+																	</div>
+																</c:if>
+																<c:if test="${isOwner and empty review.replyContent}">
+																	<div class="mt-4 pt-4 border-t border-dashed">
+																		<form
+																			action="${pageContext.request.contextPath}/review/reply"
+																			method="post" class="space-y-2">
+																			<input type="hidden" name="reviewId"
+																				value="${review.id}"> <input type="hidden"
+																				name="restaurantId" value="${restaurant.id}">
+																			<textarea name="replyContent" rows="2"
+																				placeholder="답글을 작성해주세요..."
+																				class="w-full p-2 border rounded-md text-sm"></textarea>
+																			<div class="text-right">
+																				<button type="submit"
+																					class="text-xs bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors">답글
+																					등록</button>
+																			</div>
+																		</form>
+																	</div>
+																</c:if>
+																<div class="mt-4 pt-4 border-t">
+																	<h4 class="font-bold text-sm mb-3">댓글
+																		(${fn:length(review.comments)})</h4>
+																	<div class="space-y-3 mb-4">
+																		<c:forEach var="comment" items="${review.comments}">
+																			<div class="flex items-start text-sm">
 																				<img
-																					src="${pageContext.request.contextPath}/images/${imagePath}"
-																					alt="리뷰 사진"
-																					class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger">
+																					src="${pageContext.request.contextPath}/images/profile/${comment.profileImage}"
+																					alt="${comment.author}"
+																					class="w-8 h-8 rounded-full object-cover mr-3">
+																				<div class="flex-1 bg-gray-100 p-2 rounded-lg">
+																					<a
+																						href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
+																						class="font-bold text-slate-800">${comment.author}</a>
+																					<p class="text-slate-700">${comment.content}</p>
+																				</div>
 																			</div>
 																		</c:forEach>
 																	</div>
-																	<c:if test="${fn:length(review.images) > 1}">
-																		<button class="review-image-arrow prev">&lt;</button>
-																		<button class="review-image-arrow next">&gt;</button>
-																		<div class="review-image-pagination"></div>
-																	</c:if>
+																	<c:choose>
+																		<c:when test="${not empty sessionScope.user}">
+																			<form
+																				action="${pageContext.request.contextPath}/review/addComment"
+																				method="post" class="flex items-center gap-2">
+																				<input type="hidden" name="reviewId"
+																					value="${review.id}" /><input type="hidden"
+																					name="restaurantId" value="${restaurant.id}" /> <input
+																					type="text" name="content"
+																					class="w-full p-2 border rounded-lg text-sm"
+																					placeholder="댓글을 입력하세요..." required />
+																				<button type="submit"
+																					class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap">등록</button>
+																			</form>
+																		</c:when>
+																		<c:otherwise>
+																			<a href="${pageContext.request.contextPath}/login"
+																				class="block w-full p-3 border rounded-lg text-sm text-center text-gray-500 bg-gray-100 hover:bg-gray-200 transition">로그인
+																				후 댓글을 작성할 수 있습니다.</a>
+																		</c:otherwise>
+																	</c:choose>
 																</div>
-															</c:if>
-															<div class="review-content-wrapper mb-4 flex-grow">
-																<p
-																	class="review-text text-slate-700 leading-relaxed truncated">${review.content}</p>
-																<span
-																	class="read-more-btn mt-2 inline-block cursor-pointer">더
-																	보기</span>
 															</div>
-															<c:if test="${not empty review.keywords}">
-																<div class="flex flex-wrap gap-2 mb-4">
-																	<c:forEach var="keyword" items="${review.keywords}">
-																		<span class="review-keyword-tag">${keyword}</span>
-																	</c:forEach>
+														</div>
+													</c:forEach>
+												</div>
+												<div id="load-more-container" class="text-center mt-8"></div>
+											</c:when>
+											<c:otherwise>
+												<div class="text-center py-12">
+													<div class="text-6xl mb-4">📝</div>
+													<h4 class="text-xl font-bold text-slate-600 mb-2">아직
+														리뷰가 없습니다</h4>
+													<p class="text-slate-500">첫 번째 리뷰를 작성해보세요!</p>
+												</div>
+											</c:otherwise>
+										</c:choose>
+									</section>
+
+									<c:if test="${not empty coupons}">
+										<section class="glass-card p-8 rounded-3xl slide-up">
+											<h2 class="text-2xl font-bold gradient-text mb-6">MEET
+												LOG 단독 쿠폰</h2>
+											<div class="space-y-4">
+												<c:forEach var="coupon" items="${coupons}">
+													<div
+														class="coupon-glow p-6 rounded-3xl relative overflow-hidden">
+														<div
+															class="absolute top-0 right-0 w-20 h-20 bg-yellow-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
+														<div
+															class="absolute bottom-0 left-0 w-16 h-16 bg-orange-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
+														<div class="relative z-10">
+															<div class="flex items-center justify-between">
+																<div class="flex-1">
+																	<h3 class="text-2xl font-black text-yellow-800 mb-2">${coupon.title}</h3>
+																	<p class="text-yellow-700 font-semibold mb-2">${coupon.description}</p>
+																	<p class="text-xs text-yellow-600">유효기간:
+																		${coupon.validity}</p>
 																</div>
-															</c:if>
-															<div
-																class="border-t pt-3 text-sm text-slate-500 flex items-center gap-2">
-																<button type="button"
-																	class="like-btn text-2xl leading-none ${review.likedByCurrentUser ? 'text-red-500' : 'text-slate-300'} ${not empty sessionScope.user ? 'hover:text-red-400' : ''} transition-colors duration-200"
-																	data-review-id="${review.id}"
-																	${empty sessionScope.user ? 'disabled' : ''}>♥</button>
-																<span
-																	class="likers-modal-trigger cursor-pointer hover:underline"
-																	data-review-id="${review.id}"><strong
-																	class="like-count">${review.likes > 0 ? review.likes : 0}</strong>명이
-																	좋아합니다</span>
-															</div>
-															<c:if test="${not empty review.replyContent}">
-																<div
-																	class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
-																	<div class="flex items-start text-sm">
-																		<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
-																		<div class="flex-1">
-																			<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
-																			<c:if test="${not empty review.replyCreatedAt}">
-																				<%-- ▼▼▼ [수정 2] .replyCreatedAtAsDate 사용 및 변수명 오류 수정 ▼▼▼ --%>
-																				<span><fmt:formatDate
-																						value="${review.replyCreatedAtAsDate}"
-																						pattern="yy.MM.dd" /></span>
-																			</c:if>
-																		</div>
-																	</div>
+																<div class="text-right">
+																	<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
+																	<button
+																		class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
+																		쿠폰받기</button>
 																</div>
-															</c:if>
-															<c:if test="${isOwner and empty review.replyContent}">
-																<div class="mt-4 pt-4 border-t border-dashed">
-																	<form
-																		action="${pageContext.request.contextPath}/review/reply"
-																		method="post" class="space-y-2">
-																		<input type="hidden" name="reviewId"
-																			value="${review.id}"> <input type="hidden"
-																			name="restaurantId" value="${restaurant.id}">
-																		<textarea name="replyContent" rows="2"
-																			placeholder="답글을 작성해주세요..."
-																			class="w-full p-2 border rounded-md text-sm"></textarea>
-																		<div class="text-right">
-																			<button type="submit"
-																				class="text-xs bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors">답글
-																				등록</button>
-																		</div>
-																	</form>
-																</div>
-															</c:if>
-															<div class="mt-4 pt-4 border-t">
-																<h4 class="font-bold text-sm mb-3">댓글
-																	(${fn:length(review.comments)})</h4>
-																<div class="space-y-3 mb-4">
-																	<c:forEach var="comment" items="${review.comments}">
-																		<div class="flex items-start text-sm">
-																			<img
-																				src="${pageContext.request.contextPath}/images/profile/${comment.profileImage}"
-																				alt="${comment.author}"
-																				class="w-8 h-8 rounded-full object-cover mr-3">
-																			<div class="flex-1 bg-gray-100 p-2 rounded-lg">
-																				<a
-																					href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
-																					class="font-bold text-slate-800">${comment.author}</a>
-																				<p class="text-slate-700">${comment.content}</p>
-																			</div>
-																		</div>
-																	</c:forEach>
-																</div>
-																<c:choose>
-																	<c:when test="${not empty sessionScope.user}">
-																		<form
-																			action="${pageContext.request.contextPath}/review/addComment"
-																			method="post" class="flex items-center gap-2">
-																			<input type="hidden" name="reviewId"
-																				value="${review.id}" /><input type="hidden"
-																				name="restaurantId" value="${restaurant.id}" /> <input
-																				type="text" name="content"
-																				class="w-full p-2 border rounded-lg text-sm"
-																				placeholder="댓글을 입력하세요..." required />
-																			<button type="submit"
-																				class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap">등록</button>
-																		</form>
-																	</c:when>
-																	<c:otherwise>
-																		<a href="${pageContext.request.contextPath}/login"
-																			class="block w-full p-3 border rounded-lg text-sm text-center text-gray-500 bg-gray-100 hover:bg-gray-200 transition">로그인
-																			후 댓글을 작성할 수 있습니다.</a>
-																	</c:otherwise>
-																</c:choose>
 															</div>
 														</div>
 													</div>
 												</c:forEach>
 											</div>
-											<div id="load-more-container" class="text-center mt-8"></div>
-										</c:when>
-										<c:otherwise>
-											<div class="text-center py-12">
-												<div class="text-6xl mb-4">📝</div>
-												<h4 class="text-xl font-bold text-slate-600 mb-2">아직
-													리뷰가 없습니다</h4>
-												<p class="text-slate-500">첫 번째 리뷰를 작성해보세요!</p>
-											</div>
-										</c:otherwise>
-									</c:choose>
-								</section>
+										</section>
+									</c:if>
 
-								<c:if test="${not empty coupons}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
-										<h2 class="text-2xl font-bold gradient-text mb-6">MEET
-											LOG 단독 쿠폰</h2>
-										<div class="space-y-4">
-											<c:forEach var="coupon" items="${coupons}">
-												<div
-													class="coupon-glow p-6 rounded-3xl relative overflow-hidden">
-													<div
-														class="absolute top-0 right-0 w-20 h-20 bg-yellow-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
-													<div
-														class="absolute bottom-0 left-0 w-16 h-16 bg-orange-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
-													<div class="relative z-10">
-														<div class="flex items-center justify-between">
-															<div class="flex-1">
-																<h3 class="text-2xl font-black text-yellow-800 mb-2">${coupon.title}</h3>
-																<p class="text-yellow-700 font-semibold mb-2">${coupon.description}</p>
-																<p class="text-xs text-yellow-600">유효기간:
-																	${coupon.validity}</p>
-															</div>
-															<div class="text-right">
-																<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
-																<button
-																	class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
-																	쿠폰받기</button>
-															</div>
-														</div>
+										<div class="flex justify-between items-center mb-6">
+											<h2 class="text-2xl font-bold gradient-text">❓ Q&A</h2>
+											<button onclick="toggleQnAForm()"
+												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">💬
+												문의하기</button>
+										</div>
+										<div id="qnaForm" class="hidden mb-8">
+											<div
+												class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
+												<h3 class="text-lg font-bold text-slate-800 mb-4">궁금한
+													점을 문의해주세요</h3>
+												<form method="post"
+													action="${pageContext.request.contextPath}/restaurant/qna/register"
+													class="space-y-4">
+													<input type="hidden" name="restaurantId"
+														value="${restaurant.id}">
+													<div>
+														<label
+															class="block text-sm font-semibold text-slate-700 mb-2">문의
+															내용</label>
+														<textarea name="question" rows="4"
+															placeholder="음식점에 대해 궁금한 점을 자유롭게 문의해주세요..."
+															class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+															required></textarea>
 													</div>
-												</div>
-											</c:forEach>
+													<div class="flex space-x-3">
+														<button type="submit"
+															class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">문의
+															등록</button>
+														<button type="button" onclick="toggleQnAForm()"
+															class="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">취소</button>
+													</div>
+												</form>
+											</div>
 										</div>
-									</section>
-								</c:if>
-
-								<section class="glass-card p-8 rounded-3xl slide-up">
-									<div class="flex justify-between items-center mb-6">
-										<h2 class="text-2xl font-bold gradient-text">❓ Q&A</h2>
-										<button onclick="toggleQnAForm()"
-											class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">💬
-											문의하기</button>
-									</div>
-									<div id="qnaForm" class="hidden mb-8">
-										<div
-											class="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-200">
-											<h3 class="text-lg font-bold text-slate-800 mb-4">궁금한 점을
-												문의해주세요</h3>
-											<form method="post"
-												action="${pageContext.request.contextPath}/restaurant/qna/register"
-												class="space-y-4">
-												<input type="hidden" name="restaurantId"
-													value="${restaurant.id}">
-												<div>
-													<label
-														class="block text-sm font-semibold text-slate-700 mb-2">문의
-														내용</label>
-													<textarea name="question" rows="4"
-														placeholder="음식점에 대해 궁금한 점을 자유롭게 문의해주세요..."
-														class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-														required></textarea>
-												</div>
-												<div class="flex space-x-3">
-													<button type="submit"
-														class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">문의
-														등록</button>
-													<button type="button" onclick="toggleQnAForm()"
-														class="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50">취소</button>
-												</div>
-											</form>
-										</div>
-									</div>
-									<c:choose>
-										<c:when test="${not empty qnas}">
-											<div class="space-y-6">
-												<c:forEach var="qna" items="${qnas}">
-													<div
-														class="border-gradient rounded-2xl p-6 bg-white/50 backdrop-blur-sm card-hover">
-														<div class="mb-4">
-															<div class="flex items-center mb-3">
-																<span
-																	class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Q</span><span
-																	class="ml-3 text-sm text-slate-500 font-medium">고객</span>
-																<span
-																	class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"><c:choose>
-																		<c:when test="${empty qna.answer}">답변 대기</c:when>
-																		<c:otherwise>답변 완료</c:otherwise>
-																	</c:choose></span>
-															</div>
-															<p class="text-slate-800 font-medium">${qna.question}</p>
-														</div>
-														<c:if test="${not empty qna.answer}">
-															<div class="border-t border-slate-200 pt-4">
+										<c:choose>
+											<c:when test="${not empty qnas}">
+												<div class="space-y-6">
+													<c:forEach var="qna" items="${qnas}">
+														<div
+															class="border-gradient rounded-2xl p-6 bg-white/50 backdrop-blur-sm card-hover">
+															<div class="mb-4">
 																<div class="flex items-center mb-3">
 																	<span
-																		class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">A</span>
-																	<span class="ml-3 text-sm text-slate-500 font-medium"><c:choose>
-																			<c:when test="${qna.owner}">사장님</c:when>
-																			<c:otherwise>관리자</c:otherwise>
+																		class="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Q</span><span
+																		class="ml-3 text-sm text-slate-500 font-medium">고객</span>
+																	<span
+																		class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"><c:choose>
+																			<c:when test="${empty qna.answer}">답변 대기</c:when>
+																			<c:otherwise>답변 완료</c:otherwise>
 																		</c:choose></span>
 																</div>
-																<p class="text-slate-800">${qna.answer}</p>
+																<p class="text-slate-800 font-medium">${qna.question}</p>
 															</div>
-														</c:if>
-													</div>
-												</c:forEach>
-											</div>
-										</c:when>
-										<c:otherwise>
-											<div class="text-center py-12">
-												<div class="text-6xl mb-4">❓</div>
-												<h4 class="text-xl font-bold text-slate-600 mb-2">등록된
-													Q&A가 없습니다</h4>
-												<p class="text-slate-500">궁금한 점이 있으시면 언제든 문의해주세요!</p>
-											</div>
-										</c:otherwise>
-									</c:choose>
-								</section>
+															<c:if test="${not empty qna.answer}">
+																<div class="border-t border-slate-200 pt-4">
+																	<div class="flex items-center mb-3">
+																		<span
+																			class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-sm font-semibold">A</span>
+																		<span class="ml-3 text-sm text-slate-500 font-medium"><c:choose>
+																				<c:when test="${qna.owner}">사장님</c:when>
+																				<c:otherwise>관리자</c:otherwise>
+																			</c:choose></span>
+																	</div>
+																	<p class="text-slate-800">${qna.answer}</p>
+																</div>
+															</c:if>
+														</div>
+													</c:forEach>
+												</div>
+											</c:when>
+											<c:otherwise>
+												<div class="text-center py-12">
+													<div class="text-6xl mb-4">❓</div>
+													<h4 class="text-xl font-bold text-slate-600 mb-2">등록된
+														Q&A가 없습니다</h4>
+													<p class="text-slate-500">궁금한 점이 있으시면 언제든 문의해주세요!</p>
+												</div>
+											</c:otherwise>
+										</c:choose>
+									</section>
 								</c:if>
 							</div>
 
@@ -1451,115 +2434,119 @@ translateY(
 									class="glass-card p-8 rounded-3xl slide-up map-trigger cursor-pointer">
 									<div id="map" class="w-full h-64 rounded-2xl border"></div>
 								</section>
-							<c:if test="${!isExternal}">
-							<form id="reservationForm" action="${pageContext.request.contextPath}/reservation/create" method="GET">
-							
-								<input type="hidden" name="restaurantId" value="${restaurant.id}">
-								<input type="hidden" id="selectedTime" name="reservationTime" value="">
-    							
+								<c:if test="${!isExternal}">
+									<form id="reservationForm"
+										action="${pageContext.request.contextPath}/reservation/create"
+										method="GET">
 
-								<form id="reservationForm"
-									action="${pageContext.request.contextPath}/reservation/create"
-									method="GET">
-									<input type="hidden" name="restaurantId"
-										value="${restaurant.id}"><input type="hidden"
-										id="selectedTime" name="reservationTime" value="">
-									<section class="glass-card p-8 rounded-3xl slide-up"
-										style="margin-top: 32px">
-										<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
-										<%
-										List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
-										if (operatingHours != null && !operatingHours.isEmpty()) {
-											int todayDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
-											List<String> timeSlots = new ArrayList<>();
-											for (OperatingHour oh : operatingHours) {
-												if (oh.getDayOfWeek() == todayDayOfWeek && oh.getOpeningTime() != null && oh.getClosingTime() != null) {
-											LocalTime startTime = oh.getOpeningTime();
-											LocalTime endTime = oh.getClosingTime().minusMinutes(30);
-											LocalTime currentTime = startTime;
-											while (!currentTime.isAfter(endTime)) {
-												timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-												currentTime = currentTime.plusMinutes(30);
-											}
+										<input type="hidden" name="restaurantId"
+											value="${restaurant.id}"> <input type="hidden"
+											id="selectedTime" name="reservationTime" value="">
+
+
+										<form id="reservationForm"
+											action="${pageContext.request.contextPath}/reservation/create"
+											method="GET">
+											<input type="hidden" name="restaurantId"
+												value="${restaurant.id}"><input type="hidden"
+												id="selectedTime" name="reservationTime" value="">
+											<section class="glass-card p-8 rounded-3xl slide-up"
+												style="margin-top: 32px">
+												<h3 class="text-2xl font-bold gradient-text mb-6">온라인
+													예약</h3>
+												<%
+												List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
+												if (operatingHours != null && !operatingHours.isEmpty()) {
+													int todayDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
+													List<String> timeSlots = new ArrayList<>();
+													for (OperatingHour oh : operatingHours) {
+														if (oh.getDayOfWeek() == todayDayOfWeek && oh.getOpeningTime() != null && oh.getClosingTime() != null) {
+													LocalTime startTime = oh.getOpeningTime();
+													LocalTime endTime = oh.getClosingTime().minusMinutes(30);
+													LocalTime currentTime = startTime;
+													while (!currentTime.isAfter(endTime)) {
+														timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+														currentTime = currentTime.plusMinutes(30);
+													}
+														}
+													}
+													Collections.sort(timeSlots);
+													pageContext.setAttribute("timeSlots", timeSlots);
+												} else {
+													pageContext.setAttribute("timeSlots", Collections.emptyList());
 												}
-											}
-											Collections.sort(timeSlots);
-											pageContext.setAttribute("timeSlots", timeSlots);
-										} else {
-											pageContext.setAttribute("timeSlots", Collections.emptyList());
-										}
-										pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
-										pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
-										%>
-										<div class="space-y-6">
-											<div>
-												<label class="block text-sm font-bold mb-3 text-slate-700">📅
-													날짜</label> <input type="date" name="reservationDate"
-													value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>"
-													class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
-											</div>
-											<div>
-												<label class="block text-sm font-bold mb-3 text-slate-700">👥
-													인원</label> <select name="partySize"
-													class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
-													<option value="1">1명</option>
-													<option value="2" selected>2명</option>
-													<option value="3">3명</option>
-													<option value="4">4명</option>
-													<option value="5">5명</option>
-													<option value="6">6명 이상</option>
-												</select>
-											</div>
-											<div>
-												<label class="block text-sm font-bold mb-3 text-slate-700">⏰
-													예약가능시간</label>
-												<c:choose>
-													<c:when test="${not empty timeSlots}">
-														<div class="grid grid-cols-3 gap-2">
-															<c:set var="lastCategory" value="" />
-															<c:forEach var="time" items="${timeSlots}">
-																<c:set var="currentTime"
-																	value="${LocalTime.parse(time)}" />
-																<c:set var="currentCategory" value="" />
-																<c:if test="${currentTime.isBefore(lunchStart)}">
-																	<c:set var="currentCategory" value="오전" />
-																</c:if>
-																<c:if
-																	test="${not currentTime.isBefore(lunchStart) and currentTime.isBefore(dinnerStart)}">
-																	<c:set var="currentCategory" value="점심" />
-																</c:if>
-																<c:if test="${not currentTime.isBefore(dinnerStart)}">
-																	<c:set var="currentCategory" value="저녁" />
-																</c:if>
-																<c:if test="${empty lastCategory}">
-																	<c:set var="lastCategory" value="${currentCategory}" />
-																</c:if>
-																<c:if test="${lastCategory ne currentCategory}">
-																	<div class="col-span-3 flex items-center my-2">
-																		<hr class="flex-grow border-t border-gray-200">
-																		<span class="px-2 text-sm text-gray-500">${currentCategory}</span>
-																		<hr class="flex-grow border-t border-gray-200">
-																	</div>
-																</c:if>
-																<button type="button"
-																	class="btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400"
-																	onclick="selectTime(this, '${time}')">${time}</button>
-																<c:set var="lastCategory" value="${currentCategory}" />
-															</c:forEach>
-														</div>
-													</c:when>
-													<c:otherwise>
-														<div class="text-center p-4 bg-slate-100 rounded-xl">
-															<p class="text-slate-500">오늘 예약 가능한 시간이 없습니다.</p>
-														</div>
-													</c:otherwise>
-												</c:choose>
-											</div>
-											<button type="submit"
-												class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">예약하기</button>
-										</div>
-									</section>
-								</form>
+												pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
+												pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
+												%>
+												<div class="space-y-6">
+													<div>
+														<label class="block text-sm font-bold mb-3 text-slate-700">📅
+															날짜</label> <input type="date" name="reservationDate"
+															value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>"
+															class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+													</div>
+													<div>
+														<label class="block text-sm font-bold mb-3 text-slate-700">👥
+															인원</label> <select name="partySize"
+															class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+															<option value="1">1명</option>
+															<option value="2" selected>2명</option>
+															<option value="3">3명</option>
+															<option value="4">4명</option>
+															<option value="5">5명</option>
+															<option value="6">6명 이상</option>
+														</select>
+													</div>
+													<div>
+														<label class="block text-sm font-bold mb-3 text-slate-700">⏰
+															예약가능시간</label>
+														<c:choose>
+															<c:when test="${not empty timeSlots}">
+																<div class="grid grid-cols-3 gap-2">
+																	<c:set var="lastCategory" value="" />
+																	<c:forEach var="time" items="${timeSlots}">
+																		<c:set var="currentTime"
+																			value="${LocalTime.parse(time)}" />
+																		<c:set var="currentCategory" value="" />
+																		<c:if test="${currentTime.isBefore(lunchStart)}">
+																			<c:set var="currentCategory" value="오전" />
+																		</c:if>
+																		<c:if
+																			test="${not currentTime.isBefore(lunchStart) and currentTime.isBefore(dinnerStart)}">
+																			<c:set var="currentCategory" value="점심" />
+																		</c:if>
+																		<c:if test="${not currentTime.isBefore(dinnerStart)}">
+																			<c:set var="currentCategory" value="저녁" />
+																		</c:if>
+																		<c:if test="${empty lastCategory}">
+																			<c:set var="lastCategory" value="${currentCategory}" />
+																		</c:if>
+																		<c:if test="${lastCategory ne currentCategory}">
+																			<div class="col-span-3 flex items-center my-2">
+																				<hr class="flex-grow border-t border-gray-200">
+																				<span class="px-2 text-sm text-gray-500">${currentCategory}</span>
+																				<hr class="flex-grow border-t border-gray-200">
+																			</div>
+																		</c:if>
+																		<button type="button"
+																			class="btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400"
+																			onclick="selectTime(this, '${time}')">${time}</button>
+																		<c:set var="lastCategory" value="${currentCategory}" />
+																	</c:forEach>
+																</div>
+															</c:when>
+															<c:otherwise>
+																<div class="text-center p-4 bg-slate-100 rounded-xl">
+																	<p class="text-slate-500">오늘 예약 가능한 시간이 없습니다.</p>
+																</div>
+															</c:otherwise>
+														</c:choose>
+													</div>
+													<button type="submit"
+														class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">예약하기</button>
+												</div>
+											</section>
+										</form>
 								</c:if>
 							</div>
 						</div>
@@ -1616,6 +2603,16 @@ translateY(
 		</c:if>
 	</div>
 
+	<div id="imageZoomModal" class="modal-overlay hidden"
+		style="background-color: rgba(0, 0, 0, 0.9); display: none;">
+		<button id="closeZoomModalBtn" class="modal-close-btn close-x"
+			style="position: absolute; top: 2rem; right: 2rem; font-size: 3rem; color: white;">×</button>
+		<div class="modal-content"
+			style="padding: 0; background: none; box-shadow: none;">
+			<img id="zoomedImage" src="" alt="확대 이미지"
+				style="max-width: 90vw; max-height: 90vh; object-fit: contain;">
+		</div>
+	</div>
 	<script>
 	// =========================================================================
 	// 전역 변수 및 헬퍼 함수
@@ -1630,62 +2627,79 @@ translateY(
 		$('#selectedTime').val(time);
 	}
 
-    // Q&A 폼 토글 함수
-    function toggleQnAForm() {
-        const form = document.getElementById('qnaForm');
-        if (form) {
-            form.classList.toggle('hidden');
-            if (!form.classList.contains('hidden')) {
-                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    }
-    
-    // --- 레스토랑 전체 이미지 갤러리 관련 함수 ---
+	function toggleQnAForm() {
+		const form = document.getElementById('qnaForm');
+		if (form) {
+			form.classList.toggle('hidden');
+			if (!form.classList.contains('hidden')) {
+				form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			}
+		}
+	}
+
+	// --- 레스토랑 전체 이미지 갤러리 관련 함수 ---
 	let allImageFiles = [];
 	const isExternal = ${isExternal eq true};
-	
+
 	if (isExternal) {
-	    allImageFiles = [<c:forEach var="imgUrl" items="${externalImages}" varStatus="status">'${imgUrl}'<c:if test="${!status.last}">,</c:if></c:forEach>];
+		allImageFiles = [<c:forEach var="imgUrl" items="${externalImages}" varStatus="status">'${imgUrl}'<c:if test="${!status.last}">,</c:if></c:forEach>];
 	} else {
-	    allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
+		allImageFiles = [ "${restaurant.image}", <c:forEach var="img" items="${restaurant.additionalImages}">'${fn:escapeXml(img)}',</c:forEach> ].filter(Boolean);
 	}
-	const overlaySection = document.getElementById('imageOverlay'); 
-    const overlayGrid = document.getElementById('overlayGrid'); 
-    const closeOverlayBtn = document.getElementById('closeOverlayBtn'); 
-    const imageZoomModal = document.getElementById('imageZoomModal'); 
-    const zoomedImage = document.getElementById('zoomedImage'); 
-    const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
-    
-    function cycleImages() { 
-        if (overlaySection && overlaySection.classList.contains('show')) { 
-            closeImageOverlay(); 
-        } else { 
-            showImageOverlay(); 
-        } 
-    }
-    
-    function showImageOverlay() { 
-        if (!overlaySection || !overlayGrid) return; 
-        overlayGrid.innerHTML = ''; 
-        allImageFiles.forEach(fileName => { 
-            const img = document.createElement('img'); 
-            img.className = 'gallery-image'; 
-            img.src = isExternal ? fileName : '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
-            img.addEventListener('click', () => openZoomModal(img.src)); 
-            overlayGrid.appendChild(img); 
-        }); 
-        overlaySection.classList.add('show'); 
-    }
-	/* function toggleQnAForm() {
-		$('#qnaForm').slideToggle(function() {
-			if ($(this).is(':visible')) {
-				$('html, body').animate({
-					scrollTop: $(this).offset().top - 100
-				}, 'smooth');
-			}
-		});
-	} */
+
+	const overlaySection = document.getElementById('imageOverlay');
+	const overlayGrid = document.getElementById('overlayGrid');
+	const closeOverlayBtn = document.getElementById('closeOverlayBtn'); // 'X' 닫기 버튼
+	const imageZoomModal = document.getElementById('imageZoomModal');
+	const zoomedImage = document.getElementById('zoomedImage');
+	const closeZoomModalBtn = document.getElementById('closeZoomModalBtn');
+
+	function cycleImages() {
+		if (overlaySection && overlaySection.classList.contains('show')) {
+			closeImageOverlay();
+		} else {
+			showImageOverlay();
+		}
+	}
+
+	// ✨ 수정된 showImageOverlay 함수
+	function showImageOverlay() {
+	    if (!overlaySection || !overlayGrid) return;
+
+	    // 오버레이를 열기 전 내용을 깨끗하게 비웁니다.
+	    overlayGrid.innerHTML = '';
+
+	    allImageFiles.forEach(fileName => {
+	        // 1. 이미지를 감쌀 <div> wrapper를 생성합니다.
+	        const wrapper = document.createElement('div');
+	        wrapper.className = 'gallery-image-wrapper';
+
+	        // 2. <img> 태그를 생성합니다.
+	        const img = document.createElement('img');
+	        img.className = 'gallery-image image-lightbox-trigger cursor-pointer';
+	        img.src = isExternal ? fileName : '${pageContext.request.contextPath}/images/' + encodeURIComponent(fileName);
+
+	        // 3. 이미지를 wrapper에 넣고, wrapper를 그리드에 추가합니다.
+	        wrapper.appendChild(img);
+	        overlayGrid.appendChild(wrapper);
+	    });
+
+	    // '유령' 요소 추가 로직이 제거되었습니다.
+
+	    overlaySection.classList.add('show');
+	}
+
+	// ✨ [수정 1] 누락되었던 오버레이 닫기 함수를 추가합니다.
+	function closeImageOverlay() {
+		if (overlaySection) {
+			overlaySection.classList.remove('show');
+		}
+	}
+
+	// ✨ [수정 2] 'X' 닫기 버튼에 클릭 이벤트를 연결합니다.
+	if (closeOverlayBtn) {
+		closeOverlayBtn.addEventListener('click', closeImageOverlay);
+	}
 
 	// =========================================================================
 	// DOM이 모두 로드된 후 실행될 스크립트 (jQuery 사용)
@@ -1700,7 +2714,7 @@ translateY(
 			}
 		});
 
-		// 2. 글래스 카드 등장 애니메이션 (기존 로직 유지)
+		// 2. 글래스 카드 등장 애니메이션
 		const observer = new IntersectionObserver((entries) => {
 			entries.forEach(entry => {
 				if (entry.isIntersecting) {
@@ -1821,11 +2835,10 @@ translateY(
 		const reviewContainer = document.getElementById('review-list-container');
 		if (reviewContainer) {
 			const reviews = Array.from(reviewContainer.children);
-			const initialShowCount = 2; // 처음에 보여줄 리뷰 개수
-			const loadMoreCount = 2; // 더보기 시 보여줄 리뷰 개수
+			const initialShowCount = 2;
+			const loadMoreCount = 2;
 			let currentlyShown = initialShowCount;
 
-			// 초기에 보여줄 개수 외에는 모두 숨김
 			if (reviews.length > initialShowCount) {
 				reviews.slice(initialShowCount).forEach(review => review.style.display = 'none');
 
@@ -1840,7 +2853,6 @@ translateY(
 						nextReviews.forEach(review => review.style.display = 'block');
 						currentlyShown += loadMoreCount;
 
-						// 모든 리뷰가 보이면 버튼 숨김
 						if (currentlyShown >= reviews.length) {
 							loadMoreBtn.style.display = 'none';
 						}
@@ -1885,7 +2897,7 @@ translateY(
 						}
 						if (mapTriggerSection && mapModal) {
 							mapTriggerSection.addEventListener('click', function() {
-								mapModal.style.display = 'flex'; // hidden 클래스 대신 직접 제어
+								mapModal.style.display = 'flex';
 								const modalMapContainer = document.getElementById('modalMapContainer');
 								if (!modalMap && modalMapContainer) {
 									const mapOption = {
@@ -1930,40 +2942,40 @@ translateY(
 
 			// --- 좋아요 버튼 클릭 처리 ---
 			if (e.target.closest('.like-btn')) {
-    if (!isLoggedIn) {
-        alert('로그인이 필요합니다.');
-        window.location.href = `${contextPath}/login`;
-        return;
-    }
-    const button = e.target.closest('.like-btn');
-    const reviewId = button.dataset.reviewId;
+				if (!isLoggedIn) {
+					alert('로그인이 필요합니다.');
+					window.location.href = `${contextPath}/login`;
+					return;
+				}
+				const button = e.target.closest('.like-btn');
+				const reviewId = button.dataset.reviewId;
 
-    fetch(`${contextPath}/review/like`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reviewId: reviewId }) // reviewId를 JSON으로 전송
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const countSpan = button.parentElement.querySelector('.like-count');
-            countSpan.textContent = data.newLikeCount;
+				fetch(`${contextPath}/review/like`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ reviewId: reviewId })
+				})
+				.then(response => response.json())
+				.then(data => {
+					if (data.status === 'success') {
+						const countSpan = button.parentElement.querySelector('.like-count');
+						countSpan.textContent = data.newLikeCount;
 
-            if (data.isLiked) {
-                button.classList.add('text-red-500');
-                button.classList.remove('text-slate-300');
-            } else {
-                button.classList.add('text-slate-300');
-                button.classList.remove('text-red-500');
-            }
-        } else {
-            alert(data.message || '오류가 발생했습니다.');
-        }
-    })
-    .catch(error => console.error('Like fetch error:', error));
-}
+						if (data.isLiked) {
+							button.classList.add('text-red-500');
+							button.classList.remove('text-slate-300');
+						} else {
+							button.classList.add('text-slate-300');
+							button.classList.remove('text-red-500');
+						}
+					} else {
+						alert(data.message || '오류가 발생했습니다.');
+					}
+				})
+				.catch(error => console.error('Like fetch error:', error));
+			}
 
-			// --- 좋아요 목록 모달 열기 (최종 수정) ---
+			// --- 좋아요 목록 모달 열기 ---
 			if (e.target.closest('.likers-modal-trigger')) {
 				e.preventDefault();
 				const reviewId = e.target.closest('.likers-modal-trigger').dataset.reviewId;
@@ -1972,7 +2984,6 @@ translateY(
 				likersList.innerHTML = '<div class="text-center">로딩 중...</div>';
 				document.getElementById('likersModal').style.display = 'flex';
 
-				// 서블릿 URL을 정확하게 맞춰줍니다. (`/review/getLikers/리뷰ID`)
 				fetch(`${contextPath}/review/getLikers/${reviewId}`)
 					.then(response => response.json())
 					.then(likers => {
@@ -1984,10 +2995,6 @@ translateY(
 
 						likers.forEach(liker => {
 							let followButtonHtml = '';
-
-            // 마커가 지도 위에 표시되도록 설정합니다
-            marker.setMap(map);
-							// 서버가 보내준 liker.isFollowing 값을 사용합니다.
 							if (isLoggedIn && liker.id !== currentUserId) {
 								const isFollowing = liker.isFollowing;
 								const btnClass = isFollowing ? 'bg-gray-200 text-gray-700' : 'bg-blue-500 text-white';
@@ -2028,7 +3035,6 @@ translateY(
 					})
 					.done(function(data) {
 						if (data.status === 'success') {
-							// 같은 사용자 ID를 가진 모든 팔로우 버튼의 상태를 동기화
 							const allFollowButtons = $(`.follow-btn[data-user-id="${userIdToFollow}"]`);
 							if (data.isFollowing) {
 								allFollowButtons.text('팔로잉').removeClass('bg-blue-500 text-white').addClass('bg-gray-200 text-gray-700');
@@ -2056,5 +3062,6 @@ translateY(
 		});
 	});
 </script>
+
 </body>
 </html>
