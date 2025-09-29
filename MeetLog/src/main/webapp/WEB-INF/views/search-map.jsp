@@ -28,6 +28,88 @@
             width: 80px; height: 80px; object-fit: cover;
             border-radius: 0.5rem; background-color: #e2e8f0;
         }
+        
+        /* Custom Marker (Overlay) Styles */
+        .marker-overlay {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 999px; /* Rounded pill shape */
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            padding: 6px;
+            position: relative;
+            transform: translate(-50%, -100%); /* Center above the point */
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            cursor: pointer;
+            z-index: 1; /* 💡 Make sure overlay is above map tiles */
+        }
+        .marker-overlay.highlight, .marker-overlay:hover {
+            transform: translate(-50%, -100%) scale(1.05); /* Slightly enlarge on hover */
+            z-index: 10;
+            border-color: #3182ce;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .marker-overlay::after { /* The pointer */
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+        }
+        .marker-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .marker-info {
+            padding: 0 10px 0 8px;
+            white-space: nowrap;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .marker-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2d3748;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .marker-category {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        /* Kakao (Blue) Style */
+        .marker-kakao .marker-number {
+            background-color: #3182ce; /* blue-600 */
+        }
+        .marker-kakao .marker-title {
+             color: #2b6cb0; /* blue-700 */
+        }
+
+        /* DB (Red/MEETLOG) Style */
+        .marker-db .marker-number {
+            background-color: #c53030; /* red-700 */
+            font-size: 18px;
+        }
+        .marker-db .marker-title {
+            color: #c53030;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -49,7 +131,7 @@
         </main>
     </div>
     <script>
-    const g = { markers: [], infowindows: [], listItems: [] };
+    const g = { overlays: [], listItems: [] };
     let map, ps, kakaoPagination;
     let isLoading = false;
     let isDbSearchEnd = false;
@@ -68,21 +150,17 @@
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
         
-        // 💡 1. 최종 검색 키워드와 옵션을 설정할 변수 선언
         let finalKeyword = keyword;
         let searchOptions = {
             size: 10,
-            category_group_code: 'FD6' // 💡 기본적으로 음식점(FD6)으로 설정
+            category_group_code: 'FD6'
         };
         
-        // 💡 2. 카테고리가 '전체'일 경우, 키워드에 '맛집'을 추가
         if (category === '전체') {
             finalKeyword = keyword + " 맛집";
         }
         
-        // 💡 3. 수정된 키워드와 옵션으로 검색 요청
         ps.keywordSearch(finalKeyword, (data, status, pagination) => {
-            // 만약 '독산역 맛집' 검색 결과가 없다면, 원래 키워드로 다시 검색 시도
             if (status === kakao.maps.services.Status.ZERO_RESULT && finalKeyword !== keyword) {
                  ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
                     placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
@@ -93,16 +171,15 @@
         }, searchOptions);
     });
 
-
     function placesSearchCB(data, status, pagination, contextPath) {
         kakaoPagination = pagination;
         isKakaoSearchEnd = !pagination.hasNextPage;
 
         if (currentPage === 1) {
             $('#results-list').empty();
-            g.markers.forEach(marker => marker.setMap(null));
-            g.listItems.forEach(item => item.remove());
-            g.markers = []; g.listItems = []; g.infowindows = [];
+            g.overlays.forEach(overlay => overlay.setMap(null));
+            g.listItems.forEach(item => item.el.remove());
+            g.overlays = []; g.listItems = [];
 
             if (status === kakao.maps.services.Status.OK && data.length > 0) {
                 const firstPlace = data[0];
@@ -141,7 +218,7 @@
         const url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
         
         let dbRestaurants = [];
-
+        
         $.getJSON(url, function(data) {
             dbRestaurants = data;
             if (!dbRestaurants || dbRestaurants.length === 0) isDbSearchEnd = true;
@@ -175,15 +252,35 @@
         const listEl = $('#results-list');
         places.forEach((place, i) => {
             const placePosition = new kakao.maps.LatLng(place.y, place.x);
-            const marker = new kakao.maps.Marker({ position: placePosition });
-            marker.setMap(map);
-            g.markers.push(marker);
-            
             const detailUrl = contextPath + "/searchRestaurant/external-detail?name=" + encodeURIComponent(place.place_name) + "&address=" + encodeURIComponent(place.address_name) + "&phone=" + encodeURIComponent(place.phone) + "&category=" + encodeURIComponent(place.category_name) + "&lat=" + place.y + "&lng=" + place.x;
             const categoryName = place.category_name.split(' > ').pop();
+            const uniqueId = "kakao-" + currentPage + "-" + i;
+
+            const markerIndex = g.listItems.filter(item => item.id.startsWith('kakao-')).length + g.listItems.filter(item => item.id.startsWith('db-')).length + 1;
+            
+            // 💡 1. Changed to string concatenation format
+            const overlayEl = $(
+                '<div class="marker-overlay marker-kakao">' +
+                    '<div class="marker-number">' + markerIndex + '</div>' +
+                    '<div class="marker-info">' +
+                        '<div class="marker-title" title="' + place.place_name + '">' + place.place_name + '</div>' +
+                        '<div class="marker-category">' + categoryName + '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+
+            overlayEl.on('click', () => window.location.href = detailUrl);
+            
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: placePosition,
+                content: overlayEl[0],
+                yAnchor: 1 
+            });
+            customOverlay.setMap(map);
+            g.overlays.push(customOverlay);
+            
             const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
-            const uniqueId = "kakao-" + currentPage + "-" + i;
 
             const itemEl = $(
                 '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
@@ -199,7 +296,7 @@
                 '</div>'
             );
             listEl.append(itemEl);
-            g.listItems.push({id: uniqueId, el: itemEl});
+            g.listItems.push({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
 
             setTimeout(function() {
                 const searchQuery = place.place_name + " " + place.address_name.split(" ")[0];
@@ -208,13 +305,12 @@
                 });
             }, i * 100);
 
-            const infowindow = new kakao.maps.InfoWindow({ content: '<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>' });
-            g.infowindows.push(infowindow);
-            kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-            kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
-            kakao.maps.event.addListener(marker, 'click', () => window.location.href = detailUrl);
-            itemEl.on('mouseover', () => infowindow.open(map, marker));
-            itemEl.on('mouseout', () => infowindow.close());
+            itemEl.on('mouseover', () => {
+                map.panTo(placePosition);
+                overlayEl.addClass('highlight');
+            }).on('mouseout', () => {
+                overlayEl.removeClass('highlight');
+            });
         });
     }
 
@@ -222,13 +318,31 @@
         const listEl = $('#results-list');
         dbRestaurants.forEach((r, i) => {
             const placePosition = new kakao.maps.LatLng(r.latitude, r.longitude);
-            const markerImage = new kakao.maps.MarkerImage('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', new kakao.maps.Size(33, 36));
-            const marker = new kakao.maps.Marker({ position: placePosition, image: markerImage });
-            marker.setMap(map);
-            g.markers.push(marker);
-            
             const detailUrl = contextPath + "/restaurant/detail/" + r.id;
             const categoryName = r.category || '';
+            const uniqueId = "db-" + currentPage + "-" + i;
+
+            // 💡 1. Changed to string concatenation format
+            const overlayEl = $(
+                '<div class="marker-overlay marker-db">' +
+                    '<div class="marker-number">★</div>' +
+                    '<div class="marker-info">' +
+                        '<div class="marker-title" title="' + r.name + '">' + r.name + '</div>' +
+                        '<div class="marker-category">' + categoryName + '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+            
+            overlayEl.on('click', () => window.location.href = detailUrl);
+            
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: placePosition,
+                content: overlayEl[0],
+                yAnchor: 1 
+            });
+            customOverlay.setMap(map);
+            g.overlays.push(customOverlay);
+
             let imageUrl = '';
             if (r.image && r.image.trim() !== '') {
                 imageUrl = r.image.startsWith('http') ? r.image : contextPath + '/images/' + r.image;
@@ -236,7 +350,6 @@
                 imageUrl = "https://placehold.co/100x100/fee2e2/b91c1c?text=" + encodeURIComponent(categoryName);
             }
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
-            const uniqueId = "db-" + currentPage + "-" + i;
             
             const itemEl = $(
                 '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
@@ -252,14 +365,14 @@
                 '</div>'
             );
             listEl.prepend(itemEl);
-            g.listItems.unshift({id: uniqueId, el: itemEl});
-
-            const infowindow = new kakao.maps.InfoWindow({ content: '<div style="padding:5px;font-size:12px;">[MEET LOG] ' + r.name + '</div>' });
-            kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-            kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
-            kakao.maps.event.addListener(marker, 'click', () => window.location.href = detailUrl);
-            itemEl.on('mouseover', () => infowindow.open(map, marker));
-            itemEl.on('mouseout', () => infowindow.close());
+            g.listItems.unshift({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
+            
+            itemEl.on('mouseover', () => {
+                map.panTo(placePosition);
+                overlayEl.addClass('highlight');
+            }).on('mouseout', () => {
+                overlayEl.removeClass('highlight');
+            });
         });
     }
     
@@ -267,10 +380,7 @@
         const currentCount = $('#results-list .result-item').length;
         $('#result-count').text("현재 " + currentCount + "개 결과 표시 중");
     }
-
-    function highlightListItem(index, show) {
-        // This function is not fully compatible with the current dynamic list.
-    }
     </script>
 </body>
 </html>
+
