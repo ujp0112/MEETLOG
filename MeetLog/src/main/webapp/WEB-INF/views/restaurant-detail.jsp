@@ -1677,7 +1677,7 @@ translateY(
         }); 
         overlaySection.classList.add('show'); 
     }
-	function toggleQnAForm() {
+	/* function toggleQnAForm() {
 		$('#qnaForm').slideToggle(function() {
 			if ($(this).is(':visible')) {
 				$('html, body').animate({
@@ -1685,7 +1685,7 @@ translateY(
 				}, 'smooth');
 			}
 		});
-	}
+	} */
 
 	// =========================================================================
 	// DOM이 모두 로드된 후 실행될 스크립트 (jQuery 사용)

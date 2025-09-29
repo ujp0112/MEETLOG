@@ -109,18 +109,17 @@ public class RestaurantDetailServlet extends HttpServlet {
             Collections.sort(timeSlots); // 시간 순으로 정렬
             request.setAttribute("timeSlots", timeSlots); // 생성된 시간 목록을 request에 추가
             // =================================================================
+            Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
+            restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
 
             setRequestAttributes(request, restaurant, menus, reviews, coupons, qnas, operatingHours, isOwner);
             request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
 
-			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
 			if (restaurant == null) {
 				logger.warning("ID에 해당하는 레스토랑을 찾을 수 없음: " + restaurantId);
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, "해당 레스토랑 정보를 찾을 수 없습니다.");
 				return;
 			}
-			Restaurant restaurant1 = restaurantService.getRestaurantDetailById(restaurantId);
-			restaurant.setAdditionalImages(restaurant1.getAdditionalImages());
         } catch (NumberFormatException e) {
             logger.log(Level.WARNING, "올바르지 않은 맛집 ID 형식입니다.", e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 맛집 ID 형식입니다.");
