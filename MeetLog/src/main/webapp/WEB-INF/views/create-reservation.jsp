@@ -83,8 +83,10 @@ body {
 
 										<!-- 예약 폼 -->
 										<form
-											"${pageContext.request.contextPath}.do/reservation/create" method="post"
-											class="space-y-6">
+											action="${pageContext.request.contextPath}/reservation/create" method="post"
+											class="space-y-6"
+											data-fetch-url="${pageContext.request.contextPath}/reservation"
+											data-initial-time="${param.reservationTime}">
 											<input type="hidden" name="restaurantId"
 												value="${restaurant.id}"> <input type="hidden"
 												name="restaurantName" value="${restaurant.name}">
@@ -129,6 +131,7 @@ body {
 														</c:otherwise>
 													</c:choose>
 												</select>
+												<p id="timeSlotMessage" class="text-sm text-red-600 mt-2 hidden"></p>
 											</div>
 
 											<div>
@@ -232,6 +235,11 @@ body {
         // 1. 공통으로 사용할 변수 선언
         const reservationForm = document.querySelector('form');
         const dateInput = document.getElementById('reservationDate');
+        const timeSelect = document.getElementById('reservationTime');
+        const timeMessage = document.getElementById('timeSlotMessage');
+        const restaurantInput = document.querySelector('input[name="restaurantId"]');
+        const fetchUrl = reservationForm ? reservationForm.dataset.fetchUrl : '';
+        const initialSelectedTime = reservationForm ? reservationForm.dataset.initialTime : '';
 
         // 2. 예약 가능 날짜 제한 로직
         if (dateInput) {
@@ -241,6 +249,88 @@ body {
             const maxDateString = maxDate.toISOString().split('T')[0];
             dateInput.min = today;
             dateInput.max = maxDateString;
+            if (!dateInput.value) {
+                dateInput.value = today;
+            }
+        }
+
+        async function loadTimeSlots(date, preferredTime) {
+            if (!fetchUrl || !restaurantInput || !timeSelect || !date) {
+                return;
+            }
+            const params = new URLSearchParams();
+            params.append('action', 'getTimeSlots');
+            params.append('restaurantId', restaurantInput.value);
+            params.append('date', date);
+
+            timeSelect.innerHTML = '<option value="">시간을 불러오는 중...</option>';
+            timeSelect.disabled = true;
+            if (timeMessage) {
+                timeMessage.textContent = '';
+                timeMessage.classList.add('hidden');
+            }
+
+            try {
+                const response = await fetch(fetchUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: params.toString()
+                });
+                const raw = await response.text();
+                let data;
+                try {
+                    data = raw ? JSON.parse(raw) : {};
+                } catch (parseError) {
+                    throw new Error('시간 슬롯 응답 파싱 실패');
+                }
+                if (!response.ok) {
+                    throw new Error(data && (data.message || data.error) ? data.message || data.error : '시간 정보 요청 실패');
+                }
+                const slots = Array.isArray(data.timeSlots) ? data.timeSlots : [];
+
+                timeSelect.innerHTML = '';
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = slots.length > 0 ? '시간을 선택하세요' : '선택 가능한 시간이 없습니다.';
+                timeSelect.appendChild(placeholder);
+
+                slots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot;
+                    option.textContent = slot;
+                    if (preferredTime && preferredTime === slot) {
+                        option.selected = true;
+                    }
+                    timeSelect.appendChild(option);
+                });
+
+                if (timeMessage) {
+                    const message = data.message || data.error || '';
+                    if (message) {
+                        timeMessage.textContent = message;
+                        timeMessage.classList.remove('hidden');
+                    }
+                }
+
+                timeSelect.disabled = slots.length === 0;
+            } catch (error) {
+                timeSelect.innerHTML = '';
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = '시간 정보를 불러오지 못했습니다.';
+                timeSelect.appendChild(option);
+                if (timeMessage) {
+                    timeMessage.textContent = error && error.message ? error.message : '시간 정보를 불러오는 중 오류가 발생했습니다.';
+                    timeMessage.classList.remove('hidden');
+                }
+            }
+        }
+
+        if (dateInput) {
+            loadTimeSlots(dateInput.value, initialSelectedTime);
+            dateInput.addEventListener('change', function() {
+                loadTimeSlots(this.value, '');
+            });
         }
 
         // 3. 세부 요청사항 UI 스크립트

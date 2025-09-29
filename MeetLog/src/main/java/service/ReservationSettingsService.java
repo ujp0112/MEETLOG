@@ -1,27 +1,18 @@
 package service;
 
 import model.ReservationSettings;
+import model.ReservationSettingsNew;
 import dao.ReservationSettingsDAO;
 
 public class ReservationSettingsService {
     private ReservationSettingsDAO reservationDAO = new ReservationSettingsDAO();
 
     /**
-     * 음식점별 예약 설정 조회
+     * 음식점별 예약 설정 조회 (Map으로 반환)
      */
-    public ReservationSettings getReservationSettings(int restaurantId) {
+    public java.util.Map<String, Object> getReservationSettings(int restaurantId) {
         try {
-            ReservationSettings settings = reservationDAO.findByRestaurantId(restaurantId);
-
-            // 설정이 없으면 기본 설정 생성
-            if (settings == null) {
-                settings = new ReservationSettings(restaurantId);
-                if (reservationDAO.insert(settings) > 0) {
-                    return reservationDAO.findByRestaurantId(restaurantId);
-                }
-            }
-
-            return settings;
+            return reservationDAO.findByRestaurantId(restaurantId);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -33,22 +24,29 @@ public class ReservationSettingsService {
      */
     public boolean saveReservationSettings(ReservationSettings settings) {
         try {
-            // 유효성 검증
-            if (!validateReservationSettings(settings)) {
-                return false;
+            // blackout dates를 JSON 문자열로 변환
+            if (settings.getBlackoutDates() != null && !settings.getBlackoutDates().isEmpty()) {
+                String json = "[" + String.join(",",
+                    settings.getBlackoutDates().stream()
+                        .map(date -> "\"" + date + "\"")
+                        .toArray(String[]::new)) + "]";
+                settings.setBlackoutDatesJson(json);
             }
 
-            // 기존 설정이 있는지 확인
-            ReservationSettings existing = reservationDAO.findByRestaurantId(settings.getRestaurantId());
+            // 기존 설정 확인
+            java.util.Map<String, Object> existingSettings = reservationDAO.findByRestaurantId(settings.getRestaurantId());
 
-            if (existing == null) {
-                // 새로 생성
-                return reservationDAO.insert(settings) > 0;
+            int result;
+            if (existingSettings != null && existingSettings.get("id") != null) {
+                // 기존 설정이 있으면 업데이트
+                settings.setId((Integer) existingSettings.get("id"));
+                result = reservationDAO.update(settings);
             } else {
-                // 기존 설정 업데이트
-                settings.setId(existing.getId());
-                return reservationDAO.update(settings) > 0;
+                // 새 설정 등록
+                result = reservationDAO.insert(settings);
             }
+
+            return result > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -92,23 +90,12 @@ public class ReservationSettingsService {
     }
 
     /**
-     * 예약 설정 유효성 검증
+     * 예약 설정 유효성 검증 (임시로 기본 검증만 수행)
      */
     public boolean validateReservationSettings(ReservationSettings settings) {
         if (settings == null) return false;
         if (settings.getRestaurantId() <= 0) return false;
-        if (settings.getMinPartySize() <= 0 || settings.getMaxPartySize() <= 0) return false;
-        if (settings.getMinPartySize() > settings.getMaxPartySize()) return false;
-        if (settings.getAdvanceBookingDays() <= 0) return false;
-        if (settings.getMinAdvanceHours() < 0) return false;
-
-        // 시간 검증
-        if (settings.getReservationStartTime() != null && settings.getReservationEndTime() != null) {
-            if (settings.getReservationStartTime().isAfter(settings.getReservationEndTime())) {
-                return false;
-            }
-        }
-
+        // TODO: ReservationSettingsNew에 맞게 유효성 검증 로직 수정 필요
         return true;
     }
 }

@@ -68,52 +68,100 @@
     </resultMap>
 
     <!-- 예약 설정 조회 -->
-    <select id="getByRestaurantId" parameterType="int" resultMap="ReservationSettingsResultMap">
+    <select id="getByRestaurantId" parameterType="int" resultType="map">
         SELECT rs.*,
                r.name as restaurant_name
-        FROM reservation_settings rs
+        FROM restaurant_reservation_settings rs
         LEFT JOIN restaurants r ON rs.restaurant_id = r.id
         WHERE rs.restaurant_id = #{restaurantId}
-          AND rs.is_active = true
     </select>
 
-    <!-- 예약 설정 저장 -->
-    <insert id="insert" parameterType="model.ReservationSettingsNew" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reservation_settings (
-            restaurant_id, auto_accept, max_advance_days, min_advance_hours,
-            max_party_size, time_slot_interval, special_instructions,
-            deposit_required, deposit_amount, allow_waiting_list, max_waiting_list,
-            send_sms_confirmation, penalty_for_noshow, is_active, created_at
+    <!-- 예약 활성화/비활성화 -->
+    <update id="updateReservationEnabled" parameterType="map">
+        UPDATE restaurant_reservation_settings SET
+            reservation_enabled = #{enabled},
+            updated_at = NOW()
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <!-- 자동 승인 설정 변경 -->
+    <update id="updateAutoAccept" parameterType="map">
+        UPDATE restaurant_reservation_settings SET
+            auto_accept = #{autoAccept},
+            updated_at = NOW()
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <!-- 예약 설정 저장 (기존 테이블 구조 사용) -->
+    <insert id="insert" parameterType="model.ReservationSettings" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_reservation_settings (
+            restaurant_id, reservation_enabled, auto_accept, min_party_size, max_party_size,
+            advance_booking_days, min_advance_hours, reservation_start_time, reservation_end_time,
+            blackout_dates, special_notes,
+            monday_enabled, monday_start, monday_end,
+            tuesday_enabled, tuesday_start, tuesday_end,
+            wednesday_enabled, wednesday_start, wednesday_end,
+            thursday_enabled, thursday_start, thursday_end,
+            friday_enabled, friday_start, friday_end,
+            saturday_enabled, saturday_start, saturday_end,
+            sunday_enabled, sunday_start, sunday_end,
+            created_at
         ) VALUES (
-            #{restaurantId}, #{autoAccept}, #{maxAdvanceDays}, #{minAdvanceHours},
-            #{maxPartySize}, #{timeSlotInterval}, #{specialInstructions},
-            #{depositRequired}, #{depositAmount}, #{allowWaitingList}, #{maxWaitingList},
-            #{sendSmsConfirmation}, #{penaltyForNoshow}, #{isActive}, NOW()
+            #{restaurantId}, #{reservationEnabled}, #{autoAccept}, #{minPartySize}, #{maxPartySize},
+            #{advanceBookingDays}, #{minAdvanceHours}, #{reservationStartTime}, #{reservationEndTime},
+            #{blackoutDatesJson}, #{specialNotes},
+            #{mondayEnabled}, #{mondayStart}, #{mondayEnd},
+            #{tuesdayEnabled}, #{tuesdayStart}, #{tuesdayEnd},
+            #{wednesdayEnabled}, #{wednesdayStart}, #{wednesdayEnd},
+            #{thursdayEnabled}, #{thursdayStart}, #{thursdayEnd},
+            #{fridayEnabled}, #{fridayStart}, #{fridayEnd},
+            #{saturdayEnabled}, #{saturdayStart}, #{saturdayEnd},
+            #{sundayEnabled}, #{sundayStart}, #{sundayEnd},
+            NOW()
         )
     </insert>
 
-    <!-- 예약 설정 수정 -->
-    <update id="update" parameterType="model.ReservationSettingsNew">
-        UPDATE reservation_settings SET
+    <!-- 예약 설정 수정 (기존 테이블 구조 사용) -->
+    <update id="update" parameterType="model.ReservationSettings">
+        UPDATE restaurant_reservation_settings SET
+            reservation_enabled = #{reservationEnabled},
             auto_accept = #{autoAccept},
-            max_advance_days = #{maxAdvanceDays},
-            min_advance_hours = #{minAdvanceHours},
+            min_party_size = #{minPartySize},
             max_party_size = #{maxPartySize},
-            time_slot_interval = #{timeSlotInterval},
-            special_instructions = #{specialInstructions},
-            deposit_required = #{depositRequired},
-            deposit_amount = #{depositAmount},
-            allow_waiting_list = #{allowWaitingList},
-            max_waiting_list = #{maxWaitingList},
-            send_sms_confirmation = #{sendSmsConfirmation},
-            penalty_for_noshow = #{penaltyForNoshow},
+            advance_booking_days = #{advanceBookingDays},
+            min_advance_hours = #{minAdvanceHours},
+            reservation_start_time = #{reservationStartTime},
+            reservation_end_time = #{reservationEndTime},
+            blackout_dates = #{blackoutDatesJson},
+            special_notes = #{specialNotes},
+            monday_enabled = #{mondayEnabled},
+            monday_start = #{mondayStart},
+            monday_end = #{mondayEnd},
+            tuesday_enabled = #{tuesdayEnabled},
+            tuesday_start = #{tuesdayStart},
+            tuesday_end = #{tuesdayEnd},
+            wednesday_enabled = #{wednesdayEnabled},
+            wednesday_start = #{wednesdayStart},
+            wednesday_end = #{wednesdayEnd},
+            thursday_enabled = #{thursdayEnabled},
+            thursday_start = #{thursdayStart},
+            thursday_end = #{thursdayEnd},
+            friday_enabled = #{fridayEnabled},
+            friday_start = #{fridayStart},
+            friday_end = #{fridayEnd},
+            saturday_enabled = #{saturdayEnabled},
+            saturday_start = #{saturdayStart},
+            saturday_end = #{saturdayEnd},
+            sunday_enabled = #{sundayEnabled},
+            sunday_start = #{sundayStart},
+            sunday_end = #{sundayEnd},
             updated_at = NOW()
         WHERE id = #{id}
     </update>
 
     <!-- 예약 설정 삭제 (비활성화) -->
     <update id="delete" parameterType="int">
-        UPDATE reservation_settings SET
+        UPDATE restaurant_reservation_settings SET
             is_active = false,
             updated_at = NOW()
         WHERE id = #{id}

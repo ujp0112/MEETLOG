@@ -275,6 +275,93 @@ CREATE TABLE promotion (
 -- 1. 기존 promotion 테이블에서 단일 이미지 경로 컬럼 삭제
 ALTER TABLE promotion DROP COLUMN img_path;
 
+-- ===================================================================
+-- 예약 시스템 고급 기능 테이블들
+-- ===================================================================
+
+-- 예약 블랙아웃 날짜 관리 테이블
+CREATE TABLE reservation_blackout_dates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    restaurant_id INT NOT NULL,
+    blackout_date DATE NOT NULL COMMENT '예약 불가 날짜',
+    reason VARCHAR(255) COMMENT '불가 사유',
+    is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 상태',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- 인덱스 및 제약조건
+    KEY idx_blackout_restaurant_date (restaurant_id, blackout_date),
+    UNIQUE KEY unique_restaurant_blackout_date (restaurant_id, blackout_date),
+    CONSTRAINT fk_blackout_restaurant
+        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    -- 날짜 유효성 검증
+    CONSTRAINT chk_blackout_date_future CHECK (blackout_date >= CURDATE())
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='예약 불가 날짜 관리';
+
+-- 음식점 테이블 관리 시스템
+CREATE TABLE restaurant_tables (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    restaurant_id INT NOT NULL,
+    table_name VARCHAR(50) NOT NULL COMMENT '테이블명',
+    table_number INT NOT NULL COMMENT '테이블 번호',
+    capacity INT NOT NULL COMMENT '수용 인원',
+    table_type ENUM('REGULAR', 'VIP', 'PRIVATE', 'BAR') DEFAULT 'REGULAR' COMMENT '테이블 유형',
+    is_active BOOLEAN DEFAULT TRUE COMMENT '사용 가능 여부',
+    notes TEXT COMMENT '특이사항',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    -- 인덱스 및 제약조건
+    UNIQUE KEY unique_restaurant_table_number (restaurant_id, table_number),
+    KEY idx_restaurant_capacity (restaurant_id, capacity),
+    CONSTRAINT fk_table_restaurant
+        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    -- 데이터 유효성 검증
+    CONSTRAINT chk_table_number CHECK (table_number > 0 AND table_number <= 999),
+    CONSTRAINT chk_table_capacity CHECK (capacity > 0 AND capacity <= 20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='음식점 테이블 관리';
+
+-- 예약과 테이블 연결 테이블
+CREATE TABLE reservation_tables (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id INT NOT NULL,
+    table_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY unique_reservation_table (reservation_id, table_id),
+    CONSTRAINT fk_reservation_table_reservation
+        FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_reservation_table_table
+        FOREIGN KEY (table_id) REFERENCES restaurant_tables(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='예약과 테이블 연결';
+
+-- 예약 알림 로그 테이블
+CREATE TABLE reservation_notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reservation_id INT NOT NULL,
+    notification_type ENUM('SMS', 'EMAIL', 'PUSH') NOT NULL,
+    recipient VARCHAR(255) NOT NULL COMMENT '수신자 (전화번호 또는 이메일)',
+    message TEXT NOT NULL,
+    status ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
+    sent_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    KEY idx_reservation_notifications (reservation_id),
+    CONSTRAINT fk_notification_reservation
+        FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='예약 알림 발송 로그';
+
 -- 2. 여러 이미지를 순서대로 저장할 promotion_image 테이블 생성
 CREATE TABLE promotion_image (
   id INT PRIMARY KEY AUTO_INCREMENT,

@@ -1074,7 +1074,7 @@ translateY(
 												예약가능시간</label>
 											<c:choose>
 												<c:when test="${not empty timeSlots}">
-													<div class="grid grid-cols-3 gap-2">
+													<div class="grid grid-cols-3 gap-2 time-slots-container">
 														<c:set var="lastCategory" value="" />
 														<c:forEach var="time" items="${timeSlots}">
 															<c:set var="currentTime" value="${LocalTime.parse(time)}" />
@@ -1106,7 +1106,7 @@ translateY(
 													</div>
 												</c:when>
 												<c:otherwise>
-													<div class="text-center p-4 bg-slate-100 rounded-xl">
+													<div class="time-slots-container text-center p-4 bg-slate-100 rounded-xl">
 														<p class="text-slate-500">오늘 예약 가능한 시간이 없습니다.</p>
 													</div>
 												</c:otherwise>
@@ -1145,6 +1145,42 @@ translateY(
         $(element).removeClass('bg-slate-100 text-slate-700 border-slate-200')
                   .addClass('bg-blue-500 text-white border-blue-600');
         $('#selectedTime').val(time);
+    }
+
+    // 예약 가능 시간 로드 함수
+    function loadAvailableTimes() {
+        const restaurantId = '${restaurant.id}';
+        const selectedDate = document.querySelector('input[name="reservationDate"]').value;
+        const timeContainer = document.querySelector('.time-slots-container');
+
+        if (!selectedDate || !timeContainer) return;
+
+        // 로딩 상태 표시
+        timeContainer.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-blue-500" role="status"><span class="sr-only">로딩 중...</span></div></div>';
+
+        // AJAX로 시간 슬롯 요청
+        fetch('${pageContext.request.contextPath}/reservation/create?restaurantId=' + restaurantId + '&reservationDate=' + selectedDate, {
+            method: 'GET',
+            headers: {
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // 응답에서 시간 슬롯 부분만 추출
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const timeSlots = doc.querySelector('.time-slots-container');
+            if (timeSlots) {
+                timeContainer.innerHTML = timeSlots.innerHTML;
+            } else {
+                timeContainer.innerHTML = '<p class="text-slate-500 text-center py-4">예약 가능한 시간이 없습니다.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            timeContainer.innerHTML = '<p class="text-red-500 text-center py-4">시간 로드 중 오류가 발생했습니다.</p>';
+        });
     }
 
     // Q&A 폼 토글 함수
@@ -1249,6 +1285,14 @@ translateY(
                     alert('예약 시간을 선택해주세요.');
                     event.preventDefault(); // 폼 제출 중단
                 }
+            });
+        }
+
+        // 1-1. 날짜 변경 시 예약 가능 시간 업데이트
+        var dateInput = document.querySelector('input[name="reservationDate"]');
+        if (dateInput) {
+            dateInput.addEventListener('change', function() {
+                loadAvailableTimes();
             });
         }
     

@@ -1,6 +1,7 @@
 package controller;
 
 import model.ReservationSettings;
+import model.ReservationSettingsNew;
 import model.User;
 import model.Restaurant;
 import service.ReservationSettingsService;
@@ -168,7 +169,7 @@ public class ReservationSettingsServlet extends HttpServlet {
             return;
         }
 
-        ReservationSettings settings = reservationService.getReservationSettings(restaurantId);
+        java.util.Map<String, Object> settings = reservationService.getReservationSettings(restaurantId);
         request.setAttribute("restaurant", restaurant);
         request.setAttribute("reservationSettings", settings);
         request.getRequestDispatcher("/WEB-INF/views/reservation-settings.jsp").forward(request, response);
@@ -180,7 +181,7 @@ public class ReservationSettingsServlet extends HttpServlet {
         response.setContentType("application/json; charset=UTF-8");
 
         try {
-            ReservationSettings settings = reservationService.getReservationSettings(restaurantId);
+            java.util.Map<String, Object> settings = reservationService.getReservationSettings(restaurantId);
             response.getWriter().write(gson.toJson(settings));
         } catch (Exception e) {
             e.printStackTrace();

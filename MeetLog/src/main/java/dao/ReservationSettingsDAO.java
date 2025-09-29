@@ -1,6 +1,7 @@
 package dao;
 
 import model.ReservationSettings;
+import model.ReservationSettingsNew;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.Map;
@@ -9,11 +10,11 @@ public class ReservationSettingsDAO {
     private static final String NAMESPACE = "dao.ReservationSettingsDAO";
 
     /**
-     * 음식점별 예약 설정 조회
+     * 음식점별 예약 설정 조회 (Map으로 반환)
      */
-    public ReservationSettings findByRestaurantId(int restaurantId) {
+    public java.util.Map<String, Object> findByRestaurantId(int restaurantId) {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
-            return session.selectOne(NAMESPACE + ".findByRestaurantId", restaurantId);
+            return session.selectOne(NAMESPACE + ".getByRestaurantId", restaurantId);
         }
     }
 
@@ -44,6 +45,27 @@ public class ReservationSettingsDAO {
      */
     public int update(ReservationSettings settings, SqlSession session) {
         return session.update(NAMESPACE + ".update", settings);
+    }
+
+    // ReservationSettingsNew 지원 메서드들 (추후 호환성을 위해 유지)
+    public int insert(ReservationSettingsNew settings) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = session.insert(NAMESPACE + ".insertNew", settings);
+            session.commit();
+            return result;
+        }
+    }
+
+    public int update(ReservationSettingsNew settings) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = session.update(NAMESPACE + ".updateNew", settings);
+            session.commit();
+            return result;
+        }
+    }
+
+    public int update(ReservationSettingsNew settings, SqlSession session) {
+        return session.update(NAMESPACE + ".updateNew", settings);
     }
 
     /**

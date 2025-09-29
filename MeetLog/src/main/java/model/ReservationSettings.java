@@ -21,6 +21,7 @@ public class ReservationSettings {
     private List<String> availableDays; // 예약 가능 요일
     private List<String> timeSlots; // 예약 가능 시간대
     private List<String> blackoutDates; // 예약 불가 날짜
+    private String blackoutDatesJson; // 예약 불가 날짜 (JSON 형태)
     private String specialNotes; // 특별 안내사항
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -244,4 +245,7 @@ public class ReservationSettings {
     public void setSundayStart(LocalTime sundayStart) { this.sundayStart = sundayStart; }
     public LocalTime getSundayEnd() { return sundayEnd; }
     public void setSundayEnd(LocalTime sundayEnd) { this.sundayEnd = sundayEnd; }
+
+    public String getBlackoutDatesJson() { return blackoutDatesJson; }
+    public void setBlackoutDatesJson(String blackoutDatesJson) { this.blackoutDatesJson = blackoutDatesJson; }
 }
