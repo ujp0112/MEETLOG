@@ -1,9 +1,11 @@
 package model;
 
 import java.time.LocalDateTime;
-import java.util.Arrays; // Arrays 임포트 추가
-import java.util.Collections; // Collections 임포트 추가
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Date;
+import java.sql.Timestamp;
 
 public class Review {
 	private int id;
@@ -20,18 +22,24 @@ public class Review {
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	private boolean isActive;
+	private String replyContent;
+	private LocalDateTime replyCreatedAt;
 
-	// 상세 평점 필드들 추가
-	private int tasteRating; // 맛 평점 (1-5)
-	private int serviceRating; // 서비스 평점 (1-5)
-	private int atmosphereRating; // 분위기 평점 (1-5)
-	private int priceRating; // 가격 평점 (1-5)
-	private String visitDate; // 방문 날짜
-	private int partySize; // 인원수
-	private String visitPurpose; // 방문 목적 ("데이트", "비즈니스", "가족모임", "친구모임", "혼밥")
-	
-	// 답글 목록
+	// 상세 평점 필드들
+	private int tasteRating;
+	private int serviceRating;
+	private int atmosphereRating;
+	private int priceRating;
+	private String visitDate;
+	private int partySize;
+	private String visitPurpose;
+
+	// 댓글 목록
 	private List<ReviewComment> comments;
+
+	// --- 기능 구현에 필요한 추가 필드들 ---
+	private boolean likedByCurrentUser;
+	private boolean authorIsFollowedByCurrentUser; // [ ✨ 추가된 부분 ✨ ]
 
 	public Review() {
 		// Default constructor
@@ -45,13 +53,6 @@ public class Review {
 		this.content = content;
 	}
 	
-	// ======================== [수정된 부분 시작] ========================
-	
-	/**
-	 * 쉼표로 구분된 문자열을 받아서 키워드 리스트로 변환하고 저장합니다.
-	 * Servlet에서 request.getParameter("keywords")로 받은 값을 바로 사용할 수 있습니다.
-	 * @param keywords "데이트,친구,가족" 형태의 문자열
-	 */
 	public void setKeywords(String keywords) {
 	    if (keywords != null && !keywords.trim().isEmpty()) {
 	        this.keywords = Arrays.asList(keywords.split("\\s*,\\s*"));
@@ -60,18 +61,26 @@ public class Review {
 	    }
 	}
 
-	/**
-	 * 기존의 List<String>을 받는 메서드는 그대로 유지합니다.
-	 * @param keywords 키워드 리스트
-	 */
-	public void setKeywords(List<String> keywords) {
-		this.keywords = keywords;
+	// --- 이하 Getter, Setter 메서드들 ---
+	
+	public boolean isLikedByCurrentUser() {
+		return likedByCurrentUser;
 	}
 
-	// ======================== [수정된 부분 끝] ========================
+	public void setLikedByCurrentUser(boolean likedByCurrentUser) {
+		this.likedByCurrentUser = likedByCurrentUser;
+	}
 
-	// --- 이하 기존 Getter, Setter 메서드들 (수정 없음) ---
-	
+    // [ ✨ 추가된 부분 ✨ ]
+	public boolean isAuthorIsFollowedByCurrentUser() {
+		return authorIsFollowedByCurrentUser;
+	}
+
+	public void setAuthorIsFollowedByCurrentUser(boolean authorIsFollowedByCurrentUser) {
+		this.authorIsFollowedByCurrentUser = authorIsFollowedByCurrentUser;
+	}
+	// [ ✨ 여기까지 ✨ ]
+
 	public int getId() {
 		return id;
 	}
@@ -130,6 +139,10 @@ public class Review {
 	
 	public List<String> getKeywords() {
 		return keywords;
+	}
+	
+	public void setKeywords(List<String> keywords) {
+		this.keywords = keywords;
 	}
 
 	public int getLikes() {
@@ -240,10 +253,40 @@ public class Review {
 		return profileImage;
 	}
 
-
-
 	public void setProfileImage(String profileImage) {
 		this.profileImage = profileImage;
 	}
 
+	public String getReplyContent() {
+		return replyContent;
+	}
+	
+	public Date getCreatedAtAsDate() {
+	    if (this.createdAt != null) {
+	        return Timestamp.valueOf(this.createdAt);
+	    }
+	    return null;
+	}
+
+	public Date getReplyCreatedAtAsDate() {
+	    if (this.replyCreatedAt != null) {
+	        return Timestamp.valueOf(this.replyCreatedAt);
+	    }
+	    return null;
+	}
+
+
+
+
+	public void setReplyContent(String replyContent) {
+		this.replyContent = replyContent;
+	}
+
+	public LocalDateTime getReplyCreatedAt() {
+		return replyCreatedAt;
+	}
+
+	public void setReplyCreatedAt(LocalDateTime replyCreatedAt) {
+		this.replyCreatedAt = replyCreatedAt;
+	}
 }

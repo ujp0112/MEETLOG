@@ -79,6 +79,7 @@
 		<mapper resource="mappers/OperatingHourMapper.xml" />
 		<mapper resource="mappers/RatingMapper.xml" />
         <mapper resource="mappers/ReviewCommentMapper.xml" />
+        <mapper resource="mappers/ReviewLikeMapper.xml" />
         <mapper resource="mappers/ColumnCommentMapper.xml" />
         <mapper resource="mappers/ColumnLikeMapper.xml" />
         <mapper resource="mappers/CommentLikeMapper.xml" />
