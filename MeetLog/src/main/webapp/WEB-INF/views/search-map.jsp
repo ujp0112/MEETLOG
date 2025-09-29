@@ -35,22 +35,22 @@
             align-items: center;
             background-color: white;
             border: 1px solid #ccc;
-            border-radius: 999px; /* Rounded pill shape */
+            border-radius: 999px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             padding: 6px;
             position: relative;
-            transform: translate(-50%, -100%); /* Center above the point */
+            transform: translate(-50%, -100%);
             transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
             cursor: pointer;
-            z-index: 1; /* 💡 Make sure overlay is above map tiles */
+            z-index: 1;
         }
         .marker-overlay.highlight, .marker-overlay:hover {
-            transform: translate(-50%, -100%) scale(1.05); /* Slightly enlarge on hover */
+            transform: translate(-50%, -100%) scale(1.05);
             z-index: 10;
             border-color: #3182ce;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .marker-overlay::after { /* The pointer */
+        .marker-overlay::after {
             content: '';
             position: absolute;
             bottom: -8px;
@@ -94,21 +94,38 @@
             color: #718096;
         }
 
-        /* Kakao (Blue) Style */
-        .marker-kakao .marker-number {
-            background-color: #3182ce; /* blue-600 */
-        }
-        .marker-kakao .marker-title {
-             color: #2b6cb0; /* blue-700 */
-        }
+        .marker-kakao .marker-number { background-color: #3182ce; }
+        .marker-kakao .marker-title { color: #2b6cb0; }
+        .marker-db .marker-number { background-color: #c53030; font-size: 18px; }
+        .marker-db .marker-title { color: #c53030; }
 
-        /* DB (Red/MEETLOG) Style */
-        .marker-db .marker-number {
-            background-color: #c53030; /* red-700 */
-            font-size: 18px;
+        /* Re-search Button Style */
+        #research-button {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            background-color: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #3182ce;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease-in-out;
         }
-        .marker-db .marker-title {
-            color: #c53030;
+        #research-button:hover {
+            background-color: #f7fafc;
+            border-color: #a0aec0;
+        }
+        #research-button.hidden {
+            display: none;
         }
     </style>
 </head>
@@ -125,8 +142,15 @@
                 </div>
                 <div id="results-list" class="flex-grow overflow-y-auto p-2"></div>
             </div>
-            <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full">
+            <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full relative">
                 <div id="map" style="width:100%; height:100%;"></div>
+                <button id="research-button" class="hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5A5.002 5.002 0 0 0 8 3zM3.143 8.182a.5.5 0 1 1 .771.636A5.002 5.002 0 0 0 12.5 13H11A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 1 0v2.143a.5.5 0 0 1-.143.357z"/>
+                    </svg>
+                    <span>이 지역에서 다시 검색</span>
+                </button>
             </div>
         </main>
     </div>
@@ -141,27 +165,37 @@
     $(document).ready(function() {
         const keyword = "<c:out value='${keyword}'/>";
         const contextPath = "${pageContext.request.contextPath}";
-        const category = "<c:out value='${category}'/>"; 
+        // 💡 category 값을 안전하게 가져옵니다. 값이 없으면 '전체'가 기본값입니다.
+        const category = "<c:out value='${category}' default='전체'/>"; 
         
-        if (!keyword) { $('#result-count').text('검색어가 없습니다.'); return; }
+        if (!keyword && category === '전체') { 
+            $('#result-count').text('검색어가 없습니다.'); 
+            return; 
+        }
 
         const mapContainer = document.getElementById('map');
         const mapOption = { center: new kakao.maps.LatLng(37.566826, 126.97865), level: 8 };
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
         
-        let finalKeyword = keyword;
+        let initialSearchKeyword = keyword;
+        // 💡 '전체' 카테고리일 때만 키워드에 '맛집'을 추가합니다.
+        if (category === '전체' && keyword) {
+            initialSearchKeyword = keyword + " 맛집";
+        } else if (!keyword && category !== '전체') {
+            initialSearchKeyword = category;
+        }
+        
+        // 검색 결과 제목을 설정합니다.
+        $('#result-panel h1').html('"<span class="text-blue-600">' + (keyword || category) + '</span>" 검색 결과');
+
         let searchOptions = {
             size: 10,
             category_group_code: 'FD6'
         };
         
-        if (category === '전체') {
-            finalKeyword = keyword + " 맛집";
-        }
-        
-        ps.keywordSearch(finalKeyword, (data, status, pagination) => {
-            if (status === kakao.maps.services.Status.ZERO_RESULT && finalKeyword !== keyword) {
+        ps.keywordSearch(initialSearchKeyword, (data, status, pagination) => {
+            if (status === kakao.maps.services.Status.ZERO_RESULT && initialSearchKeyword !== keyword) {
                  ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
                     placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
                 }, searchOptions);
@@ -169,6 +203,41 @@
                 placesSearchCB(data, status, pagination, contextPath);
             }
         }, searchOptions);
+
+        kakao.maps.event.addListener(map, 'dragend', function() {
+            $('#research-button').removeClass('hidden');
+        });
+
+        $('#research-button').on('click', function() {
+            $(this).addClass('hidden');
+            $('#results-list').empty().scrollTop(0);
+            g.overlays.forEach(overlay => overlay.setMap(null));
+            g.overlays = [];
+            g.listItems = [];
+            currentPage = 1;
+            isDbSearchEnd = false;
+            isKakaoSearchEnd = false;
+
+            // 💡 '다시 검색' 시 사용할 키워드를 category 값으로 설정합니다.
+            let researchKeyword = category;
+            if (category === '전체') {
+                researchKeyword = '음식점';
+            }
+
+            $('#result-panel h1').html('현재 지도에서 <span class="text-blue-600">"' + researchKeyword + '"</span> 검색 결과');
+            
+            const researchOptions = {
+                size: 10,
+                category_group_code: 'FD6',
+                location: map.getCenter()
+            };
+
+            ps.keywordSearch(researchKeyword, (data, status, pagination) => {
+                kakaoPagination = pagination;
+                isKakaoSearchEnd = !pagination.hasNextPage;
+                fetchDbAndDisplayCombined(1, data || [], contextPath, true);
+            }, researchOptions);
+        });
     });
 
     function placesSearchCB(data, status, pagination, contextPath) {
@@ -211,10 +280,11 @@
         }
     });
 
-    function fetchDbAndDisplayCombined(page, kakaoDataForPage, contextPath) {
+    function fetchDbAndDisplayCombined(page, kakaoDataForPage, contextPath, isResearch = false) {
         const center = map.getCenter();
         const level = map.getLevel();
-        const category = "<c:out value='${category}'/>";
+        // 💡 DB 검색 시에도 category 값을 사용합니다.
+        const category = "<c:out value='${category}' default='전체'/>";
         const url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
         
         let dbRestaurants = [];
@@ -239,7 +309,7 @@
             isLoading = false;
             updateResultCount();
             
-            if (page === 1 && ( (kakaoDataForPage && kakaoDataForPage.length > 0) || (dbRestaurants && dbRestaurants.length > 0))) {
+            if (page === 1 && !isResearch && ( (kakaoDataForPage && kakaoDataForPage.length > 0) || (dbRestaurants && dbRestaurants.length > 0))) {
                  const bounds = new kakao.maps.LatLngBounds();
                  if(kakaoDataForPage) kakaoDataForPage.forEach(p => bounds.extend(new kakao.maps.LatLng(p.y, p.x)));
                  if(dbRestaurants) dbRestaurants.forEach(r => bounds.extend(new kakao.maps.LatLng(r.latitude, r.longitude)));
@@ -258,7 +328,6 @@
 
             const markerIndex = g.listItems.filter(item => item.id.startsWith('kakao-')).length + g.listItems.filter(item => item.id.startsWith('db-')).length + 1;
             
-            // 💡 1. Changed to string concatenation format
             const overlayEl = $(
                 '<div class="marker-overlay marker-kakao">' +
                     '<div class="marker-number">' + markerIndex + '</div>' +
@@ -322,7 +391,6 @@
             const categoryName = r.category || '';
             const uniqueId = "db-" + currentPage + "-" + i;
 
-            // 💡 1. Changed to string concatenation format
             const overlayEl = $(
                 '<div class="marker-overlay marker-db">' +
                     '<div class="marker-number">★</div>' +
