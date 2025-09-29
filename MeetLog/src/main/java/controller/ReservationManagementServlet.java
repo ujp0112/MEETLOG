@@ -8,10 +8,16 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import model.Reservation;
+import service.ReservationService;
 
 @WebServlet("/admin/reservation-management")
 public class ReservationManagementServlet extends HttpServlet {
+
+    private final ReservationService reservationService = new ReservationService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -25,7 +31,10 @@ public class ReservationManagementServlet extends HttpServlet {
                 return;
             }
             
-            List<Reservation> reservations = createSampleReservations();
+            // 실제 DB에서 모든 예약 조회 (관리자용)
+            Map<String, Object> emptyParams = new HashMap<>();
+            List<Reservation> reservations = reservationService.searchReservations(emptyParams);
+            System.out.println("DEBUG: 관리자 예약 관리 - 조회된 예약 수: " + reservations.size());
             request.setAttribute("reservations", reservations);
             
             request.getRequestDispatcher("/WEB-INF/views/admin-reservation-management.jsp").forward(request, response);
@@ -36,45 +45,5 @@ public class ReservationManagementServlet extends HttpServlet {
         }
     }
     
-    private List<Reservation> createSampleReservations() {
-        List<Reservation> reservations = new ArrayList<>();
-        
-        Reservation reservation1 = new Reservation();
-        reservation1.setId(1);
-        reservation1.setCustomerName("김예약");
-        reservation1.setRestaurantName("고미정");
-        reservation1.setReservationDate("2025-09-15");
-        reservation1.setReservationTime("19:00");
-        reservation1.setPartySize(4);
-        reservation1.setStatus("CONFIRMED");
-        reservations.add(reservation1);
-        
-        return reservations;
-    }
-    
-    public static class Reservation {
-        private int id;
-        private String customerName;
-        private String restaurantName;
-        private String reservationDate;
-        private String reservationTime;
-        private int partySize;
-        private String status;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getCustomerName() { return customerName; }
-        public void setCustomerName(String customerName) { this.customerName = customerName; }
-        public String getRestaurantName() { return restaurantName; }
-        public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
-        public String getReservationDate() { return reservationDate; }
-        public void setReservationDate(String reservationDate) { this.reservationDate = reservationDate; }
-        public String getReservationTime() { return reservationTime; }
-        public void setReservationTime(String reservationTime) { this.reservationTime = reservationTime; }
-        public int getPartySize() { return partySize; }
-        public void setPartySize(int partySize) { this.partySize = partySize; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-    }
+    // 임시데이터 생성 메서드 제거 - 이제 실제 DB에서 조회
 }

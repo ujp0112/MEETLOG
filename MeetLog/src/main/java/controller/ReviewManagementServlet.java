@@ -8,10 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
+
+import model.Review;
+import service.ReviewService;
 
 @WebServlet("/admin/review-management")
 public class ReviewManagementServlet extends HttpServlet {
+
+    private final ReviewService reviewService = new ReviewService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -25,7 +29,9 @@ public class ReviewManagementServlet extends HttpServlet {
                 return;
             }
             
-            List<Review> reviews = createSampleReviews();
+            // 실제 DB에서 모든 리뷰 조회 (관리자용)
+            List<Review> reviews = reviewService.findAll();
+            System.out.println("DEBUG: 관리자 리뷰 관리 - 조회된 리뷰 수: " + reviews.size());
             request.setAttribute("reviews", reviews);
             
             request.getRequestDispatcher("/WEB-INF/views/admin-review-management.jsp").forward(request, response);
@@ -36,41 +42,5 @@ public class ReviewManagementServlet extends HttpServlet {
         }
     }
     
-    private List<Review> createSampleReviews() {
-        List<Review> reviews = new ArrayList<>();
-        
-        Review review1 = new Review();
-        review1.setId(1);
-        review1.setUserName("김리뷰");
-        review1.setRestaurantName("고미정");
-        review1.setContent("정말 맛있어요!");
-        review1.setRating(5);
-        review1.setCreatedAt("2025-09-14");
-        reviews.add(review1);
-        
-        return reviews;
-    }
-    
-    public static class Review {
-        private int id;
-        private String userName;
-        private String restaurantName;
-        private String content;
-        private int rating;
-        private String createdAt;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getUserName() { return userName; }
-        public void setUserName(String userName) { this.userName = userName; }
-        public String getRestaurantName() { return restaurantName; }
-        public void setRestaurantName(String restaurantName) { this.restaurantName = restaurantName; }
-        public String getContent() { return content; }
-        public void setContent(String content) { this.content = content; }
-        public int getRating() { return rating; }
-        public void setRating(int rating) { this.rating = rating; }
-        public String getCreatedAt() { return createdAt; }
-        public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-    }
+    // 임시데이터 생성 메서드 제거 - 이제 실제 DB에서 조회
 }

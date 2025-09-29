@@ -1,5 +1,28 @@
 9월 5주차 todo list
 
+**⚠️ 코드 품질 및 임시데이터 정리 (최우선)**
+
+🔧 **임시데이터 제거 필요 서블릿**:   (🟢)  (🔺)  (❌)
+  - FaqServlet.java, FaqManagementServlet.java
+  - NoticeServlet.java, NoticeManagementServlet.java
+  - InquiryManagementServlet.java
+  - FeedbackManagementServlet.java
+  - EmployeeManagementServlet.java
+  - AlertServlet.java
+
+
+📝 **TODO 항목 구현 필요**:
+- IntelligentRecommendationService.java - 메트릭 저장 로직
+- ReservationAutomationService.java - 자동화 기능
+- ColumnCommentServlet.java - DEBUG 코드 제거
+- 음식점 리뷰 평균점수 계산 로직
+- 마이페이지 "내 칼럼" 표시 문제
+
+🧹 **로깅 시스템**:
+- 323개 파일의 System.out.println → SLF4J + Logback 대체
+
+---
+
 ~~1.  MAVEN 제거 (ㅇ)
     이전에 java21 사용했을 때 썼던 maven 설정 전부 제거
     Spring, Firebase, Selenium 전부 사용 안하고 있어서 maven 제거해도 무방 ~~
