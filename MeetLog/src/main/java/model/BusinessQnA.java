@@ -1,6 +1,8 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.sql.Timestamp;
 
 public class BusinessQnA {
     private int id;
@@ -13,6 +15,7 @@ public class BusinessQnA {
     private String answer;
     private String status; // PENDING, ANSWERED, CLOSED
     private boolean isOwner;
+    private boolean isResolved; // 해결 완료 여부
     private boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime answeredAt;
@@ -149,5 +152,35 @@ public class BusinessQnA {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isResolved() {
+        return isResolved;
+    }
+
+    public boolean getIsResolved() {
+        return isResolved;
+    }
+
+    public void setResolved(boolean resolved) {
+        isResolved = resolved;
+    }
+
+    public void setIsResolved(boolean resolved) {
+        this.isResolved = resolved;
+    }
+
+    public Date getCreatedAtAsDate() {
+        if (this.createdAt != null) {
+            return Timestamp.valueOf(this.createdAt);
+        }
+        return null;
+    }
+
+    public Date getAnsweredAtAsDate() {
+        if (this.answeredAt != null) {
+            return Timestamp.valueOf(this.answeredAt);
+        }
+        return null;
     }
 }

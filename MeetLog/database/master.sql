@@ -1,5 +1,6 @@
 -- ===================================================================
 -- DATABASE INITIALIZATION SCRIPT (MEETLOG 최종 통합 버전)
+-- Merged from master.sql and master_v2.sql
 -- ===================================================================
 
 -- 데이터베이스가 존재하면 삭제하고 새로 생성 (완전 초기화)
@@ -11,602 +12,837 @@ USE meetlog;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ===================================================================
--- 1. 기존 테이블 삭제 (Drop Existing Tables)
+-- 1. 테이블 구조 생성 (Create Schema)
+-- Based on master_v2.sql with modifications
 -- ===================================================================
--- (DROP DATABASE로 이미 모두 삭제되었지만, 안전을 위해 구문 유지)
-DROP TABLE IF EXISTS comment_likes, column_likes, review_comments, column_comments, follows, reservations, detailed_ratings, rating_distributions, restaurant_qna, restaurant_news, coupons, `columns`, reviews, menus, business_users, restaurant_operating_hours, restaurants, course_reviews, course_comments, course_reservations, course_likes, course_steps, course_tags, tags, courses, user_storage_items, user_storages, user_badges, badges, notices, feed_items, alerts, users, companies, EVENTS;
-
-
--- ===================================================================
--- 2. 테이블 구조 생성 (Create Schema)
--- ===================================================================
-
-CREATE TABLE `companies` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '회사 또는 브랜드명',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='본사 또는 브랜드 정보를 담는 테이블';
-
--- companies 테이블에 updated_at 컬럼 추가
-ALTER TABLE companies ADD COLUMN updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `nickname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_type` enum('PERSONAL','BUSINESS','ADMIN') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PERSONAL',
-  `profile_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `level` int DEFAULT '1',
-  `follower_count` int DEFAULT '0',
-  `following_count` int DEFAULT '0',
-  `is_active` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CREATE TABLE `EVENTS` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `TITLE` varchar(255) NOT NULL,
+  `SUMMARY` varchar(500) DEFAULT NULL,
+  `CONTENT` text DEFAULT NULL,
+  `IMAGE` varchar(1000) DEFAULT NULL,
+  `START_DATE` date DEFAULT NULL,
+  `END_DATE` date DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `alerts` (
+  `alert_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`alert_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `alerts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `badges` (
+  `badge_id` int(11) NOT NULL AUTO_INCREMENT,
+  `icon` varchar(10) DEFAULT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`badge_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `branch_inventory` (
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `qty` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`company_id`,`branch_id`,`material_id`),
+  KEY `idx_bi_branch` (`branch_id`),
+  KEY `idx_bi_material` (`material_id`),
+  KEY `fk_bi_material` (`company_id`,`material_id`),
+  CONSTRAINT `fk_bi_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_bi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `branch_menu_toggle` (
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `enabled` char(1) NOT NULL DEFAULT 'Y',
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`company_id`,`branch_id`,`menu_id`),
+  KEY `idx_bmt_branch` (`branch_id`),
+  KEY `idx_bmt_menu` (`menu_id`),
+  KEY `fk_bmt_menu` (`company_id`,`menu_id`),
+  CONSTRAINT `fk_bmt_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_bmt_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `business_notice` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text DEFAULT NULL,
+  `view_count` int(11) NOT NULL DEFAULT 0,
+  `deleted_yn` char(1) DEFAULT 'N',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `nickname` (`nickname`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_UNICODE_CI;
-
-
-
+  KEY `fk_notice_company` (`company_id`),
+  CONSTRAINT `fk_notice_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
 CREATE TABLE `business_users` (
-  `user_id` int NOT NULL,
-  `business_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `owner_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `business_number` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `role` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '역할 (HQ 또는 BRANCH 또는 INDIVIDUAL)',
-  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PENDING' COMMENT '상태 (PENDING, ACTIVE)',
-  `company_id` int DEFAULT NULL COMMENT '소속된 회사의 ID',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `user_id` int(11) NOT NULL,
+  `business_name` varchar(200) NOT NULL,
+  `owner_name` varchar(100) NOT NULL,
+  `business_number` varchar(20) NOT NULL,
+  `role` varchar(10) NOT NULL COMMENT '역할 (HQ 또는 BRANCH 또는 INDIVIDUAL)',
+  `status` varchar(10) NOT NULL DEFAULT 'PENDING' COMMENT '상태 (PENDING, ACTIVE)',
+  `company_id` int(11) DEFAULT NULL COMMENT '소속된 회사의 ID. HQ의 경우 자신의 user_id 또는 별도 ID.',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`),
-  KEY `fk_business_users_to_companies` (`company_id`),
-  CONSTRAINT `fk_business_users_to_companies` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `business_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_UNICODE_CI;
-
--- ### business_users 테이블 수정 ###
-
--- 1. 먼저 기존 외래 키 제약 조건을 삭제합니다.
-ALTER TABLE business_users DROP FOREIGN KEY `fk_business_users_to_companies`;
-
--- 2. 제약 조건이 없는 상태에서 컬럼의 주석(COMMENT)을 수정합니다.
-ALTER TABLE business_users MODIFY COLUMN company_id INT NULL COMMENT '소속된 회사의 ID. HQ의 경우 자신의 user_id 또는 별도 ID.';
-
--- 3. 삭제했던 외래 키 제약 조건을 다시 추가합니다. (companies 테이블이 존재해야 합니다)
-ALTER TABLE business_users ADD CONSTRAINT `fk_business_users_to_companies` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL;
-
-
--- ### users 테이블 수정 ###
--- 이 쿼리들은 이전에 성공했을 수 있습니다. 
--- 만약 'Duplicate column name' 오류가 발생하면, 이미 컬럼이 추가된 것이니 무시하고 넘어가세요.
-
-ALTER TABLE users ADD COLUMN name VARCHAR(100);
-ALTER TABLE users ADD COLUMN phone VARCHAR(50);
-ALTER TABLE users ADD COLUMN address VARCHAR(255);
-
+  UNIQUE KEY `uq_business_users_company_id` (`company_id`, `user_id`),
+  CONSTRAINT `business_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_business_users_to_companies` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `column_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `column_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `like_count` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_column_id` (`column_id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_parent_id` (`parent_id`),
+  CONSTRAINT `column_comments_ibfk_1` FOREIGN KEY (`column_id`) REFERENCES `columns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `column_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `column_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `column_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_column_user` (`column_id`,`user_id`),
+  KEY `idx_column_likes_column_id` (`column_id`),
+  KEY `idx_column_likes_user_id` (`user_id`),
+  CONSTRAINT `column_likes_ibfk_1` FOREIGN KEY (`column_id`) REFERENCES `columns` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `column_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `columns` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `title` varchar(300) NOT NULL,
+  `content` text NOT NULL,
+  `image` varchar(500) DEFAULT NULL,
+  `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
+  `likes` int(11) DEFAULT 0,
+  `views` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `idx_columns_user_id` (`user_id`),
+  KEY `idx_columns_created_at` (`created_at` DESC),
+  CONSTRAINT `columns_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `comment_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_comment_user` (`comment_id`,`user_id`),
+  KEY `idx_comment_likes_comment_id` (`comment_id`),
+  KEY `idx_comment_likes_user_id` (`user_id`),
+  CONSTRAINT `comment_likes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `column_comments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `comment_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `companies` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL COMMENT '회사 또는 브랜드명',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='본사 또는 브랜드 정보를 담는 테이블';
+CREATE TABLE `coupons` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `title` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `validity` varchar(100) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `coupons_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_comments` (
+  `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `is_active` tinyint(1) DEFAULT 1,
+  PRIMARY KEY (`comment_id`),
+  KEY `course_id` (`course_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `course_comments_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_likes` (
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`,`user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `course_likes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_reservations` (
+  `reservation_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `participant_name` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `reservation_date` date DEFAULT NULL,
+  `reservation_time` varchar(50) DEFAULT NULL,
+  `participant_count` int(11) DEFAULT 1,
+  `total_price` int(11) DEFAULT 0,
+  `status` enum('PENDING','CONFIRMED','COMPLETED','CANCELLED') DEFAULT 'PENDING',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`reservation_id`),
+  KEY `course_id` (`course_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `course_reservations_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_reviews` (
+  `review_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` int(11) DEFAULT 5,
+  `content` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `response_content` text DEFAULT NULL,
+  PRIMARY KEY (`review_id`),
+  KEY `course_id` (`course_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `course_reviews_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_steps` (
+  `step_id` int(11) NOT NULL AUTO_INCREMENT,
+  `course_id` int(11) NOT NULL,
+  `step_order` int(11) NOT NULL DEFAULT 0,
+  `step_type` varchar(100) DEFAULT NULL,
+  `emoji` varchar(10) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(1000) DEFAULT NULL,
+  PRIMARY KEY (`step_id`),
+  KEY `idx_course_id` (`course_id`),
+  CONSTRAINT `course_steps_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `course_tags` (
+  `course_id` int(11) NOT NULL,
+  `tag_id` int(11) NOT NULL,
+  PRIMARY KEY (`course_id`,`tag_id`),
+  KEY `tag_id` (`tag_id`),
+  CONSTRAINT `course_tags_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_tags_ibfk_2` FOREIGN KEY (`tag_id`) REFERENCES `tags` (`tag_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `courses` (
+  `course_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `area` varchar(100) DEFAULT NULL,
+  `duration` varchar(100) DEFAULT NULL,
+  `price` int(11) DEFAULT 0,
+  `max_participants` int(11) DEFAULT 0,
+  `status` enum('PENDING','ACTIVE','COMPLETED','CANCELLED') DEFAULT 'PENDING',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `type` enum('OFFICIAL','COMMUNITY') DEFAULT 'COMMUNITY',
+  `preview_image` varchar(1000) DEFAULT NULL,
+  `author_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`course_id`),
+  KEY `author_id` (`author_id`),
+  CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`author_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `detailed_ratings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `taste` decimal(3,1) DEFAULT 0.0,
+  `price` decimal(3,1) DEFAULT 0.0,
+  `service` decimal(3,1) DEFAULT 0.0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `detailed_ratings_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `feed_items` (
+  `feed_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `feed_type` enum('COLUMN','REVIEW','COURSE') NOT NULL,
+  `content_id` int(11) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`feed_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `feed_items_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `follows` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `follower_id` int(11) NOT NULL,
+  `following_id` int(11) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_follow` (`follower_id`,`following_id`),
+  KEY `idx_follows_follower_id` (`follower_id`),
+  KEY `idx_follows_following_id` (`following_id`),
+  KEY `idx_follows_created_at` (`created_at` DESC),
+  CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `material` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `unit` varchar(30) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `img_path` varchar(255) DEFAULT NULL,
+  `step` decimal(12,2) DEFAULT 1.00,
+  `active_yn` char(1) DEFAULT 'Y',
+  `deleted_yn` char(1) DEFAULT 'N',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_material_company_id` (`company_id`,`id`),
+  KEY `idx_material_company` (`company_id`),
+  CONSTRAINT `fk_material_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `menu` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `price` decimal(12,0) NOT NULL,
+  `recipe` text DEFAULT NULL COMMENT '메뉴 레시피',
+  `img_path` varchar(255) DEFAULT NULL,
+  `active_yn` char(1) DEFAULT 'Y',
+  `deleted_yn` char(1) DEFAULT 'N',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_menu_company_id` (`company_id`,`id`),
+  KEY `idx_menu_company` (`company_id`),
+  CONSTRAINT `fk_menu_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `menu_ingredient` (
+  `company_id` int(11) NOT NULL,
+  `menu_id` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `qty` decimal(12,3) NOT NULL,
+  PRIMARY KEY (`company_id`,`menu_id`,`material_id`),
+  KEY `idx_mi_menu` (`menu_id`),
+  KEY `idx_mi_material` (`material_id`),
+  KEY `fk_mi_material` (`company_id`,`material_id`),
+  CONSTRAINT `fk_mi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
+  CONSTRAINT `fk_mi_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `menus` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `name` varchar(200) NOT NULL,
+  `price` varchar(50) NOT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(500) DEFAULT NULL,
+  `is_popular` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `notice_file` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `notice_id` int(11) NOT NULL,
+  `company_id` bigint(20) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `saved_filename` varchar(255) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `file_size` bigint(20) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_notice_file_notice` (`notice_id`),
+  CONSTRAINT `fk_notice_file_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `notice_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `notice_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `display_order` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_notice_image_notice` (`notice_id`),
+  CONSTRAINT `fk_notice_image_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `notices` (
+  `notice_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `content` text DEFAULT NULL,
+  `created_at` date DEFAULT NULL,
+  PRIMARY KEY (`notice_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL COMMENT 'follow, like, comment, review, collection, etc.',
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `action_url` varchar(500) DEFAULT NULL COMMENT '클릭 시 이동할 URL',
+  `is_read` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `read_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_notifications_user_id` (`user_id`),
+  KEY `idx_notifications_is_read` (`is_read`),
+  KEY `idx_notifications_created_at` (`created_at` DESC),
+  KEY `idx_notifications_type` (`type`),
+  CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자 알림 테이블';
+CREATE TABLE `promotion` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL COMMENT '프로모션 제목',
+  `description` text DEFAULT NULL COMMENT '프로모션 상세 설명',
+  `start_date` timestamp NOT NULL COMMENT '프로모션 시작 일시',
+  `end_date` timestamp NOT NULL COMMENT '프로모션 종료 일시',
+  `deleted_yn` char(1) DEFAULT 'N',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_promotion_company` (`company_id`),
+  CONSTRAINT `fk_promotion_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `promotion_file` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `promotion_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `original_filename` varchar(255) NOT NULL COMMENT '사용자가 올린 원래 파일명',
+  `file_path` varchar(255) NOT NULL COMMENT '서버에 저장된 고유 파일명',
+  `file_size` bigint(20) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_promo_file_promo` (`promotion_id`),
+  CONSTRAINT `fk_promo_file_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `promotion_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `promotion_id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `file_path` varchar(255) NOT NULL COMMENT '이미지 파일명',
+  `display_order` int(11) NOT NULL DEFAULT 0 COMMENT '이미지 표시 순서',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_promo_image_promo` (`promotion_id`),
+  CONSTRAINT `fk_promo_image_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `purchase_order` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `company_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `status` enum('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
+  `total_price` decimal(14,0) NOT NULL DEFAULT 0,
+  `ordered_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_purchase_order_company_id` (`company_id`, `id`),
+  KEY `idx_po_company` (`company_id`),
+  KEY `idx_po_branch` (`branch_id`),
+  KEY `fk_po_branch` (`company_id`,`branch_id`),
+  CONSTRAINT `fk_po_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `purchase_order_line` (
+  `company_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `line_no` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `qty` decimal(12,2) NOT NULL,
+  `unit_price` decimal(12,2) NOT NULL,
+  `status` enum('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
+  PRIMARY KEY (`company_id`,`order_id`,`line_no`),
+  KEY `idx_pol_order` (`order_id`),
+  KEY `idx_pol_material` (`material_id`),
+  KEY `fk_pol_material` (`company_id`,`material_id`),
+  CONSTRAINT `fk_pol_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
+  CONSTRAINT `fk_pol_order` FOREIGN KEY (`company_id`, `order_id`) REFERENCES `purchase_order` (`company_id`, `id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `rating_distributions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `rating_1` int(11) DEFAULT 0,
+  `rating_2` int(11) DEFAULT 0,
+  `rating_3` int(11) DEFAULT 0,
+  `rating_4` int(11) DEFAULT 0,
+  `rating_5` int(11) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `rating_distributions_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `reservations` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `restaurant_name` varchar(200) NOT NULL,
+  `user_name` varchar(100) NOT NULL,
+  `reservation_time` timestamp NOT NULL,
+  `party_size` int(11) NOT NULL,
+  `status` enum('PENDING','CONFIRMED','COMPLETED','CANCELLED') DEFAULT 'PENDING',
+  `special_requests` text DEFAULT NULL,
+  `contact_phone` varchar(20) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_reservations_restaurant_id` (`restaurant_id`),
+  KEY `idx_reservations_user_id` (`user_id`),
+  KEY `idx_reservations_reservation_time` (`reservation_time`),
+  CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `restaurant_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `image_path` varchar(255) NOT NULL COMMENT '서버에 저장된 이미지 파일명',
+  `display_order` int(11) NOT NULL DEFAULT 0 COMMENT '이미지 표시 순서',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_res_images_restaurant` (`restaurant_id`),
+  CONSTRAINT `fk_res_images_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+CREATE TABLE `restaurant_news` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `type` varchar(50) NOT NULL,
+  `title` varchar(300) NOT NULL,
+  `content` text NOT NULL,
+  `date` varchar(20) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `restaurant_news_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `restaurant_operating_hours` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `day_of_week` int(11) NOT NULL,
+  `opening_time` time NOT NULL,
+  `closing_time` time NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `restaurant_operating_hours_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `restaurant_qna` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `question` text NOT NULL,
+  `answer` text NOT NULL,
+  `is_owner` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `restaurant_qna_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `restaurant_reservation_settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `reservation_enabled` tinyint(1) DEFAULT 0,
+  `auto_accept` tinyint(1) DEFAULT 0,
+  `min_party_size` int(11) DEFAULT 1,
+  `max_party_size` int(11) DEFAULT 10,
+  `advance_booking_days` int(11) DEFAULT 30,
+  `min_advance_hours` int(11) DEFAULT 2,
+  `reservation_start_time` time DEFAULT '09:00:00',
+  `reservation_end_time` time DEFAULT '22:00:00',
+  `available_days` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '[monday, 	uesday, wednesday, 	hursday, friday, saturday, sunday]' CHECK (json_valid(`available_days`)),
+  `time_slots` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '[	09:00, 10:00, 11:00, 12:00, 13:00, 14:00, 15:00, 16:00, 17:00, 18:00, 19:00, 20:00, 21:00]' CHECK (json_valid(`time_slots`)),
+  `blackout_dates` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`blackout_dates`)),
+  `special_notes` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `monday_enabled` tinyint(1) DEFAULT 1,
+  `monday_start` time DEFAULT '09:00:00',
+  `monday_end` time DEFAULT '22:00:00',
+  `tuesday_enabled` tinyint(1) DEFAULT 1,
+  `tuesday_start` time DEFAULT '09:00:00',
+  `tuesday_end` time DEFAULT '22:00:00',
+  `wednesday_enabled` tinyint(1) DEFAULT 1,
+  `wednesday_start` time DEFAULT '09:00:00',
+  `wednesday_end` time DEFAULT '22:00:00',
+  `thursday_enabled` tinyint(1) DEFAULT 1,
+  `thursday_start` time DEFAULT '09:00:00',
+  `thursday_end` time DEFAULT '22:00:00',
+  `friday_enabled` tinyint(1) DEFAULT 1,
+  `friday_start` time DEFAULT '09:00:00',
+  `friday_end` time DEFAULT '22:00:00',
+  `saturday_enabled` tinyint(1) DEFAULT 1,
+  `saturday_start` time DEFAULT '09:00:00',
+  `saturday_end` time DEFAULT '22:00:00',
+  `sunday_enabled` tinyint(1) DEFAULT 1,
+  `sunday_start` time DEFAULT '09:00:00',
+  `sunday_end` time DEFAULT '22:00:00',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_restaurant` (`restaurant_id`),
+  KEY `idx_restaurant_id` (`restaurant_id`),
+  CONSTRAINT `restaurant_reservation_settings_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `restaurants` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `owner_id` int DEFAULT NULL,
-  `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `category` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `address` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `jibun_address` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `hours` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `rating` decimal(3,1) DEFAULT '0.0',
-  `review_count` int DEFAULT '0',
-  `likes` int DEFAULT '0',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) DEFAULT NULL,
+  `name` varchar(200) NOT NULL,
+  `category` varchar(50) NOT NULL,
+  `location` varchar(100) NOT NULL,
+  `address` varchar(500) NOT NULL,
+  `jibun_address` varchar(500) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `hours` varchar(200) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `image` varchar(500) DEFAULT NULL,
+  `rating` decimal(3,1) DEFAULT 0.0,
+  `review_count` int(11) DEFAULT 0,
+  `likes` int(11) DEFAULT 0,
   `latitude` decimal(10,8) DEFAULT NULL,
   `longitude` decimal(11,8) DEFAULT NULL,
-  `parking` tinyint(1) DEFAULT '0',
-  `is_active` tinyint(1) DEFAULT '1',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `parking` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `operating_days` varchar(100) DEFAULT NULL COMMENT '대표 운영요일 목록 (예: 월,화,수,목,금)',
+  `operating_times_text` varchar(255) DEFAULT NULL COMMENT '대표 운영시간 목록 (예: 09:00~18:00)',
+  `break_time_text` varchar(100) DEFAULT NULL COMMENT '브레이크타임 텍스트 (예: 15:00~17:00)',
   PRIMARY KEY (`id`),
   KEY `owner_id` (`owner_id`),
+  KEY `idx_restaurants_category` (`category`),
+  KEY `idx_restaurants_location` (`location`),
+  KEY `idx_restaurants_rating` (`rating` DESC),
   CONSTRAINT `restaurants_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE material (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id INT NOT NULL,
-  name VARCHAR(120) NOT NULL,
-  unit VARCHAR(30) NOT NULL,
-  unit_price DECIMAL(12,2) NOT NULL,
-  img_path VARCHAR(255),
-  step DECIMAL(12,2) DEFAULT 1,
-  active_yn CHAR(1) DEFAULT 'Y',
-  deleted_yn CHAR(1) DEFAULT 'N',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL,
-  KEY idx_material_company (company_id),
-  UNIQUE KEY uq_material_company_id (company_id, id),
-  CONSTRAINT fk_material_company FOREIGN KEY (company_id) REFERENCES business_users(company_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE menu (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id INT NOT NULL,
-  name VARCHAR(120) NOT NULL,
-  price DECIMAL(12,0) NOT NULL,
-  img_path VARCHAR(255),
-  active_yn CHAR(1) DEFAULT 'Y',
-  deleted_yn CHAR(1) DEFAULT 'N',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL,
-  KEY idx_menu_company (company_id),
-  UNIQUE KEY uq_menu_company_id (company_id, id),
-  CONSTRAINT fk_menu_company FOREIGN KEY (company_id) REFERENCES business_users(company_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE menu_ingredient (
-  company_id INT NOT NULL,
-  menu_id INT NOT NULL,
-  material_id INT NOT NULL,
-  qty DECIMAL(12,3) NOT NULL,
-  PRIMARY KEY (company_id, menu_id, material_id),
-  KEY idx_mi_menu (menu_id),
-  KEY idx_mi_material (material_id),
-  CONSTRAINT fk_mi_menu FOREIGN KEY (company_id, menu_id) REFERENCES menu(company_id, id) ON DELETE CASCADE,
-  CONSTRAINT fk_mi_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE branch_inventory (
-  company_id INT NOT NULL,
-  branch_id INT NOT NULL,
-  material_id INT NOT NULL,
-  qty DECIMAL(12,2) NOT NULL DEFAULT 0,
-  updated_at TIMESTAMP NULL,
-  PRIMARY KEY (company_id, branch_id, material_id),
-  KEY idx_bi_branch (branch_id),
-  KEY idx_bi_material (material_id),
-  CONSTRAINT fk_bi_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id) ON DELETE CASCADE,
-  CONSTRAINT fk_bi_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE branch_menu_toggle (
-  company_id INT NOT NULL,
-  branch_id INT NOT NULL,
-  menu_id INT NOT NULL,
-  enabled CHAR(1) NOT NULL DEFAULT 'Y',
-  updated_at TIMESTAMP NULL,
-  PRIMARY KEY (company_id, branch_id, menu_id),
-  KEY idx_bmt_branch (branch_id),
-  KEY idx_bmt_menu (menu_id),
-  CONSTRAINT fk_bmt_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id) ON DELETE CASCADE,
-  CONSTRAINT fk_bmt_menu FOREIGN KEY (company_id, menu_id) REFERENCES menu(company_id, id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE purchase_order (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id INT NOT NULL,
-  branch_id INT NOT NULL,
-  status ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
-  total_price DECIMAL(14,0) NOT NULL DEFAULT 0,
-  ordered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL,
-  KEY idx_po_company (company_id),
-  KEY idx_po_branch (branch_id),
-  CONSTRAINT fk_po_branch FOREIGN KEY (company_id, branch_id) REFERENCES business_users(company_id, user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE purchase_order_line (
-  company_id INT NOT NULL,
-  order_id INT NOT NULL,
-  line_no INT NOT NULL,
-  material_id INT NOT NULL,
-  qty DECIMAL(12,2) NOT NULL,
-  unit_price DECIMAL(12,2) NOT NULL,
-  status ENUM('REQUESTED','APPROVED','REJECTED','RECEIVED') NOT NULL DEFAULT 'REQUESTED',
-  PRIMARY KEY (company_id, order_id, line_no),
-  KEY idx_pol_order (order_id),
-  KEY idx_pol_material (material_id),
-  CONSTRAINT fk_pol_order FOREIGN KEY (company_id, order_id) REFERENCES purchase_order(company_id, id) ON DELETE CASCADE,
-  CONSTRAINT fk_pol_material FOREIGN KEY (company_id, material_id) REFERENCES material(company_id, id)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- 1. 공지사항 기본 정보를 저장할 테이블
-CREATE TABLE business_notice (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id INT NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  content TEXT,
-  img_path VARCHAR(255),  -- 대표 이미지 경로
-  deleted_yn CHAR(1) DEFAULT 'N',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL,
-  CONSTRAINT fk_notice_company FOREIGN KEY (company_id) REFERENCES companies(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 2. 공지사항의 다중 첨부파일 정보를 저장할 테이블
-CREATE TABLE notice_file (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  notice_id INT NOT NULL,
-  company_id BIGINT NOT NULL,
-  original_filename VARCHAR(255) NOT NULL, -- 사용자가 올린 원래 파일명
-  saved_filename VARCHAR(255) NOT NULL,    -- 서버에 저장될 고유한 파일명
-  file_path VARCHAR(255) NOT NULL,         -- 서버 내 파일 경로
-  file_size BIGINT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_notice_file_notice FOREIGN KEY (notice_id) REFERENCES business_notice(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- 1. 기존 notice 테이블에서 대표 이미지 컬럼 삭제
-ALTER TABLE business_notice DROP COLUMN img_path;
-
--- 2. 여러 이미지를 순서대로 저장할 새로운 테이블 생성
-CREATE TABLE notice_image (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  notice_id INT NOT NULL,
-  company_id INT NOT NULL,
-  file_path VARCHAR(255) NOT NULL,
-  display_order INT NOT NULL,  -- 이미지 표시 순서
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_notice_image_notice FOREIGN KEY (notice_id) REFERENCES business_notice(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-ALTER TABLE business_notice
-ADD COLUMN view_count INT NOT NULL DEFAULT 0 AFTER content;
-
-ALTER TABLE menu
-ADD COLUMN recipe TEXT NULL COMMENT '메뉴 레시피' AFTER price;
-
-CREATE TABLE promotion (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  company_id INT NOT NULL,
-  title VARCHAR(255) NOT NULL COMMENT '프로모션 제목',
-  description TEXT COMMENT '프로모션 상세 설명',
-  img_path VARCHAR(255) COMMENT '프로모션 대표 이미지 파일명',
-  start_date TIMESTAMP NOT NULL COMMENT '프로모션 시작 일시',
-  end_date TIMESTAMP NOT NULL COMMENT '프로모션 종료 일시',
-  deleted_yn CHAR(1) DEFAULT 'N',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NULL,
-  CONSTRAINT fk_promotion_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- 1. 기존 promotion 테이블에서 단일 이미지 경로 컬럼 삭제
-ALTER TABLE promotion DROP COLUMN img_path;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `review_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `review_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `is_owner_reply` tinyint(1) DEFAULT 0,
+  `is_resolved` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `review_id` (`review_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `review_comments_ibfk_1` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `review_comments_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `review_images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `review_id` int(11) NOT NULL COMMENT '리뷰 테이블(reviews)의 ID',
+  `image_path` varchar(255) NOT NULL COMMENT '저장된 이미지 파일명',
+  `created_at` datetime DEFAULT current_timestamp() COMMENT '생성 시간',
+  PRIMARY KEY (`id`),
+  KEY `review_id` (`review_id`),
+  CONSTRAINT `review_images_ibfk_1` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리뷰에 첨부된 이미지 정보';
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `restaurant_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `rating` int(11) NOT NULL,
+  `content` text NOT NULL,
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`images`)),
+  `keywords` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`keywords`)),
+  `likes` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `reply_content` text COMMENT '사장님 답글 내용',
+  `reply_created_at` datetime DEFAULT NULL COMMENT '사장님 답글 작성 시간',
+  PRIMARY KEY (`id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  KEY `user_id` (`user_id`),
+  KEY `idx_reviews_restaurant_id` (`restaurant_id`),
+  KEY `idx_reviews_user_id` (`user_id`),
+  KEY `idx_reviews_created_at` (`created_at` DESC),
+  CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_chk_1` CHECK (`rating` >= 1 and `rating` <= 5)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `tags` (
+  `tag_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tag_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`tag_id`),
+  UNIQUE KEY `tag_name` (`tag_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `user_badges` (
+  `user_id` int(11) NOT NULL,
+  `badge_id` int(11) NOT NULL,
+  `earned_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`user_id`,`badge_id`),
+  KEY `badge_id` (`badge_id`),
+  CONSTRAINT `user_badges_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_badges_ibfk_2` FOREIGN KEY (`badge_id`) REFERENCES `badges` (`badge_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `user_storage_items` (
+  `item_id` int(11) NOT NULL AUTO_INCREMENT,
+  `storage_id` int(11) NOT NULL,
+  `item_type` enum('RESTAURANT','COURSE','COLUMN') NOT NULL,
+  `content_id` int(11) NOT NULL,
+  `added_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`item_id`),
+  UNIQUE KEY `unique_storage_item` (`storage_id`,`item_type`,`content_id`),
+  KEY `idx_storage_items_storage_id` (`storage_id`),
+  KEY `idx_storage_items_type_content` (`item_type`,`content_id`),
+  KEY `idx_storage_items_added_at` (`added_at` DESC),
+  CONSTRAINT `user_storage_items_ibfk_1` FOREIGN KEY (`storage_id`) REFERENCES `user_storages` (`storage_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `user_storages` (
+  `storage_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `color_class` varchar(50) DEFAULT 'bg-blue-100',
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`storage_id`),
+  KEY `idx_user_storages_user_id` (`user_id`),
+  KEY `idx_user_storages_created_at` (`created_at` DESC),
+  CONSTRAINT `user_storages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) NOT NULL,
+  `nickname` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `user_type` enum('PERSONAL','BUSINESS','ADMIN') NOT NULL DEFAULT 'PERSONAL',
+  `profile_image` varchar(500) DEFAULT NULL,
+  `level` int(11) DEFAULT 1,
+  `follower_count` int(11) DEFAULT 0,
+  `following_count` int(11) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `name` varchar(100) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `nickname` (`nickname`),
+  KEY `idx_users_email` (`email`),
+  KEY `idx_users_nickname` (`nickname`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===================================================================
--- 예약 시스템 고급 기능 테이블들
+-- 2. 추가된 기능 테이블
 -- ===================================================================
 
--- 예약 블랙아웃 날짜 관리 테이블
-CREATE TABLE reservation_blackout_dates (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    blackout_date DATE NOT NULL COMMENT '예약 불가 날짜',
-    reason VARCHAR(255) COMMENT '불가 사유',
-    is_active BOOLEAN DEFAULT TRUE COMMENT '활성화 상태',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+CREATE TABLE `review_likes` (
+    `user_id` INT NOT NULL,
+    `review_id` INT NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`user_id`, `review_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`review_id`) REFERENCES `reviews`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-    -- 인덱스 및 제약조건
-    KEY idx_blackout_restaurant_date (restaurant_id, blackout_date),
-    UNIQUE KEY unique_restaurant_blackout_date (restaurant_id, blackout_date),
-    CONSTRAINT fk_blackout_restaurant
-        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-
-    -- 날짜 유효성 검증
-    CONSTRAINT chk_blackout_date_future CHECK (blackout_date >= CURDATE())
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='예약 불가 날짜 관리';
-
--- 음식점 테이블 관리 시스템
-CREATE TABLE restaurant_tables (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    table_name VARCHAR(50) NOT NULL COMMENT '테이블명',
-    table_number INT NOT NULL COMMENT '테이블 번호',
-    capacity INT NOT NULL COMMENT '수용 인원',
-    table_type ENUM('REGULAR', 'VIP', 'PRIVATE', 'BAR') DEFAULT 'REGULAR' COMMENT '테이블 유형',
-    is_active BOOLEAN DEFAULT TRUE COMMENT '사용 가능 여부',
-    notes TEXT COMMENT '특이사항',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    -- 인덱스 및 제약조건
-    UNIQUE KEY unique_restaurant_table_number (restaurant_id, table_number),
-    KEY idx_restaurant_capacity (restaurant_id, capacity),
-    CONSTRAINT fk_table_restaurant
-        FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-
-    -- 데이터 유효성 검증
-    CONSTRAINT chk_table_number CHECK (table_number > 0 AND table_number <= 999),
-    CONSTRAINT chk_table_capacity CHECK (capacity > 0 AND capacity <= 20)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='음식점 테이블 관리';
-
--- 예약과 테이블 연결 테이블
-CREATE TABLE reservation_tables (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    reservation_id INT NOT NULL,
-    table_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    UNIQUE KEY unique_reservation_table (reservation_id, table_id),
-    CONSTRAINT fk_reservation_table_reservation
-        FOREIGN KEY (reservation_id) REFERENCES reservations(id)
-        ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_reservation_table_table
-        FOREIGN KEY (table_id) REFERENCES restaurant_tables(id)
+CREATE TABLE `reservation_blackout_dates` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `restaurant_id` INT NOT NULL,
+    `blackout_date` DATE NOT NULL COMMENT '예약 불가 날짜',
+    `reason` VARCHAR(255) COMMENT '불가 사유',
+    `is_active` BOOLEAN DEFAULT TRUE COMMENT '활성화 상태',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY `idx_blackout_restaurant_date` (`restaurant_id`, `blackout_date`),
+    UNIQUE KEY `unique_restaurant_blackout_date` (`restaurant_id`, `blackout_date`),
+    CONSTRAINT `fk_blackout_restaurant`
+        FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`)
         ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='예약과 테이블 연결';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약 불가 날짜 관리';
 
--- 예약 알림 로그 테이블
-CREATE TABLE reservation_notifications (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    reservation_id INT NOT NULL,
-    notification_type ENUM('SMS', 'EMAIL', 'PUSH') NOT NULL,
-    recipient VARCHAR(255) NOT NULL COMMENT '수신자 (전화번호 또는 이메일)',
-    message TEXT NOT NULL,
-    status ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
-    sent_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `restaurant_tables` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `restaurant_id` INT NOT NULL,
+    `table_name` VARCHAR(50) NOT NULL COMMENT '테이블명',
+    `table_number` INT NOT NULL COMMENT '테이블 번호',
+    `capacity` INT NOT NULL COMMENT '수용 인원',
+    `table_type` ENUM('REGULAR', 'VIP', 'PRIVATE', 'BAR') DEFAULT 'REGULAR' COMMENT '테이블 유형',
+    `is_active` BOOLEAN DEFAULT TRUE COMMENT '사용 가능 여부',
+    `notes` TEXT COMMENT '특이사항',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_restaurant_table_number` (`restaurant_id`, `table_number`),
+    KEY `idx_restaurant_capacity` (`restaurant_id`, `capacity`),
+    CONSTRAINT `fk_table_restaurant`
+        FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `chk_table_number` CHECK (`table_number` > 0 AND `table_number` <= 999),
+    CONSTRAINT `chk_table_capacity` CHECK (`capacity` > 0 AND `capacity` <= 20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='음식점 테이블 관리';
 
-    KEY idx_reservation_notifications (reservation_id),
-    CONSTRAINT fk_notification_reservation
-        FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+CREATE TABLE `reservation_tables` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `reservation_id` INT NOT NULL,
+    `table_id` INT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_reservation_table` (`reservation_id`, `table_id`),
+    CONSTRAINT `fk_reservation_table_reservation`
+        FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_reservation_table_table`
+        FOREIGN KEY (`table_id`) REFERENCES `restaurant_tables`(`id`)
         ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-COMMENT='예약 알림 발송 로그';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약과 테이블 연결';
 
--- 2. 여러 이미지를 순서대로 저장할 promotion_image 테이블 생성
-CREATE TABLE promotion_image (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  promotion_id INT NOT NULL,
-  company_id INT NOT NULL,
-  file_path VARCHAR(255) NOT NULL COMMENT '이미지 파일명',
-  display_order INT NOT NULL DEFAULT 0 COMMENT '이미지 표시 순서',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_promo_image_promo FOREIGN KEY (promotion_id) REFERENCES promotion(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 3. 여러 첨부파일을 저장할 promotion_file 테이블 생성
-CREATE TABLE promotion_file (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  promotion_id INT NOT NULL,
-  company_id INT NOT NULL,
-  original_filename VARCHAR(255) NOT NULL COMMENT '사용자가 올린 원래 파일명',
-  file_path VARCHAR(255) NOT NULL COMMENT '서버에 저장된 고유 파일명',
-  file_size BIGINT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_promo_file_promo FOREIGN KEY (promotion_id) REFERENCES promotion(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- (이하 모든 테이블 생성 구문은 생략 없이 올바르게 포함됩니다)
-CREATE TABLE `menus` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `price` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `is_popular` tinyint(1) DEFAULT '0', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), CONSTRAINT `menus_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-CREATE TABLE `reviews` ( `id` int NOT NULL AUTO_INCREMENT, `restaurant_id` int NOT NULL, `user_id` int NOT NULL, `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `author_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `rating` int NOT NULL, `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `images` json DEFAULT NULL, `keywords` json DEFAULT NULL, `likes` int DEFAULT '0', `is_active` tinyint(1) DEFAULT '1', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `restaurant_id` (`restaurant_id`), KEY `user_id` (`user_id`), CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE, CONSTRAINT `reviews_chk_1` CHECK ((`rating` >= 1) and (`rating` <= 5)) ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-CREATE TABLE `columns` ( `id` int NOT NULL AUTO_INCREMENT, `user_id` int NOT NULL, `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `author_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `title` varchar(300) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL, `image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL, `tags` json DEFAULT NULL, `likes` int DEFAULT '0', `views` int DEFAULT '0', `is_active` tinyint(1) DEFAULT '1', `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP, `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`), KEY `user_id` (`user_id`), CONSTRAINT `columns_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;CREATE TABLE coupons ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, title VARCHAR(200) NOT NULL, description TEXT, validity VARCHAR(100), is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-CREATE TABLE restaurant_news ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, type VARCHAR(50) NOT NULL, title VARCHAR(300) NOT NULL, content TEXT NOT NULL, date VARCHAR(20) NOT NULL, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-CREATE TABLE restaurant_qna ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, question TEXT NOT NULL, answer TEXT NOT NULL, is_owner BOOLEAN DEFAULT FALSE, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-CREATE TABLE rating_distributions ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, rating_1 INT DEFAULT 0, rating_2 INT DEFAULT 0, rating_3 INT DEFAULT 0, rating_4 INT DEFAULT 0, rating_5 INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-CREATE TABLE detailed_ratings ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, taste DECIMAL(3,1) DEFAULT 0.0, price DECIMAL(3,1) DEFAULT 0.0, service DECIMAL(3,1) DEFAULT 0.0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-CREATE TABLE reservations ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, user_id INT NOT NULL, restaurant_name VARCHAR(200) NOT NULL, user_name VARCHAR(100) NOT NULL, reservation_time TIMESTAMP NOT NULL, party_size INT NOT NULL, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', special_requests TEXT, contact_phone VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-
-ALTER TABLE reviews
-ADD COLUMN reply_content TEXT NULL COMMENT '사장님 답글 내용',
-ADD COLUMN reply_created_at DATETIME NULL COMMENT '사장님 답글 작성 시간';
-
-CREATE TABLE review_likes (
-    user_id INT NOT NULL,
-    review_id INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, review_id),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
-);
+CREATE TABLE `reservation_notifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `reservation_id` INT NOT NULL,
+    `notification_type` ENUM('SMS', 'EMAIL', 'PUSH') NOT NULL,
+    `recipient` VARCHAR(255) NOT NULL COMMENT '수신자 (전화번호 또는 이메일)',
+    `message` TEXT NOT NULL,
+    `status` ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
+    `sent_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_reservation_notifications` (`reservation_id`),
+    CONSTRAINT `fk_notification_reservation`
+        FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약 알림 발송 로그';
 
 
--- 음식점 예약 설정 테이블
-CREATE TABLE restaurant_reservation_settings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    restaurant_id INT NOT NULL,
-    reservation_enabled BOOLEAN DEFAULT FALSE,
-    auto_accept BOOLEAN DEFAULT FALSE,
-    min_party_size INT DEFAULT 1,
-    max_party_size INT DEFAULT 10,
-    advance_booking_days INT DEFAULT 30,
-    min_advance_hours INT DEFAULT 2,
-    reservation_start_time TIME DEFAULT '09:00:00',
-    reservation_end_time TIME DEFAULT '22:00:00',
-    available_days JSON DEFAULT NULL,
-    time_slots JSON DEFAULT NULL,
-    blackout_dates JSON DEFAULT NULL,
-    special_notes TEXT DEFAULT NULL,
-    monday_enabled BOOLEAN DEFAULT TRUE,
-    monday_start TIME DEFAULT '09:00:00',
-    monday_end TIME DEFAULT '22:00:00',
-    tuesday_enabled BOOLEAN DEFAULT TRUE,
-    tuesday_start TIME DEFAULT '09:00:00',
-    tuesday_end TIME DEFAULT '22:00:00',
-    wednesday_enabled BOOLEAN DEFAULT TRUE,
-    wednesday_start TIME DEFAULT '09:00:00',
-    wednesday_end TIME DEFAULT '22:00:00',
-    thursday_enabled BOOLEAN DEFAULT TRUE,
-    thursday_start TIME DEFAULT '09:00:00',
-    thursday_end TIME DEFAULT '22:00:00',
-    friday_enabled BOOLEAN DEFAULT TRUE,
-    friday_start TIME DEFAULT '09:00:00',
-    friday_end TIME DEFAULT '22:00:00',
-    saturday_enabled BOOLEAN DEFAULT TRUE,
-    saturday_start TIME DEFAULT '09:00:00',
-    saturday_end TIME DEFAULT '22:00:00',
-    sunday_enabled BOOLEAN DEFAULT TRUE,
-    sunday_start TIME DEFAULT '09:00:00',
-    sunday_end TIME DEFAULT '22:00:00',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_restaurant_settings (restaurant_id)
-);
--- Fixed follows table creation with proper syntax
-CREATE TABLE follows (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    follower_id INT NOT NULL,
-    following_id INT NOT NULL,
-    is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_follow (follower_id, following_id),
-    INDEX idx_follows_follower_id (follower_id),
-    INDEX idx_follows_following_id (following_id),
-    INDEX idx_follows_created_at (created_at DESC)
-);
-CREATE TABLE review_comments ( id INT AUTO_INCREMENT PRIMARY KEY, review_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, is_owner_reply BOOLEAN DEFAULT FALSE, is_resolved BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE column_comments ( id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, user_id INT NOT NULL, content TEXT NOT NULL, parent_id INT NULL, like_count INT DEFAULT 0, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX idx_column_id (column_id), INDEX idx_user_id (user_id), INDEX idx_parent_id (parent_id), FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-
--- 칼럼 좋아요 테이블 생성
-CREATE TABLE column_likes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    column_id INT NOT NULL,
-    user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_column_user (column_id, user_id),
-    INDEX idx_column_likes_column_id (column_id),
-    INDEX idx_column_likes_user_id (user_id),
-    FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
--- 댓글 좋아요 테이블 생성
-CREATE TABLE comment_likes (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    comment_id INT NOT NULL,
-    user_id INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_comment_user (comment_id, user_id),
-    INDEX idx_comment_likes_comment_id (comment_id),
-    INDEX idx_comment_likes_user_id (user_id),
-    FOREIGN KEY (comment_id) REFERENCES column_comments(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-CREATE TABLE EVENTS ( ID BIGINT PRIMARY KEY AUTO_INCREMENT, TITLE VARCHAR(255) NOT NULL, SUMMARY VARCHAR(500), CONTENT TEXT, IMAGE VARCHAR(1000), START_DATE DATE, END_DATE DATE );
-CREATE TABLE courses ( course_id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, description TEXT, area VARCHAR(100), duration VARCHAR(100), price INT DEFAULT 0, max_participants INT DEFAULT 0, status ENUM('PENDING', 'ACTIVE', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, type ENUM('OFFICIAL', 'COMMUNITY') DEFAULT 'COMMUNITY', preview_image VARCHAR(1000), author_id INT NULL, FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL );
-CREATE TABLE tags ( tag_id INT PRIMARY KEY AUTO_INCREMENT, tag_name VARCHAR(50) NOT NULL UNIQUE );
-CREATE TABLE course_tags ( course_id INT NOT NULL, tag_id INT NOT NULL, PRIMARY KEY (course_id, tag_id), FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE );
-CREATE TABLE course_steps ( step_id INT PRIMARY KEY AUTO_INCREMENT, course_id INT NOT NULL, step_order INT NOT NULL DEFAULT 0, step_type VARCHAR(100), emoji VARCHAR(10), name VARCHAR(255) NOT NULL, description TEXT, image VARCHAR(1000), KEY idx_course_id (course_id), FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE );
-CREATE TABLE course_likes ( course_id INT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (course_id, user_id), FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE course_reservations ( reservation_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, participant_name VARCHAR(100), phone VARCHAR(20), email VARCHAR(255), reservation_date DATE, reservation_time VARCHAR(50), participant_count INT DEFAULT 1, total_price INT DEFAULT 0, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE course_reviews ( review_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, rating INT DEFAULT 5, content TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, response_content TEXT, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE course_comments ( comment_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT TRUE, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE user_storages ( storage_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100) NOT NULL,  color_class VARCHAR(50) DEFAULT 'bg-blue-100', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, INDEX idx_user_storages_user_id (user_id), INDEX idx_user_storages_created_at (created_at DESC));
-CREATE TABLE user_storage_items (item_id INT AUTO_INCREMENT PRIMARY KEY, storage_id INT NOT NULL, item_type ENUM('RESTAURANT', 'COURSE', 'COLUMN') NOT NULL, content_id INT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (storage_id) REFERENCES user_storages(storage_id) ON DELETE CASCADE, INDEX idx_storage_items_storage_id (storage_id), INDEX idx_storage_items_type_content (item_type, content_id), INDEX idx_storage_items_added_at (added_at DESC), UNIQUE KEY unique_storage_item (storage_id, item_type, content_id));
-CREATE TABLE badges ( badge_id INT AUTO_INCREMENT PRIMARY KEY, icon VARCHAR(10), name VARCHAR(100) NOT NULL, description VARCHAR(255) );
-CREATE TABLE user_badges ( user_id INT NOT NULL, badge_id INT NOT NULL, earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (user_id, badge_id), FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, FOREIGN KEY (badge_id) REFERENCES badges(badge_id) ON DELETE CASCADE );
-CREATE TABLE notices ( notice_id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, content TEXT, created_at DATE );
-CREATE TABLE feed_items ( feed_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, feed_type ENUM('COLUMN', 'REVIEW', 'COURSE') NOT NULL, content_id INT NOT NULL, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE alerts ( alert_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, content VARCHAR(500) NOT NULL, is_read BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
-CREATE TABLE restaurant_operating_hours ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, day_of_week INT NOT NULL, opening_time TIME NOT NULL, closing_time TIME NOT NULL, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
-
-CREATE TABLE review_images (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    review_id INT NOT NULL COMMENT '리뷰 테이블(reviews)의 ID',
-    image_path VARCHAR(255) NOT NULL COMMENT '저장된 이미지 파일명',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
-    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
-) COMMENT '리뷰에 첨부된 이미지 정보';
-
-CREATE TABLE restaurant_images (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  restaurant_id INT NOT NULL,
-  image_path VARCHAR(255) NOT NULL COMMENT '서버에 저장된 이미지 파일명',
-  display_order INT NOT NULL DEFAULT 0 COMMENT '이미지 표시 순서',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_res_images_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
--- notifications 테이블 생성
-CREATE TABLE IF NOT EXISTS notifications (
+CREATE TABLE user_coupons (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    type VARCHAR(50) NOT NULL COMMENT 'follow, like, comment, review, collection, etc.',
-    title VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    action_url VARCHAR(500) COMMENT '클릭 시 이동할 URL',
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    read_at TIMESTAMP NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_notifications_user_id (user_id),
-    INDEX idx_notifications_is_read (is_read),
-    INDEX idx_notifications_created_at (created_at DESC)
-) COMMENT '사용자 알림 테이블';
-CREATE INDEX idx_notifications_type ON notifications(type);
-
-
--- reviews 테이블에서 중복된 author_image 컬럼 삭제
-ALTER TABLE reviews DROP COLUMN author_image;
-
--- columns 테이블에서 중복된 author_image 컬럼 삭제
-ALTER TABLE `columns` DROP COLUMN author_image;
-
--- review_comments 테이블에서 중복된 author_image 컬럼 삭제
-ALTER TABLE review_comments DROP COLUMN author_image;
-
-ALTER TABLE reviews DROP COLUMN author;
-
-ALTER TABLE `columns` DROP COLUMN author;
-
-ALTER TABLE review_comments DROP COLUMN author;
-
-
--- 외래 키 제약 조건을 일시적으로 비활성화합니다.
-SET FOREIGN_KEY_CHECKS = 0;
-
--- RESTAURANTS 테이블에 3개의 컬럼을 추가합니다.
-ALTER TABLE restaurants
-    ADD COLUMN operating_days VARCHAR(100) NULL COMMENT '대표 운영요일 목록 (예: 월,화,수,목,금)',
-    ADD COLUMN operating_times_text VARCHAR(255) NULL COMMENT '대표 운영시간 목록 (예: 09:00~18:00)',
-    ADD COLUMN break_time_text VARCHAR(100) NULL COMMENT '브레이크타임 텍스트 (예: 15:00~17:00)';
-
--- 외래 키 제약 조건을 다시 활성화합니다.
-SET FOREIGN_KEY_CHECKS = 1;
+    coupon_id INT NOT NULL,
+    received_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    used_at TIMESTAMP NULL DEFAULT NULL,
+    is_used TINYINT(1) NOT NULL DEFAULT 0,
+    CONSTRAINT fk_user_coupons_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_coupons_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===================================================================
--- 3. 인덱스 생성 (Create Indexes)
+-- 3. 데이터 삽입 (Insert Data)
 -- ===================================================================
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_users_nickname ON users(nickname);
-CREATE INDEX idx_restaurants_category ON restaurants(category);
-CREATE INDEX idx_restaurants_location ON restaurants(location);
-CREATE INDEX idx_restaurants_rating ON restaurants(rating DESC);
-CREATE INDEX idx_reviews_restaurant_id ON reviews(restaurant_id);
-CREATE INDEX idx_reviews_user_id ON reviews(user_id);
-CREATE INDEX idx_reviews_created_at ON reviews(created_at DESC);
-CREATE INDEX idx_columns_user_id ON `columns`(user_id);
-CREATE INDEX idx_columns_created_at ON `columns`(created_at DESC);
-CREATE INDEX idx_reservations_restaurant_id ON reservations(restaurant_id);
-CREATE INDEX idx_reservations_user_id ON reservations(user_id);
-CREATE INDEX idx_reservations_reservation_time ON reservations(reservation_time);
-
-
--- 외래 키 제약 조건 다시 활성화
-SET FOREIGN_KEY_CHECKS = 1;
-
-
--- ===================================================================
--- 4. 데이터 삽입 (Insert Data)
--- ===================================================================
--- (master.sql의 모든 INSERT 구문은 생략 없이 그대로 포함됩니다)
+-- Data from master.sql
 INSERT INTO users (id, email, nickname, password, user_type, profile_image, follower_count) VALUES (1, 'kim.expert@meetlog.com', '김맛잘알', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/150x150/fca5a5/ffffff?text=C1', 12500), (2, 'mr.nopo@meetlog.com', '미스터노포', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/150x150/93c5fd/ffffff?text=C2', 8200), (3, 'bbang@meetlog.com', '빵순이', 'hashed_password_123', 'PERSONAL', 'https://item.kakaocdn.net/do/4f2c16435337b94a65d4613f785fded24022de826f725e10df604bf1b9725cfd', 25100), (4, 'date.master@meetlog.com', '데이트장인', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/150x150/e879f9/ffffff?text=Me', 1200), (5, 'gasan.worker@meetlog.com', '가산직장인', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/150x150/a78bfa/ffffff?text=가산', 3100), (6, 'after.work@meetlog.com', '퇴근후한잔', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/100x100/22d3ee/ffffff?text=U2', 0), (7, 'hyonyeo@meetlog.com', '효녀딸', 'hashed_password_123', 'PERSONAL', 'https://placehold.co/100x100/f87171/ffffff?text=U3', 0), (8, 'jungdae@meetlog.com', '중데생', 'hashed_password_123', 'PERSONAL', 'https://bbscdn.df.nexon.com/data7/commu/202004/230754_5e89e63a88677.png', 0), (9, 'sando.bread@meetlog.com', '상도동빵주먹', 'hashed_password_123', 'PERSONAL', 'https://dcimg1.dcinside.com/viewimage.php?id=3da9da27e7d13c&no=24b0d769e1d32ca73de983fa11d02831c6c0b61130e4349ff064c51af2dccfaaa69ce6d782ffbe3cfce75d0ab4b0153873c98d17df4da1937ce4df7cc1e73f9d543acb95a114b61478ff194f7f2b81facc7cc6acb3074408f65976d67d2fe0deaebbfb2ef40152de', 0);
-INSERT INTO restaurants (id, name, category, location, address, jibun_address, phone, hours, description, image, rating, review_count, likes, latitude, longitude) VALUES (1, '고미정', '한식', '강남', '서울특별시 강남구 테헤란로 123', '역삼동 123-45', '02-1234-5678', '매일 11:00 - 22:00', '강남역 한정식, 상견례 장소', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832', 4.8, 152, 1203, 37.501, 127.039), (2, '파스타 팩토리', '양식', '홍대', '서울 마포구 와우산로29길 14-12', '서교동 333-1', '02-333-4444', '매일 11:30 - 22:00', '홍대입구역 소개팅, 데이트 맛집', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', 4.6, 258, 2341, 37.5559, 126.9238), (3, '스시 마에', '일식', '여의도', '서울 영등포구 국제금융로 10', '여의도동 23', '02-555-6666', '매일 12:00 - 22:00 (브레이크타임 15:00-18:00)', '여의도 하이엔드 오마카세', 'https://placehold.co/600x400/60a5fa/ffffff?text=오마카세', 4.9, 189, 1890, 37.525, 126.925), (4, '치맥 하우스', '한식', '종로', '서울 종로구 종로 123', '종로3가 11-1', '02-777-8888', '매일 16:00 - 02:00', '종로 수제맥주와 치킨 맛집', 'https://placehold.co/600x400/fbbf24/ffffff?text=치킨', 4.4, 310, 3104, 37.570, 126.989), (5, '카페 클라우드', '카페', '성수', '서울 성동구 연무장길 12', '성수동2가 300-1', '02-464-1234', '매일 10:00 - 22:00', '성수동 뷰맛집 감성 카페', 'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg', 4.5, 288, 2880, 37.543, 127.054), (6, '북경 오리', '중식', '명동', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/f472b6/ffffff?text=중식', 4.7, 0, 1550, NULL, NULL), (7, '브루클린 버거', '양식', '이태원', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/fb923c/ffffff?text=버거', 4.5, 0, 2543, NULL, NULL), (8, '소담길', '한식', '인사동', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://www.ourhomehospitality.com/hos_img/1720054355745.jpg', 4.7, 0, 980, NULL, NULL), (9, '인도 커리 왕', '기타', '혜화', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/facc15/ffffff?text=커리', 4.5, 0, 2130, NULL, NULL), (10, '평양면옥', '한식', '을지로', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA3MDhfMTM4%2FMDAxNzUxOTM3MDgxMzg4.X3ArTpASVrp_B8rvyV-MoP42-WwO8bDzMz7Gt6TJfM4g.-5G-C_j45N7ColfwgCaYtqVMfDj-vzXOoWP5enQO5Iog.JPEG%2FrP2142571.jpg&type=sc960_832', 4.8, 0, 1760, NULL, NULL), (11, '우부래도', '베이커리', '상도', '서울특별시 동작구 상도로37길 3', '상도1동 666-3', '0507-1428-0599', '매일 10:00 - 22:00', '상도역 베이커리, 비건', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832', 4.2, 6, 850, 37.4953, 126.9448), (12, '가산생고기', '한식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/ef4444/ffffff?text=삼겹살', 4.7, 0, 2850, NULL, NULL), (13, '직장인 국밥', '한식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/f97316/ffffff?text=국밥', 4.5, 0, 3120, NULL, NULL), (14, '파파 이탈리아노', '양식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/84cc16/ffffff?text=파스타', 4.4, 0, 1890, NULL, NULL), (15, '가디 이자카야', '일식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/14b8a6/ffffff?text=이자카야', 4.6, 0, 2340, NULL, NULL), (16, '마리오아울렛 푸드코트', '기타', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/6366f1/ffffff?text=푸드코트', 4.3, 0, 4500, NULL, NULL), (17, '더현대아울렛 중식당', '중식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/8b5cf6/ffffff?text=중식', 4.5, 0, 1980, NULL, NULL), (18, '퇴근길 포차', '한식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/ec4899/ffffff?text=포차', 4.4, 0, 2670, NULL, NULL), (19, '커피 브레이크 가산점', '카페', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/10b981/ffffff?text=Cafe', 4.6, 0, 3500, NULL, NULL), (20, '가산 돈까스 클럽', '일식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/f59e0b/ffffff?text=돈까스', 4.7, 0, 2990, NULL, NULL), (21, '구로디지털단지 족발야시장', '한식', '구로', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/78716c/ffffff?text=족발', 4.8, 0, 3200, NULL, NULL), (22, '월화 G밸리점', '한식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/ef4444/ffffff?text=고기', 4.8, 0, 4100, NULL, NULL), (23, '스시메이진 가산점', '일식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/3b82f6/ffffff?text=초밥', 4.5, 0, 2800, NULL, NULL), (24, '샐러디 W몰점', '양식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/22c55e/ffffff?text=샐러드', 4.4, 0, 1500, NULL, NULL), (25, '베트남 노상식당', '기타', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/f97316/ffffff?text=쌀국수', 4.5, 0, 2400, NULL, NULL), (26, '리춘시장 가산디지털역점', '중식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/dc2626/ffffff?text=마라탕', 4.3, 0, 2100, NULL, NULL), (27, '폴바셋 현대아울렛가산점', '카페', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/172554/ffffff?text=Paul+Bassett', 4.7, 0, 2900, NULL, NULL), (28, '해물품은닭', '한식', '구로', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/fbbf24/ffffff?text=닭볶음탕', 4.7, 0, 2650, NULL, NULL), (29, '인도요리 아그라', '기타', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/c2410c/ffffff?text=커리', 4.5, 0, 1750, NULL, NULL), (30, '오봉집 가산디지털점', '한식', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/991b1b/ffffff?text=보쌈', 4.6, 0, 3800, NULL, NULL), (31, '투썸플레이스 가산W몰점', '카페', '가산', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/ef4444/ffffff?text=Twosome', 4.4, 0, 2200, NULL, NULL), (32, '툭툭누들타이', '기타', '연남', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/16a34a/ffffff?text=Thai', 4.8, 0, 4500, NULL, NULL);
+INSERT INTO restaurants (id, name, category, location, address, jibun_address, phone, hours, description, image, rating, review_count, likes, latitude, longitude) VALUES (1, '고미정', '한식', '강남', '서울특별시 강남구 테헤란로 123', '역삼동 123-45', '02-1234-5678', '매일 11:00 - 22:00', '강남역 한정식, 상견례 장소', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832', 4.8, 152, 1203, 37.501, 127.039), (2, '파스타 팩토리', '양식', '홍대', '서울 마포구 와우산로29길 14-12', '서교동 333-1', '02-333-4444', '매일 11:30 - 22:00', '홍대입구역 소개팅, 데이트 맛집', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', 4.6, 258, 2341, 37.5559, 126.9238), (3, '스시 마에', '일식', '여의도', '서울 영등포구 국제금융로 10', '여의도동 23', '02-555-6666', '매일 12:00 - 22:00 (브레이크타임 15:00-18:00)', '여의도 하이엔드 오마카세', 'https://placehold.co/600x400/60a5fa/ffffff?text=오마카세', 4.9, 189, 1890, 37.525, 126.925), (4, '치맥 하우스', '한식', '종로', '서울 종로구 종로 123', '종로3가 11-1', '02-777-8888', '매일 16:00 - 02:00', '종로 수제맥주와 치킨 맛집', 'https://placehold.co/600x400/fbbf24/ffffff?text=치킨', 4.4, 310, 3104, 37.570, 126.989), (5, '카페 클라우드', '카페', '성수', '서울 성동구 연무장길 12', '성수동2가 300-1', '02-464-1234', '매일 10:00 - 22:00', '성수동 뷰맛집 감성 카페', 'https://d12zq4w4guyljn.cloudfront.net/750_750_20200519023624996_photo_66e859a6b19b.jpg', 4.5, 288, 2880, 37.543, 127.054), (6, '북경 오리', '중식', '명동', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/f472b6/ffffff?text=중식', 4.7, 0, 1550, NULL, NULL), (7, '브루클린 버거', '양식', '이태원', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://placehold.co/600x400/fb923c/ffffff?text=버거', 4.5, 0, 2543, NULL, NULL), (8, '소담길', '한식', '인사동', '주소 정보 없음', NULL, NULL, NULL, NULL, 'https://www.ourhomehospitality.com/hos_img/1720054355745.jpg', 4.7, 0, 980, NULL, NULL);
 INSERT INTO menus (restaurant_id, name, price) VALUES (1, '궁중 수라상', '75,000원'), (1, '고미정 정식', '55,000원'), (1, '보리굴비 정식', '45,000원'), (2, '트러플 크림 파스타', '18,000원'), (2, '봉골레 파스타', '16,000원'), (2, '마르게리따 피자', '20,000원'), (3, '런치 오마카세', '120,000원'), (3, '디너 오마카세', '250,000원'), (4, '반반치킨', '19,000원'), (4, '종로 페일에일', '7,500원'), (5, '아인슈페너', '7,000원'), (5, '클라우드 케이크', '8,500원'), (11, '단호박 머핀', '4,000원'), (11, '쌀바게트', '4,500원'), (11, '홍국단팥빵', '4,000원');
-INSERT INTO reviews (id, restaurant_id, user_id, rating, content, images, keywords, likes) VALUES (1, 2, 4, 5, '여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832"]', NULL, 0), (2, 4, 6, 4, '일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.', NULL, NULL, 0), (3, 1, 7, 5, '부모님 생신이라 모시고 갔는데 정말 좋아하셨어요. 음식 하나하나 정성이 느껴져요.', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832"]', NULL, 0), (4, 10, 2, 5, '역시 여름엔 평양냉면이죠. 이 집 육수는 정말 최고입니다.', NULL, NULL, 0), (5, 12, 2, 5, '가산에서 이만한 퀄리티의 삼겹살을 찾기 힘듭니다. 회식 장소로 강력 추천!', NULL, NULL, 0), (6, 13, 5, 4, '점심시간에 웨이팅은 좀 있지만, 든든하게 한 끼 해결하기에 최고입니다. 깍두기가 맛있어요.', NULL, NULL, 0), (7, 19, 3, 4, '산미있는 원두를 좋아하시면 여기입니다. 디저트 케이크도 괜찮았어요.', NULL, NULL, 0), (8, 14, 4, 4, '가산에서 파스타 먹고 싶을 때 가끔 들러요. 창가 자리가 분위기 좋아요.', NULL, NULL, 0), (9, 11, 4, 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다. 다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832"]', NULL, 0), (10, 11, 3, 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다.\n다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]', '["#음식이 맛있어요", "#재료가 신선해요"]', 25);
-INSERT INTO `columns` (id, user_id, title, content, image) VALUES (1, 3, '상도동 비건 빵집 ''우부래도'' 솔직 리뷰', '상도동에는 숨겨진 비건 빵 맛집들이 많습니다. 그 중에서도 제가 가장 사랑하는 곳은 바로 ''우부래도''입니다. 특히 이곳의 쌀바게트는 정말 일품입니다. 겉은 바삭하고 속은 쫀득한 식감이 살아있죠.\n\n제가 남겼던 리뷰를 첨부해봅니다. 여러분도 상도동에 가시면 꼭 들러보세요!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832'), (2, 2, '을지로 직장인들을 위한 최고의 평양냉면', '여름이면 어김없이 생각나는 평양냉면. 을지로의 수많은 노포 중에서도 ''평양면옥''은 단연 최고라고 할 수 있습니다. 슴슴하면서도 깊은 육수 맛이 일품입니다. 점심시간에는 웨이팅이 길 수 있으니 조금 서두르는 것을 추천합니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA3MDhfMTM4%2FMDAxNzUxOTM3MDgxMzg4.X3ArTpASVrp_B8rvyV-MoP42-WwO8bDzMz7Gt6TJfM4g.-5G-C_j45N7ColfwgCaYtqVMfDj-vzXOoWP5enQO5Iog.JPEG%2FrP2142571.jpg&type=sc960_832'), (3, 1, '한식 다이닝의 정수, 강남 ''고미정'' 방문기', '특별한 날, 소중한 사람과 함께할 장소를 찾는다면 강남의 ''고미정''을 추천합니다. 정갈한 상차림과 깊은 맛의 한정식 코스는 먹는 내내 감탄을 자아냅니다. 특히 부모님을 모시고 가기에 최고의 장소입니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832'), (4, 4, '홍대 최고의 파스타, 데이트 성공 보장!', '홍대에서 데이트 약속이 잡혔다면 고민하지 말고 ''파스타 팩토리''로 가세요. 분위기, 맛, 서비스 뭐 하나 빠지는 게 없는 곳입니다. 특히 트러플 크림 파스타는 꼭 먹어봐야 할 메뉴입니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832'), (5, 5, '가산디지털단지 직장인 점심 맛집 BEST 3', '매일 반복되는 점심 메뉴 고민, 힘드시죠? G밸리 5년차 직장인이 추천하는 점심 맛집 리스트를 공개합니다. ''직장인 국밥''부터...', 'https://placehold.co/600x400/f97316/ffffff?text=국밥'), (6, 6, '퇴근 후 한잔, 가산 이자카야 ''가디'' 방문기', '지친 하루의 피로를 풀어주는 시원한 맥주와 맛있는 안주. ''가디 이자카야''는 회식 2차 장소로도, 혼술하기에도 좋은 곳입니다.', 'https://placehold.co/600x400/14b8a6/ffffff?text=이자카야'), (7, 3, '성수동에서 발견한 인생 커피, ''카페 클라우드''', '수많은 성수동 카페들 속에서 보석 같은 곳을 발견했습니다. 바로 ''카페 클라우드''입니다. 특히 이곳의 시그니처 라떼는...', 'https://placehold.co/600x400/34d399/ffffff?text=카페'), (8, 4, '이태원 수제버거의 정석, ''브루클린 버거''', '육즙 가득한 패티와 신선한 야채의 조화. ''브루클린 버거''는 언제나 옳은 선택입니다. 치즈 스커트 버거는 꼭 드셔보세요.', 'https://placehold.co/600x400/fb923c/ffffff?text=버거'), (9, 5, 'G밸리 회식장소 끝판왕, ''월화 G밸리점''', '두툼한 목살과 삼겹살이 일품인 곳. 단체석도 잘 마련되어 있어 가산디지털단지 회식 장소로 이만한 곳이 없습니다.', 'https://placehold.co/600x400/ef4444/ffffff?text=고기'), (10, 6, '종로 치맥의 성지, ''치맥 하우스''를 가다', '바삭한 치킨과 시원한 생맥주의 조합은 진리입니다. ''치맥 하우스''는 다양한 종류의 수제 맥주를 맛볼 수 있어 더욱 좋습니다.', 'https://placehold.co/600x400/fbbf24/ffffff?text=치킨'), (11, 1, '여의도 오마카세 입문자에게 추천, ''스시 마에''', '오마카세가 처음이라 부담스러우신가요? ''스시 마에''는 합리적인 가격과 친절한 설명으로 입문자들에게 최고의 경험을 선사합니다.', 'https://placehold.co/600x400/60a5fa/ffffff?text=오마카세'), (12, 2, '명동의 숨은 맛, ''북경 오리'' 전문점 탐방', '북적이는 명동 거리 안쪽에 위치한 이 곳은 수십 년 경력의 주방장님이 선보이는 정통 북경 오리 요리를 맛볼 수 있는 숨은 고수의 가게입니다.', 'https://placehold.co/600x400/f472b6/ffffff?text=중식'), (13, 5, '가산 W몰 쇼핑 후 필수코스, ''샐러디''', '쇼핑으로 지쳤을 때, 건강하고 가볍게 한 끼 식사를 해결하고 싶다면 ''샐러디''를 추천합니다. 든든한 웜볼 메뉴가 특히 좋습니다.', 'https://placehold.co/600x400/22c55e/ffffff?text=샐러드'), (14, 1, '인사동 골목의 정겨움, ''소담길'' 보쌈정식', '전통적인 분위기의 인사동에서 맛보는 부드러운 보쌈과 맛깔나는 반찬들. ''소담길''은 부모님을 모시고 가기에도 손색없는 곳입니다.', 'https://placehold.co/600x400/c084fc/ffffff?text=보쌈');
+INSERT INTO reviews (id, restaurant_id, user_id, rating, content, images, keywords, likes) VALUES (1, 2, 4, 5, '여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832"]', NULL, 0), (2, 4, 6, 4, '일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.', NULL, NULL, 0), (3, 1, 7, 5, '부모님 생신이라 모시고 갔는데 정말 좋아하셨어요. 음식 하나하나 정성이 느껴져요.', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832"]', NULL, 0), (4, 10, 2, 5, '역시 여름엔 평양냉면이죠. 이 집 육수는 정말 최고입니다.', NULL, NULL, 0), (5, 12, 2, 5, '가산에서 이만한 퀄리티의 삼겹살을 찾기 힘듭니다. 회식 장소로 강력 추천!', NULL, NULL, 0), (6, 13, 5, 4, '점심시간에 웨이팅은 좀 있지만, 든든하게 한 끼 해결하기에 최고입니다. 깍두기가 맛있어요.', NULL, NULL, 0), (7, 19, 3, 4, '산미있는 원두를 좋아하시면 여기입니다. 디저트 케이크도 괜찮았어요.', NULL, NULL, 0), (8, 14, 4, 4, '가산에서 파스타 먹고 싶을 때 가끔 들러요. 창가 자리가 분위기 좋아요.', NULL, NULL, 0), (9, 11, 4, 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다. 다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832"]', NULL, 0), (10, 11, 3, 5, '언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다.
+다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!', '["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]', '["#음식이 맛있어요", "#재료가 신선해요"]', 25);
+INSERT INTO `columns` (id, user_id, title, content, image) VALUES (1, 3, '상도동 비건 빵집 ''우부래도'' 솔직 리뷰', '상도동에는 숨겨진 비건 빵 맛집들이 많습니다. 그 중에서도 제가 가장 사랑하는 곳은 바로 ''우부래도''입니다. 특히 이곳의 쌀바게트는 정말 일품입니다. 겉은 바삭하고 속은 쫀득한 식감이 살아있죠.
+
+제가 남겼던 리뷰를 첨부해봅니다. 여러분도 상도동에 가시면 꼭 들러보세요!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832'), (2, 2, '을지로 직장인들을 위한 최고의 평양냉면', '여름이면 어김없이 생각나는 평양냉면. 을지로의 수많은 노포 중에서도 ''평양면옥''은 단연 최고라고 할 수 있습니다. 슴슴하면서도 깊은 육수 맛이 일품입니다. 점심시간에는 웨이팅이 길 수 있으니 조금 서두르는 것을 추천합니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA3MDhfMTM4%2FMDAxNzUxOTM3MDgxMzg4.X3ArTpASVrp_B8rvyV-MoP42-WwO8bDzMz7Gt6TJfM4g.-5G-C_j45N7ColfwgCaYtqVMfDj-vzXOoWP5enQO5Iog.JPEG%2FrP2142571.jpg&type=sc960_832'), (3, 1, '한식 다이닝의 정수, 강남 ''고미정'' 방문기', '특별한 날, 소중한 사람과 함께할 장소를 찾는다면 강남의 ''고미정''을 추천합니다. 정갈한 상차림과 깊은 맛의 한정식 코스는 먹는 내내 감탄을 자아냅니다. 특히 부모님을 모시고 가기에 최고의 장소입니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832'), (4, 4, '홍대 최고의 파스타, 데이트 성공 보장!', '홍대에서 데이트 약속이 잡혔다면 고민하지 말고 ''파스타 팩토리''로 가세요. 분위기, 맛, 서비스 뭐 하나 빠지는 게 없는 곳입니다. 특히 트러플 크림 파스타는 꼭 먹어봐야 할 메뉴입니다.', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832'), (5, 5, '가산디지털단지 직장인 점심 맛집 BEST 3', '매일 반복되는 점심 메뉴 고민, 힘드시죠? G밸리 5년차 직장인이 추천하는 점심 맛집 리스트를 공개합니다. ''직장인 국밥''부터...', 'https://placehold.co/600x400/f97316/ffffff?text=국밥'), (6, 6, '퇴근 후 한잔, 가산 이자카야 ''가디'' 방문기', '지친 하루의 피로를 풀어주는 시원한 맥주와 맛있는 안주. ''가디 이자카야''는 회식 2차 장소로도, 혼술하기에도 좋은 곳입니다.', 'https://placehold.co/600x400/14b8a6/ffffff?text=이자카야');
 INSERT INTO reservations (id, restaurant_id, user_id, restaurant_name, user_name, reservation_time, party_size, status) VALUES (1, 11, 4, '우부래도', '데이트장인', '2025-09-14 19:00:00', 2, 'CONFIRMED'), (2, 2, 4, '파스타 팩토리', '데이트장인', '2025-09-13 20:00:00', 4, 'COMPLETED'), (3, 32, 4, '툭툭누들타이', '데이트장인', '2025-08-15 18:00:00', 2, 'CANCELLED');
 INSERT INTO follows (follower_id, following_id, is_active) VALUES (2, 4, TRUE), (4, 3, TRUE), (4, 2, TRUE);
 INSERT INTO review_comments (id, review_id, user_id, content) VALUES (1, 10, 8, '오 여기 진짜 맛있죠! 저도 쌀바게트 제일 좋아해요.');
@@ -630,81 +866,31 @@ INSERT INTO feed_items (user_id, feed_type, content_id, is_active, created_at) V
 INSERT INTO alerts (user_id, content, is_read, created_at) VALUES (4, '<span class="font-bold">미스터노포</span>님이 회원님을 팔로우하기 시작했습니다.', FALSE, '2025-09-16 20:00:00'), (4, '<span class="font-bold">중데생</span>님이 회원님의 [홍대 최고의 파스타...] 칼럼에 댓글을 남겼습니다.', TRUE, '2025-09-16 18:00:00'), (4, '[공지] 개인정보처리방침 개정 안내', TRUE, '2025-09-14 09:00:00');
 INSERT INTO user_storages (user_id, name, color_class) VALUES (4, '강남역 데이트', 'text-red-500'), (4, '혼밥하기 좋은 곳', 'text-sky-500'), (5, '가산 맛집', 'text-amber-500'), (2, '여의도 점심', 'text-green-500'), (3, '저장한 코스', 'text-violet-500');
 INSERT INTO user_storage_items (storage_id, item_type, content_id) VALUES (1, 'RESTAURANT', 1), (1, 'RESTAURANT', 7), (2, 'RESTAURANT', 10), (3, 'RESTAURANT', 12), (3, 'RESTAURANT', 13), (3, 'RESTAURANT', 22), (4, 'RESTAURANT', 3), (5, 'COURSE', 1);
-INSERT INTO EVENTS (TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE) VALUES ('MEET LOG 가을맞이! 5성급 호텔 뷔페 30% 할인', '선선한 가을, MEET LOG가 추천하는 최고의 호텔 뷔페에서 특별한 미식을 경험하세요. MEET LOG 회원 전용 특별 할인을 놓치지 마세요.', '이벤트 내용 본문입니다. 상세한 약관과 참여 방법이 여기에 들어갑니다.', 'https://placehold.co/800x400/f97316/ffffff?text=Hotel+Buffet+Event', '2025-09-01', '2025-10-31'), ("신규 맛집 '파스타 팩토리' 리뷰 이벤트", "홍대 '파스타 팩토리' 방문 후 MEET LOG에 리뷰를 남겨주세요! 추첨을 통해 2인 식사권을 드립니다!", '상세 내용: 1. 파스타 팩토리 방문 2. 사진과 함께 정성스러운 리뷰 작성 3. 자동 응모 완료!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', '2025-09-10', '2025-09-30'), ('[종료] 여름맞이 치맥 하우스! 수제맥주 1+1', '무더운 여름 밤, 종로 ''치맥 하우스''에서 시원한 수제맥주 1+1 이벤트를 즐겨보세요. MEET LOG 회원이라면 누구나!', '본 이벤트는 8월 31일부로 종료되었습니다. 성원에 감사드립니다.', 'https://placehold.co/800x400/fbbf24/ffffff?text=Beer+Event+(Finished)', '2025-07-01', '2025-08-31'), ('이번 주 최고의 리뷰 선정', '정성스러운 맛집 리뷰를 작성하고 10,000 포인트를 받으세요!', '매주 3명을 선정하여 10,000 포인트를 드립니다. 사진 3장 이상, 200자 이상의 리뷰가 대상입니다. 당첨자는 매주 월요일 공지됩니다.', 'https://example.com/images/events/best_review_contest.jpg', '2025-09-15', '2025-09-21'), ('신규 오픈 \'강남 이탈리안 키친\' 방문 챌린지', '\'강남 이탈리안 키친\' 방문 리뷰 작성 시, 참여자 전원 3,000 포인트 증정!', '강남역 10번 출구에 새로 오픈한 \'이탈리안 키친\'에 방문하고 #강남이탈리안키친 태그와 함께 인증샷, 리뷰를 남겨주세요. (1인 1회 한정)', 'https://example.com/images/restaurants/gangnam_italian_promo.png', '2025-09-10', '2025-10-10'), ('\'나만의 가을 맛집\' 추천 이벤트', '가을 분위기 물씬 나는 나만 아는 맛집을 공유해주세요. 5분께 백화점 상품권 증정!', '#가을맛집 태그를 달아 커뮤니티에 글을 작성해주세요. 추첨을 통해 5분께 백화점 상품권 5만원권을 드립니다.', '/static/images/events/autumn_food_challenge.gif', '2025-09-16', '2025-09-30'), ('맛zip 커뮤니티 10만 회원 달성!', '감사하는 마음으로 이벤트 기간 동안 로그인하는 모든 회원님께 1,000 포인트를 드립니다.', NULL, 'https://example.com/images/events/100k_members_party.jpg', '2025-10-01', '2025-10-07'), ('첫 리뷰 작성 100% 선물', '가입 후 첫 맛집 리뷰를 작성하시면 스타벅스 기프티콘 증정!', '정성스러운 첫 리뷰를 작성해주시는 모든 신규 회원님께 감사의 의미로 스타벅스 아메리카노 기프티콘을 드립니다. (본 이벤트는 별도 공지 시까지 계속됩니다)', NULL, '2025-01-01', NULL);
+INSERT INTO EVENTS (TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE) VALUES ('MEET LOG 가을맞이! 5성급 호텔 뷔페 30% 할인', '선선한 가을, MEET LOG가 추천하는 최고의 호텔 뷔페에서 특별한 미식을 경험하세요. MEET LOG 회원 전용 특별 할인을 놓치지 마세요.', '이벤트 내용 본문입니다. 상세한 약관과 참여 방법이 여기에 들어갑니다.', 'https://placehold.co/800x400/f97316/ffffff?text=Hotel+Buffet+Event', '2025-09-01', '2025-10-31'), ("신규 맛집 '파스타 팩토리' 리뷰 이벤트", "홍대 '파스타 팩토리' 방문 후 MEET LOG에 리뷰를 남겨주세요! 추첨을 통해 2인 식사권을 드립니다!", '상세 내용: 1. 파스타 팩토리 방문 2. 사진과 함께 정성스러운 리뷰 작성 3. 자동 응모 완료!', 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832', '2025-09-10', '2025-09-30'), ('[종료] 여름맞이 치맥 하우스! 수제맥주 1+1', '무더운 여름 밤, 종로 ''치맥 하우스''에서 시원한 수제맥주 1+1 이벤트를 즐겨보세요. MEET LOG 회원이라면 누구나!', '본 이벤트는 8월 31일부로 종료되었습니다. 성원에 감사드립니다.', 'https://placehold.co/800x400/fbbf24/ffffff?text=Beer+Event+(Finished)', '2025-07-01', '2025-08-31'), ('이번 주 최고의 리뷰 선정', '정성스러운 맛집 리뷰를 작성하고 10,000 포인트를 받으세요!', '매주 3명을 선정하여 10,000 포인트를 드립니다. 사진 3장 이상, 200자 이상의 리뷰가 대상입니다. 당첨자는 매주 월요일 공지됩니다.', 'https://example.com/images/events/best_review_contest.jpg', '2025-09-15', '2025-09-21'), ('신규 오픈 '강남 이탈리안 키친' 방문 챌린지', ''강남 이탈리안 키친' 방문 리뷰 작성 시, 참여자 전원 3,000 포인트 증정!', '강남역 10번 출구에 새로 오픈한 '이탈리안 키친'에 방문하고 #강남이탈리안키친 태그와 함께 인증샷, 리뷰를 남겨주세요. (1인 1회 한정)', 'https://example.com/images/restaurants/gangnam_italian_promo.png', '2025-09-10', '2025-10-10'), (''나만의 가을 맛집' 추천 이벤트', '가을 분위기 물씬 나는 나만 아는 맛집을 공유해주세요. 5분께 백화점 상품권 증정!', '#가을맛집 태그를 달아 커뮤니티에 글을 작성해주세요. 추첨을 통해 5분께 백화점 상품권 5만원권을 드립니다.', '/static/images/events/autumn_food_challenge.gif', '2025-09-16', '2025-09-30'), ('맛zip 커뮤니티 10만 회원 달성!', '감사하는 마음으로 이벤트 기간 동안 로그인하는 모든 회원님께 1,000 포인트를 드립니다.', NULL, 'https://example.com/images/events/100k_members_party.jpg', '2025-10-01', '2025-10-07'), ('첫 리뷰 작성 100% 선물', '가입 후 첫 맛집 리뷰를 작성하시면 스타벅스 기프티콘 증정!', '정성스러운 첫 리뷰를 작성해주시는 모든 신규 회원님께 감사의 의미로 스타벅스 아메리카노 기프티콘을 드립니다. (본 이벤트는 별도 공지 시까지 계속됩니다)', NULL, '2025-01-01', NULL);
 INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time, closing_time) VALUES (1, 1, '11:30:00', '22:00:00'), (1, 2, '11:30:00', '22:00:00'), (1, 3, '11:30:00', '22:00:00'), (1, 4, '11:30:00', '22:00:00'), (1, 5, '11:30:00', '22:00:00'), (1, 6, '11:30:00', '22:00:00'), (1, 7, '11:30:00', '22:00:00');
 
--- follows 테이블에 is_active 컬럼이 없다면 추가 (데이터베이스 업데이트 시)
--- 이미 컬럼이 존재하는 경우 오류를 방지하기 위한 조건부 실행
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-                   WHERE TABLE_SCHEMA = 'meetlog'
-                   AND TABLE_NAME = 'follows'
-                   AND COLUMN_NAME = 'is_active');
-
-SET @sql = IF(@col_exists = 0,
-              'ALTER TABLE follows ADD COLUMN is_active BOOLEAN DEFAULT TRUE',
-              'SELECT "Column is_active already exists in follows table" as message');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- 기존 데이터에 is_active 값 설정
-UPDATE follows SET is_active = TRUE WHERE is_active IS NULL;
-
--- feed_items 테이블에 is_active 컬럼이 없다면 추가
-SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-                   WHERE TABLE_SCHEMA = 'meetlog'
-                   AND TABLE_NAME = 'feed_items'
-                   AND COLUMN_NAME = 'is_active');
-
-SET @sql = IF(@col_exists = 0,
-              'ALTER TABLE feed_items ADD COLUMN is_active BOOLEAN DEFAULT TRUE',
-              'SELECT "Column is_active already exists in feed_items table" as message');
-PREPARE stmt FROM @sql;
-EXECUTE stmt;
-DEALLOCATE PREPARE stmt;
-
--- 기존 데이터에 is_active 값 설정
-UPDATE feed_items SET is_active = TRUE WHERE is_active IS NULL;
-
--- 기본 저장소 생성 (모든 기존 사용자에 대해)
-INSERT INTO user_storages (user_id, name, color_class)
-SELECT id, '내가 찜한 로그', 'bg-blue-100'
-FROM users
-WHERE NOT EXISTS (
-    SELECT 1 FROM user_storages WHERE user_storages.user_id = users.id
-);
+-- Data from master_v2.sql (new entries only)
+-- Using INSERT IGNORE to avoid conflicts with existing primary keys.
+INSERT IGNORE INTO `users` VALUES (10,'gugu@meetlog.com','구구콘','m2tFIFw+1psjCYLXjBAbUd3IY8jB6L/VCaB8eEc1tPMKgSQnC9BX/7iOREyyLBiC','BUSINESS',NULL,1,0,0,1,'2025-09-27 01:29:10','2025-09-27 01:29:10','구구','0299999999','도산대로1');
+INSERT IGNORE INTO `companies` VALUES (1,'구구콘','2025-09-27 01:29:10','2025-09-27 01:29:10');
+INSERT IGNORE INTO `business_users` VALUES (10,'구구콘','구구','999999999','INDIVIDUAL','APPROVED',1,'2025-09-27 01:29:10','2025-09-27 01:29:10');
+INSERT IGNORE INTO `restaurants` VALUES (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','');
+INSERT IGNORE INTO `reviews` VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,0,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL), (12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
+INSERT IGNORE INTO `column_comments` VALUES (3,3,10,'ㅎㅇ',NULL,0,1,'2025-09-27 14:51:21','2025-09-27 14:51:21'), (4,15,10,'지쟈스',NULL,0,1,'2025-09-27 16:42:45','2025-09-28 19:49:44');
+INSERT IGNORE INTO `column_likes` VALUES (1,3,10,'2025-09-27 14:51:16'),(2,15,10,'2025-09-27 14:58:15');
+INSERT IGNORE INTO `comment_likes` VALUES (1,1,10,'2025-09-27 14:51:16');
+INSERT IGNORE INTO `course_comments` VALUES (1,4,10,'굿','2025-09-28 00:20:16','2025-09-28 00:26:41',0), (2,4,10,'ㄱㄱ','2025-09-28 00:32:44','2025-09-28 00:32:49',1);
+INSERT IGNORE INTO `feed_items` VALUES (6,4,'COURSE',1,1,'2025-09-28 00:42:58'),(7,3,'COURSE',3,1,'2025-09-28 00:42:58'),(8,3,'COURSE',4,1,'2025-09-28 00:42:58');
+INSERT IGNORE INTO `follows` VALUES (6,10,7,1,'2025-09-27 16:20:45'),(7,10,3,1,'2025-09-27 16:21:01'),(8,10,2,1,'2025-09-27 16:53:42');
+INSERT IGNORE INTO `restaurant_operating_hours` VALUES (8,33,2,'00:00:00','22:00:00'),(9,33,3,'00:00:00','22:00:00'),(10,33,4,'00:00:00','22:00:00'),(11,33,5,'00:00:00','22:00:00'),(12,33,6,'00:00:00','22:00:00'),(13,33,7,'00:00:00','22:00:00');
+INSERT IGNORE INTO `restaurant_qna` VALUES (4,1,'영업시간이 궁금합니다.','평일 오전 10시부터 오후 10시까지 영업합니다.',1,1,'2025-09-28 00:54:05');
+INSERT IGNORE INTO `restaurant_reservation_settings` VALUES (1,33,1,1,1,10,30,2,'09:00:00','22:00:00',NULL,NULL,'["2025-09-30"]','5','2025-09-28 15:45:05','2025-09-29 09:37:34',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00'),(2,1,1,0,2,8,30,2,'11:00:00','21:00:00','["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]','["11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"]',NULL,NULL,'2025-09-29 07:24:59','2025-09-29 07:24:59',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','22:00:00',1,'10:00:00','22:00:00',1,'10:00:00','21:00:00'),(3,2,1,1,1,6,14,1,'09:00:00','22:00:00','["monday", "tuesday", "thursday", "friday", "saturday", "sunday"]','["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]',NULL,NULL,'2025-09-29 07:25:06','2025-09-29 07:25:06',1,'09:00:00','22:00:00',1,'09:00:00','22:00:00',0,'09:00:00','22:00:00',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',1,'08:00:00','23:00:00',1,'08:00:00','22:00:00');
+INSERT IGNORE INTO `user_storages` (storage_id, user_id, name, color_class) VALUES (6,1,'내가 찜한 로그','bg-blue-100'),(7,9,'내가 찜한 로그','bg-blue-100'),(8,8,'내가 찜한 로그','bg-blue-100'),(9,6,'내가 찜한 로그','bg-blue-100'),(10,7,'내가 찜한 로그','bg-blue-100'),(11,10,'내가 찜한 로그','bg-blue-100'),(12,10,'2','bg-green-100'),(13,10,'3','bg-blue-100');
+INSERT IGNORE INTO `user_storage_items` VALUES (9,6,'COURSE',1,'2025-09-27 20:01:24'),(12,11,'COURSE',3,'2025-09-27 20:29:30'),(13,11,'COURSE',4,'2025-09-27 23:19:20');
 
 -- ===================================================================
--- sang0925.sql 통합 완료
--- 좋아요 토글 기능 구현을 위한 테이블들이 추가됨:
--- - column_likes: 칼럼 좋아요 관리
--- - comment_likes: 댓글 좋아요 관리
--- - column_comments 테이블에 like_count, parent_id, is_active, updated_at 컬럼 추가
+-- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
 
--- ===================================================================
--- feed_test_data.sql 통합 - 피드 시스템 테스트 데이터
--- ===================================================================
-
--- 테스트용 피드 아이템들 추가
-INSERT INTO feed_items (user_id, feed_type, content_id, created_at, is_active)
-VALUES
-    (8, 'COLUMN', 1, NOW(), true),
-    (9, 'REVIEW', 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), true),
-    (8, 'COLUMN', 2, DATE_SUB(NOW(), INTERVAL 2 HOUR), true);
-
--- 팔로우 관계 확인/추가 (사용자 8과 9가 서로 팔로우)
-INSERT IGNORE INTO follows (follower_id, following_id, created_at, is_active)
-VALUES
-    (8, 9, NOW(), true),
-    (9, 8, NOW(), true);
-
--- 피드 데이터 확인 쿼리 (참고용 주석)
--- SELECT * FROM feed_items WHERE is_active = true ORDER BY created_at DESC;
--- SELECT * FROM follows WHERE is_active = true;
-
--- ===================================================================
--- feed_test_data.sql 통합 완료
--- 피드 시스템 테스트를 위한 샘플 데이터가 추가됨
--- ===================================================================
-
+-- 외래 키 제약 조건 다시 활성화
+SET FOREIGN_KEY_CHECKS = 1;

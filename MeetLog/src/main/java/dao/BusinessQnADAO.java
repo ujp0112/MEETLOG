@@ -107,4 +107,30 @@ public class BusinessQnADAO {
             return result;
         }
     }
+
+    /**
+     * Q&A 답변 등록과 상태 업데이트 (트랜잭션)
+     */
+    public int updateAnswerWithStatus(int qnaId, String answer, SqlSession session) {
+        Map<String, Object> params = Map.of(
+                "qnaId", qnaId,
+                "answer", answer
+        );
+        return session.update(NAMESPACE + ".updateAnswerWithStatus", params);
+    }
+
+    /**
+     * Q&A 해결완료 상태 업데이트
+     */
+    public int updateResolvedStatus(int qnaId, boolean isResolved) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of(
+                    "qnaId", qnaId,
+                    "isResolved", isResolved
+            );
+            int result = session.update(NAMESPACE + ".updateResolvedStatus", params);
+            session.commit();
+            return result;
+        }
+    }
 }

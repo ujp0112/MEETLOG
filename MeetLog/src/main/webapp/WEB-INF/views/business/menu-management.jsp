@@ -114,19 +114,19 @@
                     <div class="space-y-4">
                         <div>
                             <label for="menuName" class="block text-sm font-medium text-slate-700 mb-2">메뉴 이름</label>
-                            <input type="text" id="menuName" name="menuName" required 
+                            <input type="text" id="menuName" name="name" required 
                                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         
                         <div>
                             <label for="menuPrice" class="block text-sm font-medium text-slate-700 mb-2">가격 (원)</label>
-                            <input type="number" id="menuPrice" name="menuPrice" required 
+                            <input type="number" id="menuPrice" name="price" required 
                                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         
                         <div>
                             <label for="menuDescription" class="block text-sm font-medium text-slate-700 mb-2">설명</label>
-                            <textarea id="menuDescription" name="menuDescription" rows="3"
+                            <textarea id="menuDescription" name="description" rows="3"
                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                         </div>
                         
@@ -160,9 +160,10 @@
     
     <script>
         function openAddMenuModal(restaurantId) {
+            const form = document.getElementById('menuForm');
             document.getElementById('modalTitle').textContent = '새 메뉴 추가';
-            document.getElementById('menuForm').action = '${pageContext.request.contextPath}/business/menu/add';
-            document.getElementById('menuForm').reset();
+            form.action = '${pageContext.request.contextPath}/business/menus/add/' + restaurantId;
+            form.reset();
             document.getElementById('restaurantId').value = restaurantId;
             document.getElementById('menuModal').classList.remove('hidden');
         }

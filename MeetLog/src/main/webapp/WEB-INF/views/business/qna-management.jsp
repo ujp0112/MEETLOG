@@ -96,8 +96,19 @@
                                             </c:choose>
                                         </span>
                                         <p class="text-slate-500 text-sm mt-2">
-                                            <fmt:formatDate value="${qna.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                            <fmt:formatDate value="${qna.createdAtAsDate}" pattern="yyyy-MM-dd HH:mm"/>
                                         </p>
+                                        <!-- 해결 완료 체크박스 (답변이 있을 때만 표시) -->
+                                        <c:if test="${not empty qna.answer}">
+                                            <div class="flex items-center mt-2">
+                                                <input type="checkbox"
+                                                       id="resolved-${qna.id}"
+                                                       ${qna.isResolved ? 'checked' : ''}
+                                                       onchange="toggleResolved(${qna.id}, this.checked)"
+                                                       class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
+                                                <label for="resolved-${qna.id}" class="ml-2 text-sm text-slate-600">해결 완료</label>
+                                            </div>
+                                        </c:if>
                                     </div>
                                 </div>
                                 
@@ -109,34 +120,33 @@
                                 
                                 <!-- 답변 -->
                                 <c:if test="${not empty qna.answer}">
-                                    <div class="mb-4">
+                                    <div class="mb-4" id="answer-${qna.id}">
                                         <h4 class="font-semibold text-slate-700 mb-2">답변</h4>
-                                        <p class="text-slate-600 bg-green-50 p-4 rounded-lg">${qna.answer}</p>
+                                        <p class="text-slate-600 bg-green-50 p-4 rounded-lg answer-content">${qna.answer}</p>
                                         <p class="text-slate-500 text-sm mt-2">
-                                            답변일: <fmt:formatDate value="${qna.answeredAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                            답변일: <fmt:formatDate value="${qna.answeredAtAsDate}" pattern="yyyy-MM-dd HH:mm"/>
                                         </p>
                                     </div>
                                 </c:if>
                                 
                                 <!-- 답변 작성 폼 -->
                                 <c:if test="${qna.status == 'PENDING'}">
-                                    <div class="mt-4">
-                                        <form method="post" action="${pageContext.request.contextPath}/business/qna/reply" class="space-y-4">
-                                            <input type="hidden" name="qnaId" value="${qna.id}">
+                                    <div class="mt-4" id="form-${qna.id}">
+                                        <div class="space-y-4">
                                             <div>
                                                 <label class="block text-sm font-semibold text-slate-700 mb-2">답변 작성</label>
-                                                <textarea name="answer" rows="4" placeholder="고객의 질문에 답변을 작성해주세요..." 
+                                                <textarea id="answer-${qna.id}" rows="4" placeholder="고객의 질문에 답변을 작성해주세요..."
                                                           class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
                                             </div>
                                             <div class="flex space-x-3">
-                                                <button type="submit" class="btn-success text-white px-6 py-2 rounded-lg">
+                                                <button type="button" onclick="submitAnswer(${qna.id})" class="btn-success text-white px-6 py-2 rounded-lg">
                                                     답변 등록
                                                 </button>
                                                 <button type="button" onclick="closeQnA(${qna.id})" class="btn-warning text-white px-6 py-2 rounded-lg">
                                                     종료
                                                 </button>
                                             </div>
-                                        </form>
+                                        </div>
                                     </div>
                                 </c:if>
                                 
@@ -181,19 +191,72 @@
             });
         }
         
-        // Q&A 답변 폼 제출
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const answer = this.querySelector('textarea[name="answer"]').value;
-                if (answer.trim() === '') {
-                    alert('답변 내용을 입력해주세요.');
-                    return;
+        // Q&A 답변 등록 (AJAX)
+        function submitAnswer(qnaId) {
+            const answerTextarea = document.getElementById('answer-' + qnaId);
+            const content = answerTextarea.value.trim();
+
+            if (content === '') {
+                alert('답변 내용을 입력해주세요.');
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'addAnswer');
+            formData.append('qnaId', qnaId);
+            formData.append('answer', content);
+
+            fetch('${pageContext.request.contextPath}/business/qna-management', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // 페이지 새로고침으로 변경된 내용 표시
+                } else {
+                    alert(data.message);
                 }
-                this.submit();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
             });
-        });
-        
+        }
+
+        // 해결완료 상태 토글 (AJAX)
+        function toggleResolved(qnaId, isResolved) {
+            const formData = new URLSearchParams();
+            formData.append('action', 'toggleResolved');
+            formData.append('qnaId', qnaId);
+            formData.append('isResolved', isResolved);
+
+            fetch('${pageContext.request.contextPath}/business/qna-management', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(data.message);
+                    // 체크박스 상태는 이미 변경되어 있음
+                } else {
+                    alert(data.message);
+                    // 실패 시 체크박스 상태 롤백
+                    document.getElementById('resolved-' + qnaId).checked = !isResolved;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
+                // 에러 시 체크박스 상태 롤백
+                document.getElementById('resolved-' + qnaId).checked = !isResolved;
+            });
+        }
+
         // Q&A 종료
         function closeQnA(qnaId) {
             if (confirm('이 Q&A를 종료하시겠습니까?')) {
@@ -201,13 +264,13 @@
                 alert('Q&A가 종료되었습니다.');
             }
         }
-        
+
         // 답변 수정
         function editAnswer(qnaId) {
             // TODO: 답변 수정 모달 또는 페이지로 이동
             alert('답변 수정 기능은 준비 중입니다.');
         }
-        
+
         // Q&A 통계 모달 표시
         function showStatistics() {
             alert('Q&A 통계 기능은 준비 중입니다.');

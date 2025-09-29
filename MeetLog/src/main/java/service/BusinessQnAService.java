@@ -116,4 +116,45 @@ public class BusinessQnAService {
             return false;
         }
     }
+
+    /**
+     * Q&A 답변 등록 (상태도 함께 업데이트)
+     */
+    public boolean addAnswer(int qnaId, String answer, int userId) {
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 답변 등록
+            int result1 = qnaDAO.updateAnswerWithStatus(qnaId, answer, session);
+
+            if (result1 > 0) {
+                session.commit();
+                return true;
+            } else {
+                session.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            if (session != null) {
+                session.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    /**
+     * Q&A 해결완료 상태 업데이트
+     */
+    public boolean updateResolvedStatus(int qnaId, boolean isResolved) {
+        try {
+            return qnaDAO.updateResolvedStatus(qnaId, isResolved) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
