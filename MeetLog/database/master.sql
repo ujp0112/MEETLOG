@@ -465,7 +465,7 @@ CREATE TABLE follows (
     INDEX idx_follows_following_id (following_id),
     INDEX idx_follows_created_at (created_at DESC)
 );
-CREATE TABLE review_comments ( id INT AUTO_INCREMENT PRIMARY KEY, review_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
+CREATE TABLE review_comments ( id INT AUTO_INCREMENT PRIMARY KEY, review_id INT NOT NULL, user_id INT NOT NULL, author VARCHAR(100) NOT NULL, author_image VARCHAR(500), content TEXT NOT NULL, is_owner_reply BOOLEAN DEFAULT FALSE, is_resolved BOOLEAN DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE column_comments ( id INT AUTO_INCREMENT PRIMARY KEY, column_id INT NOT NULL, user_id INT NOT NULL, content TEXT NOT NULL, parent_id INT NULL, like_count INT DEFAULT 0, is_active BOOLEAN DEFAULT TRUE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX idx_column_id (column_id), INDEX idx_user_id (user_id), INDEX idx_parent_id (parent_id), FOREIGN KEY (column_id) REFERENCES `columns`(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 
 -- 칼럼 좋아요 테이블 생성

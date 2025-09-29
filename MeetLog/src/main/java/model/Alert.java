@@ -69,8 +69,16 @@ public class Alert {
         return isRead;
     }
 
+    public boolean getIsRead() {
+        return isRead;
+    }
+
     public void setRead(boolean read) {
         isRead = read;
+    }
+
+    public void setIsRead(boolean read) {
+        this.isRead = read;
     }
 
     public LocalDateTime getCreatedAt() {

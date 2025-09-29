@@ -633,8 +633,13 @@ CREATE TABLE `review_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `review_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `author` varchar(100) NOT NULL,
+  `author_image` varchar(500),
   `content` text NOT NULL,
+  `is_owner_reply` boolean DEFAULT FALSE,
+  `is_resolved` boolean DEFAULT FALSE,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `review_id` (`review_id`),
   KEY `user_id` (`user_id`),
@@ -1046,7 +1051,7 @@ INSERT INTO `restaurants` VALUES
 (32,NULL,'툭툭누들타이','기타','연남','주소 정보 없음',NULL,NULL,NULL,NULL,'https://placehold.co/600x400/16a34a/ffffff?text=Thai',4.8,0,4500,NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL,NULL),
 (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','');
 INSERT INTO `review_comments` VALUES
-(1,10,8,'오 여기 진짜 맛있죠! 저도 쌀바게트 제일 좋아해요.','2025-09-27 01:27:51');
+(1,10,8,'구구','https://example.com/profile1.jpg','오 여기 진짜 맛있죠! 저도 쌀바게트 제일 좋아해요.',FALSE,FALSE,'2025-09-27 01:27:51','2025-09-27 01:27:51');
 INSERT INTO `reviews` VALUES
 (1,2,4,5,'여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
 (2,4,6,4,'일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),

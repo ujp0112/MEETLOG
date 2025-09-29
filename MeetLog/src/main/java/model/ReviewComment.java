@@ -1,6 +1,8 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * 리뷰 댓글을 나타내는 모델 클래스
@@ -19,6 +21,7 @@ public class ReviewComment {
     private LocalDateTime updatedAt;
     private boolean isActive;
     private boolean isOwnerReply;
+    private boolean isResolved; // 해결 완료 상태
 
     public ReviewComment() {
         // Default constructor
@@ -117,8 +120,16 @@ public class ReviewComment {
         return isOwnerReply;
     }
 
+    public boolean getIsOwnerReply() {
+        return isOwnerReply;
+    }
+
     public void setIsOwnerReply(boolean isOwnerReply) {
         this.isOwnerReply = isOwnerReply;
+    }
+
+    public void setOwnerReply(boolean ownerReply) {
+        this.isOwnerReply = ownerReply;
     }
 
 	public String getProfileImage() {
@@ -127,5 +138,28 @@ public class ReviewComment {
 
 	public void setProfileImage(String profileImage) {
 		this.profileImage = profileImage;
+	}
+
+	public boolean isResolved() {
+		return isResolved;
+	}
+
+	public boolean getIsResolved() {
+		return isResolved;
+	}
+
+	public void setResolved(boolean resolved) {
+		isResolved = resolved;
+	}
+
+	public void setIsResolved(boolean resolved) {
+		this.isResolved = resolved;
+	}
+
+	public Date getCreatedAtAsDate() {
+	    if (this.createdAt != null) {
+	        return Timestamp.valueOf(this.createdAt);
+	    }
+	    return null;
 	}
 }

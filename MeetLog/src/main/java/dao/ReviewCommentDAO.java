@@ -4,6 +4,7 @@ import model.ReviewComment;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.util.List;
+import java.util.Map;
 
 public class ReviewCommentDAO {
     private static final String NAMESPACE = "dao.ReviewCommentDAO";
@@ -45,5 +46,16 @@ public class ReviewCommentDAO {
      */
     public int delete(int commentId, SqlSession sqlSession) {
         return sqlSession.delete(NAMESPACE + ".delete", commentId);
+    }
+
+    /**
+     * 해결 완료 상태 업데이트 (트랜잭션 포함)
+     */
+    public int updateResolvedStatus(int commentId, boolean isResolved, SqlSession sqlSession) {
+        Map<String, Object> params = Map.of(
+            "commentId", commentId,
+            "isResolved", isResolved
+        );
+        return sqlSession.update(NAMESPACE + ".updateResolvedStatus", params);
     }
 }

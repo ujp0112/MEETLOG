@@ -168,11 +168,23 @@ public class User {
         return isActive;
     }
 
+    public boolean getIsActive() {
+        return isActive;
+    }
+
     public void setActive(boolean isActive) {
         this.isActive = isActive;
     }
 
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
     public boolean isFollowing() {
+        return isFollowing;
+    }
+
+    public boolean getIsFollowing() {
         return isFollowing;
     }
 

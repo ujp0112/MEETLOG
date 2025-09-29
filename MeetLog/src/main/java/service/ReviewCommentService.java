@@ -112,4 +112,22 @@ public class ReviewCommentService {
     public ReviewComment getCommentById(int commentId) {
         return reviewCommentDAO.findById(commentId);
     }
+
+    /**
+     * 해결 완료 상태 업데이트 (자동 트랜잭션)
+     */
+    public boolean updateResolvedStatus(int commentId, boolean isResolved) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            boolean result = reviewCommentDAO.updateResolvedStatus(commentId, isResolved, sqlSession) > 0;
+            if (result) {
+                sqlSession.commit();
+            } else {
+                sqlSession.rollback();
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

@@ -10,6 +10,7 @@
 		<result property="userId" column="user_id" />
 		<result property="profileImage" column="profile_image" />
 		<result property="isOwnerReply" column="is_owner_reply" />
+		<result property="isResolved" column="is_resolved" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
 	</resultMap>
@@ -33,8 +34,8 @@
 
 	<insert id="insert" parameterType="ReviewComment"
 		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO review_comments (review_id, user_id, content, created_at)
-		VALUES (#{reviewId}, #{userId}, #{content}, NOW())
+		INSERT INTO review_comments (review_id, user_id, author, content, is_owner_reply, is_resolved, created_at)
+		VALUES (#{reviewId}, #{userId}, #{author}, #{content}, #{isOwnerReply}, #{isResolved}, NOW())
 	</insert>
 
 	<update id="update" parameterType="ReviewComment">
@@ -46,4 +47,11 @@
 	<delete id="delete" parameterType="int">
 		DELETE FROM review_comments WHERE id = #{id}
 	</delete>
+
+	<!-- 해결 완료 상태 업데이트 -->
+	<update id="updateResolvedStatus" parameterType="map">
+		UPDATE review_comments
+		SET is_resolved = #{isResolved}
+		WHERE id = #{commentId}
+	</update>
 </mapper>

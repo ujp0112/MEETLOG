@@ -40,23 +40,81 @@
                                             <div class="flex items-start justify-between">
                                                 <div class="flex-1">
                                                     <div class="flex items-center space-x-3 mb-3">
-                                                        <h4 class="font-medium text-slate-900">${review.customerName}</h4>
+                                                        <h4 class="font-medium text-slate-900">${review.author}</h4>
                                                         <div class="flex items-center">
                                                             <c:forEach begin="1" end="5" var="i">
                                                                 <span class="text-sm ${i <= review.rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>
                                                             </c:forEach>
                                                             <span class="ml-2 text-sm text-slate-600">${review.rating}/5</span>
                                                         </div>
-                                                        <span class="text-sm text-slate-500">${review.createdAt}</span>
+                                                        <span class="text-sm text-slate-500">
+                                                            <fmt:formatDate value="${review.createdAtAsDate}" pattern="yyyy-MM-dd HH:mm" />
+                                                        </span>
                                                     </div>
                                                     <p class="text-slate-700 leading-relaxed">${review.content}</p>
+
+                                                    <!-- 답글 표시 -->
+                                                    <c:if test="${not empty review.comments}">
+                                                        <div class="mt-4 space-y-3">
+                                                            <c:forEach var="comment" items="${review.comments}">
+                                                                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg relative">
+                                                                    <div class="flex items-start justify-between">
+                                                                        <div class="flex-1">
+                                                                            <div class="flex items-center space-x-2 mb-2">
+                                                                                <span class="font-medium text-blue-800">
+                                                                                    ${comment.isOwnerReply ? '사장님' : comment.author}
+                                                                                </span>
+                                                                                <span class="text-xs text-blue-600">
+                                                                                    <fmt:formatDate value="${comment.createdAtAsDate}" pattern="MM-dd HH:mm" />
+                                                                                </span>
+                                                                                <c:if test="${comment.isOwnerReply}">
+                                                                                    <span class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                                                        ${comment.isResolved ? '해결완료' : '미해결'}
+                                                                                    </span>
+                                                                                </c:if>
+                                                                            </div>
+                                                                            <p class="text-blue-700">${comment.content}</p>
+                                                                        </div>
+                                                                        <c:if test="${comment.isOwnerReply}">
+                                                                            <div class="flex items-center ml-4">
+                                                                                <input type="checkbox" id="resolved-${comment.id}"
+                                                                                       ${comment.isResolved ? 'checked' : ''}
+                                                                                       onchange="toggleResolved(${comment.id}, this.checked)"
+                                                                                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                                                                                <label for="resolved-${comment.id}" class="ml-2 text-sm text-blue-800">해결완료</label>
+                                                                            </div>
+                                                                        </c:if>
+                                                                    </div>
+                                                                </div>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </c:if>
                                                 </div>
                                                 <div class="flex space-x-2 ml-4">
-                                                    <button class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                                    <button onclick="toggleReplyForm(${review.id})"
+                                                            class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
                                                         답글
                                                     </button>
                                                     <button class="px-3 py-1 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
                                                         숨김
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- 답글 작성 폼 -->
+                                            <div id="reply-form-${review.id}" class="hidden mt-4 p-4 bg-gray-50 rounded-lg">
+                                                <textarea id="reply-content-${review.id}"
+                                                          placeholder="고객에게 답글을 작성해주세요..."
+                                                          class="w-full p-3 border border-gray-300 rounded-lg resize-none"
+                                                          rows="3"></textarea>
+                                                <div class="flex justify-end mt-3 space-x-2">
+                                                    <button onclick="toggleReplyForm(${review.id})"
+                                                            class="px-4 py-2 text-sm text-gray-600 bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+                                                        취소
+                                                    </button>
+                                                    <button onclick="submitReply(${review.id})"
+                                                            class="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                                                        답글 등록
                                                     </button>
                                                 </div>
                                             </div>
@@ -82,5 +140,94 @@
         <%-- 공통 푸터 포함 --%>
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
+
+    <script>
+        function toggleReplyForm(reviewId) {
+            const form = document.getElementById('reply-form-' + reviewId);
+            const content = document.getElementById('reply-content-' + reviewId);
+
+            if (form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                content.focus();
+            } else {
+                form.classList.add('hidden');
+                content.value = '';
+            }
+        }
+
+        function submitReply(reviewId) {
+            const content = document.getElementById('reply-content-' + reviewId).value.trim();
+
+            if (!content) {
+                alert('답글 내용을 입력해주세요.');
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'addReply');
+            formData.append('reviewId', reviewId);
+            formData.append('content', content);
+
+            fetch('${pageContext.request.contextPath}/business/review-management', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload(); // 페이지 새로고침하여 새 답글 표시
+                } else {
+                    alert('오류: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
+            });
+        }
+
+        function toggleResolved(commentId, isResolved) {
+            const formData = new URLSearchParams();
+            formData.append('action', 'toggleResolved');
+            formData.append('commentId', commentId);
+            formData.append('isResolved', isResolved);
+
+            fetch('${pageContext.request.contextPath}/business/review-management', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 체크박스 옆의 상태 텍스트 업데이트
+                    const checkbox = document.getElementById('resolved-' + commentId);
+                    const statusSpan = checkbox.closest('.bg-blue-50').querySelector('.px-2.py-1');
+                    if (statusSpan) {
+                        statusSpan.textContent = isResolved ? '해결완료' : '미해결';
+                    }
+
+                    // 성공 메시지 표시 (선택사항)
+                    // alert(data.message);
+                } else {
+                    alert('오류: ' + data.message);
+                    // 실패 시 체크박스 상태 원복
+                    checkbox.checked = !isResolved;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버 오류가 발생했습니다.');
+                // 오류 시 체크박스 상태 원복
+                document.getElementById('resolved-' + commentId).checked = !isResolved;
+            });
+        }
+    </script>
 </body>
 </html>
