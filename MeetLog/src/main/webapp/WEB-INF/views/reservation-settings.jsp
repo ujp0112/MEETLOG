@@ -116,20 +116,20 @@
         <form id="reservationSettingsForm" action="${pageContext.request.contextPath}/reservation-settings/${restaurant.id}/save" method="post">
 
             <!-- Hidden inputs to ensure all day time values are always sent -->
-            <input type="hidden" name="mondayStart" value="${reservationSettings.mondayStart != null ? reservationSettings.mondayStart : '09:00'}">
-            <input type="hidden" name="mondayEnd" value="${reservationSettings.mondayEnd != null ? reservationSettings.mondayEnd : '22:00'}">
-            <input type="hidden" name="tuesdayStart" value="${reservationSettings.tuesdayStart != null ? reservationSettings.tuesdayStart : '09:00'}">
-            <input type="hidden" name="tuesdayEnd" value="${reservationSettings.tuesdayEnd != null ? reservationSettings.tuesdayEnd : '22:00'}">
-            <input type="hidden" name="wednesdayStart" value="${reservationSettings.wednesdayStart != null ? reservationSettings.wednesdayStart : '09:00'}">
-            <input type="hidden" name="wednesdayEnd" value="${reservationSettings.wednesdayEnd != null ? reservationSettings.wednesdayEnd : '22:00'}">
-            <input type="hidden" name="thursdayStart" value="${reservationSettings.thursdayStart != null ? reservationSettings.thursdayStart : '09:00'}">
-            <input type="hidden" name="thursdayEnd" value="${reservationSettings.thursdayEnd != null ? reservationSettings.thursdayEnd : '22:00'}">
-            <input type="hidden" name="fridayStart" value="${reservationSettings.fridayStart != null ? reservationSettings.fridayStart : '09:00'}">
-            <input type="hidden" name="fridayEnd" value="${reservationSettings.fridayEnd != null ? reservationSettings.fridayEnd : '22:00'}">
-            <input type="hidden" name="saturdayStart" value="${reservationSettings.saturdayStart != null ? reservationSettings.saturdayStart : '09:00'}">
-            <input type="hidden" name="saturdayEnd" value="${reservationSettings.saturdayEnd != null ? reservationSettings.saturdayEnd : '22:00'}">
-            <input type="hidden" name="sundayStart" value="${reservationSettings.sundayStart != null ? reservationSettings.sundayStart : '09:00'}">
-            <input type="hidden" name="sundayEnd" value="${reservationSettings.sundayEnd != null ? reservationSettings.sundayEnd : '22:00'}">
+            <input type="hidden" name="mondayStart" value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}">
+            <input type="hidden" name="mondayEnd" value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}">
+            <input type="hidden" name="tuesdayStart" value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}">
+            <input type="hidden" name="tuesdayEnd" value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}">
+            <input type="hidden" name="wednesdayStart" value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}">
+            <input type="hidden" name="wednesdayEnd" value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}">
+            <input type="hidden" name="thursdayStart" value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}">
+            <input type="hidden" name="thursdayEnd" value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}">
+            <input type="hidden" name="fridayStart" value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}">
+            <input type="hidden" name="fridayEnd" value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}">
+            <input type="hidden" name="saturdayStart" value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}">
+            <input type="hidden" name="saturdayEnd" value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}">
+            <input type="hidden" name="sundayStart" value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}">
+            <input type="hidden" name="sundayEnd" value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}">
 
             <!-- 기본 설정 -->
             <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
@@ -150,7 +150,7 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="reservationEnabled" class="toggle-switch"
-                                   ${reservationSettings.reservationEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.reservation_enabled ? 'checked' : ''}>
                         </div>
                     </div>
 
@@ -165,7 +165,7 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="autoAccept" class="toggle-switch"
-                                   ${reservationSettings.autoAccept ? 'checked' : ''}>
+                                   ${reservationSettings.auto_accept ? 'checked' : ''}>
                         </div>
                     </div>
                 </div>
@@ -186,7 +186,7 @@
                             최소 예약 인원
                         </label>
                         <input type="number" name="minPartySize" min="1" max="20"
-                               value="${reservationSettings.minPartySize != null ? reservationSettings.minPartySize : 1}"
+                               value="${reservationSettings.min_party_size != null ? reservationSettings.min_party_size : 1}"
                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <p class="text-xs text-slate-500 mt-2">명 이상 예약 가능</p>
                     </div>
@@ -198,7 +198,7 @@
                             최대 예약 인원
                         </label>
                         <input type="number" name="maxPartySize" min="1" max="50"
-                               value="${reservationSettings.maxPartySize != null ? reservationSettings.maxPartySize : 10}"
+                               value="${reservationSettings.max_party_size != null ? reservationSettings.max_party_size : 10}"
                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <p class="text-xs text-slate-500 mt-2">명 이하 예약 가능</p>
                     </div>
@@ -210,7 +210,7 @@
                             예약 가능 기간
                         </label>
                         <input type="number" name="advanceBookingDays" min="1" max="365"
-                               value="${reservationSettings.advanceBookingDays != null ? reservationSettings.advanceBookingDays : 30}"
+                               value="${reservationSettings.advance_booking_days != null ? reservationSettings.advance_booking_days : 30}"
                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <p class="text-xs text-slate-500 mt-2">일 전까지 예약 가능</p>
                     </div>
@@ -222,7 +222,7 @@
                             최소 예약 시간
                         </label>
                         <input type="number" name="minAdvanceHours" min="1" max="72"
-                               value="${reservationSettings.minAdvanceHours != null ? reservationSettings.minAdvanceHours : 2}"
+                               value="${reservationSettings.min_advance_hours != null ? reservationSettings.min_advance_hours : 2}"
                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <p class="text-xs text-slate-500 mt-2">시간 전까지 예약 가능</p>
                     </div>
@@ -249,22 +249,23 @@
                                     <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
                                 </div>
                             </div>
+                            <!-- DEBUG: monday_enabled=[${reservationSettings.monday_enabled}] -->
                             <input type="checkbox" name="mondayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.mondayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.monday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.mondayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.monday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="mondayStartVisible"
-                                       value="${reservationSettings.mondayStart != null ? reservationSettings.mondayStart : '09:00'}"
+                                       value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=mondayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="mondayEndVisible"
-                                       value="${reservationSettings.mondayEnd != null ? reservationSettings.mondayEnd : '22:00'}"
+                                       value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=mondayEnd]').value = this.value">
                             </div>
@@ -284,21 +285,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="tuesdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.tuesdayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.tuesday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.tuesdayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.tuesday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="tuesdayStartVisible"
-                                       value="${reservationSettings.tuesdayStart != null ? reservationSettings.tuesdayStart : '09:00'}"
+                                       value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=tuesdayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="tuesdayEndVisible"
-                                       value="${reservationSettings.tuesdayEnd != null ? reservationSettings.tuesdayEnd : '22:00'}"
+                                       value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=tuesdayEnd]').value = this.value">
                             </div>
@@ -318,21 +319,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="wednesdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.wednesdayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.wednesday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.wednesdayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.wednesday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="wednesdayStartVisible"
-                                       value="${reservationSettings.wednesdayStart != null ? reservationSettings.wednesdayStart : '09:00'}"
+                                       value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=wednesdayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="wednesdayEndVisible"
-                                       value="${reservationSettings.wednesdayEnd != null ? reservationSettings.wednesdayEnd : '22:00'}"
+                                       value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=wednesdayEnd]').value = this.value">
                             </div>
@@ -352,21 +353,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="thursdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.thursdayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.thursday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.thursdayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.thursday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="thursdayStartVisible"
-                                       value="${reservationSettings.thursdayStart != null ? reservationSettings.thursdayStart : '09:00'}"
+                                       value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=thursdayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="thursdayEndVisible"
-                                       value="${reservationSettings.thursdayEnd != null ? reservationSettings.thursdayEnd : '22:00'}"
+                                       value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=thursdayEnd]').value = this.value">
                             </div>
@@ -386,21 +387,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="fridayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.fridayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.friday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.fridayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.friday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="fridayStartVisible"
-                                       value="${reservationSettings.fridayStart != null ? reservationSettings.fridayStart : '09:00'}"
+                                       value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=fridayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="fridayEndVisible"
-                                       value="${reservationSettings.fridayEnd != null ? reservationSettings.fridayEnd : '22:00'}"
+                                       value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=fridayEnd]').value = this.value">
                             </div>
@@ -420,21 +421,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="saturdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.saturdayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.saturday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.saturdayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.saturday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="saturdayStartVisible"
-                                       value="${reservationSettings.saturdayStart != null ? reservationSettings.saturdayStart : '09:00'}"
+                                       value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=saturdayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="saturdayEndVisible"
-                                       value="${reservationSettings.saturdayEnd != null ? reservationSettings.saturdayEnd : '22:00'}"
+                                       value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=saturdayEnd]').value = this.value">
                             </div>
@@ -454,21 +455,21 @@
                                 </div>
                             </div>
                             <input type="checkbox" name="sundayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.sundayEnabled ? 'checked' : ''}>
+                                   ${reservationSettings.sunday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.sundayEnabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.sunday_enabled ? 'grid' : 'none'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="sundayStartVisible"
-                                       value="${reservationSettings.sundayStart != null ? reservationSettings.sundayStart : '09:00'}"
+                                       value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=sundayStart]').value = this.value">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
                                 <input type="time" name="sundayEndVisible"
-                                       value="${reservationSettings.sundayEnd != null ? reservationSettings.sundayEnd : '22:00'}"
+                                       value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}"
                                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                        onchange="document.querySelector('input[name=sundayEnd]').value = this.value">
                             </div>
@@ -493,7 +494,7 @@
                         <p class="text-sm text-slate-600 mb-4">여러 날짜를 선택할 수 있습니다. 선택된 날짜는 예약이 불가능합니다.</p>
                         <input type="text" id="blackoutDates" name="blackoutDates" placeholder="날짜를 선택하세요..." readonly
                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                               value="${reservationSettings.blackoutDates != null ? reservationSettings.blackoutDates : ''}">
+                               value="${reservationSettings.blackout_dates != null ? reservationSettings.blackout_dates : ''}">
                     </div>
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div class="flex items-center gap-2 text-yellow-800">
@@ -518,7 +519,7 @@
                         고객에게 전달할 메시지
                     </label>
                     <textarea name="specialNotes" rows="4" placeholder="예약 시 고객에게 안내할 특별한 사항을 입력하세요. (예: 주차 안내, 복장 규정, 특별 요청사항 등)"
-                              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none">${reservationSettings.specialNotes != null ? reservationSettings.specialNotes : ''}</textarea>
+                              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none">${reservationSettings.special_notes != null ? reservationSettings.special_notes : ''}</textarea>
                     <p class="text-xs text-slate-500 mt-2">이 메시지는 예약 확인 시 고객에게 표시됩니다.</p>
                 </div>
             </div>
@@ -618,27 +619,27 @@
 
             // 먼저 보이는 필드에서 숨겨진 필드로 값 복사
             dayNames.forEach(day => {
-                const visibleStart = document.querySelector(`input[name="${day}StartVisible"]`);
-                const visibleEnd = document.querySelector(`input[name="${day}EndVisible"]`);
-                const hiddenStart = document.querySelector(`input[name="${day}Start"]`);
-                const hiddenEnd = document.querySelector(`input[name="${day}End"]`);
+                const visibleStart = document.querySelector('input[name="' + day + 'StartVisible"]');
+                const visibleEnd = document.querySelector('input[name="' + day + 'EndVisible"]');
+                const hiddenStart = document.querySelector('input[name="' + day + 'Start"]');
+                const hiddenEnd = document.querySelector('input[name="' + day + 'End"]');
 
                 // 보이는 필드가 있고 값이 있으면 숨겨진 필드에 복사
                 if (visibleStart && visibleStart.value && hiddenStart) {
                     hiddenStart.value = visibleStart.value;
-                    console.log(`${day} 시작 시간 업데이트: ${visibleStart.value}`);
+                    console.log(day + ' 시작 시간 업데이트: ' + visibleStart.value);
                 }
                 if (visibleEnd && visibleEnd.value && hiddenEnd) {
                     hiddenEnd.value = visibleEnd.value;
-                    console.log(`${day} 종료 시간 업데이트: ${visibleEnd.value}`);
+                    console.log(day + ' 종료 시간 업데이트: ' + visibleEnd.value);
                 }
             });
 
             // 요일별 데이터 수집
             dayNames.forEach(day => {
-                const dayEnabled = document.querySelector(`input[name="${day}Enabled"]`);
-                const hiddenStart = document.querySelector(`input[name="${day}Start"]`);
-                const hiddenEnd = document.querySelector(`input[name="${day}End"]`);
+                const dayEnabled = document.querySelector('input[name="' + day + 'Enabled"]');
+                const hiddenStart = document.querySelector('input[name="' + day + 'Start"]');
+                const hiddenEnd = document.querySelector('input[name="' + day + 'End"]');
 
                 const enabledValue = dayEnabled ? dayEnabled.checked.toString() : 'false';
                 const startValue = hiddenStart ? hiddenStart.value : '09:00';
@@ -648,7 +649,7 @@
                 formData.append(day + 'Start', startValue);
                 formData.append(day + 'End', endValue);
 
-                console.log(`${day}:`, {
+                console.log(day + ':', {
                     enabled: enabledValue,
                     start: startValue,
                     end: endValue
@@ -677,10 +678,10 @@
             console.log('=== 전송할 데이터 ===');
             let count = 0;
             for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
+                console.log(key + ': ' + value);
                 count++;
             }
-            console.log(`총 ${count}개 항목 전송`);
+            console.log('총 ' + count + '개 항목 전송');
 
             // FormData를 무조건 URLSearchParams로 대체 (FormData 파라미터 인식 불가 문제)
             if (true) {
