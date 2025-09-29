@@ -14,3 +14,6 @@
 # 개인 설정 및 API 키 파일 (Secrets)
 config.properties
 /src/main/webapp/WEB-INF/api.properties
+
+# Database properties
+db.properties

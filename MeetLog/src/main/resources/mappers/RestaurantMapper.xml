@@ -276,6 +276,32 @@
     <select id="findAllWithLocation" resultType="model.Restaurant">
 	    SELECT * FROM restaurants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
 	</select>
+	<!-- [신규 추가] 지도 기반 맛집 검색을 위한 페이징 쿼리 -->
+	<select id="findNearbyRestaurantsByPage" parameterType="map" resultType="model.Restaurant">
+	    SELECT 
+	        id, name, address, location, phone, category, description, 
+	        image, latitude, longitude, parking, created_at, updated_at,
+	        (6371 * ACOS(
+	            COS(RADIANS(#{latitude})) * COS(RADIANS(latitude)) *
+	            COS(RADIANS(longitude) - RADIANS(#{longitude})) +
+	            SIN(RADIANS(#{latitude})) * SIN(RADIANS(latitude))
+	        )) AS distance
+	    FROM
+	        RESTAURANTS
+	    WHERE
+	        latitude IS NOT NULL AND longitude IS NOT NULL
+	        <if test="categories != null and !categories.isEmpty()">
+	            AND category IN
+	            <foreach item="item" collection="categories" open="(" separator="," close=")">
+	                #{item}
+	            </foreach>
+	        </if>
+	    HAVING
+	        distance &lt;= #{radiusKm}
+	    ORDER BY
+	        distance ASC
+	    LIMIT #{limit} OFFSET #{offset}
+	</select>
 
     <insert id="insertRestaurantImages" parameterType="map">
         INSERT INTO restaurant_images (restaurant_id, image_path, display_order)
