@@ -29,11 +29,11 @@ public class ImageProxyServlet extends HttpServlet {
             return;
         }
 
-        // [수정] 개선된 통합 메소드를 호출하여 최적의 이미지 URL을 가져옵니다.
-        String imageUrl = NaverImageSearch.searchImages(query, 1).get(0);
+        // NaverImageSearch 유틸리티의 개선된 메소드를 호출하여 최적의 이미지를 찾습니다.
+        String imageUrl = NaverImageSearch.findBestImage(query);
 
+        // 결과를 JSON 형태로 응답합니다.
         out.print(new Gson().toJson(imageUrl));
         out.flush();
     }
 }
-

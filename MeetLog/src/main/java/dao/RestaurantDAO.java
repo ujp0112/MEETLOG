@@ -145,4 +145,29 @@ public class RestaurantDAO {
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
+    /**
+     * [최종 수정] 특정 위치 주변의 레스토랑을 페이징 처리하여 조회합니다.
+     * 모든 계산과 필터링을 데이터베이스 쿼리에서 처리하여 성능을 최적화합니다.
+     * @param latitude 중심 위도
+     * @param longitude 중심 경도
+     * @param radiusKm 검색 반경 (km)
+     * @param categories 필터링할 카테고리 목록
+     * @param offset 건너뛸 레코드 수
+     * @param limit 가져올 레코드 수
+     * @return 조건에 맞는 레스토랑 목록
+     */
+    public List<Restaurant> findNearbyRestaurantsByPage(double latitude, double longitude, double radiusKm, List<String> categories, int offset, int limit) {
+        // [수정] try-with-resources 구문으로 변경하여 SqlSession을 안전하게 자동 관리합니다.
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("latitude", latitude);
+            params.put("longitude", longitude);
+            params.put("radiusKm", radiusKm);
+            params.put("categories", categories);
+            params.put("offset", offset);
+            params.put("limit", limit);
+            
+            return sqlSession.selectList(NAMESPACE + ".findNearbyRestaurantsByPage", params);
+        } // finally 블록은 try-with-resources가 자동으로 처리하므로 제거합니다.
+    }
 }

@@ -31,6 +31,20 @@ public class ExternalRestaurantDetailServlet extends HttpServlet {
         restaurant.setPhone(phone);
         restaurant.setCategory(category);
         
+     // ▼▼▼ [수정] 주소 문자열에서 location (시/군/구) 정보 추출 로직 추가 ▼▼▼
+        if (address != null && !address.isEmpty()) {
+            String[] addressParts = address.split(" ");
+            if (addressParts.length >= 2) {
+                // 주소의 첫 두 부분을 location으로 설정 (예: "서울 중구")
+                String location = addressParts[0] + " " + addressParts[1];
+                restaurant.setLocation(location);
+            } else {
+                // 주소가 한 단어일 경우 그대로 사용
+                restaurant.setLocation(address);
+            }
+        }
+        // ▲▲▲ [수정] 로직 끝 ▲▲▲
+        
         try {
             if (latitudeStr != null && !latitudeStr.isEmpty()) {
                 restaurant.setLatitude(Double.parseDouble(latitudeStr));

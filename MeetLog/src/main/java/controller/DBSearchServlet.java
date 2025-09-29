@@ -6,22 +6,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.google.gson.Gson;
-
 import dao.RestaurantDAO;
 import model.Restaurant;
 
 @WebServlet("/search/db-restaurants")
 public class DBSearchServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    // 카테고리 그룹핑
+    private static final int PAGE_SIZE = 15;
     private static final Map<String, List<String>> categoryMap = new HashMap<>();
     static {
         categoryMap.put("한식", Arrays.asList("고기/구이", "찌개/전골", "백반/국밥", "족발/보쌈", "분식", "한식 기타", "한식"));
@@ -39,12 +36,17 @@ public class DBSearchServlet extends HttpServlet {
             double lng = Double.parseDouble(request.getParameter("lng"));
             int level = Integer.parseInt(request.getParameter("level"));
             String category = request.getParameter("category");
+            
+            // [수정] page 파라미터가 null이거나 비어있을 경우 기본값 1을 사용
+            String pageParam = request.getParameter("page");
+            int page = (pageParam == null || pageParam.isEmpty()) ? 1 : Integer.parseInt(pageParam);
 
             double radiusKm = getRadiusByZoomLevel(level);
             List<String> categoryFilter = categoryMap.get(category);
+            int offset = (page - 1) * PAGE_SIZE;
 
             RestaurantDAO dao = new RestaurantDAO();
-            List<Restaurant> restaurants = dao.findNearbyRestaurants(lat, lng, radiusKm, categoryFilter);
+            List<Restaurant> restaurants = dao.findNearbyRestaurantsByPage(lat, lng, radiusKm, categoryFilter, offset, PAGE_SIZE);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
@@ -58,10 +60,6 @@ public class DBSearchServlet extends HttpServlet {
         }
     }
 
-    /**
-     * 지도 확대 레벨에 따른 검색 반경(km) 계산
-     * [수정] 검색 반경을 전체적으로 2배씩 늘려 더 많은 결과가 포함되도록 완화
-     */
     private double getRadiusByZoomLevel(int level) {
         if (level <= 3) return 20;
         if (level <= 5) return 10;
