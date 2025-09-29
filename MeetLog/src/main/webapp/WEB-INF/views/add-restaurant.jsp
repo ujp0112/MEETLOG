@@ -279,10 +279,10 @@ body {
 							class="form-input mt-1"
 							placeholder="가게에 대한 상세한 설명을 입력해주세요. (예: 주차 정보, 가게 특징 등)">${restaurant.description}</textarea>
 					</div>
-					<%-- <div>
+					<div>
 						<input type="checkbox" id="parking" name="parking" value="true" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" ${restaurant.parking ? 'checked' : ''}>
                         <label for="parking" class="ml-2 text-sm font-medium text-gray-700">주차 가능</label>
-					</div> --%>
+					</div>
 					<div>
 						<label for="break_time_text"
 							class="block text-sm font-medium text-gray-700">브레이크 타임

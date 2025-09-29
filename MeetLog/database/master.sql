@@ -395,6 +395,20 @@ CREATE TABLE rating_distributions ( id INT AUTO_INCREMENT PRIMARY KEY, restauran
 CREATE TABLE detailed_ratings ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, taste DECIMAL(3,1) DEFAULT 0.0, price DECIMAL(3,1) DEFAULT 0.0, service DECIMAL(3,1) DEFAULT 0.0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 CREATE TABLE reservations ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, user_id INT NOT NULL, restaurant_name VARCHAR(200) NOT NULL, user_name VARCHAR(100) NOT NULL, reservation_time TIMESTAMP NOT NULL, party_size INT NOT NULL, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', special_requests TEXT, contact_phone VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 
+ALTER TABLE reviews
+ADD COLUMN reply_content TEXT NULL COMMENT '사장님 답글 내용',
+ADD COLUMN reply_created_at DATETIME NULL COMMENT '사장님 답글 작성 시간';
+
+CREATE TABLE review_likes (
+    user_id INT NOT NULL,
+    review_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, review_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+);
+
+
 -- 음식점 예약 설정 테이블
 CREATE TABLE restaurant_reservation_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -693,3 +707,4 @@ VALUES
 -- feed_test_data.sql 통합 완료
 -- 피드 시스템 테스트를 위한 샘플 데이터가 추가됨
 -- ===================================================================
+
