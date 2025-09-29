@@ -272,6 +272,10 @@
         WHERE r.id = #{id} AND r.is_active = true
         ORDER BY ri.display_order ASC
     </select>
+    
+    <select id="findAllWithLocation" resultType="model.Restaurant">
+	    SELECT * FROM restaurants WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+	</select>
 
     <insert id="insertRestaurantImages" parameterType="map">
         INSERT INTO restaurant_images (restaurant_id, image_path, display_order)

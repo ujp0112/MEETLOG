@@ -1,0 +1,73 @@
+package controller;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.google.gson.Gson;
+
+import dao.RestaurantDAO;
+import model.Restaurant;
+
+@WebServlet("/search/db-restaurants")
+public class DBSearchServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    // 카테고리 그룹핑
+    private static final Map<String, List<String>> categoryMap = new HashMap<>();
+    static {
+        categoryMap.put("한식", Arrays.asList("고기/구이", "찌개/전골", "백반/국밥", "족발/보쌈", "분식", "한식 기타", "한식"));
+        categoryMap.put("일식", Arrays.asList("스시/오마카세", "라멘/돈부리", "돈까스/튀김", "이자카야", "일식 기타", "일식"));
+        categoryMap.put("중식", Arrays.asList("중식"));
+        categoryMap.put("양식", Arrays.asList("이탈리안", "프렌치", "스테이크/바베큐", "햄버거/피자", "양식 기타", "양식"));
+        categoryMap.put("아시안", Arrays.asList("태국/베트남", "인도/중동", "아시안 기타"));
+        categoryMap.put("카페", Arrays.asList("카페", "베이커리/디저트"));
+        categoryMap.put("주점", Arrays.asList("주점"));
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            double lat = Double.parseDouble(request.getParameter("lat"));
+            double lng = Double.parseDouble(request.getParameter("lng"));
+            int level = Integer.parseInt(request.getParameter("level"));
+            String category = request.getParameter("category");
+
+            double radiusKm = getRadiusByZoomLevel(level);
+            List<String> categoryFilter = categoryMap.get(category);
+
+            RestaurantDAO dao = new RestaurantDAO();
+            List<Restaurant> restaurants = dao.findNearbyRestaurants(lat, lng, radiusKm, categoryFilter);
+
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            PrintWriter out = response.getWriter();
+            out.print(new Gson().toJson(restaurants));
+            out.flush();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid parameters");
+        }
+    }
+
+    /**
+     * 지도 확대 레벨에 따른 검색 반경(km) 계산
+     * [수정] 검색 반경을 전체적으로 2배씩 늘려 더 많은 결과가 포함되도록 완화
+     */
+    private double getRadiusByZoomLevel(int level) {
+        if (level <= 3) return 20;
+        if (level <= 5) return 10;
+        if (level <= 7) return 4;
+        if (level <= 9) return 2;
+        return 1;
+    }
+}
+
