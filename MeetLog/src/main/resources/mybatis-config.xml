@@ -96,6 +96,8 @@
 		<mapper resource="mappers/ReservationBlackoutDateMapper.xml" />
 		<mapper resource="mappers/RestaurantTableMapper.xml" />
 		<mapper resource="mappers/ReservationNotificationMapper.xml" />
+		<mapper resource="mappers/CouponMapper.xml" />
+		<mapper resource="mappers/UserCouponMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

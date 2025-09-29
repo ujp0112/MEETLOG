@@ -46,23 +46,26 @@
 
                             <div class="lg:col-span-3 space-y-6">
       
-                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                                     <div class="bg-white p-6 rounded-xl shadow-lg text-center">
-                             
                                          <div class="text-2xl font-bold text-sky-600">${fn:length(myReviews)}</div>
                                         <div class="text-sm text-slate-600">작성한 리뷰</div>
                                     </div>
-       
                                      <div class="bg-white p-6 rounded-xl shadow-lg text-center">
                                         <div class="text-2xl font-bold text-sky-600">${fn:length(myColumns)}</div>
-                       
                                          <div class="text-sm text-slate-600">작성한 칼럼</div>
                                     </div>
                                     <div class="bg-white p-6 rounded-xl shadow-lg text-center">
-   
                                          <div class="text-2xl font-bold text-sky-600">${fn:length(myReservations)}</div>
                                         <div class="text-sm text-slate-600">예약 내역</div>
-                 
+                                     </div>
+                                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                                         <div class="text-2xl font-bold text-green-600">${availableCouponCount}</div>
+                                        <div class="text-sm text-slate-600">사용 가능한 쿠폰</div>
+                                     </div>
+                                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                                         <div class="text-2xl font-bold text-purple-600">${myCoursesCount}</div>
+                                        <div class="text-sm text-slate-600">만든 코스</div>
                                      </div>
                                 </div>
 
@@ -119,42 +122,44 @@
                                     </div>
                                 </div>
 
-                                
-                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <a href="${pageContext.request.contextPath}/mypage/reviews" 
+
+                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <a href="${pageContext.request.contextPath}/mypage/reviews"
                                        class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
-             
                                          <div class="text-3xl mb-2">📝</div>
                                         <h4 class="font-bold text-slate-800">내 리뷰</h4>
-                            
                                          <p class="text-sm text-slate-600">작성한 리뷰 관리</p>
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/mypage/columns" 
-          
+                                    <a href="${pageContext.request.contextPath}/mypage/columns"
                                        class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
                                         <div class="text-3xl mb-2">📰</div>
-                       
                                          <h4 class="font-bold text-slate-800">내 칼럼</h4>
                                         <p class="text-sm text-slate-600">작성한 칼럼 관리</p>
-                                    
                                      </a>
-                                    <a href="${pageContext.request.contextPath}/mypage/reservations" 
+                                    <a href="${pageContext.request.contextPath}/mypage/reservations"
                                        class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
-                 
                                          <div class="text-3xl mb-2">📅</div>
                                         <h4 class="font-bold text-slate-800">예약 내역</h4>
-                                
                                          <p class="text-sm text-slate-600">예약 관리</p>
                                     </a>
-                                    <a href="${pageContext.request.contextPath}/mypage/settings" 
-               
+                                    <a href="${pageContext.request.contextPath}/mypage/coupons"
+                                       class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
+                                         <div class="text-3xl mb-2">🎫</div>
+                                        <h4 class="font-bold text-slate-800">내 쿠폰</h4>
+                                         <p class="text-sm text-slate-600">쿠폰 관리 및 사용</p>
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/my-courses"
+                                       class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
+                                         <div class="text-3xl mb-2">🗺️</div>
+                                        <h4 class="font-bold text-slate-800">내 코스</h4>
+                                         <p class="text-sm text-slate-600">내가 만든 코스 관리</p>
+                                    </a>
+                                    <a href="${pageContext.request.contextPath}/mypage/settings"
                                          class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
                                         <div class="text-3xl mb-2">⚙️</div>
-                            
                                          <h4 class="font-bold text-slate-800">설정</h4>
                                         <p class="text-sm text-slate-600">계정 설정</p>
                                     </a>
-       
                                  </div>
                             </div>
                         </div>

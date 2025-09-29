@@ -24,10 +24,14 @@ import model.Column;
 import model.Reservation;
 import model.Review;
 import model.User;
+import model.UserCoupon;
+import model.CommunityCourse;
 import service.ColumnService;
 import service.ReservationService;
 import service.ReviewService;
 import service.UserService;
+import service.UserCouponService;
+import service.CourseService;
 import util.AppConfig;
 
 // web.xml에 매핑되어 있으므로 @WebServlet은 주석 처리 또는 삭제
@@ -38,6 +42,8 @@ public class MypageServlet extends HttpServlet {
     private final ReservationService reservationService = new ReservationService();
     private final ReviewService reviewService = new ReviewService();
     private final ColumnService columnService = new ColumnService();
+    private final UserCouponService userCouponService = new UserCouponService();
+    private final CourseService courseService = new CourseService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -69,8 +75,12 @@ public class MypageServlet extends HttpServlet {
                         forwardPath = "/WEB-INF/views/my-reviews.jsp";
                         break;
                     case "/columns":
-                        handleMyColumns(request, user.getId()); 
+                        handleMyColumns(request, user.getId());
                         forwardPath = "/WEB-INF/views/my-columns.jsp";
+                        break;
+                    case "/coupons":
+                        handleMyCoupons(request, user.getId());
+                        forwardPath = "/WEB-INF/views/my-coupons.jsp";
                         break;
                     case "/settings":
                         forwardPath = "/WEB-INF/views/settings.jsp";
@@ -101,10 +111,20 @@ public class MypageServlet extends HttpServlet {
         User currentUser = (User) session.getAttribute("user");
 
         String pathInfo = request.getPathInfo();
-        if (!"/settings".equals(pathInfo)) {
+        if ("/settings".equals(pathInfo)) {
+            handleSettingsPost(request, response, currentUser);
+        } else if ("/coupons/use".equals(pathInfo)) {
+            handleCouponUse(request, response, currentUser);
+        } else {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+
+    }
+
+    private void handleSettingsPost(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
 
         try {
             DiskFileItemFactory factory = new DiskFileItemFactory();
@@ -140,6 +160,38 @@ public class MypageServlet extends HttpServlet {
             e.printStackTrace();
             session.setAttribute("errorMessage", "요청 처리 중 오류가 발생했습니다: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/mypage/settings");
+        }
+    }
+
+    private void handleCouponUse(HttpServletRequest request, HttpServletResponse response, User currentUser)
+            throws ServletException, IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            String couponIdStr = request.getParameter("couponId");
+            if (couponIdStr == null || couponIdStr.trim().isEmpty()) {
+                response.getWriter().write("{\"success\": false, \"message\": \"쿠폰 ID가 필요합니다.\"}");
+                return;
+            }
+
+            int couponId = Integer.parseInt(couponIdStr);
+
+            // 쿠폰 사용 가능 여부 확인
+            if (!userCouponService.canUseCoupon(couponId, currentUser.getId())) {
+                response.getWriter().write("{\"success\": false, \"message\": \"사용할 수 없는 쿠폰입니다.\"}");
+                return;
+            }
+
+            // 쿠폰 사용 처리
+            userCouponService.useCoupon(couponId);
+            response.getWriter().write("{\"success\": true, \"message\": \"쿠폰이 사용되었습니다.\"}");
+
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 쿠폰 ID입니다.\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("{\"success\": false, \"message\": \"쿠폰 사용 중 오류가 발생했습니다.\"}");
         }
     }
 
@@ -199,11 +251,25 @@ public class MypageServlet extends HttpServlet {
         // request.setAttribute("recentReservations", reservationService.getRecentReservations(userId, 3));
         // request.setAttribute("recentReviews", reviewService.getRecentReviews(userId, 3));
         // request.setAttribute("recentColumns", columnService.getRecentColumns(userId, 3));
-        
+
         // 전체 목록을 가져오는 것으로 변경 (mypage.jsp 구조에 맞춤)
         request.setAttribute("myReviews", reviewService.getReviewsByUserId(userId));
         request.setAttribute("myColumns", columnService.getColumnsByUserId(userId));
         request.setAttribute("myReservations", reservationService.getReservationsByUserId(userId));
+
+        // 쿠폰 데이터 추가
+        int totalCouponCount = userCouponService.getUserCouponCount(userId);
+        int availableCouponCount = userCouponService.getAvailableCouponCount(userId);
+        int usedCouponCount = totalCouponCount - availableCouponCount;
+
+        request.setAttribute("totalCouponCount", totalCouponCount);
+        request.setAttribute("availableCouponCount", availableCouponCount);
+        request.setAttribute("usedCouponCount", usedCouponCount);
+
+        // 코스 데이터 추가
+        List<CommunityCourse> myCourses = courseService.getCoursesByUserId(userId);
+        request.setAttribute("myCourses", myCourses);
+        request.setAttribute("myCoursesCount", myCourses.size());
     }
     
     private void handleMyReservations(HttpServletRequest request, int userId) {
@@ -227,6 +293,27 @@ public class MypageServlet extends HttpServlet {
     }
     
     private void handleMyColumns(HttpServletRequest request, int userId) {
-        request.setAttribute("columns", columnService.getColumnsByUserId(userId));
+        List<Column> myColumns = columnService.getColumnsByUserId(userId);
+        request.setAttribute("columns", myColumns);
+        request.setAttribute("myColumns", myColumns);
+    }
+
+    private void handleMyCoupons(HttpServletRequest request, int userId) {
+        // 전체 쿠폰 목록
+        List<UserCoupon> allCoupons = userCouponService.getUserCoupons(userId);
+        List<UserCoupon> availableCoupons = userCouponService.getAvailableUserCoupons(userId);
+        List<UserCoupon> usedCoupons = userCouponService.getUsedUserCoupons(userId);
+
+        // 쿠폰 개수 계산
+        int totalCouponCount = userCouponService.getUserCouponCount(userId);
+        int availableCouponCount = userCouponService.getAvailableCouponCount(userId);
+        int usedCouponCount = totalCouponCount - availableCouponCount;
+
+        request.setAttribute("allCoupons", allCoupons);
+        request.setAttribute("availableCoupons", availableCoupons);
+        request.setAttribute("usedCoupons", usedCoupons);
+        request.setAttribute("totalCouponCount", totalCouponCount);
+        request.setAttribute("availableCouponCount", availableCouponCount);
+        request.setAttribute("usedCouponCount", usedCouponCount);
     }
 }
