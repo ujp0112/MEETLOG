@@ -22,9 +22,10 @@ import model.Restaurant;
 import model.User;
 import service.ReviewService;
 import service.RestaurantService;
+import service.FeedService;
 import util.AppConfig; // AppConfig 임포트 확인
 
-@WebServlet("/review/*")
+@WebServlet({"/review/*"})
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024 * 2,  // 2MB
     maxFileSize = 1024 * 1024 * 10,       // 10MB
@@ -35,6 +36,7 @@ public class ReviewServlet extends HttpServlet {
     private static final String UPLOAD_DIR_DEPRECATED = "uploads" + File.separator + "reviews";
     private ReviewService reviewService = new ReviewService();
     private RestaurantService restaurantService = new RestaurantService();
+    private FeedService feedService = new FeedService();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String pathInfo = request.getPathInfo();

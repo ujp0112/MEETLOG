@@ -40,6 +40,18 @@ public class ReviewDAO {
 			return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", restaurantId);
 		}
 	}
+	public List<Review> findByRestaurantId(Map<String, Object> params) {
+	    try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+	        return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", params);
+	    }
+	}
+	public int updateLikeCount(SqlSession session, Map<String, Object> params) {
+	    return session.update(NAMESPACE + ".updateLikeCount", params);
+	}
+	
+	public void addReply(SqlSession session, Map<String, Object> params) {
+	    session.update(NAMESPACE + ".addReply", params);
+	}
 
 	public List<Review> findByUserId(int userId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
@@ -82,5 +94,13 @@ public class ReviewDAO {
 
 	public int likeReview(SqlSession session, int id) {
 		return session.update(NAMESPACE + ".likeReview", id);
+	}
+	
+	public void incrementLikes(SqlSession session, int reviewId) {
+	    session.update(NAMESPACE + ".incrementLikes", reviewId);
+	}
+
+	public void decrementLikes(SqlSession session, int reviewId) {
+	    session.update(NAMESPACE + ".decrementLikes", reviewId);
 	}
 }

@@ -14,7 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. 기존 테이블 삭제 (Drop Existing Tables)
 -- ===================================================================
 -- (DROP DATABASE로 이미 모두 삭제되었지만, 안전을 위해 구문 유지)
-DROP TABLE IF EXISTS comment_likes, column_likes, review_comments, column_comments, follows, reservations, detailed_ratings, rating_distributions, restaurant_qna, restaurant_news, coupons, `columns`, reviews, menus, business_users, restaurant_operating_hours, restaurants, course_reviews, course_reservations, course_likes, course_steps, course_tags, tags, courses, user_storage_items, user_storages, user_badges, badges, notices, feed_items, alerts, users, companies, EVENTS;
+DROP TABLE IF EXISTS comment_likes, column_likes, review_comments, column_comments, follows, reservations, detailed_ratings, rating_distributions, restaurant_qna, restaurant_news, coupons, `columns`, reviews, menus, business_users, restaurant_operating_hours, restaurants, course_reviews, course_comments, course_reservations, course_likes, course_steps, course_tags, tags, courses, user_storage_items, user_storages, user_badges, badges, notices, feed_items, alerts, users, companies, EVENTS;
 
 
 -- ===================================================================
@@ -307,6 +307,20 @@ CREATE TABLE restaurant_qna ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id I
 CREATE TABLE rating_distributions ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, rating_1 INT DEFAULT 0, rating_2 INT DEFAULT 0, rating_3 INT DEFAULT 0, rating_4 INT DEFAULT 0, rating_5 INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 CREATE TABLE detailed_ratings ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, taste DECIMAL(3,1) DEFAULT 0.0, price DECIMAL(3,1) DEFAULT 0.0, service DECIMAL(3,1) DEFAULT 0.0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE );
 CREATE TABLE reservations ( id INT AUTO_INCREMENT PRIMARY KEY, restaurant_id INT NOT NULL, user_id INT NOT NULL, restaurant_name VARCHAR(200) NOT NULL, user_name VARCHAR(100) NOT NULL, reservation_time TIMESTAMP NOT NULL, party_size INT NOT NULL, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', special_requests TEXT, contact_phone VARCHAR(20), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
+
+ALTER TABLE reviews
+ADD COLUMN reply_content TEXT NULL COMMENT '사장님 답글 내용',
+ADD COLUMN reply_created_at DATETIME NULL COMMENT '사장님 답글 작성 시간';
+
+CREATE TABLE review_likes (
+    user_id INT NOT NULL,
+    review_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, review_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+);
+
 -- Fixed follows table creation with proper syntax
 CREATE TABLE follows (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -357,6 +371,7 @@ CREATE TABLE course_steps ( step_id INT PRIMARY KEY AUTO_INCREMENT, course_id IN
 CREATE TABLE course_likes ( course_id INT NOT NULL, user_id INT NOT NULL, PRIMARY KEY (course_id, user_id), FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE course_reservations ( reservation_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, participant_name VARCHAR(100), phone VARCHAR(20), email VARCHAR(255), reservation_date DATE, reservation_time VARCHAR(50), participant_count INT DEFAULT 1, total_price INT DEFAULT 0, status ENUM('PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE course_reviews ( review_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, rating INT DEFAULT 5, content TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, response_content TEXT, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
+CREATE TABLE course_comments ( comment_id INT AUTO_INCREMENT PRIMARY KEY, course_id INT NOT NULL, user_id INT NOT NULL, content TEXT NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT TRUE, FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE );
 CREATE TABLE user_storages ( storage_id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, name VARCHAR(100) NOT NULL,  color_class VARCHAR(50) DEFAULT 'bg-blue-100', created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, INDEX idx_user_storages_user_id (user_id), INDEX idx_user_storages_created_at (created_at DESC));
 CREATE TABLE user_storage_items (item_id INT AUTO_INCREMENT PRIMARY KEY, storage_id INT NOT NULL, item_type ENUM('RESTAURANT', 'COURSE', 'COLUMN') NOT NULL, content_id INT NOT NULL, added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (storage_id) REFERENCES user_storages(storage_id) ON DELETE CASCADE, INDEX idx_storage_items_storage_id (storage_id), INDEX idx_storage_items_type_content (item_type, content_id), INDEX idx_storage_items_added_at (added_at DESC), UNIQUE KEY unique_storage_item (storage_id, item_type, content_id));
 CREATE TABLE badges ( badge_id INT AUTO_INCREMENT PRIMARY KEY, icon VARCHAR(10), name VARCHAR(100) NOT NULL, description VARCHAR(255) );
@@ -562,3 +577,4 @@ VALUES
 -- feed_test_data.sql 통합 완료
 -- 피드 시스템 테스트를 위한 샘플 데이터가 추가됨
 -- ===================================================================
+

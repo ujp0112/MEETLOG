@@ -43,7 +43,7 @@
                         <div>
                             <h1 class="text-4xl font-bold gradient-text">${storage.name}</h1>
                             <p class="text-slate-600 mt-1">
-                                📁 ${fn:length(items)}개의 아이템이 저장되어 있습니다
+                                📁 ${fn:length(storageItems)}개의 아이템이 저장되어 있습니다
                             </p>
                         </div>
                     </div>
@@ -61,11 +61,11 @@
             <!-- 아이템 목록 -->
             <div class="glass-card p-8 rounded-3xl slide-up">
                 <c:choose>
-                    <c:when test="${not empty items}">
+                    <c:when test="${not empty storageItems}">
                         <!-- 필터 탭 -->
                         <div class="flex space-x-4 mb-6">
                             <button onclick="filterItems('ALL')" class="filter-btn active px-4 py-2 rounded-lg font-medium transition-colors">
-                                전체 (${fn:length(items)})
+                                전체 (${fn:length(storageItems)})
                             </button>
                             <button onclick="filterItems('RESTAURANT')" class="filter-btn px-4 py-2 rounded-lg font-medium transition-colors">
                                 음식점 (<span id="restaurant-count">0</span>)
@@ -79,13 +79,13 @@
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="items-container">
-                            <c:forEach var="item" items="${items}">
+                            <c:forEach var="item" items="${storageItems}">
                                 <div class="item-card card-hover rounded-2xl overflow-hidden bg-white shadow-lg" data-type="${item.itemType}">
                                     <!-- 아이템 이미지 -->
                                     <div class="relative h-48 overflow-hidden">
                                         <c:choose>
-                                            <c:when test="${not empty item.contentImage}">
-                                                <mytag:image fileName="${item.contentImage}" altText="${item.contentTitle}" cssClass="w-full h-full object-cover" />
+                                            <c:when test="${not empty item.imageUrl}">
+                                                <mytag:image fileName="${item.imageUrl}" altText="${item.title}" cssClass="w-full h-full object-cover" />
                                             </c:when>
                                             <c:otherwise>
                                                 <div class="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
@@ -129,50 +129,45 @@
                                     
                                     <!-- 아이템 정보 -->
                                     <div class="p-6">
-                                        <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2">${item.contentTitle}</h3>
-                                        
-                                        <c:if test="${not empty item.contentDescription}">
+                                        <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2">${item.title}</h3>
+
+                                        <c:if test="${not empty item.description}">
                                             <p class="text-slate-600 text-sm mb-3 line-clamp-2">
-                                                <c:choose>
-                                                    <c:when test="${fn:length(item.contentDescription) > 80}">
-                                                        ${fn:substring(item.contentDescription, 0, 80)}...
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        ${item.contentDescription}
-                                                    </c:otherwise>
-                                                </c:choose>
+                                                ${item.description}
                                             </p>
                                         </c:if>
-                                        
+
                                         <!-- 추가 정보 -->
                                         <div class="flex justify-between items-center text-sm text-slate-500 mb-4">
-                                            <c:if test="${not empty item.contentAuthor}">
-                                                <span>👤 ${item.contentAuthor}</span>
+                                            <c:if test="${not empty item.authorName}">
+                                                <span>👤 ${item.authorName}</span>
                                             </c:if>
-                                            <c:if test="${item.itemType == 'RESTAURANT' && not empty item.contentRating}">
-                                                <span>⭐ <fmt:formatNumber value="${item.contentRating}" maxFractionDigits="1"/></span>
+                                            <c:if test="${not empty item.additionalInfo}">
+                                                <span>${item.additionalInfo}</span>
                                             </c:if>
-                                            <span class="ml-auto">
-                                                ${item.addedAt.format(DateTimeFormatter.ofPattern('MM/dd'))}
-                                            </span>
+                                            <c:if test="${not empty item.createdAt}">
+                                                <span class="ml-auto">
+                                                    ${item.createdAt.toString().substring(0, 10)}
+                                                </span>
+                                            </c:if>
                                         </div>
-                                        
+
                                         <!-- 바로가기 버튼 -->
                                         <c:choose>
                                             <c:when test="${item.itemType == 'RESTAURANT'}">
-                                                <a href="${pageContext.request.contextPath}/restaurant/detail/${item.contentId}" 
+                                                <a href="${pageContext.request.contextPath}${item.linkUrl}"
                                                    class="block w-full bg-orange-100 hover:bg-orange-200 text-orange-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                                                     맛집 보기
                                                 </a>
                                             </c:when>
                                             <c:when test="${item.itemType == 'COURSE'}">
-                                                <a href="${pageContext.request.contextPath}/course/detail/${item.contentId}" 
+                                                <a href="${pageContext.request.contextPath}${item.linkUrl}"
                                                    class="block w-full bg-green-100 hover:bg-green-200 text-green-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                                                     코스 보기
                                                 </a>
                                             </c:when>
                                             <c:when test="${item.itemType == 'COLUMN'}">
-                                                <a href="${pageContext.request.contextPath}/column/detail/${item.contentId}" 
+                                                <a href="${pageContext.request.contextPath}${item.linkUrl}"
                                                    class="block w-full bg-purple-100 hover:bg-purple-200 text-purple-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                                                     칼럼 보기
                                                 </a>
@@ -359,24 +354,32 @@
         
         function removeFromStorage(storageId, itemType, contentId) {
             if (confirm('이 아이템을 폴더에서 제거하시겠습니까?')) {
+                const params = new URLSearchParams();
+                params.append('action', 'removeItem');
+                params.append('storageId', storageId);
+                params.append('itemType', itemType);
+                params.append('contentId', contentId);
+
                 fetch('${pageContext.request.contextPath}/wishlist', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: new URLSearchParams({
-                        action: 'removeItem',
-                        storageId: storageId,
-                        itemType: itemType,
-                        contentId: contentId
-                    })
+                    body: params.toString()
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(async response => {
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch (err) {
+                        console.error('JSON 파싱 실패:', err);
+                    }
+
+                    if (response.ok && data && data.success) {
                         window.location.reload();
                     } else {
-                        alert('아이템 제거에 실패했습니다.');
+                        alert((data && data.message) || '아이템 제거에 실패했습니다.');
                     }
                 })
                 .catch(error => {
@@ -402,15 +405,30 @@
             e.preventDefault();
             
             const formData = new FormData(this);
+            const params = new URLSearchParams();
+            formData.forEach((value, key) => {
+                params.append(key, value);
+            });
             
             fetch('${pageContext.request.contextPath}/wishlist', {
                 method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            }).then(async response => {
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch (err) {
+                    console.error('JSON 파싱 실패:', err);
+                }
+
+                if (response.ok && data && data.success) {
                     window.location.reload();
                 } else {
-                    alert('오류가 발생했습니다.');
+                    alert((data && data.message) || '오류가 발생했습니다.');
                 }
             }).catch(error => {
                 console.error('Error:', error);

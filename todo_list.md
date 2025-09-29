@@ -26,8 +26,8 @@
 
 5. TODO/FIXME 정리 ⭐⭐
   - IntelligentRecommendationService 메트릭 저장 로직 구현
-  - BusinessQnADAO/Service 실제 DB 구현 완료
-  - FollowService 사용자 정보 조회 로직 완성
+  - BusinessQnADAO/Service 실제 DB 구현(ㅇ)
+  - FollowService 사용자 정보 조회 로직 (ㅇ)
   - ColumnCommentServlet DEBUG 코드 제거
 
 **🛠️ 우선순위 2: 사용성 및 안정성 개선**
@@ -88,3 +88,21 @@
     * 비즈니스 메트릭 대시보드
     * 실시간 알림 시스템 고도화
 
+
+
+09/27
+코스 댓글 기능 추가(ㅇ)
+코스 찜 기능 구현 (ㅇ)
+코스 좋아요 기능 구현(ㅇ)
+
+칼럼이나 리뷰, 코스 생성 시 db feed_items에 연동 되는지 확인(ㅇ)
+wishlist 페이지에 기본 폴더로 "내 찜 목록" 기본 폴더로 만들고 모든 사용자 공통으로 해두기(ㅇ)
+
+
+09/28
+음식점 예약 설정 기능 구현
+- 음식점 관리자가 예약 설정하는 페이지
+  - 예약 가능 시간 설정
+  - 예약 가능 날짜 설정
+  - 예약 가능 인원 설정
+  - 예약 자동/수동 수락 설정

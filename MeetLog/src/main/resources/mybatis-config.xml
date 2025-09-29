@@ -79,6 +79,7 @@
 		<mapper resource="mappers/OperatingHourMapper.xml" />
 		<mapper resource="mappers/RatingMapper.xml" />
         <mapper resource="mappers/ReviewCommentMapper.xml" />
+        <mapper resource="mappers/ReviewLikeMapper.xml" />
         <mapper resource="mappers/ColumnCommentMapper.xml" />
         <mapper resource="mappers/ColumnLikeMapper.xml" />
         <mapper resource="mappers/CommentLikeMapper.xml" />
@@ -89,7 +90,8 @@
         <mapper resource="mappers/FeedMapper.xml" />
         <mapper resource="mappers/FollowMapper.xml" />
         <mapper resource="mappers/UserCollectionMapper.xml" />
-        <mapper resource="mappers/UserStorageMapper.xml" />
+		<mapper resource="mappers/UserStorageMapper.xml" />
+		<mapper resource="mappers/CourseCommentMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

@@ -58,6 +58,62 @@ public class CourseService {
         return courseDAO.findStepsByCourseId(courseId);
     }
 
+    /**
+     * 코스 좋아요 토글 (좋아요/취소)
+     */
+    public boolean toggleCourseLike(int userId, int courseId) {
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 현재 좋아요 상태 확인
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("courseId", courseId);
+            
+            Integer count = session.selectOne("mapper.CommunityCourseMapper.checkCourseLike", params);
+            boolean isLiked = (count != null && count > 0);
+            
+            if (isLiked) {
+                // 좋아요 취소
+                session.delete("mapper.CommunityCourseMapper.deleteCourseLike", params);
+            } else {
+                // 좋아요 추가
+                session.insert("mapper.CommunityCourseMapper.insertCourseLike", params);
+            }
+            
+            session.commit();
+            return !isLiked; // 새로운 상태 반환
+        } catch (Exception e) {
+            session.rollback();
+            throw new RuntimeException("코스 좋아요 토글 처리 중 오류", e);
+        } finally {
+            session.close();
+        }
+    }
+
+    /**
+     * 코스 좋아요 개수 조회
+     */
+    public int getCourseLikeCount(int courseId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Integer count = session.selectOne("mapper.CommunityCourseMapper.getCourseLikeCount", courseId);
+            return (count != null) ? count : 0;
+        }
+    }
+
+    /**
+     * 사용자의 코스 좋아요 여부 확인
+     */
+    public boolean isCourseLiked(int userId, int courseId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("courseId", courseId);
+            
+            Integer count = session.selectOne("mapper.CommunityCourseMapper.checkCourseLike", params);
+            return (count != null && count > 0);
+        }
+    }
+
     public List<CommunityCourse> getCommunityCourses(String query, String area, int page) {
         Map<String, Object> params = new HashMap<>();
         params.put("query", query);
