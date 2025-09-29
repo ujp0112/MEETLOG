@@ -1453,17 +1453,8 @@ translateY(
 								</section>
 							<c:if test="${!isExternal}">
 							<form id="reservationForm" action="${pageContext.request.contextPath}/reservation/create" method="GET">
-							
 								<input type="hidden" name="restaurantId" value="${restaurant.id}">
 								<input type="hidden" id="selectedTime" name="reservationTime" value="">
-    							
-
-								<form id="reservationForm"
-									action="${pageContext.request.contextPath}/reservation/create"
-									method="GET">
-									<input type="hidden" name="restaurantId"
-										value="${restaurant.id}"><input type="hidden"
-										id="selectedTime" name="reservationTime" value="">
 									<section class="glass-card p-8 rounded-3xl slide-up"
 										style="margin-top: 32px">
 										<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
@@ -1474,21 +1465,21 @@ translateY(
 											List<String> timeSlots = new ArrayList<>();
 											for (OperatingHour oh : operatingHours) {
 												if (oh.getDayOfWeek() == todayDayOfWeek && oh.getOpeningTime() != null && oh.getClosingTime() != null) {
-											LocalTime startTime = oh.getOpeningTime();
-											LocalTime endTime = oh.getClosingTime().minusMinutes(30);
-											LocalTime currentTime = startTime;
-											while (!currentTime.isAfter(endTime)) {
-												timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-												currentTime = currentTime.plusMinutes(30);
+													LocalTime startTime = oh.getOpeningTime();
+													LocalTime endTime = oh.getClosingTime().minusMinutes(30);
+													LocalTime currentTime = startTime;
+													while (!currentTime.isAfter(endTime)) {
+														timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+														currentTime = currentTime.plusMinutes(30);
+													}
+												}
 											}
-										}
-									}
-									Collections.sort(timeSlots);
-									pageContext.setAttribute("timeSlots", timeSlots);
-									pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
-									pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
-									%>
-									<div class="space-y-6">
+											Collections.sort(timeSlots);
+											pageContext.setAttribute("timeSlots", timeSlots);
+																		pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
+																		pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
+																		}
+																%>									<div class="space-y-6">
 										<div>
 											<label class="block text-sm font-bold mb-3 text-slate-700">📅
 												날짜</label><input type="date" name="reservationDate"

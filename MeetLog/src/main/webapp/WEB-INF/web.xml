@@ -199,14 +199,14 @@
 
     <!-- ReviewServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
-    <servlet>
+    <!-- <servlet>
         <servlet-name>ReservationServlet</servlet-name>
         <servlet-class>controller.ReservationServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>ReservationServlet</servlet-name>
         <url-pattern>/reservation/*</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>MypageServlet</servlet-name>

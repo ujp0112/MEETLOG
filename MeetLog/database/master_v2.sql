@@ -1,5 +1,5 @@
 -- ===================================================================
--- DATABASE INITIALIZATION SCRIPT (MEETLOG 최종 통합 버전 V2)
+-- DATABASE INITIALIZATION SCRIPT (MEETLOG 최종 통합 버전 V2 + 추가 기능)
 -- ===================================================================
 
 -- 데이터베이스가 존재하면 삭제하고 새로 생성 (완전 초기화)
@@ -90,7 +90,7 @@ CREATE TABLE `business_users` (
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`),
-  KEY `fk_business_users_to_companies` (`company_id`),
+  UNIQUE KEY `uq_business_users_company_id` (`company_id`, `user_id`),
   CONSTRAINT `business_users_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_business_users_to_companies` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -455,6 +455,7 @@ CREATE TABLE `purchase_order` (
   `ordered_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_purchase_order_company_id` (`company_id`, `id`),
   KEY `idx_po_company` (`company_id`),
   KEY `idx_po_branch` (`branch_id`),
   KEY `fk_po_branch` (`company_id`,`branch_id`),
@@ -661,6 +662,8 @@ CREATE TABLE `reviews` (
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `reply_content` text COMMENT '사장님 답글 내용',
+  `reply_created_at` datetime DEFAULT NULL COMMENT '사장님 답글 작성 시간',
   PRIMARY KEY (`id`),
   KEY `restaurant_id` (`restaurant_id`),
   KEY `user_id` (`user_id`),
@@ -735,7 +738,85 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ===================================================================
--- 2. 데이터 삽입 (Insert Data)
+-- 2. 추가된 기능 테이블
+-- ===================================================================
+
+CREATE TABLE `review_likes` (
+    `user_id` INT NOT NULL,
+    `review_id` INT NOT NULL,
+    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`user_id`, `review_id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`review_id`) REFERENCES `reviews`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `reservation_blackout_dates` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `restaurant_id` INT NOT NULL,
+    `blackout_date` DATE NOT NULL COMMENT '예약 불가 날짜',
+    `reason` VARCHAR(255) COMMENT '불가 사유',
+    `is_active` BOOLEAN DEFAULT TRUE COMMENT '활성화 상태',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY `idx_blackout_restaurant_date` (`restaurant_id`, `blackout_date`),
+    UNIQUE KEY `unique_restaurant_blackout_date` (`restaurant_id`, `blackout_date`),
+    CONSTRAINT `fk_blackout_restaurant`
+        FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약 불가 날짜 관리';
+
+CREATE TABLE `restaurant_tables` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `restaurant_id` INT NOT NULL,
+    `table_name` VARCHAR(50) NOT NULL COMMENT '테이블명',
+    `table_number` INT NOT NULL COMMENT '테이블 번호',
+    `capacity` INT NOT NULL COMMENT '수용 인원',
+    `table_type` ENUM('REGULAR', 'VIP', 'PRIVATE', 'BAR') DEFAULT 'REGULAR' COMMENT '테이블 유형',
+    `is_active` BOOLEAN DEFAULT TRUE COMMENT '사용 가능 여부',
+    `notes` TEXT COMMENT '특이사항',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_restaurant_table_number` (`restaurant_id`, `table_number`),
+    KEY `idx_restaurant_capacity` (`restaurant_id`, `capacity`),
+    CONSTRAINT `fk_table_restaurant`
+        FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `chk_table_number` CHECK (`table_number` > 0 AND `table_number` <= 999),
+    CONSTRAINT `chk_table_capacity` CHECK (`capacity` > 0 AND `capacity` <= 20)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='음식점 테이블 관리';
+
+CREATE TABLE `reservation_tables` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `reservation_id` INT NOT NULL,
+    `table_id` INT NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `unique_reservation_table` (`reservation_id`, `table_id`),
+    CONSTRAINT `fk_reservation_table_reservation`
+        FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_reservation_table_table`
+        FOREIGN KEY (`table_id`) REFERENCES `restaurant_tables`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약과 테이블 연결';
+
+CREATE TABLE `reservation_notifications` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `reservation_id` INT NOT NULL,
+    `notification_type` ENUM('SMS', 'EMAIL', 'PUSH') NOT NULL,
+    `recipient` VARCHAR(255) NOT NULL COMMENT '수신자 (전화번호 또는 이메일)',
+    `message` TEXT NOT NULL,
+    `status` ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
+    `sent_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY `idx_reservation_notifications` (`reservation_id`),
+    CONSTRAINT `fk_notification_reservation`
+        FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약 알림 발송 로그';
+
+
+-- ===================================================================
+-- 3. 데이터 삽입 (Insert Data)
 -- ===================================================================
 INSERT INTO `EVENTS` VALUES
 (1,'MEET LOG 가을맞이! 5성급 호텔 뷔페 30% 할인','선선한 가을, MEET LOG가 추천하는 최고의 호텔 뷔페에서 특별한 미식을 경험하세요. MEET LOG 회원 전용 특별 할인을 놓치지 마세요.','이벤트 내용 본문입니다. 상세한 약관과 참여 방법이 여기에 들어갑니다.','https://placehold.co/800x400/f97316/ffffff?text=Hotel+Buffet+Event','2025-09-01','2025-10-31'),
@@ -967,19 +1048,19 @@ INSERT INTO `restaurants` VALUES
 INSERT INTO `review_comments` VALUES
 (1,10,8,'오 여기 진짜 맛있죠! 저도 쌀바게트 제일 좋아해요.','2025-09-27 01:27:51');
 INSERT INTO `reviews` VALUES
-(1,2,4,5,'여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(2,4,6,4,'일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(3,1,7,5,'부모님 생신이라 모시고 갔는데 정말 좋아하셨어요. 음식 하나하나 정성이 느껴져요.','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(4,10,2,5,'역시 여름엔 평양냉면이죠. 이 집 육수는 정말 최고입니다.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(5,12,2,5,'가산에서 이만한 퀄리티의 삼겹살을 찾기 힘듭니다. 회식 장소로 강력 추천!',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(6,13,5,4,'점심시간에 웨이팅은 좀 있지만, 든든하게 한 끼 해결하기에 최고입니다. 깍두기가 맛있어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(7,19,3,4,'산미있는 원두를 좋아하시면 여기입니다. 디저트 케이크도 괜찮았어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(8,14,4,4,'가산에서 파스타 먹고 싶을 때 가끔 들러요. 창가 자리가 분위기 좋아요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(9,11,4,5,'언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다. 다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
+(1,2,4,5,'여기 진짜 분위기 깡패에요! 소개팅이나 데이트 초반에 가면 무조건 성공입니다.','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTAzMjNfMTkx%2FMDAxNzQyNjU2NDEyOTEx.DtVYVBzNwUtX9LVu4PE8w_rbunJUe_rd-AjnhWcsEHcg.U1sqbW057SmnvNBhBR-pypk_vVZdAOAtuFx7xJlMjJog.JPEG%2F900%25A3%25DFDSC02533.JPG&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(2,4,6,4,'일 끝나고 동료들이랑 갔는데, 스트레스가 확 풀리네요. 새로 나온 마늘간장치킨이 진짜 맛있어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(3,1,7,5,'부모님 생신이라 모시고 갔는데 정말 좋아하셨어요. 음식 하나하나 정성이 느껴져요.','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAxMTRfMjM0%2FMDAxNjczNjk0MDM1NTAz.ANz-hk6mmcWfqgTyGaWIGDyg33RuiHzT77do6XY82GYg.3oCTPQ4Vb1Ysg4rggldaWCInkQ-8dFlcvndoGR10bCYg.JPEG.izzyoh%2FIMG_8900.JPG&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(4,10,2,5,'역시 여름엔 평양냉면이죠. 이 집 육수는 정말 최고입니다.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(5,12,2,5,'가산에서 이만한 퀄리티의 삼겹살을 찾기 힘듭니다. 회식 장소로 강력 추천!',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(6,13,5,4,'점심시간에 웨이팅은 좀 있지만, 든든하게 한 끼 해결하기에 최고입니다. 깍두기가 맛있어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(7,19,3,4,'산미있는 원두를 좋아하시면 여기입니다. 디저트 케이크도 괜찮았어요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(8,14,4,4,'가산에서 파스타 먹고 싶을 때 가끔 들러요. 창가 자리가 분위기 좋아요.',NULL,NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(9,11,4,5,'언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다. 다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832"]',NULL,0,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
 (10,11,3,5,'언제 가도 맛있는 곳! 비건식빵이 정말 최고예요. 쌀로 만들어서 그런지 속도 편하고 쫀득한 식감이 일품입니다.
-다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]','["#음식이 맛있어요", "#재료가 신선해요"]',25,1,'2025-09-27 01:27:51','2025-09-27 01:27:51'),
-(11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,0,'2025-09-27 01:40:23','2025-09-27 15:20:42'),
-(12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29');
+다른 빵들도 다 맛있어서 갈 때마다 고민하게 되네요. 사장님도 친절하시고 매장도 깨끗해서 좋아요!','["https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAxOTA4MDlfMTMy%2FMDAxNTY1MzM2MTcwMzk4.9NmHsQASfgCkZy89SlMtra01wiYkt4GSWuVLBs_vm4Ig.dbp9tpFpnLoTD7tjSTMKYqBCnBJIulvtZSDbjU6EEdsg.JPEG.hariyoyo%2FKakaoTalk_20190809_140115427_05.jpg&type=sc960_832", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104136219_menu_tWPMh0i8m0ba.jpg", "https://d12zq4w4guyljn.cloudfront.net/750_750_20241013104128192_photo_tWPMh0i8m0ba.webp"]','["#음식이 맛있어요", "#재료가 신선해요"]',25,1,'2025-09-27 01:27:51','2025-09-27 01:27:51',NULL,NULL),
+(11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,0,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL),
+(12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
 INSERT INTO `tags` VALUES
 (9,'노포'),
 (1,'데이트'),
@@ -1037,7 +1118,7 @@ INSERT INTO `users` VALUES
 (10,'gugu@meetlog.com','구구콘','m2tFIFw+1psjCYLXjBAbUd3IY8jB6L/VCaB8eEc1tPMKgSQnC9BX/7iOREyyLBiC','BUSINESS',NULL,1,0,0,1,'2025-09-27 01:29:10','2025-09-27 01:29:10','구구','0299999999','도산대로1');
 
 -- ===================================================================
--- 3. 제약 조건 및 인덱스 활성화
+-- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
 
 -- 외래 키 제약 조건 다시 활성화
