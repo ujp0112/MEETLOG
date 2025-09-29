@@ -10,11 +10,10 @@
             description,
             validity,
             restaurant_id as restaurantId,
-            is_active as isActive,
+            is_active as active,
             created_at as createdAt
         FROM coupons 
         WHERE restaurant_id = #{restaurantId} 
-        AND is_active = true 
         ORDER BY created_at DESC
     </select>
     
@@ -25,7 +24,7 @@
             description,
             validity,
             restaurant_id as restaurantId,
-            is_active as isActive,
+            is_active as active,
             created_at as createdAt
         FROM coupons 
         WHERE is_active = true 

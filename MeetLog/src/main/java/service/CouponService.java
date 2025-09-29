@@ -1,5 +1,6 @@
 package service;
 
+import java.util.Collections;
 import java.util.List;
 import dao.CouponDAO;
 import model.Coupon;
@@ -12,11 +13,12 @@ public class CouponService {
      */
     public List<Coupon> getCouponsByRestaurantId(int restaurantId) {
         try {
-            return couponDAO.findByRestaurantId(restaurantId);
+            List<Coupon> coupons = couponDAO.findByRestaurantId(restaurantId);
+            return coupons != null ? coupons : Collections.emptyList();
         } catch (Exception e) {
             System.err.println("맛집별 쿠폰 조회 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
     
@@ -25,11 +27,12 @@ public class CouponService {
      */
     public List<Coupon> getAllActiveCoupons() {
         try {
-            return couponDAO.findAllActive();
+            List<Coupon> coupons = couponDAO.findAllActive();
+            return coupons != null ? coupons : Collections.emptyList();
         } catch (Exception e) {
             System.err.println("활성 쿠폰 조회 중 오류 발생: " + e.getMessage());
             e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
     

@@ -23,9 +23,15 @@
     
     <main class="container mx-auto p-4 md:p-8">
         <div class="glass-card p-8 rounded-3xl fade-in">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold gradient-text mb-2">🎟️ 새 쿠폰 생성</h1>
+            <div class="mb-8 space-y-2">
+                <h1 class="text-3xl font-bold gradient-text">🎟️ 새 쿠폰 생성</h1>
                 <p class="text-slate-600">고객에게 제공할 쿠폰을 생성하세요</p>
+                <c:if test="${not empty selectedRestaurant}">
+                    <div class="text-sm text-slate-500">
+                        <span class="font-semibold text-slate-700">선택된 매장:</span>
+                        <span class="ml-2 text-base text-slate-800">${selectedRestaurant.name}</span>
+                    </div>
+                </c:if>
             </div>
             
             <!-- 성공/에러 메시지 -->
@@ -43,6 +49,19 @@
             
             <!-- 쿠폰 생성 폼 -->
             <form action="${pageContext.request.contextPath}/coupon/create" method="post" class="space-y-6">
+                <c:if test="${not empty ownedRestaurants}">
+                    <div>
+                        <label for="restaurantId" class="block text-sm font-medium text-slate-700 mb-2">쿠폰을 적용할 매장 *</label>
+                        <select id="restaurantId" name="restaurantId" required
+                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <c:forEach items="${ownedRestaurants}" var="restaurant">
+                                <option value="${restaurant.id}" ${selectedRestaurant != null && restaurant.id == selectedRestaurant.id ? 'selected' : ''}>
+                                    ${restaurant.name}
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </c:if>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- 쿠폰명 -->
                     <div>

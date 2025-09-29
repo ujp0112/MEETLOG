@@ -29,6 +29,38 @@
                 <h1 class="text-3xl font-bold gradient-text mb-2">🎟️ 쿠폰 관리</h1>
                 <p class="text-slate-600">고객에게 제공할 쿠폰을 생성하고 관리하세요</p>
             </div>
+
+            <c:if test="${not empty ownedRestaurants}">
+                <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="text-sm text-slate-500">
+                        <span class="font-semibold text-slate-700">선택된 매장:</span>
+                        <span class="ml-2 text-base text-slate-800">${selectedRestaurant.name}</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <label for="restaurantSelector" class="text-sm text-slate-600">다른 매장 선택</label>
+                        <select id="restaurantSelector" onchange="switchRestaurant(this.value)"
+                                class="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <c:forEach items="${ownedRestaurants}" var="restaurant">
+                                <option value="${restaurant.id}" ${restaurant.id == selectedRestaurant.id ? 'selected' : ''}>
+                                    ${restaurant.name}
+                                </option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                </div>
+            </c:if>
+
+            <c:if test="${not empty successMessage}">
+                <div class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+                    ${successMessage}
+                </div>
+            </c:if>
+
+            <c:if test="${not empty errorMessage}">
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+                    ${errorMessage}
+                </div>
+            </c:if>
             
             <!-- 통계 카드 섹션 -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -83,17 +115,55 @@
             
             <!-- 쿠폰 관리 섹션 -->
             <div class="glass-card p-6 rounded-2xl">
+                <c:url var="createCouponUrl" value="/coupon/create">
+                    <c:if test="${not empty selectedRestaurant}">
+                        <c:param name="restaurantId" value="${selectedRestaurant.id}" />
+                    </c:if>
+                </c:url>
+
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-slate-800">쿠폰 목록</h2>
-                    <button onclick="createCoupon()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                    <a href="${createCouponUrl}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-flex items-center justify-center">
                         + 새 쿠폰 생성
-                    </button>
+                    </a>
                 </div>
                 
                 <c:choose>
                     <c:when test="${not empty coupons}">
                         <div class="space-y-4">
-                            <!-- 쿠폰 목록이 여기에 표시됩니다 -->
+                            <c:forEach items="${coupons}" var="coupon">
+                                <div class="glass-card p-6 rounded-2xl border border-slate-100 shadow-sm">
+                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-xs font-semibold text-slate-400">#${coupon.id}</span>
+                                                <span class="text-xs font-semibold px-2 py-1 rounded-full ${coupon.active ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
+                                                    <c:choose>
+                                                        <c:when test="${coupon.active}">활성</c:when>
+                                                        <c:otherwise>비활성</c:otherwise>
+                                                    </c:choose>
+                                                </span>
+                                            </div>
+                                            <h3 class="text-xl font-bold text-slate-800 mb-2">${coupon.title}</h3>
+                                            <p class="text-slate-600 mb-4">${empty coupon.description ? '설명 정보가 없습니다.' : coupon.description}</p>
+                                            <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+                                                <span>유효 기간: ${empty coupon.validity ? '기간 정보 없음' : coupon.validity}</span>
+                                                <c:if test="${not empty coupon.createdAt}">
+                                                    <span>생성일: <fmt:formatDate value="${coupon.createdAt}" pattern="yyyy-MM-dd HH:mm"/></span>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3 self-end md:self-center">
+                                            <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg cursor-not-allowed" disabled>
+                                                수정 예정
+                                            </button>
+                                            <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg cursor-not-allowed" disabled>
+                                                비활성화 예정
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c:forEach>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -101,9 +171,9 @@
                             <div class="text-6xl mb-4">🎟️</div>
                             <h3 class="text-xl font-bold text-slate-600 mb-2">생성된 쿠폰이 없습니다</h3>
                             <p class="text-slate-500 mb-6">첫 번째 쿠폰을 생성하여 고객에게 혜택을 제공해보세요!</p>
-                            <button onclick="createCoupon()" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            <a href="${createCouponUrl}" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-flex items-center justify-center">
                                 쿠폰 생성하기
-                            </button>
+                            </a>
                         </div>
                     </c:otherwise>
                 </c:choose>
@@ -114,9 +184,13 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
     <script>
-        function createCoupon() {
-            // 쿠폰 생성 페이지로 이동
-            window.location.href = '${pageContext.request.contextPath}/coupon/create';
+        function switchRestaurant(restaurantId) {
+            if (!restaurantId) {
+                return;
+            }
+            const url = new URL(window.location.href);
+            url.searchParams.set('restaurantId', restaurantId);
+            window.location.href = url.toString();
         }
     </script>
 </body>

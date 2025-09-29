@@ -1,9 +1,18 @@
 package model;
 
+import java.util.Date;
+
+/**
+ * 비즈니스 쿠폰 도메인 모델.
+ */
 public class Coupon {
+    private int id;
+    private int restaurantId;
     private String title;
     private String description;
     private String validity;
+    private boolean active;
+    private Date createdAt;
 
     public Coupon() {}
 
@@ -11,6 +20,22 @@ public class Coupon {
         this.title = title;
         this.description = description;
         this.validity = validity;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(int restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
     public String getTitle() {
@@ -35,5 +60,21 @@ public class Coupon {
 
     public void setValidity(String validity) {
         this.validity = validity;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 }
