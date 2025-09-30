@@ -847,10 +847,45 @@ CREATE TABLE faqs (
     is_active TINYINT(1) DEFAULT 1 COMMENT '활성화 여부',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_faqs_category (category),
-    INDEX idx_faqs_active (is_active),
-    INDEX idx_faqs_order (display_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='자주 묻는 질문 테이블';
+    read_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_notifications_user_id (user_id),
+    INDEX idx_notifications_is_read (is_read),
+    INDEX idx_notifications_created_at (created_at DESC)
+) COMMENT '사용자 알림 테이블';
+CREATE INDEX idx_notifications_type ON notifications(TYPE);
+
+ALTER TABLE feed_items
+CHANGE colomn feed_type ENUM('COLUMN', 'REVIEW', 'COURSE', 'FOLLOW');
+
+
+-- reviews 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE reviews DROP COLUMN author_image;
+
+-- columns 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE `columns` DROP COLUMN author_image;
+
+-- review_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE review_comments DROP COLUMN author_image;
+
+ALTER TABLE reviews DROP COLUMN author;
+
+ALTER TABLE `columns` DROP COLUMN author;
+
+ALTER TABLE review_comments DROP COLUMN author;
+
+
+-- 외래 키 제약 조건을 일시적으로 비활성화합니다.
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- RESTAURANTS 테이블에 3개의 컬럼을 추가합니다.
+ALTER TABLE restaurants
+    ADD COLUMN operating_days VARCHAR(100) NULL COMMENT '대표 운영요일 목록 (예: 월,화,수,목,금)',
+    ADD COLUMN operating_times_text VARCHAR(255) NULL COMMENT '대표 운영시간 목록 (예: 09:00~18:00)',
+    ADD COLUMN break_time_text VARCHAR(100) NULL COMMENT '브레이크타임 텍스트 (예: 15:00~17:00)';
+
+-- 외래 키 제약 조건을 다시 활성화합니다.
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ===================================================================
 -- 3. 데이터 삽입 (Insert Data)
@@ -904,7 +939,7 @@ INSERT IGNORE INTO `course_comments` VALUES (1,4,10,'굿','2025-09-28 00:20:16',
 INSERT IGNORE INTO `feed_items` VALUES (6,4,'COURSE',1,1,'2025-09-28 00:42:58'),(7,3,'COURSE',3,1,'2025-09-28 00:42:58'),(8,3,'COURSE',4,1,'2025-09-28 00:42:58');
 INSERT IGNORE INTO `follows` VALUES (6,10,7,1,'2025-09-27 16:20:45'),(7,10,3,1,'2025-09-27 16:21:01'),(8,10,2,1,'2025-09-27 16:53:42');
 INSERT IGNORE INTO `restaurant_operating_hours` VALUES (8,33,2,'00:00:00','22:00:00'),(9,33,3,'00:00:00','22:00:00'),(10,33,4,'00:00:00','22:00:00'),(11,33,5,'00:00:00','22:00:00'),(12,33,6,'00:00:00','22:00:00'),(13,33,7,'00:00:00','22:00:00');
-INSERT IGNORE INTO `restaurant_qna` (id, restaurant_id, question, answer, is_owner, is_resolved, answered_at) VALUES (4,1,'영업시간이 궁금합니다.','평일 오전 10시부터 오후 10시까지 영업합니다.',1,1,'2025-09-28 00:54:05');
+INSERT IGNORE INTO `restaurant_qna` VALUES (4,1,'영업시간이 궁금합니다.','평일 오전 10시부터 오후 10시까지 영업합니다.',1,1,'2025-09-28 00:54:05');
 INSERT IGNORE INTO `restaurant_reservation_settings` VALUES (1,33,1,1,1,10,30,2,'09:00:00','22:00:00',NULL,NULL,'["2025-09-30"]','5','2025-09-28 15:45:05','2025-09-29 09:37:34',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00'),(2,1,1,0,2,8,30,2,'11:00:00','21:00:00','["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]','["11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"]',NULL,NULL,'2025-09-29 07:24:59','2025-09-29 07:24:59',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','22:00:00',1,'10:00:00','22:00:00',1,'10:00:00','21:00:00'),(3,2,1,1,1,6,14,1,'09:00:00','22:00:00','["monday", "tuesday", "thursday", "friday", "saturday", "sunday"]','["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]',NULL,NULL,'2025-09-29 07:25:06','2025-09-29 07:25:06',1,'09:00:00','22:00:00',1,'09:00:00','22:00:00',0,'09:00:00','22:00:00',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',1,'08:00:00','23:00:00',1,'08:00:00','22:00:00');
 INSERT IGNORE INTO `user_storages` (storage_id, user_id, name, color_class) VALUES (6,1,'내가 찜한 로그','bg-blue-100'),(7,9,'내가 찜한 로그','bg-blue-100'),(8,8,'내가 찜한 로그','bg-blue-100'),(9,6,'내가 찜한 로그','bg-blue-100'),(10,7,'내가 찜한 로그','bg-blue-100'),(11,10,'내가 찜한 로그','bg-blue-100'),(12,10,'2','bg-green-100'),(13,10,'3','bg-blue-100');
 INSERT IGNORE INTO `user_storage_items` VALUES (9,6,'COURSE',1,'2025-09-27 20:01:24'),(12,11,'COURSE',3,'2025-09-27 20:29:30'),(13,11,'COURSE',4,'2025-09-27 23:19:20');
@@ -928,5 +963,28 @@ INSERT INTO faqs (category, question, answer, display_order, is_active) VALUES
 -- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
 
--- 외래 키 제약 조건 다시 활성화
-SET FOREIGN_KEY_CHECKS = 1;
+-- ===================================================================
+-- feed_test_data.sql 통합 - 피드 시스템 테스트 데이터
+-- ===================================================================
+
+-- 테스트용 피드 아이템들 추가
+INSERT INTO feed_items (user_id, feed_type, content_id, created_at, is_active)
+VALUES
+    (8, 'COLUMN', 1, NOW(), true),
+    (9, 'REVIEW', 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), true),
+    (8, 'COLUMN', 2, DATE_SUB(NOW(), INTERVAL 2 HOUR), true);
+
+-- 팔로우 관계 확인/추가 (사용자 8과 9가 서로 팔로우)
+INSERT IGNORE INTO follows (follower_id, following_id, created_at, is_active)
+VALUES
+    (8, 9, NOW(), true),
+    (9, 8, NOW(), true);
+
+-- 피드 데이터 확인 쿼리 (참고용 주석)
+-- SELECT * FROM feed_items WHERE is_active = true ORDER BY created_at DESC;
+-- SELECT * FROM follows WHERE is_active = true;
+
+-- ===================================================================
+-- feed_test_data.sql 통합 완료
+-- 피드 시스템 테스트를 위한 샘플 데이터가 추가됨
+-- ===================================================================

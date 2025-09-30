@@ -171,7 +171,7 @@ public class RestaurantDAO {
 	 * @return 조건에 맞는 레스토랑 목록
 	 */
 	public List<Restaurant> findNearbyRestaurantsByPage(double latitude, double longitude, double radiusKm,
-			List<String> categories, int offset, int limit) {
+			List<String> categories, int offset, int limit, List<Integer> excludeIds) {
 		// [수정] try-with-resources 구문으로 변경하여 SqlSession을 안전하게 자동 관리합니다.
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			Map<String, Object> params = new HashMap<>();
