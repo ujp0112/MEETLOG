@@ -21,8 +21,7 @@
 	animation: fadeIn 0.5s ease-out;
 }
 
-@
-keyframes fadeIn {from { opacity:0;
+@keyframes fadeIn {from { opacity:0;
 	transform: translateY(10px);
 }
 
@@ -254,8 +253,7 @@ to {
 	animation: zoomIn 0.3s ease-out;
 }
 
-@
-keyframes zoomIn {from { transform:scale(0.9);
+@keyframes zoomIn {from { transform:scale(0.9);
 	opacity: 0;
 }
 

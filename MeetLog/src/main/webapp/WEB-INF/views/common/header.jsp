@@ -185,8 +185,7 @@
 									<c:if
 										test="${sessionScope.businessUser.role.toUpperCase() == 'INDIVIDUAL'}">
 										<div class="my-1 border-t border-slate-200"></div>
-										<div class="px-4 py-2 text-sm font-semibold text-slate-500">개인
-											사업자 메뉴</div>
+										<div class="px-4 py-2 text-sm font-semibold text-slate-500">개인 사업자 메뉴</div>
 										<a
 											href="${pageContext.request.contextPath}/business/dashboard"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📊
@@ -195,10 +194,7 @@
 											href="${pageContext.request.contextPath}/business/restaurants"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙
 											내 가게 관리</a>
-										<a
-											href="${pageContext.request.contextPath}/business/restaurants/add"
-											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">➕
-											새 음식점 등록</a>
+										<%-- <a href="${pageContext.request.contextPath}/business/restaurants/add" class="block px-4 py-2 text-slate-700 hover:bg-slate-100"> ➕ 새 음식점 등록</a> --%>
 										<a href="${pageContext.request.contextPath}/coupon-management"
 											class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🎟️
 											쿠폰 관리</a>
