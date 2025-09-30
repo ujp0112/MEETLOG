@@ -69,6 +69,12 @@
 		<mapper resource="mappers/ReviewMapper.xml" />
 		<mapper resource="mappers/ColumnMapper.xml" />
 		<mapper resource="mappers/ReservationMapper.xml" />
+		<mapper resource="mappers/ReservationSettingsMapper.xml" />
+		<mapper resource="mappers/ReservationTableAssignmentMapper.xml" />
+		<mapper resource="mappers/ReservationBlackoutDateMapper.xml" />
+		<mapper resource="mappers/ReservationNotificationMapper.xml" />
+		<mapper resource="mappers/RestaurantTableMapper.xml" />
+		<mapper resource="mappers/RecommendationMetricMapper.xml" />
 		<mapper resource="mappers/MenuMapper.xml" />
 		<mapper resource="mappers/EventMapper.xml" />
 		<mapper resource="mappers/EventManagementMapper.xml" />

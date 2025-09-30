@@ -107,7 +107,7 @@
                                         <tr class="border-b border-slate-100 hover:bg-slate-50">
                                             <td class="py-3 px-4">
                                                 <div class="flex items-center">
-                                                    <img src="${not empty restaurant.image ? restaurant.image : 'https://placehold.co/40x40/3b82f6/ffffff?text=음식점'}" 
+                                                    <img src="${not empty restaurant.image ? restaurant.image : 'https://placehold.co/40x40/3b82f6/ffffff?text=음식점'}"
                                                          alt="${restaurant.name}" class="w-10 h-10 rounded-lg object-cover mr-3">
                                                     <span class="font-medium text-slate-800">${restaurant.name}</span>
                                                 </div>
@@ -119,13 +119,13 @@
                                                 <div class="flex items-center justify-center">
                                                     <span class="text-yellow-400 mr-1">★</span>
                                                     <span class="font-semibold text-slate-800">
-                                                        <fmt:formatNumber value="${restaurant.rating}" pattern="0.0"/>
+                                                        <fmt:formatNumber value="${restaurant.rating != null ? restaurant.rating : 0.0}" pattern="0.0"/>
                                                     </span>
                                                 </div>
                                             </td>
                                             <td class="py-3 px-4 text-center">
                                                 <c:choose>
-                                                    <c:when test="${restaurant.isActive}">
+                                                    <c:when test="${restaurant.isActive == true or restaurant.isActive == 1}">
                                                         <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">운영중</span>
                                                     </c:when>
                                                     <c:otherwise>

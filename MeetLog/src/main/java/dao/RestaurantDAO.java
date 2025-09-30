@@ -161,7 +161,7 @@ public class RestaurantDAO {
 	/**
 	 * [최종 수정] 특정 위치 주변의 레스토랑을 페이징 처리하여 조회합니다. 모든 계산과 필터링을 데이터베이스 쿼리에서 처리하여 성능을
 	 * 최적화합니다.
-	 * 
+	 *
 	 * @param latitude   중심 위도
 	 * @param longitude  중심 경도
 	 * @param radiusKm   검색 반경 (km)
@@ -185,6 +185,24 @@ public class RestaurantDAO {
 
 			return sqlSession.selectList(NAMESPACE + ".findNearbyRestaurantsByPage", params);
 		} // finally 블록은 try-with-resources가 자동으로 처리하므로 제거합니다.
+	}
+
+	/**
+	 * 비즈니스 사용자의 전체 통계 조회
+	 */
+	public Map<String, Object> getOwnerStatistics(int ownerId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectOne(NAMESPACE + ".getOwnerStatistics", ownerId);
+		}
+	}
+
+	/**
+	 * 비즈니스 사용자의 음식점 목록과 통계 조회
+	 */
+	public List<Map<String, Object>> getOwnerRestaurantsWithStats(int ownerId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".getOwnerRestaurantsWithStats", ownerId);
+		}
 	}
 
 }

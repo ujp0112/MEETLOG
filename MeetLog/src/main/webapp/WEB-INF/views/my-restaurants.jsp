@@ -99,7 +99,7 @@
 								    </a>
                                     <a href="${pageContext.request.contextPath}/reservation-settings/${restaurant.id}"
 								       class="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-2 px-4 rounded-xl font-semibold text-center card-hover">
-								        ⚙️ 예약설정
+								        예약설정
 								    </a>
                                 </div>
                                 

@@ -817,7 +817,8 @@ CREATE TABLE `reservation_notifications` (
     `notification_type` ENUM('SMS', 'EMAIL', 'PUSH') NOT NULL,
     `recipient` VARCHAR(255) NOT NULL COMMENT '수신자 (전화번호 또는 이메일)',
     `message` TEXT NOT NULL,
-    `status` ENUM('PENDING', 'SENT', 'FAILED') DEFAULT 'PENDING',
+    `status` ENUM('PENDING', 'SENT', 'FAILED', 'SCHEDULED') DEFAULT 'PENDING',
+    `scheduled_time` TIMESTAMP NULL COMMENT '예약 발송 시간',
     `sent_at` TIMESTAMP NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     KEY `idx_reservation_notifications` (`reservation_id`),
@@ -825,6 +826,45 @@ CREATE TABLE `reservation_notifications` (
         FOREIGN KEY (`reservation_id`) REFERENCES `reservations`(`id`)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약 알림 발송 로그';
+
+CREATE TABLE `reservation_table_assignments` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `reservation_id` INT(11) NOT NULL,
+  `table_id` INT(11) NOT NULL,
+  `assigned_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_reservation` (`reservation_id`),
+  KEY `table_id` (`table_id`),
+  CONSTRAINT `reservation_table_assignments_ibfk_1` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reservation_table_assignments_ibfk_2` FOREIGN KEY (`table_id`) REFERENCES `restaurant_tables` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='예약-테이블 배정 정보';
+
+CREATE TABLE `recommendation_metrics` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `user_id` INT(11) NOT NULL,
+  `recommendation_count` INT(11) NOT NULL,
+  `avg_score` DOUBLE DEFAULT 0.0,
+  `category_diversity` INT(11) DEFAULT 0,
+  `timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `timestamp` (`timestamp`),
+  CONSTRAINT `recommendation_metrics_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='추천 성능 메트릭';
+
+CREATE TABLE `recommendation_items` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `metric_id` INT(11) NOT NULL,
+  `restaurant_id` INT(11) NOT NULL,
+  `recommendation_score` DOUBLE DEFAULT 0.0,
+  `predicted_rating` DOUBLE DEFAULT 0.0,
+  `reason` VARCHAR(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `metric_id` (`metric_id`),
+  KEY `restaurant_id` (`restaurant_id`),
+  CONSTRAINT `recommendation_items_ibfk_1` FOREIGN KEY (`metric_id`) REFERENCES `recommendation_metrics` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `recommendation_items_ibfk_2` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='추천 항목 상세';
 
 
 CREATE TABLE user_coupons (

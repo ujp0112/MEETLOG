@@ -375,4 +375,31 @@
 		</foreach>
 	</delete>
 
+	<!-- 비즈니스 통계 쿼리 -->
+	<select id="getOwnerStatistics" parameterType="int" resultType="map">
+		SELECT
+			COUNT(DISTINCT r.id) as totalRestaurants,
+			COALESCE(SUM(r.review_count), 0) as totalReviews,
+			COALESCE(AVG(r.rating), 0.0) as averageRating,
+			COUNT(DISTINCT res.id) as totalReservations
+		FROM restaurants r
+		LEFT JOIN reservations res ON r.id = res.restaurant_id
+		WHERE r.owner_id = #{ownerId} AND r.is_active = 1
+	</select>
+
+	<select id="getOwnerRestaurantsWithStats" parameterType="int" resultType="map">
+		SELECT
+			r.id,
+			r.name,
+			r.category,
+			r.location,
+			r.image,
+			r.rating,
+			r.review_count as reviewCount,
+			r.is_active as isActive
+		FROM restaurants r
+		WHERE r.owner_id = #{ownerId}
+		ORDER BY r.created_at DESC
+	</select>
+
 </mapper>

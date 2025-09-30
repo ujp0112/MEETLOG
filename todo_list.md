@@ -12,11 +12,11 @@
 
 
 📝 **TODO 항목 구현 필요**:
-- IntelligentRecommendationService.java - 메트릭 저장 로직
-- ReservationAutomationService.java - 자동화 기능
+- IntelligentRecommendationService.java - 메트릭 저장 로직 (🔺)- 현재 선형 가중치 계산로직이라 학습모델 찾으면 넣어볼 예정?
+- ReservationAutomationService.java - 자동화 기능 (🔺)
 - ColumnCommentServlet.java - DEBUG 코드 제거
 - 음식점 리뷰 평균점수 계산 로직
-- 마이페이지 "내 칼럼" 표시 문제
+- 마이페이지 "내 칼럼" 표시 문제 (🟢)
 
 🧹 **로깅 시스템**:
 - 323개 파일의 System.out.println → SLF4J + Logback 대체
@@ -146,7 +146,7 @@ wishlist 페이지에 기본 폴더로 "내 찜 목록" 기본 폴더로 만들�
   - 해당 음식점 사장님이 댓글을 달고 나면 business/review-management페이지에서 해당 댓글의 우 상단에 체크기능을 넣어서 해결 완료된 댓글을 피드에서 사라지도록 해야함
 5. Q&A도 같은 로직으로 (△)
 
-6. 임시데이터가 들어있는 서블릿, jsp 들 찾기 및 코드에 작성된 todo 찾기
+6. 임시데이터가 들어있는 서블릿, jsp 들 찾기 및 코드에 작성된 todo 찾기(ㅇ)
 
 
 

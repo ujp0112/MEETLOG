@@ -1,6 +1,7 @@
 package service;
 
 import dao.RecommendationDAO;
+import dao.RecommendationMetricDAO;
 import model.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -337,26 +338,36 @@ public class IntelligentRecommendationService {
 
     private void logRecommendationMetrics(int userId, List<RestaurantRecommendation> recommendations) {
         try {
-            // 추천 성능 메트릭 로깅
-            Map<String, Object> metrics = new HashMap<>();
-            metrics.put("user_id", userId);
-            metrics.put("recommendation_count", recommendations.size());
-            metrics.put("timestamp", LocalDateTime.now());
-            metrics.put("avg_score", recommendations.stream()
+            // 추천 성능 메트릭 계산
+            int recommendationCount = recommendations.size();
+            double avgScore = recommendations.stream()
                 .mapToDouble(RestaurantRecommendation::getRecommendationScore)
-                .average().orElse(0.0));
+                .average().orElse(0.0);
 
             // 다양성 메트릭
             Set<String> categories = recommendations.stream()
                 .map(rec -> rec.getRestaurant().getCategory())
                 .collect(Collectors.toSet());
-            metrics.put("category_diversity", categories.size());
+            int categoryDiversity = categories.size();
 
-            // TODO: 메트릭 저장 로직 구현
-            System.out.println("추천 메트릭: " + metrics);
+            // 메트릭 객체 생성
+            RecommendationMetric metric = new RecommendationMetric(
+                userId, recommendationCount, avgScore, categoryDiversity
+            );
+
+            // DB에 메트릭 저장
+            dao.RecommendationMetricDAO metricDAO = new dao.RecommendationMetricDAO();
+            int result = metricDAO.insertMetric(metric);
+
+            if (result > 0 && metric.getId() > 0) {
+                // 추천 항목 상세 저장
+                metricDAO.insertRecommendationItems(metric.getId(), recommendations);
+                System.out.println("추천 메트릭 저장 완료: userId=" + userId + ", metricId=" + metric.getId());
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println("메트릭 저장 실패: " + e.getMessage());
         }
     }
 

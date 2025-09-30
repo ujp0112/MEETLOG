@@ -3,16 +3,19 @@ package controller;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import dao.RestaurantDAO;
 import model.User;
 
 public class BusinessStatisticsServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private final RestaurantDAO restaurantDAO = new RestaurantDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -20,24 +23,30 @@ public class BusinessStatisticsServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
-            
+
             if (user == null || !"BUSINESS".equals(user.getUserType())) {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
 
-            // 임시 데이터 (추후 실제 데이터로 교체)
-            int totalRestaurants = 2;
-            int totalReviews = 15;
-            int totalReservations = 8;
-            double averageRating = 4.2;
+            // 실제 DB에서 통계 데이터 조회
+            Map<String, Object> statistics = restaurantDAO.getOwnerStatistics(user.getId());
+            List<Map<String, Object>> restaurants = restaurantDAO.getOwnerRestaurantsWithStats(user.getId());
 
             // JSP로 데이터 전달
-            request.setAttribute("totalRestaurants", totalRestaurants);
-            request.setAttribute("totalReviews", totalReviews);
-            request.setAttribute("totalReservations", totalReservations);
-            request.setAttribute("averageRating", averageRating);
-            request.setAttribute("restaurants", new ArrayList<>());
+            if (statistics != null) {
+                request.setAttribute("totalRestaurants", statistics.get("totalRestaurants"));
+                request.setAttribute("totalReviews", statistics.get("totalReviews"));
+                request.setAttribute("totalReservations", statistics.get("totalReservations"));
+                request.setAttribute("averageRating", statistics.get("averageRating"));
+            } else {
+                request.setAttribute("totalRestaurants", 0);
+                request.setAttribute("totalReviews", 0);
+                request.setAttribute("totalReservations", 0);
+                request.setAttribute("averageRating", 0.0);
+            }
+
+            request.setAttribute("restaurants", restaurants != null ? restaurants : new ArrayList<>());
 
             request.getRequestDispatcher("/WEB-INF/views/business-statistics.jsp").forward(request, response);
         } catch (Exception e) {

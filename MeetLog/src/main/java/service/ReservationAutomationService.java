@@ -95,9 +95,26 @@ public class ReservationAutomationService {
      * 자동 승인 설정 확인
      */
     private boolean isAutoApprovalEnabled(int restaurantId) {
-        // TODO: 음식점 예약 설정에서 자동 승인 여부 확인
-        // 현재는 기본값으로 false 반환
-        return false;
+        try {
+            dao.ReservationSettingsDAO settingsDAO = new dao.ReservationSettingsDAO();
+            Map<String, Object> settings = settingsDAO.findByRestaurantId(restaurantId);
+
+            if (settings != null && settings.containsKey("auto_accept")) {
+                Object autoAccept = settings.get("auto_accept");
+                if (autoAccept instanceof Boolean) {
+                    return (Boolean) autoAccept;
+                } else if (autoAccept instanceof Integer) {
+                    return ((Integer) autoAccept) == 1;
+                }
+            }
+
+            // 설정이 없으면 기본값 false (수동 승인)
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 오류 발생 시 안전하게 수동 승인
+            return false;
+        }
     }
 
     /**
@@ -132,9 +149,25 @@ public class ReservationAutomationService {
      * 테이블 배정
      */
     private void assignTableToReservation(int reservationId, int tableId) {
-        // TODO: reservation_tables 테이블에 예약-테이블 연결 정보 저장
-        // 현재는 로그만 출력
-        System.out.println("테이블 배정: 예약 ID " + reservationId + " -> 테이블 ID " + tableId);
+        try {
+            dao.ReservationTableAssignmentDAO assignmentDAO = new dao.ReservationTableAssignmentDAO();
+            model.ReservationTableAssignment assignment = new model.ReservationTableAssignment();
+
+            assignment.setReservationId(reservationId);
+            assignment.setTableId(tableId);
+            assignment.setAssignedAt(LocalDateTime.now());
+
+            int result = assignmentDAO.insert(assignment);
+
+            if (result > 0) {
+                System.out.println("테이블 배정 완료: 예약 ID " + reservationId + " -> 테이블 ID " + tableId);
+            } else {
+                System.err.println("테이블 배정 실패: 예약 ID " + reservationId);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("테이블 배정 중 오류 발생: " + e.getMessage());
+        }
     }
 
     /**
@@ -235,8 +268,7 @@ public class ReservationAutomationService {
                 reservation.getPartySize()
             );
 
-            // TODO: 스케줄러를 통한 지연 발송 구현
-            // 현재는 즉시 알림 등록만 수행
+            // 예약된 시간에 발송할 알림 등록 (상태: SCHEDULED)
             ReservationNotification reminderNotification = new ReservationNotification(
                 reservation.getId(),
                 ReservationNotification.NotificationType.SMS,
@@ -244,8 +276,15 @@ public class ReservationAutomationService {
                 message
             );
 
+            reminderNotification.setScheduledTime(reminderTime);
+            reminderNotification.setStatus(ReservationNotification.NotificationStatus.SCHEDULED); // 예약된 상태
+
             notificationDAO.insert(reminderNotification);
             System.out.println("리마인더 알림 예약 완료: " + reminderTime);
+
+            // 참고: 실제 발송은 별도의 스케줄러 배치 작업에서 처리
+            // 예: NotificationSchedulerService가 주기적으로 scheduled_time이 현재 시간보다 이전인
+            // SCHEDULED 상태의 알림을 찾아 발송하고 상태를 SENT로 업데이트
         }
     }
 
@@ -272,9 +311,6 @@ public class ReservationAutomationService {
         switch (type) {
             case SMS:
                 return reservation.getContactPhone();
-            case EMAIL:
-                // TODO: 예약 정보에서 이메일 조회
-                return null;
             case PUSH:
                 return String.valueOf(reservation.getUserId());
             default:
@@ -383,12 +419,48 @@ public class ReservationAutomationService {
      */
     public boolean updateAutomationSettings(int restaurantId, Map<String, Object> settings) {
         try {
-            // TODO: 음식점별 자동화 설정 저장
-            // 현재는 로그만 출력
-            System.out.println("자동화 설정 업데이트: 음식점 ID " + restaurantId);
-            settings.forEach((key, value) -> System.out.println(key + ": " + value));
+            dao.ReservationSettingsDAO settingsDAO = new dao.ReservationSettingsDAO();
+            Map<String, Object> existingSettings = settingsDAO.findByRestaurantId(restaurantId);
 
-            return true;
+            model.ReservationSettings reservationSettings = new model.ReservationSettings();
+            reservationSettings.setRestaurantId(restaurantId);
+
+            // 기존 설정이 있으면 ID 설정
+            if (existingSettings != null && existingSettings.containsKey("id")) {
+                reservationSettings.setId((Integer) existingSettings.get("id"));
+            }
+
+            // 설정 값 업데이트
+            if (settings.containsKey("autoAccept")) {
+                reservationSettings.setAutoAccept((Boolean) settings.get("autoAccept"));
+            }
+            if (settings.containsKey("minPartySize")) {
+                reservationSettings.setMinPartySize((Integer) settings.get("minPartySize"));
+            }
+            if (settings.containsKey("maxPartySize")) {
+                reservationSettings.setMaxPartySize((Integer) settings.get("maxPartySize"));
+            }
+            if (settings.containsKey("advanceBookingDays")) {
+                reservationSettings.setAdvanceBookingDays((Integer) settings.get("advanceBookingDays"));
+            }
+            if (settings.containsKey("minAdvanceHours")) {
+                reservationSettings.setMinAdvanceHours((Integer) settings.get("minAdvanceHours"));
+            }
+
+            // DB 저장
+            int result;
+            if (reservationSettings.getId() > 0) {
+                result = settingsDAO.update(reservationSettings);
+            } else {
+                result = settingsDAO.insert(reservationSettings);
+            }
+
+            if (result > 0) {
+                System.out.println("자동화 설정 업데이트 완료: 음식점 ID " + restaurantId);
+                return true;
+            }
+
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

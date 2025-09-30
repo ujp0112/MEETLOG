@@ -27,6 +27,7 @@ public class ReservationNotification {
     // 알림 상태 enum
     public enum NotificationStatus {
         PENDING("대기"),
+        SCHEDULED("예약됨"),
         SENT("발송완료"),
         FAILED("실패");
 
@@ -47,6 +48,7 @@ public class ReservationNotification {
     private String recipient;
     private String message;
     private NotificationStatus status;
+    private LocalDateTime scheduledTime;
     private LocalDateTime sentAt;
     private LocalDateTime createdAt;
 
@@ -146,6 +148,14 @@ public class ReservationNotification {
         }
     }
 
+    public LocalDateTime getScheduledTime() {
+        return scheduledTime;
+    }
+
+    public void setScheduledTime(LocalDateTime scheduledTime) {
+        this.scheduledTime = scheduledTime;
+    }
+
     public LocalDateTime getSentAt() {
         return sentAt;
     }
@@ -219,6 +229,13 @@ public class ReservationNotification {
      */
     public boolean isPending() {
         return status == NotificationStatus.PENDING;
+    }
+
+    /**
+     * 알림 예약됨 여부
+     */
+    public boolean isScheduled() {
+        return status == NotificationStatus.SCHEDULED;
     }
 
     /**

@@ -26,7 +26,7 @@
     <main class="container mx-auto p-4 md:p-8">
         <div class="glass-card p-8 rounded-3xl fade-in">
             <div class="mb-8">
-                <h1 class="text-3xl font-bold gradient-text mb-2">🎟️ 쿠폰 관리</h1>
+                <h1 class="text-3xl font-bold gradient-text mb-2">쿠폰 관리</h1>
                 <p class="text-slate-600">고객에게 제공할 쿠폰을 생성하고 관리하세요</p>
             </div>
 
