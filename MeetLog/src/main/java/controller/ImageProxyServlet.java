@@ -2,6 +2,8 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -32,8 +34,9 @@ public class ImageProxyServlet extends HttpServlet {
         // NaverImageSearch 유틸리티의 개선된 메소드를 호출하여 최적의 이미지를 찾습니다.
         String imageUrl = NaverImageSearch.findBestImage(query);
 
-        // 결과를 JSON 형태로 응답합니다.
-        out.print(new Gson().toJson(imageUrl));
+        // [수정] 결과를 {"imageUrl": "..."} 형태의 JSON 객체로 응답합니다.
+        Map<String, String> responseData = Collections.singletonMap("imageUrl", imageUrl);
+        out.print(new Gson().toJson(responseData));
         out.flush();
     }
 }
