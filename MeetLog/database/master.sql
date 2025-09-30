@@ -847,10 +847,45 @@ CREATE TABLE faqs (
     is_active TINYINT(1) DEFAULT 1 COMMENT '활성화 여부',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_faqs_category (category),
-    INDEX idx_faqs_active (is_active),
-    INDEX idx_faqs_order (display_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='자주 묻는 질문 테이블';
+    read_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_notifications_user_id (user_id),
+    INDEX idx_notifications_is_read (is_read),
+    INDEX idx_notifications_created_at (created_at DESC)
+) COMMENT '사용자 알림 테이블';
+CREATE INDEX idx_notifications_type ON notifications(TYPE);
+
+ALTER TABLE feed_items
+CHANGE colomn feed_type ENUM('COLUMN', 'REVIEW', 'COURSE', 'FOLLOW');
+
+
+-- reviews 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE reviews DROP COLUMN author_image;
+
+-- columns 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE `columns` DROP COLUMN author_image;
+
+-- review_comments 테이블에서 중복된 author_image 컬럼 삭제
+ALTER TABLE review_comments DROP COLUMN author_image;
+
+ALTER TABLE reviews DROP COLUMN author;
+
+ALTER TABLE `columns` DROP COLUMN author;
+
+ALTER TABLE review_comments DROP COLUMN author;
+
+
+-- 외래 키 제약 조건을 일시적으로 비활성화합니다.
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- RESTAURANTS 테이블에 3개의 컬럼을 추가합니다.
+ALTER TABLE restaurants
+    ADD COLUMN operating_days VARCHAR(100) NULL COMMENT '대표 운영요일 목록 (예: 월,화,수,목,금)',
+    ADD COLUMN operating_times_text VARCHAR(255) NULL COMMENT '대표 운영시간 목록 (예: 09:00~18:00)',
+    ADD COLUMN break_time_text VARCHAR(100) NULL COMMENT '브레이크타임 텍스트 (예: 15:00~17:00)';
+
+-- 외래 키 제약 조건을 다시 활성화합니다.
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ===================================================================
 -- 3. 데이터 삽입 (Insert Data)
@@ -928,5 +963,28 @@ INSERT INTO faqs (category, question, answer, display_order, is_active) VALUES
 -- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
 
--- 외래 키 제약 조건 다시 활성화
-SET FOREIGN_KEY_CHECKS = 1;
+-- ===================================================================
+-- feed_test_data.sql 통합 - 피드 시스템 테스트 데이터
+-- ===================================================================
+
+-- 테스트용 피드 아이템들 추가
+INSERT INTO feed_items (user_id, feed_type, content_id, created_at, is_active)
+VALUES
+    (8, 'COLUMN', 1, NOW(), true),
+    (9, 'REVIEW', 1, DATE_SUB(NOW(), INTERVAL 1 HOUR), true),
+    (8, 'COLUMN', 2, DATE_SUB(NOW(), INTERVAL 2 HOUR), true);
+
+-- 팔로우 관계 확인/추가 (사용자 8과 9가 서로 팔로우)
+INSERT IGNORE INTO follows (follower_id, following_id, created_at, is_active)
+VALUES
+    (8, 9, NOW(), true),
+    (9, 8, NOW(), true);
+
+-- 피드 데이터 확인 쿼리 (참고용 주석)
+-- SELECT * FROM feed_items WHERE is_active = true ORDER BY created_at DESC;
+-- SELECT * FROM follows WHERE is_active = true;
+
+-- ===================================================================
+-- feed_test_data.sql 통합 완료
+-- 피드 시스템 테스트를 위한 샘플 데이터가 추가됨
+-- ===================================================================

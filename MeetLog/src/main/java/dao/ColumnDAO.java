@@ -45,6 +45,12 @@ public class ColumnDAO {
         }
     }
 
+    public List<Column> findRankedByRegion(String region) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findRankedByRegion", region);
+        }
+    }
+    
 	public int insert(Column column) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.insert(NAMESPACE + ".insert", column);

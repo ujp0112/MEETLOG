@@ -15,6 +15,10 @@ public class ReviewLikeDAO {
 		}
 	}
 
+	public int isLikedByUser(SqlSession sqlSession, Map<String, Object> params) {
+		return sqlSession.selectOne(NAMESPACE + ".isLikedByUser", params);
+	}
+
 	public List<User> findUsersWhoLikedReview(int reviewId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".findUsersWhoLikedReview", reviewId);

@@ -28,6 +28,105 @@
             width: 80px; height: 80px; object-fit: cover;
             border-radius: 0.5rem; background-color: #e2e8f0;
         }
+        
+        /* Custom Marker (Overlay) Styles */
+        .marker-overlay {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 999px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            padding: 6px;
+            position: relative;
+            transform: translate(-50%, -100%);
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            cursor: pointer;
+            z-index: 1;
+        }
+        .marker-overlay.highlight, .marker-overlay:hover {
+            transform: translate(-50%, -100%) scale(1.05);
+            z-index: 10;
+            border-color: #3182ce;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .marker-overlay::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
+        }
+        .marker-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .marker-info {
+            padding: 0 10px 0 8px;
+            white-space: nowrap;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .marker-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #2d3748;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .marker-category {
+            font-size: 11px;
+            color: #718096;
+        }
+
+        .marker-kakao .marker-number { background-color: #3182ce; }
+        .marker-kakao .marker-title { color: #2b6cb0; }
+        .marker-db .marker-number { background-color: #c53030; font-size: 18px; }
+        .marker-db .marker-title { color: #c53030; }
+
+        /* Re-search Button Style */
+        #research-button {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            background-color: white;
+            border: 1px solid #dbdbdb;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #3182ce;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+        #research-button:hover {
+            background-color: #f7fafc;
+            border-color: #a0aec0;
+        }
+        #research-button.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -42,33 +141,125 @@
                     <p id="result-count" class="text-sm text-gray-500 mt-1">지도를 검색하고 있습니다...</p>
                 </div>
                 <div id="results-list" class="flex-grow overflow-y-auto p-2"></div>
+                <%-- 💡 '더 보기' 버튼 컨테이너 추가 --%>
+                <div id="load-more-container" class="p-4 border-t text-center hidden">
+                    <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        더 보기
+                    </button>
+                </div>
             </div>
-            <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full">
+            <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full relative">
                 <div id="map" style="width:100%; height:100%;"></div>
+                <button id="research-button" class="hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5A5.002 5.002 0 0 0 8 3zM3.143 8.182a.5.5 0 1 1 .771.636A5.002 5.002 0 0 0 12.5 13H11A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 1 0v2.143a.5.5 0 0 1-.143.357z"/>
+                    </svg>
+                    <span>이 지역에서 다시 검색</span>
+                </button>
             </div>
         </main>
     </div>
     <script>
-    const g = { markers: [], infowindows: [], listItems: [] };
+    const g = { overlays: [], listItems: [] };
     let map, ps, kakaoPagination;
     let isLoading = false;
     let isDbSearchEnd = false;
     let isKakaoSearchEnd = false;
     let currentPage = 1;
+    let displayedDbIds = []; // 💡 이미 표시된 DB 맛집 ID를 저장할 배열
 
     $(document).ready(function() {
         const keyword = "<c:out value='${keyword}'/>";
         const contextPath = "${pageContext.request.contextPath}";
-        if (!keyword) { $('#result-count').text('검색어가 없습니다.'); return; }
+        const category = "<c:out value='${category}' default='전체'/>"; 
+        
+        if (!keyword && category === '전체') { 
+            $('#result-count').text('검색어가 없습니다.'); 
+            return; 
+        }
 
         const mapContainer = document.getElementById('map');
         const mapOption = { center: new kakao.maps.LatLng(37.566826, 126.97865), level: 8 };
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
         
-        ps.keywordSearch(keyword, (data, status, pagination) => {
-            placesSearchCB(data, status, pagination, contextPath);
-        }, { size: 10 });
+        let initialSearchKeyword = keyword;
+        if ((category === '전체' || category === '') && keyword) {
+            initialSearchKeyword = keyword + " 맛집";
+        } else if (!keyword && category !== '전체' && category !== '') {
+            initialSearchKeyword = category;
+        }
+        
+        $('#result-panel h1').html('"<span class="text-blue-600">' + (keyword || category) + '</span>" 검색 결과');
+
+        let searchOptions = {
+            size: 10,
+            category_group_code: 'FD6'
+        };
+        
+        ps.keywordSearch(initialSearchKeyword, (data, status, pagination) => {
+            if (status === kakao.maps.services.Status.ZERO_RESULT && initialSearchKeyword !== keyword) {
+                 ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
+                    placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
+                }, searchOptions);
+            } else {
+                placesSearchCB(data, status, pagination, contextPath);
+            }
+        }, searchOptions);
+
+        kakao.maps.event.addListener(map, 'dragend', function() {
+            $('#research-button').removeClass('hidden');
+        });
+
+        $('#research-button').on('click', function() {
+            $(this).addClass('hidden');
+            $('#results-list').empty().scrollTop(0);
+            $('#load-more-container').addClass('hidden'); // 💡 더 보기 버튼 숨기기
+            g.overlays.forEach(overlay => overlay.setMap(null));
+            g.overlays = [];
+            g.listItems = [];
+            currentPage = 1;
+            isDbSearchEnd = false;
+            isKakaoSearchEnd = false;
+            displayedDbIds = []; // 💡 재검색 시, ID 목록 초기화
+
+            let researchKeyword = category;
+            if (category === '전체' || category === '') {
+                researchKeyword = '음식점';
+            }
+
+            $('#result-panel h1').html('현재 지도에서 <span class="text-blue-600">"' + researchKeyword + '"</span> 검색 결과');
+            
+            const researchOptions = {
+                size: 10,
+                category_group_code: 'FD6',
+                location: map.getCenter()
+            };
+
+            ps.keywordSearch(researchKeyword, (data, status, pagination) => {
+                kakaoPagination = pagination;
+                isKakaoSearchEnd = !pagination.hasNextPage;
+                fetchDbAndDisplayCombined(1, data || [], contextPath, true);
+            }, researchOptions);
+        });
+
+        // 💡 '더 보기' 버튼 클릭 이벤트 리스너 추가
+        $('#load-more-btn').on('click', function() {
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (!isLoading && hasMoreData) {
+                isLoading = true;
+                $(this).text('불러오는 중...').prop('disabled', true);
+                currentPage++;
+                
+                if (!isKakaoSearchEnd) {
+                    kakaoPagination.nextPage(); // placesSearchCB가 자동으로 호출됨
+                } else {
+                    // 카카오 검색은 끝났지만 DB 검색이 남은 경우
+                    fetchDbAndDisplayCombined(currentPage, [], contextPath);
+                }
+            }
+        });
     });
 
     function placesSearchCB(data, status, pagination, contextPath) {
@@ -77,9 +268,11 @@
 
         if (currentPage === 1) {
             $('#results-list').empty();
-            g.markers.forEach(marker => marker.setMap(null));
-            g.listItems.forEach(item => item.remove());
-            g.markers = []; g.listItems = []; g.infowindows = [];
+            g.overlays.forEach(overlay => overlay.setMap(null));
+            g.listItems.forEach(item => item.el.remove());
+            g.overlays = []; g.listItems = [];
+            displayedDbIds = []; // 💡 초기 검색 시, ID 목록 초기화
+            $('#load-more-container').addClass('hidden'); // 💡 초기 검색 시 버튼 숨기기
 
             if (status === kakao.maps.services.Status.OK && data.length > 0) {
                 const firstPlace = data[0];
@@ -90,40 +283,36 @@
                 fetchDbAndDisplayCombined(currentPage, [], contextPath);
             }
         } else {
+            // '더 보기'로 다음 페이지 데이터가 왔을 때
             fetchDbAndDisplayCombined(currentPage, data || [], contextPath);
         }
     }
     
-    $('#results-list').on('scroll', function() {
-        const isScrollAtBottom = $(this).scrollTop() + $(this).innerHeight() >= this.scrollHeight - 100;
-        const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+    // 💡 무한 스크롤 리스너 제거
+    // $('#results-list').on('scroll', function() { ... });
 
-        if (isScrollAtBottom && !isLoading && hasMoreData) {
-            isLoading = true;
-            currentPage++;
-            $('#results-list').append('<div id="loading-spinner" class="text-center p-4">결과를 더 불러오는 중...</div>');
-            
-            if (!isKakaoSearchEnd) {
-                kakaoPagination.nextPage(); 
-            } else {
-                fetchDbAndDisplayCombined(currentPage, [], "${pageContext.request.contextPath}");
-            }
-        }
-    });
-
-    function fetchDbAndDisplayCombined(page, kakaoDataForPage, contextPath) {
+    function fetchDbAndDisplayCombined(page, kakaoDataForPage, contextPath, isResearch = false) {
         const center = map.getCenter();
         const level = map.getLevel();
-        const category = "<c:out value='${category}'/>";
-        const url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
+        const category = "<c:out value='${category}' default='전체'/>";
+        // 💡 제외할 ID 목록을 쿼리 파라미터로 추가
+        let url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
+        if (displayedDbIds.length > 0) {
+            url += "&excludeIds=" + displayedDbIds.join(',');
+        }
         
         let dbRestaurants = [];
-
+        
         $.getJSON(url, function(data) {
             dbRestaurants = data;
             if (!dbRestaurants || dbRestaurants.length === 0) isDbSearchEnd = true;
             if (dbRestaurants && dbRestaurants.length > 0) displayDbPlaces(dbRestaurants, contextPath);
-            
+
+            // 💡 새로 받은 DB 맛집 ID를 목록에 추가
+            if (dbRestaurants) {
+                dbRestaurants.forEach(r => displayedDbIds.push(r.id));
+            }
+
             const dbCount = dbRestaurants ? dbRestaurants.length : 0;
             const kakaoCountToShow = Math.min(10, 15 - dbCount);
             
@@ -135,11 +324,19 @@
             isDbSearchEnd = true;
             displayPlaces(kakaoDataForPage, contextPath);
         }).always(function() {
-            $('#loading-spinner').remove();
             isLoading = false;
             updateResultCount();
             
-            if (page === 1 && ( (kakaoDataForPage && kakaoDataForPage.length > 0) || (dbRestaurants && dbRestaurants.length > 0))) {
+            // 💡 버튼 상태 업데이트 로직 추가
+            $('#load-more-btn').text('더 보기').prop('disabled', false);
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (hasMoreData) {
+                $('#load-more-container').removeClass('hidden');
+            } else {
+                $('#load-more-container').addClass('hidden');
+            }
+            
+            if (page === 1 && !isResearch && ( (kakaoDataForPage && kakaoDataForPage.length > 0) || (dbRestaurants && dbRestaurants.length > 0))) {
                  const bounds = new kakao.maps.LatLngBounds();
                  if(kakaoDataForPage) kakaoDataForPage.forEach(p => bounds.extend(new kakao.maps.LatLng(p.y, p.x)));
                  if(dbRestaurants) dbRestaurants.forEach(r => bounds.extend(new kakao.maps.LatLng(r.latitude, r.longitude)));
@@ -148,50 +345,89 @@
         });
     }
 
+    // 💡 마커 하이라이트 함수 추가
+    function highlightMarker(targetOverlay, targetItemEl) {
+        // 모든 기존 하이라이트 제거
+        g.listItems.forEach(item => {
+            item.el.removeClass('highlighted');
+            if (item.overlay && item.overlay.getContent()) {
+                $(item.overlay.getContent()).removeClass('highlight');
+            }
+        });
+
+        // 새로운 대상만 하이라이트
+        $(targetOverlay.getContent()).addClass('highlight');
+        targetItemEl.addClass('highlighted');
+    }
+
     function displayPlaces(places, contextPath) {
         const listEl = $('#results-list');
         places.forEach((place, i) => {
             const placePosition = new kakao.maps.LatLng(place.y, place.x);
-            const marker = new kakao.maps.Marker({ position: placePosition });
-            marker.setMap(map);
-            g.markers.push(marker);
-            
             const detailUrl = contextPath + "/searchRestaurant/external-detail?name=" + encodeURIComponent(place.place_name) + "&address=" + encodeURIComponent(place.address_name) + "&phone=" + encodeURIComponent(place.phone) + "&category=" + encodeURIComponent(place.category_name) + "&lat=" + place.y + "&lng=" + place.x;
             const categoryName = place.category_name.split(' > ').pop();
-            const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
-            const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
             const uniqueId = "kakao-" + currentPage + "-" + i;
 
+            const markerIndex = g.listItems.length + 1;
+            
+            const overlayEl = $(
+                '<div class="marker-overlay marker-kakao">' +
+                    '<div class="marker-number">' + markerIndex + '</div>' +
+                    '<div class="marker-info">' +
+                        '<div class="marker-title" title="' + place.place_name + '">' + place.place_name + '</div>' +
+                        '<div class="marker-category">' + categoryName + '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+
+            overlayEl.on('click', () => window.location.href = detailUrl);
+            
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: placePosition,
+                content: overlayEl[0],
+                yAnchor: 1 
+            });
+            customOverlay.setMap(map);
+            g.overlays.push(customOverlay);
+            
+            const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
+            const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
+
+            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
             const itemEl = $(
-                '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '" class="flex items-center space-x-4">' +
+                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '">' +
                         '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                        '<div class="flex-grow">' +
-                            '<h3 class="font-bold text-base text-blue-700">' + place.place_name + '</h3>' +
-                            '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
-                            '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
-                            '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
-                        '</div>' +
                     '</a>' +
+                    '<div class="flex-grow">' +
+                        '<h3 class="font-bold text-base text-blue-700">' +
+                            '<a href="' + detailUrl + '" class="inline-block">' + place.place_name + '</a>' +
+                        '</h3>' +
+                        '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
+                        '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
+                        '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
+                    '</div>' +
                 '</div>'
             );
             listEl.append(itemEl);
-            g.listItems.push({id: uniqueId, el: itemEl});
+            g.listItems.push({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
+
+            // 💡 클릭 이벤트로 하이라이트 기능 변경
+            itemEl.on('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3') {
+                    map.panTo(placePosition);
+                    highlightMarker(customOverlay, itemEl);
+                }
+            });
 
             setTimeout(function() {
-                const searchQuery = place.place_name + " " + place.address_name.split(" ")[0];
+                const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
                 $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(imageUrl) {
                     if (imageUrl) $('#img-' + uniqueId).attr('src', imageUrl);
                 });
             }, i * 100);
 
-            const infowindow = new kakao.maps.InfoWindow({ content: '<div style="padding:5px;font-size:12px;">' + place.place_name + '</div>' });
-            g.infowindows.push(infowindow);
-            kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-            kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
-            kakao.maps.event.addListener(marker, 'click', () => window.location.href = detailUrl);
-            itemEl.on('mouseover', () => infowindow.open(map, marker));
-            itemEl.on('mouseout', () => infowindow.close());
+            // 💡 mouseover/mouseout 이벤트 제거
         });
     }
 
@@ -199,13 +435,30 @@
         const listEl = $('#results-list');
         dbRestaurants.forEach((r, i) => {
             const placePosition = new kakao.maps.LatLng(r.latitude, r.longitude);
-            const markerImage = new kakao.maps.MarkerImage('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', new kakao.maps.Size(33, 36));
-            const marker = new kakao.maps.Marker({ position: placePosition, image: markerImage });
-            marker.setMap(map);
-            g.markers.push(marker);
-            
             const detailUrl = contextPath + "/restaurant/detail/" + r.id;
             const categoryName = r.category || '';
+            const uniqueId = "db-" + currentPage + "-" + i;
+
+            const overlayEl = $(
+                '<div class="marker-overlay marker-db">' +
+                    '<div class="marker-number">★</div>' +
+                    '<div class="marker-info">' +
+                        '<div class="marker-title" title="' + r.name + '">' + r.name + '</div>' +
+                        '<div class="marker-category">' + categoryName + '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+            
+            overlayEl.on('click', () => window.location.href = detailUrl);
+            
+            const customOverlay = new kakao.maps.CustomOverlay({
+                position: placePosition,
+                content: overlayEl[0],
+                yAnchor: 1 
+            });
+            customOverlay.setMap(map);
+            g.overlays.push(customOverlay);
+
             let imageUrl = '';
             if (r.image && r.image.trim() !== '') {
                 imageUrl = r.image.startsWith('http') ? r.image : contextPath + '/images/' + r.image;
@@ -213,30 +466,34 @@
                 imageUrl = "https://placehold.co/100x100/fee2e2/b91c1c?text=" + encodeURIComponent(categoryName);
             }
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
-            const uniqueId = "db-" + currentPage + "-" + i;
             
+            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
             const itemEl = $(
-                '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '" class="flex items-center space-x-4">' +
+                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '">' +
                         '<img src="' + imageUrl + '" alt="' + r.name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                        '<div class="flex-grow">' +
-                            '<h3 class="font-bold text-base text-red-700">' + r.name + '<span class="meetlog-badge">MEET LOG</span></h3>' +
-                            '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
-                            '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
-                            '<p class="text-red-500 text-sm mt-1">' + (r.phone || '전화번호 정보 없음') + '</p>' +
-                        '</div>' +
                     '</a>' +
+                    '<div class="flex-grow">' +
+                        '<h3 class="font-bold text-base text-red-700">' +
+                            '<a href="' + detailUrl + '" class="inline-block">' + r.name + '</a>' + '<span class="meetlog-badge">MEET LOG</span>' +
+                        '</h3>' +
+                        '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
+                        '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
+                        '<p class="text-red-500 text-sm mt-1">' + (r.phone || '전화번호 정보 없음') + '</p>' +
+                    '</div>' +
                 '</div>'
             );
             listEl.prepend(itemEl);
-            g.listItems.unshift({id: uniqueId, el: itemEl});
-
-            const infowindow = new kakao.maps.InfoWindow({ content: '<div style="padding:5px;font-size:12px;">[MEET LOG] ' + r.name + '</div>' });
-            kakao.maps.event.addListener(marker, 'mouseover', () => infowindow.open(map, marker));
-            kakao.maps.event.addListener(marker, 'mouseout', () => infowindow.close());
-            kakao.maps.event.addListener(marker, 'click', () => window.location.href = detailUrl);
-            itemEl.on('mouseover', () => infowindow.open(map, marker));
-            itemEl.on('mouseout', () => infowindow.close());
+            g.listItems.unshift({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
+            
+            // 💡 클릭 이벤트로 하이라이트 기능 변경
+            itemEl.on('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3' && e.target.tagName !== 'SPAN') {
+                    map.panTo(placePosition);
+                    highlightMarker(customOverlay, itemEl);
+                }
+            });
+            // 💡 mouseover/mouseout 이벤트 제거
         });
     }
     
@@ -244,11 +501,6 @@
         const currentCount = $('#results-list .result-item').length;
         $('#result-count').text("현재 " + currentCount + "개 결과 표시 중");
     }
-
-    function highlightListItem(index, show) {
-        // This function is not fully compatible with the current dynamic list.
-    }
     </script>
 </body>
 </html>
-

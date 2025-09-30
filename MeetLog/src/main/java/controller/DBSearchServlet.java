@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,26 @@ public class DBSearchServlet extends HttpServlet {
         try {
             double lat = Double.parseDouble(request.getParameter("lat"));
             double lng = Double.parseDouble(request.getParameter("lng"));
+            // /search/db-restaurants 요청을 처리하는 서블릿 내부
+            String excludeIdsParam = request.getParameter("excludeIds");
+            List<Integer> excludeIds = new ArrayList<>();
+
+            if (excludeIdsParam != null && !excludeIdsParam.isEmpty()) {
+                String[] ids = excludeIdsParam.split(",");
+                for (String id : ids) {
+                    try {
+                        excludeIds.add(Integer.parseInt(id.trim()));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        // 예외 처리
+                    }
+                }
+            }
+
+            // DAO로 excludeIds 리스트를 전달하여 쿼리에 반영
+            // List<Restaurant> restaurants = restaurantDAO.searchByLocation(lat, lng, level, category, page, excludeIds);
+
+            
             int level = Integer.parseInt(request.getParameter("level"));
             String category = request.getParameter("category");
             
@@ -46,7 +67,7 @@ public class DBSearchServlet extends HttpServlet {
             int offset = (page - 1) * PAGE_SIZE;
 
             RestaurantDAO dao = new RestaurantDAO();
-            List<Restaurant> restaurants = dao.findNearbyRestaurantsByPage(lat, lng, radiusKm, categoryFilter, offset, PAGE_SIZE);
+            List<Restaurant> restaurants = dao.findNearbyRestaurantsByPage(lat, lng, radiusKm, categoryFilter, offset, PAGE_SIZE, excludeIds);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");

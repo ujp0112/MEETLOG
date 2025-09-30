@@ -188,7 +188,7 @@ public class User {
         return isFollowing;
     }
 
-    public void setIsFollowing(boolean isFollowing) {
-        this.isFollowing = isFollowing;
-    }
+	public void setIsFollowing(boolean isFollowing) {
+		this.isFollowing = isFollowing;
+	}
 }

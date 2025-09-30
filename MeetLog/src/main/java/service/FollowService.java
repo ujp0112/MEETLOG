@@ -156,8 +156,9 @@ public class FollowService {
             feedItem.setTargetType("user");
             feedItem.setTargetId(followingId);
             feedItem.setTargetName(following.getNickname() != null ? following.getNickname() : "사용자");
-
-            feedDAO.createFeedItem(feedItem);
+            //createFeedItem 수정
+            // 현재 sql이 user_nickname을 받지 못하고 있음.
+            feedDAO.createSimpleFeedItem(feedItem.getId(), "FOLLOW", feedItem.getUserId());
         } catch (Exception e) {
             e.printStackTrace();
         }

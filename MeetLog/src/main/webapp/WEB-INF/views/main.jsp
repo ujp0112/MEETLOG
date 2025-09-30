@@ -639,8 +639,8 @@ to {
 												cssClass="w-10 h-10 rounded-full object-cover mr-3" />
 											<span class="font-semibold text-slate-800">${review.author}</span>
 										</div>
-										<button
-											class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-200 stop-propagation">팔로우</button>
+										<!-- <button
+											class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-200 stop-propagation">팔로우</button> -->
 									</div>
 
 									<%-- 중상단: 별점, 날짜 --%>
@@ -779,39 +779,33 @@ to {
 	<jsp:include page="/WEB-INF/views/common/loading.jsp" />
 	<script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 💡 --- [수정] 지도 검색 버튼 로직 ---
 	const mapSearchBtn = document.getElementById('mapSearchBtn');
 	const detailSearchForm = document.getElementById('detailSearchForm');
 	const keywordInput = document.getElementById('mainSearchKeyword');
 
 	// "지도로 검색" 버튼 클릭 이벤트
 	mapSearchBtn.addEventListener('click', function() {
-		// 폼 안의 모든 필드에서 값을 가져옵니다.
-		const keyword = keywordInput.value.trim();
+		const keyword = detailSearchForm.querySelector('input[name="keyword"]').value;
 		const category = detailSearchForm.querySelector('select[name="category"]').value;
-		const parkingSelect = detailSearchForm.querySelector('select[name="parking"]');
-		const parkingKeyword = parkingSelect.value === 'true' ? '주차' : '';
-
-		// 검색어들을 배열에 담습니다.
-		const searchTerms = [];
-		if (keyword) {
-			searchTerms.push(keyword);
+		
+		// URL 파라미터를 생성합니다.
+		const params = new URLSearchParams();
+		
+		// 키워드가 있을 경우에만 추가합니다.
+		if (keyword.trim()) {
+			params.append('keyword', keyword.trim());
 		}
-		if (category) {
-			searchTerms.push(category);
-		}
-		if (parkingKeyword) {
-			searchTerms.push(parkingKeyword);
-		}
-
-		// 배열을 공백으로 합쳐 최종 검색어를 만듭니다.
-		const finalKeyword = searchTerms.join(' ').trim();
-
-		if (finalKeyword) {
-			// 조합된 최종 검색어로 지도 검색 서블릿 URL을 호출합니다.
-			const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?keyword=" + encodeURIComponent(finalKeyword);
-			window.location.href = searchUrl;
+		
+		// 카테고리는 항상 전달하되, 선택되지 않았으면 '전체' 값을 가집니다.
+		params.append('category', category || '전체');
+		
+		// 검색할 내용이 있을 때만 페이지를 이동합니다.
+		if (keyword.trim() || category) {
+			 const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?" + params.toString();
+			 window.location.href = searchUrl;
 		} else {
-			alert('검색할 키워드를 입력하거나 필터를 선택해주세요.');
+			alert('검색할 키워드를 입력해주세요.');
 			keywordInput.focus();
 		}
 	});
@@ -825,12 +819,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	});
 
     // --- (이 아래는 기존 캐러셀 및 모달 기능 코드들... 그대로 유지) ---
-});
-</script>
-	<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    // --- 기존 캐러셀 기능들 ---
     const mainReviewTrack = document.getElementById('mainReviewCarouselTrack');
     if (mainReviewTrack && mainReviewTrack.querySelector('.flex-shrink-0')) {
         const prevMainBtn = document.getElementById('prevMainReviewBtn');
@@ -980,39 +968,38 @@ document.addEventListener('DOMContentLoaded', function() {
             const images = Array.from(cardElement.querySelectorAll('.review-image-item img'));
             let imagesHtml = '';
             if (images.length > 0) {
-                imagesHtml = `<div class="review-image-container rounded-lg relative">
-                                <div class="review-image-track">`;
+                imagesHtml = '<div class="review-image-container rounded-lg relative">' +
+                                '<div class="review-image-track">';
                 images.forEach(img => {
-                    imagesHtml += `<div class="review-image-item"><img src="${img.src}" class="w-full h-64 object-cover" /></div>`;
+                    imagesHtml += '<div class="review-image-item"><img src="' + img.src + '" class="w-full h-64 object-cover" /></div>';
                 });
-                imagesHtml += `</div>`;
+                imagesHtml += '</div>';
                 if (images.length > 1) {
-                    imagesHtml += `<button class="review-image-arrow prev">&lt;</button>
-                                   <button class="review-image-arrow next">&gt;</button>
-                                   <div class="review-image-pagination"></div>`;
+                    imagesHtml += '<button class="review-image-arrow prev">&lt;</button>' +
+                                   '<button class="review-image-arrow next">&gt;</button>' +
+                                   '<div class="review-image-pagination"></div>';
                 }
-                imagesHtml += `</div>`;
+                imagesHtml += '</div>';
             }
 
             // 모달 내용 채우기
-            reviewDetailContent.innerHTML = `
-                <div class="w-full">
-                    ${imagesHtml}
-                    <div class="flex justify-between items-center my-4">
-                        <div class="flex items-center">
-                            <img src="${profileImgSrc}" alt="${author}" class="w-12 h-12 rounded-full object-cover mr-3" />
-                            <div>
-                                <div class="font-bold text-lg">${author}</div>
-                                <div class="flex items-center text-sm text-slate-500">${ratingHtml}</div>
-                            </div>
-                        </div>
-                        <button class="text-sm font-semibold bg-sky-100 text-sky-700 px-4 py-2 rounded-full hover:bg-sky-200">팔로우</button>
-                    </div>
-                    <div class="flex flex-wrap gap-2 my-4">${keywordsHtml}</div>
-                    <p class="text-slate-800 leading-relaxed whitespace-pre-wrap">${content}</p>
-                    <div class="mt-6 pt-4 border-t border-slate-200">${restaurantLinkHtml}</div>
-                </div>
-            `;
+            reviewDetailContent.innerHTML = 
+                '<div class="w-full">' +
+                    imagesHtml +
+                    '<div class="flex justify-between items-center my-4">' +
+                        '<div class="flex items-center">' +
+                            '<img src="' + profileImgSrc + '" alt="' + author + '" class="w-12 h-12 rounded-full object-cover mr-3" />' +
+                            '<div>' +
+                                '<div class="font-bold text-lg">' + author + '</div>' +
+                                '<div class="flex items-center text-sm text-slate-500">' + ratingHtml + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button class="text-sm font-semibold bg-sky-100 text-sky-700 px-4 py-2 rounded-full hover:bg-sky-200">팔로우</button>' +
+                    '</div>' +
+                    '<div class="flex flex-wrap gap-2 my-4">' + keywordsHtml + '</div>' +
+                    '<p class="text-slate-800 leading-relaxed whitespace-pre-wrap">' + content + '</p>' +
+                    '<div class="mt-6 pt-4 border-t border-slate-200">' + restaurantLinkHtml + '</div>' +
+                '</div>';
             
             // 모달 표시
             reviewDetailModal.style.display = 'flex';

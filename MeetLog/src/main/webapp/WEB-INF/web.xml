@@ -84,7 +84,23 @@
 	</servlet-mapping>
 
 
+	<servlet>
+		<servlet-name>ColumnRankApi</servlet-name>
+		<servlet-class>controller.ColumnRankApiServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>ColumnRankApi</servlet-name>
+		<url-pattern>/api/column/rank</url-pattern>
+	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>RestaurantRankApi</servlet-name>
+		<servlet-class>controller.RestaurantRankApiServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>RestaurantRankApi</servlet-name>
+		<url-pattern>/api/restaurant/rank</url-pattern>
+	</servlet-mapping>
 
 
 
@@ -197,16 +213,11 @@
 		<url-pattern>/index</url-pattern>
 	</servlet-mapping>
 
-    <!-- ReviewServlet은 @WebServlet 어노테이션으로 매핑됨 -->
+	<!-- ReviewServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
-    <!-- <servlet>
-        <servlet-name>ReservationServlet</servlet-name>
-        <servlet-class>controller.ReservationServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>ReservationServlet</servlet-name>
-        <url-pattern>/reservation/*</url-pattern>
-    </servlet-mapping> -->
+	<!-- <servlet> <servlet-name>ReservationServlet</servlet-name> <servlet-class>controller.ReservationServlet</servlet-class> 
+		</servlet> <servlet-mapping> <servlet-name>ReservationServlet</servlet-name> 
+		<url-pattern>/reservation/*</url-pattern> </servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>MypageServlet</servlet-name>
