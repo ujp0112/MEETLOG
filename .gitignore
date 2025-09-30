@@ -6,3 +6,4 @@ GEMINI.md
 sub.txt
 MeetLog/src/main/resources/mybatis-config.xml
 MeetLog/src/main/resources/db.properties
+.DS_Store
