@@ -40,16 +40,13 @@
         <div class="glass-card p-8 rounded-3xl fade-in">
             <div class="flex justify-between items-center mb-8">
                 <h1 class="text-3xl font-bold gradient-text">Q&A 관리</h1>
-                <div class="flex space-x-4">
+                <%-- <div class="flex space-x-4">
                     <select class="px-4 py-2 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:outline-none" onchange="filterByStatus(this.value)">
                         <option value="all">전체</option>
                         <option value="PENDING">답변 대기</option>
                         <option value="ANSWERED">답변 완료</option>
                     </select>
-                    <button class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold" onclick="showStatistics()">
-                        📊 Q&A 통계
-                    </button>
-                </div>
+                </div> --%>
             </div>
             
             <!-- 통계 카드 -->
@@ -275,11 +272,6 @@
         function editAnswer(qnaId) {
             // TODO: 답변 수정 모달 또는 페이지로 이동
             alert('답변 수정 기능은 준비 중입니다.');
-        }
-
-        // Q&A 통계 모달 표시
-        function showStatistics() {
-            alert('Q&A 통계 기능은 준비 중입니다.');
         }
     </script>
 </body>

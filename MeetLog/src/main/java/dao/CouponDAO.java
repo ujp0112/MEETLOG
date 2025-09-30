@@ -77,4 +77,17 @@ public class CouponDAO {
             return 0;
         }
     }
+
+    /**
+     * ID로 쿠폰 조회
+     */
+    public Coupon findById(int couponId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne("CouponMapper.findById", couponId);
+        } catch (Exception e) {
+            System.err.println("쿠폰 조회 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

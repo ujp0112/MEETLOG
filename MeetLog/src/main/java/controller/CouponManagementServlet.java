@@ -94,6 +94,108 @@ public class CouponManagementServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+
+        try {
+            HttpSession session = request.getSession(false);
+            User user = (session != null) ? (User) session.getAttribute("user") : null;
+
+            if (user == null || !"BUSINESS".equals(user.getUserType())) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
+            String action = request.getParameter("action");
+            String couponIdParam = request.getParameter("couponId");
+            String restaurantIdParam = request.getParameter("restaurantId");
+
+            if (action == null || couponIdParam == null) {
+                session.setAttribute("couponErrorMessage", "잘못된 요청입니다.");
+                response.sendRedirect(request.getContextPath() + "/coupon/management" +
+                        (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+                return;
+            }
+
+            int couponId = Integer.parseInt(couponIdParam);
+
+            // 쿠폰 소유자 확인
+            Coupon coupon = couponService.getCouponById(couponId);
+            if (coupon == null) {
+                session.setAttribute("couponErrorMessage", "쿠폰을 찾을 수 없습니다.");
+                response.sendRedirect(request.getContextPath() + "/coupon/management" +
+                        (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+                return;
+            }
+
+            // 소유자 권한 확인
+            List<Restaurant> ownedRestaurants = restaurantService.getRestaurantsByOwnerId(user.getId());
+            boolean isOwner = ownedRestaurants.stream()
+                    .anyMatch(r -> r.getId() == coupon.getRestaurantId());
+
+            if (!isOwner) {
+                session.setAttribute("couponErrorMessage", "해당 쿠폰에 대한 권한이 없습니다.");
+                response.sendRedirect(request.getContextPath() + "/coupon/management" +
+                        (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+                return;
+            }
+
+            switch (action) {
+                case "deactivate":
+                    boolean deactivateSuccess = couponService.deactivateCoupon(couponId);
+                    if (deactivateSuccess) {
+                        session.setAttribute("couponSuccessMessage", "쿠폰이 비활성화되었습니다.");
+                    } else {
+                        session.setAttribute("couponErrorMessage", "쿠폰 비활성화에 실패했습니다.");
+                    }
+                    break;
+
+                case "update":
+                    String title = request.getParameter("title");
+                    String description = request.getParameter("description");
+                    String validity = request.getParameter("validity");
+
+                    if (title == null || title.trim().isEmpty()) {
+                        session.setAttribute("couponErrorMessage", "쿠폰 제목은 필수입니다.");
+                        response.sendRedirect(request.getContextPath() + "/coupon/management" +
+                                (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+                        return;
+                    }
+
+                    coupon.setTitle(title.trim());
+                    coupon.setDescription(description != null ? description.trim() : "");
+                    coupon.setValidity(validity != null ? validity.trim() : "");
+
+                    boolean updateSuccess = couponService.updateCoupon(coupon);
+                    if (updateSuccess) {
+                        session.setAttribute("couponSuccessMessage", "쿠폰이 수정되었습니다.");
+                    } else {
+                        session.setAttribute("couponErrorMessage", "쿠폰 수정에 실패했습니다.");
+                    }
+                    break;
+
+                default:
+                    session.setAttribute("couponErrorMessage", "알 수 없는 작업입니다.");
+            }
+
+            response.sendRedirect(request.getContextPath() + "/coupon/management" +
+                    (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.setAttribute("couponErrorMessage", "잘못된 쿠폰 ID입니다.");
+            }
+            response.sendRedirect(request.getContextPath() + "/coupon/management");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                    "쿠폰 관리 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
     private int resolveRestaurantId(String restaurantIdParam, List<Restaurant> ownedRestaurants) {
         if (restaurantIdParam != null) {
             try {

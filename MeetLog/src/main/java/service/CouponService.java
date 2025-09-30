@@ -77,4 +77,31 @@ public class CouponService {
             return false;
         }
     }
+
+    /**
+     * ID로 쿠폰 조회
+     */
+    public Coupon getCouponById(int couponId) {
+        try {
+            return couponDAO.findById(couponId);
+        } catch (Exception e) {
+            System.err.println("쿠폰 조회 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * 쿠폰 비활성화
+     */
+    public boolean deactivateCoupon(int couponId) {
+        try {
+            int result = couponDAO.deleteCoupon(couponId);
+            return result > 0;
+        } catch (Exception e) {
+            System.err.println("쿠폰 비활성화 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

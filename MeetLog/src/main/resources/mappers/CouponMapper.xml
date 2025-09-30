@@ -59,10 +59,23 @@
     </update>
     
     <update id="deleteCoupon" parameterType="int">
-        UPDATE coupons 
-        SET 
+        UPDATE coupons
+        SET
             is_active = false
         WHERE id = #{couponId}
     </update>
-    
+
+    <select id="findById" parameterType="int" resultType="Coupon">
+        SELECT
+            id,
+            title,
+            description,
+            validity,
+            restaurant_id as restaurantId,
+            is_active as active,
+            created_at as createdAt
+        FROM coupons
+        WHERE id = #{couponId}
+    </select>
+
 </mapper>

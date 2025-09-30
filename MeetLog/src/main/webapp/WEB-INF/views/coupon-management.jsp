@@ -154,12 +154,16 @@
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-3 self-end md:self-center">
-                                            <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg cursor-not-allowed" disabled>
-                                                수정 예정
+                                            <button onclick="openEditModal(${coupon.id}, '${coupon.title}', '${empty coupon.description ? '' : coupon.description}', '${empty coupon.validity ? '' : coupon.validity}')"
+                                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                                수정
                                             </button>
-                                            <button class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg cursor-not-allowed" disabled>
-                                                비활성화 예정
-                                            </button>
+                                            <c:if test="${coupon.active}">
+                                                <button onclick="deactivateCoupon(${coupon.id}, ${selectedRestaurant.id})"
+                                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                                    비활성화
+                                                </button>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </div>
@@ -182,7 +186,46 @@
     </main>
     
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
-    
+
+    <!-- 쿠폰 수정 모달 -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">쿠폰 수정</h2>
+            <form id="editForm" method="POST" action="${pageContext.request.contextPath}/coupon/management">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="couponId" id="editCouponId">
+                <input type="hidden" name="restaurantId" value="${selectedRestaurant.id}">
+
+                <div class="mb-4">
+                    <label for="editTitle" class="block text-sm font-medium text-slate-700 mb-2">쿠폰 제목 *</label>
+                    <input type="text" id="editTitle" name="title" required
+                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label for="editDescription" class="block text-sm font-medium text-slate-700 mb-2">설명</label>
+                    <textarea id="editDescription" name="description" rows="3"
+                              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label for="editValidity" class="block text-sm font-medium text-slate-700 mb-2">유효 기간</label>
+                    <input type="text" id="editValidity" name="validity" placeholder="예: 2024-12-31까지"
+                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        수정
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-lg hover:bg-slate-300 transition-colors font-semibold">
+                        취소
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         function switchRestaurant(restaurantId) {
             if (!restaurantId) {
@@ -192,6 +235,57 @@
             url.searchParams.set('restaurantId', restaurantId);
             window.location.href = url.toString();
         }
+
+        function openEditModal(couponId, title, description, validity) {
+            document.getElementById('editCouponId').value = couponId;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editDescription').value = description;
+            document.getElementById('editValidity').value = validity;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function deactivateCoupon(couponId, restaurantId) {
+            if (!confirm('이 쿠폰을 비활성화하시겠습니까?')) {
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '${pageContext.request.contextPath}/coupon/management';
+
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = 'deactivate';
+
+            const couponIdInput = document.createElement('input');
+            couponIdInput.type = 'hidden';
+            couponIdInput.name = 'couponId';
+            couponIdInput.value = couponId;
+
+            const restaurantIdInput = document.createElement('input');
+            restaurantIdInput.type = 'hidden';
+            restaurantIdInput.name = 'restaurantId';
+            restaurantIdInput.value = restaurantId;
+
+            form.appendChild(actionInput);
+            form.appendChild(couponIdInput);
+            form.appendChild(restaurantIdInput);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        // 모달 외부 클릭시 닫기
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
     </script>
 </body>
 </html>
