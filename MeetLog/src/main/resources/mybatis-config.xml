@@ -101,6 +101,10 @@
 		<mapper resource="mappers/UserStorageMapper.xml" />
 		<mapper resource="mappers/CourseCommentMapper.xml" />
 		<mapper resource="mappers/FaqMapper.xml" />
+		<mapper resource="mappers/NoticeMapper.xml" />
+		<mapper resource="mappers/InquiryMapper.xml" />
+		<mapper resource="mappers/FeedbackMapper.xml" />
+		<mapper resource="mappers/EmployeeMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

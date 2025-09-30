@@ -2,20 +2,19 @@ package model;
 
 import java.sql.Timestamp;
 
-public class Alert {
-    private int id;              // alert_id
-    private int userId;          // user_id
+public class Feedback {
+    private int id;              // feedback_id
+    private String userName;     // user_name
     private String content;      // content
-    private boolean isRead;      // is_read
+    private int rating;          // rating
     private Timestamp createdAt; // created_at
 
-    public Alert() {
-    }
+    public Feedback() {}
 
-    public Alert(int userId, String content) {
-        this.userId = userId;
+    public Feedback(String userName, String content, int rating) {
+        this.userName = userName;
         this.content = content;
-        this.isRead = false;
+        this.rating = rating;
     }
 
     // Getters and Setters
@@ -27,12 +26,12 @@ public class Alert {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getContent() {
@@ -43,20 +42,12 @@ public class Alert {
         this.content = content;
     }
 
-    public boolean isRead() {
-        return isRead;
+    public int getRating() {
+        return rating;
     }
 
-    public boolean getIsRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
-    }
-
-    public void setIsRead(boolean read) {
-        this.isRead = read;
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
     public Timestamp getCreatedAt() {
@@ -69,11 +60,11 @@ public class Alert {
 
     @Override
     public String toString() {
-        return "Alert{" +
+        return "Feedback{" +
                 "id=" + id +
-                ", userId=" + userId +
+                ", userName='" + userName + '\'' +
                 ", content='" + content + '\'' +
-                ", isRead=" + isRead +
+                ", rating=" + rating +
                 ", createdAt=" + createdAt +
                 '}';
     }

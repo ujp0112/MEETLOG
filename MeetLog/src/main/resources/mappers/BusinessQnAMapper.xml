@@ -71,13 +71,14 @@
     </select>
 
     <insert id="insert" parameterType="model.BusinessQnA" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO restaurant_qna (restaurant_id, user_id, user_name, user_email, question, answer, status, is_owner, is_resolved, is_active)
-        VALUES (#{restaurantId}, #{userId}, #{userName}, #{userEmail}, #{question}, #{answer}, #{status}, #{isOwner}, #{isResolved}, #{isActive})
+        INSERT INTO restaurant_qna (restaurant_id, user_id, user_name, user_email, question, answer, status, is_owner, is_active)
+        VALUES (#{restaurantId}, #{userId}, #{userName}, #{userEmail}, #{question}, #{answer}, #{status}, #{isOwner}, #{isActive})
     </insert>
 
     <update id="updateAnswer" parameterType="map">
         UPDATE restaurant_qna
-        SET answer = #{answer}
+        SET answer = #{answer},
+            updated_at = NOW()
         WHERE id = #{qnaId}
     </update>
 

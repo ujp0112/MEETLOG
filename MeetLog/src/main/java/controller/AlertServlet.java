@@ -40,31 +40,28 @@ public class AlertServlet extends HttpServlet {
     private List<Alert> createSampleAlerts() {
         List<Alert> alerts = new ArrayList<>();
 
-        // 두 버전의 장점을 조합하여 샘플 데이터 생성
+        // 샘플 알림 데이터 생성
         Alert alert1 = new Alert();
         alert1.setId(1);
-        alert1.setTitle("새로운 리뷰가 등록되었습니다");
-        alert1.setContent("고미정에 대한 리뷰가 새로 등록되었습니다.");
-        alert1.setCreatedAt(java.time.LocalDateTime.now().minusMinutes(10));
+        alert1.setContent("<span class='font-bold'>새로운 리뷰</span>가 등록되었습니다. 고미정에 대한 리뷰를 확인해보세요.");
+        alert1.setCreatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now().minusMinutes(10)));
         alert1.setRead(false);
         alerts.add(alert1);
-        
+
         Alert alert2 = new Alert();
         alert2.setId(2);
-        alert2.setTitle("예약이 확정되었습니다");
-        alert2.setContent("파스타 팩토리 예약이 확정되었습니다. (2025-09-16 19:00)");
-        alert2.setCreatedAt(java.time.LocalDateTime.now().minusHours(1));
+        alert2.setContent("<span class='font-bold'>예약 확정</span>: 파스타 팩토리 예약이 확정되었습니다. (2025-09-16 19:00)");
+        alert2.setCreatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now().minusHours(1)));
         alert2.setRead(true);
         alerts.add(alert2);
-        
+
         Alert alert3 = new Alert();
         alert3.setId(3);
-        alert3.setTitle("칼럼이 추천되었습니다");
-        alert3.setContent("작성하신 '강남 맛집 베스트 5' 칼럼이 추천 목록에 등록되었습니다.");
-        alert3.setCreatedAt(java.time.LocalDateTime.now().minusHours(5));
+        alert3.setContent("<span class='font-bold'>칼럼 추천</span>: '강남 맛집 베스트 5' 칼럼이 추천 목록에 등록되었습니다.");
+        alert3.setCreatedAt(java.sql.Timestamp.valueOf(java.time.LocalDateTime.now().minusHours(5)));
         alert3.setRead(false);
         alerts.add(alert3);
-        
+
         return alerts;
     }
 }

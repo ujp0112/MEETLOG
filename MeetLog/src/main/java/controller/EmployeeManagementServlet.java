@@ -1,5 +1,8 @@
 package controller;
 
+import model.Employee;
+import service.EmployeeService;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -7,26 +10,25 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import java.util.ArrayList;
-
 
 public class EmployeeManagementServlet extends HttpServlet {
-    
+    private final EmployeeService employeeService = new EmployeeService();
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             HttpSession session = request.getSession();
             String adminId = (String) session.getAttribute("adminId");
-            
+
             if (adminId == null) {
                 response.sendRedirect(request.getContextPath() + "/admin/login");
                 return;
             }
-            
-            List<Employee> employees = createSampleEmployees();
+
+            List<Employee> employees = employeeService.getAllEmployees();
             request.setAttribute("employees", employees);
-            
+
             request.getRequestDispatcher("/WEB-INF/views/admin-employee-management.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -34,38 +36,153 @@ public class EmployeeManagementServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         }
     }
-    
-    private List<Employee> createSampleEmployees() {
-        List<Employee> employees = new ArrayList<>();
-        
-        Employee employee1 = new Employee();
-        employee1.setId(1);
-        employee1.setName("김직원");
-        employee1.setPosition("매니저");
-        employee1.setBranch("강남점");
-        employee1.setStatus("ACTIVE");
-        employees.add(employee1);
-        
-        return employees;
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            HttpSession session = request.getSession();
+            String adminId = (String) session.getAttribute("adminId");
+
+            if (adminId == null) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"success\": false, \"message\": \"관리자 권한이 필요합니다.\"}");
+                return;
+            }
+
+            String action = request.getParameter("action");
+            if (action == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"Action이 필요합니다.\"}");
+                return;
+            }
+
+            response.setContentType("application/json; charset=UTF-8");
+
+            switch (action) {
+                case "create":
+                    handleCreateEmployee(request, response);
+                    break;
+                case "update":
+                    handleUpdateEmployee(request, response);
+                    break;
+                case "delete":
+                    handleDeleteEmployee(request, response);
+                    break;
+                case "updateStatus":
+                    handleUpdateStatus(request, response);
+                    break;
+                default:
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.getWriter().write("{\"success\": false, \"message\": \"지원하지 않는 액션입니다.\"}");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
     }
-    
-    public static class Employee {
-        private int id;
-        private String name;
-        private String position;
-        private String branch;
-        private String status;
-        
-        // Getters and Setters
-        public int getId() { return id; }
-        public void setId(int id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getPosition() { return position; }
-        public void setPosition(String position) { this.position = position; }
-        public String getBranch() { return branch; }
-        public void setBranch(String branch) { this.branch = branch; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
+
+    private void handleCreateEmployee(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String name = request.getParameter("name");
+        String position = request.getParameter("position");
+        String branch = request.getParameter("branch");
+
+        if (name == null || position == null || branch == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"필수 항목을 입력해주세요.\"}");
+            return;
+        }
+
+        Employee employee = new Employee(name, position, branch);
+        boolean success = employeeService.createEmployee(employee);
+
+        if (success) {
+            response.getWriter().write("{\"success\": true, \"message\": \"직원이 생성되었습니다.\"}");
+        } else {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"success\": false, \"message\": \"직원 생성에 실패했습니다.\"}");
+        }
+    }
+
+    private void handleUpdateEmployee(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String name = request.getParameter("name");
+            String position = request.getParameter("position");
+            String branch = request.getParameter("branch");
+            String status = request.getParameter("status");
+
+            if (name == null || position == null || branch == null || status == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"필수 항목을 입력해주세요.\"}");
+                return;
+            }
+
+            Employee employee = new Employee();
+            employee.setId(id);
+            employee.setName(name);
+            employee.setPosition(position);
+            employee.setBranch(branch);
+            employee.setStatus(status);
+
+            boolean success = employeeService.updateEmployee(employee);
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"직원 정보가 수정되었습니다.\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"직원 정보 수정에 실패했습니다.\"}");
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"올바른 ID를 입력해주세요.\"}");
+        }
+    }
+
+    private void handleDeleteEmployee(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            boolean success = employeeService.deleteEmployee(id);
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"직원이 삭제되었습니다.\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"직원 삭제에 실패했습니다.\"}");
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"올바른 ID를 입력해주세요.\"}");
+        }
+    }
+
+    private void handleUpdateStatus(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            String status = request.getParameter("status");
+
+            if (status == null) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"상태를 입력해주세요.\"}");
+                return;
+            }
+
+            boolean success = employeeService.updateEmployeeStatus(id, status);
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"직원 상태가 변경되었습니다.\"}");
+            } else {
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"직원 상태 변경에 실패했습니다.\"}");
+            }
+        } catch (NumberFormatException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("{\"success\": false, \"message\": \"올바른 ID를 입력해주세요.\"}");
+        }
     }
 }

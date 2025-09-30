@@ -45,7 +45,6 @@
                         <option value="all">전체</option>
                         <option value="PENDING">답변 대기</option>
                         <option value="ANSWERED">답변 완료</option>
-                        <option value="CLOSED">종료</option>
                     </select>
                     <button class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold" onclick="showStatistics()">
                         📊 Q&A 통계
@@ -55,15 +54,15 @@
             
             <!-- 통계 카드 -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-blue-50 p-6 rounded-xl text-center">
+                <div class="bg-blue-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('all')">
                     <div class="text-3xl font-bold text-blue-600">${totalQnA}</div>
                     <div class="text-slate-600">총 Q&A</div>
                 </div>
-                <div class="bg-yellow-50 p-6 rounded-xl text-center">
+                <div class="bg-yellow-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('PENDING')">
                     <div class="text-3xl font-bold text-yellow-600">${pendingQnA}</div>
                     <div class="text-slate-600">답변 대기</div>
                 </div>
-                <div class="bg-green-50 p-6 rounded-xl text-center">
+                <div class="bg-green-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('ANSWERED')">
                     <div class="text-3xl font-bold text-green-600">${answeredQnA}</div>
                     <div class="text-slate-600">답변 완료</div>
                 </div>
@@ -99,7 +98,7 @@
                                             <fmt:formatDate value="${qna.createdAtAsDate}" pattern="yyyy-MM-dd HH:mm"/>
                                         </p>
                                         <!-- 해결 완료 체크박스 (답변이 있을 때만 표시) -->
-                                        <c:if test="${not empty qna.answer}">
+                                        <!-- <c:if test="${not empty qna.answer}">
                                             <div class="flex items-center mt-2">
                                                 <input type="checkbox"
                                                        id="resolved-${qna.id}"
@@ -108,7 +107,7 @@
                                                        class="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500">
                                                 <label for="resolved-${qna.id}" class="ml-2 text-sm text-slate-600">해결 완료</label>
                                             </div>
-                                        </c:if>
+                                        </c:if> -->
                                     </div>
                                 </div>
                                 
@@ -182,6 +181,13 @@
         // 상태별 필터링
         function filterByStatus(status) {
             const qnaItems = document.querySelectorAll('.qna-item');
+            const selectElement = document.querySelector('select');
+
+            // 드롭다운도 함께 업데이트
+            if (selectElement) {
+                selectElement.value = status;
+            }
+
             qnaItems.forEach(item => {
                 if (status === 'all' || item.dataset.status === status) {
                     item.style.display = 'block';
