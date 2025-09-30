@@ -74,4 +74,16 @@ public class FaqDAO {
             return session.selectList("FaqMapper.findDistinctCategories");
         }
     }
+
+    public int countTotal() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne("FaqMapper.countTotal");
+        }
+    }
+
+    public int countActive() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne("FaqMapper.countActive");
+        }
+    }
 }

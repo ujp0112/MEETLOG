@@ -301,14 +301,7 @@
 		<url-pattern>/notice/*</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>FaqServlet</servlet-name>
-		<servlet-class>controller.FaqServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FaqServlet</servlet-name>
-		<url-pattern>/faq</url-pattern>
-	</servlet-mapping>
+	<!-- FaqServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
 	<servlet>
 		<servlet-name>PrivacyServlet</servlet-name>
@@ -479,14 +472,7 @@
 		<url-pattern>/admin/event-management</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>FaqManagementServlet</servlet-name>
-		<servlet-class>controller.FaqManagementServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FaqManagementServlet</servlet-name>
-		<url-pattern>/admin/faq-management</url-pattern>
-	</servlet-mapping>
+	<!-- FaqManagementServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
 	<servlet>
 		<servlet-name>InquiryManagementServlet</servlet-name>

@@ -66,7 +66,7 @@ public class FaqService {
 
     public int getTotalFaqCount() {
         try {
-            return getAllFaqs().size();
+            return faqDAO.countTotal();
         } catch (Exception e) {
             System.out.println("ERROR: FAQ 총 개수 조회 실패 - " + e.getMessage());
             return 0;
@@ -75,7 +75,7 @@ public class FaqService {
 
     public int getActiveFaqCount() {
         try {
-            return getActiveFaqsOrdered().size();
+            return faqDAO.countActive();
         } catch (Exception e) {
             System.out.println("ERROR: 활성 FAQ 개수 조회 실패 - " + e.getMessage());
             return 0;

@@ -84,4 +84,14 @@
         ORDER BY category
     </select>
 
+    <!-- 전체 FAQ 개수 조회 -->
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM faqs
+    </select>
+
+    <!-- 활성화된 FAQ 개수 조회 -->
+    <select id="countActive" resultType="int">
+        SELECT COUNT(*) FROM faqs WHERE is_active = 1
+    </select>
+
 </mapper>
