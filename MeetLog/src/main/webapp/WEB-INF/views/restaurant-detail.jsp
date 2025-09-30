@@ -1125,8 +1125,8 @@ to {
 									<c:if test="${not empty restaurant.description}">
 										<div
 											class="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl">
-											<h3 class="font-bold text-slate-700 mb-2">📝 설명</h3>
-											<p class="text-slate-600 leading-relaxed">${restaurant.description}</p>
+											<h3 class="font-bold text-slate-700 mb-2">📝 가게 소개</h3>
+											<p class="text-slate-600 leading-relaxed break-words">${restaurant.description}</p>
 										</div>
 									</c:if>
 								</section>
@@ -1250,7 +1250,7 @@ to {
 																</c:if>
 																<div class="review-content-wrapper mb-4 flex-grow">
 																	<p
-																		class="review-text text-slate-700 leading-relaxed truncated">${review.content}</p>
+																		class="review-text text-slate-700 leading-relaxed truncated break-words">${review.content}</p>
 																	<span
 																		class="read-more-btn mt-2 inline-block cursor-pointer">더
 																		보기</span>
@@ -1279,7 +1279,7 @@ to {
 																		class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
 																		<div class="flex items-start text-sm">
 																			<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
-																			<div class="flex-1">
+																			<div class="flex-1 break-words">
 																				<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
 																				<c:if test="${not empty review.replyCreatedAt}">
 																					<%-- ▼▼▼ [수정 2] .replyCreatedAtAsDate 사용 및 변수명 오류 수정 ▼▼▼ --%>
@@ -1319,7 +1319,7 @@ to {
 																				<img
 																					src="${pageContext.request.contextPath}/images/${comment.profileImage}"
 																					alt="${comment.author}"
-																					class="w-8 h-8 rounded-full object-cover mr-3">
+																					class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">
 																				<div class="flex-1 bg-gray-100 p-2 rounded-lg">
 																					<a
 																						href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
@@ -1451,11 +1451,11 @@ to {
 																		class="ml-3 text-sm text-slate-500 font-medium">고객</span>
 																	<span
 																		class="ml-2 px-2 py-1 bg-slate-100 text-slate-600 text-xs rounded-full"><c:choose>
-																			<c:when test="${empty qna.answer}">답변 대기</c:when>
+																			<c:when test="${empty qna.answer}">답변대기</c:when>
 																			<c:otherwise>답변 완료</c:otherwise>
 																		</c:choose></span>
 																</div>
-																<p class="text-slate-800 font-medium">${qna.question}</p>
+																<p class="text-slate-800 font-medium break-words">${qna.question}</p>
 															</div>
 															<c:if test="${not empty qna.answer}">
 																<div class="border-t border-slate-200 pt-4">
@@ -1467,7 +1467,7 @@ to {
 																				<c:otherwise>관리자</c:otherwise>
 																			</c:choose></span>
 																	</div>
-																	<p class="text-slate-800">${qna.answer}</p>
+																	<p class="text-slate-800 break-words">${qna.answer}</p>
 																</div>
 															</c:if>
 														</div>
