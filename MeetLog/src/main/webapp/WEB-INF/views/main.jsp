@@ -64,26 +64,14 @@ to {
 	}
 }
 
-/* [수정] 리뷰 텍스트 스크롤 스타일 */
+/* [수정] 리뷰 텍스트 생략(...) 스타일 */
 .review-content-scrollable {
-	max-height: 84px; /* 약 4줄 높이 */
-	overflow-y: auto;
-	scrollbar-width: thin;
-	scrollbar-color: #94a3b8 #e2e8f0;
-}
-
-.review-content-scrollable::-webkit-scrollbar {
-	width: 5px;
-}
-
-.review-content-scrollable::-webkit-scrollbar-track {
-	background: #f1f5f9;
-	border-radius: 10px;
-}
-
-.review-content-scrollable::-webkit-scrollbar-thumb {
-	background-color: #94a3b8;
-	border-radius: 10px;
+	display: -webkit-box;
+	-webkit-line-clamp: 4; /* 4줄 후 생략 */
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-height: 90px; /* 내용이 적을 때도 최소 높이 확보 */
 }
 /* 리뷰 카드 관련 스타일 (restaurant-detail.jsp에서 가져옴) */
 .review-card {
@@ -634,7 +622,7 @@ to {
 									<%-- 상단: 프로필, 작성자, 팔로우 버튼 --%>
 									<div class="flex justify-between items-center mb-3">
 										<div class="flex items-center ">
-											<mytag:image fileName="profile/${review.profileImage}"
+											<mytag:image fileName="${review.profileImage}"
 												altText="${review.author} 프로필"
 												cssClass="w-10 h-10 rounded-full object-cover mr-3" />
 											<span class="font-semibold text-slate-800">${review.author}</span>
@@ -658,26 +646,30 @@ to {
 									</div>
 
 									<%-- 중간: 리뷰 이미지 캐러셀 --%>
-									<c:if test="${not empty review.images}">
-										<div
-											class="review-image-container mb-4 rounded-lg stop-propagation review-card-clickable">
-											<div class="review-image-track">
-												<c:forEach var="imagePath" items="${review.images}">
+									<div
+										class="review-image-container mb-4 rounded-lg stop-propagation review-card-clickable">
+										<div class="review-image-track">
+											<c:choose>
+												<c:when test="${not empty review.images}">
+													<c:forEach var="imagePath" items="${review.images}">
+														<div class="review-image-item">
+															<mytag:image fileName="${imagePath}" altText="리뷰 사진" cssClass="w-full h-48 object-cover image-lightbox-trigger cursor-zoom-in" />
+														</div>
+													</c:forEach>
+												</c:when>
+												<%-- <c:otherwise>
 													<div class="review-image-item">
-														<img
-															src="${pageContext.request.contextPath}/images/${imagePath}"
-															alt="리뷰 사진" class="w-full h-48 object-cover image-lightbox-trigger cursor-zoom-in">
+														<mytag:image fileName="https://placehold.co/100x100/fee2e2/b91c1c?text=${review.author }" altText="기본 이미지" cssClass="w-full h-48 object-cover" />
 													</div>
-												</c:forEach>
-											</div>
-
-											<c:if test="${fn:length(review.images) > 1}">
-												<button class="review-image-arrow prev">&lt;</button>
-												<button class="review-image-arrow next">&gt;</button>
-												<div class="review-image-pagination"></div>
-											</c:if>
+												</c:otherwise> --%>
+											</c:choose>
 										</div>
-									</c:if>
+										<c:if test="${fn:length(review.images) > 1}">
+											<button class="review-image-arrow prev">&lt;</button>
+											<button class="review-image-arrow next">&gt;</button>
+											<div class="review-image-pagination"></div>
+										</c:if>
+									</div>
 
 									<%-- 하단: 리뷰 내용(스크롤 가능), 키워드, 맛집 정보 링크 --%>
 									<div class="flex flex-col flex-grow">
