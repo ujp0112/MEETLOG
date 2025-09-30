@@ -545,7 +545,10 @@ CREATE TABLE IF NOT EXISTS notifications (
     INDEX idx_notifications_is_read (is_read),
     INDEX idx_notifications_created_at (created_at DESC)
 ) COMMENT '사용자 알림 테이블';
-CREATE INDEX idx_notifications_type ON notifications(type);
+CREATE INDEX idx_notifications_type ON notifications(TYPE);
+
+ALTER TABLE feed_items
+CHANGE colomn feed_type ENUM('COLUMN', 'REVIEW', 'COURSE', 'FOLLOW');
 
 
 -- reviews 테이블에서 중복된 author_image 컬럼 삭제

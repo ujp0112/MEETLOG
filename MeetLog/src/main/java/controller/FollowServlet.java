@@ -20,56 +20,50 @@ public class FollowServlet extends HttpServlet {
     private final FollowService followService = new FollowService();
     private final Gson gson = new Gson();
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        Map<String, Object> jsonResponse = new HashMap<>();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
-        // 1. 로그인 여부 확인
-        if (session == null || session.getAttribute("user") == null) { 
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            jsonResponse.put("status", "error");
-            jsonResponse.put("message", "로그인이 필요합니다.");
-            response.getWriter().write(gson.toJson(jsonResponse));
+            response.getWriter().write("{\"status\":\"error\", \"message\":\"로그인이 필요합니다.\"}");
             return;
         }
 
         try {
             User currentUser = (User) session.getAttribute("user");
-            int followerId = currentUser.getId(); // 팔로우를 하는 사람 (나)
-            int followingId = Integer.parseInt(request.getParameter("userId")); // 팔로우 대상
+            int followerId = currentUser.getId();
+            int followingId = Integer.parseInt(request.getParameter("userId"));
 
-            // 2. 자기 자신을 팔로우하는 경우 방지
+            // 자기 자신을 팔로우하는 경우 방지
             if (followerId == followingId) {
-                throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"status\":\"error\", \"message\":\"자기 자신을 팔로우할 수 없습니다.\"}");
+                return;
             }
             
-            // 3. 현재 팔로우 상태 확인
+            // 현재 팔로우 상태 확인
             boolean isCurrentlyFollowing = followService.isFollowing(followerId, followingId);
 
-            // 4. 서비스 호출하여 팔로우 또는 언팔로우 처리
-            boolean success;
+            // 팔로우/언팔로우 토글
             if (isCurrentlyFollowing) {
-                success = followService.unfollowUser(followerId, followingId); // 언팔로우
+                followService.unfollowUser(followerId, followingId);
             } else {
-                success = followService.followUser(followerId, followingId); // 팔로우
+                followService.followUser(followerId, followingId);
             }
 
-            if (success) {
-                jsonResponse.put("status", "success");
-                jsonResponse.put("isFollowing", !isCurrentlyFollowing); // 작업 후의 변경된 상태
-            } else {
-                throw new Exception("팔로우/언팔로우 작업에 실패했습니다.");
-            }
+            // 최종 결과를 Map에 담아 JSON으로 반환
+            Map<String, Object> result = new HashMap<>();
+            result.put("status", "success");
+            result.put("isFollowing", !isCurrentlyFollowing); // 상태가 반전되었으므로 !isCurrentlyFollowing
+            response.getWriter().write(gson.toJson(result));
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            jsonResponse.put("status", "error");
-            jsonResponse.put("message", e.getMessage());
+            response.getWriter().write("{\"status\":\"error\", \"message\":\"처리 중 오류가 발생했습니다.\"}");
             e.printStackTrace();
         }
-
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(gson.toJson(jsonResponse));
     }
 }

@@ -639,8 +639,8 @@ to {
 												cssClass="w-10 h-10 rounded-full object-cover mr-3" />
 											<span class="font-semibold text-slate-800">${review.author}</span>
 										</div>
-										<button
-											class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-200 stop-propagation">팔로우</button>
+										<!-- <button
+											class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-200 stop-propagation">팔로우</button> -->
 									</div>
 
 									<%-- 중상단: 별점, 날짜 --%>

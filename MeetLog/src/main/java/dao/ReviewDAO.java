@@ -22,6 +22,11 @@ public class ReviewDAO {
 		}
 	}
 
+	// 트랜잭션 내에서 likes를 포함한 리뷰 정보를 조회하는 메서드
+	public Review findByIdWithLikes(SqlSession session, int id) {
+		return session.selectOne(NAMESPACE + ".findById", id);
+	}
+
 	public List<ReviewInfo> getRecentReviewsWithInfo(int limit) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".getRecentReviewsWithInfo", limit);
@@ -44,9 +49,6 @@ public class ReviewDAO {
 	    try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 	        return sqlSession.selectList(NAMESPACE + ".findByRestaurantId", params);
 	    }
-	}
-	public int updateLikeCount(SqlSession session, Map<String, Object> params) {
-	    return session.update(NAMESPACE + ".updateLikeCount", params);
 	}
 	
 	public void addReply(SqlSession session, Map<String, Object> params) {

@@ -172,11 +172,11 @@ public class User {
         this.isActive = isActive;
     }
 
-    public boolean isFollowing() {
-        return isFollowing;
-    }
+	public boolean getIsFollowing() {
+		return isFollowing;
+	}
 
-    public void setIsFollowing(boolean isFollowing) {
-        this.isFollowing = isFollowing;
-    }
+	public void setIsFollowing(boolean isFollowing) {
+		this.isFollowing = isFollowing;
+	}
 }

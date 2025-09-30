@@ -11,6 +11,7 @@
 		<result property="userId" column="user_id" />
 		<result property="keywords" column="keywords"
 			typeHandler="typehandler.JsonArrayTypeHandler" />
+		<result property="likes" column="likes" />
 		<result property="isActive" column="is_active" />
 		<result property="createdAt" column="created_at" />
 		<result property="updatedAt" column="updated_at" />
@@ -66,6 +67,7 @@
 		r.user_id,
 		r.rating,
 		r.content,
+		r.likes,
 		r.created_at,
 		r.reply_content,
 		r.reply_created_at,
@@ -234,5 +236,20 @@
 		WHERE id = #{reviewId} AND likes + #{change}
 		>= 0
 	</update>
+	
+	<!-- [추가] 리뷰의 '좋아요' 수를 1 증가시킵니다. -->
+    <update id="incrementLikes" parameterType="int">
+        UPDATE reviews
+           SET likes = likes + 1
+         WHERE id = #{reviewId}
+    </update>
+
+    <!-- [추가] 리뷰의 '좋아요' 수를 1 감소시킵니다. -->
+    <update id="decrementLikes" parameterType="int">
+        UPDATE reviews
+           SET likes = likes - 1
+         WHERE id = #{reviewId}
+           AND likes > 0 <!-- 혹시 모를 음수 방지 -->
+    </update>
 
 </mapper>

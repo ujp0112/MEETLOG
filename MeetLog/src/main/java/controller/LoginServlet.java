@@ -31,7 +31,6 @@ public class LoginServlet extends HttpServlet {
             // 1. UserService를 통해 이메일과 비밀번호로 사용자 인증을 시도합니다.
             //    이때 반환되는 user 객체는 DB의 모든 컬럼 정보(profileImage 포함)를 가지고 있습니다.
             User user = userService.authenticateUser(email, password);
-
             if (user != null) {
                 // ============== 인증 성공 ==============
                 // 비즈니스 회원의 경우, 승인 상태 추가 확인

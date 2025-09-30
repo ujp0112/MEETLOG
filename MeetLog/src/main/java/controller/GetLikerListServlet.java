@@ -37,10 +37,16 @@ public class GetLikerListServlet extends HttpServlet {
             User currentUser = (session != null) ? (User) session.getAttribute("user") : null;
 
             List<User> likerList = reviewLikeService.getUsersWhoLikedReview(reviewId);
+            
+            // [안정성 강화] 서비스에서 null을 반환할 경우를 대비해 빈 리스트로 처리
+            if (likerList == null) {
+                likerList = Collections.emptyList();
+            }
 
             if (currentUser != null) {
                 for (User liker : likerList) {
                     boolean isFollowing = followService.isFollowing(currentUser.getId(), liker.getId());
+                    // User 모델에 isFollowing 필드와 setIsFollowing 메서드가 있어야 합니다.
                     liker.setIsFollowing(isFollowing);
                 }
             }

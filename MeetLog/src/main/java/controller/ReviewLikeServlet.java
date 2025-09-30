@@ -34,22 +34,24 @@ public class ReviewLikeServlet extends HttpServlet {
         try {
             User user = (User) session.getAttribute("user");
             Map<String, Object> payload = gson.fromJson(request.getReader(), Map.class);
-            int reviewId = ((Double) payload.get("reviewId")).intValue();
+            // [수정] JSON에서 reviewId를 String으로 받고, Integer로 파싱합니다.
+            // 이렇게 하면 클라이언트에서 숫자로 보내든, 문자열로 보내든 모두 처리 가능합니다.
+            String reviewIdStr = String.valueOf(payload.get("reviewId"));
+            int reviewId = Integer.parseInt(reviewIdStr);
 
-            // [최종 수정] 새로 만든 단일 메서드를 호출하여 결과(Map)를 받음
+            // 좋아요 토글 로직을 호출하고 결과(Map)를 받음
             Map<String, Object> result = reviewLikeService.toggleLike(user.getId(), reviewId);
             
-            // 결과에 "status":"success"를 추가하여 최종 응답 생성
-            result.put("status", "success");
+            // 성공 상태를 추가하여 최종 응답 생성
+            result.put("status", "success"); 
             
+            response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(gson.toJson(result));
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            // 클라이언트에게 에러 메시지를 전달
-            String errorMessage = "{\"status\":\"error\", \"message\":\"" + e.getMessage() + "\"}";
-            response.getWriter().write(errorMessage);
+            response.getWriter().write(gson.toJson(Map.of("status", "error", "message", e.getMessage())));
         }
     }
 }

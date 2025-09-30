@@ -1187,7 +1187,7 @@ to {
 																<div class="flex justify-between items-start mb-4">
 																	<div class="flex items-start">
 																		<img
-																			src="${pageContext.request.contextPath}/images/profile/${review.profileImage}"
+																			src="${pageContext.request.contextPath}/images/${review.profileImage}"
 																			alt="${review.author}"
 																			class="w-12 h-12 rounded-full object-cover mr-4">
 																		<div>
@@ -1209,7 +1209,7 @@ to {
 																			</div>
 																		</div>
 																	</div>
-																	<c:if
+																	<!-- <c:if
 																		test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
 																		<c:choose>
 																			<c:when
@@ -1224,7 +1224,7 @@ to {
 																					data-user-id="${review.userId}">팔로우</button>
 																			</c:otherwise>
 																		</c:choose>
-																	</c:if>
+																	</c:if> -->
 																</div>
 
 																<c:if test="${not empty review.images}">
@@ -1317,7 +1317,7 @@ to {
 																		<c:forEach var="comment" items="${review.comments}">
 																			<div class="flex items-start text-sm">
 																				<img
-																					src="${pageContext.request.contextPath}/images/profile/${comment.profileImage}"
+																					src="${pageContext.request.contextPath}/images/${comment.profileImage}"
 																					alt="${comment.author}"
 																					class="w-8 h-8 rounded-full object-cover mr-3">
 																				<div class="flex-1 bg-gray-100 p-2 rounded-lg">
@@ -1678,6 +1678,11 @@ to {
 	const contextPath = "${pageContext.request.contextPath}";
 	const isLoggedIn = ${not empty sessionScope.user};
 	const currentUserId = <c:out value="${sessionScope.user.id}" default="null"/>;
+	// ✨ [추가] 모달 닫기 버튼에 대한 공통 이벤트 핸들러
+	$('.modal-close-btn').on('click', function() {
+		$(this).closest('.modal-overlay').hide();
+	});
+
 
     // 예약 시간 선택 함수
     function selectTime(element, time) {
@@ -1930,10 +1935,10 @@ to {
 		const mapTriggerSection = document.querySelector('.map-trigger');
 
 		// 8. 카카오맵 스크립트
-		if (mapTriggerSection) {
+		if (mapTriggerSection && typeof kakao !== 'undefined' && kakao.maps) {
 			let mapInitialized = false;
 			const mapObserver = new IntersectionObserver((entries, observer) => {
-				if (entries[0].isIntersecting && !mapInitialized) {
+				if (entries[0].isIntersecting && !mapInitialized && kakao.maps.load) {
 					mapInitialized = true;
 					kakao.maps.load(() => {
 						const lat = parseFloat("${restaurant.latitude}");
@@ -1992,26 +1997,27 @@ to {
 			// --- 이미지 라이트박스 열기 ---
 			if ($target.hasClass('image-lightbox-trigger')) {
 				e.stopPropagation();
-				$('#lightboxImage').attr('src', $target.attr('src'));
-				$('#imageLightbox').css('display', 'flex');
+				const imageSrc = $target.attr('src');
+				if (imageSrc) {
+					$('#lightboxImage').attr('src', imageSrc);
+					$('#imageLightbox').css('display', 'flex');
+				}
 			}
 
-			// --- 모든 모달 닫기 ---
-			if ($target.hasClass('modal-overlay') || $target.closest('.modal-close-btn').length) {
-				$target.closest('.modal-overlay').hide();
-			}
+			// ✨ [수정] 모달 닫기 로직은 상단 공통 핸들러로 이동
 
 			// --- 좋아요 버튼 클릭 처리 ---
 			if (e.target.closest('.like-btn')) {
 				if (!isLoggedIn) {
 					alert('로그인이 필요합니다.');
-					window.location.href = `${contextPath}/login`;
+					window.location.href = contextPath + "/login";
 					return;
 				}
 				const button = e.target.closest('.like-btn');
+				const $button = $(button);
 				const reviewId = button.dataset.reviewId;
 
-				fetch(`${contextPath}/review/like`, {
+				fetch(contextPath +"/review/like", {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ reviewId: reviewId })
@@ -2019,16 +2025,16 @@ to {
 				.then(response => response.json())
 				.then(data => {
 					if (data.status === 'success') {
-						const countSpan = button.parentElement.querySelector('.like-count');
-						countSpan.textContent = data.newLikeCount;
+						const $likeCountSpan = $button.parent().find('.like-count');
+						$likeCountSpan.text(data.newLikeCount);
 
 						if (data.isLiked) {
-							button.classList.add('text-red-500');
-							button.classList.remove('text-slate-300');
+							$button.addClass('text-red-500').removeClass('text-slate-300');
 						} else {
-							button.classList.add('text-slate-300');
-							button.classList.remove('text-red-500');
+							$button.addClass('text-slate-300').removeClass('text-red-500');
 						}
+						// ✨ [추가] 좋아요 목록 트리거 텍스트도 업데이트
+						$button.parent().find('.likers-modal-trigger').html('<strong class="like-count">' + data.newLikeCount + '</strong>명이 좋아합니다');
 					} else {
 						alert(data.message || '오류가 발생했습니다.');
 					}
@@ -2039,46 +2045,46 @@ to {
 			// --- 좋아요 목록 모달 열기 ---
 			if (e.target.closest('.likers-modal-trigger')) {
 				e.preventDefault();
-				const reviewId = e.target.closest('.likers-modal-trigger').dataset.reviewId;
-				const likersList = document.getElementById('likersList');
-
-				likersList.innerHTML = '<div class="text-center">로딩 중...</div>';
+				const $trigger = $(e.target.closest('.likers-modal-trigger'));
+				const reviewId = $trigger.data('review-id');
+				const $likersList = $('#likersList');
+				$likersList.html('<div class="text-center">로딩 중...</div>');
 				document.getElementById('likersModal').style.display = 'flex';
 
-				fetch(`${contextPath}/review/getLikers/${reviewId}`)
+				fetch(contextPath + "/review/getLikers/" + reviewId)
 					.then(response => response.json())
 					.then(likers => {
 						likersList.innerHTML = '';
 						if (!likers || likers.length === 0) {
-							likersList.innerHTML = '<div class="text-center text-gray-500">아직 좋아요가 없습니다.</div>';
+							$likersList.html('<div class="text-center text-gray-500">아직 좋아요가 없습니다.</div>');
 							return;
 						}
-
+						$likersList.empty(); // 목록 비우기
 						likers.forEach(liker => {
 							let followButtonHtml = '';
 							if (isLoggedIn && liker.id !== currentUserId) {
 								const isFollowing = liker.isFollowing;
 								const btnClass = isFollowing ? 'bg-gray-200 text-gray-700' : 'bg-blue-500 text-white';
 								const btnText = isFollowing ? '팔로잉' : '팔로우';
-								followButtonHtml = `<button class="follow-btn text-xs font-bold py-1 px-3 rounded-full ${btnClass}" data-user-id="${liker.id}">${btnText}</button>`;
+								followButtonHtml = '<button class="follow-btn text-xs font-bold py-1 px-3 rounded-full ' + btnClass + '" data-user-id="' + liker.id + '">' + btnText + '</button>';
 							}
 
-							const likerHtml = `
-								<div class="flex items-center justify-between py-2 user-row" data-user-id="${liker.id}">
-									<div class="flex items-center">
-										<a href="${contextPath}/feed/user/${liker.id}">
-											<img src="${contextPath}/images/profile/${liker.profileImage}" alt="${liker.nickname}" class="w-10 h-10 rounded-full object-cover mr-3">
-										</a>
-										<div><a href="${contextPath}/feed/user/${liker.id}" class="font-bold text-slate-800">${liker.nickname}</a></div>
-									</div>
-									<div class="follow-btn-container">${followButtonHtml}</div>
-								</div>`;
-							likersList.insertAdjacentHTML('beforeend', likerHtml);
+							const likerHtml =
+								'<div class="flex items-center justify-between py-2 user-row" data-user-id="' + liker.id + '">' +
+									'<div class="flex items-center">' +
+										'<a href="' + contextPath + '/feed/user/' + liker.id + '">' + // [수정] /images/ 경로가 mytag:image 에서 자동으로 붙으므로 여기서는 제거
+											'<img src="' + contextPath + '/images/' + liker.profileImage + '" alt="' + liker.nickname + '" class="w-10 h-10 rounded-full object-cover mr-3">' +
+										'</a>' +
+										'<div><a href="' + contextPath + '/feed/user/' + liker.id + '" class="font-bold text-slate-800">' + liker.nickname + '</a></div>' +
+									'</div>' +
+									'<div class="follow-btn-container">' + followButtonHtml + '</div>' +
+								'</div>';
+							$likersList.append(likerHtml);
 						});
 					})
 					.catch(error => {
 						console.error('Likers fetch error:', error);
-						likersList.innerHTML = '<div class="text-center text-red-500">목록을 불러오는데 실패했습니다.</div>';
+						$likersList.html('<div class="text-center text-red-500">목록을 불러오는데 실패했습니다.</div>');
 					});
 			}
 
@@ -2086,27 +2092,29 @@ to {
 			if ($target.hasClass('follow-btn')) {
 				if (!isLoggedIn) {
 					alert('로그인이 필요합니다.');
-					window.location.href = `${contextPath}/login`;
+					window.location.href = contextPath + '/login';
 					return;
 				}
 				const userIdToFollow = $target.data('user-id');
 
-				$.post(`${contextPath}/user/follow`, {
+				$.post(contextPath + '/user/follow', {
 						userId: userIdToFollow
 					})
 					.done(function(data) {
 						if (data.status === 'success') {
-							const allFollowButtons = $(`.follow-btn[data-user-id="${userIdToFollow}"]`);
+							// [수정] 클릭된 버튼과 동일한 사용자의 모든 팔로우 버튼을 찾아 상태를 업데이트합니다.
+							const $buttonsToUpdate = $(`.follow-btn[data-user-id="${userIdToFollow}"]`);
+							
 							if (data.isFollowing) {
-								allFollowButtons.text('팔로잉').removeClass('bg-blue-500 text-white').addClass('bg-gray-200 text-gray-700');
+								$buttonsToUpdate.text('팔로잉').removeClass('bg-blue-500 text-white').addClass('bg-gray-200 text-gray-700');
 							} else {
-								allFollowButtons.text('팔로우').removeClass('bg-gray-200 text-gray-700').addClass('bg-blue-500 text-white');
+								$buttonsToUpdate.text('팔로우').removeClass('bg-gray-200 text-gray-700').addClass('bg-blue-500 text-white');
 							}
 						}
 					}).fail(function(xhr) {
 						if (xhr.status === 401) {
 							alert('로그인이 필요합니다.');
-							window.location.href = `${contextPath}/login`;
+							window.location.href = contextPath + '/login';
 						} else {
 							alert('오류가 발생했습니다.');
 						}

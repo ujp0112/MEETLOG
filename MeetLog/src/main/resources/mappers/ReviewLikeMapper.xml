@@ -21,6 +21,8 @@
 		DELETE FROM review_likes
 		WHERE user_id = #{userId} AND review_id = #{reviewId}
 	</delete>
+	
+	
 
 	<select id="findUsersWhoLikedReview" parameterType="int"
 		resultType="model.User">
