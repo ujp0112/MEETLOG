@@ -20,6 +20,22 @@ public class ColumnService {
 	public List<Column> getTopColumns(int limit) {
 		return columnDAO.findTopColumns(limit);
 	}
+	
+	public List<Column> getRankedColumnsByRegion(String region) {
+	    // [보완] 내용이 너무 길 경우 요약문을 만들어주는 로직 추가
+	    List<Column> columns = columnDAO.findRankedByRegion(region);
+	    for (Column column : columns) {
+	        String content = column.getContent();
+	        // HTML 태그 제거 및 100자로 요약
+	        String plainText = content.replaceAll("<[^>]*>", "");
+	        if (plainText.length() > 100) {
+	            column.setContent(plainText.substring(0, 100) + "...");
+	        } else {
+	            column.setContent(plainText);
+	        }
+	    }
+	    return columns;
+	}
 
     // --- [수정된 메서드] ---
     // MypageServlet이 (userId, limit) 2개를 보내므로, 파라미터를 2개 받도록 수정
