@@ -167,6 +167,7 @@
     let isDbSearchEnd = false;
     let isKakaoSearchEnd = false;
     let currentPage = 1;
+    let displayedDbIds = []; // 💡 이미 표시된 DB 맛집 ID를 저장할 배열
 
     $(document).ready(function() {
         const keyword = "<c:out value='${keyword}'/>";
@@ -221,6 +222,7 @@
             currentPage = 1;
             isDbSearchEnd = false;
             isKakaoSearchEnd = false;
+            displayedDbIds = []; // 💡 재검색 시, ID 목록 초기화
 
             let researchKeyword = category;
             if (category === '전체' || category === '') {
@@ -269,6 +271,7 @@
             g.overlays.forEach(overlay => overlay.setMap(null));
             g.listItems.forEach(item => item.el.remove());
             g.overlays = []; g.listItems = [];
+            displayedDbIds = []; // 💡 초기 검색 시, ID 목록 초기화
             $('#load-more-container').addClass('hidden'); // 💡 초기 검색 시 버튼 숨기기
 
             if (status === kakao.maps.services.Status.OK && data.length > 0) {
@@ -292,7 +295,11 @@
         const center = map.getCenter();
         const level = map.getLevel();
         const category = "<c:out value='${category}' default='전체'/>";
-        const url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
+        // 💡 제외할 ID 목록을 쿼리 파라미터로 추가
+        let url = contextPath + "/search/db-restaurants?lat=" + center.getLat() + "&lng=" + center.getLng() + "&level=" + level + "&category=" + category + "&page=" + page;
+        if (displayedDbIds.length > 0) {
+            url += "&excludeIds=" + displayedDbIds.join(',');
+        }
         
         let dbRestaurants = [];
         
@@ -300,7 +307,12 @@
             dbRestaurants = data;
             if (!dbRestaurants || dbRestaurants.length === 0) isDbSearchEnd = true;
             if (dbRestaurants && dbRestaurants.length > 0) displayDbPlaces(dbRestaurants, contextPath);
-            
+
+            // 💡 새로 받은 DB 맛집 ID를 목록에 추가
+            if (dbRestaurants) {
+                dbRestaurants.forEach(r => displayedDbIds.push(r.id));
+            }
+
             const dbCount = dbRestaurants ? dbRestaurants.length : 0;
             const kakaoCountToShow = Math.min(10, 15 - dbCount);
             
@@ -331,6 +343,21 @@
                  map.setBounds(bounds);
             }
         });
+    }
+
+    // 💡 마커 하이라이트 함수 추가
+    function highlightMarker(targetOverlay, targetItemEl) {
+        // 모든 기존 하이라이트 제거
+        g.listItems.forEach(item => {
+            item.el.removeClass('highlighted');
+            if (item.overlay && item.overlay.getContent()) {
+                $(item.overlay.getContent()).removeClass('highlight');
+            }
+        });
+
+        // 새로운 대상만 하이라이트
+        $(targetOverlay.getContent()).addClass('highlight');
+        targetItemEl.addClass('highlighted');
     }
 
     function displayPlaces(places, contextPath) {
@@ -366,21 +393,32 @@
             const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
 
+            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
             const itemEl = $(
-                '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '" class="flex items-center space-x-4">' +
+                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '">' +
                         '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                        '<div class="flex-grow">' +
-                            '<h3 class="font-bold text-base text-blue-700">' + place.place_name + '</h3>' +
-                            '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
-                            '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
-                            '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
-                        '</div>' +
                     '</a>' +
+                    '<div class="flex-grow">' +
+                        '<h3 class="font-bold text-base text-blue-700">' +
+                            '<a href="' + detailUrl + '" class="inline-block">' + place.place_name + '</a>' +
+                        '</h3>' +
+                        '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
+                        '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
+                        '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
+                    '</div>' +
                 '</div>'
             );
             listEl.append(itemEl);
             g.listItems.push({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
+
+            // 💡 클릭 이벤트로 하이라이트 기능 변경
+            itemEl.on('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3') {
+                    map.panTo(placePosition);
+                    highlightMarker(customOverlay, itemEl);
+                }
+            });
 
             setTimeout(function() {
                 const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
@@ -389,12 +427,7 @@
                 });
             }, i * 100);
 
-            itemEl.on('mouseover', () => {
-                map.panTo(placePosition);
-                overlayEl.addClass('highlight');
-            }).on('mouseout', () => {
-                overlayEl.removeClass('highlight');
-            });
+            // 💡 mouseover/mouseout 이벤트 제거
         });
     }
 
@@ -434,28 +467,33 @@
             }
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
             
+            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
             const itemEl = $(
-                '<div class="result-item cursor-pointer p-3 border-b border-gray-100 transition" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '" class="flex items-center space-x-4">' +
+                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '">' +
                         '<img src="' + imageUrl + '" alt="' + r.name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                        '<div class="flex-grow">' +
-                            '<h3 class="font-bold text-base text-red-700">' + r.name + '<span class="meetlog-badge">MEET LOG</span></h3>' +
-                            '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
-                            '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
-                            '<p class="text-red-500 text-sm mt-1">' + (r.phone || '전화번호 정보 없음') + '</p>' +
-                        '</div>' +
                     '</a>' +
+                    '<div class="flex-grow">' +
+                        '<h3 class="font-bold text-base text-red-700">' +
+                            '<a href="' + detailUrl + '" class="inline-block">' + r.name + '</a>' + '<span class="meetlog-badge">MEET LOG</span>' +
+                        '</h3>' +
+                        '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
+                        '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
+                        '<p class="text-red-500 text-sm mt-1">' + (r.phone || '전화번호 정보 없음') + '</p>' +
+                    '</div>' +
                 '</div>'
             );
             listEl.prepend(itemEl);
             g.listItems.unshift({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
             
-            itemEl.on('mouseover', () => {
-                map.panTo(placePosition);
-                overlayEl.addClass('highlight');
-            }).on('mouseout', () => {
-                overlayEl.removeClass('highlight');
+            // 💡 클릭 이벤트로 하이라이트 기능 변경
+            itemEl.on('click', function(e) {
+                if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3' && e.target.tagName !== 'SPAN') {
+                    map.panTo(placePosition);
+                    highlightMarker(customOverlay, itemEl);
+                }
             });
+            // 💡 mouseover/mouseout 이벤트 제거
         });
     }
     
@@ -466,4 +504,3 @@
     </script>
 </body>
 </html>
-

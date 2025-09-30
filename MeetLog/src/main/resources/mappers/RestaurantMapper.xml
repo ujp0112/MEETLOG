@@ -296,6 +296,12 @@
 	                #{item}
 	            </foreach>
 	        </if>
+			<if test="excludeIds != null and !excludeIds.isEmpty()">
+				AND id NOT IN
+				<foreach item="id" collection="excludeIds" open="(" separator="," close=")">
+				#{id}
+				</foreach>
+			</if>
 	    HAVING
 	        distance &lt;= #{radiusKm}
 	    ORDER BY
