@@ -76,12 +76,6 @@ public class RestaurantDetailServlet extends HttpServlet {
             List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
             // 현재 로그인한 사용자의 ID를 전달하여 리뷰별 '좋아요' 여부를 함께 조회
             List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId, currentUserId); 
-            FollowService fs = new FollowService();
-            for(Review review: reviews) {
-            	if(fs.isFollowing(currentUser.getId(), review.getUserId())) {
-            		review.setAuthorIsFollowedByCurrentUser(true);
-            	}
-            }
             List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
             List<QnA> qnas = qnaService.getQnAsByRestaurantId(restaurantId);
             List<OperatingHour> operatingHours = operatingHourService.getOperatingHoursByRestaurantId(restaurantId);
