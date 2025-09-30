@@ -4,30 +4,46 @@
 <mapper namespace="CouponMapper">
     
     <select id="findByRestaurantId" parameterType="int" resultType="Coupon">
-        SELECT 
+        SELECT
             id,
             title,
             description,
             validity,
             restaurant_id as restaurantId,
             is_active as active,
-            created_at as createdAt
-        FROM coupons 
-        WHERE restaurant_id = #{restaurantId} 
+            created_at as createdAt,
+            discount_type as discountType,
+            discount_value as discountValue,
+            min_order_amount as minOrderAmount,
+            valid_from as validFrom,
+            valid_to as validTo,
+            usage_limit as usageLimit,
+            per_user_limit as perUserLimit,
+            usage_count as usageCount
+        FROM coupons
+        WHERE restaurant_id = #{restaurantId}
         ORDER BY created_at DESC
     </select>
     
     <select id="findAllActive" resultType="Coupon">
-        SELECT 
+        SELECT
             id,
             title,
             description,
             validity,
             restaurant_id as restaurantId,
             is_active as active,
-            created_at as createdAt
-        FROM coupons 
-        WHERE is_active = true 
+            created_at as createdAt,
+            discount_type as discountType,
+            discount_value as discountValue,
+            min_order_amount as minOrderAmount,
+            valid_from as validFrom,
+            valid_to as validTo,
+            usage_limit as usageLimit,
+            per_user_limit as perUserLimit,
+            usage_count as usageCount
+        FROM coupons
+        WHERE is_active = true
         ORDER BY created_at DESC
     </select>
     
@@ -38,23 +54,46 @@
             validity,
             restaurant_id,
             is_active,
-            created_at
+            created_at,
+            discount_type,
+            discount_value,
+            min_order_amount,
+            valid_from,
+            valid_to,
+            usage_limit,
+            per_user_limit,
+            usage_count
         ) VALUES (
             #{title},
             #{description},
             #{validity},
             #{restaurantId},
             true,
-            NOW()
+            NOW(),
+            #{discountType},
+            #{discountValue},
+            #{minOrderAmount},
+            #{validFrom},
+            #{validTo},
+            #{usageLimit},
+            #{perUserLimit},
+            0
         )
     </insert>
     
     <update id="updateCoupon" parameterType="Coupon">
-        UPDATE coupons 
-        SET 
+        UPDATE coupons
+        SET
             title = #{title},
             description = #{description},
-            validity = #{validity}
+            validity = #{validity},
+            discount_type = #{discountType},
+            discount_value = #{discountValue},
+            min_order_amount = #{minOrderAmount},
+            valid_from = #{validFrom},
+            valid_to = #{validTo},
+            usage_limit = #{usageLimit},
+            per_user_limit = #{perUserLimit}
         WHERE id = #{id}
     </update>
     
@@ -73,7 +112,15 @@
             validity,
             restaurant_id as restaurantId,
             is_active as active,
-            created_at as createdAt
+            created_at as createdAt,
+            discount_type as discountType,
+            discount_value as discountValue,
+            min_order_amount as minOrderAmount,
+            valid_from as validFrom,
+            valid_to as validTo,
+            usage_limit as usageLimit,
+            per_user_limit as perUserLimit,
+            usage_count as usageCount
         FROM coupons
         WHERE id = #{couponId}
     </select>

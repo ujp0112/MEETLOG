@@ -14,6 +14,16 @@ public class Coupon {
     private boolean active;
     private Date createdAt;
 
+    // 새로운 필드
+    private String discountType;    // PERCENTAGE, FIXED
+    private Integer discountValue;
+    private Integer minOrderAmount;
+    private Date validFrom;
+    private Date validTo;
+    private Integer usageLimit;
+    private Integer perUserLimit;
+    private int usageCount;
+
     public Coupon() {}
 
     public Coupon(String title, String description, String validity) {
@@ -76,5 +86,69 @@ public class Coupon {
 
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getDiscountType() {
+        return discountType;
+    }
+
+    public void setDiscountType(String discountType) {
+        this.discountType = discountType;
+    }
+
+    public Integer getDiscountValue() {
+        return discountValue;
+    }
+
+    public void setDiscountValue(Integer discountValue) {
+        this.discountValue = discountValue;
+    }
+
+    public Integer getMinOrderAmount() {
+        return minOrderAmount;
+    }
+
+    public void setMinOrderAmount(Integer minOrderAmount) {
+        this.minOrderAmount = minOrderAmount;
+    }
+
+    public Date getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(Date validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public Date getValidTo() {
+        return validTo;
+    }
+
+    public void setValidTo(Date validTo) {
+        this.validTo = validTo;
+    }
+
+    public Integer getUsageLimit() {
+        return usageLimit;
+    }
+
+    public void setUsageLimit(Integer usageLimit) {
+        this.usageLimit = usageLimit;
+    }
+
+    public Integer getPerUserLimit() {
+        return perUserLimit;
+    }
+
+    public void setPerUserLimit(Integer perUserLimit) {
+        this.perUserLimit = perUserLimit;
+    }
+
+    public int getUsageCount() {
+        return usageCount;
+    }
+
+    public void setUsageCount(int usageCount) {
+        this.usageCount = usageCount;
     }
 }
