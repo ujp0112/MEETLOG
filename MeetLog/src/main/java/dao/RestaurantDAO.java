@@ -186,6 +186,10 @@ public class RestaurantDAO {
 			return sqlSession.selectList(NAMESPACE + ".findNearbyRestaurantsByPage", params);
 		} // finally 블록은 try-with-resources가 자동으로 처리하므로 제거합니다.
 	}
+	
+	public void updateRatingAndReviewCount(SqlSession session, int restaurantId) {
+        session.update(NAMESPACE + ".updateRatingAndReviewCount", restaurantId);
+    }
 
 	/**
 	 * 비즈니스 사용자의 전체 통계 조회

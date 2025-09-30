@@ -1,10 +1,12 @@
 package service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionException;
+
+import dao.RestaurantDAO;
 import dao.ReviewDAO;
 import model.Review;
 import model.ReviewInfo;
@@ -12,6 +14,7 @@ import util.MyBatisSqlSessionFactory;
 
 public class ReviewService {
 	private final ReviewDAO reviewDAO = new ReviewDAO();
+	private final RestaurantDAO restaurantDAO = new RestaurantDAO();
 
 	// --- Read Operations ---
 	public List<Review> findAll() {
@@ -89,6 +92,8 @@ public class ReviewService {
 					e.printStackTrace();
 					// 피드 아이템 생성 실패는 리뷰 작성을 막지 않음
 				}
+				
+				restaurantDAO.updateRatingAndReviewCount(session, review.getRestaurantId());
 
 				// 모든 DB 작업이 성공적으로 끝나면 commit
 				session.commit();
@@ -108,6 +113,7 @@ public class ReviewService {
 			try {
 				int result = reviewDAO.update(sqlSession, review);
 				if (result > 0) {
+					restaurantDAO.updateRatingAndReviewCount(sqlSession, review.getRestaurantId());
 					sqlSession.commit();
 					return true;
 				}
@@ -122,8 +128,20 @@ public class ReviewService {
 	public boolean deleteReview(int id) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			try {
+				// ▼▼▼ [수정] 삭제 전에 레스토랑 ID를 먼저 조회해야 합니다. ▼▼▼
+				Review reviewToDelete = reviewDAO.findById(id);
+				if (reviewToDelete == null) {
+					// 삭제할 리뷰가 없으면 롤백하고 실패를 반환합니다.
+					sqlSession.rollback();
+					return false;
+				}
+				int restaurantId = reviewToDelete.getRestaurantId();
+				
 				int result = reviewDAO.delete(sqlSession, id);
 				if (result > 0) {
+					// ▼▼▼ [수정] 리뷰 삭제 후 레스토랑 평점 및 리뷰 수 업데이트 로직 추가 ▼▼▼
+					restaurantDAO.updateRatingAndReviewCount(sqlSession, restaurantId);
+					
 					sqlSession.commit();
 					return true;
 				}
@@ -134,6 +152,7 @@ public class ReviewService {
 		}
 		return false;
 	}
+
 
 	public boolean likeReview(int reviewId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {

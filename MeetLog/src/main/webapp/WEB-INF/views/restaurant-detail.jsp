@@ -364,15 +364,25 @@ body {
 	animation: fadeIn 0.6s ease-out;
 }
 
-@keyframes fadeIn {from { opacity:0;
-	transform: translateY(20px);}to {	opacity: 1;	transform: translateY(0);}
+@
+keyframes fadeIn {from { opacity:0;
+	transform: translateY(20px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
 }
 .slide-up {
 	animation: slideUp 0.8s ease-out;
 }
 
-@keyframes slideUp {from { opacity:0;
-	transform: translateY(30px);}
+@
+keyframes slideUp {from { opacity:0;
+	transform: translateY(30px);
+}
 
 to {
 	opacity: 1;
@@ -384,10 +394,29 @@ to {
 	animation: pulseGlow 2s ease-in-out infinite;
 }
 
-@keyframes pulseGlow { 0%, 100% {
+@
+keyframes pulseGlow { 0%, 100% {
 	box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
-50%{box-shadow:0 0 30px rgba(59,130,246,0.5);}
+
+50
+%
+{
+box-shadow
+:
+0
+0
+30px
+rgba(
+59
+,
+130
+,
+246
+,
+0.5
+);
+}
 }
 .shimmer {
 	background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -395,10 +424,19 @@ to {
 	animation: shimmer 2s infinite;
 }
 
-@keyframes shimmer { 0% {
+@
+keyframes shimmer { 0% {
 	background-position: -200% 0;
 }
-100%{background-position:200% 0;}
+
+100
+%
+{
+background-position
+:
+200%
+0;
+}
 }
 .progress-bar {
 	background: linear-gradient(90deg, var(--accent) 0%, #fbbf24 100%);
@@ -439,10 +477,29 @@ to {
 	animation: couponGlow 3s ease-in-out infinite;
 }
 
-@keyframes couponGlow { 0%, 100% {
+@
+keyframes couponGlow { 0%, 100% {
 	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
-50%{box-shadow:0 0 30px rgba(245,158,11,0.5);}
+
+50
+%
+{
+box-shadow
+:
+0
+0
+30px
+rgba(
+245
+,
+158
+,
+11
+,
+0.5
+);
+}
 }
 .review-card {
 	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%,
@@ -499,9 +556,20 @@ to {
 	animation: float 3s ease-in-out infinite;
 }
 
-@keyframes float { 0%, 100% {transform: translateY(0px);
+@
+keyframes float { 0%, 100% {
+	transform: translateY(0px);
 }
-50%{transform:translateY(-10px);}
+
+50
+%
+{
+transform
+:
+translateY(
+-10px
+);
+}
 }
 .section-divider {
 	height: 1px;
@@ -863,6 +931,70 @@ to {
 	object-fit: cover;
 	object-position: center;
 }
+
+/* ▼▼▼ [추가] 리뷰 '더보기' 메뉴 관련 스타일 ▼▼▼ */
+.review-options-container {
+	position: relative; /* 자식 요소(드롭다운)의 기준점 */
+}
+
+.review-options-btn {
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 50%;
+	transition: background-color 0.2s;
+	line-height: 1; /* 아이콘 정렬 */
+}
+
+.review-options-btn:hover {
+	background-color: #f1f5f9; /* 연한 회색 배경 */
+}
+
+.review-options-dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	z-index: 20;
+	background-color: white;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+	border: 1px solid #e2e8f0;
+	min-width: 120px;
+	padding: 8px;
+	opacity: 0;
+	transform: translateY(-10px);
+	transition: opacity 0.2s ease, transform 0.2s ease;
+	visibility: hidden; /* display: none 대신 사용 */
+}
+
+.review-options-dropdown.show {
+	opacity: 1;
+	transform: translateY(0);
+	visibility: visible;
+}
+
+.dropdown-item {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 8px 12px;
+	font-size: 0.875rem; /* 14px */
+	color: #334155;
+	background: none;
+	border: none;
+	cursor: pointer;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+	background-color: #f1f5f9;
+}
+
+.dropdown-item.delete {
+	color: #ef4444; /* 빨간색 텍스트 */
+}
 </style>
 </head>
 <body class="bg-slate-100">
@@ -1181,7 +1313,7 @@ to {
 											<c:when test="${not empty reviews}">
 												<div id="review-list-container" class="space-y-6">
 													<c:forEach var="review" items="${reviews}">
-														<div>
+														<div class="review-card-container">
 															<div
 																class="bg-white p-6 rounded-2xl shadow-lg h-full flex flex-col">
 																<div class="flex justify-between items-start mb-4">
@@ -1209,6 +1341,37 @@ to {
 																			</div>
 																		</div>
 																	</div>
+
+																	<%-- ▼▼▼ [추가] '더보기' 메뉴 버튼 및 드롭다운 메뉴 ▼▼▼ --%>
+																	<c:if test="${not empty sessionScope.user}">
+																		<div class="review-options-container">
+																			<button class="review-options-btn"
+																				data-review-id="${review.id}">
+																				<img
+																					src="${pageContext.request.contextPath}/img/icon_more_vertical.png"
+																					alt="더보기" class="w-5 h-5">
+																			</button>
+																			<div class="review-options-dropdown">
+																				<c:choose>
+																					<%-- 리뷰 작성자와 현재 로그인한 유저가 같을 경우 --%>
+																					<c:when
+																						test="${sessionScope.user.id == review.userId}">
+																						<a
+																							href="${pageContext.request.contextPath}/review/edit?reviewId=${review.id}"
+																							class="dropdown-item">리뷰 수정</a>
+																						<button
+																							class="dropdown-item delete review-delete-btn"
+																							data-review-id="${review.id}">리뷰 삭제</button>
+																					</c:when>
+																					<%-- 다른 유저일 경우 --%>
+																					<c:otherwise>
+																						<button class="dropdown-item review-report-btn"
+																							data-review-id="${review.id}">리뷰 신고</button>
+																					</c:otherwise>
+																				</c:choose>
+																			</div>
+																		</div>
+																	</c:if>
 																	<!-- <c:if
 																		test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
 																		<c:choose>
@@ -1927,6 +2090,7 @@ to {
 				}
 			}
 		}
+		
 
 		// 7. 필요한 변수 선언
 		const imageLightbox = document.getElementById('imageLightbox');
@@ -2129,6 +2293,55 @@ to {
 				}
 			}
 		});
+		// 10. 리뷰 '더보기' 메뉴 토글 기능
+		$(document).on('click', '.review-options-btn', function(e) {
+		    e.stopPropagation(); // 이벤트 전파 중단
+		    // 현재 클릭한 메뉴 외에 다른 메뉴는 모두 닫기
+		    $('.review-options-dropdown').not($(this).next('.review-options-dropdown')).removeClass('show');
+		    // 현재 클릭한 메뉴의 드롭다운 토글
+		    $(this).next('.review-options-dropdown').toggleClass('show');
+		});
+
+		// 화면의 다른 곳을 클릭하면 모든 '더보기' 메뉴 닫기
+		$(document).on('click', function(e) {
+		    if (!$(e.target).closest('.review-options-container').length) {
+		        $('.review-options-dropdown').removeClass('show');
+		    }
+		});
+
+		// 11. 리뷰 삭제 버튼 클릭 이벤트
+		$(document).on('click', '.review-delete-btn', function() {
+		    const reviewId = $(this).data('review-id');
+		    const reviewCard = $(this).closest('.review-card-container'); // 각 리뷰를 감싸는 최상위 div 선택자
+
+		    if (confirm("정말로 이 리뷰를 삭제하시겠습니까?")) {
+		        fetch(contextPath + "/review/delete", {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify({ id: reviewId }) // 서블릿에서 받을 수 있도록 JSON 형식으로 변경
+		        })
+		        .then(response => response.json())
+		        .then(data => {
+		            if (data.success) {
+		                alert("리뷰가 삭제되었습니다.");
+		                // ✨ 중요: 페이지를 새로고침하여 레스토랑 평점과 리뷰 수를 정확하게 다시 반영합니다.
+		                window.location.reload(); 
+		            } else {
+		                alert(data.message || '리뷰 삭제에 실패했습니다.');
+		            }
+		        })
+		        .catch(error => {
+		            console.error('Error:', error);
+		            alert('리뷰 삭제 중 오류가 발생했습니다.');
+		        });
+		    }
+		});
+
+		// 12. 리뷰 신고 버튼 (기능은 미구현, 알림창만 표시)
+		$(document).on('click', '.review-report-btn', function() {
+		    alert('리뷰 신고 기능은 현재 준비 중입니다.');
+		});
+		
 	});
 </script>
 

@@ -321,37 +321,41 @@
 		WHERE r.id = #{id} AND r.is_active = true
 		ORDER BY ri.display_order ASC
 	</select>
-	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. ▼▼▼ -->
-	<select id="findNearbyRestaurantsByPage" parameterType="map" resultType="model.Restaurant">
-	    SELECT 
-	        id, name, address, location, phone, category, description, 
-	        image, latitude, longitude, parking, created_at, updated_at,
-	        (6371 * ACOS(
-	            COS(RADIANS(#{latitude})) * COS(RADIANS(latitude)) *
-	            COS(RADIANS(longitude) - RADIANS(#{longitude})) +
-	            SIN(RADIANS(#{latitude})) * SIN(RADIANS(latitude))
-	        )) AS distance
-	    FROM
-	        restaurants
-	    WHERE
-	        latitude IS NOT NULL AND longitude IS NOT NULL
-	        <if test="categories != null and !categories.isEmpty()">
-	            AND category IN
-	            <foreach item="item" collection="categories" open="(" separator="," close=")">
-	                #{item}
-	            </foreach>
-	        </if>
-			<if test="excludeIds != null and !excludeIds.isEmpty()">
-				AND id NOT IN
-				<foreach item="id" collection="excludeIds" open="(" separator="," close=")">
+	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. 
+		▼▼▼ -->
+	<select id="findNearbyRestaurantsByPage" parameterType="map"
+		resultType="model.Restaurant">
+		SELECT
+		id, name, address, location, phone, category, description,
+		image, latitude, longitude, parking, created_at, updated_at,
+		(6371 * ACOS(
+		COS(RADIANS(#{latitude})) * COS(RADIANS(latitude)) *
+		COS(RADIANS(longitude) - RADIANS(#{longitude})) +
+		SIN(RADIANS(#{latitude})) * SIN(RADIANS(latitude))
+		)) AS distance
+		FROM
+		restaurants
+		WHERE
+		latitude IS NOT NULL AND longitude IS NOT NULL
+		<if test="categories != null and !categories.isEmpty()">
+			AND category IN
+			<foreach item="item" collection="categories" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="excludeIds != null and !excludeIds.isEmpty()">
+			AND id NOT IN
+			<foreach item="id" collection="excludeIds" open="("
+				separator="," close=")">
 				#{id}
-				</foreach>
-			</if>
-	    HAVING
-	        distance &lt;= #{radiusKm}
-	    ORDER BY
-	        distance ASC
-	    LIMIT #{limit} OFFSET #{offset}
+			</foreach>
+		</if>
+		HAVING
+		distance &lt;= #{radiusKm}
+		ORDER BY
+		distance ASC
+		LIMIT #{limit} OFFSET #{offset}
 	</select>
 
 	<insert id="insertRestaurantImages" parameterType="map">
@@ -401,5 +405,15 @@
 		WHERE r.owner_id = #{ownerId}
 		ORDER BY r.created_at DESC
 	</select>
+
+	<update id="updateRatingAndReviewCount" parameterType="int">
+		UPDATE restaurants
+		SET
+		rating = COALESCE((SELECT AVG(rating) FROM reviews WHERE restaurant_id =
+		#{restaurantId} AND is_active = true), 0),
+		review_count = (SELECT COUNT(*) FROM reviews WHERE restaurant_id = #{restaurantId}
+		AND is_active = true)
+		WHERE id = #{restaurantId}
+	</update>
 
 </mapper>
