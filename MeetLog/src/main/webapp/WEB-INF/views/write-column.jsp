@@ -68,6 +68,10 @@
 	background-color: #3182ce;
 }
 
+.marker-db .marker-number {
+	background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+}
+
 .marker-info {
 	padding: 0 10px 0 8px;
 	white-space: nowrap;
@@ -82,6 +86,10 @@
 	color: #2b6cb0;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+.marker-db .marker-title {
+    color: #8b5cf6;
+    font-weight: 900;
 }
 
 .marker-category {
@@ -253,11 +261,8 @@
 					class="w-full md:w-1/3 h-1/3 md:h-full flex flex-col border-r bg-white">
 					<div class="p-3 border-b">
 						<div class="flex space-x-2">
-							<input type="text" id="modal-search-keyword"
-								placeholder="맛집 이름, 지역 검색"
-								class="flex-grow px-3 py-2 border border-slate-300 rounded-md">
-							<button type="button" id="modal-search-btn"
-								class="px-4 py-2 bg-sky-600 text-white rounded-md">검색</button>
+							<input type="text" id="modal-search-keyword" placeholder="맛집 이름, 지역 검색" class="flex-grow px-3 py-2 border border-slate-300 rounded-md">
+							<button type="button" id="modal-search-btn" class="px-4 py-2 bg-sky-600 text-white rounded-md">검색</button>
 						</div>
 					</div>
 					<div id="modal-results-list" class="flex-grow overflow-y-auto">
@@ -286,50 +291,152 @@
         
         let modalMap, modalPs, modalOverlays = [];
         $('#open-map-modal-btn').on('click', function() { $('#map-modal').removeClass('hidden'); if (!modalMap) { const mapContainer = document.getElementById('modal-map'); const mapOption = { center: new kakao.maps.LatLng(37.566826, 126.97865), level: 5 }; modalMap = new kakao.maps.Map(mapContainer, mapOption); modalPs = new kakao.maps.services.Places(); } else { modalMap.relayout(); } });
-        $('#close-map-modal-btn').on('click', () => $('#map-modal').addClass('hidden'));
+        $('#close-map-modal-btn').on('click', () => { $('#map-modal').addClass('hidden'); $('#modal-results-list').html('<p class="p-4 text-slate-500 text-center">검색어를 입력해주세요.</p>'); modalOverlays.forEach(o => o.setMap(null)); modalOverlays = []; });
         $('#modal-search-btn').on('click', searchOnModalMap);
         $('#modal-search-keyword').on('keydown', e => { if (e.key === 'Enter') searchOnModalMap(); });
-        function searchOnModalMap() { const keyword = $('#modal-search-keyword').val(); if (!keyword.trim()) return; modalPs.keywordSearch(keyword, (data, status) => { if (status === kakao.maps.services.Status.OK) { displayModalResults(data); } else { $('#modal-results-list').html('<p class="p-4 text-slate-500 text-center">검색 결과가 없습니다.</p>'); } }, { category_group_code: 'FD6' }); }
+
+        function searchOnModalMap() {
+            const keyword = $('#modal-search-keyword').val().trim(); 
+            if (!keyword) {
+                alert('검색어를 입력해주세요.');
+                return;
+            }
+
+            const listEl = $('#modal-results-list');
+            listEl.html('<p class="p-4 text-slate-500 text-center">검색 중...</p>');
+            modalOverlays.forEach(o => o.setMap(null));
+            modalOverlays = [];
+            const dbSearch = $.ajax({
+                url: contextPath + "/search/db-restaurants",
+                data: { keyword: keyword, category: '', lat: modalMap.getCenter().getLat(), lng: modalMap.getCenter().getLng(), level: modalMap.getLevel() }
+            });
+
+            const kakaoSearch = new Promise((resolve, reject) => {
+                modalPs.keywordSearch(keyword, (data, status) => {
+                    if (status === kakao.maps.services.Status.OK) {
+                        resolve(data);
+                    } else {
+                        resolve([]); // 카카오 검색 결과가 없어도 DB 결과는 보여줘야 하므로 빈 배열로 resolve
+                    }
+                }, { category_group_code: 'FD6' });
+            });
+
+            Promise.all([dbSearch, kakaoSearch]).then(([dbResults, kakaoResults]) => {
+                listEl.empty();
+                const bounds = new kakao.maps.LatLngBounds();
+                let markerIndex = 1;
+
+                if ((!dbResults || dbResults.length === 0) && (!kakaoResults || kakaoResults.length === 0)) {
+                    listEl.html('<p class="p-4 text-slate-500 text-center">검색 결과가 없습니다.</p>');
+                    return;
+                }
+
+                if (dbResults && dbResults.length > 0) {
+                    listEl.append('<div class="p-2 bg-slate-100 text-center text-sm font-bold text-purple-700">MEETLOG 맛집</div>');
+                    displayModalDbResults(dbResults, bounds);
+                    markerIndex += dbResults.length;
+                }
+
+                if (kakaoResults && kakaoResults.length > 0) {
+                    listEl.append('<div class="p-2 bg-slate-100 text-center text-sm font-bold text-blue-700">카카오 검색 결과</div>');
+                    displayModalKakaoResults(kakaoResults, bounds, markerIndex);
+                }
+
+                if (!bounds.isEmpty()) {
+                    modalMap.setBounds(bounds);
+                }
+            }).catch(error => {
+                console.error("Search failed:", error);
+                listEl.html('<p class="p-4 text-red-500 text-center">검색 중 오류가 발생했습니다.</p>');
+            });
+        }
         
-        function displayModalResults(places) {
-            const listEl = $('#modal-results-list'); listEl.empty(); modalOverlays.forEach(o => o.setMap(null)); modalOverlays = []; const bounds = new kakao.maps.LatLngBounds();
+        function displayModalDbResults(places, bounds) {
+            const listEl = $('#modal-results-list');
+            places.forEach((place, i) => {
+                const placePosition = new kakao.maps.LatLng(place.latitude, place.longitude);
+                const overlayEl = $(`<div class="marker-overlay marker-db"><div class="marker-number">★</div><div class="marker-info"><div class="marker-title" title="${place.name}">${place.name}</div><div class="marker-category">${place.category}</div></div></div>`);
+                const customOverlay = new kakao.maps.CustomOverlay({ position: placePosition, content: overlayEl[0], yAnchor: 1 });
+                customOverlay.setMap(modalMap);
+                modalOverlays.push(customOverlay);
+                const imageUrl = place.image ? (place.image.startsWith('http') ? place.image : contextPath + '/images/' + place.image) : 'https://placehold.co/70x70/f3e8ff/8b5cf6?text=MEETLOG';
+                const isAttached = attachedRestaurants.has(place.id);
+
+                const itemEl = $(
+                    '<div class="modal-result-item p-3 border-b flex items-center space-x-3 cursor-pointer" data-index="' + i + '">' +
+                        '<img src="' + imageUrl + '" alt="' + place.name + '" class="modal-result-item-image flex-shrink-0">' +
+                        '<div class="flex-grow">' +
+                            '<h3 class="font-bold text-base text-purple-700">' + place.name + ' <span class="text-xs font-bold text-white bg-purple-500 px-1.5 py-0.5 rounded-full align-middle">LOG</span></h3>' +
+                            '<p class="text-gray-600 text-sm mt-1">' + place.address + '</p>' +
+                        '</div>' +
+                        '<button class="add-db-restaurant-btn px-4 py-2 text-sm rounded-md flex-shrink-0 ' + (isAttached ? 'bg-slate-300 text-slate-500' : 'bg-purple-600 text-white hover:bg-purple-700') + '" data-id="' + place.id + '" ' + (isAttached ? 'disabled' : '') + '>' + (isAttached ? '추가됨' : '추가') + '</button>' +
+                    '</div>'
+                );
+                listEl.append(itemEl);
+                bounds.extend(placePosition);
+                addHoverAndClickEvents(itemEl, placePosition, customOverlay);
+            });
+        }
+
+        function displayModalKakaoResults(places, bounds, startIndex) {
+            const listEl = $('#modal-results-list');
             places.forEach((place, i) => {
                 const placePosition = new kakao.maps.LatLng(place.y, place.x);
                 const categoryName = place.category_name.split(' > ').pop();
                 const address = place.road_address_name || place.address_name;
                 const location = address.split(' ').slice(0, 2).join(' ');
                 
-                const overlayEl = $(`<div class="marker-overlay"><div class="marker-number">${i + 1}</div><div class="marker-info"><div class="marker-title" title="${place.place_name}">${place.place_name}</div><div class="marker-category">${categoryName}</div></div></div>`);
+                const overlayEl = $(`<div class="marker-overlay"><div class="marker-number">${startIndex + i}</div><div class="marker-info"><div class="marker-title" title="${place.place_name}">${place.place_name}</div><div class="marker-category">${categoryName}</div></div></div>`);
                 const customOverlay = new kakao.maps.CustomOverlay({ position: placePosition, content: overlayEl[0], yAnchor: 1 });
                 customOverlay.setMap(modalMap); modalOverlays.push(customOverlay);
                 
-                const itemEl = $(`
-                    <div class="modal-result-item p-3 border-b flex items-center space-x-3 cursor-pointer" data-index="${i}">
-                        <img src="https://placehold.co/70x70/EBF8FF/3182CE?text=${i + 1}" alt="${place.place_name}" class="modal-result-item-image flex-shrink-0">
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-base text-blue-700">${place.place_name}</h3>
-                            <p class="text-gray-600 text-sm mt-1">${address}</p>
-                        </div>
-                        <button class="add-restaurant-btn px-4 py-2 bg-sky-600 text-white text-sm rounded-md hover:bg-sky-700 flex-shrink-0"
-                                data-kakao-id="${place.id}" data-name="${place.place_name}" data-address="${address}"
-                                data-location="${location}" data-phone="${place.phone}" data-category="${place.category_name}"
-                                data-lat="${place.y}" data-lng="${place.x}">추가</button>
-                    </div>`);
+                const uniqueId = "kakao-" + i;
+                const placeholderUrl = "https://placehold.co/70x70/EBF8FF/3182CE?text=" + (startIndex + i);
+
+                const itemEl = $(
+					'<div class="modal-result-item p-3 border-b flex items-center space-x-3 cursor-pointer" data-index="' + (startIndex + i -1) + '">' +
+						'<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="modal-result-item-image flex-shrink-0">' +
+						'<div class="flex-grow">' +
+							'<h3 class="font-bold text-base text-blue-700">' + place.place_name + '</h3>' +
+							'<p class="text-gray-600 text-sm mt-1">' + address + '</p>' +
+						'</div>' +
+						'<button class="add-kakao-restaurant-btn px-4 py-2 bg-sky-600 text-white text-sm rounded-md hover:bg-sky-700 flex-shrink-0"' +
+								' data-kakao-id="' + place.id + '"' +
+								' data-name="' + place.place_name + '"' +
+								' data-address="' + address + '"' +
+								' data-location="' + location + '"' +
+								' data-phone="' + place.phone + '"' +
+								' data-category="' + place.category_name + '"' +
+								' data-lat="' + place.y + '"' +
+								' data-lng="' + place.x + '">추가</button>' +
+					'</div>'
+				);
                 listEl.append(itemEl);
                 bounds.extend(placePosition);
 
-                itemEl.on('click', function(e) {
-                    if (!$(e.target).is('.add-restaurant-btn')) {
-                        modalMap.panTo(placePosition);
-                        $('.marker-overlay').removeClass('highlight'); $(customOverlay.getContent()).addClass('highlight');
-                        $('.modal-result-item').removeClass('highlighted'); $(this).addClass('highlighted');
-                    }
-                });
+                // search-map.jsp의 이미지 프록시 로직 적용
+                setTimeout(function() {
+                    const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
+                    $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
+                        if (data && data.imageUrl) { $(`#img-${uniqueId}`).attr('src', data.imageUrl); }
+                    });
+                }, i * 100);
+
+                addHoverAndClickEvents(itemEl, placePosition, customOverlay);
             });
-            modalMap.setBounds(bounds);
         }
 
-        $('#modal-results-list').on('click', '.add-restaurant-btn', function() {
+        function addHoverAndClickEvents(itemEl, position, overlay) {
+            itemEl.on('click', function(e) {
+                if (!$(e.target).is('button')) {
+                    modalMap.panTo(position);
+                    $('.marker-overlay').removeClass('highlight'); $(overlay.getContent()).addClass('highlight');
+                    $('.modal-result-item').removeClass('highlighted'); $(this).addClass('highlighted');
+                }
+            });
+        }
+
+        $('#modal-results-list').on('click', '.add-kakao-restaurant-btn', function() {
             const btn = $(this); btn.prop('disabled', true).text('...');
             const restaurantData = { kakaoPlaceId: btn.data('kakao-id'), name: btn.data('name'), address: btn.data('address'), location: btn.data('location'), phone: btn.data('phone'), category: btn.data('category'), lat: btn.data('lat'), lng: btn.data('lng') };
             $.ajax({
@@ -338,6 +445,13 @@
                 error: function() { alert('맛집 추가 중 오류가 발생했습니다.'); },
                 complete: function() { btn.prop('disabled', false).text('추가'); }
             });
+        });
+
+        $('#modal-results-list').on('click', '.add-db-restaurant-btn', function() {
+            const btn = $(this);
+            const restaurantId = btn.data('id');
+            const restaurant = { id: restaurantId, name: btn.closest('.modal-result-item').find('h3').text().replace(' LOG',''), address: btn.closest('.modal-result-item').find('p').text() };
+            attachedRestaurants.set(restaurantId, restaurant); updateAttachedList(); alert('맛집이 추가되었습니다.'); $('#map-modal').addClass('hidden');
         });
     });
     </script>
