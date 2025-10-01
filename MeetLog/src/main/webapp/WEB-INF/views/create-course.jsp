@@ -1,5 +1,6 @@
 <%@ page buffer="32kb" %>
 <%@ page import="util.ApiKeyLoader"%>
+<%@ page import="com.google.gson.Gson"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -92,7 +93,7 @@
         </div>
         <div id="map" class="flex-grow h-full"></div>
         <div id="course-sidebar" class="course-sidebar bg-white shadow-2xl flex flex-col border-l">
-            <form id="course-form" action="${pageContext.request.contextPath}/course/create" method="post" class="h-full flex flex-col">
+            <form id="course-form" action="${pageContext.request.contextPath}/course/create" method="post" enctype="multipart/form-data" class="h-full flex flex-col">
                 <input type="hidden" name="courseData" id="courseDataInput">
                 <div class="p-6 border-b"><h3 class="font-bold text-xl">📍 나의 코스</h3><p class="text-slate-500 mt-1 text-sm">맛집, 명소를 추가해 하루를 계획하세요.</p></div>
                 <div id="course-cart-sidebar" class="flex-grow p-4 space-y-4 overflow-y-auto"><p class="initial-message text-slate-400 text-center pt-12">좌측 검색 결과에서<br/>장소를 추가하세요.</p></div>
@@ -107,6 +108,35 @@
             </form>
         </div>
     </main>
+</div>
+
+<!-- 코스 저장 모달 -->
+<div id="save-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <h3 class="text-xl font-bold mb-4">코스 저장</h3>
+        <div class="space-y-4">
+            <div>
+                <label for="course-title" class="block text-sm font-medium text-slate-700 mb-1">코스 제목 *</label>
+                <input type="text" id="course-title" name="title" placeholder="예: 성수동 핫플레이스 투어" class="w-full p-2 border rounded-md" required>
+            </div>
+            <div>
+                <label for="course-description" class="block text-sm font-medium text-slate-700 mb-1">코스 설명 *</label>
+                <input type="text" id="course-description" name="description" placeholder="예: 성수동 핫플레이스 투어" class="w-full p-2 border rounded-md" required>
+            </div>
+            <div>
+                <label for="course-tags" class="block text-sm font-medium text-slate-700 mb-1">태그 (쉼표로 구분)</label>
+                <input type="text" id="course-tags" name="tags" placeholder="예: 성수동, 데이트, 카페" class="w-full p-2 border rounded-md">
+            </div>
+            <div>
+                <label for="course-thumbnail" class="block text-sm font-medium text-slate-700 mb-1">썸네일 이미지 (선택)</label>
+                <input type="file" id="course-thumbnail" name="thumbnail" accept="image/*" class="w-full p-2 border rounded-md">
+            </div>
+        </div>
+        <div class="flex gap-2 mt-6">
+            <button type="button" onclick="closeSaveModal()" class="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300">취소</button>
+            <button type="button" onclick="submitCourse()" class="flex-1 px-4 py-2 bg-sky-600 text-white rounded-md hover:bg-sky-700">완성하기</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -128,8 +158,59 @@
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
 
+        // 수정 모드일 경우 기존 데이터 로드
+        <c:if test="${isEditMode && not empty course && not empty steps}">
+            // 코스 정보 로드
+            const editCourse = {
+                id: ${course.id},
+                title: '${course.title}',
+                description: '${course.description}',
+                tags: <c:if test="${not empty course.tags}">[<c:forEach var="tag" items="${course.tags}" varStatus="status">'${tag}'<c:if test="${!status.last}">,</c:if></c:forEach>]</c:if><c:if test="${empty course.tags}">[]</c:if>
+            };
+
+            // 스텝 데이터를 courseCart에 추가
+            <c:forEach var="step" items="${steps}">
+                courseCart.push({
+                    id: null,
+                    name: '${step.name}',
+                    address: '${step.address != null ? step.address : ""}',
+                    lat: ${step.latitude != null ? step.latitude : 0},
+                    lng: ${step.longitude != null ? step.longitude : 0},
+                    type: '${step.type}',
+                    time: ${step.time},
+                    cost: ${step.cost}
+                });
+            </c:forEach>
+
+            // UI 업데이트
+            if (courseCart.length > 0) {
+                renderCourseSidebar();
+                updateCourseOnMap();
+                updateSummary();
+            }
+        </c:if>
+
         $('#search-btn').on('click', performSearch);
         $('#search-input').on('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); performSearch(); } });
+
+        // 폼 제출 이벤트 막고 모달 띄우기
+        $('#course-form').on('submit', function(e) {
+            e.preventDefault();
+            if (courseCart.length === 0) {
+                alert('코스에 장소를 추가해주세요.');
+                return;
+            }
+            openSaveModal();
+
+            // 수정 모드일 경우 기존 정보 미리 입력
+            <c:if test="${isEditMode && not empty course}">
+                document.getElementById('course-title').value = editCourse.title;
+                document.getElementById('course-description').value = editCourse.description;
+                if (editCourse.tags && editCourse.tags.length > 0) {
+                    document.getElementById('course-tags').value = editCourse.tags.join(', ');
+                }
+            </c:if>
+        });
 
         $('.tab-btn').on('click', function() {
             $('.tab-btn').removeClass('active-tab');
@@ -433,11 +514,21 @@
     }
 
     function addPlaceToCart(place) {
-        if (courseCart.some(item => item.id === place.id)) {
+        // 이름으로 중복 체크 (id가 없을 수 있음)
+        if (courseCart.some(item => item.name === place.name && item.address === place.address)) {
             alert("이미 코스에 추가된 장소입니다.");
             return;
         }
-        const placeData = { id: place.id, name: place.name, address: place.address, lat: place.lat, lng: place.lng, time: 60, cost: 10000 };
+        const placeData = {
+            id: place.id || null,
+            name: place.name,
+            address: place.address,
+            lat: place.lat,
+            lng: place.lng,
+            type: place.type || 'RESTAURANT',
+            time: 60,
+            cost: 10000
+        };
         courseCart.push(placeData);
         renderCourseSidebar();
         updateCourseOnMap();
@@ -505,10 +596,129 @@
         $('#total-cost').text('₩ ' + totalCost.toLocaleString());
     }
 
-    $('#course-form').on('submit', function(e) {
-        $('#courseDataInput').val(JSON.stringify(courseCart));
-    });
+    function openSaveModal() {
+        document.getElementById('save-modal').classList.remove('hidden');
+    }
 
+    function closeSaveModal() {
+        document.getElementById('save-modal').classList.add('hidden');
+        document.getElementById('course-title').value = '';
+        document.getElementById('course-description').value = '';
+        document.getElementById('course-tags').value = '';
+        document.getElementById('course-thumbnail').value = '';
+    }
+
+    function submitCourse() {
+        const title = document.getElementById('course-title').value.trim();
+        const description = document.getElementById('course-description').value.trim();
+        if (!title) {
+            alert('코스 제목을 입력해주세요.');
+            return;
+        }
+        if (!description) {
+            alert('설명을 입력해주세요.');
+            return;
+        }
+
+        // 코스에 장소가 있는지 확인
+        if (courseCart.length === 0) {
+            alert('코스에 장소를 추가해주세요.');
+            closeSaveModal();
+            return;
+        }
+
+        // 모든 step의 데이터가 유효한지 검증
+        for (let i = 0; i < courseCart.length; i++) {
+            const place = courseCart[i];
+            if (!place.name || !place.name.trim()) {
+                alert(`${i + 1}번째 장소의 이름이 없습니다.`);
+                return;
+            }
+            if (isNaN(place.time) || place.time < 0) {
+                alert(`${i + 1}번째 장소의 시간이 유효하지 않습니다.`);
+                return;
+            }
+            if (isNaN(place.cost) || place.cost < 0) {
+                alert(`${i + 1}번째 장소의 비용이 유효하지 않습니다.`);
+                return;
+            }
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+
+        const tags = document.getElementById('course-tags').value.trim();
+        if (tags) {
+            formData.append('tags', tags);
+        }
+
+        const thumbnailFile = document.getElementById('course-thumbnail').files[0];
+        if (thumbnailFile) {
+            formData.append('thumbnail', thumbnailFile);
+        }
+
+        // 코스 데이터 추가 (각 step을 개별 파라미터로)
+        courseCart.forEach((place, index) => {
+            const stepNum = index + 1;
+            formData.append('step_name_' + stepNum, place.name);
+            formData.append('step_type_' + stepNum, place.type || 'RESTAURANT');
+            formData.append('step_time_' + stepNum, Math.max(0, parseInt(place.time) || 0));
+            formData.append('step_cost_' + stepNum, Math.max(0, parseInt(place.cost) || 0));
+            formData.append('step_latitude_' + stepNum, place.lat || 0);
+            formData.append('step_longitude_' + stepNum, place.lng || 0);
+            formData.append('step_address_' + stepNum, place.address || '');
+        });
+
+        // 수정 모드일 경우 코스 ID 추가
+        <c:if test="${isEditMode && not empty course}">
+            formData.append('courseId', ${course.id});
+        </c:if>
+
+        // 폼 제출
+        const form = document.getElementById('course-form');
+        <c:choose>
+            <c:when test="${isEditMode}">
+                const action = contextPath + '/course/edit';
+            </c:when>
+            <c:otherwise>
+                const action = form.action;
+            </c:otherwise>
+        </c:choose>
+
+        // 로딩 표시
+        const submitBtn = document.querySelector('#save-modal button[onclick="submitCourse()"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = '저장 중...';
+
+        fetch(action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else if (response.ok) {
+                return response.text().then(text => {
+                    // 응답 본문을 확인해서 에러 메시지가 있는지 체크
+                    if (text.includes('error') || text.includes('Error')) {
+                        throw new Error('서버에서 에러가 발생했습니다.');
+                    }
+                    // 성공했지만 리다이렉트가 안된 경우 수동으로 이동
+                    window.location.href = contextPath + '/course/list';
+                });
+            } else {
+                throw new Error('코스 저장 실패 (HTTP ' + response.status + ')');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('코스 저장 중 오류가 발생했습니다: ' + error.message);
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+        });
+    }
 </script>
 </body>
 </html>

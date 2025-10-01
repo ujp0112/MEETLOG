@@ -31,12 +31,46 @@
                     <div class="p-6 border-b border-slate-200">
                         <h3 class="text-lg font-semibold text-slate-800">예약 목록</h3>
                     </div>
+
+                    <!-- 필터 버튼 그룹 -->
+                    <c:if test="${not empty reservations}">
+                        <div class="px-6 py-4 border-b border-slate-200">
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="filterReservations('all')"
+                                        class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-blue-600 text-white"
+                                        data-filter="all">
+                                    전체
+                                </button>
+                                <button onclick="filterReservations('PENDING')"
+                                        class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                        data-filter="PENDING">
+                                    🟡 대기중
+                                </button>
+                                <button onclick="filterReservations('CONFIRMED')"
+                                        class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                        data-filter="CONFIRMED">
+                                    🟢 확정
+                                </button>
+                                <button onclick="filterReservations('COMPLETED')"
+                                        class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                        data-filter="COMPLETED">
+                                    🔵 완료
+                                </button>
+                                <button onclick="filterReservations('CANCELLED')"
+                                        class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                        data-filter="CANCELLED">
+                                    🔴 취소
+                                </button>
+                            </div>
+                        </div>
+                    </c:if>
+
                     <div class="p-6">
                         <c:choose>
                             <c:when test="${not empty reservations}">
-                                <div class="space-y-4">
+                                <div id="reservationList" class="space-y-4">
                                     <c:forEach var="reservation" items="${reservations}">
-                                        <div class="border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors">
+                                        <div class="reservation-card border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors" data-status="${reservation.status}">
                                             <div class="flex items-center justify-between">
                                                 <div class="flex-1">
                                                     <div class="flex items-center space-x-4">
@@ -97,5 +131,61 @@
         <%-- 공통 푸터 포함 --%>
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
+
+    <script>
+        // 예약 필터링 함수
+        function filterReservations(status) {
+            const reservationCards = document.querySelectorAll('.reservation-card');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            // 모든 버튼의 active 상태 제거
+            filterButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+            });
+
+            // 클릭된 버튼을 active 상태로 변경
+            const activeBtn = document.querySelector(`[data-filter="${status}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+            }
+
+            // 예약 카드 필터링
+            let visibleCount = 0;
+            reservationCards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    if (card.dataset.status === status) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+
+            // 필터링 결과가 없을 때 메시지 표시
+            const reservationList = document.getElementById('reservationList');
+            let noResultMsg = document.getElementById('noResultMessage');
+
+            if (visibleCount === 0) {
+                if (!noResultMsg) {
+                    noResultMsg = document.createElement('div');
+                    noResultMsg.id = 'noResultMessage';
+                    noResultMsg.className = 'text-center py-12 text-slate-500';
+                    noResultMsg.innerHTML = '<div class="text-4xl mb-3">🔍</div><p class="text-lg font-medium">해당 상태의 예약이 없습니다.</p>';
+                    reservationList.appendChild(noResultMsg);
+                }
+                noResultMsg.style.display = 'block';
+            } else {
+                if (noResultMsg) {
+                    noResultMsg.style.display = 'none';
+                }
+            }
+        }
+    </script>
 </body>
 </html>

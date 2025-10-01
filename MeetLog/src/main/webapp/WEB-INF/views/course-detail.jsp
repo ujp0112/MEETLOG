@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -26,14 +27,15 @@
                         <div id="course-detail-container" class="bg-white rounded-2xl shadow-lg overflow-hidden">
                             <div>
                                 <c:choose>
-                                    <c:when test="${fn:startsWith(course.previewImage, 'http')}">
-                                        <c:set var="previewImageUrl" value="${course.previewImage}" />
+                                    <c:when test="${not empty course.previewImage}">
+                                        <mytag:image fileName="${course.previewImage}" altText="${course.title}" cssClass="w-full h-72 object-cover" />
                                     </c:when>
                                     <c:otherwise>
-                                        <c:set var="previewImageUrl" value="${pageContext.request.contextPath}/${course.previewImage}" />
+                                        <div class="w-full h-72 bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center">
+                                            <span class="text-4xl">MEET LOG</span>
+                                        </div>
                                     </c:otherwise>
                                 </c:choose>
-                                <img src="${previewImageUrl}" alt="${course.title}" class="w-full h-72 object-cover">
                             </div>
 
                             <div class="p-6 md:p-8">

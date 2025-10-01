@@ -244,8 +244,13 @@ CREATE TABLE `course_steps` (
   `step_type` varchar(100) DEFAULT NULL,
   `emoji` varchar(10) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `latitude` decimal(10,8) DEFAULT NULL COMMENT '위도',
+  `longitude` decimal(11,8) DEFAULT NULL COMMENT '경도',
+  `address` varchar(500) DEFAULT NULL COMMENT '주소',
   `description` text DEFAULT NULL,
   `image` varchar(1000) DEFAULT NULL,
+  `time` int(11) DEFAULT 0 COMMENT '소요 시간 (분)',
+  `cost` int(11) DEFAULT 0 COMMENT '예상 비용 (원)',
   PRIMARY KEY (`step_id`),
   KEY `idx_course_id` (`course_id`),
   CONSTRAINT `course_steps_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE

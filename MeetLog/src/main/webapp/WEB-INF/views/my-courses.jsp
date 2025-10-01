@@ -70,43 +70,25 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <c:forEach var="course" items="${courses}">
                                 <div class="card-hover rounded-2xl overflow-hidden bg-white shadow-lg">
-                                    <!-- 코스 이미지 -->
-                                    <div class="relative h-48 overflow-hidden">
+                                    <!-- 코스 이미지 (클릭 가능) -->
+                                    <a href="${pageContext.request.contextPath}/course/detail?id=${course.courseId}" class="block relative h-48 overflow-hidden">
                                         <c:choose>
                                             <c:when test="${not empty course.previewImage}">
                                                 <mytag:image fileName="${course.previewImage}" altText="${course.title}" cssClass="w-full h-full object-cover" />
                                             </c:when>
                                             <c:otherwise>
                                                 <div class="w-full h-full bg-gradient-to-br from-green-200 to-green-400 flex items-center justify-center">
-                                                    <span class="text-4xl">🗺️</span>
+                                                    <span class="text-4xl">MEET LOG</span>
                                                 </div>
                                             </c:otherwise>
                                         </c:choose>
-                                        
-                                        <!-- 상태 배지 -->
-                                        <div class="absolute top-3 left-3">
-                                            <span class="px-3 py-1 rounded-full text-xs font-semibold text-white ${course['public'] ? 'bg-green-500' : 'bg-gray-500'}">
-                                                ${course['public'] ? '공개' : '비공개'}
-                                            </span>
-                                        </div>
-                                        
-                                        <!-- 액션 버튼들 -->
-                                        <div class="absolute top-3 right-3 flex space-x-2">
-                                            <button data-course-id="${course.courseId}" 
-                                                    data-is-public="${course['public']}"
-                                                    class="toggle-public-btn w-8 h-8 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full flex items-center justify-center transition-all">
-                                                ${course['public'] ? '🔓' : '🔒'}
-                                            </button>
-                                            <button data-course-id="${course.courseId}"
-                                                    class="delete-course-btn w-8 h-8 bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white rounded-full flex items-center justify-center transition-all">
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
+                                    </a>
+
                                     <!-- 코스 정보 -->
                                     <div class="p-6">
-                                        <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2">${course.title}</h3>
+                                        <a href="${pageContext.request.contextPath}/course/detail?id=${course.courseId}" class="block">
+                                            <h3 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">${course.title}</h3>
+                                        </a>
                                         
                                         <c:if test="${not empty course.description}">
                                             <p class="text-slate-600 text-sm mb-3 line-clamp-2">
@@ -134,14 +116,14 @@
                                         
                                         <!-- 액션 버튼 -->
                                         <div class="flex space-x-2">
-                                            <a href="${pageContext.request.contextPath}/course/detail/${course.courseId}" 
-                                               class="flex-1 bg-green-100 hover:bg-green-200 text-green-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                                                보기
-                                            </a>
-                                            <a href="${pageContext.request.contextPath}/course/edit/${course.courseId}" 
+                                            <a href="${pageContext.request.contextPath}/course/edit?id=${course.courseId}"
                                                class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                                                수정
+                                                ✏️ 수정
                                             </a>
+                                            <button data-course-id="${course.courseId}"
+                                                    class="delete-course-btn flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded-lg font-semibold transition-colors">
+                                                🗑️ 삭제
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -210,42 +192,42 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
     <script>
-        function togglePublic(courseId, button) {
-            fetch('${pageContext.request.contextPath}/my-courses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    action: 'togglePublic',
-                    courseId: courseId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 버튼 아이콘과 배지 업데이트
-                    button.textContent = data.isPublic ? '🔓' : '🔒';
+        // function togglePublic(courseId, button) {
+        //     fetch('${pageContext.request.contextPath}/my-courses', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/x-www-form-urlencoded',
+        //         },
+        //         body: new URLSearchParams({
+        //             action: 'togglePublic',
+        //             courseId: courseId
+        //         })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         if (data.success) {
+        //             // 버튼 아이콘과 배지 업데이트
+        //             button.textContent = data.isPublic ? '🔓' : '🔒';
                     
-                    const card = button.closest('.card-hover');
-                    const badge = card.querySelector('.absolute.top-3.left-3 span');
+        //             const card = button.closest('.card-hover');
+        //             const badge = card.querySelector('.absolute.top-3.left-3 span');
                     
-                    if (data.isPublic) {
-                        badge.textContent = '공개';
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold text-white bg-green-500';
-                    } else {
-                        badge.textContent = '비공개';
-                        badge.className = 'px-3 py-1 rounded-full text-xs font-semibold text-white bg-gray-500';
-                    }
-                } else {
-                    alert(data.message || '상태 변경에 실패했습니다.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('오류가 발생했습니다.');
-            });
-        }
+        //             if (data.isPublic) {
+        //                 badge.textContent = '공개';
+        //                 badge.className = 'px-3 py-1 rounded-full text-xs font-semibold text-white bg-green-500';
+        //             } else {
+        //                 badge.textContent = '비공개';
+        //                 badge.className = 'px-3 py-1 rounded-full text-xs font-semibold text-white bg-gray-500';
+        //             }
+        //         } else {
+        //             alert(data.message || '상태 변경에 실패했습니다.');
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         alert('오류가 발생했습니다.');
+        //     });
+        // }
         
         function deleteCourse(courseId) {
             if (confirm('정말로 이 코스를 삭제하시겠습니까?\n삭제된 코스는 복구할 수 없습니다.')) {
@@ -273,12 +255,12 @@
         // 페이지 로드 시 이벤트 리스너 등록
         document.addEventListener('DOMContentLoaded', function() {
             // 공개/비공개 토글 버튼 이벤트 리스너
-            document.querySelectorAll('.toggle-public-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const courseId = this.getAttribute('data-course-id');
-                    togglePublic(courseId, this);
-                });
-            });
+            // document.querySelectorAll('.toggle-public-btn').forEach(button => {
+            //     button.addEventListener('click', function() {
+            //         const courseId = this.getAttribute('data-course-id');
+            //         togglePublic(courseId, this);
+            //     });
+            // });
             
             // 코스 삭제 버튼 이벤트 리스너
             document.querySelectorAll('.delete-course-btn').forEach(button => {

@@ -35,8 +35,24 @@ public class CourseService {
                 step.setOrder(i + 1);
                 courseDAO.insertCourseStep(step, session);
             }
-            
-            // 4. 모든 작업이 성공하면 최종 commit
+
+            // 4. 태그 저장
+            if (course.getTags() != null && !course.getTags().isEmpty()) {
+                for (String tagName : course.getTags()) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // 태그가 이미 존재하는지 확인
+                        Integer tagId = courseDAO.findTagByName(tagName.trim(), session);
+                        if (tagId == null) {
+                            // 태그가 없으면 새로 생성
+                            tagId = courseDAO.insertTag(tagName.trim(), session);
+                        }
+                        // 코스-태그 연결
+                        courseDAO.insertCourseTag(generatedCourseId, tagId, session);
+                    }
+                }
+            }
+
+            // 5. 모든 작업이 성공하면 최종 commit
             session.commit();
             return true;
         } catch (Exception e) {
@@ -147,8 +163,7 @@ public class CourseService {
 
     public List<CommunityCourse> getCoursesByUserId(int userId) {
         // 사용자가 생성한 커뮤니티 코스들을 조회
-        // 임시로 빈 리스트 반환 (실제 구현 필요)
-        return new java.util.ArrayList<>();
+        return courseDAO.findByUserId(userId);
     }
 
     public List<CommunityCourse> getBookmarkedCourses(int userId) {
@@ -165,8 +180,35 @@ public class CourseService {
 
     public boolean deleteCourse(int courseId, int userId) {
         // 코스 삭제 (권한 확인 포함)
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. 권한 확인 - 해당 코스의 작성자가 맞는지 확인
+            CommunityCourse course = courseDAO.findById(courseId);
+            if (course == null) {
+                return false;
+            }
+            if (course.getUserId() != userId) {
+                // 권한이 없음
+                return false;
+            }
+
+            // 2. 코스 삭제 (CASCADE로 steps, likes 등도 자동 삭제됨)
+            int result = session.delete("mapper.CommunityCourseMapper.deleteCourse", courseId);
+
+            if (result > 0) {
+                session.commit();
+                return true;
+            } else {
+                session.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            session.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
     public CommunityCourse getCourseById(int courseId) {
@@ -191,6 +233,25 @@ public class CourseService {
                 step.setCourseId(course.getId());
                 step.setOrder(i + 1);
                 courseDAO.insertCourseStep(step, session);
+            }
+
+            // 4. 기존 태그들 삭제
+            courseDAO.deleteCourseTagsByCourseId(course.getId(), session);
+
+            // 5. 새로운 태그들 저장
+            if (course.getTags() != null && !course.getTags().isEmpty()) {
+                for (String tagName : course.getTags()) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // 태그가 이미 존재하는지 확인
+                        Integer tagId = courseDAO.findTagByName(tagName.trim(), session);
+                        if (tagId == null) {
+                            // 태그가 없으면 새로 생성
+                            tagId = courseDAO.insertTag(tagName.trim(), session);
+                        }
+                        // 코스-태그 연결
+                        courseDAO.insertCourseTag(course.getId(), tagId, session);
+                    }
+                }
             }
 
             session.commit();
