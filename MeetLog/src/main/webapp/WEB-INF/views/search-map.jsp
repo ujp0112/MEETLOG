@@ -422,10 +422,14 @@
 
             setTimeout(function() {
                 const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
-                $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(imageUrl) {
-                    if (imageUrl) $('#img-' + uniqueId).attr('src', imageUrl);
+                $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
+                    // This is the critical part.
+                    // Ensure you are using data.imageUrl to access the URL string.
+                    if (data && data.imageUrl) {
+                        $('#img-' + uniqueId).attr('src', data.imageUrl);
+                    }
                 });
-            }, i * 100);
+            }, i * 100); 
 
             // 💡 mouseover/mouseout 이벤트 제거
         });

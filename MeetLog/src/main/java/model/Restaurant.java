@@ -16,8 +16,17 @@ public class Restaurant {
     private double longitude;
     private int ownerId;
     private String kakaoPlaceId; // [추가] 카카오 지도 place ID 필드
+    private String website;
     
-    // ======================== [추가된 필드 시작] ========================
+    public String getWebsite() {
+		return website;
+	}
+
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+
+	// ======================== [추가된 필드 시작] ========================
     /**
      * JSP에서 ${restaurant.averageRating} 으로 사용하기 위한 필드입니다.
      * 이 값은 데이터베이스 쿼리에서 계산되어 채워집니다.

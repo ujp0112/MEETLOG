@@ -82,11 +82,11 @@ public class DBSearchServlet extends HttpServlet {
     }
 
     private double getRadiusByZoomLevel(int level) {
-        if (level <= 3) return 20;
-        if (level <= 5) return 10;
-        if (level <= 7) return 4;
-        if (level <= 9) return 2;
-        return 1;
+        if (level <= 3) return 10;
+        if (level <= 5) return 5;
+        if (level <= 7) return 2;
+        if (level <= 9) return 1;
+        return 0.5;
     }
 }
 

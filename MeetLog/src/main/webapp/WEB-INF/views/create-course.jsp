@@ -22,6 +22,28 @@
     .course-item-connector { position: absolute; bottom: -20px; left: 27px; width: 2px; height: 20px; background-color: #cbd5e1; }
     .course-item-connector::after { content: '▼'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #94a3b8; }
     .marker-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -65%); font-size: 12px; font-weight: bold; color: white; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000; }
+    /* search-map.jsp의 커스텀 마커 스타일 */
+    .marker-overlay { display: flex; align-items: center; background-color: white; border: 1px solid #ccc; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 5px; position: relative; transform: translate(-50%, -100%); transition: all 0.1s ease-in-out; cursor: pointer; z-index: 1; }
+    .marker-overlay.highlight, .marker-overlay:hover { transform: translate(-50%, -100%) scale(1.05); z-index: 10; border-color: #3182ce; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .marker-overlay::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid white; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+    .marker-overlay-number { display: flex; justify-content: center; align-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; font-weight: bold; font-size: 13px; flex-shrink: 0; }
+    .marker-overlay-info { padding: 0 8px 0 6px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+    .marker-overlay-title { font-weight: bold; font-size: 13px; color: #2d3748; overflow: hidden; text-overflow: ellipsis; }
+    .marker-overlay-category { font-size: 10px; color: #718096; }
+    .marker-kakao .marker-overlay-number { background-color: #3182ce; }
+    .marker-kakao .marker-overlay-title { color: #2b6cb0; }
+    .marker-db .marker-overlay-number { background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%); font-size: 16px; }
+    .marker-db .marker-overlay-title { color: #8b5cf6; }
+    /* 리스트 아이템 스타일 */
+    .result-item { transition: background-color 0.2s; }
+    .result-item:hover { background-color: #f0f7ff; }
+    .result-item.highlighted { background-color: #ebf8ff; border-left: 4px solid #3182ce; padding-left: calc(0.5rem - 4px); }
+    /* search-map.jsp의 리스트 아이템 이미지 스타일 */
+    .result-item-image {
+        width: 64px; height: 64px; object-fit: cover;
+        border-radius: 0.5rem; background-color: #e2e8f0;
+    }
+
     .result-badge {
         background-color: #e0f2fe; color: #0c4a6e; font-size: 11px; font-weight: bold;
         padding: 2px 6px; border-radius: 10px; margin-left: 6px;
@@ -56,8 +78,13 @@
                 <button type="button" class="tab-btn" data-tab="ranking-review">✨ 리뷰</button>
                 <button type="button" class="tab-btn" data-tab="ranking-course">🚗 코스</button>
             </div>
-            <div class="flex-grow pt-4">
+            <div class="flex-grow pt-4 flex flex-col">
                 <div id="ranking-resto-content" class="tab-content active-content space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
+                <div id="load-more-container" class="p-4 border-t text-center hidden">
+                    <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        더 보기
+                    </button>
+                </div>
                 <div id="ranking-column-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
                 <div id="ranking-review-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
                 <div id="ranking-course-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
@@ -85,9 +112,15 @@
 <script>
     const contextPath = "<%= request.getContextPath() %>";
     let map, ps;
-    let searchMarkers = [], courseMarkers = [];
+    let courseMarkers = [], kakaoPagination;
+    const g = { overlays: [], listItems: [] }; // 마커와 리스트 아이템 관리 객체
     let coursePolyline = null;
     let courseCart = [];
+    let isLoading = false;
+    let isDbSearchEnd = false;
+    let isKakaoSearchEnd = false;
+    let currentPage = 1;
+    let displayedDbIds = [];
 
     $(document).ready(function() {
         const mapContainer = document.getElementById('map');
@@ -106,6 +139,21 @@
             $('#' + tabName + '-content').addClass('active-content');
         });
 
+        $('#load-more-btn').on('click', function() {
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (!isLoading && hasMoreData) {
+                isLoading = true;
+                $(this).text('불러오는 중...').prop('disabled', true);
+                currentPage++;
+                
+                if (kakaoPagination && !isKakaoSearchEnd) {
+                    kakaoPagination.nextPage(); // placesSearchCB가 자동으로 호출됨
+                } else {
+                    fetchDbAndDisplayCombined(currentPage, []);
+                }
+            }
+        });
+
         renderCourseSidebar();
     });
 
@@ -117,68 +165,191 @@
         }
         
         $('.tab-content').html('<p class="text-slate-400 text-center py-8">검색 중...</p>');
-        removeSearchMarkers();
-        
-        ps.keywordSearch(keyword, (kakaoData, status) => {
-            if (status === kakao.maps.services.Status.OK) {
-                const bounds = new kakao.maps.LatLngBounds();
-                kakaoData.forEach(place => bounds.extend(new kakao.maps.LatLng(place.y, place.x)));
-                map.setBounds(bounds);
-                fetchDbAndDisplayCombined(kakaoData);
-            } else {
-                fetchDbAndDisplayCombined([]);
-            }
-        });
+        $('#ranking-resto-content').empty(); // 맛집 목록만 비움
+        $('#load-more-container').addClass('hidden');
+        clearSearchResults();
+        currentPage = 1;
+        isDbSearchEnd = false;
+        isKakaoSearchEnd = false;
+        displayedDbIds = [];
+
+        // [수정] search-map.jsp와 동일하게 음식점(FD6) 카테고리 그룹으로 검색을 제한합니다.
+        const searchOptions = {
+            category_group_code: 'FD6',
+            size: 10
+        };
+
+        ps.keywordSearch(keyword, placesSearchCB, searchOptions);
 
         fetchRankedData('columns', keyword, displayRankedColumns);
     }
 
-    function fetchDbAndDisplayCombined(kakaoPlaces) {
+    function placesSearchCB(data, status, pagination) {
+        kakaoPagination = pagination;
+        isKakaoSearchEnd = !pagination.hasNextPage;
+
+        if (currentPage === 1) {
+            $('#ranking-resto-content').empty();
+            clearSearchResults();
+            displayedDbIds = [];
+            $('#load-more-container').addClass('hidden');
+
+            if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                const bounds = new kakao.maps.LatLngBounds();
+                data.forEach(place => bounds.extend(new kakao.maps.LatLng(place.y, place.x)));
+                map.setBounds(bounds);
+                fetchDbAndDisplayCombined(currentPage, data);
+            } else {
+                fetchDbAndDisplayCombined(currentPage, []);
+            }
+        } else {
+            fetchDbAndDisplayCombined(currentPage, data || []);
+        }
+    }
+
+    function fetchDbAndDisplayCombined(page, kakaoDataForPage) {
         const center = map.getCenter();
-        const url = contextPath + '/search/db-restaurants?lat=' + center.getLat() + '&lng=' + center.getLng() + '&level=' + map.getLevel() + '&page=1';
+        // [수정] 카테고리 파라미터를 제거하고 항상 전체 음식점을 검색하도록 변경
+        let url = contextPath + '/search/db-restaurants?lat=' + center.getLat() + '&lng=' + center.getLng() + '&level=' + map.getLevel() + '&page=' + page + '&category=';
+        if (displayedDbIds.length > 0) {
+            url += "&excludeIds=" + displayedDbIds.join(',');
+        }
         
-        $.getJSON(url, function(dbPlaces) {
-            const dbPlaceIds = new Set(dbPlaces.map(p => p.id));
-            const filteredKakaoPlaces = kakaoPlaces.filter(p => !dbPlaceIds.has(p.id));
-            displayCombinedRestaurantResults(dbPlaces, filteredKakaoPlaces);
+        $.getJSON(url, function(dbData) {
+            const dbPlaces = dbData || [];
+            // [수정] DB 검색 결과가 페이지당 항목 수(10)보다 적을 때만 DB 검색이 끝난 것으로 간주합니다.
+            const itemsPerPage = 10; 
+            if (dbPlaces.length < itemsPerPage) isDbSearchEnd = true;
+
+            dbPlaces.forEach(p => displayedDbIds.push(p.id));
+            const kakaoPlaces = kakaoDataForPage.filter(p => !displayedDbIds.includes(p.id));
+
+            displayCombinedRestaurantResults(dbPlaces, kakaoPlaces);
         }).fail(function() {
-            displayCombinedRestaurantResults([], kakaoPlaces);
+            isDbSearchEnd = true;
+            displayCombinedRestaurantResults([], kakaoDataForPage);
+        }).always(function() {
+            isLoading = false;
+            $('#load-more-btn').text('더 보기').prop('disabled', false);
+            const hasMoreData = !isDbSearchEnd || !isKakaoSearchEnd;
+            if (hasMoreData) {
+                $('#load-more-container').removeClass('hidden');
+            } else {
+                $('#load-more-container').addClass('hidden');
+            }
         });
     }
 
     function displayCombinedRestaurantResults(dbPlaces, kakaoPlaces) {
         const container = $('#ranking-resto-content');
-        container.empty();
-        removeSearchMarkers();
         
-        const totalCount = dbPlaces.length + kakaoPlaces.length;
-        updateTabBadge('ranking-resto', totalCount);
-
-        if (totalCount === 0) {
+        if (currentPage === 1 && dbPlaces.length === 0 && kakaoPlaces.length === 0) {
             container.html('<p class="text-slate-400 text-center py-8">이 지역의 맛집 검색 결과가 없습니다.</p>');
             return;
         }
 
-        dbPlaces.forEach(place => {
+        dbPlaces.forEach((place, i) => {
             const placePosition = new kakao.maps.LatLng(place.latitude, place.longitude);
-            const markerImage = new kakao.maps.MarkerImage('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', new kakao.maps.Size(33, 36));
-            addMarker(placePosition, markerImage);
+            const detailUrl = contextPath + "/restaurant/detail/" + place.id;
+            // [수정] currentPage를 포함하여 고유 ID 생성
+            const uniqueId = "db-" + currentPage + "-" + i;
+            
+            const overlay = addCustomMarker(placePosition, {
+                type: 'db',
+                name: place.name,
+                category: place.category,
+                index: g.listItems.length + 1,
+                url: detailUrl
+            });
+
+            const imageUrl = place.image ? (place.image.startsWith('http') ? place.image : contextPath + '/images/' + place.image) : 'https://placehold.co/100x100/fee2e2/b91c1c?text=No+Image';
+
             const placeDataForCart = { id: 'db-' + place.id, name: place.name, address: place.address, lat: place.latitude, lng: place.longitude };
-            const itemEl = $('<div class="p-2 border rounded-md flex justify-between items-center cursor-pointer hover:bg-sky-50"><div class="flex items-center"><div><p class="font-bold">' + place.name + ' <span class="meetlog-badge">MEET LOG</span></p><p class="text-xs text-slate-500">' + place.address + '</p></div></div><button class="add-btn text-sm bg-sky-500 text-white px-2 py-1 rounded-md whitespace-nowrap">추가</button></div>');
-            itemEl.on('click', '.add-btn', (e) => { e.stopPropagation(); addPlaceToCart(placeDataForCart); });
-            itemEl.on('click', () => map.setCenter(placePosition));
+            const itemEl = $(
+                '<div class="result-item p-2 border rounded-md flex items-center cursor-pointer gap-3" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '" target="_blank">' +
+                        '<img id="img-' + uniqueId + '" src="' + imageUrl + '" alt="' + place.name + '" class="result-item-image flex-shrink-0">' +
+                    '</a>' +
+                    '<div class="flex-grow min-w-0">' +
+                        '<a href="' + detailUrl + '" target="_blank" class="font-bold truncate block">' + place.name + ' <span class="meetlog-badge">MEET LOG</span></a>' +
+                        '<p class="text-xs text-slate-500 truncate">' + place.address + '</p>' +
+                    '</div>' +
+                    '<button class="add-btn text-sm bg-sky-500 text-white px-2 py-1 rounded-md whitespace-nowrap ml-auto">추가</button>' +
+                '</div>'
+            );
+            
+            itemEl.on('click', function(e) {
+                if (!$(e.target).closest('a, .add-btn').length) {
+                    map.panTo(placePosition);
+                    highlightMarker(overlay, itemEl);
+                }
+            });
+            itemEl.on('click', '.add-btn', (e) => { e.stopPropagation(); addPlaceToCart(placeDataForCart); }); // 추가 버튼은 그대로 유지
+            
             container.append(itemEl);
+            g.listItems.push({id: uniqueId, el: itemEl, overlay: overlay, position: placePosition});
         });
         
-        kakaoPlaces.forEach(place => {
+        kakaoPlaces.forEach((place, i) => {
             const placePosition = new kakao.maps.LatLng(place.y, place.x);
-            addMarker(placePosition);
+            const detailUrl = contextPath + "/searchRestaurant/external-detail?name=" + encodeURIComponent(place.place_name) + "&address=" + encodeURIComponent(place.address_name) + "&phone=" + encodeURIComponent(place.phone) + "&category=" + encodeURIComponent(place.category_name) + "&lat=" + place.y + "&lng=" + place.x;
+            // [수정] currentPage를 포함하여 고유 ID 생성
+            const uniqueId = "kakao-" + currentPage + "-" + i;
+
+            const overlay = addCustomMarker(placePosition, {
+                type: 'kakao',
+                name: place.place_name,
+                category: place.category_name.split(' > ').pop(),
+                index: g.listItems.length + 1,
+                url: detailUrl
+            });
+
+            const categoryName = place.category_name.split(' > ').pop();
+            const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
+
             const placeDataForCart = { id: place.id, name: place.place_name, address: (place.road_address_name || place.address_name), lat: place.y, lng: place.x };
-            const itemEl = $('<div class="p-2 border rounded-md flex justify-between items-center cursor-pointer hover:bg-sky-50"><div class="flex items-center"><div><p class="font-bold">' + place.place_name + '</p><p class="text-xs text-slate-500">' + (place.road_address_name || place.address_name) + '</p></div></div><button class="add-btn text-sm bg-sky-500 text-white px-2 py-1 rounded-md whitespace-nowrap">추가</button></div>');
-            itemEl.on('click', '.add-btn', (e) => { e.stopPropagation(); addPlaceToCart(placeDataForCart); });
-            itemEl.on('click', () => map.setCenter(placePosition));
+            const itemEl = $(
+                '<div class="result-item p-2 border rounded-md flex items-center cursor-pointer gap-3" data-id="' + uniqueId + '">' +
+                    '<a href="' + detailUrl + '" target="_blank">' +
+                        '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="result-item-image flex-shrink-0">' +
+                    '</a>' +
+                    '<div class="flex-grow min-w-0">' +
+                        '<a href="' + detailUrl + '" target="_blank" class="font-bold truncate block">' + place.place_name + '</a>' +
+                        '<p class="text-xs text-slate-500 truncate">' + (place.road_address_name || place.address_name) + '</p>' +
+                    '</div>' +
+                    '<button class="add-btn text-sm bg-sky-500 text-white px-2 py-1 rounded-md whitespace-nowrap ml-auto">추가</button>' +
+                '</div>'
+            );
+            
+            itemEl.on('click', function(e) {
+                if (!$(e.target).closest('a, .add-btn').length) {
+                    map.panTo(placePosition);
+                    highlightMarker(overlay, itemEl);
+                }
+            });
+            itemEl.on('click', '.add-btn', (e) => { e.stopPropagation(); addPlaceToCart(placeDataForCart); }); // 추가 버튼은 그대로 유지
+
+            // [추가] search-map.jsp와 동일하게 이미지 프록시를 통해 이미지를 가져옵니다.
+            // [수정] 클로저 문제를 해결하기 위해, setTimeout 콜백 함수가 실행될 때
+            // 올바른 uniqueId와 place를 참조하도록 새로운 변수에 값을 복사합니다.
+            const currentUniqueId = uniqueId;
+            const currentPlace = place;
+            setTimeout(function() {
+                const searchQuery = currentPlace.place_name + " " + (currentPlace.road_address_name || currentPlace.address_name).split(" ")[0];
+                $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
+                    if (data && data.imageUrl) {
+                        // 복사된 currentUniqueId를 사용하여 정확한 img 태그를 찾습니다.
+                        $('#img-' + currentUniqueId).attr('src', data.imageUrl);
+                    }
+                });
+            }, i * 100); // API 요청 부하를 줄이기 위해 지연 실행
+
             container.append(itemEl);
+            g.listItems.push({id: uniqueId, el: itemEl, overlay: overlay, position: placePosition});
         });
+
+        // [수정] 목록이 업데이트된 후, 항상 배지 숫자를 최신 상태로 갱신합니다.
+        updateTabBadge('ranking-resto', g.listItems.length);
     }
 
     async function fetchRankedData(type, keyword, displayFunction) {
@@ -212,14 +383,45 @@
         });
     }
 
-    function addMarker(position, image) {
-        const marker = new kakao.maps.Marker({ map: map, position: position, image: image });
-        searchMarkers.push(marker);
+    function addCustomMarker(position, data) {
+        const markerClass = data.type === 'db' ? 'marker-db' : 'marker-kakao';
+        const markerIndex = data.type === 'db' ? '★' : data.index;
+
+        const overlayEl = $(
+            '<div class="marker-overlay ' + markerClass + '">' +
+                '<div class="marker-overlay-number">' + markerIndex + '</div>' +
+                '<div class="marker-overlay-info">' +
+                    '<div class="marker-overlay-title" title="' + data.name + '">' + data.name + '</div>' +
+                    '<div class="marker-overlay-category">' + data.category + '</div>' +
+                '</div>' +
+            '</div>'
+        );
+
+        overlayEl.on('click', () => window.open(data.url, '_blank'));
+
+        const customOverlay = new kakao.maps.CustomOverlay({
+            position: position,
+            content: overlayEl[0],
+            yAnchor: 1 
+        });
+        customOverlay.setMap(map);
+        g.overlays.push(customOverlay);
+        return customOverlay;
     }
     
-    function removeSearchMarkers() {
-        searchMarkers.forEach(marker => marker.setMap(null));
-        searchMarkers = [];
+    function clearSearchResults() {
+        g.overlays.forEach(overlay => overlay.setMap(null));
+        g.overlays = [];
+        g.listItems = [];
+    }
+
+    function highlightMarker(targetOverlay, targetItemEl) {
+        g.listItems.forEach(item => {
+            item.el.removeClass('highlighted');
+            $(item.overlay.getContent()).removeClass('highlight');
+        });
+        $(targetOverlay.getContent()).addClass('highlight');
+        targetItemEl.addClass('highlighted');
     }
 
     function updateTabBadge(tabName, count) {
@@ -302,7 +504,11 @@
         $('#total-time').text(timeString.trim() || '0 분');
         $('#total-cost').text('₩ ' + totalCost.toLocaleString());
     }
+
+    $('#course-form').on('submit', function(e) {
+        $('#courseDataInput').val(JSON.stringify(courseCart));
+    });
+
 </script>
 </body>
 </html>
-

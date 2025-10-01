@@ -26,12 +26,14 @@ public class AppConfigListener implements ServletContextListener {
             // [수정] 두 개의 키를 모두 로드합니다.
             String tinymceKey = properties.getProperty("tinymce.api.key");
             String kakaoKey = properties.getProperty("kakao.api.key");
+            String googleKey = properties.getProperty("GOOGLE_API_KEY");
 
             // ServletContext에 두 키를 모두 저장합니다.
             context.setAttribute("TINYMCE_API_KEY", tinymceKey);
             context.setAttribute("KAKAO_API_KEY", kakaoKey);
+            context.setAttribute("GOOGLE_API_KEY", googleKey);
             
-            System.out.println("API Keys (TinyMCE, Kakao, Naver) have been loaded into ServletContext.");
+            System.out.println("API Keys (TinyMCE, Kakao, Naver, Google) have been loaded into ServletContext.");
 
         } catch (Exception e) {
             e.printStackTrace();
