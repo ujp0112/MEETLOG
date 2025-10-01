@@ -1,204 +1,265 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEET LOG - <c:out value="${column.title}" default="칼럼 상세" /></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Noto Sans KR', sans-serif; }
-        .prose-content { white-space: pre-wrap; }
-        .prose-content img {
-            max-width: 100%;
-            height: auto;
-            margin-top: 1.5em;
-            margin-bottom: 1.5em;
-            border-radius: 0.5rem; /* 이미지 모서리를 살짝 둥글게 */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); /* 그림자 효과 */
-        }
-        /* 댓글 입력 UI 스타일 추가 */
-        .form-input {
-            display: block; width: 100%; border-radius: 0.5rem; border: 1px solid #cbd5e1; 
-            padding: 0.75rem 1rem;
-        }
-        .form-input:focus {
-            outline: 2px solid transparent; outline-offset: 2px; border-color: #38bdf8;
-            box-shadow: 0 0 0 2px #7dd3fc;
-        }
-        .form-btn-primary {
-            display: inline-flex; justify-content: center; border-radius: 0.5rem; background-color: #0284c7;
-            padding: 0.5rem 1rem; font-weight: 600; color: white; transition: background-color 0.2s;
-        }
-        .form-btn-primary:hover { background-color: #0369a1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEET LOG - <c:out value="${column.title}" default="칼럼 상세" /></title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap"
+	rel="stylesheet">
+<style>
+body {
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.prose-content {
+	white-space: pre-wrap;
+}
+
+.prose-content img {
+	max-width: 100%;
+	height: auto;
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
+	border-radius: 0.5rem; /* 이미지 모서리를 살짝 둥글게 */
+	box-shadow: 0 4px 6px -1px rgb(0 0 0/ 0.1), 0 2px 4px -2px
+		rgb(0 0 0/ 0.1); /* 그림자 효과 */
+}
+/* 댓글 입력 UI 스타일 추가 */
+.form-input {
+	display: block;
+	width: 100%;
+	border-radius: 0.5rem;
+	border: 1px solid #cbd5e1;
+	padding: 0.75rem 1rem;
+}
+
+.form-input:focus {
+	outline: 2px solid transparent;
+	outline-offset: 2px;
+	border-color: #38bdf8;
+	box-shadow: 0 0 0 2px #7dd3fc;
+}
+
+.form-btn-primary {
+	display: inline-flex;
+	justify-content: center;
+	border-radius: 0.5rem;
+	background-color: #0284c7;
+	padding: 0.5rem 1rem;
+	font-weight: 600;
+	color: white;
+	transition: background-color 0.2s;
+}
+
+.form-btn-primary:hover {
+	background-color: #0369a1;
+}
+</style>
 </head>
 <body class="bg-slate-100">
-    <div id="app" class="flex flex-col min-h-screen">
-        <jsp:include page="/WEB-INF/views/common/header.jsp" />
-        <main class="flex-grow">
-            <div class="container mx-auto p-4 md:p-8">
-                <div class="max-w-4xl mx-auto">
-                    <c:choose>
-                        <c:when test="${not empty column}">
-                            <article class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <mytag:image fileName="${column.image}"
-                                    altText="${column.title}"
-                                    cssClass="w-full h-64 md:h-80 object-cover" />
-                                <div class="p-6 md:p-8">
-                                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4">${column.title}</h1>
-                                    <div
-                                        class="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
-                                        <div class="flex items-center space-x-3">
-                                            <a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="flex-shrink-0">
-                                                <mytag:image fileName="${column.profileImage}"
-                                                    altText="${column.author}"
-                                                    cssClass="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" />
-                                            </a>
-                                            <div>
-                                                <a href="${pageContext.request.contextPath}/feed/user/${column.userId}" class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${column.author}</a>
-                                                <p class="text-sm text-slate-500">
-                                                    <c:choose>
-                                                        <c:when test="${column.createdAt != null}">
-                                                            ${column.createdAt.toString().substring(0, 10).replace('-', '. ').concat('.')}
-                                                        </c:when>
-                                                        <c:otherwise>-</c:otherwise>
-                                                    </c:choose>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="flex items-center space-x-4 text-sm text-slate-500">
-                                            <span class="flex items-center space-x-1"> <span>👁️</span>
-                                                <span><c:out value="${column.views}" default="0" /></span>
-                                            </span> <span class="flex items-center space-x-1"> <span>❤️</span>
-                                                <span id="like-count-${column.id}"><c:out
-                                                        value="${column.likes}" default="0" /></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="prose max-w-none text-slate-700 leading-relaxed">
-                                        <div class="prose-content">
-                                            <c:out value="${column.content}" escapeXml="false" />
-                                        </div>
-                                    </div>
-                                    <div class="mt-8 pt-6 border-t border-slate-200">
-                                        <div class="flex items-center justify-between">
-                                            <div class="flex items-center space-x-3">
-                                                <button id="column-like-btn-${column.id}" onclick="likeColumn(${column.id})"
-                                                    class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors">
-                                                    <span>❤️</span> <span>좋아요</span>
-                                                </button>
-                                                <button onclick="shareColumn()"
-                                                    class="flex items-center space-x-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
-                                                    <span>📤</span> <span>공유</span>
-                                                </button>
-                                            </div>
-                                            <c:if
-                                                test="${not empty sessionScope.user and sessionScope.user.id == column.userId}">
-                                                <div class="flex items-center space-x-2">
-                                                    <a
-                                                        href="${pageContext.request.contextPath}/column/edit?id=${column.id}"
-                                                        class="px-4 py-2 text-slate-600 hover:text-slate-800 text-sm">수정</a>
-                                                    <span class="text-slate-300">|</span>
-                                                    <button onclick="deleteColumn(${column.id})"
-                                                        class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">삭제</button>
-                                                </div>
-                                            </c:if>
-                                        </div>
-                                    </div>
-                                </div>
-                            </article>
-                            <div class="mt-8">
-                                <h3 class="text-xl font-bold text-slate-800 mb-4">댓글 (<span id="comment-count">${commentCount}</span>)</h3>
+	<div id="app" class="flex flex-col min-h-screen">
+		<jsp:include page="/WEB-INF/views/common/header.jsp" />
+		<main class="flex-grow">
+			<div class="container mx-auto p-4 md:p-8">
+				<div class="max-w-4xl mx-auto">
+					<c:choose>
+						<c:when test="${not empty column}">
+							<article class="bg-white rounded-xl shadow-lg overflow-hidden">
+								<mytag:image fileName="${column.image}"
+									altText="${column.title}"
+									cssClass="w-full h-64 md:h-80 object-cover" />
 
-                                <!-- 댓글 입력 폼 -->
-                                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                                    <c:choose>
-                                        <c:when test="${not empty sessionScope.user}">
-                                            <textarea id="comment-content" class="form-input w-full mb-4"
-                                                placeholder="따뜻한 댓글을 남겨주세요." rows="3"></textarea>
-                                            <div class="text-right">
-                                                <button id="submit-comment" class="form-btn-primary">댓글 등록</button>
-                                            </div>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <p class="text-slate-500 text-center py-4">
-                                                <a href="${pageContext.request.contextPath}/login" class="text-sky-600 hover:text-sky-700">로그인</a>하시면 댓글을 작성할 수 있습니다.
-                                            </p>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
+								<%-- 모든 콘텐츠를 감싸는 하나의 div로 구조 개선 --%>
+								<div class="p-6 md:p-8">
 
-                                <!-- 댓글 목록 -->
-                                <div id="comments-list" class="space-y-4">
-                                    <c:choose>
-                                        <c:when test="${not empty comments}">
-                                            <c:forEach var="comment" items="${comments}">
-                                                <div class="bg-white rounded-xl shadow-sm p-6 comment-item" data-comment-id="${comment.id}">
-                                                    <div class="flex items-start space-x-3">
-                                                        <a href="${pageContext.request.contextPath}/feed/user/${comment.userId}" class="flex-shrink-0">
-                                                            <mytag:image fileName="${comment.profileImage}"
-                                                                altText="${comment.author}"
-                                                                cssClass="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" />
-                                                        </a>
-                                                        <div class="flex-1">
-                                                            <div class="flex items-center justify-between mb-2">
-                                                                <a href="${pageContext.request.contextPath}/feed/user/${comment.userId}" class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${comment.author}</a>
-                                                                <div class="flex items-center space-x-2 comment-actions">
-                                                                    <span class="text-sm text-slate-500">
-                                                                        ${comment.createdAt.toString().substring(0, 16).replace('T', ' ')}
-                                                                    </span>
-                                                                    <c:if test="${not empty sessionScope.user and sessionScope.user.id == comment.userId}">
-                                                                        <button onclick="editComment(${comment.id})" class="text-blue-500 hover:text-blue-700 text-sm">수정</button>
-                                                                        <button onclick="deleteComment(${comment.id})" class="text-red-500 hover:text-red-700 text-sm">삭제</button>
-                                                                    </c:if>
-                                                                </div>
-                                                            </div>
-                                                            <p id="comment-content-${comment.id}" class="text-slate-700 leading-relaxed">${comment.content}</p>
-                                                            <div class="mt-2 flex items-center space-x-4">
-                                                                <button id="comment-like-btn-${comment.id}" onclick="likeComment(${comment.id})" class="flex items-center space-x-1 text-slate-600 hover:text-red-500 transition-colors">
-                                                                    <span>❤️</span>
-                                                                    <span id="comment-like-count-${comment.id}">${comment.likeCount > 0 ? comment.likeCount : 0}</span>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </c:forEach>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <div class="text-center py-8 text-slate-500">
-                                                <p>아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
-                                            </div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </div>
-                            </div>
-                        </c:when>
-                        <c:otherwise>
-                            <div class="text-center py-20">
-                                <div class="text-6xl mb-4">📰</div>
-                                <h2 class="text-2xl font-bold text-slate-800 mb-4">칼럼을 찾을 수
-                                    없습니다.</h2>
-                                <p class="text-slate-600 mb-6">요청하신 칼럼이 존재하지 않거나 삭제되었습니다.</p>
-                                <a href="${pageContext.request.contextPath}/column"
-                                    class="inline-block bg-sky-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-700 transition-colors">
-                                    칼럼 목록으로 돌아가기 </a>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-        </main>
-        <jsp:include page="/WEB-INF/views/common/footer.jsp" />
-    </div>
-    <script>
+									<div class="flex justify-between items-start mb-4">
+										<h1 class="text-2xl md:text-3xl font-bold text-slate-800">${column.title}</h1>
+										<div class="flex-shrink-0 flex items-center space-x-2">
+											<button id="column-like-btn-${column.id}"
+												onclick="likeColumn(${column.id})"
+												class="flex items-center space-x-2 px-3 py-2 bg-slate-100 hover:bg-red-100 hover:text-red-600 rounded-lg transition-colors">
+												<span>❤️</span>
+												<%-- 이 ID는 유일해야 합니다. --%>
+												<span id="like-count-${column.id}"><c:out
+														value="${column.likes}" default="0" /></span>
+											</button>
+											<button onclick="shareColumn()"
+												class="flex items-center justify-center w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+												<span>📤</span>
+											</button>
+										</div>
+									</div>
+
+									<div
+										class="flex items-center space-x-4 text-sm text-slate-500 mb-6 pb-4 border-b">
+										<span class="font-semibold text-slate-700">${column.author}</span>
+										<span class="text-slate-400">|</span> <span><fmt:formatDate
+												value="${column.createdAt}" pattern="yyyy.MM.dd" /></span> <span
+											class="text-slate-400">|</span> <span
+											class="flex items-center space-x-1"> <span>👁️</span>
+											<span><c:out value="${column.views}" default="0" /></span>
+										</span>
+										<%-- [수정] 중복되던 좋아요 카운트 삭제 --%>
+									</div>
+
+									<%-- 본문 내용 --%>
+									<div class="prose max-w-none text-slate-700 leading-relaxed">
+										<div class="prose-content">
+											<c:out value="${column.content}" escapeXml="false" />
+										</div>
+									</div>
+
+									<%-- 수정/삭제 버튼 --%>
+									<c:if
+										test="${not empty sessionScope.user and sessionScope.user.id == column.userId}">
+										<div
+											class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+											<div class="flex items-center space-x-2">
+												<a
+													href="${pageContext.request.contextPath}/column/edit?id=${column.id}"
+													class="px-4 py-2 text-slate-600 hover:text-slate-800 text-sm">수정</a>
+												<span class="text-slate-300">|</span>
+												<button onclick="deleteColumn(${column.id})"
+													class="px-4 py-2 text-red-600 hover:text-red-800 text-sm">삭제</button>
+											</div>
+										</div>
+									</c:if>
+
+								</div>
+								<%-- 모든 콘텐츠를 감싸는 div의 닫는 태그 --%>
+							</article>
+							<%-- [추가] 첨부된 맛집 목록 섹션 --%>
+							<c:if test="${not empty attachedRestaurants}">
+								<div class="mt-8 bg-white rounded-xl shadow-lg p-6 md:p-8">
+									<h3 class="text-xl font-bold text-slate-800 mb-4">소개된 맛집</h3>
+									<div class="space-y-4">
+										<c:forEach var="r" items="${attachedRestaurants}">
+											<a
+												href="${pageContext.request.contextPath}/restaurant/detail/${r.id}"
+												class="flex items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+												<%-- 이미지가 있다면 표시 (없다면 기본 아이콘) --%>
+												<div
+													class="w-16 h-16 rounded-md bg-slate-200 flex-shrink-0 mr-4 flex items-center justify-center">
+													<span class="text-2xl">🍽️</span>
+												</div>
+												<div>
+													<p class="font-bold text-lg text-slate-800">${r.name}</p>
+													<p class="text-slate-600">${r.address}</p>
+												</div>
+											</a>
+										</c:forEach>
+									</div>
+								</div>
+							</c:if>
+
+							<div class="mt-8">
+								<h3 class="text-xl font-bold text-slate-800 mb-4">
+									댓글 (<span id="comment-count">${commentCount}</span>)
+								</h3>
+
+								<!-- 댓글 입력 폼 -->
+								<div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+									<c:choose>
+										<c:when test="${not empty sessionScope.user}">
+											<textarea id="comment-content" class="form-input w-full mb-4"
+												placeholder="따뜻한 댓글을 남겨주세요." rows="3"></textarea>
+											<div class="text-right">
+												<button id="submit-comment" class="form-btn-primary">댓글
+													등록</button>
+											</div>
+										</c:when>
+										<c:otherwise>
+											<p class="text-slate-500 text-center py-4">
+												<a href="${pageContext.request.contextPath}/login"
+													class="text-sky-600 hover:text-sky-700">로그인</a>하시면 댓글을 작성할
+												수 있습니다.
+											</p>
+										</c:otherwise>
+									</c:choose>
+								</div>
+
+								<!-- 댓글 목록 -->
+								<div id="comments-list" class="space-y-4">
+									<c:choose>
+										<c:when test="${not empty comments}">
+											<c:forEach var="comment" items="${comments}">
+												<div class="bg-white rounded-xl shadow-sm p-6 comment-item"
+													data-comment-id="${comment.id}">
+													<div class="flex items-start space-x-3">
+														<a
+															href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
+															class="flex-shrink-0"> <mytag:image
+																fileName="${comment.profileImage}"
+																altText="${comment.author}"
+																cssClass="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity" />
+														</a>
+														<div class="flex-1">
+															<div class="flex items-center justify-between mb-2">
+																<a
+																	href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
+																	class="font-semibold text-slate-800 hover:text-blue-600 transition-colors">${comment.author}</a>
+																<div class="flex items-center space-x-2 comment-actions">
+																	<span class="text-sm text-slate-500">
+																		${comment.createdAt.toString().substring(0, 16).replace('T', ' ')}
+																	</span>
+																	<c:if
+																		test="${not empty sessionScope.user and sessionScope.user.id == comment.userId}">
+																		<button onclick="editComment(${comment.id})"
+																			class="text-blue-500 hover:text-blue-700 text-sm">수정</button>
+																		<button onclick="deleteComment(${comment.id})"
+																			class="text-red-500 hover:text-red-700 text-sm">삭제</button>
+																	</c:if>
+																</div>
+															</div>
+															<p id="comment-content-${comment.id}"
+																class="text-slate-700 leading-relaxed">${comment.content}</p>
+															<div class="mt-2 flex items-center space-x-4">
+																<button id="comment-like-btn-${comment.id}"
+																	onclick="likeComment(${comment.id})"
+																	class="flex items-center space-x-1 text-slate-600 hover:text-red-500 transition-colors">
+																	<span>❤️</span> <span
+																		id="comment-like-count-${comment.id}">${comment.likeCount > 0 ? comment.likeCount : 0}</span>
+																</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</c:forEach>
+										</c:when>
+										<c:otherwise>
+											<div class="text-center py-8 text-slate-500">
+												<p>아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</p>
+											</div>
+										</c:otherwise>
+									</c:choose>
+								</div>
+							</div>
+						</c:when>
+						<c:otherwise>
+							<div class="text-center py-20">
+								<div class="text-6xl mb-4">📰</div>
+								<h2 class="text-2xl font-bold text-slate-800 mb-4">칼럼을 찾을 수
+									없습니다.</h2>
+								<p class="text-slate-600 mb-6">요청하신 칼럼이 존재하지 않거나 삭제되었습니다.</p>
+								<a href="${pageContext.request.contextPath}/column"
+									class="inline-block bg-sky-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-sky-700 transition-colors">
+									칼럼 목록으로 돌아가기 </a>
+							</div>
+						</c:otherwise>
+					</c:choose>
+				</div>
+			</div>
+		</main>
+		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
+	</div>
+	<script>
         // 댓글 등록 기능
         document.addEventListener('DOMContentLoaded', function() {
             const submitBtn = document.getElementById('submit-comment');

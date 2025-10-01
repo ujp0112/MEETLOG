@@ -79,6 +79,15 @@ public class RestaurantDAO {
 	public int insert(SqlSession session, Restaurant restaurant) {
 		return session.insert(NAMESPACE + ".insert", restaurant);
 	}
+	
+	public int insert(Restaurant restaurant) {
+        // [수정] openSession() 사용 및 commit() 호출
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = sqlSession.insert(NAMESPACE + ".insert", restaurant);
+            sqlSession.commit(); // <-- 이 부분이 매우 중요합니다.
+            return result;
+        }
+    }
 
 	public int update(SqlSession session, Restaurant restaurant) {
 		return session.update(NAMESPACE + ".update", restaurant);
@@ -181,15 +190,15 @@ public class RestaurantDAO {
 			params.put("categories", categories);
 			params.put("offset", offset);
 			params.put("limit", limit);
-            params.put("excludeIds", excludeIds);
+			params.put("excludeIds", excludeIds);
 
 			return sqlSession.selectList(NAMESPACE + ".findNearbyRestaurantsByPage", params);
 		} // finally 블록은 try-with-resources가 자동으로 처리하므로 제거합니다.
 	}
-	
+
 	public void updateRatingAndReviewCount(SqlSession session, int restaurantId) {
-        session.update(NAMESPACE + ".updateRatingAndReviewCount", restaurantId);
-    }
+		session.update(NAMESPACE + ".updateRatingAndReviewCount", restaurantId);
+	}
 
 	/**
 	 * 비즈니스 사용자의 전체 통계 조회
@@ -208,5 +217,11 @@ public class RestaurantDAO {
 			return sqlSession.selectList(NAMESPACE + ".getOwnerRestaurantsWithStats", ownerId);
 		}
 	}
+	 // ▼▼▼ [추가] findByKakaoPlaceId 메서드 ▼▼▼
+    public Restaurant findByKakaoPlaceId(String kakaoPlaceId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".findByKakaoPlaceId", kakaoPlaceId);
+        }
+    }
 
 }

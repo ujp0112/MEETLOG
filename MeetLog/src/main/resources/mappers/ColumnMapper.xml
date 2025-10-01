@@ -31,10 +31,12 @@
 		<include refid="selectColumnWithUser" />
 		WHERE
 		c.is_active = true AND
-		(c.title LIKE CONCAT('%', #{region}, '%') OR c.content LIKE CONCAT('%',
+		(c.title LIKE CONCAT('%', #{region}, '%')
+		OR c.content LIKE CONCAT('%',
 		#{region}, '%'))
 		ORDER BY
-		c.likes DESC, c.views DESC
+		c.likes DESC,
+		c.views DESC
 		LIMIT 5
 	</select>
 
@@ -73,46 +75,58 @@
 		resultMap="columnResultMap">
 		<include refid="selectColumnWithUser" />
 		WHERE c.user_id = #{userId} AND c.is_active = true
-		ORDER BY c.created_at DESC
+		ORDER BY
+		c.created_at DESC
 		LIMIT #{limit}
 	</select>
 
 	<insert id="insert" parameterType="model.Column"
 		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO columns (user_id, title, content, image, tags, created_at,
+		INSERT INTO columns (user_id,
+		title, content, image, tags, created_at,
 		updated_at)
-		VALUES (#{userId}, #{title}, #{content}, #{image},
-		#{tags, typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
+		VALUES (#{userId},
+		#{title}, #{content}, #{image},
+		#{tags,
+		typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
 	</insert>
 
 	<update id="update" parameterType="model.Column">
 		UPDATE columns SET
-		title = #{title},
+		title =
+		#{title},
 		content = #{content},
 		image = #{image},
-		tags = #{tags, typeHandler=typehandler.JsonArrayTypeHandler},
+		tags = #{tags,
+		typeHandler=typehandler.JsonArrayTypeHandler},
 		updated_at = NOW()
-		WHERE id = #{id}
+		WHERE
+		id = #{id}
 	</update>
 
 	<update id="delete" parameterType="int">
-		UPDATE columns SET is_active = false, updated_at = NOW() WHERE id = #{id}
+		UPDATE columns SET is_active =
+		false, updated_at = NOW() WHERE id = #{id}
 	</update>
 
 	<update id="incrementViews" parameterType="int">
-		UPDATE columns SET views = views + 1 WHERE id = #{id}
+		UPDATE columns SET
+		views = views + 1 WHERE id = #{id}
 	</update>
 
 	<update id="likeColumn" parameterType="int">
-		UPDATE columns SET likes = likes + 1, updated_at = NOW() WHERE id = #{id}
+		UPDATE columns SET likes =
+		likes + 1, updated_at = NOW() WHERE id = #{id}
 	</update>
 
 	<update id="incrementLikes" parameterType="int">
-		UPDATE columns SET likes = likes + 1 WHERE id = #{id}
+		UPDATE columns SET
+		likes = likes + 1 WHERE id = #{id}
 	</update>
 
 	<update id="decrementLikes" parameterType="int">
-		UPDATE columns SET likes = GREATEST(likes - 1, 0) WHERE id = #{id}
+		UPDATE columns SET
+		likes = GREATEST(likes - 1, 0) WHERE id = #{id}
 	</update>
 
 	<select id="searchColumns" parameterType="map"
@@ -121,9 +135,36 @@
 		WHERE c.is_active = true
 		<if test="keyword != null and keyword != ''">
 			AND (c.title LIKE CONCAT('%', #{keyword}, '%')
-			OR c.content LIKE CONCAT('%', #{keyword}, '%')
-			OR u.nickname LIKE CONCAT('%', #{keyword}, '%'))
+			OR c.content
+			LIKE CONCAT('%', #{keyword}, '%')
+			OR u.nickname LIKE CONCAT('%',
+			#{keyword}, '%'))
 		</if>
 		ORDER BY c.created_at DESC
 	</select>
+
+	<select id="findAttachedRestaurantsByColumnId"
+		parameterType="int" resultType="model.Restaurant">
+		SELECT
+		r.id,
+		r.name,
+		r.address,
+		r.image
+		FROM restaurants r
+		JOIN column_restaurants cr ON r.id = cr.restaurant_id
+		WHERE cr.column_id = #{columnId}
+	</select>
+
+	<insert id="insertColumnRestaurantLinks" parameterType="map">
+		INSERT INTO column_restaurants (column_id, restaurant_id)
+		VALUES
+		<foreach collection="restaurantIds" item="restaurantId"
+			separator=",">
+			(#{columnId}, #{restaurantId})
+		</foreach>
+	</insert>
+
+	<delete id="deleteColumnRestaurantLinks" parameterType="int">
+		DELETE FROM column_restaurants WHERE column_id = #{columnId}
+	</delete>
 </mapper>

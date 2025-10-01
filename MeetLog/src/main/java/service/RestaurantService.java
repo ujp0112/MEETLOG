@@ -26,8 +26,8 @@ public class RestaurantService {
         return restaurantDAO.findById(id);
     }
 
-    public Restaurant getRestaurantById(int id) {
-        return findById(id);
+    public Restaurant getRestaurantById(int restaurantId) {
+        return restaurantDAO.findById(restaurantId);
     }
     
     public Restaurant getRestaurantDetailById(int id) {
@@ -192,5 +192,31 @@ public class RestaurantService {
             }
         }
         return false;
+    }
+    
+// ▼▼▼ [추가] RestaurantApiServlet에서 사용할 서비스 메서드들 ▼▼▼
+    
+    /**
+     * 카카오 장소 ID로 DB에 저장된 맛집 정보를 조회합니다.
+     */
+    public Restaurant findRestaurantByKakaoPlaceId(String kakaoPlaceId) {
+        return restaurantDAO.findByKakaoPlaceId(kakaoPlaceId);
+    }
+    
+    /**
+     * 새로운 맛집 정보를 DB에 저장하고, 생성된 ID가 포함된 객체를 반환합니다.
+     */
+    public Restaurant createRestaurantAndReturn(Restaurant restaurant) {
+        // DAO의 insert 메서드는 MyBatis의 useGeneratedKeys 속성 덕분에
+        // 파라미터로 전달된 restaurant 객체의 id 필드를 채워줍니다.
+        int result = restaurantDAO.insert(restaurant);
+        
+        if (result > 0) {
+            // 삽입 성공 시, ID가 채워진 객체를 반환합니다.
+            return restaurant;
+        } else {
+            // 실패 시 null 반환
+            return null; 
+        }
     }
 }

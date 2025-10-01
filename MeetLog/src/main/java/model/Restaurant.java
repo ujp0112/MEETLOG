@@ -15,6 +15,7 @@ public class Restaurant {
     private double latitude;
     private double longitude;
     private int ownerId;
+    private String kakaoPlaceId; // [추가] 카카오 지도 place ID 필드
     
     // ======================== [추가된 필드 시작] ========================
     /**
@@ -389,6 +390,14 @@ public class Restaurant {
 	
 	public void setAdditionalImages(List<String> additionalImages) {
 		this.additionalImages = additionalImages;
+	}
+
+	public String getKakaoPlaceId() {
+		return kakaoPlaceId;
+	}
+
+	public void setKakaoPlaceId(String kakaoPlaceId) {
+		this.kakaoPlaceId = kakaoPlaceId;
 	}
 	
 }

@@ -645,7 +645,17 @@ CREATE TABLE `restaurants` (
   KEY `idx_restaurants_location` (`location`),
   KEY `idx_restaurants_rating` (`rating` DESC),
   CONSTRAINT `restaurants_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_UNICODE_CI;
+
+-- restaurants 테이블의 owner_id 컬럼이 NULL 값을 허용하도록 변경합니다.
+SET FOREIGN_KEY_CHECKS = 0;
+
+ALTER TABLE restaurants MODIFY COLUMN owner_id INT NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE restaurants ADD COLUMN kakao_place_id VARCHAR(255) UNIQUE;
+
 CREATE TABLE `review_comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `review_id` int(11) NOT NULL,
@@ -899,6 +909,17 @@ CREATE TABLE faqs (
     INDEX idx_faqs_active (is_active),
     INDEX idx_faqs_order (display_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='자주 묻는 질문 테이블';
+
+-- 칼럼과 맛집의 다대다(N:M) 관계를 위한 연결 테이블 생성
+CREATE TABLE column_restaurants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    column_id INT NOT NULL,
+    restaurant_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_column FOREIGN KEY (column_id) REFERENCES columns(id) ON DELETE CASCADE,
+    CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_column_restaurant (column_id, restaurant_id)
+);
 
 -- ===================================================================
 -- 3. 데이터 삽입 (Insert Data)
