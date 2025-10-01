@@ -1,3 +1,297 @@
+
+10/01
+쿠폰 관리 페이지도 Q&A관리 페이지처럼 (ㅇ)
+코스 생성/수정 시 태그 저장 기능 구현 (ㅇ)
+썸네일 이미지 표시 문제 수정 (ㅇ)
+코스 수정 페이지에서 기존 위치 데이터 지도에 표시 (ㅇ)
+master.sql 스키마 에러 수정 (ㅇ)
+CLAUDE.md 프로젝트 가이드 문서 작성 (ㅇ)
+
+---
+
+## 📋 10월 1일 이후 작업 계획 (프로젝트 전체 분석 결과 기반)
+
+### 🚨 **CRITICAL - 즉시 수정 필요 (보안 취약점)**
+
+#### 1. 인증/인가 보안 수정
+- [ ] **예약 취소 권한 검증 추가** (ReservationServlet.java:393)
+  - 현재: 다른 사용자의 예약도 취소 가능
+  - 수정: 본인 예약만 취소하도록 userId 검증 로직 추가
+
+- [ ] **리뷰 답글 권한 검증 추가** (ReviewService.java:177)
+  - 현재: 누구나 사장님 답글 작성 가능
+  - 수정: 해당 음식점 소유자만 답글 작성하도록 검증
+
+- [ ] **AuthenticationFilter 범위 확장** (filter/AuthenticationFilter.java)
+  - 현재: 일부 URL만 보호 (mypage, review/write 등)
+  - 추가 필요:
+    * `/business/*` - 비즈니스 대시보드 전체
+    * `/admin/*` - 관리자 페이지 전체
+    * `/hq/*`, `/branch/*` - ERP 기능 전체
+  - 또는 역할별 필터 분리 (BusinessFilter, AdminFilter, ErpFilter)
+
+#### 2. 파일 업로드 보안 강화
+- [ ] **ColumnImageUploadServlet 보안 개선** (controller/ColumnImageUploadServlet.java)
+  - 파일 타입 검증 (MIME 타입 + Magic Byte 확인)
+  - 파일 크기 제한 (예: 10MB)
+  - 안전한 파일명 생성 (현재 사용자 입력 파일명 사용)
+  - 에러 메시지에서 스택 트레이스 제거
+
+- [ ] **다른 업로드 서블릿도 동일하게 적용**
+  - CourseServlet (썸네일 업로드)
+  - RestaurantServlet (이미지 업로드)
+  - ReviewImageUploadServlet
+
+#### 3. 프로덕션 코드에서 디버그/테스트 코드 제거
+- [ ] **web.xml에서 디버그 서블릿 제거**
+  - TestServlet (`/test`) - DB 연결 테스트용
+  - DebugServlet (`/debug`) - 디버그 데이터 생성용
+
+- [ ] **백업 JSP 파일 삭제** (6개)
+  - `review-management-old.jsp`
+  - `review-management-new.jsp`
+  - `review-management-v2.jsp`
+  - `review-management-final.jsp`
+  - `review-management.jsp.backup`
+  - `sales-orders백업.jsp`
+
+---
+
+### 🔥 **HIGH PRIORITY - 이번 주 내 완료**
+
+#### 4. 로깅 시스템 도입
+- [ ] **의존성 추가** (pom.xml)
+  ```xml
+  <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.9</version>
+  </dependency>
+  <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.4.11</version>
+  </dependency>
+  ```
+
+- [ ] **logback.xml 설정 파일 생성** (src/main/resources/)
+  - 로그 레벨: DEBUG (개발), INFO (운영)
+  - 파일 로테이션 설정
+  - 콘솔/파일 Appender 설정
+
+- [ ] **System.out.println 대체** (152개 발견)
+  - 우선순위 파일들:
+    * CourseServlet.java (20개)
+    * ColumnCommentServlet.java (8개)
+    * BusinessReviewManagementServlet.java (8개)
+    * BusinessQnAManagementServlet.java (8개)
+  - 패턴:
+    ```java
+    // 변경 전
+    System.out.println("Debug: " + value);
+
+    // 변경 후
+    private static final Logger logger = LoggerFactory.getLogger(ClassName.class);
+    logger.debug("Debug: {}", value);
+    ```
+
+#### 5. 에러 핸들링 표준화
+- [ ] **중앙 집중식 에러 처리 유틸 생성**
+  - `util/ErrorHandler.java` 생성
+  - JSON 에러 응답 표준화
+  - 사용자 친화적 에러 메시지
+
+- [ ] **printStackTrace() 제거** (124개 파일)
+  - 로거로 대체: `logger.error("Error message", e);`
+  - 클라이언트에 스택 트레이스 노출 방지
+
+- [ ] **입력 검증 강화**
+  - parseInt/parseDouble 래핑 (10개 서블릿)
+  - 예시:
+    ```java
+    try {
+        int id = Integer.parseInt(request.getParameter("id"));
+    } catch (NumberFormatException e) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid ID format");
+        return;
+    }
+    ```
+
+#### 6. 트랜잭션 관리 추가
+- [ ] **UserService - 사용자 등록 트랜잭션**
+  - 사용자 생성 + 기본 스토리지 생성을 하나의 트랜잭션으로
+
+- [ ] **RestaurantService - 음식점 등록 트랜잭션**
+  - 음식점 정보 + 이미지 + 초기 설정을 하나의 트랜잭션으로
+
+- [ ] **CouponService - 쿠폰 사용 트랜잭션**
+  - 쿠폰 상태 업데이트 + 사용 로그 기록을 하나의 트랜잭션으로
+
+- [ ] **ReservationService - 예약 처리 트랜잭션**
+  - 예약 생성 + 테이블 할당 + 알림 발송을 하나의 트랜잭션으로
+
+#### 7. 미완성 기능 처리
+- [ ] **IntelligentRecommendationService 결정**
+  - 옵션 A: 10개 stub 메소드 구현 (ML/데이터 분석 필요, 고난이도)
+  - 옵션 B: 서비스 제거하고 기본 추천만 유지
+  - 추천: 우선 옵션 B로 진행, 향후 필요시 재구현
+
+- [ ] **ReservationSettingsService 검증 로직 완성** (Line 98)
+  - ReservationSettingsNew 검증 업데이트
+
+- [ ] **EventManagementService 이미지 업로드 완성** (Line 23)
+  - 이벤트 이미지 처리 로직 구현
+
+---
+
+### ⚙️ **MEDIUM PRIORITY - 2주 내 완료**
+
+#### 8. 데이터베이스 최적화
+- [ ] **SELECT * 쿼리 수정** (31개 발견)
+  - 명시적 컬럼 리스트로 변경
+  - 성능 및 유지보수성 개선
+
+- [ ] **쿠폰 스키마 마이그레이션 확인**
+  - `coupon_table_update.sql` 적용 여부 확인
+  - 미적용 시 실행 후 매퍼 업데이트
+
+- [ ] **인덱스 분석 및 추가**
+  - 자주 조회되는 컬럼에 인덱스 추가
+  - 느린 쿼리 로그 분석 (EXPLAIN 사용)
+
+#### 9. 단위 테스트 추가
+- [ ] **JUnit 5 의존성 추가**
+  ```xml
+  <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.10.0</version>
+      <scope>test</scope>
+  </dependency>
+  ```
+
+- [ ] **Service 레이어 테스트 작성**
+  - UserService 테스트
+  - ReviewService 테스트
+  - ReservationService 테스트
+  - CourseService 테스트
+
+- [ ] **DAO 레이어 테스트 작성**
+  - 핵심 DAO부터 시작
+  - H2 인메모리 DB 사용
+
+#### 10. API 문서화
+- [ ] **AJAX 엔드포인트 문서 작성**
+  - 각 서블릿의 AJAX 요청/응답 형식 문서화
+  - 예시:
+    ```
+    POST /course/like
+    Request: { courseId: number, userId: number }
+    Response: { success: boolean, likeCount: number }
+    ```
+
+#### 11. Rate Limiting 구현
+- [ ] **RateLimitFilter 생성**
+  - IP 기반 요청 제한
+  - 공용 엔드포인트 보호 (리뷰 작성, 예약 등)
+  - Redis 또는 간단한 메모리 기반 구현
+
+---
+
+### 🔧 **LOW PRIORITY - 다음 달**
+
+#### 12. 코드 리팩토링
+- [ ] **중복 코드 제거**
+  - Path normalization 로직 → `util/PathUtils.java`
+  - 세션 사용자 조회 → `util/SessionUtils.java`
+  - JSON 응답 생성 → `util/JsonResponseUtils.java`
+
+- [ ] **하드코딩 값 설정 파일로 이동**
+  - DB 비밀번호 환경 변수로 관리
+  - 업로드 경로 중앙 관리
+  - Magic number 상수로 정의
+
+#### 13. ERP 멀티테넌트 보안 감사
+- [ ] **회사별 데이터 격리 확인**
+  - 모든 ERP 쿼리에 company_id 조건 있는지 확인
+  - 지점 사용자가 다른 지점 데이터 접근 불가 확인
+
+#### 14. 성능 모니터링
+- [ ] **애플리케이션 헬스체크 엔드포인트**
+  - `/health` - DB 연결, 서버 상태 확인
+
+- [ ] **슬로우 쿼리 모니터링**
+  - MyBatis 플러그인 또는 DB 로그 활용
+
+---
+
+### 📊 **작업 우선순위 요약**
+
+```
+🚨 CRITICAL (즉시)
+├─ 예약 취소 권한 검증
+├─ 리뷰 답글 권한 검증
+├─ AuthenticationFilter 확장
+├─ 파일 업로드 보안
+└─ 디버그 코드 제거
+
+🔥 HIGH (이번 주)
+├─ 로깅 시스템 도입
+├─ 에러 핸들링 표준화
+├─ 트랜잭션 관리 추가
+└─ 미완성 기능 처리
+
+⚙️ MEDIUM (2주)
+├─ DB 최적화
+├─ 단위 테스트
+├─ API 문서화
+└─ Rate Limiting
+
+🔧 LOW (다음 달)
+├─ 코드 리팩토링
+├─ 보안 감사
+└─ 성능 모니터링
+```
+
+---
+
+### 📈 **진행 상황 체크리스트**
+
+#### Week 1 (10/1 - 10/7)
+- [ ] 보안 취약점 수정 완료 (4개)
+- [ ] 디버그 코드 제거 완료
+- [ ] 로깅 시스템 도입 시작
+
+#### Week 2 (10/8 - 10/14)
+- [ ] 로깅 시스템 완료 (152개 println 대체)
+- [ ] 에러 핸들링 표준화 완료
+- [ ] 트랜잭션 관리 추가 완료
+
+#### Week 3 (10/15 - 10/21)
+- [ ] DB 최적화 완료
+- [ ] 단위 테스트 작성 시작
+- [ ] API 문서화 시작
+
+#### Week 4 (10/22 - 10/31)
+- [ ] 단위 테스트 완료 (핵심 기능)
+- [ ] Rate Limiting 구현
+- [ ] 코드 리팩토링 시작
+
+---
+
+### 🎯 **최종 목표: Production-Ready 상태 달성**
+
+**현재 상태:**
+- 보안: 6/10 → 목표: 9/10
+- 안정성: 6/10 → 목표: 9/10
+- 유지보수성: 7/10 → 목표: 9/10
+- 테스트 커버리지: 0% → 목표: 60%
+
+**예상 완료: 11월 말**
+
+
+
+---------------------------------------------
 9월 5주차 todo list
 
 **⚠️ 코드 품질 및 임시데이터 정리 (최우선)**
@@ -157,6 +451,3 @@ wishlist 페이지에 기본 폴더로 "내 찜 목록" 기본 폴더로 만들�
 음식점 리뷰 점수 음식점에 평균으로 들어갈 수 있게 수정, 음식점 상세 페이지에서 예약 가능 시간 선택(restaurant-detail페이지 완성 이후 예정)
 
 
-
-10/01
-쿠폰 관리 페이지도 Q&A관리 페이지처럼
