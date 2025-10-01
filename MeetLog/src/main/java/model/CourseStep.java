@@ -16,6 +16,11 @@ public class CourseStep {
 	private int time;     // 소요 시간 (분)
 	private int cost;     // 예상 비용 (원)
 
+	// 위치 정보
+	private Double latitude;  // 위도
+	private Double longitude; // 경도
+	private String address;   // 주소
+
 	// --- 모든 필드에 대한 Getter/Setter ---
 	
     // [추가] id 필드의 Getter/Setter
@@ -97,5 +102,29 @@ public class CourseStep {
 
 	public void setCost(int cost) {
 		this.cost = cost;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 }

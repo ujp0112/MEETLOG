@@ -135,9 +135,9 @@
                 courseCart.push({
                     id: null,
                     name: '${step.name}',
-                    address: '',
-                    lat: 0,
-                    lng: 0,
+                    address: '${step.address != null ? step.address : ""}',
+                    lat: ${step.latitude != null ? step.latitude : 0},
+                    lng: ${step.longitude != null ? step.longitude : 0},
                     type: '${step.type}',
                     time: ${step.time},
                     cost: ${step.cost}
@@ -147,6 +147,7 @@
             // UI 업데이트
             if (courseCart.length > 0) {
                 renderCourseSidebar();
+                updateCourseOnMap();
                 updateSummary();
             }
         </c:if>
@@ -449,6 +450,9 @@
             formData.append('step_type_' + stepNum, place.type || 'RESTAURANT');
             formData.append('step_time_' + stepNum, Math.max(0, parseInt(place.time) || 0));
             formData.append('step_cost_' + stepNum, Math.max(0, parseInt(place.cost) || 0));
+            formData.append('step_latitude_' + stepNum, place.lat || 0);
+            formData.append('step_longitude_' + stepNum, place.lng || 0);
+            formData.append('step_address_' + stepNum, place.address || '');
         });
 
         // 수정 모드일 경우 코스 ID 추가

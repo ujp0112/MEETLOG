@@ -108,7 +108,10 @@
 		description,
 		image,
 		time,
-		cost
+		cost,
+		latitude,
+		longitude,
+		address
 		FROM course_steps
 		WHERE course_id = #{courseId}
 		ORDER BY step_order ASC
@@ -144,8 +147,8 @@
 	</insert>
 
 	<insert id="insertCourseStep" parameterType="model.CourseStep">
-		INSERT INTO course_steps (course_id, step_order, name, step_type, time, cost)
-		VALUES (#{courseId}, #{order}, #{name}, #{type}, #{time}, #{cost})
+		INSERT INTO course_steps (course_id, step_order, name, step_type, time, cost, latitude, longitude, address)
+		VALUES (#{courseId}, #{order}, #{name}, #{type}, #{time}, #{cost}, #{latitude}, #{longitude}, #{address})
 	</insert>
 
 	<select id="findByUserId" parameterType="int" resultMap="communityCourseResult">

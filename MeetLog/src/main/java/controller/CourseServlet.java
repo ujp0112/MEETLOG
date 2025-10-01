@@ -206,12 +206,28 @@ public class CourseServlet extends HttpServlet {
             while (true) {
                 String stepName = formFields.get("step_name_" + stepIndex);
                 if (stepName == null) break;
-                
+
                 CourseStep step = new CourseStep();
                 step.setName(stepName);
                 step.setType(formFields.get("step_type_" + stepIndex));
                 step.setTime(Integer.parseInt(formFields.get("step_time_" + stepIndex)));
                 step.setCost(Integer.parseInt(formFields.get("step_cost_" + stepIndex)));
+
+                // 위치 정보 추가
+                String latStr = formFields.get("step_latitude_" + stepIndex);
+                String lngStr = formFields.get("step_longitude_" + stepIndex);
+                String address = formFields.get("step_address_" + stepIndex);
+
+                if (latStr != null && !latStr.isEmpty()) {
+                    step.setLatitude(Double.parseDouble(latStr));
+                }
+                if (lngStr != null && !lngStr.isEmpty()) {
+                    step.setLongitude(Double.parseDouble(lngStr));
+                }
+                if (address != null) {
+                    step.setAddress(address);
+                }
+
                 steps.add(step);
                 stepIndex++;
             }
