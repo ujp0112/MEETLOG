@@ -19,6 +19,7 @@ public class RestaurantApiServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8"); // [추가] POST 요청에 대한 인코딩 설정
 
 		String pathInfo = request.getPathInfo();
 		if ("/find-or-create".equals(pathInfo)) {
@@ -28,41 +29,37 @@ public class RestaurantApiServlet extends HttpServlet {
 		}
 	}
 
-	// controller/RestaurantApiServlet.java
-
-	// ...
-
 	private void handleFindOrCreate(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
 		try {
+			// 1. 프론트엔드에서 전송된 파라미터 수신
 			String kakaoPlaceId = request.getParameter("kakaoPlaceId");
 			String name = request.getParameter("name");
 			String address = request.getParameter("address");
 			String phone = request.getParameter("phone");
 			String category = request.getParameter("category");
-			String location = request.getParameter("location"); // [추가] location 파라미터 받기
+			String location = request.getParameter("location");
 
 			double lat = parseDoubleParameter(request.getParameter("lat"));
 			double lng = parseDoubleParameter(request.getParameter("lng"));
 
-			Restaurant restaurant = restaurantService.findRestaurantByKakaoPlaceId(kakaoPlaceId);
+			// [수정] Restaurant 객체를 먼저 생성하고 서비스 레이어에 전달
+			Restaurant restaurantData = new Restaurant();
+			restaurantData.setKakaoPlaceId(kakaoPlaceId);
+			restaurantData.setName(name);
+			restaurantData.setAddress(address);
+			restaurantData.setPhone(phone);
+			restaurantData.setCategory(category);
+			restaurantData.setLocation(location);
+			restaurantData.setLatitude(lat);
+			restaurantData.setLongitude(lng);
 
-			if (restaurant == null) {
-				Restaurant newRestaurant = new Restaurant();
-				newRestaurant.setKakaoPlaceId(kakaoPlaceId);
-				newRestaurant.setName(name);
-				newRestaurant.setAddress(address);
-				newRestaurant.setPhone(phone);
-				newRestaurant.setCategory(category);
-				newRestaurant.setLocation(location); // [추가] location 값 설정
-				newRestaurant.setLatitude(lat);
-				newRestaurant.setLongitude(lng);
+			// [수정] 서비스의 findOrCreateRestaurant 메서드 호출
+			Restaurant restaurant = restaurantService.findOrCreateRestaurant(restaurantData);
 
-				restaurant = restaurantService.createRestaurantAndReturn(newRestaurant);
-			}
-
+			// 4. 최종 결과(찾았거나 새로 생성한 맛집 정보)를 JSON으로 응답
 			response.getWriter().write(gson.toJson(restaurant));
 
 		} catch (Exception e) {
@@ -72,12 +69,6 @@ public class RestaurantApiServlet extends HttpServlet {
 		}
 	}
 
-	/**
-	 * [추가] 문자열 파라미터를 안전하게 Double로 변환하는 헬퍼 메서드
-	 * 
-	 * @param param 변환할 문자열
-	 * @return 변환된 double 값 (실패 시 0.0)
-	 */
 	private double parseDoubleParameter(String param) {
 		if (param == null || param.trim().isEmpty()) {
 			return 0.0;

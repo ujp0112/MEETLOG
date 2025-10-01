@@ -656,6 +656,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 ALTER TABLE restaurants MODIFY COLUMN owner_id INT NULL;
 
+-- ▼▼▼ [수정] 외부 API ID 저장을 위한 컬럼 추가 ▼▼▼
 ALTER TABLE restaurants ADD COLUMN kakao_place_id VARCHAR(255) UNIQUE;
 
 CREATE TABLE `reviews` (
