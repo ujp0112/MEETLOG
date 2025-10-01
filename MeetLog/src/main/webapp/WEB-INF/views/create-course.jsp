@@ -1,5 +1,6 @@
 <%@ page buffer="32kb" %>
 <%@ page import="util.ApiKeyLoader"%>
+<%@ page import="com.google.gson.Gson"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -120,6 +121,36 @@
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
 
+        // 수정 모드일 경우 기존 데이터 로드
+        <c:if test="${isEditMode && not empty course && not empty steps}">
+            // 코스 정보 로드
+            const editCourse = {
+                id: ${course.id},
+                title: '${course.title}',
+                tags: <c:if test="${not empty course.tags}">[<c:forEach var="tag" items="${course.tags}" varStatus="status">'${tag}'<c:if test="${!status.last}">,</c:if></c:forEach>]</c:if><c:if test="${empty course.tags}">[]</c:if>
+            };
+
+            // 스텝 데이터를 courseCart에 추가
+            <c:forEach var="step" items="${steps}">
+                courseCart.push({
+                    id: null,
+                    name: '${step.name}',
+                    address: '',
+                    lat: 0,
+                    lng: 0,
+                    type: '${step.type}',
+                    time: ${step.time},
+                    cost: ${step.cost}
+                });
+            </c:forEach>
+
+            // UI 업데이트
+            if (courseCart.length > 0) {
+                renderCourseSidebar();
+                updateSummary();
+            }
+        </c:if>
+
         $('#search-btn').on('click', performSearch);
         $('#search-input').on('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); performSearch(); } });
 
@@ -131,6 +162,14 @@
                 return;
             }
             openSaveModal();
+
+            // 수정 모드일 경우 기존 정보 미리 입력
+            <c:if test="${isEditMode && not empty course}">
+                document.getElementById('course-title').value = editCourse.title;
+                if (editCourse.tags && editCourse.tags.length > 0) {
+                    document.getElementById('course-tags').value = editCourse.tags.join(', ');
+                }
+            </c:if>
         });
 
         $('.tab-btn').on('click', function() {
@@ -412,9 +451,21 @@
             formData.append('step_cost_' + stepNum, Math.max(0, parseInt(place.cost) || 0));
         });
 
+        // 수정 모드일 경우 코스 ID 추가
+        <c:if test="${isEditMode && not empty course}">
+            formData.append('courseId', ${course.id});
+        </c:if>
+
         // 폼 제출
         const form = document.getElementById('course-form');
-        const action = form.action;
+        <c:choose>
+            <c:when test="${isEditMode}">
+                const action = contextPath + '/course/edit';
+            </c:when>
+            <c:otherwise>
+                const action = form.action;
+            </c:otherwise>
+        </c:choose>
 
         // 로딩 표시
         const submitBtn = document.querySelector('#save-modal button[onclick="submitCourse()"]');

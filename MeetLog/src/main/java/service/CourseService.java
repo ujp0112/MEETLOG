@@ -164,8 +164,35 @@ public class CourseService {
 
     public boolean deleteCourse(int courseId, int userId) {
         // 코스 삭제 (권한 확인 포함)
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        SqlSession session = MyBatisSqlSessionFactory.getSqlSession();
+        try {
+            // 1. 권한 확인 - 해당 코스의 작성자가 맞는지 확인
+            CommunityCourse course = courseDAO.findById(courseId);
+            if (course == null) {
+                return false;
+            }
+            if (course.getUserId() != userId) {
+                // 권한이 없음
+                return false;
+            }
+
+            // 2. 코스 삭제 (CASCADE로 steps, likes 등도 자동 삭제됨)
+            int result = session.delete("mapper.CommunityCourseMapper.deleteCourse", courseId);
+
+            if (result > 0) {
+                session.commit();
+                return true;
+            } else {
+                session.rollback();
+                return false;
+            }
+        } catch (Exception e) {
+            session.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            session.close();
+        }
     }
 
     public CommunityCourse getCourseById(int courseId) {

@@ -160,4 +160,8 @@
 		ORDER BY c.created_at DESC
 	</select>
 
+	<delete id="deleteCourse" parameterType="int">
+		DELETE FROM courses WHERE course_id = #{courseId}
+	</delete>
+
 </mapper>
