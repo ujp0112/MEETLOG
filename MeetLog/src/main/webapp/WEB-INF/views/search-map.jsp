@@ -359,7 +359,7 @@
         $(targetOverlay.getContent()).addClass('highlight');
         targetItemEl.addClass('highlighted');
     }
-
+console.log("무라사키");
     function displayPlaces(places, contextPath) {
         const listEl = $('#results-list');
         places.forEach((place, i) => {
