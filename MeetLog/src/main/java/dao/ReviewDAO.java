@@ -105,4 +105,16 @@ public class ReviewDAO {
 	public void decrementLikes(SqlSession session, int reviewId) {
 	    session.update(NAMESPACE + ".decrementLikes", reviewId);
 	}
+
+	public List<Review> findNearbyReviewsByPage(double latitude, double longitude, double radiusKm, int offset, int limit) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			java.util.Map<String, Object> params = new java.util.HashMap<>();
+			params.put("latitude", latitude);
+			params.put("longitude", longitude);
+			params.put("radiusKm", radiusKm);
+			params.put("offset", offset);
+			params.put("limit", limit);
+			return sqlSession.selectList(NAMESPACE + ".findNearbyReviewsByPage", params);
+		}
+	}
 }

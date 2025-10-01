@@ -193,4 +193,37 @@
 		DELETE FROM course_tags WHERE course_id = #{courseId}
 	</delete>
 
+	<!-- 특정 위치 주변의 커뮤니티 코스를 페이징 처리하여 조회합니다. -->
+	<select id="findNearbyCoursesByPage" parameterType="map" resultType="model.CommunityCourse">
+		SELECT DISTINCT
+			c.course_id AS id,
+			c.course_id AS courseId,
+			c.title,
+			c.description,
+			c.preview_image AS previewImage,
+			c.created_at AS createdAt,
+			u.nickname AS author,
+			u.profile_image AS profileImage,
+			(SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likes,
+			(SELECT COUNT(*) FROM course_steps cs2 WHERE cs2.course_id = c.course_id) AS restaurantCount,
+			MIN((6371 * ACOS(
+				COS(RADIANS(#{latitude})) * COS(RADIANS(cs.latitude)) *
+				COS(RADIANS(cs.longitude) - RADIANS(#{longitude})) +
+				SIN(RADIANS(#{latitude})) * SIN(RADIANS(cs.latitude))
+			))) AS distance
+		FROM courses c
+		LEFT JOIN users u ON c.author_id = u.id
+		INNER JOIN course_steps cs ON c.course_id = cs.course_id
+		WHERE
+			c.type = 'COMMUNITY'
+			AND cs.latitude IS NOT NULL AND cs.longitude IS NOT NULL
+		GROUP BY c.course_id
+		HAVING
+			distance &lt;= #{radiusKm}
+		ORDER BY
+			c.created_at DESC
+		LIMIT #{limit}
+		OFFSET #{offset}
+	</select>
+
 </mapper>

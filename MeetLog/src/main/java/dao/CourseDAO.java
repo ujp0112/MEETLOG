@@ -100,4 +100,16 @@ public class CourseDAO {
     public int deleteCourseTagsByCourseId(int courseId, SqlSession session) {
         return session.delete(COMMUNITY_MAPPER + ".deleteCourseTagsByCourseId", courseId);
     }
+
+    public List<CommunityCourse> findNearbyCoursesByPage(double latitude, double longitude, double radiusKm, int offset, int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new java.util.HashMap<>();
+            params.put("latitude", latitude);
+            params.put("longitude", longitude);
+            params.put("radiusKm", radiusKm);
+            params.put("offset", offset);
+            params.put("limit", limit);
+            return sqlSession.selectList(COMMUNITY_MAPPER + ".findNearbyCoursesByPage", params);
+        }
+    }
 }

@@ -280,6 +280,9 @@
                 data.forEach(place => bounds.extend(new kakao.maps.LatLng(place.y, place.x)));
                 map.setBounds(bounds);
                 fetchDbAndDisplayCombined(currentPage, data);
+                // 리뷰와 코스도 같은 위치 기준으로 검색
+                fetchNearbyReviews();
+                fetchNearbyCourses();
             } else {
                 fetchDbAndDisplayCombined(currentPage, []);
             }
@@ -461,6 +464,88 @@
         }
         columns.forEach(col => {
             container.append('<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition"><p class="font-bold text-lg text-slate-800">' + col.title + '</p><p class="text-sm text-slate-500 mt-1 truncate">' + col.contentSnippet + '</p><p class="text-xs text-slate-400 mt-2">by ' + col.authorNickname + '</p></a>');
+        });
+    }
+
+    function fetchNearbyReviews() {
+        const center = map.getCenter();
+        const url = contextPath + '/search/nearby-reviews?lat=' + center.getLat() + '&lng=' + center.getLng() + '&level=' + map.getLevel() + '&page=1';
+
+        $.getJSON(url, function(reviews) {
+            displayNearbyReviews(reviews);
+        }).fail(function() {
+            displayNearbyReviews([]);
+        });
+    }
+
+    function displayNearbyReviews(reviews) {
+        const container = $('#ranking-review-content');
+        container.empty();
+        updateTabBadge('ranking-review', reviews.length);
+
+        if (reviews.length === 0) {
+            container.html('<p class="text-slate-400 text-center py-8">이 지역의 리뷰가 없습니다.</p>');
+            return;
+        }
+
+        reviews.forEach(review => {
+            const reviewUrl = contextPath + '/restaurant/detail/' + review.restaurantId + '#review-' + review.id;
+            const profileImg = review.profileImage ? (contextPath + '/images/' + review.profileImage) : 'https://placehold.co/40x40/ccc/666?text=User';
+            const ratingStars = '⭐'.repeat(review.rating);
+            const truncatedContent = review.content.length > 80 ? review.content.substring(0, 80) + '...' : review.content;
+
+            container.append(
+                '<a href="' + reviewUrl + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition">' +
+                    '<div class="flex items-center gap-2 mb-2">' +
+                        '<img src="' + profileImg + '" alt="' + review.author + '" class="w-8 h-8 rounded-full object-cover">' +
+                        '<div class="flex-grow">' +
+                            '<p class="font-bold text-sm">' + review.restaurantName + '</p>' +
+                            '<p class="text-xs text-slate-500">' + review.author + ' · ' + ratingStars + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<p class="text-sm text-slate-700">' + truncatedContent + '</p>' +
+                '</a>'
+            );
+        });
+    }
+
+    function fetchNearbyCourses() {
+        const center = map.getCenter();
+        const url = contextPath + '/search/nearby-courses?lat=' + center.getLat() + '&lng=' + center.getLng() + '&level=' + map.getLevel() + '&page=1';
+
+        $.getJSON(url, function(courses) {
+            displayNearbyCourses(courses);
+        }).fail(function() {
+            displayNearbyCourses([]);
+        });
+    }
+
+    function displayNearbyCourses(courses) {
+        const container = $('#ranking-course-content');
+        container.empty();
+        updateTabBadge('ranking-course', courses.length);
+
+        if (courses.length === 0) {
+            container.html('<p class="text-slate-400 text-center py-8">이 지역의 코스가 없습니다.</p>');
+            return;
+        }
+
+        courses.forEach(course => {
+            const courseUrl = contextPath + '/course/detail?id=' + course.id;
+            const thumbImg = course.previewImage ? (contextPath + '/images/' + course.previewImage) : 'https://placehold.co/80x80/e0f2fe/0891b2?text=Course';
+
+            container.append(
+                '<a href="' + courseUrl + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition">' +
+                    '<div class="flex gap-3">' +
+                        '<img src="' + thumbImg + '" alt="' + course.title + '" class="w-20 h-20 rounded-md object-cover flex-shrink-0">' +
+                        '<div class="flex-grow min-w-0">' +
+                            '<p class="font-bold text-slate-800 truncate">' + course.title + '</p>' +
+                            '<p class="text-xs text-slate-500 mt-1">by ' + course.author + '</p>' +
+                            '<p class="text-xs text-slate-400 mt-1">👍 ' + course.likes + ' · 🍽️ ' + course.restaurantCount + '곳</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</a>'
+            );
         });
     }
 

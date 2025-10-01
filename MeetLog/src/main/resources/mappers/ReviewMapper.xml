@@ -252,4 +252,31 @@
            AND likes > 0 <!-- 혹시 모를 음수 방지 -->
     </update>
 
+    <!-- [추가] 특정 위치 주변의 리뷰를 페이징 처리하여 조회합니다. -->
+    <select id="findNearbyReviewsByPage" parameterType="map" resultMap="reviewResultMap">
+        SELECT
+            r.id, r.restaurant_id, r.user_id, r.rating, r.content,
+            r.images, r.keywords, r.likes, r.is_active,
+            r.created_at, r.updated_at, r.reply_content, r.reply_created_at,
+            u.nickname AS author, u.profile_image AS profileImage,
+            res.name AS restaurantName,
+            (6371 * ACOS(
+                COS(RADIANS(#{latitude})) * COS(RADIANS(res.latitude)) *
+                COS(RADIANS(res.longitude) - RADIANS(#{longitude})) +
+                SIN(RADIANS(#{latitude})) * SIN(RADIANS(res.latitude))
+            )) AS distance
+        FROM reviews r
+        JOIN restaurants res ON r.restaurant_id = res.id
+        JOIN users u ON r.user_id = u.id
+        WHERE
+            res.latitude IS NOT NULL AND res.longitude IS NOT NULL
+            AND r.is_active = true
+        HAVING
+            distance &lt;= #{radiusKm}
+        ORDER BY
+            r.created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
+
 </mapper>
