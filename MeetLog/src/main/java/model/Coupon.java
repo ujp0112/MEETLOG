@@ -151,4 +151,75 @@ public class Coupon {
     public void setUsageCount(int usageCount) {
         this.usageCount = usageCount;
     }
+
+    /**
+     * 쿠폰이 현재 사용 가능한지 확인
+     * - is_active가 true이고
+     * - 만료되지 않았고
+     * - 사용 횟수가 제한을 초과하지 않은 경우
+     */
+    public boolean isAvailable() {
+        if (!active) {
+            return false;
+        }
+
+        // 만료 여부 확인
+        if (isExpired()) {
+            return false;
+        }
+
+        // 사용 횟수 제한 확인
+        if (usageLimit != null && usageCount >= usageLimit) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * 쿠폰이 만료되었는지 확인
+     */
+    public boolean isExpired() {
+        if (validTo == null) {
+            return false;
+        }
+
+        Date now = new Date();
+        return now.after(validTo);
+    }
+
+    /**
+     * 쿠폰이 아직 시작되지 않았는지 확인
+     */
+    public boolean isNotStarted() {
+        if (validFrom == null) {
+            return false;
+        }
+
+        Date now = new Date();
+        return now.before(validFrom);
+    }
+
+    /**
+     * 쿠폰 상태를 문자열로 반환 (UI 표시용)
+     */
+    public String getStatusText() {
+        if (!active) {
+            return "비활성";
+        }
+
+        if (isNotStarted()) {
+            return "시작 전";
+        }
+
+        if (isExpired()) {
+            return "만료됨";
+        }
+
+        if (usageLimit != null && usageCount >= usageLimit) {
+            return "소진됨";
+        }
+
+        return "사용 가능";
+    }
 }

@@ -121,40 +121,146 @@
                     </c:if>
                 </c:url>
 
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                     <h2 class="text-2xl font-bold text-slate-800">쿠폰 목록</h2>
                     <a href="${createCouponUrl}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-flex items-center justify-center">
                         + 새 쿠폰 생성
                     </a>
                 </div>
-                
+
+                <!-- 필터 버튼 그룹 -->
+                <c:if test="${not empty coupons}">
+                    <div class="mb-6 flex flex-wrap gap-2">
+                        <button onclick="filterCoupons('all')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-blue-600 text-white"
+                                data-filter="all">
+                            전체 (${totalCoupons})
+                        </button>
+                        <button onclick="filterCoupons('available')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                data-filter="available">
+                            🟢 사용 가능
+                        </button>
+                        <button onclick="filterCoupons('notStarted')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                data-filter="notStarted">
+                            🟡 시작 전
+                        </button>
+                        <button onclick="filterCoupons('expired')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                data-filter="expired">
+                            🔴 만료됨
+                        </button>
+                        <button onclick="filterCoupons('inactive')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                data-filter="inactive">
+                            ⚫ 비활성
+                        </button>
+                        <button onclick="filterCoupons('depleted')"
+                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                                data-filter="depleted">
+                            🟠 소진됨
+                        </button>
+                    </div>
+                </c:if>
+
                 <c:choose>
                     <c:when test="${not empty coupons}">
-                        <div class="space-y-4">
+                        <div id="couponList" class="space-y-4">
                             <c:forEach items="${coupons}" var="coupon">
-                                <div class="glass-card p-6 rounded-2xl border border-slate-100 shadow-sm">
+                                <c:set var="couponStatus" value="available" />
+                                <c:if test="${coupon.notStarted}">
+                                    <c:set var="couponStatus" value="notStarted" />
+                                </c:if>
+                                <c:if test="${coupon.expired}">
+                                    <c:set var="couponStatus" value="expired" />
+                                </c:if>
+                                <c:if test="${not coupon.active}">
+                                    <c:set var="couponStatus" value="inactive" />
+                                </c:if>
+                                <c:if test="${not empty coupon.usageLimit && coupon.usageCount >= coupon.usageLimit}">
+                                    <c:set var="couponStatus" value="depleted" />
+                                </c:if>
+
+                                <div class="coupon-card glass-card p-6 rounded-2xl border border-slate-100 shadow-sm" data-status="${couponStatus}">
                                     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                        <div>
+                                        <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-2">
                                                 <span class="text-xs font-semibold text-slate-400">#${coupon.id}</span>
-                                                <span class="text-xs font-semibold px-2 py-1 rounded-full ${coupon.active ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
-                                                    <c:choose>
-                                                        <c:when test="${coupon.active}">활성</c:when>
-                                                        <c:otherwise>비활성</c:otherwise>
-                                                    </c:choose>
-                                                </span>
-                                            </div>
-                                            <h3 class="text-xl font-bold text-slate-800 mb-2">${coupon.title}</h3>
-                                            <p class="text-slate-600 mb-4">${empty coupon.description ? '설명 정보가 없습니다.' : coupon.description}</p>
-                                            <div class="flex flex-wrap gap-4 text-sm text-slate-500">
-                                                <span>유효 기간: ${empty coupon.validity ? '기간 정보 없음' : coupon.validity}</span>
-                                                <c:if test="${not empty coupon.createdAt}">
-                                                    <span>생성일: <fmt:formatDate value="${coupon.createdAt}" pattern="yyyy-MM-dd HH:mm"/></span>
+
+                                                <!-- 쿠폰 상태 배지 -->
+                                                <c:choose>
+                                                    <c:when test="${coupon.available}">
+                                                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700">사용 가능</span>
+                                                    </c:when>
+                                                    <c:when test="${coupon.notStarted}">
+                                                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">시작 전</span>
+                                                    </c:when>
+                                                    <c:when test="${coupon.expired}">
+                                                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-red-100 text-red-700">만료됨</span>
+                                                    </c:when>
+                                                    <c:when test="${not coupon.active}">
+                                                        <span class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-200 text-slate-600">비활성</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <c:if test="${not empty coupon.usageLimit && coupon.usageCount >= coupon.usageLimit}">
+                                                            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-orange-100 text-orange-700">소진됨</span>
+                                                        </c:if>
+                                                    </c:otherwise>
+                                                </c:choose>
+
+                                                <c:if test="${not empty coupon.discountType}">
+                                                    <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                                        <c:choose>
+                                                            <c:when test="${coupon.discountType == 'PERCENTAGE'}">
+                                                                ${coupon.discountValue}% 할인
+                                                            </c:when>
+                                                            <c:when test="${coupon.discountType == 'FIXED'}">
+                                                                ${coupon.discountValue}원 할인
+                                                            </c:when>
+                                                        </c:choose>
+                                                    </span>
                                                 </c:if>
                                             </div>
+                                            <h3 class="text-xl font-bold text-slate-800 mb-2">${coupon.title}</h3>
+                                            <p class="text-slate-600 mb-3">${empty coupon.description ? '설명 정보가 없습니다.' : coupon.description}</p>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-600">
+                                                <c:if test="${not empty coupon.validFrom && not empty coupon.validTo}">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-slate-500">📅 유효기간:</span>
+                                                        <span class="font-medium">
+                                                            <fmt:formatDate value="${coupon.validFrom}" pattern="yyyy-MM-dd"/> ~
+                                                            <fmt:formatDate value="${coupon.validTo}" pattern="yyyy-MM-dd"/>
+                                                        </span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty coupon.minOrderAmount && coupon.minOrderAmount > 0}">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-slate-500">💰 최소주문:</span>
+                                                        <span class="font-medium">${coupon.minOrderAmount}원 이상</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty coupon.usageLimit}">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-slate-500">🎫 총 사용:</span>
+                                                        <span class="font-medium">${coupon.usageCount} / ${coupon.usageLimit}회</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty coupon.perUserLimit}">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-slate-500">👤 인당제한:</span>
+                                                        <span class="font-medium">${coupon.perUserLimit}회</span>
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                            <c:if test="${not empty coupon.createdAt}">
+                                                <div class="mt-2 text-xs text-slate-400">
+                                                    생성일: <fmt:formatDate value="${coupon.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                                                </div>
+                                            </c:if>
                                         </div>
                                         <div class="flex items-center gap-3 self-end md:self-center">
-                                            <button onclick="openEditModal(${coupon.id}, '${coupon.title}', '${empty coupon.description ? '' : coupon.description}', '${empty coupon.validity ? '' : coupon.validity}')"
+                                            <button onclick="openEditModal(${coupon.id})"
                                                     class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                                 수정
                                             </button>
@@ -188,33 +294,95 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
 
     <!-- 쿠폰 수정 모달 -->
-    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl p-8 max-w-lg w-full mx-4">
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 my-8">
             <h2 class="text-2xl font-bold text-slate-800 mb-6">쿠폰 수정</h2>
-            <form id="editForm" method="POST" action="${pageContext.request.contextPath}/coupon/management">
+            <form id="editForm" method="POST" action="${pageContext.request.contextPath}/coupon-management" class="space-y-6">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="couponId" id="editCouponId">
                 <input type="hidden" name="restaurantId" value="${selectedRestaurant.id}">
 
-                <div class="mb-4">
-                    <label for="editTitle" class="block text-sm font-medium text-slate-700 mb-2">쿠폰 제목 *</label>
-                    <input type="text" id="editTitle" name="title" required
-                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 쿠폰명 -->
+                    <div>
+                        <label for="editCouponName" class="block text-sm font-medium text-slate-700 mb-2">쿠폰명 *</label>
+                        <input type="text" id="editCouponName" name="couponName" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="예: 신규 고객 10% 할인">
+                    </div>
+
+                    <!-- 할인 유형 -->
+                    <div>
+                        <label for="editDiscountType" class="block text-sm font-medium text-slate-700 mb-2">할인 유형 *</label>
+                        <select id="editDiscountType" name="discountType" required
+                                class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">할인 유형을 선택하세요</option>
+                            <option value="PERCENTAGE">퍼센트 할인</option>
+                            <option value="FIXED">고정 금액 할인</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="editDescription" class="block text-sm font-medium text-slate-700 mb-2">설명</label>
-                    <textarea id="editDescription" name="description" rows="3"
-                              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 할인 값 -->
+                    <div>
+                        <label for="editDiscountValue" class="block text-sm font-medium text-slate-700 mb-2">할인 값 *</label>
+                        <input type="number" id="editDiscountValue" name="discountValue" required min="1"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="예: 10 (10% 또는 10원)">
+                    </div>
+
+                    <!-- 최소 주문 금액 -->
+                    <div>
+                        <label for="editMinOrderAmount" class="block text-sm font-medium text-slate-700 mb-2">최소 주문 금액</label>
+                        <input type="number" id="editMinOrderAmount" name="minOrderAmount" min="0"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="예: 10000 (10000원 이상)">
+                    </div>
                 </div>
 
-                <div class="mb-6">
-                    <label for="editValidity" class="block text-sm font-medium text-slate-700 mb-2">유효 기간</label>
-                    <input type="text" id="editValidity" name="validity" placeholder="예: 2024-12-31까지"
-                           class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 유효 시작일 -->
+                    <div>
+                        <label for="editValidFrom" class="block text-sm font-medium text-slate-700 mb-2">유효 시작일 *</label>
+                        <input type="date" id="editValidFrom" name="validFrom" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+
+                    <!-- 유효 종료일 -->
+                    <div>
+                        <label for="editValidTo" class="block text-sm font-medium text-slate-700 mb-2">유효 종료일 *</label>
+                        <input type="date" id="editValidTo" name="validTo" required
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
                 </div>
 
-                <div class="flex gap-3">
+                <!-- 쿠폰 설명 -->
+                <div>
+                    <label for="editDescription" class="block text-sm font-medium text-slate-700 mb-2">쿠폰 설명</label>
+                    <textarea id="editDescription" name="description" rows="4"
+                              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="쿠폰에 대한 상세 설명을 입력하세요"></textarea>
+                </div>
+
+                <!-- 사용 제한 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="editUsageLimit" class="block text-sm font-medium text-slate-700 mb-2">사용 제한 (회)</label>
+                        <input type="number" id="editUsageLimit" name="usageLimit" min="1"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="예: 100 (100회 사용 가능)">
+                    </div>
+
+                    <div>
+                        <label for="editPerUserLimit" class="block text-sm font-medium text-slate-700 mb-2">사용자당 제한 (회)</label>
+                        <input type="number" id="editPerUserLimit" name="perUserLimit" min="1"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="예: 1 (사용자당 1회 사용 가능)">
+                    </div>
+                </div>
+
+                <div class="flex gap-3 pt-4">
                     <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
                         수정
                     </button>
@@ -236,13 +404,79 @@
             window.location.href = url.toString();
         }
 
-        function openEditModal(couponId, title, description, validity) {
-            document.getElementById('editCouponId').value = couponId;
-            document.getElementById('editTitle').value = title;
-            document.getElementById('editDescription').value = description;
-            document.getElementById('editValidity').value = validity;
-            document.getElementById('editModal').classList.remove('hidden');
+        function openEditModal(couponId) {
+            // AJAX로 쿠폰 데이터 가져오기
+            fetch('${pageContext.request.contextPath}/coupon-management?action=getCoupon&couponId=' + couponId)
+                .then(response => response.json())
+                .then(coupon => {
+                    document.getElementById('editCouponId').value = coupon.id;
+                    document.getElementById('editCouponName').value = coupon.title || '';
+                    document.getElementById('editDescription').value = coupon.description || '';
+                    document.getElementById('editDiscountType').value = coupon.discountType || '';
+                    document.getElementById('editDiscountValue').value = coupon.discountValue || '';
+                    document.getElementById('editMinOrderAmount').value = coupon.minOrderAmount || '';
+
+                    // Date 처리 - 안전하게 처리
+                    if (coupon.validFrom) {
+                        // 이미 YYYY-MM-DD 형식인 경우 그대로 사용
+                        if (typeof coupon.validFrom === 'string' && coupon.validFrom.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            document.getElementById('editValidFrom').value = coupon.validFrom;
+                        } else {
+                            const validFrom = new Date(coupon.validFrom);
+                            if (!isNaN(validFrom.getTime())) {
+                                document.getElementById('editValidFrom').value = validFrom.toISOString().split('T')[0];
+                            }
+                        }
+                    } else {
+                        document.getElementById('editValidFrom').value = '';
+                    }
+
+                    if (coupon.validTo) {
+                        // 이미 YYYY-MM-DD 형식인 경우 그대로 사용
+                        if (typeof coupon.validTo === 'string' && coupon.validTo.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            document.getElementById('editValidTo').value = coupon.validTo;
+                        } else {
+                            const validTo = new Date(coupon.validTo);
+                            if (!isNaN(validTo.getTime())) {
+                                document.getElementById('editValidTo').value = validTo.toISOString().split('T')[0];
+                            }
+                        }
+                    } else {
+                        document.getElementById('editValidTo').value = '';
+                    }
+
+                    document.getElementById('editUsageLimit').value = coupon.usageLimit || '';
+                    document.getElementById('editPerUserLimit').value = coupon.perUserLimit || '';
+
+                    // 할인 유형에 따른 플레이스홀더 업데이트
+                    updateDiscountValuePlaceholder();
+
+                    document.getElementById('editModal').classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error('쿠폰 정보 로딩 실패:', error);
+                    alert('쿠폰 정보를 불러오는데 실패했습니다.');
+                });
         }
+
+        function updateDiscountValuePlaceholder() {
+            const discountType = document.getElementById('editDiscountType').value;
+            const discountValue = document.getElementById('editDiscountValue');
+            if (discountType === 'PERCENTAGE') {
+                discountValue.placeholder = '예: 10 (10% 할인)';
+            } else if (discountType === 'FIXED') {
+                discountValue.placeholder = '예: 1000 (1000원 할인)';
+            }
+        }
+
+        // 할인 유형 변경 이벤트
+        document.getElementById('editDiscountType').addEventListener('change', updateDiscountValuePlaceholder);
+
+        // 날짜 유효성 검사
+        document.getElementById('editValidFrom').addEventListener('change', function() {
+            const validTo = document.getElementById('editValidTo');
+            validTo.min = this.value;
+        });
 
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
@@ -255,7 +489,7 @@
 
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '${pageContext.request.contextPath}/coupon/management';
+            form.action = '${pageContext.request.contextPath}/coupon-management';
 
             const actionInput = document.createElement('input');
             actionInput.type = 'hidden';
@@ -286,6 +520,60 @@
                 closeEditModal();
             }
         });
+
+        // 쿠폰 필터링 함수
+        function filterCoupons(status) {
+            const couponCards = document.querySelectorAll('.coupon-card');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            // 모든 버튼의 active 상태 제거
+            filterButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+            });
+
+            // 클릭된 버튼을 active 상태로 변경
+            const activeBtn = document.querySelector(`[data-filter="${status}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-700', 'hover:bg-slate-200');
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+            }
+
+            // 쿠폰 카드 필터링
+            let visibleCount = 0;
+            couponCards.forEach(card => {
+                if (status === 'all') {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    if (card.dataset.status === status) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                }
+            });
+
+            // 필터링 결과가 없을 때 메시지 표시
+            const couponList = document.getElementById('couponList');
+            let noResultMsg = document.getElementById('noResultMessage');
+
+            if (visibleCount === 0) {
+                if (!noResultMsg) {
+                    noResultMsg = document.createElement('div');
+                    noResultMsg.id = 'noResultMessage';
+                    noResultMsg.className = 'text-center py-12 text-slate-500';
+                    noResultMsg.innerHTML = '<div class="text-4xl mb-3">🔍</div><p class="text-lg font-medium">해당 상태의 쿠폰이 없습니다.</p>';
+                    couponList.appendChild(noResultMsg);
+                }
+                noResultMsg.style.display = 'block';
+            } else {
+                if (noResultMsg) {
+                    noResultMsg.style.display = 'none';
+                }
+            }
+        }
     </script>
 </body>
 </html>

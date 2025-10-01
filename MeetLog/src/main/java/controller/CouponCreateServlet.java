@@ -84,6 +84,11 @@ public class CouponCreateServlet extends HttpServlet {
             String validFrom = request.getParameter("validFrom");
             String validTo = request.getParameter("validTo");
             String description = request.getParameter("description");
+            String discountType = request.getParameter("discountType");
+            String discountValue = request.getParameter("discountValue");
+            String minOrderAmount = request.getParameter("minOrderAmount");
+            String usageLimit = request.getParameter("usageLimit");
+            String perUserLimit = request.getParameter("perUserLimit");
             selectedRestaurant = resolveRestaurant(request.getParameter("restaurantId"), ownedRestaurants);
 
             Coupon coupon = new Coupon();
@@ -92,6 +97,27 @@ public class CouponCreateServlet extends HttpServlet {
             coupon.setValidity(buildValidityPeriod(validFrom, validTo));
             coupon.setRestaurantId(selectedRestaurant.getId());
             coupon.setActive(true);
+
+            // 새 필드 설정
+            coupon.setDiscountType(discountType);
+            if (discountValue != null && !discountValue.trim().isEmpty()) {
+                coupon.setDiscountValue(Integer.parseInt(discountValue));
+            }
+            if (minOrderAmount != null && !minOrderAmount.trim().isEmpty()) {
+                coupon.setMinOrderAmount(Integer.parseInt(minOrderAmount));
+            }
+            if (validFrom != null && !validFrom.trim().isEmpty()) {
+                coupon.setValidFrom(java.sql.Date.valueOf(validFrom));
+            }
+            if (validTo != null && !validTo.trim().isEmpty()) {
+                coupon.setValidTo(java.sql.Date.valueOf(validTo));
+            }
+            if (usageLimit != null && !usageLimit.trim().isEmpty()) {
+                coupon.setUsageLimit(Integer.parseInt(usageLimit));
+            }
+            if (perUserLimit != null && !perUserLimit.trim().isEmpty()) {
+                coupon.setPerUserLimit(Integer.parseInt(perUserLimit));
+            }
 
             boolean created = couponService.addCoupon(coupon);
             if (created) {

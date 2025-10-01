@@ -28,9 +28,52 @@ public class CouponManagementServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
-            
+
             if (user == null || !"BUSINESS".equals(user.getUserType())) {
                 response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
+            String action = request.getParameter("action");
+
+            // AJAX 요청: 쿠폰 정보 가져오기
+            if ("getCoupon".equals(action)) {
+                String couponIdParam = request.getParameter("couponId");
+                if (couponIdParam != null) {
+                    int couponId = Integer.parseInt(couponIdParam);
+                    Coupon coupon = couponService.getCouponById(couponId);
+
+                    if (coupon != null) {
+                        // 소유자 확인
+                        List<Restaurant> ownedRestaurants = restaurantService.getRestaurantsByOwnerId(user.getId());
+                        boolean isOwner = ownedRestaurants.stream()
+                                .anyMatch(r -> r.getId() == coupon.getRestaurantId());
+
+                        if (isOwner) {
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+
+                            // JSON 수동 생성
+                            StringBuilder json = new StringBuilder();
+                            json.append("{");
+                            json.append("\"id\":").append(coupon.getId()).append(",");
+                            json.append("\"title\":\"").append(escapeJson(coupon.getTitle())).append("\",");
+                            json.append("\"description\":\"").append(escapeJson(coupon.getDescription())).append("\",");
+                            json.append("\"discountType\":\"").append(escapeJson(coupon.getDiscountType())).append("\",");
+                            json.append("\"discountValue\":").append(coupon.getDiscountValue() != null ? coupon.getDiscountValue() : "null").append(",");
+                            json.append("\"minOrderAmount\":").append(coupon.getMinOrderAmount() != null ? coupon.getMinOrderAmount() : "null").append(",");
+                            json.append("\"validFrom\":").append(coupon.getValidFrom() != null ? "\"" + coupon.getValidFrom().toString() + "\"" : "null").append(",");
+                            json.append("\"validTo\":").append(coupon.getValidTo() != null ? "\"" + coupon.getValidTo().toString() + "\"" : "null").append(",");
+                            json.append("\"usageLimit\":").append(coupon.getUsageLimit() != null ? coupon.getUsageLimit() : "null").append(",");
+                            json.append("\"perUserLimit\":").append(coupon.getPerUserLimit() != null ? coupon.getPerUserLimit() : "null");
+                            json.append("}");
+
+                            response.getWriter().write(json.toString());
+                            return;
+                        }
+                    }
+                }
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
 
@@ -94,6 +137,15 @@ public class CouponManagementServlet extends HttpServlet {
         }
     }
 
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -153,20 +205,47 @@ public class CouponManagementServlet extends HttpServlet {
                     break;
 
                 case "update":
-                    String title = request.getParameter("title");
+                    String couponName = request.getParameter("couponName");
                     String description = request.getParameter("description");
-                    String validity = request.getParameter("validity");
+                    String discountType = request.getParameter("discountType");
+                    String discountValue = request.getParameter("discountValue");
+                    String minOrderAmount = request.getParameter("minOrderAmount");
+                    String validFrom = request.getParameter("validFrom");
+                    String validTo = request.getParameter("validTo");
+                    String usageLimit = request.getParameter("usageLimit");
+                    String perUserLimit = request.getParameter("perUserLimit");
 
-                    if (title == null || title.trim().isEmpty()) {
+                    if (couponName == null || couponName.trim().isEmpty()) {
                         session.setAttribute("couponErrorMessage", "쿠폰 제목은 필수입니다.");
                         response.sendRedirect(request.getContextPath() + "/coupon/management" +
                                 (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
                         return;
                     }
 
-                    coupon.setTitle(title.trim());
+                    coupon.setTitle(couponName.trim());
                     coupon.setDescription(description != null ? description.trim() : "");
-                    coupon.setValidity(validity != null ? validity.trim() : "");
+                    coupon.setValidity(buildValidityPeriod(validFrom, validTo));
+
+                    // 새 필드 설정
+                    coupon.setDiscountType(discountType);
+                    if (discountValue != null && !discountValue.trim().isEmpty()) {
+                        coupon.setDiscountValue(Integer.parseInt(discountValue));
+                    }
+                    if (minOrderAmount != null && !minOrderAmount.trim().isEmpty()) {
+                        coupon.setMinOrderAmount(Integer.parseInt(minOrderAmount));
+                    }
+                    if (validFrom != null && !validFrom.trim().isEmpty()) {
+                        coupon.setValidFrom(java.sql.Date.valueOf(validFrom));
+                    }
+                    if (validTo != null && !validTo.trim().isEmpty()) {
+                        coupon.setValidTo(java.sql.Date.valueOf(validTo));
+                    }
+                    if (usageLimit != null && !usageLimit.trim().isEmpty()) {
+                        coupon.setUsageLimit(Integer.parseInt(usageLimit));
+                    }
+                    if (perUserLimit != null && !perUserLimit.trim().isEmpty()) {
+                        coupon.setPerUserLimit(Integer.parseInt(perUserLimit));
+                    }
 
                     boolean updateSuccess = couponService.updateCoupon(coupon);
                     if (updateSuccess) {
@@ -211,5 +290,21 @@ public class CouponManagementServlet extends HttpServlet {
             }
         }
         return ownedRestaurants.get(0).getId();
+    }
+
+    private String buildValidityPeriod(String validFrom, String validTo) {
+        if (validFrom == null && validTo == null) {
+            return null;
+        }
+
+        if (validFrom == null) {
+            return validTo;
+        }
+
+        if (validTo == null || validFrom.equals(validTo)) {
+            return validFrom;
+        }
+
+        return validFrom + " ~ " + validTo;
     }
 }
