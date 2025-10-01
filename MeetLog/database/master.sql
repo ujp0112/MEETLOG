@@ -246,6 +246,8 @@ CREATE TABLE `course_steps` (
   `name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `image` varchar(1000) DEFAULT NULL,
+  `time` int(11) DEFAULT 0 COMMENT '소요 시간 (분)',
+  `cost` int(11) DEFAULT 0 COMMENT '예상 비용 (원)',
   PRIMARY KEY (`step_id`),
   KEY `idx_course_id` (`course_id`),
   CONSTRAINT `course_steps_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE

@@ -344,6 +344,17 @@ public class ReservationServlet extends HttpServlet {
 			Reservation reservation = new Reservation(restaurantId, user.getId(), restaurantName, user.getNickname(),
 					reservationDateTime, partySize, contactPhone);
 
+			// --- ▼▼▼ [자동 승인] 설정에 따라 예약 상태 결정 ▼▼▼ ---
+			boolean autoAccept = toBoolean(settings.get("auto_accept"));
+			if (autoAccept) {
+				reservation.setStatus("CONFIRMED"); // 자동 승인
+				System.out.println("✅ 자동 승인이 활성화되어 있어 예약 상태를 CONFIRMED로 설정합니다.");
+			} else {
+				reservation.setStatus("PENDING"); // 승인 대기
+				System.out.println("⏳ 자동 승인이 비활성화되어 있어 예약 상태를 PENDING으로 설정합니다.");
+			}
+			// --- ▲▲▲ [자동 승인] 끝 ▲▲▲ ---
+
 			if (reservationService.createReservation(reservation)) {
 				// 예약 성공 시, 내 예약 목록 페이지로 이동
 				response.sendRedirect(request.getContextPath() + "/mypage/reservations");

@@ -147,8 +147,7 @@ public class CourseService {
 
     public List<CommunityCourse> getCoursesByUserId(int userId) {
         // 사용자가 생성한 커뮤니티 코스들을 조회
-        // 임시로 빈 리스트 반환 (실제 구현 필요)
-        return new java.util.ArrayList<>();
+        return courseDAO.findByUserId(userId);
     }
 
     public List<CommunityCourse> getBookmarkedCourses(int userId) {

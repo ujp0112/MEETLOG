@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dao.RestaurantDAO;
 import model.Restaurant;
 
@@ -72,7 +73,18 @@ public class DBSearchServlet extends HttpServlet {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             PrintWriter out = response.getWriter();
-            out.print(new Gson().toJson(restaurants));
+
+            // LocalDateTime 직렬화를 위한 Gson 설정
+            Gson gson = new GsonBuilder()
+                .registerTypeAdapter(java.time.LocalDateTime.class, new com.google.gson.JsonSerializer<java.time.LocalDateTime>() {
+                    @Override
+                    public com.google.gson.JsonElement serialize(java.time.LocalDateTime src, java.lang.reflect.Type typeOfSrc, com.google.gson.JsonSerializationContext context) {
+                        return new com.google.gson.JsonPrimitive(src.toString());
+                    }
+                })
+                .create();
+
+            out.print(gson.toJson(restaurants));
             out.flush();
 
         } catch (Exception e) {

@@ -37,8 +37,11 @@ public class MyCoursesServlet extends HttpServlet {
                 List<CommunityCourse> myCourses = courseService.getCoursesByUserId(user.getId());
                 List<CommunityCourse> bookmarkedCourses = courseService.getBookmarkedCourses(user.getId());
 
-                request.setAttribute("myCourses", myCourses);
+                request.setAttribute("courses", myCourses);
                 request.setAttribute("bookmarkedCourses", bookmarkedCourses);
+                request.setAttribute("totalCourses", myCourses.size());
+                request.setAttribute("currentPage", 1);
+                request.setAttribute("totalPages", 1);
                 request.getRequestDispatcher("/WEB-INF/views/my-courses.jsp").forward(request, response);
 
             } else {

@@ -71,4 +71,11 @@ public class CourseDAO {
             return session.selectOne(COMMUNITY_MAPPER + ".findById", id);
         }
     }
+
+    // 사용자 ID로 코스 목록 조회
+    public List<CommunityCourse> findByUserId(int userId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectList(COMMUNITY_MAPPER + ".findByUserId", userId);
+        }
+    }
 }

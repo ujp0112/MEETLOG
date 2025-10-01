@@ -8,6 +8,7 @@
 	<resultMap id="communityCourseResult"
 		type="model.CommunityCourse">
 		<id property="id" column="course_id" />
+		<result property="courseId" column="course_id" />
 		<result property="title" column="title" />
 		<result property="description" column="description" />
 		<result property="previewImage" column="preview_image" />
@@ -15,6 +16,7 @@
 		<result property="author" column="author" />
 		<result property="profileImage" column="profile_image" />
 		<result property="likes" column="likes" />
+		<result property="likeCount" column="likes" />
 		<result property="createdAt" column="created_at" />
 		<collection property="tags" javaType="java.util.ArrayList"
 			select="selectTagsForCourse" column="course_id" />
@@ -104,7 +106,9 @@
 		emoji,
 		name,
 		description,
-		image
+		image,
+		time,
+		cost
 		FROM course_steps
 		WHERE course_id = #{courseId}
 		ORDER BY step_order ASC
@@ -140,8 +144,20 @@
 	</insert>
 
 	<insert id="insertCourseStep" parameterType="model.CourseStep">
-		INSERT INTO course_steps (course_id, step_order, name, type, time, cost)
+		INSERT INTO course_steps (course_id, step_order, name, step_type, time, cost)
 		VALUES (#{courseId}, #{order}, #{name}, #{type}, #{time}, #{cost})
 	</insert>
+
+	<select id="findByUserId" parameterType="int" resultMap="communityCourseResult">
+		SELECT
+		c.course_id, c.title, c.preview_image, c.author_id AS user_id, c.created_at,
+		u.nickname AS author,
+		u.profile_image,
+		(SELECT COUNT(*) FROM course_likes cl WHERE cl.course_id = c.course_id) AS likes
+		FROM courses c
+		LEFT JOIN users u ON c.author_id = u.id
+		WHERE c.author_id = #{userId} AND c.type = 'COMMUNITY'
+		ORDER BY c.created_at DESC
+	</select>
 
 </mapper>
