@@ -326,7 +326,12 @@
 
     function displayCombinedRestaurantResults(dbPlaces, kakaoPlaces) {
         const container = $('#ranking-resto-content');
-        
+
+        // 첫 페이지일 때는 기존 내용을 모두 지움 (중복 방지)
+        if (currentPage === 1) {
+            container.empty();
+        }
+
         if (currentPage === 1 && dbPlaces.length === 0 && kakaoPlaces.length === 0) {
             container.html('<p class="text-slate-400 text-center py-8">이 지역의 맛집 검색 결과가 없습니다.</p>');
             return;
