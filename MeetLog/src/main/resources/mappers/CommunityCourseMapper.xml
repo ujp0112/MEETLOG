@@ -142,9 +142,17 @@
 
 	<insert id="insertCourse" parameterType="model.CommunityCourse"
 		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO courses (author_id, title, preview_image, type)
-		VALUES (#{userId}, #{title}, #{previewImage}, 'COMMUNITY')
+		INSERT INTO courses (author_id, title, description, preview_image, type)
+		VALUES (#{userId}, #{title}, #{description}, #{previewImage}, 'COMMUNITY')
 	</insert>
+
+	<update id="updateCourse" parameterType="model.CommunityCourse">
+		UPDATE courses
+		SET title = #{title},
+		    description = #{description},
+		    preview_image = #{previewImage}
+		WHERE course_id = #{id}
+	</update>
 
 	<insert id="insertCourseStep" parameterType="model.CourseStep">
 		INSERT INTO course_steps (course_id, step_order, name, step_type, time, cost, latitude, longitude, address)
@@ -165,6 +173,24 @@
 
 	<delete id="deleteCourse" parameterType="int">
 		DELETE FROM courses WHERE course_id = #{courseId}
+	</delete>
+
+	<!-- 태그 관련 쿼리 -->
+	<select id="findOrCreateTag" parameterType="string" resultType="int">
+		<!-- 태그가 있으면 ID 반환, 없으면 INSERT 후 ID 반환 -->
+		SELECT tag_id FROM tags WHERE tag_name = #{tagName}
+	</select>
+
+	<insert id="insertTag" parameterType="string" useGeneratedKeys="true" keyProperty="tagId">
+		INSERT INTO tags (tag_name) VALUES (#{tagName})
+	</insert>
+
+	<insert id="insertCourseTag" parameterType="map">
+		INSERT INTO course_tags (course_id, tag_id) VALUES (#{courseId}, #{tagId})
+	</insert>
+
+	<delete id="deleteCourseTagsByCourseId" parameterType="int">
+		DELETE FROM course_tags WHERE course_id = #{courseId}
 	</delete>
 
 </mapper>

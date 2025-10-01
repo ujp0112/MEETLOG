@@ -93,6 +93,10 @@
                 <input type="text" id="course-title" name="title" placeholder="예: 성수동 핫플레이스 투어" class="w-full p-2 border rounded-md" required>
             </div>
             <div>
+                <label for="course-description" class="block text-sm font-medium text-slate-700 mb-1">코스 설명 *</label>
+                <input type="text" id="course-description" name="description" placeholder="예: 성수동 핫플레이스 투어" class="w-full p-2 border rounded-md" required>
+            </div>
+            <div>
                 <label for="course-tags" class="block text-sm font-medium text-slate-700 mb-1">태그 (쉼표로 구분)</label>
                 <input type="text" id="course-tags" name="tags" placeholder="예: 성수동, 데이트, 카페" class="w-full p-2 border rounded-md">
             </div>
@@ -127,6 +131,7 @@
             const editCourse = {
                 id: ${course.id},
                 title: '${course.title}',
+                description: '${course.description}',
                 tags: <c:if test="${not empty course.tags}">[<c:forEach var="tag" items="${course.tags}" varStatus="status">'${tag}'<c:if test="${!status.last}">,</c:if></c:forEach>]</c:if><c:if test="${empty course.tags}">[]</c:if>
             };
 
@@ -167,6 +172,7 @@
             // 수정 모드일 경우 기존 정보 미리 입력
             <c:if test="${isEditMode && not empty course}">
                 document.getElementById('course-title').value = editCourse.title;
+                document.getElementById('course-description').value = editCourse.description;
                 if (editCourse.tags && editCourse.tags.length > 0) {
                     document.getElementById('course-tags').value = editCourse.tags.join(', ');
                 }
@@ -395,14 +401,20 @@
     function closeSaveModal() {
         document.getElementById('save-modal').classList.add('hidden');
         document.getElementById('course-title').value = '';
+        document.getElementById('course-description').value = '';
         document.getElementById('course-tags').value = '';
         document.getElementById('course-thumbnail').value = '';
     }
 
     function submitCourse() {
         const title = document.getElementById('course-title').value.trim();
+        const description = document.getElementById('course-description').value.trim();
         if (!title) {
             alert('코스 제목을 입력해주세요.');
+            return;
+        }
+        if (!description) {
+            alert('설명을 입력해주세요.');
             return;
         }
 
@@ -432,6 +444,7 @@
 
         const formData = new FormData();
         formData.append('title', title);
+        formData.append('description', description);
 
         const tags = document.getElementById('course-tags').value.trim();
         if (tags) {

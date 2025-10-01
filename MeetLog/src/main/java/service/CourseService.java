@@ -35,8 +35,24 @@ public class CourseService {
                 step.setOrder(i + 1);
                 courseDAO.insertCourseStep(step, session);
             }
-            
-            // 4. 모든 작업이 성공하면 최종 commit
+
+            // 4. 태그 저장
+            if (course.getTags() != null && !course.getTags().isEmpty()) {
+                for (String tagName : course.getTags()) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // 태그가 이미 존재하는지 확인
+                        Integer tagId = courseDAO.findTagByName(tagName.trim(), session);
+                        if (tagId == null) {
+                            // 태그가 없으면 새로 생성
+                            tagId = courseDAO.insertTag(tagName.trim(), session);
+                        }
+                        // 코스-태그 연결
+                        courseDAO.insertCourseTag(generatedCourseId, tagId, session);
+                    }
+                }
+            }
+
+            // 5. 모든 작업이 성공하면 최종 commit
             session.commit();
             return true;
         } catch (Exception e) {
@@ -217,6 +233,25 @@ public class CourseService {
                 step.setCourseId(course.getId());
                 step.setOrder(i + 1);
                 courseDAO.insertCourseStep(step, session);
+            }
+
+            // 4. 기존 태그들 삭제
+            courseDAO.deleteCourseTagsByCourseId(course.getId(), session);
+
+            // 5. 새로운 태그들 저장
+            if (course.getTags() != null && !course.getTags().isEmpty()) {
+                for (String tagName : course.getTags()) {
+                    if (tagName != null && !tagName.trim().isEmpty()) {
+                        // 태그가 이미 존재하는지 확인
+                        Integer tagId = courseDAO.findTagByName(tagName.trim(), session);
+                        if (tagId == null) {
+                            // 태그가 없으면 새로 생성
+                            tagId = courseDAO.insertTag(tagName.trim(), session);
+                        }
+                        // 코스-태그 연결
+                        courseDAO.insertCourseTag(course.getId(), tagId, session);
+                    }
+                }
             }
 
             session.commit();

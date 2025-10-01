@@ -78,4 +78,26 @@ public class CourseDAO {
             return session.selectList(COMMUNITY_MAPPER + ".findByUserId", userId);
         }
     }
+
+    // 태그 관련 메서드
+    public Integer findTagByName(String tagName, SqlSession session) {
+        return session.selectOne(COMMUNITY_MAPPER + ".findOrCreateTag", tagName);
+    }
+
+    public int insertTag(String tagName, SqlSession session) {
+        session.insert(COMMUNITY_MAPPER + ".insertTag", tagName);
+        // MyBatis가 자동으로 생성한 ID를 반환하도록 설정 필요
+        return session.selectOne(COMMUNITY_MAPPER + ".findOrCreateTag", tagName);
+    }
+
+    public int insertCourseTag(int courseId, int tagId, SqlSession session) {
+        Map<String, Object> params = new java.util.HashMap<>();
+        params.put("courseId", courseId);
+        params.put("tagId", tagId);
+        return session.insert(COMMUNITY_MAPPER + ".insertCourseTag", params);
+    }
+
+    public int deleteCourseTagsByCourseId(int courseId, SqlSession session) {
+        return session.delete(COMMUNITY_MAPPER + ".deleteCourseTagsByCourseId", courseId);
+    }
 }

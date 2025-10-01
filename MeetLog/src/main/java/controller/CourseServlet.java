@@ -198,7 +198,7 @@ public class CourseServlet extends HttpServlet {
                 String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
                 File storeFile = new File(uploadDir, uniqueFileName);
                 imageFileItem.write(storeFile);
-                savedFilePath = "uploads/course_thumbnails/" + uniqueFileName;
+                savedFilePath = "course_thumbnails/" + uniqueFileName;
             }
 
             List<CourseStep> steps = new ArrayList<>();
@@ -235,6 +235,7 @@ public class CourseServlet extends HttpServlet {
             CommunityCourse course = new CommunityCourse();
             course.setUserId(user.getId());
             course.setTitle(formFields.get("title"));
+            course.setDescription(formFields.get("description"));
             String tagsString = formFields.get("tags");
             if (tagsString != null && !tagsString.isEmpty()) {
                 course.setTags(java.util.Arrays.asList(tagsString.split("\\s*,\\s*")));
@@ -450,36 +451,66 @@ public class CourseServlet extends HttpServlet {
             }
 
             // 이미지 처리
-            String imageFileName = existingCourse.getThumbnail(); // 기존 이미지 유지
+            String savedFilePath = existingCourse.getPreviewImage(); // 기존 이미지 유지
             if (imageFileItem != null) {
                 String uploadPath = AppConfig.getUploadPath();
                 if (uploadPath == null || uploadPath.isEmpty()) {
                     throw new Exception("업로드 경로가 설정되지 않았습니다.");
                 }
 
-                File uploadDir = new File(uploadPath);
+                File uploadDir = new File(uploadPath, "course_thumbnails");
                 if (!uploadDir.exists()) uploadDir.mkdirs();
 
                 String originalFileName = new File(imageFileItem.getName()).getName();
-                imageFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-
-                File storeFile = new File(uploadPath, imageFileName);
+                String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+                File storeFile = new File(uploadDir, uniqueFileName);
                 imageFileItem.write(storeFile);
+                savedFilePath = "course_thumbnails/" + uniqueFileName;
+            }
+
+            // 경로 정보 파싱 (formData 방식)
+            List<CourseStep> steps = new ArrayList<>();
+            int stepIndex = 1;
+            while (true) {
+                String stepName = formFields.get("step_name_" + stepIndex);
+                if (stepName == null) break;
+
+                CourseStep step = new CourseStep();
+                step.setName(stepName);
+                step.setType(formFields.get("step_type_" + stepIndex));
+                step.setTime(Integer.parseInt(formFields.get("step_time_" + stepIndex)));
+                step.setCost(Integer.parseInt(formFields.get("step_cost_" + stepIndex)));
+
+                // 위치 정보 추가
+                String latStr = formFields.get("step_latitude_" + stepIndex);
+                String lngStr = formFields.get("step_longitude_" + stepIndex);
+                String address = formFields.get("step_address_" + stepIndex);
+
+                if (latStr != null && !latStr.isEmpty()) {
+                    step.setLatitude(Double.parseDouble(latStr));
+                }
+                if (lngStr != null && !lngStr.isEmpty()) {
+                    step.setLongitude(Double.parseDouble(lngStr));
+                }
+                if (address != null) {
+                    step.setAddress(address);
+                }
+
+                steps.add(step);
+                stepIndex++;
             }
 
             // 코스 정보 업데이트
             existingCourse.setTitle(formFields.get("title"));
             existingCourse.setDescription(formFields.get("description"));
-            existingCourse.setThumbnail(imageFileName);
+            existingCourse.setPreviewImage(savedFilePath);
 
-            // 경로 정보 파싱
-            String stepsJsonStr = formFields.get("steps");
-            List<CourseStep> steps = new ArrayList<>();
-            if (stepsJsonStr != null && !stepsJsonStr.trim().isEmpty()) {
-                CourseStep[] stepsArray = objectMapper.readValue(stepsJsonStr, CourseStep[].class);
-                for (CourseStep step : stepsArray) {
-                    steps.add(step);
-                }
+            // 태그 처리
+            String tagsString = formFields.get("tags");
+            if (tagsString != null && !tagsString.isEmpty()) {
+                existingCourse.setTags(java.util.Arrays.asList(tagsString.split("\\s*,\\s*")));
+            } else {
+                existingCourse.setTags(new ArrayList<>());
             }
 
             boolean success = courseService.updateCourseWithSteps(existingCourse, steps);
