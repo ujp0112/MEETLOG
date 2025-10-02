@@ -5,57 +5,74 @@
 
 <mapper namespace="dao.UserDAO">
 
-    <resultMap id="userResultMap" type="model.User" autoMapping="true">
-        <id property="id" column="id" />
-        <result property="userType" column="user_type"/>
-        <result property="profileImage" column="profile_image"/>
-        <result property="followerCount" column="follower_count"/>
-        <result property="followingCount" column="following_count"/>
-        <result property="isActive" column="is_active"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
-    </resultMap>
+	<resultMap id="userResultMap" type="model.User"
+		autoMapping="true">
+		<id property="id" column="id" />
+		<result property="userType" column="user_type" />
+		<result property="profileImage" column="profile_image" />
+		<result property="followerCount" column="follower_count" />
+		<result property="followingCount" column="following_count" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<result property="socialProvider" column="social_provider" />
+		<result property="socialId" column="social_id" />
+	</resultMap>
 
-    <select id="findByEmail" parameterType="string" resultMap="userResultMap">
-        SELECT * FROM users WHERE email = #{email} AND is_active = true
-    </select>
+	<select id="findBySocial" parameterType="map"
+		resultMap="userResultMap">
+		SELECT * FROM users
+		WHERE social_provider = #{socialProvider} AND social_id = #{socialId} AND
+		is_active = true
+	</select>
 
-    <select id="findByNickname" parameterType="string" resultMap="userResultMap">
-        SELECT * FROM users WHERE nickname = #{nickname} AND is_active = true
-    </select>
-    
-    <select id="findById" parameterType="int" resultMap="userResultMap">
-        SELECT * FROM users WHERE id = #{id} AND is_active = true
-    </select>
-    
-    <select id="findAll" resultMap="userResultMap">
-        SELECT * FROM users WHERE is_active = true
-    </select>
+	<select id="findByEmail" parameterType="string"
+		resultMap="userResultMap">
+		SELECT * FROM users WHERE email = #{email} AND is_active = true
+	</select>
 
-    <insert id="insert" parameterType="model.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO users 
-            (email, nickname, password, user_type, name, phone, address, profile_image, created_at, updated_at)
-        VALUES 
-            (#{email}, #{nickname}, #{password}, #{userType}, #{name}, #{phone}, #{address}, #{profileImage}, NOW(), NOW())
-    </insert>
+	<select id="findByNickname" parameterType="string"
+		resultMap="userResultMap">
+		SELECT * FROM users WHERE nickname = #{nickname} AND is_active = true
+	</select>
 
-    <update id="update" parameterType="model.User">
-        UPDATE users SET 
-            nickname = #{nickname}, 
-            user_type = #{userType}, 
-            profile_image = #{profileImage},
-            name = #{name},
-            phone = #{phone},
-            address = #{address},
-            updated_at = NOW() 
-        WHERE id = #{id}
-    </update>
-    
-    <update id="updatePassword" parameterType="map">
-        UPDATE users SET password = #{password}, updated_at = NOW() WHERE id = #{id}
-    </update>
+	<select id="findById" parameterType="int"
+		resultMap="userResultMap">
+		SELECT * FROM users WHERE id = #{id} AND is_active = true
+	</select>
 
-    <update id="delete" parameterType="int">
-        UPDATE users SET is_active = false, updated_at = NOW() WHERE id = #{id}
-    </update>
+	<select id="findAll" resultMap="userResultMap">
+		SELECT * FROM users WHERE is_active = true
+	</select>
+
+	<insert id="insert" parameterType="model.User"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO users
+		(email, nickname, password, user_type, name, phone, address, profile_image,
+		social_provider, social_id, created_at, updated_at)
+		VALUES
+		(#{email}, #{nickname}, #{password}, #{userType}, #{name}, #{phone}, #{address},
+		#{profileImage},
+		#{socialProvider}, #{socialId}, NOW(), NOW())
+	</insert>
+
+	<update id="update" parameterType="model.User">
+		UPDATE users SET
+		nickname = #{nickname},
+		user_type = #{userType},
+		profile_image = #{profileImage},
+		name = #{name},
+		phone = #{phone},
+		address = #{address},
+		updated_at = NOW()
+		WHERE id = #{id}
+	</update>
+
+	<update id="updatePassword" parameterType="map">
+		UPDATE users SET password = #{password}, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<update id="delete" parameterType="int">
+		UPDATE users SET is_active = false, updated_at = NOW() WHERE id = #{id}
+	</update>
 </mapper>

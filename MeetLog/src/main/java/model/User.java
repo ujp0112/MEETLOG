@@ -1,194 +1,224 @@
+// src/main/java/model/User.java
+
 package model;
 
 import java.time.LocalDateTime;
 
 public class User {
-    private int id;
-    private String username;
-    private String password;
-    private String email;
-    private String phone;
-    private String userType; // USER, BUSINESS, ADMIN
-    private int level;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    private String name;
-    private String address;
+	private int id;
+	// [수정] 'username'을 DB 컬럼명과 일치하는 'nickname'으로 변경
+	private String nickname;
+	private String password;
+	private String email;
+	private String phone;
+	private String userType; // PERSONAL, BUSINESS, ADMIN
+	private int level;
+	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+	private String name;
+	private String address;
 
-    // 기본 생성자
-    public User() {}
+	// [추가] 소셜 로그인 정보 저장을 위한 필드
+	private String socialProvider; // "KAKAO", "NAVER", "GOOGLE"
+	private String socialId; // 소셜 서비스에서 제공하는 고유 ID
 
-    // 생성자
-    public User(String username, String password, String email, String userType) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.userType = userType;
-    }
+	// 기본 생성자
+	public User() {
+	}
 
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
+	// 생성자 (nickname으로 수정)
+	public User(String nickname, String password, String email, String userType) {
+		this.nickname = nickname;
+		this.password = password;
+		this.email = email;
+		this.userType = userType;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	// Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	// [수정] get/setUsername -> get/setNickname
+	public String getNickname() {
+		return nickname;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getPassword() {
+		return password;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public String getPhone() {
-        return phone;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	public String getPhone() {
+		return phone;
+	}
 
-    public String getUserType() {
-        return userType;
-    }
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
-    public void setUserType(String userType) {
-        this.userType = userType;
-    }
+	public String getUserType() {
+		return userType;
+	}
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public String getAddress() {
-        return address;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+	public String getAddress() {
+		return address;
+	}
 
-    // 추가 필드들
-    private String nickname;
-    private String profileImage;
-    private int restaurantId;
-    private int followerCount;
-    private int followingCount;
-    private boolean isActive;
-    private boolean isFollowing; // 현재 사용자가 이 사용자를 팔로우하고 있는지 여부 (UI용)
+	public void setAddress(String address) {
+		this.address = address;
+	}
 
-    public String getNickname() {
-        return nickname;
-    }
+	// [추가] socialProvider, socialId의 Getters/Setters
+	public String getSocialProvider() {
+		return socialProvider;
+	}
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
+	public void setSocialProvider(String socialProvider) {
+		this.socialProvider = socialProvider;
+	}
 
-    public String getProfileImage() {
-        return profileImage;
-    }
+	public String getSocialId() {
+		return socialId;
+	}
 
-    public void setProfileImage(String profileImage) {
-        this.profileImage = profileImage;
-    }
+	public void setSocialId(String socialId) {
+		this.socialId = socialId;
+	}
 
-    public int getRestaurantId() {
-        return restaurantId;
-    }
+	// --- 나머지 추가 필드들 ---
+	private String profileImage;
+	private int restaurantId;
+	private int followerCount;
+	private int followingCount;
+	private boolean isActive;
+	private boolean isFollowing;
 
-    public void setRestaurantId(int restaurantId) {
-        this.restaurantId = restaurantId;
-    }
+	public String getProfileImage() {
+		return profileImage;
+	}
 
-    public int getLevel() {
-        return level;
-    }
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
+	}
 
-    public void setLevel(int level) {
-        this.level = level;
-    }
+	public int getRestaurantId() {
+		return restaurantId;
+	}
 
-    public int getFollowerCount() {
-        return followerCount;
-    }
+	public void setRestaurantId(int restaurantId) {
+		this.restaurantId = restaurantId;
+	}
 
-    public void setFollowerCount(int followerCount) {
-        this.followerCount = followerCount;
-    }
+	public int getLevel() {
+		return level;
+	}
 
-    public int getFollowingCount() {
-        return followingCount;
-    }
+	public void setLevel(int level) {
+		this.level = level;
+	}
 
-    public void setFollowingCount(int followingCount) {
-        this.followingCount = followingCount;
-    }
+	public int getFollowerCount() {
+		return followerCount;
+	}
 
-    public boolean isActive() {
-        return isActive;
-    }
+	public void setFollowerCount(int followerCount) {
+		this.followerCount = followerCount;
+	}
 
-    public boolean getIsActive() {
-        return isActive;
-    }
+	public int getFollowingCount() {
+		return followingCount;
+	}
 
-    public void setActive(boolean isActive) {
-        this.isActive = isActive;
-    }
+	public void setFollowingCount(int followingCount) {
+		this.followingCount = followingCount;
+	}
 
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
-    }
+	public boolean isActive() {
+		return isActive;
+	}
 
-    public boolean isFollowing() {
-        return isFollowing;
-    }
+	public boolean getIsActive() {
+		return isActive;
+	}
 
-    public boolean getIsFollowing() {
-        return isFollowing;
-    }
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public boolean isFollowing() {
+		return isFollowing;
+	}
+
+	public boolean getIsFollowing() {
+		return isFollowing;
+	}
 
 	public void setIsFollowing(boolean isFollowing) {
 		this.isFollowing = isFollowing;
 	}
+	
+	@Override
+    public String toString() {
+        return "User{" +
+               "id=" + id +
+               ", nickname='" + nickname + '\'' +
+               ", email='" + email + '\'' +
+               ", userType='" + userType + '\'' +
+               ", isActive=" + isActive +
+               ", socialProvider='" + socialProvider + '\'' +
+               ", socialId='" + socialId + '\'' +
+               '}';
+    }
 }

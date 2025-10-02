@@ -999,6 +999,15 @@ INSERT INTO faqs (category, question, answer, display_order, is_active) VALUES
 -- ===================================================================
 -- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
+ALTER TABLE users ADD COLUMN social_provider VARCHAR(20) NULL COMMENT '소셜 로그인 제공자 (KAKAO, NAVER, GOOGLE)';
+ALTER TABLE users ADD COLUMN social_id VARCHAR(255) NULL COMMENT '소셜 서비스의 고유 사용자 ID';
+
+-- 소셜 ID는 중복 로그인을 방지하기 위해 UNIQUE 제약조건을 거는 것이 좋습니다.
+ALTER TABLE users ADD UNIQUE `UK_social` (social_provider, social_id);
+
+-- 기존 이메일/비밀번호 가입자는 social_id가 없으므로, email을 UNIQUE로 설정하여 중복 가입을 방지합니다.
+ALTER TABLE users ADD UNIQUE `UK_email` (email);
+
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
