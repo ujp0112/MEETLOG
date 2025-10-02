@@ -4,11 +4,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
+import model.User;
+import util.AdminSessionUtils;
 
 public class AdminReportManagementServlet extends HttpServlet {
     
@@ -16,11 +17,8 @@ public class AdminReportManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            User adminUser = AdminSessionUtils.requireAdmin(request, response);
+            if (adminUser == null) {
                 return;
             }
             
@@ -42,11 +40,8 @@ public class AdminReportManagementServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            User adminUser = AdminSessionUtils.requireAdmin(request, response);
+            if (adminUser == null) {
                 return;
             }
             

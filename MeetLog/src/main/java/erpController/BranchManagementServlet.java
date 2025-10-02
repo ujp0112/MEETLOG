@@ -5,10 +5,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+
+import util.AdminSessionUtils;
 
 
 public class BranchManagementServlet extends HttpServlet {
@@ -22,11 +23,7 @@ public class BranchManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
             
@@ -48,11 +45,7 @@ public class BranchManagementServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
             

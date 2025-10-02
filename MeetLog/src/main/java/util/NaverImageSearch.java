@@ -7,14 +7,14 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 public class NaverImageSearch {
 
     public static String findBestImage(String query) {
-//        String imageUrl = searchLocalAndGetThumbnail(query);
-    	String imageUrl = null;
+        String imageUrl = null;
         if (imageUrl == null || !isImageUrl(imageUrl)) {
             List<String> images = searchImages(query, 1);
             if (images != null && !images.isEmpty()) {
@@ -33,11 +33,11 @@ public class NaverImageSearch {
         try {
             String encodedQuery = URLEncoder.encode(query, "UTF-8");
             String apiURL = "https://openapi.naver.com/v1/search/image?query=" + encodedQuery + "&display=" + display + "&sort=sim";
-            JSONObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
+            JsonObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
             if (jsonResponse != null && jsonResponse.has("items")) {
-                JSONArray items = jsonResponse.getJSONArray("items");
-                for (int i = 0; i < items.length(); i++) {
-                    imageLinks.add(items.getJSONObject(i).getString("link"));
+                JsonArray items = jsonResponse.getAsJsonArray("items");
+                for (int i = 0; i < items.size(); i++) {
+                    imageLinks.add(items.get(i).getAsJsonObject().get("link").getAsString());
                 }
             }
         } catch (Exception e) {
@@ -55,13 +55,13 @@ public class NaverImageSearch {
             String encodedQuery = URLEncoder.encode(query, "UTF-8");
             String apiURL = "https://openapi.naver.com/v1/search/local.json?query=" + encodedQuery + "&display=1&sort=random";
             
-            JSONObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
+            JsonObject jsonResponse = executeApiCall(apiURL, clientId, clientSecret);
             if (jsonResponse != null && jsonResponse.has("items")) {
-                JSONArray items = jsonResponse.getJSONArray("items");
-                if (items.length() > 0) {
-                    JSONObject item = items.getJSONObject(0);
-                    if (item.has("thumbnail") && !item.getString("thumbnail").isEmpty()) {
-                        return item.getString("thumbnail"); 
+                JsonArray items = jsonResponse.getAsJsonArray("items");
+                if (items.size() > 0) {
+                    JsonObject item = items.get(0).getAsJsonObject();
+                    if (item.has("thumbnail") && !item.get("thumbnail").getAsString().isEmpty()) {
+                        return item.get("thumbnail").getAsString(); 
                     }
                 }
             }
@@ -71,7 +71,7 @@ public class NaverImageSearch {
         return null;
     }
     
-    private static JSONObject executeApiCall(String apiUrl, String clientId, String clientSecret) {
+    private static JsonObject executeApiCall(String apiUrl, String clientId, String clientSecret) {
         try {
             URL url = new URL(apiUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -89,7 +89,7 @@ public class NaverImageSearch {
             }
             br.close();
             if (responseCode == 200) {
-                return new JSONObject(response.toString());
+                return JsonParser.parseString(response.toString()).getAsJsonObject();
             } else {
                 System.err.println("Naver API Error for URL (" + apiUrl + "): " + response.toString());
                 return null;

@@ -5,8 +5,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
+
+import util.AdminSessionUtils;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -17,11 +18,7 @@ public class AdminMenuManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
             

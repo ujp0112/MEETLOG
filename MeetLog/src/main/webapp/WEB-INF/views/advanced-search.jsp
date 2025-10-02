@@ -4,6 +4,14 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <%@ page import="com.google.gson.Gson" %>
+<%@ page import="com.google.gson.GsonBuilder" %>
+<%@ page import="java.time.LocalDateTime" %>
+<%@ page import="util.LocalDateTimeAdapter" %>
+<%
+    Gson gson = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+        .create();
+%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -497,7 +505,7 @@
             document.getElementById('no-restaurant-results').style.display = 'none';
 
             // 검색 결과가 있을 경우에만 렌더링 함수 호출
-            const dbRestaurants = <% out.print(new Gson().toJson(request.getAttribute("restaurants") != null ? request.getAttribute("restaurants") : new java.util.ArrayList<>())); %>;            
+            const dbRestaurants = <% out.print(gson.toJson(request.getAttribute("restaurants") != null ? request.getAttribute("restaurants") : new java.util.ArrayList<>())); %>;            
             if (dbRestaurants.length > 0) {
                 displayDbPlaces(dbRestaurants, contextPath);
             }
@@ -512,7 +520,7 @@
             }
 
             // 페이지네이션으로 전달된 외부 결과 렌더링
-            const externalRestaurants = <% out.print(new Gson().toJson(request.getAttribute("externalRestaurants") != null ? request.getAttribute("externalRestaurants") : new java.util.ArrayList<>())); %>;
+            const externalRestaurants = <% out.print(gson.toJson(request.getAttribute("externalRestaurants") != null ? request.getAttribute("externalRestaurants") : new java.util.ArrayList<>())); %>;
             if (externalRestaurants.length > 0) {
                 displayPlaces(externalRestaurants, contextPath);
             }

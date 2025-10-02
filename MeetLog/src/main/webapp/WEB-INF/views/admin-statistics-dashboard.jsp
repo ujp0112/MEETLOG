@@ -12,23 +12,9 @@
 </head>
 <body class="bg-gray-100">
 
+    <c:set var="adminMenu" value="statistics" />
     <div class="min-h-screen flex flex-col">
-        <nav class="bg-white shadow">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <h1 class="text-xl font-bold text-gray-900">MEET LOG 관리자</h1>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <a href="${pageContext.request.contextPath}/admin/dashboard" class="text-gray-700 hover:text-gray-900">대시보드</a>
-                        <a href="${pageContext.request.contextPath}/admin/statistics-dashboard" class="text-blue-600 font-medium">통계 대시보드</a>
-                        <a href="${pageContext.request.contextPath}/admin/revenue-analysis" class="text-gray-700 hover:text-gray-900">매출 분석</a>
-                        <a href="${pageContext.request.contextPath}/admin/user-analysis" class="text-gray-700 hover:text-gray-900">사용자 분석</a>
-                        <a href="${pageContext.request.contextPath}/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">로그아웃</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
+        <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
 
         <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
             <div class="px-4 py-6 sm:px-0">

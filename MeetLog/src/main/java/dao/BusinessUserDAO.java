@@ -2,6 +2,7 @@ package dao;
 
 import org.apache.ibatis.session.SqlSession;
 import model.BusinessUser;
+import model.AdminBusinessSummary;
 import util.MyBatisSqlSessionFactory;
 import java.util.List; // List import 추가
 
@@ -29,6 +30,12 @@ public class BusinessUserDAO {
     public List<BusinessUser> findAll() {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             return sqlSession.selectList(NAMESPACE + ".findAll");
+        }
+    }
+
+    public List<AdminBusinessSummary> findAdminBusinessSummaries() {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".findAdminBusinessSummaries");
         }
     }
 

@@ -297,6 +297,18 @@ public class UserService {
 		return userDAO.findAll();
 	}
 
+	public List<User> getAllUsersIncludingInactive() {
+		return userDAO.findAllIncludingInactive();
+	}
+
+	public boolean deactivateUser(int userId) {
+		return userDAO.updateActiveStatus(userId, false) > 0;
+	}
+
+	public boolean activateUser(int userId) {
+		return userDAO.updateActiveStatus(userId, true) > 0;
+	}
+
 	public String findEmailByNickname(String nickname) {
 		User user = userDAO.findByNickname(nickname);
 		return (user != null) ? user.getEmail() : null;

@@ -31,10 +31,10 @@
         <form class="mt-8 space-y-6" method="post">
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
-                    <label for="adminId" class="sr-only">관리자 ID</label>
+                    <label for="adminId" class="sr-only">관리자 이메일</label>
                     <input id="adminId" name="adminId" type="text" required 
                            class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" 
-                           placeholder="관리자 ID">
+                           placeholder="관리자 이메일">
                 </div>
                 <div>
                     <label for="password" class="sr-only">비밀번호</label>

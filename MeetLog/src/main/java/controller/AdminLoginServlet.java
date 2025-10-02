@@ -1,5 +1,8 @@
 package controller;
 
+import model.User;
+import service.UserService;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -7,39 +10,46 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
-
 public class AdminLoginServlet extends HttpServlet {
-    
+
+    private final UserService userService = new UserService();
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 관리자 로그인 페이지로 이동
         request.getRequestDispatcher("/WEB-INF/views/admin-login.jsp").forward(request, response);
     }
-    
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-        
-        String adminId = request.getParameter("adminId");
+
+        String adminEmail = request.getParameter("adminId");
         String password = request.getParameter("password");
-        
+
+        if (adminEmail == null || adminEmail.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            request.setAttribute("errorMessage", "관리자 이메일과 비밀번호를 모두 입력해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/admin-login.jsp").forward(request, response);
+            return;
+        }
+
         try {
-            // 간단한 관리자 인증 (실제로는 데이터베이스에서 확인)
-            if ("admin".equals(adminId) && "admin123".equals(password)) {
-                HttpSession session = request.getSession();
-                session.setAttribute("adminId", adminId);
-                session.setAttribute("adminRole", "SUPER_ADMIN");
-                
-                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
-            } else {
-                request.setAttribute("errorMessage", "관리자 ID 또는 비밀번호가 올바르지 않습니다.");
+            User adminUser = userService.authenticateUser(adminEmail.trim(), password, "ADMIN");
+            if (adminUser == null) {
+                request.setAttribute("errorMessage", "관리자 계정 정보가 올바르지 않습니다.");
                 request.getRequestDispatcher("/WEB-INF/views/admin-login.jsp").forward(request, response);
+                return;
             }
+
+            HttpSession session = request.getSession(true);
+            session.setAttribute("user", adminUser);
+            session.setMaxInactiveInterval(30 * 60);
+
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "로그인 중 오류가 발생했습니다.");
+            request.setAttribute("errorMessage", "로그인 처리 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/admin-login.jsp").forward(request, response);
         }
     }

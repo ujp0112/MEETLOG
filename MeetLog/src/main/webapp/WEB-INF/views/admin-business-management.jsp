@@ -11,24 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
+<c:set var="adminMenu" value="business" />
 <div class="min-h-screen flex flex-col">
-    <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">MEET LOG 관리자</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="text-gray-700 hover:text-gray-900">대시보드</a>
-                    <a href="${pageContext.request.contextPath}/admin/member-management" class="text-gray-700 hover:text-gray-900">회원 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/business-management" class="text-blue-600 font-medium">업체 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/report-management" class="text-gray-700 hover:text-gray-900">신고 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/faq-management" class="text-gray-700 hover:text-gray-900">FAQ 관리</a>
-                    <a href="${pageContext.request.contextPath}/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">로그아웃</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
         <div class="px-4 py-6 sm:px-0">
@@ -40,37 +25,26 @@
                 </div>
             </c:if>
 
-            <c:set var="approvedCount" value="0" />
-            <c:set var="pendingCount" value="0" />
-            <c:set var="suspendedCount" value="0" />
-            <c:forEach var="business" items="${businesses}">
-                <c:if test="${business.status == 'APPROVED'}">
-                    <c:set var="approvedCount" value="${approvedCount + 1}" />
-                </c:if>
-                <c:if test="${business.status == 'PENDING'}">
-                    <c:set var="pendingCount" value="${pendingCount + 1}" />
-                </c:if>
-                <c:if test="${business.status == 'SUSPENDED'}">
-                    <c:set var="suspendedCount" value="${suspendedCount + 1}" />
-                </c:if>
-            </c:forEach>
-
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
                 <div class="bg-white shadow rounded-lg p-4">
                     <p class="text-sm text-gray-500">총 등록 업체</p>
-                    <p class="text-2xl font-bold text-gray-900">${fn:length(businesses)}</p>
+                    <p class="text-2xl font-bold text-gray-900">${totalBusinesses}</p>
                 </div>
                 <div class="bg-white shadow rounded-lg p-4">
                     <p class="text-sm text-gray-500">승인 완료</p>
-                    <p class="text-2xl font-bold text-emerald-600">${approvedCount}</p>
+                    <p class="text-2xl font-bold text-emerald-600">${approvedBusinesses}</p>
                 </div>
                 <div class="bg-white shadow rounded-lg p-4">
                     <p class="text-sm text-gray-500">승인 대기</p>
-                    <p class="text-2xl font-bold text-yellow-600">${pendingCount}</p>
+                    <p class="text-2xl font-bold text-yellow-600">${pendingBusinesses}</p>
                 </div>
                 <div class="bg-white shadow rounded-lg p-4">
                     <p class="text-sm text-gray-500">정지 업체</p>
-                    <p class="text-2xl font-bold text-red-500">${suspendedCount}</p>
+                    <p class="text-2xl font-bold text-red-500">${suspendedBusinesses}</p>
+                </div>
+                <div class="bg-white shadow rounded-lg p-4">
+                    <p class="text-sm text-gray-500">거부 업체</p>
+                    <p class="text-2xl font-bold text-gray-600">${rejectedBusinesses}</p>
                 </div>
             </div>
 
@@ -83,12 +57,13 @@
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">업체명</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">업체 정보</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">대표자</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">카테고리</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">지역</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신청일</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">역할</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">등록 매장</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">리뷰 수</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">가입일</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                         </thead>
@@ -98,12 +73,17 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-semibold text-gray-900">${business.businessName}</div>
                                     <div class="text-sm text-gray-500">${business.email}</div>
-                                    <div class="text-sm text-gray-500">리뷰 ${business.reviewCount}건</div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.ownerName}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.category}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.location}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.createdAt}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        <c:choose>
+                                            <c:when test="${business.role == 'HQ'}">본사</c:when>
+                                            <c:when test="${business.role == 'BRANCH'}">지점</c:when>
+                                            <c:otherwise>${business.role}</c:otherwise>
+                                        </c:choose>
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <c:choose>
                                         <c:when test="${business.status == 'APPROVED'}">
@@ -112,14 +92,25 @@
                                         <c:when test="${business.status == 'PENDING'}">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">대기</span>
                                         </c:when>
-                                        <c:otherwise>
+                                        <c:when test="${business.status == 'SUSPENDED'}">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">정지</span>
+                                        </c:when>
+                                        <c:when test="${business.status == 'REJECTED'}">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-200 text-gray-700">거부</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">${business.status}</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.restaurantCount}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${business.reviewCount}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                    <fmt:formatDate value="${business.createdAt}" pattern="yyyy-MM-dd" />
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <form method="post" class="inline-flex space-x-2">
-                                        <input type="hidden" name="businessId" value="${business.id}" />
+                                        <input type="hidden" name="businessId" value="${business.userId}" />
                                         <c:choose>
                                             <c:when test="${business.status == 'PENDING'}">
                                                 <button type="submit" name="action" value="approve" class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">승인</button>
@@ -129,7 +120,7 @@
                                                 <button type="submit" name="action" value="suspend" class="px-3 py-2 bg-red-500 text-white text-sm rounded hover:bg-red-600">정지</button>
                                             </c:when>
                                             <c:otherwise>
-                                                <button type="submit" name="action" value="approve" class="px-3 py-2 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600">재승인</button>
+                                                <button type="submit" name="action" value="reapprove" class="px-3 py-2 bg-emerald-500 text-white text-sm rounded hover:bg-emerald-600">재승인</button>
                                             </c:otherwise>
                                         </c:choose>
                                     </form>

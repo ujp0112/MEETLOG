@@ -83,12 +83,27 @@ public class UserDAO {
 		}
 	}
 
+	public List<User> findAllIncludingInactive() {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findAllIncludingInactive");
+		}
+	}
+
 	public int update(User user, SqlSession sqlSession) {
 		return sqlSession.update(NAMESPACE + ".update", user);
 	}
 
 	public int delete(int id, SqlSession sqlSession) {
 		return sqlSession.update(NAMESPACE + ".delete", id);
+	}
+
+	public int updateActiveStatus(int id, boolean active) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("id", id);
+			params.put("active", active);
+			return sqlSession.update(NAMESPACE + ".updateActiveStatus", params);
+		}
 	}
 
 	public User findBySocial(String socialProvider, String socialId) {

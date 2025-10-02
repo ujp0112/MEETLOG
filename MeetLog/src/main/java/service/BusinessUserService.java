@@ -7,6 +7,7 @@ import dao.BusinessUserDAO;
 import dao.RestaurantDAO;
 import dao.CompanyDAO; // CompanyDAO import
 import model.User;
+import model.AdminBusinessSummary;
 import model.BusinessUser;
 import model.Restaurant;
 import model.Company; // Company 모델 import
@@ -68,6 +69,13 @@ public class BusinessUserService {
 
     public BusinessUser findHqByIdentifier(String identifier) {
         return businessUserDAO.findHqByIdentifier(identifier);
+    }
+    public java.util.List<AdminBusinessSummary> getAdminBusinessSummaries() {
+        return businessUserDAO.findAdminBusinessSummaries();
+    }
+
+    public boolean updateBusinessStatus(int userId, String status) {
+        return businessUserDAO.updateStatus(userId, status) > 0;
     }
 
 	public void registerIndividualUser(User user, BusinessUser businessUser, Restaurant restaurant, Company company) throws Exception {

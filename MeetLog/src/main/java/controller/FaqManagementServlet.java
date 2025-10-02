@@ -5,13 +5,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
 import model.Faq;
+import model.User;
 import service.FaqService;
+import util.AdminSessionUtils;
 
 @WebServlet("/admin/faq-management")
 public class FaqManagementServlet extends HttpServlet {
@@ -22,11 +23,8 @@ public class FaqManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            User adminUser = AdminSessionUtils.requireAdmin(request, response);
+            if (adminUser == null) {
                 return;
             }
 
@@ -58,11 +56,8 @@ public class FaqManagementServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-
-            if (adminId == null) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "관리자 권한이 필요합니다.");
+            User adminUser = AdminSessionUtils.requireAdmin(request, response);
+            if (adminUser == null) {
                 return;
             }
 

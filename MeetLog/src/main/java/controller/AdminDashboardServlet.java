@@ -4,22 +4,36 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import service.UserService;
+import service.RestaurantService;
+import service.ReviewService;
+import service.ReservationService;
+import model.User;
+import model.Reservation;
+import model.Review;
+
+import util.AdminSessionUtils;
 
 public class AdminDashboardServlet extends HttpServlet {
-    
+
+    private final UserService userService = new UserService();
+    private final RestaurantService restaurantService = new RestaurantService();
+    private final ReviewService reviewService = new ReviewService();
+    private final ReservationService reservationService = new ReservationService();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
             
@@ -37,36 +51,67 @@ public class AdminDashboardServlet extends HttpServlet {
     
     private DashboardData createDashboardData() {
         DashboardData data = new DashboardData();
-        
-        // 통계 데이터
-        data.setTotalUsers(1250);
-        data.setTotalRestaurants(89);
-        data.setTotalReviews(3420);
-        data.setTotalReservations(156);
-        
-        // 최근 활동
+
+        List<User> users = userService.getAllUsersIncludingInactive();
+        data.setTotalUsers(users != null ? users.size() : 0);
+        data.setTotalRestaurants(restaurantService.findAll().size());
+        data.setTotalReviews(reviewService.findAll().size());
+
+        List<Reservation> reservations = reservationService.searchReservations(new HashMap<>());
+        data.setTotalReservations(reservations != null ? reservations.size() : 0);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         List<RecentActivity> activities = new ArrayList<>();
-        
-        RecentActivity activity1 = new RecentActivity();
-        activity1.setType("user_register");
-        activity1.setDescription("새로운 사용자가 가입했습니다");
-        activity1.setTime("2분 전");
-        activities.add(activity1);
-        
-        RecentActivity activity2 = new RecentActivity();
-        activity2.setType("restaurant_add");
-        activity2.setDescription("새로운 맛집이 등록되었습니다");
-        activity2.setTime("15분 전");
-        activities.add(activity2);
-        
-        RecentActivity activity3 = new RecentActivity();
-        activity3.setType("review_add");
-        activity3.setDescription("새로운 리뷰가 작성되었습니다");
-        activity3.setTime("1시간 전");
-        activities.add(activity3);
-        
+
+        if (users != null) {
+            users.stream()
+                    .filter(u -> u.getCreatedAt() != null)
+                    .sorted(Comparator.comparing(User::getCreatedAt).reversed())
+                    .limit(5)
+                    .forEach(user -> {
+                        RecentActivity activity = new RecentActivity();
+                        String nickname = user.getNickname() != null ? user.getNickname() : user.getEmail();
+                        activity.setType("USER");
+                        activity.setDescription(nickname + " 회원 가입");
+                        activity.setTime(user.getCreatedAt().format(formatter));
+                        activities.add(activity);
+                    });
+        }
+
+        if (reservations != null) {
+            reservations.stream()
+                    .filter(r -> r.getCreatedAt() != null)
+                    .sorted(Comparator.comparing(Reservation::getCreatedAt).reversed())
+                    .limit(5)
+                    .forEach(reservation -> {
+                        RecentActivity activity = new RecentActivity();
+                        String customer = reservation.getUserName() != null ? reservation.getUserName() : "예약";
+                        activity.setType("RESERVATION");
+                        activity.setDescription(customer + " 님 예약 생성");
+                        activity.setTime(reservation.getCreatedAt().format(formatter));
+                        activities.add(activity);
+                    });
+        }
+
+        reviewService.findAll().stream()
+                .filter(review -> review.getCreatedAt() != null)
+                .sorted(Comparator.comparing(Review::getCreatedAt).reversed())
+                .limit(5)
+                .forEach(review -> {
+                    RecentActivity activity = new RecentActivity();
+                    String author = review.getAuthor() != null ? review.getAuthor() : "회원";
+                    activity.setType("REVIEW");
+                    activity.setDescription(author + " 님 리뷰 작성");
+                    activity.setTime(review.getCreatedAt().format(formatter));
+                    activities.add(activity);
+                });
+
+        activities.sort((a, b) -> b.getTime().compareTo(a.getTime()));
+        if (activities.size() > 10) {
+            activities.subList(10, activities.size()).clear();
+        }
+
         data.setRecentActivities(activities);
-        
         return data;
     }
     

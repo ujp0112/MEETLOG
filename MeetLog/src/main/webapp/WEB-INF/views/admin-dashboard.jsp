@@ -15,9 +15,9 @@
     </style>
 </head>
 <body class="bg-slate-100">
+    <c:set var="adminMenu" value="dashboard" />
     <div id="app" class="flex flex-col min-h-screen">
-        <%-- 공통 헤더 포함 --%>
-        <jsp:include page="/WEB-INF/views/common/header.jsp" />
+        <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
 
         <main class="flex-grow">
             <div class="container mx-auto p-4 md:p-8">

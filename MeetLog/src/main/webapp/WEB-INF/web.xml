@@ -34,6 +34,15 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 
+	<filter>
+		<filter-name>AdminAuthenticationFilter</filter-name>
+		<filter-class>filter.AdminAuthenticationFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>AdminAuthenticationFilter</filter-name>
+		<url-pattern>/admin/*</url-pattern>
+	</filter-mapping>
+
 	<servlet>
 		<servlet-name>AddMenuServlet</servlet-name>
 		<servlet-class>controller.AddMenuServlet</servlet-class>
@@ -557,6 +566,7 @@
 	<servlet-mapping>
 		<servlet-name>BranchStatisticsServlet</servlet-name>
 		<url-pattern>/branch/statistics</url-pattern>
+		<url-pattern>/admin/branch-statistics</url-pattern>
 	</servlet-mapping>
 
 	<servlet>
@@ -666,6 +676,7 @@
 	<servlet-mapping>
 		<servlet-name>ErpBranchManagementServlet</servlet-name>
 		<url-pattern>/branch/management/*</url-pattern>
+		<url-pattern>/admin/branch-management</url-pattern>
 	</servlet-mapping>
 
 	<!-- BranchInventoryServlet은 @WebServlet 어노테이션으로 매핑됨 -->

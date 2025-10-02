@@ -4,8 +4,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
+
+import util.AdminSessionUtils;
 import java.io.PrintWriter;
 import java.sql.Date;
 import java.util.List;
@@ -21,11 +22,7 @@ public class NoticeManagementServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
 
@@ -51,10 +48,7 @@ public class NoticeManagementServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-
-            if (adminId == null) {
+            if (AdminSessionUtils.getAdminUser(request) == null) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "관리자 권한이 필요합니다.");
                 return;
             }

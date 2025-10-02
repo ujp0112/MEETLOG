@@ -19,24 +19,20 @@
 		<result property="socialId" column="social_id" />
 	</resultMap>
 
-	<select id="findByEmailAndUserType" parameterType="map"
-		resultType="model.User">
-		SELECT
-		id,
-		email,
-		password,
-		nickname,
-		profile_image AS profileImage,
-		user_type AS userType,
-		social_provider AS socialProvider,
-		social_id AS socialId,
-		created_at AS createdAt,
-		updated_at AS updatedAt
-		FROM
-		users
-		WHERE
-		email = #{email}
-		AND user_type = #{userType}
+	<select id="findByEmailAndUserType" parameterType="map" resultMap="userResultMap">
+		SELECT *
+		FROM users
+		WHERE email = #{email}
+		  AND is_active = true
+		  AND
+		  <choose>
+			<when test="userType == 'BUSINESS'">
+			  user_type IN ('BUSINESS', 'ADMIN')
+			</when>
+			<otherwise>
+			  user_type = #{userType}
+			</otherwise>
+		  </choose>
 	</select>
 
 	<select id="findBySocial" parameterType="map"
@@ -67,6 +63,10 @@
 	<select id="findAll" resultMap="userResultMap">
 		SELECT * FROM users WHERE
 		is_active = true
+	</select>
+
+	<select id="findAllIncludingInactive" resultMap="userResultMap">
+		SELECT * FROM users
 	</select>
 
 	<insert id="insert" parameterType="model.User"
@@ -104,5 +104,12 @@
 	<update id="delete" parameterType="int">
 		UPDATE users SET is_active =
 		false, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<update id="updateActiveStatus" parameterType="map">
+		UPDATE users SET
+		is_active = #{active},
+		updated_at = NOW()
+		WHERE id = #{id}
 	</update>
 </mapper>

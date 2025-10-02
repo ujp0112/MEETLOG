@@ -54,4 +54,32 @@
         LIMIT 1
     </select>
     
+    <select id="findAdminBusinessSummaries" resultType="model.AdminBusinessSummary">
+        SELECT
+            b.user_id AS userId,
+            b.business_name AS businessName,
+            b.owner_name AS ownerName,
+            b.status AS status,
+            b.role AS role,
+            u.email AS email,
+            u.nickname AS nickname,
+            u.created_at AS createdAt,
+            COALESCE(rc.restaurant_count, 0) AS restaurantCount,
+            COALESCE(rv.review_count, 0) AS reviewCount
+        FROM business_users b
+        JOIN users u ON b.user_id = u.id
+        LEFT JOIN (
+            SELECT owner_id, COUNT(*) AS restaurant_count
+            FROM restaurants
+            GROUP BY owner_id
+        ) rc ON rc.owner_id = b.user_id
+        LEFT JOIN (
+            SELECT r.owner_id, COUNT(*) AS review_count
+            FROM reviews rev
+            JOIN restaurants r ON rev.restaurant_id = r.id
+            GROUP BY r.owner_id
+        ) rv ON rv.owner_id = b.user_id
+        ORDER BY u.created_at DESC
+    </select>
+
 </mapper>

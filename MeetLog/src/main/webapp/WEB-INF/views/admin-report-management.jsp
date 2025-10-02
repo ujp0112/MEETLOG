@@ -10,24 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
+<c:set var="adminMenu" value="report" />
 <div class="min-h-screen flex flex-col">
-    <nav class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-gray-900">MEET LOG 관리자</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="${pageContext.request.contextPath}/admin/dashboard" class="text-gray-700 hover:text-gray-900">대시보드</a>
-                    <a href="${pageContext.request.contextPath}/admin/member-management" class="text-gray-700 hover:text-gray-900">회원 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/business-management" class="text-gray-700 hover:text-gray-900">업체 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/report-management" class="text-blue-600 font-medium">신고 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/faq-management" class="text-gray-700 hover:text-gray-900">FAQ 관리</a>
-                    <a href="${pageContext.request.contextPath}/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">로그아웃</a>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
         <div class="px-4 py-6 sm:px-0">

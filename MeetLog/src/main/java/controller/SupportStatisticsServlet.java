@@ -4,23 +4,29 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.List;
+import java.time.Duration;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import service.InquiryService;
+import model.Inquiry;
+import util.AdminSessionUtils;
 
 
 public class SupportStatisticsServlet extends HttpServlet {
+
+    private final InquiryService inquiryService = new InquiryService();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         try {
-            HttpSession session = request.getSession();
-            String adminId = (String) session.getAttribute("adminId");
-            
-            if (adminId == null) {
-                response.sendRedirect(request.getContextPath() + "/admin/login");
+            if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
             
@@ -38,61 +44,85 @@ public class SupportStatisticsServlet extends HttpServlet {
     
     private SupportStatisticsData createSupportStatisticsData() {
         SupportStatisticsData data = new SupportStatisticsData();
-        
-        // 전체 통계
-        data.setTotalInquiries(1500);
-        data.setResolvedInquiries(1350);
-        data.setPendingInquiries(150);
-        data.setAverageResolutionTime(4.2);
-        data.setCustomerSatisfaction(4.5);
-        
-        // 월별 문의 현황
-        List<MonthlyInquiry> monthlyInquiries = new ArrayList<>();
-        
-        MonthlyInquiry month1 = new MonthlyInquiry();
-        month1.setMonth("2025-07");
-        month1.setInquiries(120);
-        month1.setResolved(110);
-        month1.setPending(10);
-        monthlyInquiries.add(month1);
-        
-        MonthlyInquiry month2 = new MonthlyInquiry();
-        month2.setMonth("2025-08");
-        month2.setInquiries(140);
-        month2.setResolved(125);
-        month2.setPending(15);
-        monthlyInquiries.add(month2);
-        
-        MonthlyInquiry month3 = new MonthlyInquiry();
-        month3.setMonth("2025-09");
-        month3.setInquiries(160);
-        month3.setResolved(145);
-        month3.setPending(15);
-        monthlyInquiries.add(month3);
-        
+
+        List<Inquiry> inquiries = inquiryService.getAllInquiries();
+        int total = inquiries != null ? inquiries.size() : 0;
+        int resolved = inquiryService.getInquiryCountByStatus("RESOLVED");
+        int pending = inquiryService.getInquiryCountByStatus("PENDING");
+        int inProgress = inquiryService.getInquiryCountByStatus("IN_PROGRESS");
+
+        data.setTotalInquiries(total);
+        data.setResolvedInquiries(resolved);
+        data.setPendingInquiries(pending + inProgress);
+
+        List<Double> responseHours = new ArrayList<>();
+        if (inquiries != null) {
+            inquiries.stream()
+                    .filter(inquiry -> inquiry.getReply() != null && inquiry.getCreatedAt() != null && inquiry.getUpdatedAt() != null)
+                    .forEach(inquiry -> {
+                        double hours = Duration
+                                .between(inquiry.getCreatedAt().toLocalDateTime(), inquiry.getUpdatedAt().toLocalDateTime())
+                                .toMinutes() / 60.0;
+                        responseHours.add(hours);
+                    });
+        }
+
+        double averageResolution = responseHours.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        double fastest = responseHours.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
+        double slowest = responseHours.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
+        double within24 = responseHours.isEmpty() ? 0.0 : responseHours.stream().filter(value -> value <= 24.0).count() * 100.0 / responseHours.size();
+        double within48 = responseHours.isEmpty() ? 0.0 : responseHours.stream().filter(value -> value <= 48.0).count() * 100.0 / responseHours.size();
+
+        data.setAverageResolutionTime(Math.round(averageResolution * 10.0) / 10.0);
+        data.setCustomerSatisfaction(0.0);
+
+        Map<String, MonthlyInquiry> monthlyMap = new HashMap<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        if (inquiries != null) {
+            for (Inquiry inquiry : inquiries) {
+                if (inquiry.getCreatedAt() == null) {
+                    continue;
+                }
+                String month = inquiry.getCreatedAt().toLocalDateTime().format(formatter);
+                MonthlyInquiry monthly = monthlyMap.computeIfAbsent(month, key -> {
+                    MonthlyInquiry item = new MonthlyInquiry();
+                    item.setMonth(key);
+                    item.setInquiries(0);
+                    item.setResolved(0);
+                    item.setPending(0);
+                    return item;
+                });
+                monthly.setInquiries(monthly.getInquiries() + 1);
+                if ("RESOLVED".equalsIgnoreCase(inquiry.getStatus())) {
+                    monthly.setResolved(monthly.getResolved() + 1);
+                } else {
+                    monthly.setPending(monthly.getPending() + 1);
+                }
+            }
+        }
+        List<MonthlyInquiry> monthlyInquiries = new ArrayList<>(monthlyMap.values());
+        monthlyInquiries.sort(Comparator.comparing(MonthlyInquiry::getMonth).reversed());
         data.setMonthlyInquiries(monthlyInquiries);
-        
-        // 응답 시간 통계
-        ResponseTimeStats responseTimeStats = new ResponseTimeStats();
-        responseTimeStats.setAverageResponseTime(2.5);
-        responseTimeStats.setFastestResponseTime(0.5);
-        responseTimeStats.setSlowestResponseTime(8.0);
-        responseTimeStats.setWithin24Hours(85.0);
-        responseTimeStats.setWithin48Hours(95.0);
-        data.setResponseTimeStats(responseTimeStats);
-        
-        // 고객 만족도 통계
+
+        ResponseTimeStats responseStats = new ResponseTimeStats();
+        responseStats.setAverageResponseTime(Math.round(averageResolution * 10.0) / 10.0);
+        responseStats.setFastestResponseTime(Math.round(fastest * 10.0) / 10.0);
+        responseStats.setSlowestResponseTime(Math.round(slowest * 10.0) / 10.0);
+        responseStats.setWithin24Hours(Math.round(within24 * 10.0) / 10.0);
+        responseStats.setWithin48Hours(Math.round(within48 * 10.0) / 10.0);
+        data.setResponseTimeStats(responseStats);
+
         SatisfactionStats satisfactionStats = new SatisfactionStats();
-        satisfactionStats.setVerySatisfied(60);
-        satisfactionStats.setSatisfied(30);
-        satisfactionStats.setNeutral(8);
-        satisfactionStats.setDissatisfied(2);
+        satisfactionStats.setVerySatisfied(0);
+        satisfactionStats.setSatisfied(resolved);
+        satisfactionStats.setNeutral(inProgress);
+        satisfactionStats.setDissatisfied(pending);
         satisfactionStats.setVeryDissatisfied(0);
         data.setSatisfactionStats(satisfactionStats);
-        
+
         return data;
     }
-    
+
     // 고객 지원 통계 데이터 클래스
     public static class SupportStatisticsData {
         private int totalInquiries;
