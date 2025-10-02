@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Restaurant {
@@ -89,7 +90,7 @@ public class Restaurant {
     }
     
     private List<Menu> menuList;
-    private List<Review> reviews;
+    private List<Review> reviews = new ArrayList<>();
     private List<Coupon> coupons;
     private List<QnA> qna;
     private List<Reservation> reservationList;
