@@ -73,6 +73,11 @@ public class ColumnServlet extends HttpServlet {
 				request.setAttribute("attachedRestaurants", attachedRestaurants); // [추가]
 				request.getRequestDispatcher("/WEB-INF/views/column-detail.jsp").forward(request, response);
 
+			} else if ("/attached-restaurants".equals(pathInfo)) {
+				// [추가] 칼럼에 첨부된 맛집 목록을 JSON으로 반환하는 API
+				handleGetAttachedRestaurants(request, response);
+				return;
+
 			} else if ("/write".equals(pathInfo)) {
 				request.getRequestDispatcher("/WEB-INF/views/write-column.jsp").forward(request, response);
 
@@ -398,6 +403,28 @@ public class ColumnServlet extends HttpServlet {
 			response.getWriter().write(new Gson().toJson(columns));
 		} catch (NumberFormatException e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid restaurant IDs format.");
+		}
+	}
+	
+	/**
+	 * [추가] 특정 칼럼에 첨부된 맛집 목록을 JSON으로 반환합니다.
+	 */
+	private void handleGetAttachedRestaurants(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String columnIdStr = request.getParameter("columnId");
+		if (columnIdStr == null || columnIdStr.isEmpty()) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "columnId is required.");
+			return;
+		}
+		
+		try {
+			int columnId = Integer.parseInt(columnIdStr);
+			List<Restaurant> restaurants = columnService.getAttachedRestaurantsByColumnId(columnId);
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(new Gson().toJson(restaurants));
+		} catch (NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid columnId format.");
 		}
 	}
 }

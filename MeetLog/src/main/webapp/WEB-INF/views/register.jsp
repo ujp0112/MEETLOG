@@ -32,7 +32,7 @@
 
             <form action="${pageContext.request.contextPath}/register" method="post" class="mt-8 space-y-6">
                 <input type="hidden" name="userType" value="PERSONAL">
-                <div class="space-y-4">
+                <div class="space-y-5">
                     <div>
                          <label for="email" class="text-sm font-medium text-slate-700">이메일 주소</label>
                         <input type="email" id="email" name="email" required 
@@ -56,6 +56,12 @@
                         <input type="password" id="confirmPassword" name="confirmPassword" required 
                                class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
                                placeholder="비밀번호를 한번 더 입력해주세요">
+                    </div>
+                    <div>
+                         <label for="phone" class="text-sm font-medium text-slate-700">휴대전화 번호</label>
+                        <input type="text" id="phone" name="phone" required 
+                               class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
+                                placeholder="010-1234-5678">
                     </div>
                 </div>
                 <div class="space-y-3">

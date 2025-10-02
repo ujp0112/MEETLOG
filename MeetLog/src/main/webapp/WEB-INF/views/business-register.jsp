@@ -153,7 +153,7 @@
                     </div>
                 </form>
             </div>
-            <div id="register-individual-content">
+            <div id="register-individual-content" class="hidden">
                 <form class="space-y-5" action="${pageContext.request.contextPath}/business-register" method="post">
                     <input type="hidden" name="userType" value="BUSINESS_INDIVIDUAL">
                     <div>

@@ -171,7 +171,7 @@
 		r.id,
 		r.name,
 		r.address,
-		r.image
+		r.image, r.latitude, r.longitude
 		FROM restaurants r
 		JOIN column_restaurants cr ON r.id = cr.restaurant_id
 		WHERE cr.column_id = #{columnId}

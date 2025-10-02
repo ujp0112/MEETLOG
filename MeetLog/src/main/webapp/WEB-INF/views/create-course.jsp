@@ -23,10 +23,7 @@
     .course-item-connector { position: absolute; bottom: -20px; left: 27px; width: 2px; height: 20px; background-color: #cbd5e1; }
     .course-item-connector::after { content: '▼'; position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #94a3b8; }
     .marker-number { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -65%); font-size: 12px; font-weight: bold; color: white; text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000; }
-    /* search-map.jsp의 커스텀 마커 스타일 */
-    .marker-overlay { display: flex; align-items: center; background-color: white; border: 1px solid #ccc; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 5px; position: relative; transform: translate(-50%, -100%); transition: all 0.1s ease-in-out; cursor: pointer; z-index: 1; }
-    .marker-overlay.highlight, .marker-overlay:hover { transform: translate(-50%, -100%) scale(1.05); z-index: 10; border-color: #3182ce; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .marker-overlay::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid white; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
+    .marker-overlay { display: flex; align-items: center; background-color: white; border: 1px solid #ccc; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); padding: 5px; position: relative; transform: translate(0, -100%); transition: all 0.1s ease-in-out; cursor: pointer; z-index: 1; } /* [수정] 마커를 오른쪽으로 50% 이동 */ .marker-overlay.highlight, .marker-overlay:hover { transform: translate(0, -100%) scale(1.05); z-index: 10; border-color: #3182ce; box-shadow: 0 4px 12px rgba(0,0,0,0.2); } .marker-overlay::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid white; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15)); }
     .marker-overlay-number { display: flex; justify-content: center; align-items: center; width: 24px; height: 24px; border-radius: 50%; color: white; font-weight: bold; font-size: 13px; flex-shrink: 0; }
     .marker-overlay-info { padding: 0 8px 0 6px; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
     .marker-overlay-title { font-weight: bold; font-size: 13px; color: #2d3748; overflow: hidden; text-overflow: ellipsis; }
@@ -480,18 +477,22 @@
                 : 'https://placehold.co/400x200/e2e8f0/94a3b8?text=No+Image';
 
             const itemHtml = 
-                '<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank" class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">' +
+                '<div class="relative bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">' +
                     // 썸네일 이미지 영역
-                    '<div class="w-full h-32 bg-slate-200">' +
-                        '<img src="' + imageUrl + '" alt="' + col.title + '" class="w-full h-full object-cover">' +
-                    '</div>' +
+                    '<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank">' +
+                        '<div class="w-full h-32 bg-slate-200">' +
+                            '<img src="' + imageUrl + '" alt="' + col.title + '" class="w-full h-full object-cover">' +
+                        '</div>' +
+                    '</a>' +
                     // 텍스트 정보 영역
-                    '<div class="block p-3 border rounded-md hover:shadow-md transition">' +
-                        '<p class="font-bold text-base text-slate-800 truncate">' + col.title + '</p>' +
-                        '<p class="text-sm text-slate-500 mt-1 truncate">' + col.content + '</p>' +
-                        '<p class="text-xs text-slate-400 mt-1">by ' + col.author + '</p>' + // [수정] 작성자 필드를 올바르게 참조합니다.
+                    '<div class="p-3 flex justify-between items-start">' +
+                        '<div>' +
+                            '<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank" class="font-bold text-base text-slate-800 truncate hover:underline">' + col.title + '</a>' +
+                            '<p class="text-xs text-slate-400 mt-1">by ' + col.author + '</p>' +
+                        '</div>' +
+                        '<button class="add-column-btn flex-shrink-0 ml-2 bg-sky-600 text-white text-xs font-bold px-2 py-1 rounded-md hover:bg-sky-700 transition-colors" data-column-id="' + col.id + '">코스에 추가</button>' +
                     '</div>' +
-                '</a>'
+                '</div>';
             container.append(itemHtml);
         });
     }
@@ -518,23 +519,36 @@
         }
 
         reviews.forEach(review => {
-            const reviewUrl = contextPath + '/restaurant/detail/' + review.restaurantId + '#review-' + review.id;
+            const detailUrl = contextPath + '/restaurant/detail/' + review.restaurantId;
             const profileImg = review.profileImage ? (contextPath + '/images/' + review.profileImage) : 'https://placehold.co/40x40/ccc/666?text=User';
             const ratingStars = '⭐'.repeat(review.rating);
             const truncatedContent = review.content.length > 80 ? review.content.substring(0, 80) + '...' : review.content;
 
-            container.append(
-                '<a href="' + reviewUrl + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition">' +
-                    '<div class="flex items-center gap-2 mb-2">' +
-                        '<img src="' + profileImg + '" alt="' + review.author + '" class="w-8 h-8 rounded-full object-cover">' +
-                        '<div class="flex-grow">' +
-                            '<p class="font-bold text-sm">' + review.restaurantName + '</p>' +
-                            '<p class="text-xs text-slate-500">' + review.author + ' · ' + ratingStars + '</p>' +
+            const placeData = {
+                id: 'db-' + review.restaurantId,
+                name: review.restaurantName,
+                address: review.address,
+                lat: review.latitude,
+                lng: review.longitude
+            };
+
+            const itemEl = $(
+                '<div class="p-3 border rounded-md hover:shadow-md transition relative">' +
+                    '<div class="flex justify-between items-start gap-2 mb-2">' +
+                        '<div class="flex items-center gap-2 min-w-0">' +
+                            '<img src="' + profileImg + '" alt="' + review.author + '" class="w-8 h-8 rounded-full object-cover flex-shrink-0">' +
+                            '<div class="flex-grow min-w-0">' +
+                                '<a href="' + detailUrl + '" target="_blank" class="font-bold text-sm truncate block hover:underline">' + review.restaurantName + '</a>' +
+                                '<p class="text-xs text-slate-500">' + review.author + ' · ' + ratingStars + '</p>' +
+                            '</div>' +
                         '</div>' +
+                        '<button class="add-review-resto-btn flex-shrink-0 bg-sky-600 text-white text-xs font-bold px-2 py-1 rounded-md hover:bg-sky-700 transition-colors">코스에 추가</button>' +
                     '</div>' +
-                    '<p class="text-sm text-slate-700">' + truncatedContent + '</p>' +
-                '</a>'
+                    '<a href="' + detailUrl + '#review-' + review.id + '" target="_blank" class="text-sm text-slate-700 block hover:text-sky-700">' + truncatedContent + '</a>' +
+                '</div>'
             );
+            itemEl.find('.add-review-resto-btn').on('click', () => addPlaceToCart(placeData));
+            container.append(itemEl);
         });
     }
 
@@ -563,18 +577,20 @@
             const courseUrl = contextPath + '/course/detail?id=' + course.id;
             const thumbImg = course.previewImage ? (contextPath + '/images/' + course.previewImage) : 'https://placehold.co/80x80/e0f2fe/0891b2?text=Course';
 
-            container.append(
-                '<a href="' + courseUrl + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition">' +
-                    '<div class="flex gap-3">' +
+            
+            const itemHtml =
+                '<div class="relative p-3 border rounded-md hover:shadow-md transition">' +
+                    '<a href="' + courseUrl + '" target="_blank" class="flex gap-3">' +
                         '<img src="' + thumbImg + '" alt="' + course.title + '" class="w-20 h-20 rounded-md object-cover flex-shrink-0">' +
                         '<div class="flex-grow min-w-0">' +
                             '<p class="font-bold text-slate-800 truncate">' + course.title + '</p>' +
                             '<p class="text-xs text-slate-500 mt-1">by ' + course.author + '</p>' +
                             '<p class="text-xs text-slate-400 mt-1">👍 ' + course.likes + ' · 🍽️ ' + course.restaurantCount + '곳</p>' +
                         '</div>' +
-                    '</div>' +
-                '</a>'
-            );
+                    '</a>' +
+                    '<button class="add-course-btn absolute bottom-2 right-2 bg-sky-600 text-white text-xs font-bold px-2 py-1 rounded-md hover:bg-sky-700 transition-colors" data-course-id="' + course.id + '">코스에 추가</button>' +
+                '</div>';
+            container.append(itemHtml);
         });
     }
 
@@ -648,6 +664,25 @@
         updateCourseOnMap();
         updateSummary();
     }
+
+    // [추가] 여러 장소를 한 번에 카트에 추가하는 함수
+    function addPlacesToCart(places) {
+        let addedCount = 0;
+        places.forEach(place => {
+            if (!courseCart.some(item => item.name === place.name && item.address === place.address)) {
+                courseCart.push(place);
+                addedCount++;
+            }
+        });
+        if (addedCount > 0) {
+            alert(addedCount + '개의 장소가 코스에 추가되었습니다.');
+            renderCourseSidebar();
+            updateCourseOnMap();
+            updateSummary();
+        } else {
+            alert('모든 장소가 이미 코스에 포함되어 있습니다.');
+        }
+    }
         
     function renderCourseSidebar() {
         const container = $('#course-cart-sidebar');
@@ -659,8 +694,27 @@
         container.empty();
         courseCart.forEach((item, index) => {
             const isLastItem = index === courseCart.length - 1;
-            const itemEl = $('<div class="p-3 rounded-lg bg-slate-50 relative"><div class="flex justify-between items-start"><div class="flex items-start gap-3"><span class="font-bold text-lg text-sky-600 mt-1">' + (index + 1) + '</span><div><p class="font-bold text-slate-800">' + item.name + '</p><p class="text-xs text-slate-500">' + (item.address || '') + '</p></div></div><button class="remove-btn text-sm text-red-500 font-semibold whitespace-nowrap">삭제</button></div><div class="flex gap-4 text-sm mt-3 pl-8"><div class="flex-1"><label class="font-medium text-xs">시간(분)</label><input type="number" class="time-input w-full p-1 border rounded-md mt-1" value="' + item.time + '" step="10" min="0"></div><div class="flex-1"><label class="font-medium text-xs">비용(원)</label><input type="number" class="cost-input w-full p-1 border rounded-md mt-1" value="' + item.cost + '" step="1000" min="0"></div></div>' + (!isLastItem ? '<div class="course-item-connector"></div>' : '') + '</div>');
+            const isFirstItem = index === 0;
+
+            const itemEl = $(
+                '<div class="p-3 rounded-lg bg-slate-50 relative">' +
+                    '<div class="flex justify-between items-start">' +
+                        '<div class="flex items-start gap-3">' +
+                            '<span class="font-bold text-lg text-sky-600 mt-1">' + (index + 1) + '</span>' +
+                            '<div><p class="font-bold text-slate-800">' + item.name + '</p><p class="text-xs text-slate-500">' + (item.address || '') + '</p></div>' +
+                        '</div>' +
+                        '<div class="flex items-center gap-1 flex-shrink-0 ml-2">' +
+                            '<button class="move-up-btn p-1 text-slate-500 hover:text-sky-600 disabled:text-slate-300 disabled:cursor-not-allowed" ' + (isFirstItem ? 'disabled' : '') + '>▲</button>' +
+                            '<button class="move-down-btn p-1 text-slate-500 hover:text-sky-600 disabled:text-slate-300 disabled:cursor-not-allowed" ' + (isLastItem ? 'disabled' : '') + '>▼</button>' +
+                            '<button class="remove-btn text-sm text-red-500 font-semibold whitespace-nowrap">삭제</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="flex gap-4 text-sm mt-3 pl-8"><div class="flex-1"><label class="font-medium text-xs">시간(분)</label><input type="number" class="time-input w-full p-1 border rounded-md mt-1" value="' + item.time + '" step="10" min="0"></div><div class="flex-1"><label class="font-medium text-xs">비용(원)</label><input type="number" class="cost-input w-full p-1 border rounded-md mt-1" value="' + item.cost + '" step="1000" min="0"></div></div>' + (!isLastItem ? '<div class="course-item-connector"></div>' : '') + 
+                '</div>'
+            );
             itemEl.on('click', '.remove-btn', () => removePlaceFromCart(index));
+            itemEl.on('click', '.move-up-btn', () => moveCourseItem(index, 'up'));
+            itemEl.on('click', '.move-down-btn', () => moveCourseItem(index, 'down'));
             itemEl.on('input', '.time-input', function() { courseCart[index].time = parseInt($(this).val()) || 0; updateSummary(); });
             itemEl.on('input', '.cost-input', function() { courseCart[index].cost = parseInt($(this).val()) || 0; updateSummary(); });
             container.append(itemEl);
@@ -673,6 +727,20 @@
         renderCourseSidebar();
         updateCourseOnMap();
         updateSummary();
+    }
+
+    function moveCourseItem(index, direction) {
+        if (direction === 'up' && index > 0) {
+            [courseCart[index - 1], courseCart[index]] = [courseCart[index], courseCart[index - 1]];
+        } else if (direction === 'down' && index < courseCart.length - 1) {
+            [courseCart[index], courseCart[index + 1]] = [courseCart[index + 1], courseCart[index]];
+        } else {
+            return; // 이동 불가
+        }
+        // UI 갱신
+        renderCourseSidebar();
+        updateCourseOnMap();
+        // updateSummary는 시간/비용 변경 시에만 필요하므로 여기서는 호출하지 않아도 됩니다.
     }
 
     function updateCourseOnMap() {
@@ -833,6 +901,51 @@
             submitBtn.textContent = originalText;
         });
     }
+
+    // [추가] 동적으로 생성된 '코스에 추가' 버튼에 대한 이벤트 위임
+    $(document).on('click', '.add-column-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const columnId = $(this).data('column-id');
+        const $button = $(this);
+        $button.text('...').prop('disabled', true);
+
+        $.getJSON(contextPath + '/api/columns/attached-restaurants?columnId=' + columnId, function(restaurants) {
+            const placesToAdd = restaurants.map(r => ({
+                id: 'db-' + r.id,
+                name: r.name,
+                address: r.address,
+                lat: r.latitude,
+                lng: r.longitude,
+                type: 'RESTAURANT', time: 60, cost: 10000
+            }));
+            addPlacesToCart(placesToAdd);
+        }).always(() => {
+            $button.text('코스에 추가').prop('disabled', false);
+        });
+    });
+    // [추가] 동적으로 생성된 '코스에 추가' 버튼에 대한 이벤트 위임 (코스 탭)
+    $(document).on('click', '.add-course-btn', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const courseId = $(this).data('course-id');
+        const $button = $(this);
+        $button.text('...').prop('disabled', true);
+
+        $.getJSON(contextPath + '/api/courses/steps?courseId=' + courseId, function(steps) {
+            const placesToAdd = steps.map(step => ({
+                id: 'step-' + step.id, // ID가 겹치지 않도록 prefix 추가
+                name: step.name,
+                address: step.address,
+                lat: step.latitude,
+                lng: step.longitude,
+                type: step.type || 'RESTAURANT', time: step.time || 60, cost: step.cost || 10000
+            }));
+            addPlacesToCart(placesToAdd);
+        }).always(() => {
+            $button.text('코스에 추가').prop('disabled', false);
+        });
+    });
 </script>
 </body>
 </html>

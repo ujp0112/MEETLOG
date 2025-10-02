@@ -25,6 +25,11 @@ public class Review {
 	private String replyContent;
 	private LocalDateTime replyCreatedAt;
 
+	// [추가] 주변 리뷰 검색 시 맛집 위치 정보를 담기 위한 필드
+	private String address;
+	private Double latitude;
+	private Double longitude;
+
 	// 상세 평점 필드들
 	private int tasteRating;
 	private int serviceRating;
@@ -52,17 +57,42 @@ public class Review {
 		this.rating = rating;
 		this.content = content;
 	}
-	
+
+	// [추가] Getter/Setter
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
 	public void setKeywords(String keywords) {
-	    if (keywords != null && !keywords.trim().isEmpty()) {
-	        this.keywords = Arrays.asList(keywords.split("\\s*,\\s*"));
-	    } else {
-	        this.keywords = Collections.emptyList();
-	    }
+		if (keywords != null && !keywords.trim().isEmpty()) {
+			this.keywords = Arrays.asList(keywords.split("\\s*,\\s*"));
+		} else {
+			this.keywords = Collections.emptyList();
+		}
 	}
 
 	// --- 이하 Getter, Setter 메서드들 ---
-	
+
 	public boolean isLikedByCurrentUser() {
 		return likedByCurrentUser;
 	}
@@ -71,7 +101,7 @@ public class Review {
 		this.likedByCurrentUser = likedByCurrentUser;
 	}
 
-    // [ ✨ 추가된 부분 ✨ ]
+	// [ ✨ 추가된 부분 ✨ ]
 	public boolean isAuthorIsFollowedByCurrentUser() {
 		return authorIsFollowedByCurrentUser;
 	}
@@ -104,7 +134,7 @@ public class Review {
 	public void setUserId(int userId) {
 		this.userId = userId;
 	}
-	
+
 	public String getAuthor() {
 		return author;
 	}
@@ -136,11 +166,11 @@ public class Review {
 	public void setImages(List<String> images) {
 		this.images = images;
 	}
-	
+
 	public List<String> getKeywords() {
 		return keywords;
 	}
-	
+
 	public void setKeywords(List<String> keywords) {
 		this.keywords = keywords;
 	}
@@ -240,11 +270,11 @@ public class Review {
 	public void setVisitPurpose(String visitPurpose) {
 		this.visitPurpose = visitPurpose;
 	}
-	
+
 	public List<ReviewComment> getComments() {
 		return comments;
 	}
-	
+
 	public void setComments(List<ReviewComment> comments) {
 		this.comments = comments;
 	}
@@ -260,23 +290,20 @@ public class Review {
 	public String getReplyContent() {
 		return replyContent;
 	}
-	
+
 	public Date getCreatedAtAsDate() {
-	    if (this.createdAt != null) {
-	        return Timestamp.valueOf(this.createdAt);
-	    }
-	    return null;
+		if (this.createdAt != null) {
+			return Timestamp.valueOf(this.createdAt);
+		}
+		return null;
 	}
 
 	public Date getReplyCreatedAtAsDate() {
-	    if (this.replyCreatedAt != null) {
-	        return Timestamp.valueOf(this.replyCreatedAt);
-	    }
-	    return null;
+		if (this.replyCreatedAt != null) {
+			return Timestamp.valueOf(this.replyCreatedAt);
+		}
+		return null;
 	}
-
-
-
 
 	public void setReplyContent(String replyContent) {
 		this.replyContent = replyContent;
