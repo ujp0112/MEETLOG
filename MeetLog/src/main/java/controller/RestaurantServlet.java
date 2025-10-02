@@ -114,10 +114,24 @@ public class RestaurantServlet extends HttpServlet {
 
 		// 5. 조회된 데이터를 JSP로 전달하기 위해 request 객체에 저장
 		request.setAttribute("restaurants", restaurants);
+		request.setAttribute("totalResults", totalRestaurants);
 		request.setAttribute("currentPage", page);
 		request.setAttribute("totalPages", totalPages);
+		request.setAttribute("pageSize", pageSize);
 		
-		// 6. 사용자가 선택한 필터 값을 JSP에 다시 전달 (검색창의 상태를 유지하기 위함)
+		// 6. 사용자가 선택한 필터 값을 Map 형태로 저장하여 JSP에 전달
+		Map<String, Object> searchParams = new HashMap<>();
+		searchParams.put("keyword", keyword);
+		searchParams.put("category", category);
+		searchParams.put("location", location);
+		searchParams.put("price", price);
+		searchParams.put("parking", parking);
+		searchParams.put("sortBy", sortBy);
+		request.setAttribute("searchParams", searchParams);
+		request.setAttribute("searchType", "restaurants");
+		request.setAttribute("submitted", true);
+
+		// 기존 선택 값도 유지 (다른 뷰에서 사용 중일 수 있으므로 유지)
 		request.setAttribute("selectedKeyword", keyword);
 		request.setAttribute("selectedCategory", category);
 		request.setAttribute("selectedLocation", location);
@@ -125,8 +139,8 @@ public class RestaurantServlet extends HttpServlet {
 		request.setAttribute("selectedParking", parking);
 		request.setAttribute("selectedSortBy", sortBy);
 		
-		// 7. restaurant-list.jsp로 포워딩
-		request.getRequestDispatcher("/WEB-INF/views/restaurant-list.jsp").forward(request, response);
+		// 7. 고급 검색 페이지로 포워딩 (통합 뷰)
+		request.getRequestDispatcher("/WEB-INF/views/advanced-search.jsp").forward(request, response);
 	}
     
 	/**

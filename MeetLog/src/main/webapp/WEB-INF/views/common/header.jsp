@@ -70,9 +70,9 @@
 			<a href="${pageContext.request.contextPath}/main"
 				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">홈</a>
 			<a href="${pageContext.request.contextPath}/search"
-				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">키워드
-				검색</a> <a href="${pageContext.request.contextPath}/searchRestaurant?keyword=서울특별시청&category=전체"
-				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">맛집찾기</a>
+				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">키워드 검색</a> 
+			<a href="${pageContext.request.contextPath}/searchRestaurant?keyword=서울특별시청&category=전체"
+				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">지도 검색</a>
 			<a href="${pageContext.request.contextPath}/column"
 				class="text-slate-700 hover:text-sky-600 transition font-medium px-4 py-2">칼럼</a>
 			<a href="${pageContext.request.contextPath}/course"
