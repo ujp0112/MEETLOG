@@ -44,6 +44,18 @@ public class FeedService {
     }
 
     /**
+     * 팔로우한 사용자들의 활동 피드 조회 (상세 정보 포함)
+     */
+    public List<Map<String, Object>> getFollowingFeedWithDetails(int userId, int limit, int offset) {
+        try {
+            return feedDAO.getUserFeedWithDetails(userId, limit, offset);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
+        }
+    }
+
+    /**
      * 특정 사용자의 활동 피드 조회
      */
     public List<FeedItem> getUserActivityFeed(int userId, int limit, int offset) {
@@ -59,8 +71,12 @@ public class FeedService {
      * 특정 사용자의 활동 피드 조회 (Map 형태 - 상세 정보 포함)
      */
     public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset) {
+        return getUserActivityFeedWithDetails(userId, limit, offset, true);
+    }
+
+    public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset, boolean includeFollow) {
         try {
-            return feedDAO.getUserActivityFeedWithDetails(userId, limit, offset);
+            return feedDAO.getUserActivityFeedWithDetails(userId, limit, offset, includeFollow);
         } catch (Exception e) {
             e.printStackTrace();
             return List.of();

@@ -84,12 +84,13 @@ public class FeedDAO {
     /**
      * 특정 사용자의 활동 피드 조회 (Map 형태로 반환 - 상세 정보 포함)
      */
-    public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset) {
+    public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset, boolean includeFollow) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
             Map<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             params.put("limit", limit);
             params.put("offset", offset);
+            params.put("includeFollow", includeFollow);
             return sqlSession.selectList(NAMESPACE + ".getUserActivityFeed", params);
         }
     }

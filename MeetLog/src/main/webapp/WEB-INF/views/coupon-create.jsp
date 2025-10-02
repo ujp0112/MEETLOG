@@ -24,7 +24,7 @@
     <main class="container mx-auto p-4 md:p-8">
         <div class="glass-card p-8 rounded-3xl fade-in">
             <div class="mb-8 space-y-2">
-                <h1 class="text-3xl font-bold gradient-text">🎟️ 새 쿠폰 생성</h1>
+                <h1 class="text-3xl font-bold gradient-text">새 쿠폰 생성</h1>
                 <p class="text-slate-600">고객에게 제공할 쿠폰을 생성하세요</p>
                 <c:if test="${not empty selectedRestaurant}">
                     <div class="text-sm text-slate-500">

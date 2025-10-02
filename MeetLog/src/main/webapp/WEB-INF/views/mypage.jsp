@@ -69,11 +69,9 @@
                                      </div>
                                 </div>
 
-                                <div class="bg-white p-6 rounded-xl shadow-lg">
-             
-                                     <h3 class="text-xl font-bold text-slate-800 mb-4">최근 활동</h3>
-                                    <div class="space-y-4">
-                                   
+                                <!-- <div class="bg-white p-6 rounded-xl shadow-lg">
+                                    <h3 class="text-xl font-bold text-slate-800 mb-4">최근 활동</h3>
+                                       <div class="space-y-4">
                                          <c:choose>
                                             <c:when test="${not empty myReviews}">
                                                 
@@ -120,7 +118,7 @@
                                         
                                          </c:choose>
                                     </div>
-                                </div>
+                                </div> -->
 
 
                                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

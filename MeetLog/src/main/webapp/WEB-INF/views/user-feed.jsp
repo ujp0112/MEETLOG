@@ -201,6 +201,17 @@
                                     </div>
                                 </div>
                             </c:forEach>
+
+                            <c:if test="${hasMore}">
+                                <div class="glass-card p-6 rounded-3xl text-center mt-6">
+                                    <form method="get" class="inline-block">
+                                        <input type="hidden" name="page" value="${nextPage}" />
+                                        <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                                            더 보기
+                                        </button>
+                                    </form>
+                                </div>
+                            </c:if>
                         </c:when>
                         <c:otherwise>
                             <!-- 활동이 없을 때 -->

@@ -216,40 +216,14 @@
                                 </div>
                             </c:forEach>
                             
-                            <!-- 페이징 -->
-                            <c:if test="${totalPages > 1}">
-                                <div class="glass-card p-6 rounded-3xl">
-                                    <div class="flex justify-center space-x-2">
-                                        <c:if test="${currentPage > 1}">
-                                            <a href="?page=${currentPage - 1}" 
-                                               class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-semibold transition-colors">
-                                                이전
-                                            </a>
-                                        </c:if>
-                                        
-                                        <c:forEach begin="1" end="${totalPages}" var="pageNum">
-                                            <c:choose>
-                                                <c:when test="${pageNum == currentPage}">
-                                                    <span class="px-4 py-2 btn-primary text-white rounded-lg font-semibold">
-                                                        ${pageNum}
-                                                    </span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <a href="?page=${pageNum}" 
-                                                       class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-semibold transition-colors">
-                                                        ${pageNum}
-                                                    </a>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </c:forEach>
-                                        
-                                        <c:if test="${currentPage < totalPages}">
-                                            <a href="?page=${currentPage + 1}" 
-                                               class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-lg font-semibold transition-colors">
-                                                다음
-                                            </a>
-                                        </c:if>
-                                    </div>
+                            <c:if test="${hasMore}">
+                                <div class="glass-card p-6 rounded-3xl text-center">
+                                    <form method="get" class="inline-block">
+                                        <input type="hidden" name="page" value="${nextPage}" />
+                                        <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                                            더 보기
+                                        </button>
+                                    </form>
                                 </div>
                             </c:if>
                         </c:when>

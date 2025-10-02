@@ -34,11 +34,15 @@
                END as restaurantName,
                CASE
                    WHEN fi.feed_type = 'REVIEW' THEN rest.name
+                   WHEN fi.feed_type = 'COURSE' THEN course.title
+                   WHEN fi.feed_type = 'COLUMN' THEN column_item.title
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.nickname
                    ELSE NULL
                END as targetName,
                CASE
                    WHEN fi.feed_type = 'REVIEW' THEN rest.image
+                   WHEN fi.feed_type = 'COURSE' THEN course.preview_image
+                   WHEN fi.feed_type = 'COLUMN' THEN column_item.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image
                    ELSE NULL
                END as targetImage
@@ -92,6 +96,9 @@
         LEFT JOIN columns column_item ON fi.feed_type = 'COLUMN' AND fi.content_id = column_item.id
         LEFT JOIN users follow_target ON fi.feed_type = 'FOLLOW' AND fi.content_id = follow_target.id
         WHERE fi.user_id = #{userId}
+        <if test="includeFollow == false">
+            AND fi.feed_type != 'FOLLOW'
+        </if>
         AND fi.is_active = true
         ORDER BY fi.created_at DESC
         LIMIT #{limit} OFFSET #{offset}

@@ -42,9 +42,29 @@ public class FeedServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                // 메인 피드 페이지 (자신의 활동 + 팔로우한 사용자들의 활동)
-                List<Map<String, Object>> feedData = feedService.getMainFeedWithDetails(user.getId(), 20, 0);
-                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 메인 피드 아이템 수: " + feedData.size());
+                int page = 1;
+                String pageParam = request.getParameter("page");
+                if (pageParam != null) {
+                    try {
+                        page = Integer.parseInt(pageParam);
+                    } catch (NumberFormatException ignore) {
+                        page = 1;
+                    }
+                }
+                if (page < 1) {
+                    page = 1;
+                }
+
+                int pageSize = 10;
+                int fetchLimit = (page * pageSize) + 1;
+
+                // 메인 피드 페이지 (팔로우한 사용자들의 활동만)
+                List<Map<String, Object>> feedData = feedService.getFollowingFeedWithDetails(user.getId(), fetchLimit, 0);
+                boolean hasMore = feedData.size() > (page * pageSize);
+                if (hasMore) {
+                    feedData = feedData.subList(0, page * pageSize);
+                }
+                System.out.println("DEBUG 피드: 사용자 " + user.getId() + "의 팔로우 피드 아이템 수: " + feedData.size());
 
                 // Map 데이터를 Activity로 변환
                 List<Activity> activities = convertMapDataToActivities(feedData);
@@ -60,6 +80,9 @@ public class FeedServlet extends HttpServlet {
                 request.setAttribute("hasActivities", !activities.isEmpty());
                 request.setAttribute("followingCount", followingUsers.size());
                 request.setAttribute("followerCount", followers.size());
+                request.setAttribute("currentPage", page);
+                request.setAttribute("hasMore", hasMore);
+                request.setAttribute("nextPage", page + 1);
                 request.getRequestDispatcher("/WEB-INF/views/feed.jsp").forward(request, response);
 
             } else if (pathInfo.equals("/follow-list")) {
@@ -97,28 +120,37 @@ public class FeedServlet extends HttpServlet {
                         return;
                     }
 
-                    // 대상 사용자의 활동 피드 조회
-                    List<Map<String, Object>> userFeedData = feedService.getUserActivityFeedWithDetails(targetUserId, 20, 0);
-
-                    // 다른 사용자가 볼 때는 팔로우 활동은 제외
-                    if (user.getId() != targetUserId) {
-                        List<Map<String, Object>> filteredData = new ArrayList<>();
-                        for (Map<String, Object> data : userFeedData) {
-                            Object actionTypeObj = data.get("actionType");
-                            if (actionTypeObj instanceof String
-                                    && "FOLLOW".equalsIgnoreCase((String) actionTypeObj)) {
-                                continue;
-                            }
-                            filteredData.add(data);
+                    int page = 1;
+                    String pageParam = request.getParameter("page");
+                    if (pageParam != null) {
+                        try {
+                            page = Integer.parseInt(pageParam);
+                        } catch (NumberFormatException ignore) {
+                            page = 1;
                         }
-                        userFeedData = filteredData;
+                    }
+                    if (page < 1) {
+                        page = 1;
+                    }
+
+                    int pageSize = 10;
+                    int fetchLimit = (page * pageSize) + 1;
+
+                    boolean isOwnProfile = (user.getId() == targetUserId);
+
+                    // 대상 사용자의 활동 피드 조회
+                    List<Map<String, Object>> userFeedData = feedService.getUserActivityFeedWithDetails(
+                            targetUserId, fetchLimit, 0, isOwnProfile);
+
+                    boolean hasMore = userFeedData.size() > (page * pageSize);
+                    if (hasMore) {
+                        userFeedData = userFeedData.subList(0, page * pageSize);
                     }
 
                     List<Activity> userActivities = convertMapDataToActivities(userFeedData);
 
                     // 팔로우 관계 확인
                     boolean isFollowing = followService.isFollowing(user.getId(), targetUserId);
-                    boolean isOwnProfile = (user.getId() == targetUserId);
 
                     // 대상 사용자의 팔로잉/팔로워 수 조회
                     List<User> targetFollowingUsers = followService.getFollowingUsers(targetUserId);
@@ -132,6 +164,9 @@ public class FeedServlet extends HttpServlet {
                     request.setAttribute("followerCount", targetFollowers.size());
                     request.setAttribute("isFollowing", isFollowing);
                     request.setAttribute("isOwnProfile", isOwnProfile);
+                    request.setAttribute("currentPage", page);
+                    request.setAttribute("hasMore", hasMore);
+                    request.setAttribute("nextPage", page + 1);
 
                     request.getRequestDispatcher("/WEB-INF/views/user-feed.jsp").forward(request, response);
 

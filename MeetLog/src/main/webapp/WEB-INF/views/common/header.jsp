@@ -239,7 +239,7 @@
 									</c:if>
 								</a> <a href="${pageContext.request.contextPath}/mypage"
 									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">👤
-									내 프로필</a> 
+									마이페이지</a> 
 									<a href="${pageContext.request.contextPath}/feed/user/${sessionScope.user.id}"
 									class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📖
 									내 피드	</a> 
