@@ -351,7 +351,7 @@
 		)) AS distance
 		FROM
 		restaurants
-		WHERE
+		WHERE kakao_place_id IS NULL AND
 		latitude IS NOT NULL AND longitude IS NOT NULL
 		<if test="categories != null and !categories.isEmpty()">
 			AND category IN
