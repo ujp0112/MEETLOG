@@ -140,18 +140,25 @@ body {
 								<div class="mt-8 bg-white rounded-xl shadow-lg p-6 md:p-8">
 									<h3 class="text-xl font-bold text-slate-800 mb-4">소개된 맛집</h3>
 									<div class="space-y-4">
-										<c:forEach var="r" items="${attachedRestaurants}">
+										<c:forEach var="r" items="${attachedRestaurants}" varStatus="status">
 											<a
 												href="${pageContext.request.contextPath}/restaurant/detail/${r.id}"
 												class="flex items-center p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
-												<%-- 이미지가 있다면 표시 (없다면 기본 아이콘) --%>
-												<div
-													class="w-16 h-16 rounded-md bg-slate-200 flex-shrink-0 mr-4 flex items-center justify-center">
-													<span class="text-2xl">🍽️</span>
-												</div>
+												<%-- [수정] 이미지 썸네일 표시 --%>
+												<c:choose>
+													<c:when test="${not empty r.image}">
+														<mytag:image fileName="${r.image}" altText="${r.name}" cssClass="w-16 h-16 rounded-md object-cover flex-shrink-0 mr-4" />
+													</c:when>
+													<c:otherwise>
+														<%-- 이미지가 없을 경우, JS로 프록시를 통해 가져오기 위한 placeholder --%>
+														<img id="attached-restaurant-img-${status.index}" src="https://placehold.co/64x64/e2e8f0/94a3b8?text=..." alt="${r.name}"
+															 class="w-16 h-16 rounded-md object-cover flex-shrink-0 mr-4"
+															 data-name="${r.name}" data-address="${r.address}">
+													</c:otherwise>
+												</c:choose>
 												<div>
 													<p class="font-bold text-lg text-slate-800">${r.name}</p>
-													<p class="text-slate-600">${r.address}</p>
+													<p class="text-sm text-slate-600">${r.address}</p>
 												</div>
 											</a>
 										</c:forEach>
@@ -266,6 +273,23 @@ body {
             if (submitBtn) {
                 submitBtn.addEventListener('click', submitComment);
             }
+            
+            // [추가] 이미지가 없는 첨부 맛집에 대해 이미지 프록시 호출
+            document.querySelectorAll('img[id^="attached-restaurant-img-"]').forEach(imgElement => {
+                // src가 placeholder 이미지일 경우에만 실행
+                if (imgElement.src.includes('placehold.co')) {
+                    const name = imgElement.dataset.name;
+                    const address = imgElement.dataset.address;
+                    if (name && address) {
+                        const searchQuery = name + " " + (address || '').split(" ")[0];
+                        fetch('${pageContext.request.contextPath}/search/image-proxy?query=' + encodeURIComponent(searchQuery))
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data && data.imageUrl) imgElement.src = data.imageUrl;
+                            });
+                    }
+                }
+            });
         });
 
         function submitComment() {

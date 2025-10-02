@@ -15,7 +15,7 @@ public class Restaurant {
     private String description;
     private double latitude;
     private double longitude;
-    private int ownerId;
+    private Integer ownerId; // [수정] int -> Integer
     private String kakaoPlaceId; // [추가] 카카오 지도 place ID 필드
     private String website;
     
@@ -210,11 +210,11 @@ public class Restaurant {
         this.longitude = longitude;
     }
 
-    public int getOwnerId() {
+    public Integer getOwnerId() { // [수정] int -> Integer
         return ownerId;
     }
 
-    public void setOwnerId(int ownerId) {
+    public void setOwnerId(Integer ownerId) { // [수정] int -> Integer
         this.ownerId = ownerId;
     }
     

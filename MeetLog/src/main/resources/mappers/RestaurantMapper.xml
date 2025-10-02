@@ -37,10 +37,11 @@
 		latitude,
 		longitude,
 		rating AS
-		average_rating -- 이 부분을 수정하세요
+		average_rating
 		FROM
 		restaurants
 		WHERE
+		kakao_place_id IS NULL AND
 		name LIKE CONCAT('%',
 		#{region}, '%')
 		OR address LIKE CONCAT('%', #{region}, '%')
@@ -52,7 +53,7 @@
 	<select id="findAll" resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
 		WHERE
-		is_active = true
+		is_active = true AND kakao_place_id IS NULL
 		ORDER BY created_at DESC
 	</select>
 
@@ -66,7 +67,7 @@
 	<select id="findByCategory" parameterType="String"
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE category = #{category} AND
+		WHERE category = #{category} AND kakao_place_id IS NULL AND
 		is_active = true
 		ORDER BY created_at DESC
 	</select>
@@ -74,7 +75,7 @@
 	<select id="findByLocation" parameterType="String"
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE location = #{location} AND
+		WHERE location = #{location} AND kakao_place_id IS NULL AND
 		is_active = true
 		ORDER BY created_at DESC
 	</select>
@@ -82,7 +83,7 @@
 	<select id="findByOwnerId" parameterType="int"
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE owner_id = #{ownerId} AND
+		WHERE owner_id = #{ownerId} AND kakao_place_id IS NULL AND
 		is_active = true
 		ORDER BY created_at DESC
 	</select>
@@ -93,7 +94,7 @@
 		review_count as
 		reviewCount
 		FROM restaurants
-		WHERE owner_id = #{ownerId}
+		WHERE owner_id = #{ownerId} AND kakao_place_id IS NULL
 		AND is_active = true
 		ORDER BY created_at DESC
 	</select>
@@ -101,7 +102,7 @@
 	<select id="findTopRestaurants" parameterType="int"
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE is_active = true
+		WHERE is_active = true AND kakao_place_id IS NULL
 		ORDER BY
 		rating DESC, review_count DESC
 		LIMIT #{limit}
@@ -111,7 +112,7 @@
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
 		<where>
-			is_active = true
+			is_active = true AND kakao_place_id IS NULL
 			<if test="keyword != null and keyword != ''">
 				AND (name LIKE CONCAT('%', #{keyword}, '%')
 				OR location
@@ -164,7 +165,7 @@
 		resultType="int">
 		SELECT count(*) FROM restaurants
 		<where>
-			is_active = true
+			is_active = true AND kakao_place_id IS NULL
 			<if test="keyword != null and keyword != ''">
 				AND (name LIKE CONCAT('%', #{keyword}, '%')
 				OR location
@@ -204,7 +205,7 @@
 	<select id="searchRestaurants" parameterType="map"
 		resultMap="restaurantResultMap">
 		SELECT * FROM restaurants
-		WHERE is_active = true
+		WHERE is_active = true AND kakao_place_id IS NULL
 		<if test="category != null and category != ''">
 			AND category = #{category}
 		</if>

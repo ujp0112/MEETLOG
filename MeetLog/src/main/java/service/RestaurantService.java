@@ -194,29 +194,31 @@ public class RestaurantService {
         return false;
     }
     
-// ▼▼▼ [추가] RestaurantApiServlet에서 사용할 서비스 메서드들 ▼▼▼
-    
     /**
-     * 카카오 장소 ID로 DB에 저장된 맛집 정보를 조회합니다.
+     * [수정] 카카오 장소 ID로 맛집을 찾거나, 없으면 새로 생성합니다. (트랜잭션 및 동기화 처리)
+     * synchronized 키워드를 사용하여 여러 스레드가 동시에 이 메서드에 접근하는 것을 막아
+     * 'select 후 insert' 로직 사이에서 발생할 수 있는 경쟁 조건을 방지합니다.
+     * @param restaurantData 맛집 생성을 위한 데이터가 담긴 객체
+     * @return 찾았거나 새로 생성된 Restaurant 객체
      */
-    public Restaurant findRestaurantByKakaoPlaceId(String kakaoPlaceId) {
-        return restaurantDAO.findByKakaoPlaceId(kakaoPlaceId);
-    }
-    
-    /**
-     * 새로운 맛집 정보를 DB에 저장하고, 생성된 ID가 포함된 객체를 반환합니다.
-     */
-    public Restaurant createRestaurantAndReturn(Restaurant restaurant) {
-        // DAO의 insert 메서드는 MyBatis의 useGeneratedKeys 속성 덕분에
-        // 파라미터로 전달된 restaurant 객체의 id 필드를 채워줍니다.
-        int result = restaurantDAO.insert(restaurant);
-        
-        if (result > 0) {
-            // 삽입 성공 시, ID가 채워진 객체를 반환합니다.
-            return restaurant;
+    public synchronized Restaurant findOrCreateRestaurant(Restaurant restaurantData) {
+        // 1. 먼저 카카오 ID로 맛집이 DB에 있는지 확인합니다.
+        Restaurant existingRestaurant = restaurantDAO.findByKakaoPlaceId(restaurantData.getKakaoPlaceId());
+
+        if (existingRestaurant != null) {
+            // 2. 이미 존재하면, 그 맛집 정보를 반환합니다.
+            return existingRestaurant;
         } else {
-            // 실패 시 null 반환
-            return null; 
+            // 3. 존재하지 않으면, 새로운 맛집을 DB에 삽입합니다.
+            // DAO의 insert 메서드는 MyBatis의 useGeneratedKeys 속성 덕분에
+            // 파라미터로 전달된 restaurantData 객체의 id 필드를 채워줍니다.
+            int result = restaurantDAO.insert(restaurantData);
+
+            if (result > 0) {
+                // 4. 삽입 성공 시, ID가 채워진 객체를 반환합니다.
+                return restaurantData;
+            }
         }
+        return null; // 실패 시 null 반환
     }
 }
