@@ -28,6 +28,17 @@ public class UserDAO {
 		}
 	}
 
+	// ▼▼▼ [추가] 이메일과 사용자 유형으로 사용자를 찾는 신규 메소드 ▼▼▼
+	public User findByEmailAndUserType(String email, String userType) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("email", email);
+			params.put("userType", userType);
+			// 매퍼의 "findByEmailAndUserType" ID를 가진 쿼리 실행
+			return sqlSession.selectOne(NAMESPACE + ".findByEmailAndUserType", params);
+		}
+	}
+
 	/**
 	 * [신규] 트랜잭션 관리를 위해 SqlSession을 외부(서비스 계층)에서 받아 처리하는 메소드
 	 */

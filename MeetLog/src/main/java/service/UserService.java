@@ -120,7 +120,42 @@ public class UserService {
 		return userCreated;
 	}
 
+	/**
+	 * 이메일, 비밀번호, 그리고 명시된 사용자 유형을 기반으로 사용자를 인증합니다. 로그인 서블릿에서 이 메소드를 사용해야 개인/기업 회원을
+	 * 정확히 구분할 수 있습니다.
+	 * 
+	 * @param email    사용자 이메일
+	 * @param password 사용자가 입력한 비밀번호 (암호화 전)
+	 * @param userType 로그인 시도하는 사용자의 유형 ("PERSONAL" 또는 "BUSINESS")
+	 * @return 인증 성공 시 User 객체, 실패 시 null
+	 */
+	public User authenticateUser(String email, String password, String userType) {
+		// [디버깅 로그 1] DAO 호출 직전, 입력된 값 확인
+		System.out.println("[DEBUG] 인증 시도: email=" + email + ", userType=" + userType);
+
+		User user = userDAO.findByEmailAndUserType(email, userType);
+
+		// [디버깅 로그 2] DAO 호출 직후, 사용자를 찾았는지 확인
+		if (user == null) {
+			System.out.println("[DEBUG] 인증 실패: DB에서 해당 email과 userType의 사용자를 찾을 수 없음.");
+			return null;
+		} else {
+			System.out.println("[DEBUG] 인증 성공: DB에서 사용자 찾음. ID=" + user.getId() + ", Email=" + user.getEmail());
+		}
+
+		// [디버깅 로그 3] 비밀번호 일치 여부 확인
+		boolean passwordMatches = PasswordUtil.verifyPassword(password, user.getPassword());
+		if (passwordMatches) {
+			System.out.println("[DEBUG] 비밀번호 일치. 최종 인증 성공.");
+			return user;
+		} else {
+			System.out.println("[DEBUG] 인증 실패: 비밀번호가 일치하지 않음.");
+			return null;
+		}
+	}
+
 	// --- 기존 인증 메소드 ---
+	// 이 메소드는 userType을 구분하지 않으므로, 로그인 로직에서는 더 이상 사용하지 않는 것을 권장합니다.
 	public User authenticateUser(String email, String password) {
 		User user = userDAO.findByEmail(email);
 		if (user != null && user.getPassword() != null && PasswordUtil.verifyPassword(password, user.getPassword())) {

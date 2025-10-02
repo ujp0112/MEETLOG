@@ -79,8 +79,7 @@ body {
 	height: 45px; /* 이미지 높이를 버튼 높이에 맞춤 */
 	width: 200px; /* 너비는 비율 유지 */
 	display: block; /* 이미지 정렬을 위해 */
-} 
-
+}
 
 /* 네이버 버튼 전용 스타일 */
 .btn-naver-full {
@@ -202,7 +201,8 @@ body {
 						찾기</a>
 				</div>
 
-				<div class="mt-6">
+				<div class="mt-6" id="social-login-section">
+					<%-- [수정] ID 추가 --%>
 					<div class="relative">
 						<div class="absolute inset-0 flex items-center">
 							<div class="w-full border-t border-slate-200"></div>
@@ -219,8 +219,7 @@ body {
 							alt="네이버로 로그인">
 						</a> <a href="${pageContext.request.contextPath}/auth/login/kakao"
 							class="social-btn-container btn-kakao-full" title="카카오로 로그인">
-							<img
-							src="${pageContext.request.contextPath}/img/kakao_login.png"
+							<img src="${pageContext.request.contextPath}/img/kakao_login.png"
 							alt="카카오로 로그인">
 						</a> <a href="${pageContext.request.contextPath}/auth/login/google"
 							class="social-btn-container btn-google-full" title="Google로 로그인">
@@ -243,34 +242,37 @@ body {
 		</div>
 	</main>
 	<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabs = document.querySelectorAll('#login-tabs button');
-            const personalContent = document.getElementById('login-personal-content');
-            const businessContent = document.getElementById('login-business-content');
-            const signupLink = document.getElementById('signup-link');
+    document.addEventListener('DOMContentLoaded', function () {
+        const tabs = document.querySelectorAll('#login-tabs button');
+        const personalContent = document.getElementById('login-personal-content');
+        const businessContent = document.getElementById('login-business-content');
+        const signupLink = document.getElementById('signup-link');
+        const socialLoginSection = document.getElementById('social-login-section'); // [추가] 소셜 로그인 영역 변수
 
-            tabs.forEach(clickedTab => {
-                clickedTab.addEventListener('click', () => {
-                    tabs.forEach(tab => {
-                        tab.classList.remove('tab-active');
-                        tab.classList.add('text-slate-500', 'border-transparent');
-                    });
-                    
-                    clickedTab.classList.add('tab-active');
-                    clickedTab.classList.remove('text-slate-500', 'border-transparent');
-                    
-                    if (clickedTab.dataset.tab === 'personal') {
-                        personalContent.classList.remove('hidden');
-                        businessContent.classList.add('hidden');
-                        signupLink.href = '${pageContext.request.contextPath}/register';
-                    } else {
-                        personalContent.classList.add('hidden');
-                        businessContent.classList.remove('hidden');
-                        signupLink.href = '${pageContext.request.contextPath}/business-register';
-                    }
+        tabs.forEach(clickedTab => {
+            clickedTab.addEventListener('click', () => {
+                tabs.forEach(tab => {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-slate-500', 'border-transparent');
                 });
+
+                clickedTab.classList.add('tab-active');
+				clickedTab.classList.remove('text-slate-500', 'border-transparent');
+
+                if (clickedTab.dataset.tab === 'personal') {
+                    personalContent.classList.remove('hidden');
+					businessContent.classList.add('hidden');
+                    socialLoginSection.classList.remove('hidden'); // [추가] 개인 탭 클릭 시 소셜 로그인 보이기
+                    signupLink.href = '${pageContext.request.contextPath}/register';
+                } else {
+                    personalContent.classList.add('hidden');
+					businessContent.classList.remove('hidden');
+                    socialLoginSection.classList.add('hidden'); // [추가] 기업 탭 클릭 시 소셜 로그인 숨기기
+                    signupLink.href = '${pageContext.request.contextPath}/business-register';
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>

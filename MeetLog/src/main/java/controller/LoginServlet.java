@@ -12,80 +12,89 @@ import model.BusinessUser;
 import service.UserService;
 
 public class LoginServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
-    private final UserService userService = new UserService();
+	private static final long serialVersionUID = 1L;
+	private final UserService userService = new UserService();
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-    }
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+	}
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String redirectUrl = request.getParameter("redirectUrl");
-        
-        try {
-            // 1. UserService를 통해 이메일과 비밀번호로 사용자 인증을 시도합니다.
-            //    이때 반환되는 user 객체는 DB의 모든 컬럼 정보(profileImage 포함)를 가지고 있습니다.
-            User user = userService.authenticateUser(email, password);
-            if (user != null) {
-                // ============== 인증 성공 ==============
-                // 비즈니스 회원의 경우, 승인 상태 추가 확인
-                if ("BUSINESS".equals(user.getUserType())) {
-                    BusinessUser bizUser = userService.getBusinessUserByUserId(user.getId());
-                    if (bizUser != null && "PENDING".equals(bizUser.getStatus())) {
-                        request.setAttribute("errorMessage", "가입 승인 대기 중인 계정입니다. 본사의 승인 후 로그인해주세요.");
-                        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-                        return;
-                    }
-                }
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    request.setCharacterEncoding("UTF-8");
+	    String email = request.getParameter("email");
+	    String password = request.getParameter("password");
+	    String userType = request.getParameter("userType");
+	    String redirectUrl = request.getParameter("redirectUrl");
+	    
+	    try {
+	        User user = userService.authenticateUser(email, password, userType);
+	        
+	        if (user != null) {
+	            // ============== 인증 성공 ==============
+	            HttpSession session = request.getSession();
+	            session.setAttribute("user", user);
+	            session.setMaxInactiveInterval(30 * 60);
 
-                // 2. 새로운 세션을 생성하고, profileImage가 포함된 완전한 user 객체를 세션에 저장합니다.
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                
-                // 비즈니스 회원이면 businessUser 정보도 세션에 저장
-                if ("BUSINESS".equals(user.getUserType())) {
-                    BusinessUser businessUser = userService.getBusinessUserByUserId(user.getId());
-                    if (businessUser != null) {
-                        session.setAttribute("businessUser", businessUser);
-                        System.out.println("BusinessUser 세션 저장 완료: " + businessUser.getRole());
-                    } else {
-                        System.out.println("BusinessUser 정보를 찾을 수 없음: userId=" + user.getId());
-                    }
-                }
-                
-                session.setMaxInactiveInterval(30 * 60);
+	            // ▼▼▼ [수정] 기업 회원 로그인 시 HQ/Branch 구분 로직 추가 ▼▼▼
+	            if ("BUSINESS".equals(user.getUserType())) {
+	                BusinessUser businessUser = userService.getBusinessUserByUserId(user.getId());
+	                
+	                // 승인 상태 확인 (기존 로직 유지)
+	                if (businessUser != null && "PENDING".equals(businessUser.getStatus())) {
+	                    request.setAttribute("errorMessage", "가입 승인 대기 중인 계정입니다. 본사의 승인 후 로그인해주세요.");
+	                    request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+	                    return;
+	                }
+	                
+	                if (businessUser != null) {
+	                    session.setAttribute("businessUser", businessUser);
+	                    System.out.println("BusinessUser 세션 저장 완료: " + businessUser.getRole());
+	                } else {
+	                    System.out.println("BusinessUser 정보를 찾을 수 없음: userId=" + user.getId());
+	                    // 비즈니스 회원이지만 business_users 정보가 없는 예외적인 경우
+	                    request.setAttribute("errorMessage", "기업 회원 정보를 찾을 수 없습니다. 관리자에게 문의하세요.");
+	                    request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+	                    return;
+	                }
+	            }
 
-                // 3. 사용자의 유형 또는 요청된 URL에 따라 올바른 페이지로 리다이렉트합니다.
-                String targetUrl = redirectUrl;
-                if (targetUrl == null || targetUrl.trim().isEmpty()) {
-                    switch (user.getUserType()) {
-                        case "ADMIN":
-                            targetUrl = request.getContextPath() + "/admin";
-                            break;
-                        case "BUSINESS":
-                            targetUrl = request.getContextPath() + "/business/restaurants";
-                            break;
-                        default:
-                            targetUrl = request.getContextPath() + "/main";
-                            break;
-                    }
-                }
-                response.sendRedirect(targetUrl);
-                
-            } else {
-                // ============== 인증 실패 ==============
-                request.setAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
-                request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("errorMessage", "로그인 처리 중 오류가 발생했습니다.");
-            request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
-        }
-    }
+	            // ▼▼▼ [수정] 리다이렉션 URL 결정 로직 수정 ▼▼▼
+	            String targetUrl = redirectUrl;
+	            if (targetUrl == null || targetUrl.trim().isEmpty()) {
+	                switch (user.getUserType()) {
+	                    case "ADMIN":
+	                        targetUrl = request.getContextPath() + "/admin";
+	                        break;
+	                    case "BUSINESS":
+	                        // 세션에서 businessUser 정보를 다시 가져와 역할(role)에 따라 분기
+	                        BusinessUser bizUser = (BusinessUser) session.getAttribute("businessUser");
+	                        if (bizUser != null && "HQ".equalsIgnoreCase(bizUser.getRole())) {
+	                            // 본사(HQ) 사용자는 관리 페이지로 이동
+	                            targetUrl = request.getContextPath() + "/business/restaurants"; // 예시 URL
+	                        } else {
+	                            // 지점(Branch) 사용자는 기존 페이지로 이동
+	                            targetUrl = request.getContextPath() + "/business/restaurants";
+	                        }
+	                        break;
+	                    default: // PERSONAL
+	                        targetUrl = request.getContextPath() + "/main";
+	                        break;
+	                }
+	            }
+	            response.sendRedirect(targetUrl);
+	            
+	        } else {
+	            // ============== 인증 실패 ==============
+	            request.setAttribute("errorMessage", "이메일 또는 비밀번호가 올바르지 않습니다.");
+	            request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        request.setAttribute("errorMessage", "로그인 처리 중 오류가 발생했습니다.");
+	        request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
+	    }
+	}
 }
