@@ -1,8 +1,11 @@
 package service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.ibatis.session.SqlSession; // SqlSession import
 import util.MyBatisSqlSessionFactory;      // SqlSessionFactory import
@@ -11,10 +14,13 @@ import model.CommunityCourse;
 import model.OfficialCourse;
 import model.CourseStep;
 import model.Paging; 
+import model.UserStorage;
+import model.UserStorageItem;
 
 public class CourseService {
     
     private CourseDAO courseDAO = new CourseDAO();
+    private final UserStorageService userStorageService = new UserStorageService();
 
     /**
      * [수정] 코스와 경로들을 하나의 트랜잭션으로 묶어 처리하는 메소드
@@ -167,15 +173,58 @@ public class CourseService {
     }
 
     public List<CommunityCourse> getBookmarkedCourses(int userId) {
-        // 사용자가 북마크한 코스들을 조회
-        // 임시로 빈 리스트 반환 (실제 구현 필요)
-        return new java.util.ArrayList<>();
+        if (userStorageService == null) {
+            return new ArrayList<>();
+        }
+
+        List<UserStorage> storages = userStorageService.getUserStorages(userId);
+        if (storages == null || storages.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<Integer> bookmarkedCourseIds = new LinkedHashSet<>();
+        for (UserStorage storage : storages) {
+            List<UserStorageItem> items = userStorageService.getStorageItems(storage.getStorageId());
+            for (UserStorageItem item : items) {
+                if ("COURSE".equalsIgnoreCase(item.getItemType())) {
+                    bookmarkedCourseIds.add(item.getContentId());
+                }
+            }
+        }
+
+        if (bookmarkedCourseIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<CommunityCourse> bookmarkedCourses = new ArrayList<>();
+        for (Integer courseId : bookmarkedCourseIds) {
+            CommunityCourse course = courseDAO.findById(courseId);
+            if (course != null) {
+                bookmarkedCourses.add(course);
+            }
+        }
+
+        return bookmarkedCourses;
     }
 
     public boolean toggleCourseBookmark(int userId, int courseId) {
-        // 코스 북마크 토글
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        if (userStorageService == null) {
+            return false;
+        }
+
+        UserStorage defaultStorage = userStorageService.getOrCreateDefaultStorage(userId);
+        if (defaultStorage == null) {
+            return false;
+        }
+
+        int storageId = defaultStorage.getStorageId();
+        boolean alreadyBookmarked = userStorageService.isItemInStorage(storageId, "COURSE", courseId);
+
+        if (alreadyBookmarked) {
+            return userStorageService.removeFromStorage(storageId, "COURSE", courseId);
+        }
+
+        return userStorageService.addToStorage(storageId, "COURSE", courseId);
     }
 
     public boolean deleteCourse(int courseId, int userId) {
