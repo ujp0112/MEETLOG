@@ -118,13 +118,6 @@ public class ColumnService {
 	}
 
 	/**
-	 * 특정 칼럼에 첨부된 맛집 목록을 조회합니다.
-	 */
-	public List<Restaurant> getAttachedRestaurantsByColumnId(int columnId) {
-		return columnDAO.findAttachedRestaurantsByColumnId(columnId);
-	}
-
-	/**
 	 * [추가] 여러 레스토랑 ID에 연결된 칼럼 목록을 조회합니다.
 	 */
 	public List<Column> getColumnsByRestaurantIds(List<Integer> restaurantIds) {
@@ -137,5 +130,12 @@ public class ColumnService {
 			column.setContent(summary);
 		}
 		return columns;
+	}
+
+	/**
+	 * [추가] 특정 칼럼에 첨부된 맛집 목록을 조회합니다.
+	 */
+	public List<Restaurant> getAttachedRestaurantsByColumnId(int columnId) {
+		return columnDAO.findAttachedRestaurantsByColumnId(columnId);
 	}
 }

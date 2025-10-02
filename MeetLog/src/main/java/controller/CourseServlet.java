@@ -20,6 +20,7 @@ import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
+import com.google.gson.Gson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import model.CommunityCourse;
@@ -41,7 +42,7 @@ import util.AppConfig;
     maxFileSize = 1024 * 1024 * 10,
     maxRequestSize = 1024 * 1024 * 15
 )
-@WebServlet("/course/*")
+@WebServlet(urlPatterns = {"/course", "/course/*", "/api/courses/*"})
 public class CourseServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -55,9 +56,9 @@ public class CourseServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
+        String path = normalizePath(request.getPathInfo());
+        System.out.println("[CourseServlet][GET] path=" + path);
         try {
-            String path = normalizePath(request.getPathInfo());
-            System.out.println("[CourseServlet][GET] path=" + path);
 
             if (path == null || path.equals("/") || "/list".equals(path)) {
                 showCourseList(request, response);
@@ -77,6 +78,9 @@ public class CourseServlet extends HttpServlet {
                 handleCourseWishlist(request, response);
             } else if ("/storages".equals(path)) {
                 handleGetUserStorages(request, response);
+            } else if ("/steps".equals(path)) {
+                handleGetCourseSteps(request, response);
+                return;
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -1019,6 +1023,32 @@ public class CourseServlet extends HttpServlet {
                     "success", false,
                     "message", "댓글 수정 중 오류가 발생했습니다."
             ));
+        }
+    }
+    
+    /**
+     * [추가] 특정 코스의 모든 지점(Step) 목록을 JSON으로 반환합니다.
+     */
+    private void handleGetCourseSteps(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String courseIdStr = request.getParameter("courseId");
+        if (courseIdStr == null || courseIdStr.isEmpty()) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "courseId is required.");
+            return;
+        }
+
+        try {
+            int courseId = Integer.parseInt(courseIdStr);
+            List<CourseStep> steps = courseService.getCourseSteps(courseId);
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            // ObjectMapper 대신 Gson을 사용하여 간단하게 처리 (또는 ObjectMapper를 사용하도록 통일)
+            response.getWriter().write(new Gson().toJson(steps));
+        } catch (NumberFormatException e) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid courseId format.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
         }
     }
 }

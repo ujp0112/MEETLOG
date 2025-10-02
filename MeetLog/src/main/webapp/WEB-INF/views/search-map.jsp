@@ -39,17 +39,12 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             padding: 6px;
             position: relative;
-            transform: translate(-50%, -100%);
+            transform: translate(0, -100%); /* [수정] 마커를 오른쪽으로 50% 이동 */
             transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
             cursor: pointer;
             z-index: 1;
         }
-        .marker-overlay.highlight, .marker-overlay:hover {
-            transform: translate(-50%, -100%) scale(1.05);
-            z-index: 10;
-            border-color: #3182ce;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+        .marker-overlay.highlight, .marker-overlay:hover { transform: translate(0, -100%) scale(1.05); z-index: 10; border-color: #3182ce; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .marker-overlay::after {
             content: '';
             position: absolute;

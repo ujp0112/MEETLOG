@@ -20,13 +20,24 @@
 
 		<result property="author" column="author_nickname" />
 		<result property="profileImage" column="author_profile_image" />
+		
+		<!-- [추가] 맛집의 위도/경도 정보를 Review 객체에 매핑합니다. -->
+		<result property="latitude" column="latitude" />
+		<result property="longitude" column="longitude" />
 
 		<collection property="images" ofType="java.lang.String"
 			select="findImagesByReviewId" column="review_id" />
 
 		<collection property="comments"
-			ofType="model.ReviewComment"
-			select="dao.ReviewCommentDAO.findByReviewId" column="review_id" />
+			ofType="model.ReviewComment" autoMapping="true">
+			<id property="id" column="comment_id" />
+			<result property="userId" column="comment_user_id" />
+			<result property="author" column="comment_author_nickname" />
+			<result property="profileImage"
+				column="comment_author_profile_image" />
+			<result property="content" column="comment_content" />
+			<result property="createdAt" column="comment_created_at" />
+		</collection>
 	</resultMap>
 
 	<select id="findImagesByReviewId" resultType="java.lang.String">
@@ -64,25 +75,46 @@
 		r.created_at,
 		r.reply_content,
 		r.reply_created_at,
-		u_rev.nickname AS author_nickname,
+		u_rev.nickname AS
+		author_nickname,
 		u_rev.profile_image AS author_profile_image,
-		(CASE WHEN rl.user_id IS NOT NULL THEN 1 ELSE 0 END) AS likedByCurrentUser,
-		(CASE WHEN f.follower_id IS NOT NULL THEN 1 ELSE 0 END) AS
+
+		rc.id AS
+		comment_id,
+		rc.user_id AS comment_user_id,
+		rc.content AS
+		comment_content,
+		rc.created_at AS comment_created_at,
+		u_com.nickname AS
+		comment_author_nickname,
+		u_com.profile_image AS
+		comment_author_profile_image,
+
+		(CASE WHEN rl.user_id IS NOT NULL THEN 1
+		ELSE 0 END) AS likedByCurrentUser,
+		(CASE WHEN f.follower_id IS NOT NULL
+		THEN 1 ELSE 0 END) AS
 		authorIsFollowedByCurrentUser
-		FROM
-		reviews r
+
+		FROM reviews r
 		JOIN
 		users u_rev ON r.user_id = u_rev.id
-		LEFT JOIN
-		review_likes rl ON r.id = rl.review_id AND rl.user_id = #{currentUserId}
-		LEFT JOIN
-		follows f ON r.user_id = f.following_id AND f.follower_id =
+
+		LEFT JOIN review_comments rc ON
+		r.id = rc.review_id
+		LEFT JOIN users u_com ON rc.user_id = u_com.id
+
+		LEFT
+		JOIN review_likes rl ON r.id = rl.review_id AND rl.user_id =
 		#{currentUserId}
-		WHERE
-		r.restaurant_id = #{restaurantId}
+
+		LEFT JOIN follows f ON r.user_id = f.following_id AND
+		f.follower_id =
+		#{currentUserId}
+
+		WHERE r.restaurant_id = #{restaurantId}
 		AND r.is_active = true
-		ORDER BY
-		r.created_at DESC
+		ORDER BY r.created_at DESC, rc.created_at ASC
 	</select>
 
 	<select id="findById" resultMap="reviewResultMap">
@@ -208,45 +240,47 @@
 		WHERE id = #{reviewId} AND likes + #{change}
 		>= 0
 	</update>
+	
+	<!-- [추가] 리뷰의 '좋아요' 수를 1 증가시킵니다. -->
+    <update id="incrementLikes" parameterType="int">
+        UPDATE reviews
+           SET likes = likes + 1
+         WHERE id = #{reviewId}
+    </update>
 
-	<update id="incrementLikes" parameterType="int">
-		UPDATE reviews
-		SET likes = likes + 1
-		WHERE id = #{reviewId}
-	</update>
+    <!-- [추가] 리뷰의 '좋아요' 수를 1 감소시킵니다. -->
+    <update id="decrementLikes" parameterType="int">
+        UPDATE reviews
+           SET likes = likes - 1
+         WHERE id = #{reviewId}
+           AND likes > 0 <!-- 혹시 모를 음수 방지 -->
+    </update>
 
-	<update id="decrementLikes" parameterType="int">
-		UPDATE reviews
-		SET likes = likes - 1
-		WHERE id = #{reviewId}
-		AND likes > 0
-	</update>
-
-	<select id="findNearbyReviewsByPage" parameterType="map"
-		resultMap="reviewResultMap">
-		SELECT
-		r.id, r.restaurant_id, r.user_id, r.rating, r.content,
-		r.images, r.keywords, r.likes, r.is_active,
-		r.created_at, r.updated_at, r.reply_content, r.reply_created_at,
-		u.nickname AS author, u.profile_image AS profileImage,
-		res.name AS restaurantName,
-		(6371 * ACOS(
-		COS(RADIANS(#{latitude})) * COS(RADIANS(res.latitude)) *
-		COS(RADIANS(res.longitude) - RADIANS(#{longitude})) +
-		SIN(RADIANS(#{latitude})) * SIN(RADIANS(res.latitude))
-		)) AS distance
-		FROM reviews r
-		JOIN restaurants res ON r.restaurant_id = res.id
-		JOIN users u ON r.user_id = u.id
-		WHERE
-		res.latitude IS NOT NULL AND res.longitude IS NOT NULL
-		AND r.is_active = true
-		HAVING
-		distance &lt;= #{radiusKm}
-		ORDER BY
-		r.created_at DESC
-		LIMIT #{limit}
-		OFFSET #{offset}
-	</select>
+    <!-- [추가] 특정 위치 주변의 리뷰를 페이징 처리하여 조회합니다. -->
+    <select id="findNearbyReviewsByPage" parameterType="map" resultMap="reviewResultMap">
+        SELECT
+            r.id, r.restaurant_id, r.user_id, r.rating, r.content,
+            r.keywords, r.likes, r.is_active,
+            r.created_at, r.updated_at, r.reply_content, r.reply_created_at,
+            u.nickname AS author, u.profile_image AS profileImage,
+            res.name AS restaurantName, res.address, res.latitude, res.longitude,
+            (6371 * ACOS(
+                COS(RADIANS(#{latitude})) * COS(RADIANS(res.latitude)) *
+                COS(RADIANS(res.longitude) - RADIANS(#{longitude})) +
+                SIN(RADIANS(#{latitude})) * SIN(RADIANS(res.latitude))
+            )) AS distance
+        FROM reviews r
+        JOIN restaurants res ON r.restaurant_id = res.id
+        JOIN users u ON r.user_id = u.id
+        WHERE
+            res.latitude IS NOT NULL AND res.longitude IS NOT NULL
+            AND r.is_active = true
+        HAVING
+            distance &lt;= #{radiusKm}
+        ORDER BY
+            r.created_at DESC
+        LIMIT #{limit}
+        OFFSET #{offset}
+    </select>
 
 </mapper>
