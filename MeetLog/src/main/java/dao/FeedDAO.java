@@ -122,12 +122,27 @@ public class FeedDAO {
             if (createdAtObj instanceof java.sql.Timestamp) {
                 item.setCreatedAt(((java.sql.Timestamp) createdAtObj).toLocalDateTime());
             }
-            
+
+            Object targetNameObj = result.get("targetName");
+            if (targetNameObj instanceof String) {
+                item.setTargetName((String) targetNameObj);
+            }
+
+            Object targetImageObj = result.get("targetImage");
+            if (targetImageObj instanceof String) {
+                item.setTargetImage((String) targetImageObj);
+            }
+
+            Object restaurantNameObj = result.get("restaurantName");
+            if (restaurantNameObj instanceof String && item.getTargetName() == null) {
+                item.setTargetName((String) restaurantNameObj);
+            }
+
             // 기본값 설정
             item.setContent("활동");
             item.setTargetType(item.getActionType().toLowerCase());
             item.setActive(true);
-            
+
             feedItems.add(item);
         }
         return feedItems;

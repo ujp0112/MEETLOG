@@ -186,6 +186,55 @@
                     </c:otherwise>
                 </c:choose>
             </div>
+
+            <c:if test="${not empty bookmarkedCourses}">
+                <div class="glass-card p-8 rounded-3xl slide-up">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">저장한 코스</h2>
+                            <p class="text-slate-500 text-sm">찜한 코스를 빠르게 다시 살펴보세요.</p>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm font-semibold">
+                            총 ${fn:length(bookmarkedCourses)}개
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <c:forEach var="course" items="${bookmarkedCourses}">
+                            <div class="card-hover rounded-2xl overflow-hidden bg-white shadow-lg">
+                                <a href="${pageContext.request.contextPath}/course/detail?id=${course.courseId}" class="block relative h-40 overflow-hidden">
+                                    <c:choose>
+                                        <c:when test="${not empty course.previewImage}">
+                                            <mytag:image fileName="${course.previewImage}" altText="${course.title}" cssClass="w-full h-full object-cover" />
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400 flex items-center justify-center text-white text-lg font-bold">
+                                                ${course.title}
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </a>
+                                <div class="p-5 space-y-3">
+                                    <h3 class="text-lg font-bold text-slate-800 line-clamp-2">${course.title}</h3>
+                                    <p class="text-slate-600 text-sm line-clamp-3">
+                                        <c:choose>
+                                            <c:when test="${not empty course.description}">${course.description}</c:when>
+                                            <c:otherwise>설명이 없는 코스입니다.</c:otherwise>
+                                        </c:choose>
+                                    </p>
+                                    <div class="flex items-center justify-between text-sm text-slate-500">
+                                        <span class="flex items-center gap-1">
+                                            <span>❤️</span>
+                                            <fmt:formatNumber value="${course.likes}"/>
+                                        </span>
+                                        <a href="${pageContext.request.contextPath}/course/detail?id=${course.courseId}" class="text-blue-600 hover:text-blue-700 font-semibold">자세히 보기</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:forEach>
+                    </div>
+                </div>
+            </c:if>
         </div>
     </main>
     

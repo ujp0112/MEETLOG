@@ -125,7 +125,7 @@
             GROUP BY storage_id
         ) item_counts ON us.storage_id = item_counts.storage_id
         WHERE us.user_id = #{userId}
-        AND us.name = '내가 찜한 로그'
+        AND us.name = '내 찜 목록'
         LIMIT 1
     </select>
 

@@ -122,7 +122,7 @@ public class UserStorageDAO {
             
             if (defaultStorage == null) {
                 // 기본 저장소가 없으면 생성
-                defaultStorage = new UserStorage(userId, "내가 찜한 로그", "bg-blue-100");
+                defaultStorage = new UserStorage(userId, "내 찜 목록", "bg-blue-100");
                 sqlSession.insert(NAMESPACE + ".insert", defaultStorage);
                 sqlSession.commit();
             }

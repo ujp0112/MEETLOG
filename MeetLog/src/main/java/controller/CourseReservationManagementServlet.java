@@ -31,7 +31,7 @@ public class CourseReservationManagementServlet extends HttpServlet {
         List<AdminCourseReservation> reservations = reservationService.getAllReservationsForAdmin();
         request.setAttribute("reservations", reservations);
         
-        request.getRequestDispatcher("/WEB-INF/views/admin/course-reservation-management.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin-course-reservation-management.jsp").forward(request, response);
     }
     
     @Override
