@@ -1,6 +1,7 @@
 package service;
 
 import dao.ColumnDAO;
+import util.StringUtil; // StringUtil 임포트
 import model.Column;
 import model.Restaurant; // [추가]
 import java.util.List;
@@ -121,5 +122,20 @@ public class ColumnService {
 	 */
 	public List<Restaurant> getAttachedRestaurantsByColumnId(int columnId) {
 		return columnDAO.findAttachedRestaurantsByColumnId(columnId);
+	}
+
+	/**
+	 * [추가] 여러 레스토랑 ID에 연결된 칼럼 목록을 조회합니다.
+	 */
+	public List<Column> getColumnsByRestaurantIds(List<Integer> restaurantIds) {
+		if (restaurantIds == null || restaurantIds.isEmpty()) {
+			return List.of();
+		}
+		List<Column> columns = columnDAO.findColumnsByRestaurantIds(restaurantIds);
+		for (Column column : columns) {
+			String summary = StringUtil.stripHtmlAndTruncate(column.getContent(), 100);
+			column.setContent(summary);
+		}
+		return columns;
 	}
 }

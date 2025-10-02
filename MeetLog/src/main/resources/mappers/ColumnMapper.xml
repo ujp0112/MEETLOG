@@ -39,6 +39,28 @@
 		c.views DESC
 		LIMIT 5
 	</select>
+	<!-- [추가] 맛집 ID 목록으로 관련 칼럼 조회 -->
+	<select id="findColumnsByRestaurantIds" parameterType="java.util.List" resultType="model.Column">
+	    SELECT 
+	        c.id, 
+	        c.title,
+	        c.content,
+	        c.image,
+	        u.nickname as author
+	    FROM columns c
+	    JOIN users u ON c.user_id = u.id
+	    WHERE c.is_active = true 
+	      AND c.id IN (
+	        SELECT DISTINCT cr.column_id
+	        FROM column_restaurants cr
+	        WHERE cr.restaurant_id IN
+	        <foreach item="id" collection="list" open="(" separator="," close=")">
+	            #{id}
+	        </foreach>
+	    )
+	    ORDER BY c.likes DESC, c.views DESC
+	    LIMIT 10;
+	</select>
 
 	<select id="findAll" resultMap="columnResultMap">
 		<include refid="selectColumnWithUser" />

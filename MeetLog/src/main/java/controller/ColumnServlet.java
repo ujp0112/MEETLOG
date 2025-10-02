@@ -1,5 +1,6 @@
 package controller;
 
+import com.google.gson.Gson; // Gson 임포트
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,6 +50,11 @@ public class ColumnServlet extends HttpServlet {
 				request.setAttribute("columns", columns);
 				request.getRequestDispatcher("/WEB-INF/views/column-list.jsp").forward(request, response);
 
+			// [수정] /api/columns/* 매핑에 따라 pathInfo는 /by-restaurants가 됩니다.
+			} else if ("/by-restaurants".equals(pathInfo)) {
+				handleGetColumnsByRestaurants(request, response);
+				// API 요청은 JSON 응답 후 종료되어야 하므로, 아래 코드를 실행하지 않도록 return 합니다.
+				return;
 			} else if ("/detail".equals(pathInfo)) {
 				int columnId = Integer.parseInt(request.getParameter("id"));
 				columnService.incrementViews(columnId);
@@ -366,6 +372,32 @@ public class ColumnServlet extends HttpServlet {
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
 			response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+		}
+	}
+	
+	/**
+	 * [추가] 레스토랑 ID 목록을 받아 관련 칼럼을 JSON으로 반환하는 API 핸들러
+	 */
+	private void handleGetColumnsByRestaurants(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String idsParam = request.getParameter("ids");
+		if (idsParam == null || idsParam.isEmpty()) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().write("[]"); // 빈 배열 반환
+			return;
+		}
+
+		try {
+			List<Integer> restaurantIds = Arrays.stream(idsParam.split(","))
+					.map(Integer::parseInt)
+					.collect(Collectors.toList());
+			
+			List<Column> columns = columnService.getColumnsByRestaurantIds(restaurantIds);
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(new Gson().toJson(columns));
+		} catch (NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid restaurant IDs format.");
 		}
 	}
 }

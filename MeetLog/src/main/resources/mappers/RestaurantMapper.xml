@@ -331,6 +331,13 @@
 	</select>
 	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. 
 		▼▼▼ -->
+	<select id="findAllWithLocation" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND is_active = true
+	</select>
+	
+	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. 
+		▼▼▼ -->
 	<select id="findNearbyRestaurantsByPage" parameterType="map"
 		resultType="model.Restaurant">
 		SELECT

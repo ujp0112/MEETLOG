@@ -16,6 +16,16 @@ public class ColumnDAO {
 			return sqlSession.selectList(NAMESPACE + ".findAll");
 		}
 	}
+	/**
+	 * [추가] 여러 레스토랑 ID에 연결된 칼럼 목록을 조회합니다.
+	 * @param restaurantIds 레스토랑 ID 리스트
+	 * @return 관련 칼럼 리스트
+	 */
+	public List<Column> findColumnsByRestaurantIds(List<Integer> restaurantIds) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".findColumnsByRestaurantIds", restaurantIds);
+		}
+	}
 
 	public List<Column> findTopColumns(int limit) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
