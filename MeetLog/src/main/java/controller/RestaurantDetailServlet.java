@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.util.Collections; // [ ✨ 1. Collections 임포트 추가 ✨ ]
+import java.net.URLEncoder; // [ ✨ 2. URLEncoder 임포트 추가 ✨ ]
 import java.util.ArrayList; // [ ✨ 2. ArrayList 임포트 추가 ✨ ]
 import java.time.LocalDate; // [ ✨ 3. java.time.* 임포트 추가 ✨ ]
 import java.time.LocalTime;
@@ -67,13 +68,33 @@ public class RestaurantDetailServlet extends HttpServlet {
             User currentUser = (session != null) ? (User) session.getAttribute("user") : null;
             int currentUserId = (currentUser != null) ? currentUser.getId() : 0;
 
-            // --- 데이터베이스 조회 ---
+            // 1. ID로 레스토랑 기본 정보 조회
             Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
             if (restaurant == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "해당 맛집을 찾을 수 없습니다.");
                 return;
             }
-            List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId);
+
+            // 2. [핵심] kakao_place_id 존재 여부로 외부/내부 맛집 분기 처리
+            if (restaurant.getKakaoPlaceId() != null && !restaurant.getKakaoPlaceId().isEmpty()) {
+                // 외부 맛집 -> ExternalRestaurantDetailServlet으로 리다이렉트
+                String redirectUrl = String.format(
+                    "%s/searchRestaurant/external-detail?name=%s&address=%s&phone=%s&category=%s&lat=%s&lng=%s",
+                    request.getContextPath(),
+                    URLEncoder.encode(restaurant.getName(), "UTF-8"),
+                    URLEncoder.encode(restaurant.getAddress(), "UTF-8"),
+                    URLEncoder.encode(restaurant.getPhone() != null ? restaurant.getPhone() : "", "UTF-8"),
+                    URLEncoder.encode(restaurant.getCategory() != null ? restaurant.getCategory() : "", "UTF-8"),
+                    restaurant.getLatitude(),
+                    restaurant.getLongitude()
+                );
+                response.sendRedirect(redirectUrl);
+                return; // 리다이렉트 후 서블릿 실행 종료
+            }
+
+            // 3. 내부 맛집 -> 기존 로직대로 상세 정보 조회 및 JSP 포워딩
+            request.setAttribute("isExternal", false); // 내부 맛집임을 명시
+            List<Menu> menus = menuService.getMenusByRestaurantId(restaurantId); // --- 데이터베이스 조회 ---
             // 현재 로그인한 사용자의 ID를 전달하여 리뷰별 '좋아요' 여부를 함께 조회
             List<Review> reviews = reviewService.getReviewsByRestaurantId(restaurantId, currentUserId); 
             List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
@@ -132,10 +153,11 @@ public class RestaurantDetailServlet extends HttpServlet {
     }
 
     private boolean checkIfOwner(User currentUser, Restaurant restaurant) {
-        if (currentUser == null || restaurant == null) {
+        // [수정] restaurant.getOwnerId()가 null일 경우를 대비한 Null 체크 추가
+        if (currentUser == null || restaurant == null || restaurant.getOwnerId() == null) {
             return false;
         }
-        return currentUser.getId() == restaurant.getOwnerId() && "BUSINESS".equals(currentUser.getUserType());
+        return currentUser.getId() == restaurant.getOwnerId().intValue() && "BUSINESS".equals(currentUser.getUserType());
     }
 
     private void setRequestAttributes(HttpServletRequest request, Restaurant restaurant, List<Menu> menus,

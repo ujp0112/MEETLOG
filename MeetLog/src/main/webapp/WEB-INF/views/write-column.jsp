@@ -130,6 +130,12 @@
 	border-radius: 8px;
 	background-color: #f8fafc;
 }
+.attached-restaurant-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+}
 </style>
 </head>
 <body class="bg-slate-100">
@@ -331,9 +337,47 @@
 
     // 3. 첨부된 맛집 관리
     function initializeAttachedRestaurants() {
-        <c:if test="${isEditMode and not empty attachedRestaurants}"><c:forEach var="r" items="${attachedRestaurants}">attachedRestaurants.set(${r.id}, { id: ${r.id}, name: "${r.name}", address: "${r.address}" });</c:forEach></c:if>
+        <c:if test="${isEditMode and not empty attachedRestaurants}">
+            <c:forEach var="r" items="${attachedRestaurants}">
+                // EL 표현식이 깨지는 것을 방지하기 위해 JavaScript 변수로 안전하게 값을 받습니다.
+                var restaurantData = { id: ${r.id}, name: "" + "${r.name}", address: "" + "${r.address}", image: "" + "${r.image}" };
+                attachedRestaurants.set(${r.id}, restaurantData);
+            </c:forEach>
+        </c:if>
         
-        function updateAttachedList() { const listEl = $('#attached-restaurants-list'); listEl.empty(); const ids = []; attachedRestaurants.forEach(r => { if (r && typeof r.id === 'number') { listEl.append(`<div class="attached-restaurant-item" data-id="${r.id}"><div class="flex-grow"><p class="font-bold text-slate-800">${r.name}</p><p class="text-sm text-slate-500">${r.address}</p></div><button type="button" class="remove-restaurant-btn ml-4 text-red-500 font-bold">삭제</button></div>`); ids.push(r.id); } }); $('#attached-restaurants-input').val(ids.join(',')); }
+        function updateAttachedList() { 
+            const listEl = $('#attached-restaurants-list'); 
+            listEl.empty(); 
+            const ids = []; 
+            attachedRestaurants.forEach(r => { 
+                if (r && typeof r.id === 'number') {
+                    let imageUrl = 'https://placehold.co/60x60/e2e8f0/94a3b8?text=...';
+                    if (r.image && r.image.trim() !== '') {
+                        imageUrl = r.image.startsWith('http') ? r.image : `${contextPath}/uploads/${r.image}`;
+                    } else if (r.kakaoPlaceId) { // 카카오에서 온 맛집인데 이미지가 없는 경우
+                        const searchQuery = r.name + " " + (r.address || '').split(" ")[0];
+                        $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
+                            if (data && data.imageUrl) {
+                                $(`#attached-img-${r.id}`).attr('src', data.imageUrl);
+                            }
+                        });
+                    }
+
+                    const itemHtml = 
+                        '<div class="attached-restaurant-item" data-id="' + r.id + '">' +
+                            '<img id="attached-img-' + r.id + '" src="' + imageUrl + '" alt="' + r.name + '" class="flex-shrink-0 mr-4">' +
+                            '<div class="flex-grow">' +
+                                '<p class="font-bold text-slate-800">' + r.name + '</p>' +
+                                '<p class="text-sm text-slate-500">' + r.address + '</p>' +
+                            '</div>' +
+                            '<button type="button" class="remove-restaurant-btn ml-4 text-red-500 font-bold">삭제</button>' +
+                        '</div>';
+                    listEl.append(itemHtml); 
+                    ids.push(r.id); 
+                } 
+            }); 
+            $('#attached-restaurants-input').val(ids.join(',')); 
+        }
         
         updateAttachedList();
         
@@ -342,7 +386,7 @@
         $('#modal-results-list').on('click', '.add-db-restaurant-btn', function() {
             const btn = $(this);
             const restaurantId = btn.data('id');
-            const restaurant = { id: restaurantId, name: btn.closest('.modal-result-item').find('h3').text().replace(' LOG',''), address: btn.closest('.modal-result-item').find('p').text() };
+            const restaurant = { id: restaurantId, name: btn.closest('.modal-result-item').find('h3').text().replace(' LOG',''), address: btn.closest('.modal-result-item').find('p').text(), image: btn.closest('.modal-result-item').find('img').attr('src') };
             attachedRestaurants.set(restaurantId, restaurant); 
             updateAttachedList(); 
             alert('맛집이 추가되었습니다.'); 
@@ -351,7 +395,7 @@
 
         $('#modal-results-list').on('click', '.add-kakao-restaurant-btn', function() {
             const btn = $(this); btn.prop('disabled', true).text('...');
-            const restaurantData = { kakaoPlaceId: btn.data('kakao-id'), name: btn.data('name'), address: btn.data('address'), location: btn.data('location'), phone: btn.data('phone'), category: btn.data('category'), lat: btn.data('lat'), lng: btn.data('lng') };
+            const restaurantData = { kakaoPlaceId: btn.data('kakao-id'), name: btn.data('name'), address: btn.data('address'), location: btn.data('location'), phone: btn.data('phone'), category: btn.data('category'), lat: btn.data('lat'), lng: btn.data('lng'), image: btn.closest('.modal-result-item').find('img').attr('src') };
             $.ajax({
                 url: contextPath + '/api/restaurant/find-or-create', type: 'POST', data: restaurantData,
                 success: function(dbRestaurant) { 
@@ -360,7 +404,10 @@
                             alert('이미 추가된 맛집입니다.'); 
                             return; 
                         } 
-                        attachedRestaurants.set(dbRestaurant.id, dbRestaurant); 
+                        // 새로 생성된 맛집 정보에 이미지 URL을 추가해줍니다.
+                        const newRestaurant = {...dbRestaurant, image: restaurantData.image };
+
+                        attachedRestaurants.set(dbRestaurant.id, newRestaurant); 
                         updateAttachedList(); 
                         alert('맛집이 추가되었습니다.'); 
                         $('#map-modal').addClass('hidden'); 
@@ -368,30 +415,6 @@
                         alert('맛집 정보 처리에 실패했습니다.'); 
                     } 
                 },
-                error: function() { alert('맛집 추가 중 오류가 발생했습니다.'); },
-                complete: function() { btn.prop('disabled', false).text('추가'); }
-            });
-        });
-        // [수정] 카카오 맛집 추가 버튼 이벤트 핸들러
-        $('#modal-results-list').on('click', '.add-kakao-restaurant-btn', function() {
-            const btn = $(this); btn.prop('disabled', true).text('...');
-            const restaurantData = { 
-                kakaoPlaceId: btn.data('kakao-id'), 
-                name: btn.data('name'), 
-                address: btn.data('address'), 
-                location: btn.data('location'), 
-                phone: btn.data('phone'), 
-                category: btn.data('category'), 
-                lat: btn.data('lat'), 
-                lng: btn.data('lng') 
-            };
-            $.ajax({
-                url: contextPath + '/api/restaurant/find-or-create', type: 'POST', data: restaurantData,
-                success: function(dbRestaurant) { 
-                    if (dbRestaurant && dbRestaurant.id) { 
-                        if(attachedRestaurants.has(dbRestaurant.id)) { alert('이미 추가된 맛집입니다.'); return; } 
-                        attachedRestaurants.set(dbRestaurant.id, dbRestaurant); updateAttachedList(); alert('맛집이 추가되었습니다.'); $('#map-modal').addClass('hidden'); 
-                    } else { alert('맛집 정보 처리에 실패했습니다.'); } },
                 error: function() { alert('맛집 추가 중 오류가 발생했습니다.'); },
                 complete: function() { btn.prop('disabled', false).text('추가'); }
             });
