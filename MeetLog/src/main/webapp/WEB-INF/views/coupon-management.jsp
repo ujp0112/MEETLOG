@@ -128,7 +128,7 @@
                     </a>
                 </div>
 
-                <!-- 필터 버튼 그룹 -->
+                <!-- 필터 버튼 그룹
                 <c:if test="${not empty coupons}">
                     <div class="mb-6 flex flex-wrap gap-2">
                         <button onclick="filterCoupons('all')"
@@ -162,7 +162,7 @@
                             🟠 소진됨
                         </button>
                     </div>
-                </c:if>
+                </c:if> -->
 
                 <c:choose>
                     <c:when test="${not empty coupons}">

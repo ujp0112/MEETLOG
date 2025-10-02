@@ -259,8 +259,9 @@ public class CouponManagementServlet extends HttpServlet {
                     session.setAttribute("couponErrorMessage", "알 수 없는 작업입니다.");
             }
 
-            response.sendRedirect(request.getContextPath() + "/coupon/management" +
-                    (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
+            response.sendRedirect(request.getContextPath() + "/coupon-management");
+            // response.sendRedirect(request.getContextPath() + "/coupon/management" +
+            //         (restaurantIdParam != null ? "?restaurantId=" + restaurantIdParam : ""));
 
         } catch (NumberFormatException e) {
             HttpSession session = request.getSession(false);
