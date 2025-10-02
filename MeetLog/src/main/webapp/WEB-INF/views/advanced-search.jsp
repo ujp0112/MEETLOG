@@ -3,12 +3,14 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
+<%@ page import="com.google.gson.Gson" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>통합 검색 - MEET LOG</title>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -72,7 +74,7 @@
             <div class="glass-card p-8 rounded-3xl">
                 <!-- 음식점 검색 -->
                 <div class="search-section data-section-restaurants" data-type="restaurants" id="form-restaurants" style="display: ${searchType == 'restaurants' ? 'block' : 'none'};">
-                    <form action="${pageContext.request.contextPath}/search" method="get" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <form action="${pageContext.request.contextPath}/search" method="post" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <input type="hidden" name="type" value="restaurants" />
                         <input type="hidden" name="submitted" value="true" />
                         <div class="md:col-span-2">
@@ -213,135 +215,30 @@
                             <h2 class="text-2xl font-bold gradient-text">음식점 검색 결과</h2>
                             <span class="text-slate-600">총 <strong>${totalResults != null ? totalResults : 0}</strong>건</span>
                         </div>
-                        <c:choose>
-                            <c:when test="${not empty restaurants}">
-                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    <c:forEach var="restaurant" items="${restaurants}">
-                                        <div class="bg-white rounded-2xl overflow-hidden card-hover">
-                                            <a href="${pageContext.request.contextPath}/restaurant/detail/${restaurant.id}">
-                                                <div class="h-48 w-full overflow-hidden">
-                                                    <mytag:image fileName="${restaurant.image}" altText="${restaurant.name}" cssClass="w-full h-full object-cover" />
-                                                </div>
-                                            </a>
-                                            <div class="p-6 space-y-3">
-                                                <div class="flex items-center justify-between">
-                                                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">${restaurant.category}</span>
-                                                    <span class="text-sm text-slate-500">${restaurant.location}</span>
-                                                </div>
-                                                <h3 class="text-xl font-bold text-slate-800">${restaurant.name}</h3>
-                                                <div class="flex items-center space-x-2 text-sm">
-                                                    <div class="flex space-x-1 text-yellow-400">
-                                                        <c:forEach begin="1" end="${restaurant.rating}">
-                                                            <span>★</span>
-                                                        </c:forEach>
-                                                    </div>
-                                                    <span class="font-semibold text-slate-700">${restaurant.rating}</span>
-                                                    <span class="text-slate-500">(${restaurant.reviewCount}개 리뷰)</span>
-                                                </div>
-                                                <div class="flex items-center justify-between">
-                                                    <span class="text-slate-500 text-sm">주차 ${restaurant.parking ? '가능' : '불가'}</span>
-                                                    <span class="text-slate-500 text-sm">찜 ${restaurant.likes}</span>
-                                                </div>
-                                                <a href="${pageContext.request.contextPath}/restaurant/detail/${restaurant.id}" class="btn-primary text-white w-full text-center block px-4 py-2 rounded-lg font-semibold">상세 보기</a>
-                                            </div>
-                                        </div>
-                                    </c:forEach>
-                                </div>
+                        
+                        <%-- JavaScript에 의해 동적으로 채워질 컨테이너 (항상 렌더링) --%>
+                        <div id="restaurant-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        </div>
 
-                                <c:if test="${totalPages > 1}">
-                                    <div class="mt-8 flex justify-center">
-                                        <nav class="inline-flex rounded-lg shadow-sm" aria-label="Pagination">
-                                            <c:if test="${currentPage > 1}">
-                                            <c:url var="prevUrl" value="/search">
-                                                <c:param name="page" value="${currentPage - 1}" />
-                                                <c:param name="type" value="restaurants" />
-                                                <c:param name="submitted" value="true" />
-                                                <c:if test="${not empty searchParams.keyword}">
-                                                    <c:param name="keyword" value="${searchParams.keyword}" />
-                                                </c:if>
-                                                    <c:if test="${not empty searchParams.category}">
-                                                        <c:param name="category" value="${searchParams.category}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.location}">
-                                                        <c:param name="location" value="${searchParams.location}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.price}">
-                                                        <c:param name="price" value="${searchParams.price}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.parking}">
-                                                        <c:param name="parking" value="${searchParams.parking}" />
-                                                    </c:if>
-                                                </c:url>
-                                                <a href="${prevUrl}" class="px-3 py-2 border border-slate-300 bg-white text-slate-600 rounded-l-lg hover:bg-slate-100">이전</a>
-                                            </c:if>
+                        <%-- 결과 없음 메시지 (JavaScript로 제어) --%>
+                        <div id="no-restaurant-results" class="text-center py-20" style="display: none;">
+                            <div class="text-5xl mb-4">🔍</div>
+                            <p class="text-lg text-slate-600">조건에 맞는 음식점이 없습니다. 필터를 조정해보세요.</p>
+                        </div>
 
-                                            <c:forEach begin="1" end="${totalPages}" var="pageNum">
-                                                <c:url var="pageUrl" value="/search">
-                                                    <c:param name="page" value="${pageNum}" />
-                                                    <c:param name="type" value="restaurants" />
-                                                    <c:param name="submitted" value="true" />
-                                                    <c:if test="${not empty searchParams.keyword}">
-                                                        <c:param name="keyword" value="${searchParams.keyword}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.category}">
-                                                        <c:param name="category" value="${searchParams.category}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.location}">
-                                                        <c:param name="location" value="${searchParams.location}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.price}">
-                                                        <c:param name="price" value="${searchParams.price}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.parking}">
-                                                        <c:param name="parking" value="${searchParams.parking}" />
-                                                    </c:if>
-                                                </c:url>
-                                                <a href="${pageUrl}" class="px-3 py-2 border ${pageNum == currentPage ? 'bg-blue-50 border-blue-400 text-blue-600 font-semibold' : 'bg-white border-slate-300 text-slate-600'} hover:bg-slate-100">${pageNum}</a>
-                                            </c:forEach>
-
-                                            <c:if test="${currentPage < totalPages}">
-                                                <c:url var="nextUrl" value="/search">
-                                                    <c:param name="page" value="${currentPage + 1}" />
-                                                    <c:param name="type" value="restaurants" />
-                                                    <c:param name="submitted" value="true" />
-                                                    <c:if test="${not empty searchParams.keyword}">
-                                                        <c:param name="keyword" value="${searchParams.keyword}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.category}">
-                                                        <c:param name="category" value="${searchParams.category}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.location}">
-                                                        <c:param name="location" value="${searchParams.location}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.price}">
-                                                        <c:param name="price" value="${searchParams.price}" />
-                                                    </c:if>
-                                                    <c:if test="${not empty searchParams.parking}">
-                                                        <c:param name="parking" value="${searchParams.parking}" />
-                                                    </c:if>
-                                                </c:url>
-                                                <a href="${nextUrl}" class="px-3 py-2 border border-slate-300 bg-white text-slate-600 rounded-r-lg hover:bg-slate-100">다음</a>
-                                            </c:if>
-                                        </nav>
-                                    </div>
-                                </c:if>
-                            </c:when>
-                            <c:otherwise>
-                                <c:choose>
-                                    <c:when test="${submitted}">
-                                        <div class="text-center py-20">
-                                            <div class="text-5xl mb-4">🔍</div>
-                                            <p class="text-lg text-slate-600">조건에 맞는 음식점이 없습니다. 필터를 조정해보세요.</p>
-                                        </div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="text-center py-16 text-slate-500">
-                                            검색 조건을 입력한 뒤 검색 버튼을 눌러보세요.
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:otherwise>
-                        </c:choose>
+                        <%-- "더 보기" 버튼 컨테이너 --%>
+                        <div id="load-more-container" class="mt-8 text-center" style="display: none;">
+                            <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                더 보기
+                            </button>
+                        </div>
+                        
+                        <%-- 기존 페이지네이션은 DB 검색 결과에 대해서만 유지 --%>
+                        <c:if test="${totalPages > 1 and empty searchParams.keyword}">
+                            <div class="mt-8 flex justify-center">
+                                <!-- 페이지네이션 UI -->
+                            </div>
+                        </c:if>
                     </div>
                 </c:when>
 
@@ -522,6 +419,17 @@
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
 
     <script>
+        const contextPath = "${pageContext.request.contextPath}";
+        let currentPage = 1;
+        let kakaoPagination = null;
+        let isLoading = false;
+        let isDbSearchEnd = false;
+        let isKakaoSearchEnd = false;
+        let currentSearchCoords = null;
+        let currentSearchCategory = '';
+
+        let dbResultCount = 0;
+        let extResultCount = 0;
         function setSearchType(type) {
             const hiddenTypeField = document.getElementById('activeSearchType');
             if (hiddenTypeField) {
@@ -559,7 +467,277 @@
         document.addEventListener('DOMContentLoaded', function () {
             const initialType = document.getElementById('activeSearchType').value || 'restaurants';
             setSearchType(initialType);
+
+            // 검색 폼 제출 이벤트 리스너 추가
+            const searchForm = document.getElementById('form-restaurants').querySelector('form');
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault(); // 기본 폼 제출(페이지 새로고침) 방지
+                const keyword = this.elements.keyword.value;
+                const category = this.elements.category.value;
+                performAjaxSearch(keyword, category);
+            });
+
+            // "더 보기" 버튼 클릭 이벤트 리스너 추가
+            document.getElementById('load-more-btn').addEventListener('click', function() {
+                if (!isLoading && (!isDbSearchEnd || !isKakaoSearchEnd)) {
+                    isLoading = true;
+                    this.textContent = '불러오는 중...';
+                    this.disabled = true;
+                    currentPage++;
+                    if (kakaoPagination && !isKakaoSearchEnd) {
+                        kakaoPagination.nextPage(); // placesSearchCB가 자동으로 호출됨
+                    } else {
+                        fetchDbResults(currentPage, currentSearchCoords, currentSearchCategory);
+                    }
+                }
+            });
+
+            // 검색 결과 컨테이너 초기화 및 '결과 없음' 메시지 숨기기
+            document.getElementById('restaurant-results-list').innerHTML = '';
+            document.getElementById('no-restaurant-results').style.display = 'none';
+
+            // 검색 결과가 있을 경우에만 렌더링 함수 호출
+            const dbRestaurants = <% out.print(new Gson().toJson(request.getAttribute("restaurants") != null ? request.getAttribute("restaurants") : new java.util.ArrayList<>())); %>;            
+            if (dbRestaurants.length > 0) {
+                displayDbPlaces(dbRestaurants, contextPath);
+            }
+
+            // 장소 키워드 검색 로직
+            const keyword = "${searchParams.keyword}";
+            const category = "${searchParams.category}";
+            const submitted = "${submitted}" === "true";
+
+            if (submitted && keyword && keyword.trim() !== "") {
+                performAjaxSearch(keyword, category);
+            }
+
+            // 페이지네이션으로 전달된 외부 결과 렌더링
+            const externalRestaurants = <% out.print(new Gson().toJson(request.getAttribute("externalRestaurants") != null ? request.getAttribute("externalRestaurants") : new java.util.ArrayList<>())); %>;
+            if (externalRestaurants.length > 0) {
+                displayPlaces(externalRestaurants, contextPath);
+            }
         });
+
+        function placesSearchCB(data, status, pagination) {
+            const kakaoData = (status === kakao.maps.services.Status.OK) ? data : [];
+            kakaoPagination = pagination;
+            isKakaoSearchEnd = !pagination.hasNextPage;
+            
+            // 1. DB 결과를 먼저 가져와서 표시합니다.
+            fetchDbResults(currentPage, currentSearchCoords, currentSearchCategory, function() {
+                // 2. DB 결과 표시 후, Kakao 결과를 표시합니다.
+                if (kakaoData.length > 0) {
+                    const kakaoPlaces = kakaoData.map(function(p) { return ({
+                        place_name: p.place_name, address_name: p.address_name,
+                        road_address_name: p.road_address_name, phone: p.phone,
+                        category_name: p.category_name, x: p.x, y: p.y
+                    }); });
+                    displayPlaces(kakaoPlaces, contextPath);
+                }
+                updateLoadMoreButtonState();
+            });
+        }
+
+        function fetchDbResults(page, coords, category, callback) {
+            if (isDbSearchEnd || !coords) {
+                if (callback) callback();
+                return;
+            }
+
+            const dbSearchUrl = contextPath + "/search/db-restaurants?lat=" + coords.lat + "&lng=" + coords.lng + "&level=8&category=" + (category || '전체') + "&page=" + page;
+            fetch(dbSearchUrl)
+                .then(response => response.json())
+                .then(dbData => {
+                    if (dbData && dbData.length > 0) {
+                        displayDbPlaces(dbData, contextPath);
+                    } else {
+                        isDbSearchEnd = true;
+                    }
+                })
+                .catch(() => { isDbSearchEnd = true; })
+                .finally(() => {
+                    if (callback) callback();
+                });
+        }
+
+        function updateLoadMoreButtonState() {
+            isLoading = false;
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const loadMoreContainer = document.getElementById('load-more-container');
+            
+            loadMoreBtn.textContent = '더 보기';
+            loadMoreBtn.disabled = false;
+
+            if (!isDbSearchEnd || !isKakaoSearchEnd) {
+                loadMoreContainer.style.display = 'block';
+            } else {
+                loadMoreContainer.style.display = 'none';
+                if (document.getElementById('restaurant-results-list').children.length === 0) {
+                    document.getElementById('no-restaurant-results').style.display = 'block';
+                }
+            }
+        }
+
+        function performAjaxSearch(keyword, category) {
+            if (!keyword || keyword.trim() === "") return;
+
+            // 검색 시작 전, 기존 결과 초기화
+            currentPage = 1;
+            isDbSearchEnd = false;
+            isKakaoSearchEnd = false;
+            kakaoPagination = null;
+            currentSearchCoords = null;
+            // 검색 시 카운터 초기화
+            dbResultCount = 0;
+            extResultCount = 0;
+            currentSearchCategory = category;
+            document.getElementById('restaurant-results-list').innerHTML = '';
+            document.getElementById('no-restaurant-results').style.display = 'none';
+            document.getElementById('load-more-container').style.display = 'none';
+            
+            // URL 업데이트
+            const newUrl = contextPath + "/search?type=restaurants&submitted=true&keyword=" + encodeURIComponent(keyword) + "&category=" + encodeURIComponent(category);
+            history.pushState({keyword, category}, '', newUrl);
+
+            const ps = new kakao.maps.services.Places();
+            
+            ps.keywordSearch(keyword, function(data, status) {
+                if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                    const place = data[0];
+                    currentSearchCoords = { lat: place.y, lng: place.x };
+
+                    const externalSearchOptions = {
+                        category_group_code: 'FD6',
+                        location: new kakao.maps.LatLng(place.y, place.x),
+                        radius: 2000
+                    };
+                    ps.keywordSearch(category || '맛집', placesSearchCB, externalSearchOptions);
+                } else {
+                    // 장소 검색 실패 시 DB만 검색
+                    isKakaoSearchEnd = true; 
+                    fetchDbResults(1, null, category, updateLoadMoreButtonState);
+                }
+            });
+        }
+
+
+        function displayPlaces(places, contextPath) {
+            const listEl = document.getElementById('restaurant-results-list');
+            places.forEach((place, i) => {
+                // search-map.jsp의 displayPlaces와 형식을 맞춤
+                const placeName = place.place_name || place.name;
+                const addressName = place.address_name || place.address;
+                const phone = place.phone || '';
+                const categoryName = place.category_name || place.category || '';
+                const lat = place.y || place.latitude;
+                const lng = place.x || place.longitude;
+
+                // 중복 렌더링 방지
+                if (document.querySelector('[data-place-name="' + placeName + '"]')) return;
+
+                const detailUrl = contextPath + "/searchRestaurant/external-detail?name=" + encodeURIComponent(placeName) + "&address=" + encodeURIComponent(addressName) + "&phone=" + encodeURIComponent(phone) + "&category=" + encodeURIComponent(categoryName) + "&lat=" + lat + "&lng=" + lng;
+                const uniqueId = "ext-" + extResultCount; // 전역 카운터 사용
+                extResultCount++;
+                const placeholderUrl = "https://placehold.co/400x250/e2e8f0/94a3b8?text=Image";
+                const errorImageUrl = "https://placehold.co/400x250/fecaca/991b1b?text=Error";
+
+                const itemHtml =
+                    '<div class="bg-white rounded-2xl overflow-hidden card-hover">' +
+                        '<a href="' + detailUrl + '">' +
+                            '<div class="h-48 w-full overflow-hidden" data-place-name="' + placeName + '">' +
+                                '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + placeName + '" class="w-full h-full object-cover" ' +
+                                     'onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
+                            '</div>' +
+                        '</a>' +
+                        '<div class="p-6 space-y-3">' +
+                            '<div class="flex items-center justify-between">' +
+                                '<span class="px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-semibold">외부 검색 결과</span>' +
+                                '<span class="text-sm text-slate-500">' + (place.road_address_name || addressName).split(' ')[0] + '</span>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-slate-800">' + placeName + '</h3>' +
+                            '<div class="flex items-center space-x-2 text-sm">' +
+                                '<span class="text-slate-500">' + (categoryName.split(' > ').pop()) + '</span>' +
+                            '</div>' +
+                            '<div class="flex items-center justify-between">' +
+                                '<span class="text-slate-500 text-sm">' + (phone || '전화번호 정보 없음') + '</span>' +
+                            '</div>' +
+                            '<a href="' + detailUrl + '" class="btn-primary text-white w-full text-center block px-4 py-2 rounded-lg font-semibold">상세 보기</a>' +
+                        '</div>' +
+                    '</div>';
+                listEl.insertAdjacentHTML('beforeend', itemHtml);
+
+                setTimeout(() => {
+                    const searchQuery = placeName + " " + (addressName ? addressName.split(' ')[0] : '');
+                    fetch(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery))
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.imageUrl) {
+                                document.getElementById("img-" + uniqueId).src = data.imageUrl;
+                            }
+                        });
+                }, i * 150);
+            });
+        }
+
+        function displayDbPlaces(dbRestaurants, contextPath) {
+            const listEl = document.getElementById('restaurant-results-list');
+            dbRestaurants.forEach((r, i) => {
+                // 중복 렌더링 방지
+                const restaurantName = r.name;
+                const uniqueId = "db-" + dbResultCount; // 전역 카운터 사용
+                dbResultCount++;
+                if (document.querySelector('[data-place-name="' + restaurantName + '"]')) return;
+
+                const detailUrl = contextPath + "/restaurant/detail/" + r.id;
+                let imageUrl = 'https://placehold.co/400x250/e2e8f0/94a3b8?text=Loading...';
+                if (r.image && r.image.trim() !== '') {
+                    imageUrl = r.image.startsWith('http') ? r.image : contextPath + "/images/" + r.image;
+                }
+
+                const itemHtml =
+                    '<div class="bg-white rounded-2xl overflow-hidden card-hover">' +
+                        '<a href="' + detailUrl + '">' +
+                            '<div class="h-48 w-full overflow-hidden" data-place-name="' + restaurantName + '">' +
+                                '<img id="img-' + uniqueId + '" src="' + imageUrl + '" alt="' + r.name + '" class="w-full h-full object-cover" onerror="this.onerror=null;this.src=\'https://placehold.co/400x250/fecaca/991b1b?text=Error\';">' +
+                            '</div>' +
+                        '</a>' +
+                        '<div class="p-6 space-y-3">' +
+                            '<div class="flex items-center justify-between">' +
+                                '<span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">' + (r.category || '') + '</span>' +
+                                '<span class="text-sm text-slate-500">' + (r.location || '') + '</span>' +
+                            '</div>' +
+                            '<h3 class="text-xl font-bold text-slate-800">' + r.name + '</h3>' +
+                            '<div class="flex items-center space-x-2 text-sm">' +
+                                '<div class="flex space-x-1 text-yellow-400">' +
+                                    '<span>★</span>'.repeat(Math.floor(r.rating || 0)) +
+                                '</div>' +
+                                '<span class="font-semibold text-slate-700">' + (r.rating || 0).toFixed(1) + '</span>' +
+                                '<span class="text-slate-500">(' + (r.reviewCount || 0) + '개 리뷰)</span>' +
+                            '</div>' +
+                            '<div class="flex items-center justify-between">' +
+                                '<span class="text-slate-500 text-sm">주차 ' + (r.parking ? '가능' : '불가') + '</span>' +
+                                '<span class="text-slate-500 text-sm">찜 ' + (r.likes || 0) + '</span>' +
+                            '</div>' +
+                            '<a href="' + detailUrl + '" class="btn-primary text-white w-full text-center block px-4 py-2 rounded-lg font-semibold">상세 보기</a>' +
+                        '</div>' +
+                    '</div>';
+                listEl.insertAdjacentHTML('beforeend', itemHtml);
+
+                // DB 결과에 대해서도 이미지 프록시 적용
+                if (!r.image || r.image.trim() === '') {
+                    setTimeout(() => {
+                        const searchQuery = r.name + " " + (r.address ? r.address.split(' ')[0] : '');
+                        fetch(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery))
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data && data.imageUrl) {
+                                    document.getElementById("img-" + uniqueId).src = data.imageUrl;
+                                }
+                            });
+                    }, i * 150);
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.ArrayList;
 import model.User;
 import model.Restaurant;
 import model.Review;
@@ -46,7 +47,7 @@ public class AdvancedSearchServlet extends HttpServlet {
         searchParams.put("startDate", request.getParameter("startDate"));
         searchParams.put("endDate", request.getParameter("endDate"));
 
-        if ("restaurants".equals(type) && submitted) {
+        if ("restaurants".equals(type)) { // submitted 여부와 관계없이 GET 요청 시 검색 실행
             searchRestaurants(request, response, searchParams);
             return;
         }
@@ -105,11 +106,8 @@ public class AdvancedSearchServlet extends HttpServlet {
     private void searchRestaurants(HttpServletRequest request, HttpServletResponse response,
                                    Map<String, Object> baseParams) throws ServletException, IOException {
         RestaurantService restaurantService = new RestaurantService();
-
+        String keyword = (String) baseParams.get("keyword");
         String category = request.getParameter("category");
-        String location = request.getParameter("location");
-        String price = request.getParameter("price");
-        String parking = request.getParameter("parking");
         String sortBy = request.getParameter("sortBy");
 
         String pageStr = request.getParameter("page");
@@ -121,32 +119,30 @@ public class AdvancedSearchServlet extends HttpServlet {
                 page = 1;
             }
         }
-        int pageSize = 12;
+        int pageSize = 9; // DB 9개, 외부 3개로 조정
         int offset = (page - 1) * pageSize;
 
         Map<String, Object> dbParams = new HashMap<>(baseParams);
         dbParams.put("category", category);
-        dbParams.put("location", location);
-        dbParams.put("price", price);
-        dbParams.put("parking", parking);
         dbParams.put("sortBy", sortBy);
         dbParams.put("limit", pageSize);
         dbParams.put("offset", offset);
 
         List<Restaurant> restaurants = restaurantService.getPaginatedRestaurants(dbParams);
-        int totalRestaurants = restaurantService.getRestaurantCount(dbParams);
-        int totalPages = (int) Math.ceil((double) totalRestaurants / pageSize);
+        int totalDbRestaurants = restaurantService.getRestaurantCount(dbParams);
+
+        // 외부 API 검색은 클라이언트(JSP)에서 처리하므로 서버에서는 빈 리스트를 전달합니다.
+        List<Restaurant> externalRestaurants = new ArrayList<>();
+        int totalPages = (int) Math.ceil((double) totalDbRestaurants / pageSize);
 
         Map<String, Object> viewParams = new HashMap<>();
-        viewParams.put("keyword", baseParams.get("keyword"));
+        viewParams.put("keyword", keyword);
         viewParams.put("category", category);
-        viewParams.put("location", location);
-        viewParams.put("price", price);
-        viewParams.put("parking", parking);
         viewParams.put("sortBy", sortBy);
 
         request.setAttribute("restaurants", restaurants);
-        request.setAttribute("totalResults", totalRestaurants);
+        request.setAttribute("externalRestaurants", externalRestaurants); // 빈 리스트 전달
+        request.setAttribute("totalResults", totalDbRestaurants); // 총 결과는 DB 기준으로만 계산
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
