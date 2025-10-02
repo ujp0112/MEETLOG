@@ -63,20 +63,16 @@ public class AdminServlet extends HttpServlet {
         // 대시보드에 필요한 데이터 로딩 (총 사용자 수, 총 맛집 수 등)
         int totalUsers = userService.getAllUsers().size();
         request.setAttribute("totalUsers", totalUsers);
-        request.getRequestDispatcher("/WEB-INF/views/admin/dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin-dashboard.jsp").forward(request, response);
     }
 
     private void handleUserManagement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<User> users = userService.getAllUsers();
         request.setAttribute("users", users);
-        request.getRequestDispatcher("/WEB-INF/views/admin/user-management.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/views/admin-member-management.jsp").forward(request, response);
     }
 
     private void handleRestaurantManagement(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // RestaurantService에 모든 가게를 가져오는 메소드가 필요합니다.
-        // List<Restaurant> restaurants = restaurantService.getAllRestaurants();
-        // request.setAttribute("restaurants", restaurants);
-        // request.getRequestDispatcher("/WEB-INF/views/admin/restaurant-management.jsp").forward(request, response);
-        response.getWriter().println("Restaurant Management Page (Not Implemented)");
+        response.sendRedirect(request.getContextPath() + "/admin/business-management");
     }
 }
