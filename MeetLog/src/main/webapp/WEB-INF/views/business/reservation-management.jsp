@@ -34,16 +34,28 @@
 
     <main class="container mx-auto p-4 md:p-8">
         <div class="glass-card p-8 rounded-3xl">
-            <div class="flex justify-between items-center mb-8">
+            <div class="mb-8">
                 <h1 class="text-3xl font-bold gradient-text">예약 관리</h1>
-                <div class="flex space-x-4">
-                    <select id="statusFilter" class="px-4 py-2 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:outline-none">
-                        <option value="ALL">전체</option>
-                        <option value="PENDING">대기중</option>
-                        <option value="CONFIRMED">확정</option>
-                        <option value="CANCELLED">취소</option>
-                    </select>
-                    <button class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">📊 통계 보기</button>
+                <p class="text-slate-600 mt-2">매장별 예약 현황을 확인하고 관리하세요</p>
+            </div>
+
+            <!-- 통계 카드 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-blue-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('ALL')">
+                    <div class="text-3xl font-bold text-blue-600" id="totalCount">0</div>
+                    <div class="text-slate-600">총 예약</div>
+                </div>
+                <div class="bg-yellow-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('PENDING')">
+                    <div class="text-3xl font-bold text-yellow-600" id="pendingCount">0</div>
+                    <div class="text-slate-600">대기중</div>
+                </div>
+                <div class="bg-green-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('CONFIRMED')">
+                    <div class="text-3xl font-bold text-green-600" id="confirmedCount">0</div>
+                    <div class="text-slate-600">확정</div>
+                </div>
+                <div class="bg-red-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('CANCELLED')">
+                    <div class="text-3xl font-bold text-red-600" id="cancelledCount">0</div>
+                    <div class="text-slate-600">취소</div>
                 </div>
             </div>
 
@@ -142,34 +154,50 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const statusFilter = document.getElementById('statusFilter');
-            if (statusFilter) {
-                statusFilter.addEventListener('change', function() {
-                    const selectedStatus = this.value;
-
-                    document.querySelectorAll('.restaurant-section').forEach(section => {
-                        const reservationList = section.querySelector('.reservation-list');
-                        let visibleCount = 0;
-                        
-                        reservationList.querySelectorAll('.reservation-card').forEach(card => {
-                            const cardStatus = card.dataset.status;
-                            if (selectedStatus === 'ALL' || cardStatus === selectedStatus) {
-                                card.style.display = 'block';
-                                visibleCount++;
-                            } else {
-                                card.style.display = 'none';
-                            }
-                        });
-
-                        if (visibleCount > 0) {
-                            section.style.display = 'block';
-                        } else {
-                            section.style.display = 'none';
-                        }
-                    });
-                });
-            }
+            // 통계 계산
+            calculateStats();
         });
+
+        function calculateStats() {
+            const allCards = document.querySelectorAll('.reservation-card');
+            let total = 0, pending = 0, confirmed = 0, cancelled = 0;
+
+            allCards.forEach(card => {
+                total++;
+                const status = card.dataset.status;
+                if (status === 'PENDING') pending++;
+                else if (status === 'CONFIRMED') confirmed++;
+                else if (status === 'CANCELLED') cancelled++;
+            });
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('confirmedCount').textContent = confirmed;
+            document.getElementById('cancelledCount').textContent = cancelled;
+        }
+
+        function filterByStatus(status) {
+            document.querySelectorAll('.restaurant-section').forEach(section => {
+                const reservationList = section.querySelector('.reservation-list');
+                let visibleCount = 0;
+
+                reservationList.querySelectorAll('.reservation-card').forEach(card => {
+                    const cardStatus = card.dataset.status;
+                    if (status === 'ALL' || cardStatus === status) {
+                        card.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                if (visibleCount > 0) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        }
     </script>
 </body>
 </html>

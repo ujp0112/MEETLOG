@@ -64,7 +64,7 @@
             
             <!-- 통계 카드 섹션 -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="glass-card p-6 rounded-2xl slide-up">
+                <div class="glass-card p-6 rounded-2xl slide-up cursor-pointer hover:shadow-lg transition-all" onclick="filterCoupons('all')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-slate-600 text-sm font-medium">총 쿠폰</p>
@@ -75,8 +75,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="glass-card p-6 rounded-2xl slide-up">
+
+                <div class="glass-card p-6 rounded-2xl slide-up cursor-pointer hover:shadow-lg transition-all" onclick="filterCoupons('available')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-slate-600 text-sm font-medium">활성 쿠폰</p>
@@ -87,8 +87,8 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="glass-card p-6 rounded-2xl slide-up">
+
+                <div class="glass-card p-6 rounded-2xl slide-up cursor-pointer hover:shadow-lg transition-all" onclick="filterCoupons('expired')">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-slate-600 text-sm font-medium">만료된 쿠폰</p>
@@ -99,11 +99,11 @@
                         </div>
                     </div>
                 </div>
-                
-                <div class="glass-card p-6 rounded-2xl slide-up">
+
+                <div class="glass-card p-6 rounded-2xl slide-up cursor-pointer hover:shadow-lg transition-all" onclick="filterCoupons('depleted')">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-slate-600 text-sm font-medium">사용된 쿠폰</p>
+                            <p class="text-slate-600 text-sm font-medium">소진된 쿠폰</p>
                             <p class="text-3xl font-bold text-purple-600">${usedCoupons}</p>
                         </div>
                         <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">

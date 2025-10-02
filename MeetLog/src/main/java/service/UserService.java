@@ -222,9 +222,20 @@ public class UserService {
     // --- 위시리스트 관련 메소드들 ---
 
     public List<model.Restaurant> getWishlistRestaurants(int userId) {
-        // UserCollectionDAO를 통해 사용자의 위시리스트 레스토랑들을 가져옴
-        // 임시로 빈 리스트 반환 (실제 구현 필요)
-        return new java.util.ArrayList<>();
+        if (userStorageService == null) {
+            return new ArrayList<>();
+        }
+
+        try {
+            UserStorage defaultStorage = userStorageService.getOrCreateDefaultStorage(userId);
+            if (defaultStorage == null) {
+                return new ArrayList<>();
+            }
+            return getStorageRestaurants(defaultStorage.getStorageId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     public List<model.UserCollection> getUserCollections(int userId) {
@@ -246,21 +257,41 @@ public class UserService {
     }
 
     public boolean addToCollection(int userId, int restaurantId, int collectionId) {
-        // 컬렉션에 레스토랑을 추가
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        if (userStorageService == null) {
+            return false;
+        }
+
+        UserStorage storage = userStorageService.getStorageById(collectionId);
+        if (storage == null || storage.getUserId() != userId) {
+            return false;
+        }
+        return userStorageService.addToStorage(collectionId, "RESTAURANT", restaurantId);
     }
 
     public boolean addToWishlist(int userId, int restaurantId) {
-        // 기본 위시리스트에 레스토랑을 추가
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        if (userStorageService == null) {
+            return false;
+        }
+
+        try {
+            return userStorageService.addToWishlist(userId, "RESTAURANT", restaurantId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean removeFromWishlist(int userId, int restaurantId) {
-        // 위시리스트에서 레스토랑을 제거
-        // 임시로 true 반환 (실제 구현 필요)
-        return true;
+        if (userStorageService == null) {
+            return false;
+        }
+
+        try {
+            return userStorageService.removeFromWishlist(userId, "RESTAURANT", restaurantId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean createCollection(int userId, String collectionName, String description) {
@@ -336,11 +367,15 @@ public class UserService {
     }
 
     public UserStorage getUserStorage(int storageId, int userId) {
-        if (userStorageService != null) {
-            // 보안을 위해 userId는 일단 무시하고 storageId로만 조회 (실제로는 권한 체크 필요)
-            return userStorageService.getStorageById(storageId);
+        if (userStorageService == null) {
+            return null;
         }
-        return null;
+
+        UserStorage storage = userStorageService.getStorageById(storageId);
+        if (storage == null || storage.getUserId() != userId) {
+            return null;
+        }
+        return storage;
     }
 
     public List<Restaurant> getStorageRestaurants(int storageId) {
@@ -511,10 +546,16 @@ public class UserService {
     }
 
     public boolean addToStorage(int userId, int restaurantId, int storageId) {
-        if (userStorageService != null) {
-            return userStorageService.addToStorage(storageId, "RESTAURANT", restaurantId);
+        if (userStorageService == null) {
+            return false;
         }
-        return true;
+
+        UserStorage storage = userStorageService.getStorageById(storageId);
+        if (storage == null || storage.getUserId() != userId) {
+            return false;
+        }
+
+        return userStorageService.addToStorage(storageId, "RESTAURANT", restaurantId);
     }
 
     public boolean removeItemFromStorage(int userId, int storageId, String itemType, int contentId) {

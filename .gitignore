@@ -8,3 +8,4 @@ MeetLog/src/main/resources/mybatis-config.xml
 MeetLog/src/main/resources/db.properties
 .DS_Store
 MeetLog/database/.DS_Store
+/MeetLog/AGENTS.md

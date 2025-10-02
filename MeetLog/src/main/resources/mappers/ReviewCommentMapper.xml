@@ -18,39 +18,49 @@
 	<select id="findByReviewId" parameterType="int"
 		resultMap="reviewCommentResultMap">
 		SELECT rc.*, u.nickname AS author, u.profile_image
-		FROM review_comments rc
+		FROM
+		review_comments rc
 		JOIN users u ON rc.user_id = u.id
-		WHERE rc.review_id = #{reviewId}
+		WHERE rc.review_id
+		= #{reviewId}
 		ORDER BY rc.created_at ASC
 	</select>
 
 	<select id="findById" parameterType="int"
 		resultMap="reviewCommentResultMap">
 		SELECT rc.*, u.nickname AS author, u.profile_image
-		FROM review_comments rc
+		FROM
+		review_comments rc
 		JOIN users u ON rc.user_id = u.id
-		WHERE rc.id = #{commentId}
+		WHERE rc.id =
+		#{commentId}
 	</select>
 
 	<insert id="insert" parameterType="ReviewComment"
 		useGeneratedKeys="true" keyProperty="id">
-		INSERT INTO review_comments (review_id, user_id, author, content, is_owner_reply, is_resolved, created_at)
-		VALUES (#{reviewId}, #{userId}, #{author}, #{content}, #{isOwnerReply}, #{isResolved}, NOW())
+
+		INSERT INTO review_comments (review_id, user_id, content, is_owner_reply,
+		is_resolved, created_at)
+		VALUES (#{reviewId}, #{userId}, #{content}, #{isOwnerReply}, #{isResolved},
+		NOW())
 	</insert>
 
 	<update id="update" parameterType="ReviewComment">
 		UPDATE review_comments
-		SET content = #{content}, updated_at = NOW()
+		SET
+		content = #{content}, updated_at = NOW()
 		WHERE id = #{id}
 	</update>
 
 	<delete id="delete" parameterType="int">
-		DELETE FROM review_comments WHERE id = #{id}
+		DELETE FROM review_comments
+		WHERE id = #{id}
 	</delete>
 
 	<!-- 해결 완료 상태 업데이트 -->
 	<update id="updateResolvedStatus" parameterType="map">
-		UPDATE review_comments
+		UPDATE
+		review_comments
 		SET is_resolved = #{isResolved}
 		WHERE id = #{commentId}
 	</update>

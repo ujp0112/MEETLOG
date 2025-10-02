@@ -29,6 +29,7 @@
         .activity-card.review { border-left-color: #f59e0b; }
         .activity-card.course { border-left-color: #10b981; }
         .activity-card.column { border-left-color: #8b5cf6; }
+        .activity-card.follow { border-left-color: #3b82f6; }
     </style>
 </head>
 <body class="bg-slate-100">
@@ -102,12 +103,14 @@
                                                         <c:when test="${activity.activityType == 'REVIEW'}">bg-orange-100 text-orange-700</c:when>
                                                         <c:when test="${activity.activityType == 'COURSE'}">bg-green-100 text-green-700</c:when>
                                                         <c:when test="${activity.activityType == 'COLUMN'}">bg-purple-100 text-purple-700</c:when>
+                                                        <c:when test="${activity.activityType == 'FOLLOW'}">bg-blue-100 text-blue-700</c:when>
                                                         <c:otherwise>bg-gray-100 text-gray-700</c:otherwise>
                                                     </c:choose>">
                                                     <c:choose>
                                                         <c:when test="${activity.activityType == 'REVIEW'}">리뷰 작성</c:when>
                                                         <c:when test="${activity.activityType == 'COURSE'}">코스 생성</c:when>
                                                         <c:when test="${activity.activityType == 'COLUMN'}">칼럼 작성</c:when>
+                                                        <c:when test="${activity.activityType == 'FOLLOW'}">새로운 팔로우</c:when>
                                                         <c:otherwise>${activity.activityType}</c:otherwise>
                                                     </c:choose>
                                                 </span>
@@ -187,6 +190,12 @@
                                                     <a href="${pageContext.request.contextPath}/column/detail?id=${activity.contentId}" 
                                                        class="text-purple-600 hover:text-purple-700 font-semibold text-sm">
                                                         칼럼 보기
+                                                    </a>
+                                                </c:when>
+                                                <c:when test="${activity.activityType == 'FOLLOW'}">
+                                                    <a href="${pageContext.request.contextPath}/feed/user/${activity.contentId}" 
+                                                       class="text-blue-600 hover:text-blue-700 font-semibold text-sm">
+                                                        프로필 보기
                                                     </a>
                                                 </c:when>
                                             </c:choose>

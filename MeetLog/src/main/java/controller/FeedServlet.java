@@ -231,7 +231,16 @@ public class FeedServlet extends HttpServlet {
             activity.setUserProfileImage((String) data.get("userProfileImage"));
             activity.setActivityType((String) data.get("actionType"));
             activity.setContentId(((Number) data.get("targetId")).intValue());
-            
+
+            String rawTargetName = (String) data.get("targetName");
+            if (rawTargetName != null && !rawTargetName.isBlank()) {
+                activity.setContentTitle(rawTargetName);
+            }
+
+            String targetImage = (String) data.get("targetImage");
+            if (targetImage != null && !targetImage.isBlank()) {
+                activity.setContentImage(targetImage);
+            }
             // 날짜 변환
             Object createdAtObj = data.get("createdAt");
             if (createdAtObj instanceof java.sql.Timestamp) {
@@ -251,15 +260,36 @@ public class FeedServlet extends HttpServlet {
                         targetUrl = contextPath + "/restaurant/detail/" + restaurantId + "#reviews";
                     }
                     activity.setRestaurantName((String) data.get("restaurantName"));
+                    if (activity.getContentTitle() == null || activity.getContentTitle().isBlank()) {
+                        activity.setContentTitle(activity.getRestaurantName());
+                    }
                     break;
                 case "COURSE":
                     targetUrl = contextPath + "/course/detail?id=" + activity.getContentId();
+                    if (activity.getContentTitle() == null || activity.getContentTitle().isBlank()) {
+                        activity.setContentTitle((String) data.get("targetName"));
+                    }
                     break;
                 case "COLUMN":
                     targetUrl = contextPath + "/column/detail?id=" + activity.getContentId();
+                    if (activity.getContentTitle() == null || activity.getContentTitle().isBlank()) {
+                        activity.setContentTitle((String) data.get("targetName"));
+                    }
+                    break;
+                case "FOLLOW":
+                    String followTarget = activity.getContentTitle();
+                    if (followTarget == null || followTarget.isBlank()) {
+                        followTarget = (String) data.get("targetName");
+                    }
+                    if (followTarget == null || followTarget.isBlank()) {
+                        followTarget = "사용자";
+                    }
+                    activity.setContentTitle(followTarget);
+                    activity.setContentDescription(followTarget + "님을 팔로우했습니다.");
+                    targetUrl = contextPath + "/feed/user/" + activity.getContentId();
                     break;
             }
-            
+
             activity.setTargetUrl(targetUrl);
             activities.add(activity);
         }
