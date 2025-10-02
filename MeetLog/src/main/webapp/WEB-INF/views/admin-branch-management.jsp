@@ -12,9 +12,9 @@
     <%-- 공통 스타일시트나 커스텀 CSS가 있다면 여기에 추가 --%>
 </head>
 <body class="bg-gray-100">
-<c:set var="adminMenu" value="branch" />
+<c:set var="adminMenu" scope="request" value="branch" />
 <div class="min-h-screen flex flex-col">
-    <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
+    <%@ include file="/WEB-INF/views/admin/include/admin-navbar.jspf" %>
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
         <c:set var="subNavBase" value="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition" />

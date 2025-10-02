@@ -63,6 +63,7 @@ public class AdminServlet extends HttpServlet {
         // 대시보드에 필요한 데이터 로딩 (총 사용자 수, 총 맛집 수 등)
         int totalUsers = userService.getAllUsers().size();
         request.setAttribute("totalUsers", totalUsers);
+        request.setAttribute("adminMenu", "dashboard");
         request.getRequestDispatcher("/WEB-INF/views/admin-dashboard.jsp").forward(request, response);
     }
 

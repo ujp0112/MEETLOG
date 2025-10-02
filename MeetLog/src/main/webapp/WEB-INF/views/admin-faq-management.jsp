@@ -12,9 +12,9 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 <body class="bg-gray-100">
-<c:set var="adminMenu" value="faq" />
+<c:set var="adminMenu" scope="request" value="faq" />
 <div class="min-h-screen flex flex-col">
-    <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
+    <%@ include file="/WEB-INF/views/admin/include/admin-navbar.jspf" %>
 
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 flex-grow w-full">
         <div class="px-4 py-6 sm:px-0 space-y-6">

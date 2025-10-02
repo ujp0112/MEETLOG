@@ -15,9 +15,8 @@
     </style>
 </head>
 <body class="bg-slate-100">
-    <c:set var="adminMenu" value="dashboard" />
     <div id="app" class="flex flex-col min-h-screen">
-        <jsp:include page="/WEB-INF/views/admin/include/admin-navbar.jspf" />
+        <%@ include file="/WEB-INF/views/admin/include/admin-navbar.jspf" %>
 
         <main class="flex-grow">
             <div class="container mx-auto p-4 md:p-8">
@@ -100,7 +99,7 @@
 
                 <!-- 관리 메뉴 섹션 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <a href="${pageContext.request.contextPath}/admin/users" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <a href="${pageContext.request.contextPath}/admin/member-management" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="flex items-center mb-4">
                             <div class="p-3 bg-blue-100 rounded-lg">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,7 +110,7 @@
                         </div>
                         <p class="text-slate-600 text-sm">회원 정보 조회, 수정 및 비활성화 처리</p>
                     </a>
-                    <a href="${pageContext.request.contextPath}/admin/restaurants" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <a href="${pageContext.request.contextPath}/admin/business-management" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="flex items-center mb-4">
                             <div class="p-3 bg-green-100 rounded-lg">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,7 +121,7 @@
                         </div>
                         <p class="text-slate-600 text-sm">맛집 정보 승인, 수정 및 삭제</p>
                     </a>
-                    <a href="${pageContext.request.contextPath}/admin/reports" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <a href="${pageContext.request.contextPath}/admin/report-management" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                         <div class="flex items-center mb-4">
                             <div class="p-3 bg-red-100 rounded-lg">
                                 <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

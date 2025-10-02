@@ -52,16 +52,16 @@ public class AdminDashboardServlet extends HttpServlet {
     private DashboardData createDashboardData() {
         DashboardData data = new DashboardData();
 
-        List<User> users = userService.getAllUsersIncludingInactive();
+        final List<User> users = userService.getAllUsersIncludingInactive();
         data.setTotalUsers(users != null ? users.size() : 0);
         data.setTotalRestaurants(restaurantService.findAll().size());
         data.setTotalReviews(reviewService.findAll().size());
 
-        List<Reservation> reservations = reservationService.searchReservations(new HashMap<>());
+        final List<Reservation> reservations = reservationService.searchReservations(new HashMap<>());
         data.setTotalReservations(reservations != null ? reservations.size() : 0);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        List<RecentActivity> activities = new ArrayList<>();
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        final List<RecentActivity> activities = new ArrayList<>();
 
         if (users != null) {
             users.stream()
