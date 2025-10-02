@@ -38,7 +38,7 @@
                    ELSE NULL
                END as targetName,
                CASE
-                   WHEN fi.feed_type = 'REVIEW' THEN rest.main_image
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image
                    ELSE NULL
                END as targetImage
@@ -78,7 +78,7 @@
                    ELSE NULL
                END as targetName,
                CASE
-                   WHEN fi.feed_type = 'REVIEW' THEN rest.main_image
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.image
                    WHEN fi.feed_type = 'COURSE' THEN course.preview_image
                    WHEN fi.feed_type = 'COLUMN' THEN column_item.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image
@@ -118,7 +118,7 @@
                    ELSE NULL
                END as targetName,
                CASE
-                   WHEN fi.feed_type = 'REVIEW' THEN rest.main_image
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.image
                    WHEN fi.feed_type = 'COURSE' THEN course.preview_image
                    WHEN fi.feed_type = 'COLUMN' THEN column_item.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image
@@ -173,7 +173,7 @@
                    ELSE NULL
                END as targetName,
                CASE
-                   WHEN fi.feed_type = 'REVIEW' THEN rest.main_image
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.image
                    WHEN fi.feed_type = 'COURSE' THEN course.preview_image
                    WHEN fi.feed_type = 'COLUMN' THEN column_item.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image
@@ -215,7 +215,7 @@
                    ELSE NULL
                END as targetName,
                CASE
-                   WHEN fi.feed_type = 'REVIEW' THEN rest.main_image
+                   WHEN fi.feed_type = 'REVIEW' THEN rest.image
                    WHEN fi.feed_type = 'COURSE' THEN course.preview_image
                    WHEN fi.feed_type = 'COLUMN' THEN column_item.image
                    WHEN fi.feed_type = 'FOLLOW' THEN follow_target.profile_image

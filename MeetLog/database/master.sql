@@ -294,7 +294,7 @@ CREATE TABLE `detailed_ratings` (
 CREATE TABLE `feed_items` (
   `feed_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `feed_type` enum('COLUMN','REVIEW','COURSE') NOT NULL,
+  `feed_type` enum('COLUMN','REVIEW','COURSE','FOLLOW') NOT NULL,
   `content_id` int(11) NOT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NULL DEFAULT current_timestamp(),

@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 소셜 피드 시스템을 위한 DAO 클래스
@@ -29,11 +30,10 @@ public class FeedDAO {
      */
     public int createSimpleFeedItem(int userId, String feedType, int contentId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of(
-                "userId", userId,
-                "feedType", feedType,
-                "contentId", contentId
-            );
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("feedType", feedType);
+            params.put("contentId", contentId);
             int result = sqlSession.insert(NAMESPACE + ".createSimpleFeedItem", params);
             sqlSession.commit();
             return result;
@@ -45,7 +45,10 @@ public class FeedDAO {
      */
     public List<FeedItem> getUserFeed(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            params.put("offset", offset);
             List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getUserFeed", params);
             return convertMapListToFeedItems(results);
         }
@@ -56,7 +59,10 @@ public class FeedDAO {
      */
     public List<Map<String, Object>> getUserFeedWithDetails(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            params.put("offset", offset);
             return sqlSession.selectList(NAMESPACE + ".getUserFeed", params);
         }
     }
@@ -66,7 +72,10 @@ public class FeedDAO {
      */
     public List<FeedItem> getUserActivityFeed(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            params.put("offset", offset);
             List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getUserActivityFeed", params);
             return convertMapListToFeedItems(results);
         }
@@ -77,7 +86,10 @@ public class FeedDAO {
      */
     public List<Map<String, Object>> getUserActivityFeedWithDetails(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            params.put("offset", offset);
             return sqlSession.selectList(NAMESPACE + ".getUserActivityFeed", params);
         }
     }
@@ -87,7 +99,9 @@ public class FeedDAO {
      */
     public List<FeedItem> getPublicFeed(int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("limit", limit);
+            params.put("offset", offset);
             List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getPublicFeed", params);
             return convertMapListToFeedItems(results);
         }
@@ -173,7 +187,9 @@ public class FeedDAO {
      */
     public List<FeedItem> getFollowingActivity(int userId, int limit) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
             List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getFollowingActivity", params);
             return convertMapListToFeedItems(results);
         }
@@ -184,7 +200,10 @@ public class FeedDAO {
      */
     public List<Map<String, Object>> getMainFeed(int userId, int limit, int offset) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            Map<String, Object> params = Map.of("userId", userId, "limit", limit, "offset", offset);
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("limit", limit);
+            params.put("offset", offset);
             return sqlSession.selectList(NAMESPACE + ".getMainFeed", params);
         }
     }
