@@ -81,14 +81,14 @@
             </div>
             <div class="flex-grow pt-4 flex flex-col">
                 <div id="ranking-resto-content" class="tab-content active-content space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
+                <div id="ranking-column-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
+                <div id="ranking-review-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
+                <div id="ranking-course-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
                 <div id="load-more-container" class="p-4 border-t text-center hidden">
                     <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
                         더 보기
                     </button>
                 </div>
-                <div id="ranking-column-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
-                <div id="ranking-review-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
-                <div id="ranking-course-content" class="tab-content space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto"></div>
             </div>
         </div>
         <div id="map" class="flex-grow h-full"></div>
@@ -262,7 +262,6 @@
 
         ps.keywordSearch(keyword, placesSearchCB, searchOptions);
 
-        fetchRankedData('columns', keyword, displayRankedColumns);
     }
 
     function placesSearchCB(data, status, pagination) {
@@ -304,6 +303,13 @@
             // [수정] DB 검색 결과가 페이지당 항목 수(10)보다 적을 때만 DB 검색이 끝난 것으로 간주합니다.
             const itemsPerPage = 10; 
             if (dbPlaces.length < itemsPerPage) isDbSearchEnd = true;
+
+            // [추가] DB 맛집 ID를 기반으로 관련 칼럼을 검색합니다.
+            const dbPlaceIds = dbPlaces.map(p => p.id);
+            if (page === 1 && dbPlaceIds.length > 0) {
+                // 기존의 지역명 기반 검색 대신, 맛집 ID 기반으로 칼럼을 가져옵니다.
+                fetchColumnsByRestaurantIds(dbPlaceIds);
+            }
 
             dbPlaces.forEach(p => displayedDbIds.push(p.id));
             const kakaoPlaces = kakaoDataForPage.filter(p => !displayedDbIds.includes(p.id));
@@ -441,21 +447,22 @@
         updateTabBadge('ranking-resto', g.listItems.length);
     }
 
-    async function fetchRankedData(type, keyword, displayFunction) {
-        const container = $('#ranking-' + type + '-content');
+     // [추가] 맛집 ID 목록으로 칼럼을 가져오는 함수
+    async function fetchColumnsByRestaurantIds(restaurantIds) {
+        const container = $('#ranking-column-content');
+        container.html('<p class="text-slate-400 text-center py-8">칼럼 검색 중...</p>');
         try {
-            // [수정] 템플릿 리터럴을 문자열 더하기로 변경
-            const response = await fetch(contextPath + '/api/' + type + '/rank?region=' + encodeURIComponent(keyword));
+            const response = await fetch(contextPath + '/api/columns/by-restaurants?ids=' + restaurantIds.join(','));
             if (response.ok) {
                 const data = await response.json();
-                displayFunction(data);
+                displayRankedColumns(data);
             } else {
                 throw new Error('Server response was not ok.');
             }
         } catch (e) {
-            console.error(type + ' 랭킹 API 호출 에러:', e);
-            container.html('<p class="text-red-500 text-center py-8">' + type + ' 로딩 실패</p>');
-            updateTabBadge('ranking-' + type, 0);
+            console.error('칼럼 API 호출 에러:', e);
+            container.html('<p class="text-red-500 text-center py-8">칼럼 로딩 실패</p>');
+            updateTabBadge('ranking-column', 0);
         }
     }
 
@@ -468,7 +475,24 @@
             return;
         }
         columns.forEach(col => {
-            container.append('<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank" class="block p-3 border rounded-md hover:shadow-md transition"><p class="font-bold text-lg text-slate-800">' + col.title + '</p><p class="text-sm text-slate-500 mt-1 truncate">' + col.contentSnippet + '</p><p class="text-xs text-slate-400 mt-2">by ' + col.authorNickname + '</p></a>');
+            const imageUrl = col.image 
+                ? (col.image.startsWith('http') ? col.image : contextPath + '/images/' + col.image) 
+                : 'https://placehold.co/400x200/e2e8f0/94a3b8?text=No+Image';
+
+            const itemHtml = 
+                '<a href="' + contextPath + '/column/detail?id=' + col.id + '" target="_blank" class="block bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">' +
+                    // 썸네일 이미지 영역
+                    '<div class="w-full h-32 bg-slate-200">' +
+                        '<img src="' + imageUrl + '" alt="' + col.title + '" class="w-full h-full object-cover">' +
+                    '</div>' +
+                    // 텍스트 정보 영역
+                    '<div class="block p-3 border rounded-md hover:shadow-md transition">' +
+                        '<p class="font-bold text-base text-slate-800 truncate">' + col.title + '</p>' +
+                        '<p class="text-sm text-slate-500 mt-1 truncate">' + col.content + '</p>' +
+                        '<p class="text-xs text-slate-400 mt-1">by ' + col.author + '</p>' + // [수정] 작성자 필드를 올바르게 참조합니다.
+                    '</div>' +
+                '</a>'
+            container.append(itemHtml);
         });
     }
 

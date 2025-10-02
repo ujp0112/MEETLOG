@@ -134,6 +134,21 @@
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
         <main class="flex-grow flex flex-col md:flex-row overflow-hidden">
             <div id="result-panel" class="w-full md:w-1/3 lg:w-1/4 h-1/3 md:h-full flex flex-col border-r border-gray-200 bg-white">
+                <%-- [추가] 검색 폼 --%>
+                <div class="p-3 border-b">
+                    <form id="map-search-form" action="${pageContext.request.contextPath}/searchRestaurant" method="get" class="flex space-x-2">
+                        <input type="text" name="keyword" value="<c:out value="${keyword}"/>" placeholder="맛집 이름, 지역 검색" class="flex-grow px-3 py-2 border border-slate-300 rounded-md text-sm">
+                        <select name="category" class="px-2 py-2 border border-slate-300 rounded-md text-sm">
+                            <option value="전체" ${category == '전체' ? 'selected' : ''}>전체</option>
+                            <option value="한식" ${category == '한식' ? 'selected' : ''}>한식</option>
+                            <option value="양식" ${category == '양식' ? 'selected' : ''}>양식</option>
+                            <option value="일식" ${category == '일식' ? 'selected' : ''}>일식</option>
+                            <option value="중식" ${category == '중식' ? 'selected' : ''}>중식</option>
+                            <option value="카페" ${category == '카페' ? 'selected' : ''}>카페</option>
+                        </select>
+                        <button type="submit" class="px-4 py-2 bg-sky-600 text-white rounded-md text-sm">검색</button>
+                    </form>
+                </div>
                 <div class="p-4 border-b">
                     <h1 class="text-xl font-bold text-gray-800">
                         "<span class="text-blue-600"><c:out value="${keyword}"/></span>" 검색 결과
