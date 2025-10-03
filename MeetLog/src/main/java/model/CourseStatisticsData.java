@@ -1,9 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.List;
 
 // 전체 통계 데이터를 담는 최상위 객체
-public class CourseStatisticsData {
+public class CourseStatisticsData implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int totalCourses;
     private int activeCourses;
     private long totalReservations;

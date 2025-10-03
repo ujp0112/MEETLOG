@@ -25,23 +25,7 @@
 		<url-pattern>/js/*</url-pattern>
 	</servlet-mapping>
 
-	<filter>
-		<filter-name>EncodingFilter</filter-name>
-		<filter-class>filter.EncodingFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>EncodingFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-
-	<filter>
-		<filter-name>AdminAuthenticationFilter</filter-name>
-		<filter-class>filter.AdminAuthenticationFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>AdminAuthenticationFilter</filter-name>
-		<url-pattern>/admin/*</url-pattern>
-	</filter-mapping>
+	<!-- EncodingFilter와 AdminAuthenticationFilter는 @WebFilter 어노테이션으로 매핑됨 -->
 
 	<servlet>
 		<servlet-name>AddMenuServlet</servlet-name>

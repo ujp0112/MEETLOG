@@ -26,10 +26,6 @@
                 <div class="flex flex-wrap items-center gap-2">
                     <a href="${pageContext.request.contextPath}/admin/support-dashboard"
                        class="${subNavActive}">지원 대시보드</a>
-                    <a href="${pageContext.request.contextPath}/admin/support-statistics"
-                       class="${subNavBase}">지원 통계</a>
-                    <a href="${pageContext.request.contextPath}/admin/faq-management"
-                       class="${subNavBase}">FAQ 관리</a>
                 </div>
             </div>
 

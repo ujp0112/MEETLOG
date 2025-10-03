@@ -25,6 +25,14 @@ public class InquiryManagementServlet extends HttpServlet {
                 return;
             }
 
+            String action = request.getParameter("action");
+
+            // 상세보기 API
+            if ("detail".equals(action)) {
+                handleGetInquiryDetail(request, response);
+                return;
+            }
+
             // DB에서 모든 문의 조회
             List<Inquiry> inquiries = inquiryService.getAllInquiries();
             int totalInquiries = inquiryService.getTotalInquiryCount();
@@ -46,134 +54,160 @@ public class InquiryManagementServlet extends HttpServlet {
         }
     }
 
+    private void handleGetInquiryDetail(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+
+        try {
+            String idStr = request.getParameter("id");
+            if (idStr == null) {
+                out.print("{\"success\": false, \"message\": \"문의 ID가 필요합니다.\"}");
+                return;
+            }
+
+            int id = Integer.parseInt(idStr);
+            Inquiry inquiry = inquiryService.getInquiryById(id);
+
+            if (inquiry == null) {
+                out.print("{\"success\": false, \"message\": \"문의를 찾을 수 없습니다.\"}");
+                return;
+            }
+
+            // JSON 응답 생성
+            StringBuilder json = new StringBuilder();
+            json.append("{");
+            json.append("\"inquiryId\": ").append(inquiry.getInquiryId()).append(",");
+            json.append("\"userName\": \"").append(escapeJson(inquiry.getUserName())).append("\",");
+            json.append("\"subject\": \"").append(escapeJson(inquiry.getSubject())).append("\",");
+            json.append("\"content\": \"").append(escapeJson(inquiry.getContent())).append("\",");
+            json.append("\"status\": \"").append(inquiry.getStatus()).append("\",");
+            if (inquiry.getReply() != null) {
+                json.append("\"reply\": \"").append(escapeJson(inquiry.getReply())).append("\",");
+            } else {
+                json.append("\"reply\": null,");
+            }
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            json.append("\"createdAt\": \"").append(sdf.format(inquiry.getCreatedAt())).append("\"");
+            json.append("}");
+
+            out.print(json.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            out.print("{\"success\": false, \"message\": \"문의 조회 중 오류가 발생했습니다.\"}");
+        }
+    }
+
+    private String escapeJson(String str) {
+        if (str == null) return "";
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             if (AdminSessionUtils.getAdminUser(request) == null) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "관리자 권한이 필요합니다.");
+                response.sendRedirect(request.getContextPath() + "/admin/login");
                 return;
             }
 
             String action = request.getParameter("action");
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
 
             if (action == null || action.trim().isEmpty()) {
-                out.print("{\"success\": false, \"message\": \"요청 작업이 지정되지 않았습니다.\"}");
+                request.setAttribute("errorMessage", "요청 작업이 지정되지 않았습니다.");
+                doGet(request, response);
                 return;
             }
+
+            boolean success = false;
+            String message = "";
 
             switch (action) {
                 case "reply":
-                    handleReplyInquiry(request, out);
+                    success = handleReplyInquiryForm(request);
+                    message = success ? "답변이 성공적으로 등록되었습니다." : "답변 등록에 실패했습니다.";
                     break;
                 case "updateStatus":
-                    handleUpdateStatus(request, out);
+                    success = handleUpdateStatusForm(request);
+                    message = success ? "상태가 성공적으로 변경되었습니다." : "상태 변경에 실패했습니다.";
                     break;
                 case "delete":
-                    handleDeleteInquiry(request, out);
+                    success = handleDeleteInquiryForm(request);
+                    message = success ? "문의가 성공적으로 삭제되었습니다." : "문의 삭제에 실패했습니다.";
                     break;
                 default:
-                    out.print("{\"success\": false, \"message\": \"잘못된 요청입니다.\"}");
+                    message = "잘못된 요청입니다.";
             }
+
+            if (success) {
+                request.setAttribute("successMessage", message);
+            } else {
+                request.setAttribute("errorMessage", message);
+            }
+
+            // 목록 페이지로 리다이렉트
+            response.sendRedirect(request.getContextPath() + "/admin/inquiry-management");
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            PrintWriter out = response.getWriter();
-            out.print("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+            request.setAttribute("errorMessage", "서버 오류가 발생했습니다.");
+            doGet(request, response);
         }
     }
 
-    private void handleReplyInquiry(HttpServletRequest request, PrintWriter out) throws IOException {
+    private boolean handleReplyInquiryForm(HttpServletRequest request) {
         try {
-            String idStr = request.getParameter("id");
+            String idStr = request.getParameter("inquiryId");
             String reply = request.getParameter("reply");
 
             if (idStr == null || reply == null || reply.trim().isEmpty()) {
-                out.print("{\"success\": false, \"message\": \"답변 내용을 입력해주세요.\"}");
-                return;
+                return false;
             }
 
-            int id;
-            try {
-                id = Integer.parseInt(idStr.trim());
-            } catch (NumberFormatException e) {
-                out.print("{\"success\": false, \"message\": \"유효하지 않은 문의 ID입니다.\"}");
-                return;
-            }
-
-            boolean success = inquiryService.replyToInquiry(id, reply.trim(), "RESOLVED");
-            if (success) {
-                out.print("{\"success\": true, \"message\": \"답변이 성공적으로 등록되었습니다.\"}");
-            } else {
-                out.print("{\"success\": false, \"message\": \"답변 등록에 실패했습니다.\"}");
-            }
+            int id = Integer.parseInt(idStr.trim());
+            return inquiryService.replyToInquiry(id, reply.trim(), "RESOLVED");
         } catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"success\": false, \"message\": \"답변 등록 중 오류가 발생했습니다.\"}");
+            return false;
         }
     }
 
-    private void handleUpdateStatus(HttpServletRequest request, PrintWriter out) throws IOException {
+    private boolean handleUpdateStatusForm(HttpServletRequest request) {
         try {
             String idStr = request.getParameter("id");
             String status = request.getParameter("status");
 
-            if (idStr == null || status == null || status.trim().isEmpty()) {
-                out.print("{\"success\": false, \"message\": \"필수 파라미터가 누락되었습니다.\"}");
-                return;
+            if (idStr == null || status == null) {
+                return false;
             }
 
-            int id;
-            try {
-                id = Integer.parseInt(idStr.trim());
-            } catch (NumberFormatException e) {
-                out.print("{\"success\": false, \"message\": \"유효하지 않은 문의 ID입니다.\"}");
-                return;
-            }
-
-            boolean success = inquiryService.updateInquiryStatus(id, status.trim());
-            if (success) {
-                out.print("{\"success\": true, \"message\": \"상태가 성공적으로 변경되었습니다.\"}");
-            } else {
-                out.print("{\"success\": false, \"message\": \"상태 변경에 실패했습니다.\"}");
-            }
+            int id = Integer.parseInt(idStr.trim());
+            return inquiryService.updateInquiryStatus(id, status.trim());
         } catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"success\": false, \"message\": \"상태 변경 중 오류가 발생했습니다.\"}");
+            return false;
         }
     }
 
-    private void handleDeleteInquiry(HttpServletRequest request, PrintWriter out) throws IOException {
+    private boolean handleDeleteInquiryForm(HttpServletRequest request) {
         try {
             String idStr = request.getParameter("id");
-
-            if (idStr == null || idStr.trim().isEmpty()) {
-                out.print("{\"success\": false, \"message\": \"문의 ID가 필요합니다.\"}");
-                return;
+            if (idStr == null) {
+                return false;
             }
 
-            int id;
-            try {
-                id = Integer.parseInt(idStr.trim());
-            } catch (NumberFormatException e) {
-                out.print("{\"success\": false, \"message\": \"유효하지 않은 문의 ID입니다.\"}");
-                return;
-            }
-
-            boolean success = inquiryService.deleteInquiry(id);
-
-            if (success) {
-                out.print("{\"success\": true, \"message\": \"문의가 성공적으로 삭제되었습니다.\"}");
-            } else {
-                out.print("{\"success\": false, \"message\": \"문의 삭제에 실패했습니다.\"}");
-            }
+            int id = Integer.parseInt(idStr.trim());
+            return inquiryService.deleteInquiry(id);
         } catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"success\": false, \"message\": \"문의 삭제 중 오류가 발생했습니다.\"}");
+            return false;
         }
     }
+
 }

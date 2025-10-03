@@ -24,6 +24,15 @@ public class AdminCourseReservation {
 		this.id = id;
 	}
 
+	// Alias for JSP compatibility
+	public int getReservationId() {
+		return id;
+	}
+
+	public void setReservationId(int reservationId) {
+		this.id = reservationId;
+	}
+
 	public String getCourseTitle() {
 		return courseTitle;
 	}

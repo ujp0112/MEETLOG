@@ -38,7 +38,7 @@ public class CourseStatisticsServlet extends HttpServlet {
             CourseStatisticsData statisticsData = statisticsService.getCourseStatistics();
             request.setAttribute("statisticsData", statisticsData);
             
-            request.getRequestDispatcher("/WEB-INF/views/admin/course-statistics.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/admin-course-statistics.jsp").forward(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();

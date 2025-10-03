@@ -34,7 +34,7 @@ public class SupportStatisticsServlet extends HttpServlet {
             SupportStatisticsData statisticsData = createSupportStatisticsData();
             request.setAttribute("statisticsData", statisticsData);
             
-            request.getRequestDispatcher("/WEB-INF/views/admin-support-statistics.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/admin-support-dashboard.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "고객 지원 통계를 불러오는 중 오류가 발생했습니다.");

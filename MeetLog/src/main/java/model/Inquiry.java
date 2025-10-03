@@ -30,6 +30,15 @@ public class Inquiry {
         this.id = id;
     }
 
+    // Alias getter for JSP compatibility
+    public int getInquiryId() {
+        return id;
+    }
+
+    public void setInquiryId(int inquiryId) {
+        this.id = inquiryId;
+    }
+
     public String getUserName() {
         return userName;
     }

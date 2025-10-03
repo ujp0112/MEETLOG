@@ -1,7 +1,11 @@
 package model;
 
+import java.io.Serializable;
+
 // 인기 코스 TOP 5 정보를 담는 객체
-public class PopularCourse {
+public class PopularCourse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String title;
     private long reservationCount;
     private long revenue;
