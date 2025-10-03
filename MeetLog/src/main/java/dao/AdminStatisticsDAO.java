@@ -61,6 +61,69 @@ public class AdminStatisticsDAO {
     }
 
     // ================================================
+    // Statistics Dashboard Methods
+    // ================================================
+
+    public int getTotalUserCount() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getTotalUserCount");
+        }
+    }
+
+    public int getTotalRestaurantCount() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getTotalRestaurantCount");
+        }
+    }
+
+    public int getTotalReservationCount() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getTotalReservationCount");
+        }
+    }
+
+    public int getTotalReviewCount() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getTotalReviewCount");
+        }
+    }
+
+    public double getAverageRestaurantRating() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Double result = session.selectOne(MAPPER + ".getAverageRestaurantRating");
+            return result != null ? result : 0.0;
+        }
+    }
+
+    public double getUserGrowthRate() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Double result = session.selectOne(MAPPER + ".getUserGrowthRate");
+            return result != null ? result : 0.0;
+        }
+    }
+
+    public double getRestaurantGrowthRate() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Double result = session.selectOne(MAPPER + ".getRestaurantGrowthRate");
+            return result != null ? result : 0.0;
+        }
+    }
+
+    public double getReservationGrowthRate() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Double result = session.selectOne(MAPPER + ".getReservationGrowthRate");
+            return result != null ? result : 0.0;
+        }
+    }
+
+    public double getRevenueGrowthRate() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Double result = session.selectOne(MAPPER + ".getRevenueGrowthRate");
+            return result != null ? result : 0.0;
+        }
+    }
+
+    // ================================================
     // Monthly Statistics Methods
     // ================================================
 
@@ -155,6 +218,48 @@ public class AdminStatisticsDAO {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             Double result = session.selectOne(MAPPER + ".getTotalBranchRevenue", yearMonth);
             return result != null ? result : 0.0;
+        }
+    }
+
+    // 회사별 지점 통계
+    public int getTotalBranchCountByCompany(int companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getTotalBranchCountByCompany", companyId);
+        }
+    }
+
+    public int getActiveBranchCountByCompany(int companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(MAPPER + ".getActiveBranchCountByCompany", companyId);
+        }
+    }
+
+    public int getTotalEmployeeCountByCompany(String yearMonth, int companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("yearMonth", yearMonth);
+            params.put("companyId", companyId);
+            Integer result = session.selectOne(MAPPER + ".getTotalEmployeeCountByCompany", params);
+            return result != null ? result : 0;
+        }
+    }
+
+    public double getTotalBranchRevenueByCompany(String yearMonth, int companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("yearMonth", yearMonth);
+            params.put("companyId", companyId);
+            Double result = session.selectOne(MAPPER + ".getTotalBranchRevenueByCompany", params);
+            return result != null ? result : 0.0;
+        }
+    }
+
+    public List<BranchPerformance> getBranchPerformanceByCompany(String yearMonth, int companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("yearMonth", yearMonth);
+            params.put("companyId", companyId);
+            return session.selectList(MAPPER + ".getBranchPerformanceByCompany", params);
         }
     }
 }

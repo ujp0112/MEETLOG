@@ -18,11 +18,91 @@
         <div class="px-4 py-6 sm:px-0">
             <h2 class="text-2xl font-bold text-gray-900 mb-6">신고 관리</h2>
 
-            <c:if test="${not empty successMessage}">
+            <c:if test="${not empty sessionScope.successMessage}">
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    ${successMessage}
+                    ${sessionScope.successMessage}
                 </div>
+                <c:remove var="successMessage" scope="session"/>
             </c:if>
+
+            <!-- 통계 카드 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">전체 신고</p>
+                            <p class="text-2xl font-bold text-gray-900">${statistics.total}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">대기 중</p>
+                            <p class="text-2xl font-bold text-gray-900">${statistics.pending}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">처리 완료</p>
+                            <p class="text-2xl font-bold text-gray-900">${statistics.processed}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gray-500 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-500">기각됨</p>
+                            <p class="text-2xl font-bold text-gray-900">${statistics.dismissed}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상태별 탭 -->
+            <div class="mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <a href="?status=" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${empty currentStatus ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">
+                            전체 (${statistics.total})
+                        </a>
+                        <a href="?status=PENDING" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${currentStatus == 'PENDING' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">
+                            대기 중 (${statistics.pending})
+                        </a>
+                        <a href="?status=PROCESSED" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${currentStatus == 'PROCESSED' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">
+                            처리 완료 (${statistics.processed})
+                        </a>
+                        <a href="?status=DISMISSED" class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${currentStatus == 'DISMISSED' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">
+                            기각됨 (${statistics.dismissed})
+                        </a>
+                    </nav>
+                </div>
+            </div>
 
             <div class="bg-white shadow overflow-hidden sm:rounded-lg">
                 <div class="px-4 py-5 sm:px-6">
@@ -39,41 +119,80 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">신고 대상</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">사유</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-                                <th class="px-6 py-3"></th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">관리</th>
                             </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                            <c:forEach var="report" items="${reports}">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">#${report.id}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">${report.reporterName}</div>
-                                        <div class="text-sm text-gray-500">${report.createdAt}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${report.reportedContent}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${report.reason}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <c:choose>
-                                            <c:when test="${report.status == 'PENDING'}">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">대기</span>
-                                            </c:when>
-                                            <c:when test="${report.status == 'PROCESSED'}">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">조치 완료</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">기타</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <form method="post" class="inline-flex space-x-2">
-                                            <input type="hidden" name="reportId" value="${report.id}" />
-                                            <button type="submit" name="action" value="process" class="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">조치 완료</button>
-                                            <button type="submit" name="action" value="dismiss" class="px-3 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300">기각</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </c:forEach>
+                            <c:choose>
+                                <c:when test="${empty reports}">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+                                            신고 내역이 없습니다.
+                                        </td>
+                                    </tr>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="report" items="${reports}">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">#${report.reportId}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">${report.reporterNickname}</div>
+                                                <div class="text-sm text-gray-500">${report.createdAt}</div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-900">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                        ${report.reportedType}
+                                                    </span>
+                                                    <c:if test="${not empty report.reportedUserNickname}">
+                                                        <span class="ml-2">${report.reportedUserNickname}</span>
+                                                    </c:if>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm text-gray-700 max-w-xs truncate">${report.reason}</div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <c:choose>
+                                                    <c:when test="${report.status == 'PENDING'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">대기</span>
+                                                    </c:when>
+                                                    <c:when test="${report.status == 'PROCESSED'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">조치 완료</span>
+                                                    </c:when>
+                                                    <c:when test="${report.status == 'DISMISSED'}">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">기각됨</span>
+                                                    </c:when>
+                                                </c:choose>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <c:if test="${report.status == 'PENDING'}">
+                                                    <form method="post" class="inline-flex space-x-2">
+                                                        <input type="hidden" name="reportId" value="${report.reportId}" />
+                                                        <button type="submit" name="action" value="process"
+                                                                onclick="return confirm('이 신고를 처리 완료로 변경하시겠습니까?')"
+                                                                class="px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
+                                                            조치 완료
+                                                        </button>
+                                                        <button type="submit" name="action" value="dismiss"
+                                                                onclick="return confirm('이 신고를 기각하시겠습니까?')"
+                                                                class="px-3 py-1.5 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300">
+                                                            기각
+                                                        </button>
+                                                    </form>
+                                                </c:if>
+                                                <c:if test="${report.status != 'PENDING'}">
+                                                    <span class="text-xs text-gray-500">
+                                                        <c:if test="${not empty report.processedByNickname}">
+                                                            처리자: ${report.processedByNickname}
+                                                        </c:if>
+                                                    </span>
+                                                </c:if>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
                             </tbody>
                         </table>
                     </div>

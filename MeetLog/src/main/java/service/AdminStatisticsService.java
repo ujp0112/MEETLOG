@@ -3,6 +3,7 @@ package service;
 import dao.AdminStatisticsDAO;
 import dto.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AdminStatisticsService {
@@ -47,6 +48,48 @@ public class AdminStatisticsService {
             }
         }
         data.setSatisfactionStats(satisfactionStats);
+
+        return data;
+    }
+
+    /**
+     * Statistics Dashboard 데이터 조회
+     */
+    public StatisticsDashboardData getStatisticsDashboardData() {
+        StatisticsDashboardData data = new StatisticsDashboardData();
+
+        // 기본 통계
+        data.setTotalUsers(dao.getTotalUserCount());
+        data.setTotalRestaurants(dao.getTotalRestaurantCount());
+        data.setTotalReservations(dao.getTotalReservationCount());
+        data.setTotalReviews(dao.getTotalReviewCount());
+        data.setAverageRating(Math.round(dao.getAverageRestaurantRating() * 10.0) / 10.0);
+
+        // 최근 월 통계에서 매출과 지점 정보
+        MonthlyStatistics latest = dao.getLatestMonthlyStatistics();
+        if (latest != null && latest.getTotalRevenue() != null) {
+            data.setTotalRevenue(latest.getTotalRevenue().doubleValue());
+        }
+
+        // 지점 및 직원 수
+        data.setTotalBranches(dao.getTotalBranchCount());
+        String currentMonth = getCurrentYearMonth();
+        data.setTotalEmployees(dao.getTotalEmployeeCount(currentMonth));
+
+        // 성장률
+        data.setUserGrowthRate(dao.getUserGrowthRate());
+        data.setRestaurantGrowthRate(dao.getRestaurantGrowthRate());
+        data.setReservationGrowthRate(dao.getReservationGrowthRate());
+        data.setRevenueGrowthRate(dao.getRevenueGrowthRate());
+
+        // 카테고리별 통계 (TOP 5)
+        data.setPopularCategories(dao.getCategoryStatistics(currentMonth, 5));
+
+        // 월별 성장 추이 (최근 4개월)
+        data.setMonthlyGrowths(dao.getMonthlyStatistics(4));
+
+        // 지역별 분포 (TOP 5)
+        data.setRegionalDistributions(dao.getRegionalStatistics(currentMonth, 5));
 
         return data;
     }
@@ -108,6 +151,74 @@ public class AdminStatisticsService {
      */
     public List<RestaurantPopularity> getTopRestaurantsThisWeek(int limit) {
         return dao.getTopRestaurantsThisWeek(limit);
+    }
+
+    /**
+     * Branch Statistics Dashboard 데이터 조회 (전체)
+     */
+    public BranchStatisticsData getBranchStatisticsData() {
+        return getBranchStatisticsData(null);
+    }
+
+    /**
+     * Branch Statistics Dashboard 데이터 조회 (회사별)
+     */
+    public BranchStatisticsData getBranchStatisticsData(Integer companyId) {
+        BranchStatisticsData data = new BranchStatisticsData();
+
+        String currentMonth = getCurrentYearMonth();
+
+        // 기본 통계
+        if (companyId != null) {
+            data.setTotalBranches(dao.getTotalBranchCountByCompany(companyId));
+            data.setActiveBranches(dao.getActiveBranchCountByCompany(companyId));
+            data.setTotalEmployees(dao.getTotalEmployeeCountByCompany(currentMonth, companyId));
+            data.setTotalRevenue(dao.getTotalBranchRevenueByCompany(currentMonth, companyId));
+        } else {
+            data.setTotalBranches(dao.getTotalBranchCount());
+            data.setActiveBranches(dao.getTotalBranchCount());
+            data.setTotalEmployees(dao.getTotalEmployeeCount(currentMonth));
+            data.setTotalRevenue(dao.getTotalBranchRevenue(currentMonth));
+        }
+
+        // 평균 매출 계산
+        if (data.getTotalBranches() > 0) {
+            data.setAverageRevenuePerBranch(data.getTotalRevenue() / data.getTotalBranches());
+        }
+
+        // 이번 달 지점별 성과
+        List<BranchPerformance> branchPerformances;
+        if (companyId != null) {
+            branchPerformances = dao.getBranchPerformanceByCompany(currentMonth, companyId);
+        } else {
+            branchPerformances = dao.getBranchPerformance(currentMonth);
+        }
+        data.setBranchPerformances(branchPerformances);
+
+        // 최근 3개월 월별 데이터
+        List<BranchMonthlyData> monthlyData = new ArrayList<>();
+        List<MonthlyStatistics> recentMonths = dao.getMonthlyStatistics(3);
+
+        for (MonthlyStatistics month : recentMonths) {
+            String yearMonth = month.getYearMonth();
+            List<BranchPerformance> branches;
+            if (companyId != null) {
+                branches = dao.getBranchPerformanceByCompany(yearMonth, companyId);
+            } else {
+                branches = dao.getBranchPerformance(yearMonth);
+            }
+
+            double totalRevenue = branches.stream()
+                    .mapToDouble(b -> b.getRevenue() != null ? b.getRevenue().doubleValue() : 0.0)
+                    .sum();
+
+            BranchMonthlyData monthData = new BranchMonthlyData(yearMonth, totalRevenue);
+            monthData.setBranches(branches);
+            monthlyData.add(monthData);
+        }
+        data.setMonthlyData(monthlyData);
+
+        return data;
     }
 
     /**

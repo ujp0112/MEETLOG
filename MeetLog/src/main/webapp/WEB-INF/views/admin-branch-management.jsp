@@ -23,7 +23,7 @@
                     <div class="flex flex-col gap-4 mb-6">
                         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                             <h2 class="text-2xl font-bold text-gray-900">지점 관리</h2>
-                            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
+                            <button onclick="openAddModal()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition">
                                 새 지점 추가
                             </button>
                         </div>
@@ -32,6 +32,24 @@
                                class="${subNavActive}">지점 목록</a>
                             <a href="${pageContext.request.contextPath}/admin/branch-statistics"
                                class="${subNavBase}">지점 통계</a>
+                        </div>
+                    </div>
+
+                    <!-- 회사 검색 필터 -->
+                    <div class="bg-white shadow rounded-lg p-4 mb-6">
+                        <div class="flex items-center gap-4">
+                            <label class="text-sm font-medium text-gray-700">회사 선택:</label>
+                            <select id="companyFilter" onchange="filterByCompany()" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">전체 회사</option>
+                                <c:forEach var="company" items="${companies}">
+                                    <option value="${company.id}" ${selectedCompanyId == company.id ? 'selected' : ''}>
+                                        ${company.name}
+                                    </option>
+                                </c:forEach>
+                            </select>
+                            <c:if test="${not empty selectedCompanyId}">
+                                <span class="text-sm text-gray-500">총 ${branches.size()}개 지점</span>
+                            </c:if>
                         </div>
                     </div>
                     
@@ -59,30 +77,32 @@
                                                 </div>
                                                 <div class="ml-4">
                                                     <div class="flex items-center">
-                                                        <p class="text-lg font-medium text-gray-900">${branch.name}</p>
-                                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${branch.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : branch.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
-                                                            ${branch.status == 'ACTIVE' ? '운영중' : branch.status == 'PENDING' ? '준비중' : '휴업'}
+                                                        <p class="text-lg font-medium text-gray-900">${branch.branchName}</p>
+                                                        <span class="ml-2 text-xs text-gray-500">(${branch.companyName})</span>
+                                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${branch.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                                            ${branch.status == 'ACTIVE' ? '운영중' : '휴업'}
                                                         </span>
                                                     </div>
                                                     <p class="text-sm text-gray-500">${branch.address}</p>
                                                     <div class="flex items-center mt-1">
                                                         <span class="text-sm text-gray-500">전화: ${branch.phone}</span>
-                                                        <span class="ml-4 text-sm text-gray-500">지점장: ${branch.manager}</span>
+                                                        <span class="ml-4 text-sm text-gray-500">지점장: ${branch.managerName}</span>
                                                         <span class="ml-4 text-sm text-gray-500">직원: ${branch.employeeCount}명</span>
-                                                        <span class="ml-4 text-sm text-gray-500">월매출: 
+                                                        <span class="ml-4 text-sm text-gray-500">월매출:
                                                             <fmt:formatNumber value="${branch.monthlyRevenue}" type="currency" currencySymbol="₩"/>
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="flex space-x-2">
-                                                <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                                <button onclick="openEditModal(${branch.branchId}, '${branch.branchName}', '${branch.address}', '${branch.phone}', '${branch.managerName}')" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     수정
                                                 </button>
-                                                <c:if test="${branch.status == 'PENDING'}">
+                                                <c:if test="${branch.status == 'INACTIVE'}">
                                                     <form method="post" class="inline">
                                                         <input type="hidden" name="action" value="activate">
-                                                        <input type="hidden" name="branchId" value="${branch.id}">
+                                                        <input type="hidden" name="branchId" value="${branch.branchId}">
+                                                        <input type="hidden" name="companyId" value="${selectedCompanyId}">
                                                         <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
                                                             운영 시작
                                                         </button>
@@ -91,17 +111,18 @@
                                                 <c:if test="${branch.status == 'ACTIVE'}">
                                                     <form method="post" class="inline">
                                                         <input type="hidden" name="action" value="deactivate">
-                                                        <input type="hidden" name="branchId" value="${branch.id}">
+                                                        <input type="hidden" name="branchId" value="${branch.branchId}">
+                                                        <input type="hidden" name="companyId" value="${selectedCompanyId}">
                                                         <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700">
                                                             휴업
                                                         </button>
                                                     </form>
                                                 </c:if>
-                                                <form method="post" class="inline">
+                                                <form method="post" class="inline" onsubmit="return confirm('정말로 이 지점을 삭제하시겠습니까?')">
                                                     <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="branchId" value="${branch.id}">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                                                            onclick="return confirm('정말로 이 지점을 삭제하시겠습니까?')">
+                                                    <input type="hidden" name="branchId" value="${branch.branchId}">
+                                                    <input type="hidden" name="companyId" value="${selectedCompanyId}">
+                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                         삭제
                                                     </button>
                                                 </form>
@@ -119,6 +140,140 @@
 </div>
 
 <jsp:include page="/WEB-INF/views/common/loading.jsp" />
+
+<!-- 지점 추가 모달 -->
+<div id="addModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">새 지점 추가</h3>
+            <form method="post" action="${pageContext.request.contextPath}/admin/branch-management">
+                <input type="hidden" name="action" value="add">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">회사</label>
+                    <select name="companyId" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">회사 선택</option>
+                        <c:forEach var="company" items="${companies}">
+                            <option value="${company.id}" ${selectedCompanyId == company.id ? 'selected' : ''}>${company.name}</option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">지점명</label>
+                    <input type="text" name="branchName" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">주소</label>
+                    <input type="text" name="address" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                    <input type="text" name="phone" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">지점장명</label>
+                    <input type="text" name="managerName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex justify-end space-x-2 mt-5">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        취소
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        추가
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 지점 수정 모달 -->
+<div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">지점 수정</h3>
+            <form method="post" action="${pageContext.request.contextPath}/admin/branch-management">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="branchId" id="editBranchId">
+                <input type="hidden" name="companyId" value="${selectedCompanyId}">
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">지점명</label>
+                    <input type="text" name="branchName" id="editBranchName" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">주소</label>
+                    <input type="text" name="address" id="editAddress" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">전화번호</label>
+                    <input type="text" name="phone" id="editPhone" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">지점장명</label>
+                    <input type="text" name="managerName" id="editManagerName" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex justify-end space-x-2 mt-5">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        취소
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        수정
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterByCompany() {
+    const companyId = document.getElementById('companyFilter').value;
+    const url = '${pageContext.request.contextPath}/admin/branch-management' + (companyId ? '?companyId=' + companyId : '');
+    window.location.href = url;
+}
+
+function openAddModal() {
+    document.getElementById('addModal').classList.remove('hidden');
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').classList.add('hidden');
+}
+
+function openEditModal(branchId, branchName, address, phone, managerName) {
+    document.getElementById('editBranchId').value = branchId;
+    document.getElementById('editBranchName').value = branchName;
+    document.getElementById('editAddress').value = address;
+    document.getElementById('editPhone').value = phone;
+    document.getElementById('editManagerName').value = managerName || '';
+    document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.add('hidden');
+}
+
+// 모달 외부 클릭 시 닫기
+window.onclick = function(event) {
+    const addModal = document.getElementById('addModal');
+    const editModal = document.getElementById('editModal');
+    if (event.target == addModal) {
+        closeAddModal();
+    } else if (event.target == editModal) {
+        closeEditModal();
+    }
+}
+</script>
 
 </body>
 </html>

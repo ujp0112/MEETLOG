@@ -3,6 +3,7 @@ package controller;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import model.AdminCourse;
 import model.User;
 import service.CourseManagementService; // Service 계층 사용
 
+@WebServlet("/admin/course-management")
 public class CourseManagementServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     

@@ -1,191 +1,63 @@
 package controller;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.ArrayList;
 
+import service.AdminStatisticsService;
+import service.BranchManagementService;
+import dto.BranchStatisticsData;
 import util.AdminSessionUtils;
 
+import java.util.List;
+import java.util.Map;
 
+@WebServlet("/admin/branch-statistics")
 public class BranchStatisticsServlet extends HttpServlet {
-    
+    private static final long serialVersionUID = 1L;
+
+    private final AdminStatisticsService statisticsService = new AdminStatisticsService();
+    private final BranchManagementService branchService = new BranchManagementService();
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try {
             if (AdminSessionUtils.requireAdmin(request, response) == null) {
                 return;
             }
-            
-            // 지점 통계 데이터
-            BranchStatisticsData statisticsData = createBranchStatisticsData();
+
+            System.out.println("DEBUG: BranchStatisticsServlet - DB 연동 버전 실행 중");
+
+            // 회사 목록 조회
+            List<Map<String, Object>> companies = branchService.getAllCompanies();
+            request.setAttribute("companies", companies);
+
+            // 선택된 회사 ID
+            String companyIdParam = request.getParameter("companyId");
+            Integer selectedCompanyId = null;
+
+            if (companyIdParam != null && !companyIdParam.isEmpty()) {
+                selectedCompanyId = Integer.parseInt(companyIdParam);
+                request.setAttribute("selectedCompanyId", selectedCompanyId);
+            }
+
+            // DB에서 지점 통계 데이터 조회 (회사 필터 적용)
+            BranchStatisticsData statisticsData = statisticsService.getBranchStatisticsData(selectedCompanyId);
+
+            System.out.println("DEBUG: statisticsData 생성 완료 - totalBranches=" + statisticsData.getTotalBranches());
+
             request.setAttribute("statisticsData", statisticsData);
-            
+
             request.getRequestDispatcher("/WEB-INF/views/admin-branch-statistics.jsp").forward(request, response);
         } catch (Exception e) {
+            System.err.println("ERROR: Branch Statistics 오류 발생");
             e.printStackTrace();
             request.setAttribute("errorMessage", "지점 통계를 불러오는 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
         }
-    }
-    
-    private BranchStatisticsData createBranchStatisticsData() {
-        BranchStatisticsData data = new BranchStatisticsData();
-        
-        // 전체 통계
-        data.setTotalBranches(3);
-        data.setActiveBranches(2);
-        data.setTotalEmployees(27);
-        data.setTotalRevenue(85000000);
-        data.setAverageRevenuePerBranch(42500000);
-        
-        // 지점별 성과
-        List<BranchPerformance> branchPerformances = new ArrayList<>();
-        
-        BranchPerformance branch1 = new BranchPerformance();
-        branch1.setBranchName("강남점");
-        branch1.setRevenue(50000000);
-        branch1.setMonthlyRevenue(50000000.0);
-        branch1.setEmployeeCount(15);
-        branch1.setCustomerCount(1200);
-        branch1.setReservationCount(350);
-        branch1.setRating(4.5);
-        branchPerformances.add(branch1);
-
-        BranchPerformance branch2 = new BranchPerformance();
-        branch2.setBranchName("홍대점");
-        branch2.setRevenue(35000000);
-        branch2.setMonthlyRevenue(35000000.0);
-        branch2.setEmployeeCount(12);
-        branch2.setCustomerCount(800);
-        branch2.setReservationCount(220);
-        branch2.setRating(4.2);
-        branchPerformances.add(branch2);
-        
-        data.setBranchPerformances(branchPerformances);
-
-        // 월별 매출 데이터
-        List<MonthlyRevenue> monthlyRevenues = new ArrayList<>();
-
-        MonthlyRevenue month1 = new MonthlyRevenue();
-        month1.setMonth("2025-07");
-        month1.setRevenue(70000000.0);
-        List<BranchRevenue> month1Branches = new ArrayList<>();
-        month1Branches.add(new BranchRevenue("강남점", 42000000.0));
-        month1Branches.add(new BranchRevenue("홍대점", 28000000.0));
-        month1.setBranchRevenues(month1Branches);
-        monthlyRevenues.add(month1);
-
-        MonthlyRevenue month2 = new MonthlyRevenue();
-        month2.setMonth("2025-08");
-        month2.setRevenue(78000000.0);
-        List<BranchRevenue> month2Branches = new ArrayList<>();
-        month2Branches.add(new BranchRevenue("강남점", 47000000.0));
-        month2Branches.add(new BranchRevenue("홍대점", 31000000.0));
-        month2.setBranchRevenues(month2Branches);
-        monthlyRevenues.add(month2);
-
-        MonthlyRevenue month3 = new MonthlyRevenue();
-        month3.setMonth("2025-09");
-        month3.setRevenue(85000000.0);
-        List<BranchRevenue> month3Branches = new ArrayList<>();
-        month3Branches.add(new BranchRevenue("강남점", 50000000.0));
-        month3Branches.add(new BranchRevenue("홍대점", 35000000.0));
-        month3.setBranchRevenues(month3Branches);
-        monthlyRevenues.add(month3);
-
-        data.setMonthlyRevenues(monthlyRevenues);
-
-        return data;
-    }
-    
-    // 지점 통계 데이터 클래스
-    public static class BranchStatisticsData {
-        private int totalBranches;
-        private int activeBranches;
-        private int totalEmployees;
-        private int totalRevenue;
-        private int averageRevenuePerBranch;
-        private List<BranchPerformance> branchPerformances;
-        private List<MonthlyRevenue> monthlyRevenues;
-
-        // Getters and Setters
-        public int getTotalBranches() { return totalBranches; }
-        public void setTotalBranches(int totalBranches) { this.totalBranches = totalBranches; }
-        public int getActiveBranches() { return activeBranches; }
-        public void setActiveBranches(int activeBranches) { this.activeBranches = activeBranches; }
-        public int getTotalEmployees() { return totalEmployees; }
-        public void setTotalEmployees(int totalEmployees) { this.totalEmployees = totalEmployees; }
-        public int getTotalRevenue() { return totalRevenue; }
-        public void setTotalRevenue(int totalRevenue) { this.totalRevenue = totalRevenue; }
-        public int getAverageRevenuePerBranch() { return averageRevenuePerBranch; }
-        public void setAverageRevenuePerBranch(int averageRevenuePerBranch) { this.averageRevenuePerBranch = averageRevenuePerBranch; }
-        public List<BranchPerformance> getBranchPerformances() { return branchPerformances; }
-        public void setBranchPerformances(List<BranchPerformance> branchPerformances) { this.branchPerformances = branchPerformances; }
-        public List<MonthlyRevenue> getMonthlyRevenues() { return monthlyRevenues; }
-        public void setMonthlyRevenues(List<MonthlyRevenue> monthlyRevenues) { this.monthlyRevenues = monthlyRevenues; }
-    }
-    
-    // 지점 성과 클래스
-    public static class BranchPerformance {
-        private String branchName;
-        private int revenue;
-        private double monthlyRevenue;
-        private int employeeCount;
-        private int customerCount;
-        private int reservationCount;
-        private double rating;
-
-        // Getters and Setters
-        public String getBranchName() { return branchName; }
-        public void setBranchName(String branchName) { this.branchName = branchName; }
-        public int getRevenue() { return revenue; }
-        public void setRevenue(int revenue) { this.revenue = revenue; }
-        public double getMonthlyRevenue() { return monthlyRevenue; }
-        public void setMonthlyRevenue(double monthlyRevenue) { this.monthlyRevenue = monthlyRevenue; }
-        public int getEmployeeCount() { return employeeCount; }
-        public void setEmployeeCount(int employeeCount) { this.employeeCount = employeeCount; }
-        public int getCustomerCount() { return customerCount; }
-        public void setCustomerCount(int customerCount) { this.customerCount = customerCount; }
-        public int getReservationCount() { return reservationCount; }
-        public void setReservationCount(int reservationCount) { this.reservationCount = reservationCount; }
-        public double getRating() { return rating; }
-        public void setRating(double rating) { this.rating = rating; }
-    }
-
-    // 월별 매출 클래스
-    public static class MonthlyRevenue {
-        private String month;
-        private double revenue;
-        private List<BranchRevenue> branchRevenues;
-
-        // Getters and Setters
-        public String getMonth() { return month; }
-        public void setMonth(String month) { this.month = month; }
-        public double getRevenue() { return revenue; }
-        public void setRevenue(double revenue) { this.revenue = revenue; }
-        public List<BranchRevenue> getBranchRevenues() { return branchRevenues; }
-        public void setBranchRevenues(List<BranchRevenue> branchRevenues) { this.branchRevenues = branchRevenues; }
-    }
-
-    // 지점별 매출 클래스
-    public static class BranchRevenue {
-        private String branchName;
-        private double revenue;
-
-        public BranchRevenue(String branchName, double revenue) {
-            this.branchName = branchName;
-            this.revenue = revenue;
-        }
-
-        // Getters and Setters
-        public String getBranchName() { return branchName; }
-        public void setBranchName(String branchName) { this.branchName = branchName; }
-        public double getRevenue() { return revenue; }
-        public void setRevenue(double revenue) { this.revenue = revenue; }
     }
 }

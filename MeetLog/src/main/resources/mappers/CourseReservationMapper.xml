@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.CourseReservationMapper">
+    <resultMap id="courseReservationResult" type="model.CourseReservation">
+        <id property="reservationId" column="reservation_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="courseTitle" column="course_title"/>
+        <result property="userId" column="user_id"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="participantName" column="participant_name"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="reservationDate" column="reservation_date"/>
+        <result property="reservationTime" column="reservation_time"/>
+        <result property="participantCount" column="participant_count"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectAllReservations" resultMap="courseReservationResult">
+        SELECT
+            cr.*,
+            c.title as course_title,
+            u.nickname as user_nickname
+        FROM course_reservations cr
+        LEFT JOIN courses c ON cr.course_id = c.course_id
+        LEFT JOIN users u ON cr.user_id = u.id
+        ORDER BY
+            CASE cr.status
+                WHEN 'PENDING' THEN 1
+                WHEN 'CONFIRMED' THEN 2
+                WHEN 'COMPLETED' THEN 3
+                WHEN 'CANCELLED' THEN 4
+            END,
+            cr.created_at DESC
+    </select>
+
+    <select id="selectReservationsByStatus" parameterType="string" resultMap="courseReservationResult">
+        SELECT
+            cr.*,
+            c.title as course_title,
+            u.nickname as user_nickname
+        FROM course_reservations cr
+        LEFT JOIN courses c ON cr.course_id = c.course_id
+        LEFT JOIN users u ON cr.user_id = u.id
+        WHERE cr.status = #{status}
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <select id="selectReservationsByCourse" parameterType="int" resultMap="courseReservationResult">
+        SELECT
+            cr.*,
+            c.title as course_title,
+            u.nickname as user_nickname
+        FROM course_reservations cr
+        LEFT JOIN courses c ON cr.course_id = c.course_id
+        LEFT JOIN users u ON cr.user_id = u.id
+        WHERE cr.course_id = #{courseId}
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <select id="selectReservationById" parameterType="int" resultMap="courseReservationResult">
+        SELECT
+            cr.*,
+            c.title as course_title,
+            u.nickname as user_nickname
+        FROM course_reservations cr
+        LEFT JOIN courses c ON cr.course_id = c.course_id
+        LEFT JOIN users u ON cr.user_id = u.id
+        WHERE cr.reservation_id = #{reservationId}
+    </select>
+
+    <update id="updateReservationStatus" parameterType="map">
+        UPDATE course_reservations
+        SET status = #{status}
+        WHERE reservation_id = #{reservationId}
+    </update>
+
+    <select id="getReservationStatistics" resultType="map">
+        SELECT
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = 'CONFIRMED' THEN 1 ELSE 0 END) as confirmed,
+            SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled,
+            SUM(total_price) as totalRevenue,
+            SUM(CASE WHEN status IN ('CONFIRMED', 'COMPLETED') THEN total_price ELSE 0 END) as confirmedRevenue
+        FROM course_reservations
+    </select>
+</mapper>

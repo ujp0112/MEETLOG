@@ -95,6 +95,91 @@
     </select>
 
     <!-- ================================================== -->
+    <!-- Statistics Dashboard Queries -->
+    <!-- ================================================== -->
+
+    <!-- 총 사용자 수 -->
+    <select id="getTotalUserCount" resultType="int">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 총 맛집 수 -->
+    <select id="getTotalRestaurantCount" resultType="int">
+        SELECT COUNT(*) FROM restaurants
+    </select>
+
+    <!-- 총 예약 수 -->
+    <select id="getTotalReservationCount" resultType="int">
+        SELECT COUNT(*) FROM reservations
+    </select>
+
+    <!-- 총 리뷰 수 -->
+    <select id="getTotalReviewCount" resultType="int">
+        SELECT COUNT(*) FROM reviews
+    </select>
+
+    <!-- 평균 평점 -->
+    <select id="getAverageRestaurantRating" resultType="double">
+        SELECT COALESCE(AVG(rating), 0) FROM restaurants WHERE rating IS NOT NULL
+    </select>
+
+    <!-- 사용자 성장률 계산 (전월 대비) -->
+    <select id="getUserGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_users = 0 THEN 0
+                ELSE ROUND((current_month_users - prev_month_users) * 100.0 / prev_month_users, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT new_users FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_users,
+                (SELECT new_users FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_users
+        ) growth_data
+    </select>
+
+    <!-- 맛집 성장률 계산 (전월 대비) -->
+    <select id="getRestaurantGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_restaurants = 0 THEN 0
+                ELSE ROUND((current_month_restaurants - prev_month_restaurants) * 100.0 / prev_month_restaurants, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT new_restaurants FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_restaurants,
+                (SELECT new_restaurants FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_restaurants
+        ) growth_data
+    </select>
+
+    <!-- 예약 성장률 계산 (전월 대비) -->
+    <select id="getReservationGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_reservations = 0 THEN 0
+                ELSE ROUND((current_month_reservations - prev_month_reservations) * 100.0 / prev_month_reservations, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT total_reservations FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_reservations,
+                (SELECT total_reservations FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_reservations
+        ) growth_data
+    </select>
+
+    <!-- 매출 성장률 계산 (전월 대비) -->
+    <select id="getRevenueGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_revenue = 0 THEN 0
+                ELSE ROUND((current_month_revenue - prev_month_revenue) * 100.0 / prev_month_revenue, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT total_revenue FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_revenue,
+                (SELECT total_revenue FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_revenue
+        ) growth_data
+    </select>
+
+    <!-- ================================================== -->
     <!-- Monthly Statistics Queries -->
     <!-- ================================================== -->
 
@@ -111,7 +196,7 @@
 
     <select id="getMonthlyStatistics" parameterType="int" resultMap="MonthlyStatisticsMap">
         SELECT
-            year_month,
+            `year_month`,
             total_users,
             new_users,
             total_restaurants,
@@ -119,14 +204,14 @@
             total_reservations,
             total_revenue
         FROM monthly_statistics
-        ORDER BY year_month DESC
+        ORDER BY `year_month` DESC
         LIMIT #{months}
     </select>
 
     <!-- 최근 월 통계 -->
     <select id="getLatestMonthlyStatistics" resultMap="MonthlyStatisticsMap">
         SELECT
-            year_month,
+            `year_month`,
             total_users,
             new_users,
             total_restaurants,
@@ -134,7 +219,7 @@
             total_reservations,
             total_revenue
         FROM monthly_statistics
-        ORDER BY year_month DESC
+        ORDER BY `year_month` DESC
         LIMIT 1
     </select>
 
@@ -157,7 +242,7 @@
             reservation_count,
             revenue
         FROM category_statistics
-        WHERE year_month = #{yearMonth}
+        WHERE `year_month` = #{yearMonth}
         ORDER BY revenue DESC
         <if test="limit != null">
             LIMIT #{limit}
@@ -182,7 +267,7 @@
             reservation_count,
             revenue
         FROM regional_statistics
-        WHERE year_month = #{yearMonth}
+        WHERE `year_month` = #{yearMonth}
         ORDER BY revenue DESC
         <if test="limit != null">
             LIMIT #{limit}
@@ -267,7 +352,7 @@
         SELECT
             bmp.branch_id,
             b.branch_name,
-            bmp.year_month,
+            bmp.`year_month`,
             bmp.employee_count,
             bmp.customer_count,
             bmp.reservation_count,
@@ -287,13 +372,52 @@
     <select id="getTotalEmployeeCount" parameterType="string" resultType="int">
         SELECT COALESCE(SUM(employee_count), 0)
         FROM branch_monthly_performance
-        WHERE year_month = #{yearMonth}
+        WHERE `year_month` = #{yearMonth}
     </select>
 
     <select id="getTotalBranchRevenue" parameterType="string" resultType="double">
         SELECT COALESCE(SUM(revenue), 0)
         FROM branch_monthly_performance
-        WHERE year_month = #{yearMonth}
+        WHERE `year_month` = #{yearMonth}
+    </select>
+
+    <!-- 회사별 지점 통계 -->
+    <select id="getTotalBranchCountByCompany" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM branches WHERE company_id = #{companyId}
+    </select>
+
+    <select id="getActiveBranchCountByCompany" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM branches WHERE company_id = #{companyId} AND status = 'ACTIVE'
+    </select>
+
+    <select id="getTotalEmployeeCountByCompany" parameterType="map" resultType="int">
+        SELECT COALESCE(SUM(bmp.employee_count), 0)
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+    </select>
+
+    <select id="getTotalBranchRevenueByCompany" parameterType="map" resultType="double">
+        SELECT COALESCE(SUM(bmp.revenue), 0)
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+    </select>
+
+    <select id="getBranchPerformanceByCompany" parameterType="map" resultMap="BranchPerformanceMap">
+        SELECT
+            bmp.branch_id,
+            b.branch_name,
+            bmp.`year_month`,
+            bmp.employee_count,
+            bmp.customer_count,
+            bmp.reservation_count,
+            bmp.revenue,
+            bmp.rating
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+        ORDER BY bmp.revenue DESC
     </select>
 
 </mapper>

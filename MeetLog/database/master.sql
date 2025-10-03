@@ -935,6 +935,28 @@ CREATE TABLE faqs (
     INDEX idx_faqs_order (display_order)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='자주 묻는 질문 테이블';
 
+-- 신고 관리 테이블
+CREATE TABLE reports (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,
+    reporter_id INT NOT NULL COMMENT '신고자 ID',
+    reported_type ENUM('REVIEW', 'COLUMN', 'COURSE', 'USER') NOT NULL COMMENT '신고 대상 타입',
+    reported_id INT NOT NULL COMMENT '신고 대상 ID',
+    reported_user_id INT COMMENT '피신고자 ID',
+    reason VARCHAR(500) NOT NULL COMMENT '신고 사유',
+    status ENUM('PENDING', 'PROCESSED', 'DISMISSED') DEFAULT 'PENDING' COMMENT '처리 상태',
+    admin_note TEXT COMMENT '관리자 메모',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '신고 일시',
+    processed_at TIMESTAMP NULL COMMENT '처리 일시',
+    processed_by INT COMMENT '처리자 ID',
+    FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (processed_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_reports_status (status),
+    INDEX idx_reports_type (reported_type),
+    INDEX idx_reports_reporter (reporter_id),
+    INDEX idx_reports_reported_user (reported_user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='신고 관리 테이블';
+
 -- Admin user
 INSERT INTO users (id, email, nickname, password, user_type, profile_image, follower_count, is_active) VALUES (11, 'admin@meetlog.com', 'admin', 'admin123', 'ADMIN', NULL, 0, 1);
 -- 칼럼과 맛집의 다대다(N:M) 관계를 위한 연결 테이블 생성
@@ -1400,6 +1422,16 @@ CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
 CREATE INDEX IF NOT EXISTS idx_inquiries_category ON inquiries(category);
 CREATE INDEX IF NOT EXISTS idx_inquiries_priority ON inquiries(priority);
 CREATE INDEX IF NOT EXISTS idx_inquiries_created ON inquiries(created_at DESC);
+
+-- ===================================================================
+-- 5. 샘플 데이터 삽입 (reports)
+-- ===================================================================
+INSERT INTO reports (reporter_id, reported_type, reported_id, reported_user_id, reason, status) VALUES
+(1, 'REVIEW', 1, 2, '부적절한 언어 사용 및 욕설', 'PENDING'),
+(2, 'COLUMN', 1, 3, '허위 정보 게시', 'PENDING'),
+(3, 'COURSE', 1, 4, '스팸 콘텐츠', 'PROCESSED'),
+(4, 'REVIEW', 2, 2, '광고 및 홍보', 'PENDING'),
+(1, 'USER', 5, 5, '부적절한 프로필 이미지', 'DISMISSED');
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;

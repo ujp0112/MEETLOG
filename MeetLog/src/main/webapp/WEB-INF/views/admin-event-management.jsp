@@ -20,7 +20,7 @@
             <div class="px-4 py-6 sm:px-0">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-gray-900">이벤트 관리</h2>
-                    <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    <button onclick="openAddModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                         새 이벤트 추가
                     </button>
                 </div>
@@ -58,7 +58,8 @@
                                             </div>
                                         </div>
                                         <div class="flex space-x-2">
-                                            <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                                            <button onclick="openEditModal(${event.id}, '${event.title}', '${event.summary}', '${event.content}', '${event.image}', '<fmt:formatDate value="${event.startDate}" pattern="yyyy-MM-dd"/>', '<fmt:formatDate value="${event.endDate}" pattern="yyyy-MM-dd"/>')"
+                                                    class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                 수정
                                             </button>
                                             <form method="post" class="inline">
@@ -83,6 +84,131 @@
     </div>
 
     <jsp:include page="/WEB-INF/views/common/loading.jsp" />
+
+    <!-- 추가 모달 -->
+    <div id="addModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">새 이벤트 추가</h3>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form method="post" class="space-y-4">
+                <input type="hidden" name="action" value="add">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">제목</label>
+                    <input type="text" name="title" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">요약</label>
+                    <input type="text" name="summary" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">내용</label>
+                    <textarea name="content" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">이미지 URL</label>
+                    <input type="text" name="image" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">시작일</label>
+                        <input type="date" name="startDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">종료일</label>
+                        <input type="date" name="endDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        취소
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-600">
+                        등록
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 수정 모달 -->
+    <div id="editModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-900">이벤트 수정</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form method="post" class="space-y-4">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="id" id="editId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">제목</label>
+                    <input type="text" name="title" id="editTitle" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">요약</label>
+                    <input type="text" name="summary" id="editSummary" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">내용</label>
+                    <textarea name="content" id="editContent" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">이미지 URL</label>
+                    <input type="text" name="image" id="editImage" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">시작일</label>
+                        <input type="date" name="startDate" id="editStartDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">종료일</label>
+                        <input type="date" name="endDate" id="editEndDate" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        취소
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-600">
+                        수정
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openAddModal() {
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+        function openEditModal(id, title, summary, content, image, startDate, endDate) {
+            document.getElementById('editId').value = id;
+            document.getElementById('editTitle').value = title;
+            document.getElementById('editSummary').value = summary;
+            document.getElementById('editContent').value = content || '';
+            document.getElementById('editImage').value = image || '';
+            document.getElementById('editStartDate').value = startDate;
+            document.getElementById('editEndDate').value = endDate;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+    </script>
 
 </body>
 </html>

@@ -31,6 +31,8 @@
                        class="${subNavActive}">코스 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/course-reservation"
                        class="${subNavBase}">예약 관리</a>
+                    <a href="${pageContext.request.contextPath}/admin/reservation-statistics"
+                       class="${subNavBase}">예약 통계</a>
                     <a href="${pageContext.request.contextPath}/admin/course-statistics"
                        class="${subNavBase}">코스 통계</a>
                 </div>
@@ -54,23 +56,42 @@
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center">
                                                 <div class="flex-shrink-0 h-16 w-16">
-                                                    <div class="h-16 w-16 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center">
-                                                        <span class="text-white text-lg font-bold">🚶</span>
-                                                    </div>
+                                                    <c:choose>
+                                                        <c:when test="${not empty course.previewImage}">
+                                                            <img src="${course.previewImage}" alt="${course.title}" class="h-16 w-16 rounded-lg object-cover">
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <div class="h-16 w-16 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center">
+                                                                <span class="text-white text-lg font-bold">🚶</span>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
                                                 </div>
                                                 <div class="ml-4">
-                                                    <div class="flex items-center">
+                                                    <div class="flex items-center gap-2">
                                                         <p class="text-lg font-medium text-gray-900">${course.title}</p>
-                                                        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : course.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.type == 'OFFICIAL' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
+                                                            ${course.type == 'OFFICIAL' ? '공식' : '커뮤니티'}
+                                                        </span>
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : course.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
                                                             ${course.status == 'ACTIVE' ? '진행중' : course.status == 'PENDING' ? '대기중' : '종료됨'}
                                                         </span>
                                                     </div>
-                                                    <p class="text-sm text-gray-500">${course.description}</p>
-                                                    <div class="flex items-center mt-1">
-                                                        <span class="text-sm text-gray-500">지역: ${course.area}</span>
-                                                        <span class="ml-4 text-sm text-gray-500">소요시간: ${course.duration}</span>
-                                                        <span class="ml-4 text-sm text-gray-500">가격: <fmt:formatNumber value="${course.price}" type="currency" currencySymbol="₩"/></span>
-                                                        <span class="ml-4 text-sm text-gray-500">참여자: ${course.participantCount}/${course.maxParticipants}</span>
+                                                    <p class="text-sm text-gray-500 mt-1">${course.description}</p>
+                                                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                                                        <c:if test="${not empty course.authorName}">
+                                                            <span>작성자: ${course.authorName}</span>
+                                                            <span class="mx-2">•</span>
+                                                        </c:if>
+                                                        <span>예약: ${course.reservationCount}건</span>
+                                                        <c:if test="${not empty course.area}">
+                                                            <span class="mx-2">•</span>
+                                                            <span>지역: ${course.area}</span>
+                                                        </c:if>
+                                                        <c:if test="${not empty course.duration}">
+                                                            <span class="mx-2">•</span>
+                                                            <span>소요: ${course.duration}</span>
+                                                        </c:if>
                                                     </div>
                                                 </div>
                                             </div>

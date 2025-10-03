@@ -38,7 +38,7 @@
                                     <div class="flex items-center">
                                         <span class="text-lg font-bold text-gray-900 mr-4">${status.index + 1}</span>
                                         <div>
-                                            <p class="text-sm font-medium text-gray-900">${category.name}</p>
+                                            <p class="text-sm font-medium text-gray-900">${category.categoryName}</p>
                                             <p class="text-sm text-gray-500">맛집 ${category.restaurantCount}개 | 예약 ${category.reservationCount}건</p>
                                         </div>
                                     </div>
@@ -58,13 +58,13 @@
                             <c:forEach var="month" items="${statisticsData.monthlyGrowths}">
                                 <div class="p-4 bg-gray-50 rounded-lg">
                                     <div class="flex justify-between items-center mb-2">
-                                        <h4 class="text-lg font-medium text-gray-900">${month.month}</h4>
+                                        <h4 class="text-lg font-medium text-gray-900">${month.yearMonth}</h4>
                                     </div>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div class="text-center"><p class="text-sm text-gray-500">사용자</p><p class="text-lg font-medium text-gray-900">${month.users}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">맛집</p><p class="text-lg font-medium text-gray-900">${month.restaurants}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">예약</p><p class="text-lg font-medium text-gray-900">${month.reservations}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">매출</p><p class="text-lg font-medium text-gray-900"><fmt:formatNumber value="${month.revenue}" type="currency" currencySymbol="₩"/></p></div>
+                                        <div class="text-center"><p class="text-sm text-gray-500">사용자</p><p class="text-lg font-medium text-gray-900">${month.totalUsers}</p></div>
+                                        <div class="text-center"><p class="text-sm text-gray-500">맛집</p><p class="text-lg font-medium text-gray-900">${month.totalRestaurants}</p></div>
+                                        <div class="text-center"><p class="text-sm text-gray-500">예약</p><p class="text-lg font-medium text-gray-900">${month.totalReservations}</p></div>
+                                        <div class="text-center"><p class="text-sm text-gray-500">매출</p><p class="text-lg font-medium text-gray-900"><fmt:formatNumber value="${month.totalRevenue}" type="currency" currencySymbol="₩"/></p></div>
                                     </div>
                                 </div>
                             </c:forEach>

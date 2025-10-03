@@ -74,8 +74,13 @@ public class EventManagementServlet extends HttpServlet {
                     AdminEvent updateEvent = new AdminEvent();
                     updateEvent.setId(Integer.parseInt(request.getParameter("id")));
                     updateEvent.setTitle(request.getParameter("title"));
-                    // ... (수정에 필요한 모든 파라미터를 받아와서 객체에 설정)
-                    
+                    updateEvent.setSummary(request.getParameter("summary"));
+                    updateEvent.setContent(request.getParameter("content"));
+                    updateEvent.setImage(request.getParameter("image"));
+                    SimpleDateFormat sdfUpdate = new SimpleDateFormat("yyyy-MM-dd");
+                    updateEvent.setStartDate(sdfUpdate.parse(request.getParameter("startDate")));
+                    updateEvent.setEndDate(sdfUpdate.parse(request.getParameter("endDate")));
+
                     eventService.updateEvent(updateEvent); // Service를 통해 DB 수정
                     request.setAttribute("successMessage", "이벤트 정보가 수정되었습니다.");
                     break;

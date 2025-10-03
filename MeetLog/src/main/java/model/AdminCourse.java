@@ -13,6 +13,11 @@ public class AdminCourse {
 	private String status; // "ACTIVE", "PENDING", "INACTIVE"
 	private Date createdAt;
 	private int participantCount;
+	private String type; // "COMMUNITY", "OFFICIAL"
+	private String previewImage;
+	private Integer authorId;
+	private String authorName;
+	private int reservationCount;
 
 	// --- Getters and Setters ---
 	public int getId() {
@@ -93,5 +98,45 @@ public class AdminCourse {
 
 	public void setParticipantCount(int participantCount) {
 		this.participantCount = participantCount;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getPreviewImage() {
+		return previewImage;
+	}
+
+	public void setPreviewImage(String previewImage) {
+		this.previewImage = previewImage;
+	}
+
+	public Integer getAuthorId() {
+		return authorId;
+	}
+
+	public void setAuthorId(Integer authorId) {
+		this.authorId = authorId;
+	}
+
+	public String getAuthorName() {
+		return authorName;
+	}
+
+	public void setAuthorName(String authorName) {
+		this.authorName = authorName;
+	}
+
+	public int getReservationCount() {
+		return reservationCount;
+	}
+
+	public void setReservationCount(int reservationCount) {
+		this.reservationCount = reservationCount;
 	}
 }

@@ -31,6 +31,21 @@
                 </div>
             </div>
 
+            <!-- 회사 검색 필터 -->
+            <div class="bg-white shadow rounded-lg p-4 mb-6">
+                <div class="flex items-center gap-4">
+                    <label class="text-sm font-medium text-gray-700">회사 선택:</label>
+                    <select id="companyFilter" onchange="filterByCompany()" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">전체 회사</option>
+                        <c:forEach var="company" items="${companies}">
+                            <option value="${company.id}" ${selectedCompanyId == company.id ? 'selected' : ''}>
+                                ${company.name}
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
                         <div class="bg-white overflow-hidden shadow rounded-lg">
                             <div class="p-5"><div class="flex items-center"><div class="flex-shrink-0"><div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center"><span class="text-white text-sm font-medium">🏢</span></div></div><div class="ml-5 w-0 flex-1"><dl><dt class="text-sm font-medium text-gray-500 truncate">총 지점 수</dt><dd class="text-lg font-medium text-gray-900">${statisticsData.totalBranches}</dd></dl></div></div></div>
@@ -63,7 +78,7 @@
                                             </div>
                                         </div>
                                         <div class="text-right">
-                                            <p class="text-lg font-medium text-gray-900"><fmt:formatNumber value="${branch.monthlyRevenue}" type="currency" currencySymbol="₩"/></p>
+                                            <p class="text-lg font-medium text-gray-900"><fmt:formatNumber value="${branch.revenue}" type="currency" currencySymbol="₩"/></p>
                                             <div class="flex items-center">
                                                 <c:forEach begin="1" end="5" var="i">
                                                     <span class="text-sm ${i <= branch.rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>
@@ -81,17 +96,17 @@
                         <div class="px-4 py-5 sm:p-6">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">월별 매출 추이</h3>
                             <div class="space-y-4">
-                                <c:forEach var="month" items="${statisticsData.monthlyRevenues}">
+                                <c:forEach var="month" items="${statisticsData.monthlyData}">
                                     <div class="p-4 bg-gray-50 rounded-lg">
                                         <div class="flex justify-between items-center mb-2">
-                                            <h4 class="text-lg font-medium text-gray-900">${month.month}</h4>
-                                            <p class="text-lg font-bold text-gray-900"><fmt:formatNumber value="${month.revenue}" type="currency" currencySymbol="₩"/></p>
+                                            <h4 class="text-lg font-medium text-gray-900">${month.yearMonth}</h4>
+                                            <p class="text-lg font-bold text-gray-900"><fmt:formatNumber value="${month.totalRevenue}" type="currency" currencySymbol="₩"/></p>
                                         </div>
                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <c:forEach var="branchRevenue" items="${month.branchRevenues}">
+                                            <c:forEach var="branch" items="${month.branches}">
                                                 <div class="flex justify-between items-center p-2 bg-white rounded">
-                                                    <span class="text-sm text-gray-600">${branchRevenue.branchName}</span>
-                                                    <span class="text-sm font-medium text-gray-900"><fmt:formatNumber value="${branchRevenue.revenue}" type="currency" currencySymbol="₩"/></span>
+                                                    <span class="text-sm text-gray-600">${branch.branchName}</span>
+                                                    <span class="text-sm font-medium text-gray-900"><fmt:formatNumber value="${branch.revenue}" type="currency" currencySymbol="₩"/></span>
                                                 </div>
                                             </c:forEach>
                                         </div>
@@ -107,6 +122,14 @@
 </div>
 
 <jsp:include page="/WEB-INF/views/common/loading.jsp" />
+
+<script>
+function filterByCompany() {
+    const companyId = document.getElementById('companyFilter').value;
+    const url = '${pageContext.request.contextPath}/admin/branch-statistics' + (companyId ? '?companyId=' + companyId : '');
+    window.location.href = url;
+}
+</script>
 
 </body>
 </html>

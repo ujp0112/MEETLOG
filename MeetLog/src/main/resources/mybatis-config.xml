@@ -66,6 +66,7 @@
 		<mapper resource="mappers/UserMapper.xml" />
 		<mapper resource="mappers/BusinessUserMapper.xml" />
 		<mapper resource="mappers/RestaurantMapper.xml" />
+		<mapper resource="mappers/BranchManagementMapper.xml" />
 		<mapper resource="mappers/ReviewMapper.xml" />
 		<mapper resource="mappers/ColumnMapper.xml" />
 		<mapper resource="mappers/ReservationMapper.xml" />
@@ -119,5 +120,7 @@
 		<mapper resource="erpMappers/OrderMapper.xml" />
 		<mapper resource="erpMappers/NoticeMapper.xml" />
 		<mapper resource="erpMappers/PromotionMapper.xml" />
+		<mapper resource="mappers/ReportMapper.xml" />
+		<mapper resource="mappers/CourseReservationMapper.xml" />
 	</mappers>
 </configuration>
