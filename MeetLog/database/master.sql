@@ -871,8 +871,14 @@ CREATE TABLE `inquiries` (
     `reply` TEXT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_status` (`status`),
-    `index_created_at` (`created_at`),
+    `category` VARCHAR(50) DEFAULT 'GENERAL' COMMENT '문의 카테고리: RESERVATION, PAYMENT, TECHNICAL, GENERAL',
+    `priority` ENUM('HIGH', 'MEDIUM', 'LOW') DEFAULT 'MEDIUM' COMMENT '우선순위',
+    `response_time_hours` DECIMAL(10,2) COMMENT '응답 시간(시간)',
+    `resolved_at` DATETIME COMMENT '해결 완료 시각',
+    INDEX `idx_inquiries_status` (`status`),
+    INDEX `idx_inquiries_category` (`category`),
+    INDEX `idx_inquiries_priority` (`priority`),
+    INDEX `idx_inquiries_created_at` (`created_at` DESC),
     CONSTRAINT `fk_inquiry_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='고객 문의';
 
@@ -941,6 +947,122 @@ CREATE TABLE column_restaurants (
     CONSTRAINT fk_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
     UNIQUE KEY unique_column_restaurant (column_id, restaurant_id)
 );
+
+-- 고객 만족도 테이블
+CREATE TABLE IF NOT EXISTS inquiry_satisfaction (
+    satisfaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    inquiry_id INT NOT NULL,
+    rating INT NOT NULL COMMENT '1~5점 만족도',
+    comment TEXT COMMENT '만족도 코멘트',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (inquiry_id) REFERENCES inquiries(inquiry_id) ON DELETE CASCADE,
+    INDEX idx_rating (rating),
+    INDEX idx_created (created_at),
+    CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='고객 문의 만족도';
+
+-- 월별 종합 통계 스냅샷
+CREATE TABLE IF NOT EXISTS monthly_statistics (
+    stat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    `year_month` VARCHAR(7) NOT NULL COMMENT 'YYYY-MM 형식',
+    total_users INT DEFAULT 0 COMMENT '누적 총 회원 수',
+    new_users INT DEFAULT 0 COMMENT '해당 월 신규 가입자',
+    total_restaurants INT DEFAULT 0 COMMENT '누적 총 맛집 수',
+    new_restaurants INT DEFAULT 0 COMMENT '해당 월 신규 등록 맛집',
+    total_reservations INT DEFAULT 0 COMMENT '해당 월 예약 건수',
+    total_revenue DECIMAL(15,2) DEFAULT 0 COMMENT '해당 월 총 매출',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_year_month (`year_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='월별 종합 통계';
+
+-- 카테고리별 월별 통계
+CREATE TABLE IF NOT EXISTS category_statistics (
+    category_stat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    category_name VARCHAR(100) NOT NULL COMMENT '카테고리명',
+    `year_month` VARCHAR(7) NOT NULL,
+    restaurant_count INT DEFAULT 0 COMMENT '해당 카테고리 맛집 수',
+    reservation_count INT DEFAULT 0 COMMENT '예약 건수',
+    revenue DECIMAL(15,2) DEFAULT 0 COMMENT '매출',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_category_month (category_name, `year_month`),
+    INDEX idx_year_month (`year_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='카테고리별 통계';
+
+-- 지역별 월별 통계
+CREATE TABLE IF NOT EXISTS regional_statistics (
+    regional_stat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    region VARCHAR(100) NOT NULL COMMENT '지역명 (시/도 단위)',
+    `year_month` VARCHAR(7) NOT NULL,
+    restaurant_count INT DEFAULT 0,
+    reservation_count INT DEFAULT 0,
+    revenue DECIMAL(15,2) DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_region_month (region, `year_month`),
+    INDEX idx_year_month (`year_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='지역별 통계';
+
+-- 지점 기본 정보 테이블
+CREATE TABLE IF NOT EXISTS branches (
+    branch_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    branch_name VARCHAR(200) NOT NULL COMMENT '지점명',
+    status ENUM('ACTIVE', 'INACTIVE') DEFAULT 'ACTIVE' COMMENT '운영 상태',
+    address VARCHAR(500) COMMENT '주소',
+    phone VARCHAR(20) COMMENT '전화번호',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='지점 정보';
+
+-- 지점 월별 성과 테이블
+CREATE TABLE IF NOT EXISTS branch_monthly_performance (
+    performance_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    branch_id BIGINT NOT NULL,
+    `year_month` VARCHAR(7) NOT NULL,
+    employee_count INT DEFAULT 0 COMMENT '직원 수',
+    customer_count INT DEFAULT 0 COMMENT '고객 수',
+    reservation_count INT DEFAULT 0 COMMENT '예약 건수',
+    revenue DECIMAL(15,2) DEFAULT 0 COMMENT '매출',
+    rating DECIMAL(3,2) DEFAULT 0 COMMENT '평점 (1.00 ~ 5.00)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (branch_id) REFERENCES branches(branch_id) ON DELETE CASCADE,
+    UNIQUE KEY uk_branch_month (branch_id, `year_month`),
+    INDEX idx_year_month (`year_month`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='지점별 월별 성과';
+
+-- 일별 활동 집계
+CREATE TABLE IF NOT EXISTS daily_activity_stats (
+    stat_id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    stat_date DATE NOT NULL COMMENT '통계 날짜',
+    reviews_count INT DEFAULT 0 COMMENT '당일 작성 리뷰 수',
+    courses_created_count INT DEFAULT 0 COMMENT '당일 생성 코스 수',
+    wishlist_saves_count INT DEFAULT 0 COMMENT '당일 위시리스트 저장 수',
+    new_follows_count INT DEFAULT 0 COMMENT '당일 신규 팔로우 수',
+    active_users_count INT DEFAULT 0 COMMENT '당일 활성 사용자 수',
+    new_users_count INT DEFAULT 0 COMMENT '당일 신규 가입자 수',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_stat_date (stat_date),
+    INDEX idx_stat_date (stat_date DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='일별 활동 통계';
+
+-- 주별 맛집 인기도 스냅샷
+CREATE TABLE IF NOT EXISTS restaurant_popularity (
+    popularity_id INT PRIMARY KEY AUTO_INCREMENT,
+    restaurant_id INT NOT NULL,
+    week_start_date DATE NOT NULL COMMENT '주 시작일 (월요일)',
+    reservation_count INT DEFAULT 0 COMMENT '주간 예약 수',
+    review_count INT DEFAULT 0 COMMENT '주간 리뷰 수',
+    rating DECIMAL(3,2) DEFAULT 0 COMMENT '평점',
+    reservation_growth_rate DECIMAL(5,2) DEFAULT 0 COMMENT '전주 대비 예약 증가율(%)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+    UNIQUE KEY uk_restaurant_week (restaurant_id, week_start_date),
+    INDEX idx_week_start (week_start_date DESC),
+    INDEX idx_reservation_count (reservation_count DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='맛집 주별 인기도';
 
 -- ===================================================================
 -- 3. 데이터 삽입 (Insert Data)
@@ -1038,6 +1160,229 @@ INSERT INTO faqs (category, question, answer, display_order, is_active) VALUES
 ('기타', '앱이 자주 꺼져요.', '앱 재설치 후에도 문제가 지속되면 고객센터(help@meetlog.com)로 연락해주세요. 기기 정보와 오류 상황을 함께 알려주시면 더 빠른 해결이 가능합니다.', 11, 1),
 ('기타', '제휴 문의는 어디로 하나요?', '사업 제휴 및 입점 문의는 business@meetlog.com으로 연락해주시기 바랍니다.', 12, 1);
 
+-- =====================================================
+-- 1. inquiries 테이블 기존 데이터 업데이트 (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+-- 기존 inquiries 데이터에 category, priority 추가
+UPDATE inquiries SET
+    category = CASE
+        WHEN subject LIKE '%예약%' THEN 'RESERVATION'
+        WHEN subject LIKE '%결제%' OR subject LIKE '%환불%' THEN 'PAYMENT'
+        WHEN subject LIKE '%로그인%' OR subject LIKE '%오류%' THEN 'TECHNICAL'
+        ELSE 'GENERAL'
+    END,
+    priority = CASE
+        WHEN status = 'PENDING' AND created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR) THEN 'HIGH'
+        WHEN status = 'IN_PROGRESS' THEN 'MEDIUM'
+        ELSE 'LOW'
+    END
+WHERE category IS NULL OR category = 'GENERAL';
+
+-- 응답 시간 계산 (resolved 건만)
+UPDATE inquiries SET
+    response_time_hours = TIMESTAMPDIFF(HOUR, created_at, updated_at),
+    resolved_at = CASE WHEN status = 'RESOLVED' THEN updated_at ELSE NULL END
+WHERE status = 'RESOLVED' AND response_time_hours IS NULL;
+
+-- =====================================================
+-- 2. 고객 만족도 샘플 데이터 (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO inquiry_satisfaction (inquiry_id, rating, comment)
+SELECT
+    inquiry_id,
+    FLOOR(3 + RAND() * 3) as rating,  -- 3~5점 랜덤
+    CASE
+        WHEN RAND() > 0.7 THEN '친절한 답변 감사합니다'
+        WHEN RAND() > 0.4 THEN '빠른 해결 감사드립니다'
+        ELSE NULL
+    END
+FROM inquiries
+WHERE status = 'RESOLVED'
+LIMIT 50
+ON DUPLICATE KEY UPDATE rating=rating;
+
+-- =====================================================
+-- 3. 월별 통계 데이터 (최근 6개월) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO monthly_statistics (`year_month`, total_users, new_users, total_restaurants, new_restaurants, total_reservations, total_revenue)
+VALUES
+    ('2024-09', 1200, 150, 450, 25, 3200, 48500000.00),
+    ('2024-10', 1380, 180, 485, 35, 3850, 56200000.00),
+    ('2024-11', 1590, 210, 528, 43, 4320, 62800000.00),
+    ('2024-12', 1845, 255, 580, 52, 5100, 74500000.00),
+    ('2025-01', 2140, 295, 645, 65, 5980, 87300000.00),
+    ('2025-02', 2480, 340, 720, 75, 6750, 98600000.00)
+ON DUPLICATE KEY UPDATE
+    total_users=VALUES(total_users),
+    new_users=VALUES(new_users),
+    total_restaurants=VALUES(total_restaurants),
+    new_restaurants=VALUES(new_restaurants),
+    total_reservations=VALUES(total_reservations),
+    total_revenue=VALUES(total_revenue);
+
+-- =====================================================
+-- 4. 카테고리별 통계 (최근 3개월) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO category_statistics (category_name, `year_month`, restaurant_count, reservation_count, revenue)
+VALUES
+    -- 2024-12
+    ('한식', '2024-12', 180, 1850, 28500000.00),
+    ('일식', '2024-12', 125, 1320, 21800000.00),
+    ('중식', '2024-12', 95, 890, 13200000.00),
+    ('양식', '2024-12', 110, 1040, 16500000.00),
+    ('카페/디저트', '2024-12', 70, 450, 6800000.00),
+    -- 2025-01
+    ('한식', '2025-01', 195, 2150, 33200000.00),
+    ('일식', '2025-01', 142, 1580, 26500000.00),
+    ('중식', '2025-01', 108, 1020, 15800000.00),
+    ('양식', '2025-01', 128, 1230, 19800000.00),
+    ('카페/디저트', '2025-01', 82, 520, 7900000.00),
+    -- 2025-02
+    ('한식', '2025-02', 218, 2480, 38500000.00),
+    ('일식', '2025-02', 165, 1850, 31200000.00),
+    ('중식', '2025-02', 125, 1180, 18500000.00),
+    ('양식', '2025-02', 145, 1420, 23100000.00),
+    ('카페/디저트', '2025-02', 95, 600, 9200000.00)
+ON DUPLICATE KEY UPDATE
+    restaurant_count=VALUES(restaurant_count),
+    reservation_count=VALUES(reservation_count),
+    revenue=VALUES(revenue);
+
+-- =====================================================
+-- 5. 지역별 통계 (최근 3개월) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO regional_statistics (region, `year_month`, restaurant_count, reservation_count, revenue)
+VALUES
+    -- 2024-12
+    ('서울', '2024-12', 285, 2850, 42500000.00),
+    ('경기', '2024-12', 165, 1420, 19800000.00),
+    ('부산', '2024-12', 78, 580, 8200000.00),
+    ('대구', '2024-12', 52, 250, 4000000.00),
+    -- 2025-01
+    ('서울', '2025-01', 315, 3380, 51200000.00),
+    ('경기', '2025-01', 195, 1720, 24500000.00),
+    ('부산', '2025-01', 92, 680, 9800000.00),
+    ('대구', '2025-01', 63, 320, 5100000.00),
+    -- 2025-02
+    ('서울', '2025-02', 352, 3920, 59800000.00),
+    ('경기', '2025-02', 228, 2050, 28900000.00),
+    ('부산', '2025-02', 108, 780, 11500000.00),
+    ('대구', '2025-02', 72, 380, 6200000.00)
+ON DUPLICATE KEY UPDATE
+    restaurant_count=VALUES(restaurant_count),
+    reservation_count=VALUES(reservation_count),
+    revenue=VALUES(revenue);
+
+-- =====================================================
+-- 6. 지점 월별 성과 (branches 테이블이 있다고 가정) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO branch_monthly_performance (branch_id, `year_month`, employee_count, customer_count, reservation_count, revenue, rating)
+VALUES
+    -- 2024-12
+    (1, '2024-12', 25, 1850, 520, 15800000.00, 4.65),
+    (2, '2024-12', 18, 1320, 385, 11200000.00, 4.52),
+    (3, '2024-12', 22, 1580, 450, 13500000.00, 4.58),
+    (4, '2024-12', 15, 980, 280, 8900000.00, 4.45),
+    (5, '2024-12', 20, 1420, 410, 12500000.00, 4.61),
+    -- 2025-01
+    (1, '2025-01', 26, 2150, 615, 19200000.00, 4.68),
+    (2, '2025-01', 19, 1580, 465, 14100000.00, 4.55),
+    (3, '2025-01', 23, 1820, 528, 16800000.00, 4.62),
+    (4, '2025-01', 16, 1150, 335, 10800000.00, 4.48),
+    (5, '2025-01', 21, 1680, 485, 15200000.00, 4.64),
+    -- 2025-02
+    (1, '2025-02', 27, 2520, 720, 23500000.00, 4.72),
+    (2, '2025-02', 20, 1850, 548, 17200000.00, 4.59),
+    (3, '2025-02', 24, 2120, 615, 20500000.00, 4.66),
+    (4, '2025-02', 17, 1350, 395, 13200000.00, 4.51),
+    (5, '2025-02', 22, 1980, 575, 18800000.00, 4.68)
+ON DUPLICATE KEY UPDATE
+    employee_count=VALUES(employee_count),
+    customer_count=VALUES(customer_count),
+    reservation_count=VALUES(reservation_count),
+    revenue=VALUES(revenue),
+    rating=VALUES(rating);
+
+-- =====================================================
+-- 7. 일별 활동 통계 (최근 30일) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+-- 최근 30일치 데이터 생성 (동적)
+INSERT INTO daily_activity_stats (stat_date, reviews_count, courses_created_count, wishlist_saves_count, new_follows_count, active_users_count, new_users_count)
+SELECT
+    DATE_SUB(CURDATE(), INTERVAL n DAY) as stat_date,
+    FLOOR(50 + RAND() * 100) as reviews_count,
+    FLOOR(10 + RAND() * 30) as courses_created_count,
+    FLOOR(20 + RAND() * 50) as wishlist_saves_count,
+    FLOOR(30 + RAND() * 70) as new_follows_count,
+    FLOOR(500 + RAND() * 500) as active_users_count,
+    FLOOR(10 + RAND() * 20) as new_users_count
+FROM (
+    SELECT 0 as n UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL
+    SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
+    SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL
+    SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL
+    SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL SELECT 24 UNION ALL
+    SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL SELECT 28 UNION ALL SELECT 29
+) as numbers
+ON DUPLICATE KEY UPDATE
+    reviews_count=VALUES(reviews_count),
+    active_users_count=VALUES(active_users_count);
+
+-- =====================================================
+-- 8. 지점 샘플 데이터 (성과 데이터를 위한 기본 지점) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+INSERT INTO branches (branch_name, status, address, phone)
+VALUES
+    ('강남점', 'ACTIVE', '서울시 강남구 테헤란로 123', '02-1234-5678'),
+    ('홍대점', 'ACTIVE', '서울시 마포구 와우산로 45', '02-2345-6789'),
+    ('판교점', 'ACTIVE', '경기도 성남시 분당구 판교역로 235', '031-3456-7890'),
+    ('부산점', 'ACTIVE', '부산시 해운대구 해운대로 567', '051-4567-8901'),
+    ('대구점', 'ACTIVE', '대구시 중구 동성로 89', '053-5678-9012')
+ON DUPLICATE KEY UPDATE branch_name=branch_name;
+
+-- =====================================================
+-- 9. 맛집 인기도 (최근 4주, 상위 맛집만) (admin-statistics-sample-data.sql 에서 가져옴)
+-- =====================================================
+
+-- 이번 주 시작일 계산 (월요일 기준)
+SET @this_monday = DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY);
+
+INSERT INTO restaurant_popularity (restaurant_id, week_start_date, reservation_count, review_count, rating, reservation_growth_rate)
+SELECT
+    r.id as restaurant_id,
+    @this_monday as week_start_date,
+    FLOOR(50 + RAND() * 150) as reservation_count,
+    FLOOR(10 + RAND() * 30) as review_count,
+    ROUND(3.5 + RAND() * 1.5, 2) as rating,
+    ROUND(-20 + RAND() * 60, 2) as reservation_growth_rate
+FROM restaurants r
+WHERE r.id <= 20  -- 상위 20개 맛집만
+ON DUPLICATE KEY UPDATE
+    reservation_count=VALUES(reservation_count),
+    review_count=VALUES(review_count);
+
+-- 전주 데이터
+INSERT INTO restaurant_popularity (restaurant_id, week_start_date, reservation_count, review_count, rating, reservation_growth_rate)
+SELECT
+    r.id as restaurant_id,
+    DATE_SUB(@this_monday, INTERVAL 7 DAY) as week_start_date,
+    FLOOR(40 + RAND() * 130) as reservation_count,
+    FLOOR(8 + RAND() * 25) as review_count,
+    ROUND(3.4 + RAND() * 1.5, 2) as rating,
+    ROUND(-15 + RAND() * 50, 2) as reservation_growth_rate
+FROM restaurants r
+WHERE r.id <= 20
+ON DUPLICATE KEY UPDATE
+    reservation_count=VALUES(reservation_count);
+
 -- ===================================================================
 -- 4. 제약 조건 및 인덱스 활성화
 -- ===================================================================
@@ -1050,6 +1395,11 @@ ALTER TABLE users ADD UNIQUE `UK_social` (social_provider, social_id);
 -- 기존 이메일/비밀번호 가입자는 social_id가 없으므로, email을 UNIQUE로 설정하여 중복 가입을 방지합니다.
 ALTER TABLE users ADD UNIQUE `UK_email` (email);
 
+-- inquiries 테이블 추가 인덱스
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_inquiries_category ON inquiries(category);
+CREATE INDEX IF NOT EXISTS idx_inquiries_priority ON inquiries(priority);
+CREATE INDEX IF NOT EXISTS idx_inquiries_created ON inquiries(created_at DESC);
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
