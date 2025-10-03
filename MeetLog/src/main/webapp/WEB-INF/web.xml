@@ -571,14 +571,7 @@
 		<url-pattern>/admin/statistics-dashboard</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>SupportDashboardServlet</servlet-name>
-		<servlet-class>controller.SupportDashboardServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>SupportDashboardServlet</servlet-name>
-		<url-pattern>/admin/support-dashboard</url-pattern>
-	</servlet-mapping>
+	<!-- SupportDashboardServlet 삭제됨 - SupportStatisticsServlet이 @WebServlet으로 /admin/support-dashboard 처리 -->
 
 	<servlet>
 		<servlet-name>SupportServlet</servlet-name>
@@ -589,14 +582,15 @@
 		<url-pattern>/support</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
+	<!-- SupportStatisticsServlet은 @WebServlet 어노테이션으로 매핑됨 (/admin/support-dashboard) -->
+	<!-- <servlet>
 		<servlet-name>SupportStatisticsServlet</servlet-name>
 		<servlet-class>controller.SupportStatisticsServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>SupportStatisticsServlet</servlet-name>
 		<url-pattern>/admin/support-statistics</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>UserAnalysisServlet</servlet-name>

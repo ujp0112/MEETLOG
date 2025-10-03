@@ -111,6 +111,7 @@
 		<mapper resource="mappers/InquiryMapper.xml" />
 		<mapper resource="mappers/FeedbackMapper.xml" />
 		<mapper resource="mappers/EmployeeMapper.xml" />
+		<mapper resource="mappers/AdminStatisticsMapper.xml" />
 		<mapper resource="erpMappers/AuthMapper.xml" />
 		<mapper resource="erpMappers/MaterialMapper.xml" />
 		<mapper resource="erpMappers/BranchMenuMapper.xml" />

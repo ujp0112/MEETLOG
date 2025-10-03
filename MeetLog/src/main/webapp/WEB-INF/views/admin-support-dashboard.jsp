@@ -92,19 +92,26 @@
                         <div class="px-4 py-5 sm:p-6">
                             <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">고객 만족도 통계</h3>
                             <div class="space-y-3">
-                                <c:forEach var="satisfaction" items="${dashboardData.satisfactionStats}">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center">
-                                            <span class="text-sm font-medium text-gray-900">${satisfaction.rating}점</span>
-                                            <div class="ml-4 w-32 bg-gray-200 rounded-full h-2">
-                                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${satisfaction.percentage}%"></div>
+                                <c:choose>
+                                    <c:when test="${empty dashboardData.satisfactionStats}">
+                                        <p class="text-sm text-gray-500 text-center py-4">만족도 데이터가 없습니다.</p>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach var="satisfaction" items="${dashboardData.satisfactionStats}">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center">
+                                                    <span class="text-sm font-medium text-gray-900">${satisfaction.rating}점</span>
+                                                    <div class="ml-4 w-32 bg-gray-200 rounded-full h-2">
+                                                        <div class="bg-blue-600 h-2 rounded-full" style="width: ${satisfaction.percentage}%"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="text-right">
+                                                    <span class="text-sm text-gray-500">${satisfaction.count}명 (<fmt:formatNumber value="${satisfaction.percentage}" pattern="0.0"/>%)</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-sm text-gray-500">${satisfaction.count}명 (${satisfaction.percentage}%)</span>
-                                        </div>
-                                    </div>
-                                </c:forEach>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                     </div>
