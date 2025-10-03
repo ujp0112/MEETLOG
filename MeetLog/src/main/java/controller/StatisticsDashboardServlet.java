@@ -34,23 +34,27 @@ public class StatisticsDashboardServlet extends HttpServlet {
     
     private StatisticsData createStatisticsData() {
         StatisticsData data = new StatisticsData();
-        
+
         data.setTotalUsers(1250);
         data.setTotalRestaurants(45);
         data.setTotalReservations(3200);
         data.setTotalReviews(890);
         data.setAverageRating(4.3);
-        
+        data.setUserGrowthRate(12.5);
+        data.setRevenueGrowthRate(8.3);
+        data.setRestaurantGrowthRate(5.2);
+        data.setReservationGrowthRate(15.8);
+
         List<DailyStats> dailyStats = new ArrayList<>();
-        
+
         DailyStats day1 = new DailyStats();
         day1.setDate("2025-09-14");
         day1.setReservations(25);
         day1.setReviews(12);
         dailyStats.add(day1);
-        
+
         data.setDailyStats(dailyStats);
-        
+
         return data;
     }
     
@@ -60,8 +64,12 @@ public class StatisticsDashboardServlet extends HttpServlet {
         private int totalReservations;
         private int totalReviews;
         private double averageRating;
+        private double userGrowthRate;
+        private double revenueGrowthRate;
+        private double restaurantGrowthRate;
+        private double reservationGrowthRate;
         private List<DailyStats> dailyStats;
-        
+
         // Getters and Setters
         public int getTotalUsers() { return totalUsers; }
         public void setTotalUsers(int totalUsers) { this.totalUsers = totalUsers; }
@@ -73,6 +81,14 @@ public class StatisticsDashboardServlet extends HttpServlet {
         public void setTotalReviews(int totalReviews) { this.totalReviews = totalReviews; }
         public double getAverageRating() { return averageRating; }
         public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+        public double getUserGrowthRate() { return userGrowthRate; }
+        public void setUserGrowthRate(double userGrowthRate) { this.userGrowthRate = userGrowthRate; }
+        public double getRevenueGrowthRate() { return revenueGrowthRate; }
+        public void setRevenueGrowthRate(double revenueGrowthRate) { this.revenueGrowthRate = revenueGrowthRate; }
+        public double getRestaurantGrowthRate() { return restaurantGrowthRate; }
+        public void setRestaurantGrowthRate(double restaurantGrowthRate) { this.restaurantGrowthRate = restaurantGrowthRate; }
+        public double getReservationGrowthRate() { return reservationGrowthRate; }
+        public void setReservationGrowthRate(double reservationGrowthRate) { this.reservationGrowthRate = reservationGrowthRate; }
         public List<DailyStats> getDailyStats() { return dailyStats; }
         public void setDailyStats(List<DailyStats> dailyStats) { this.dailyStats = dailyStats; }
     }

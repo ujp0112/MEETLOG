@@ -50,14 +50,10 @@
                                             <div class="ml-4">
                                                 <div class="flex items-center">
                                                     <p class="text-lg font-medium text-gray-900">${event.title}</p>
-                                                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${event.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : event.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
-                                                        ${event.status == 'ACTIVE' ? '진행중' : event.status == 'PENDING' ? '대기중' : '종료됨'}
-                                                    </span>
                                                 </div>
-                                                <p class="text-sm text-gray-500">${event.description}</p>
+                                                <p class="text-sm text-gray-500 mt-1">${event.summary}</p>
                                                 <div class="flex items-center mt-1">
-                                                    <span class="text-sm text-gray-500">기간: ${event.startDate} ~ ${event.endDate}</span>
-                                                    <span class="ml-4 text-sm text-gray-500">참여자: ${event.participantCount}명</span>
+                                                    <span class="text-sm text-gray-500">기간: <fmt:formatDate value="${event.startDate}" pattern="yyyy-MM-dd"/> ~ <fmt:formatDate value="${event.endDate}" pattern="yyyy-MM-dd"/></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -65,28 +61,10 @@
                                             <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                 수정
                                             </button>
-                                            <c:if test="${event.status == 'PENDING'}">
-                                                <form method="post" class="inline">
-                                                    <input type="hidden" name="action" value="activate">
-                                                    <input type="hidden" name="eventId" value="${event.id}">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                                                        활성화
-                                                    </button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${event.status == 'ACTIVE'}">
-                                                <form method="post" class="inline">
-                                                    <input type="hidden" name="action" value="deactivate">
-                                                    <input type="hidden" name="eventId" value="${event.id}">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700">
-                                                        비활성화
-                                                    </button>
-                                                </form>
-                                            </c:if>
                                             <form method="post" class="inline">
                                                 <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="eventId" value="${event.id}">
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                                <input type="hidden" name="id" value="${event.id}">
+                                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
                                                         onclick="return confirm('정말로 이 이벤트를 삭제하시겠습니까?')">
                                                     삭제
                                                 </button>

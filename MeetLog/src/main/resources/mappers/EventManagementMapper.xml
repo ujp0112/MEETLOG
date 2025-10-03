@@ -5,37 +5,37 @@
 
 <mapper namespace="mapper.EventManagementMapper">
     <resultMap id="adminEventResult" type="model.AdminEvent">
-        <id property="id" column="event_id"/>
-        <result property="title" column="title"/>
-        <result property="description" column="description"/>
-        <result property="startDate" column="start_date"/>
-        <result property="endDate" column="end_date"/>
-        <result property="status" column="status"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="participantCount" column="participant_count"/>
+        <id property="id" column="ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="summary" column="SUMMARY"/>
+        <result property="content" column="CONTENT"/>
+        <result property="image" column="IMAGE"/>
+        <result property="startDate" column="START_DATE"/>
+        <result property="endDate" column="END_DATE"/>
     </resultMap>
 
     <select id="selectAllEventsForAdmin" resultMap="adminEventResult">
-        SELECT * FROM events ORDER BY created_at DESC
+        SELECT * FROM events ORDER BY ID DESC
     </select>
-    
-    <insert id="insertEvent" parameterType="model.AdminEvent">
-        INSERT INTO events (title, description, start_date, end_date, status, created_at)
-        VALUES (#{title}, #{description}, #{startDate}, #{endDate}, 'PENDING', NOW())
+
+    <insert id="insertEvent" parameterType="model.AdminEvent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO events (TITLE, SUMMARY, CONTENT, IMAGE, START_DATE, END_DATE)
+        VALUES (#{title}, #{summary}, #{content}, #{image}, #{startDate}, #{endDate})
     </insert>
     
     <update id="updateEvent" parameterType="model.AdminEvent">
         UPDATE events
-        SET 
-            title = #{title},
-            description = #{description},
-            start_date = #{startDate},
-            end_date = #{endDate},
-            status = #{status}
-        WHERE event_id = #{id}
+        SET
+            TITLE = #{title},
+            SUMMARY = #{summary},
+            CONTENT = #{content},
+            IMAGE = #{image},
+            START_DATE = #{startDate},
+            END_DATE = #{endDate}
+        WHERE ID = #{id}
     </update>
-    
+
     <delete id="deleteEvent" parameterType="int">
-        DELETE FROM events WHERE event_id = #{id}
+        DELETE FROM events WHERE ID = #{id}
     </delete>
 </mapper>

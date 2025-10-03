@@ -62,20 +62,20 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             <c:forEach var="reservation" items="${reservations}">
                                 <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${reservation.reservationDate}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700"><fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy-MM-dd"/></td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${reservation.courseTitle}</td>
-                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${reservation.userName}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${reservation.participantName}</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${reservation.phone}</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">${reservation.participantCount}명</td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700"><fmt:formatNumber value="${reservation.totalPrice}" type="currency" currencySymbol="₩"/></td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${reservation.status == 'CONFIRMED' ? 'bg-green-100 text-green-800' : reservation.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : reservation.status == 'COMPLETED' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}">
-                                            ${reservation.statusLabel}
+                                            ${reservation.status}
                                         </span>
                                     </td>
                                     <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
                                         <form method="post" class="flex flex-wrap gap-2 items-center">
-                                            <input type="hidden" name="id" value="${reservation.id}" />
+                                            <input type="hidden" name="id" value="${reservation.reservationId}" />
                                             <button name="action" value="confirm"
                                                     class="px-3 py-2 text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                                                     type="submit">확정</button>

@@ -3,21 +3,20 @@ package model;
 import java.util.Date;
 
 public class AdminEvent {
-	private int id;
+	private long id;
 	private String title;
-	private String description;
+	private String summary;
+	private String content;
+	private String image;
 	private Date startDate;
 	private Date endDate;
-	private String status; // "ACTIVE", "PENDING", "EXPIRED"
-	private Date createdAt;
-	private int participantCount;
 
 	// --- Getters and Setters ---
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -29,12 +28,28 @@ public class AdminEvent {
 		this.title = title;
 	}
 
-	public String getDescription() {
-		return description;
+	public String getSummary() {
+		return summary;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
 	}
 
 	public Date getStartDate() {
@@ -51,29 +66,5 @@ public class AdminEvent {
 
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-	public Date getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public int getParticipantCount() {
-		return participantCount;
-	}
-
-	public void setParticipantCount(int participantCount) {
-		this.participantCount = participantCount;
 	}
 }

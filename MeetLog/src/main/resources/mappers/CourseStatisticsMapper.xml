@@ -48,20 +48,20 @@
     </select>
     
     <select id="findPopularCoursesTop5" resultMap="popularCourseResult">
-        SELECT 
+        SELECT
             c.title,
             SUM(cr.participant_count) AS reservation_count,
             SUM(CASE WHEN cr.status = 'COMPLETED' THEN cr.total_price ELSE 0 END) AS total_revenue,
             AVG(rev.rating) AS average_rating
-        FROM 
+        FROM
             courses c
-        LEFT JOIN 
-            course_reservations cr ON c.id = cr.course_id
-        LEFT JOIN 
-            course_reviews rev ON c.id = rev.course_id
-        GROUP BY 
-            c.id, c.title
-        ORDER BY 
+        LEFT JOIN
+            course_reservations cr ON c.course_id = cr.course_id
+        LEFT JOIN
+            course_reviews rev ON c.course_id = rev.course_id
+        GROUP BY
+            c.course_id, c.title
+        ORDER BY
             reservation_count DESC
         LIMIT 5
     </select>

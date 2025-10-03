@@ -33,8 +33,8 @@ public class EventManagementServlet extends HttpServlet {
         // [수정] Service를 통해 DB에서 실제 이벤트 목록을 가져옴
         List<AdminEvent> events = eventService.getAllEventsForAdmin();
         request.setAttribute("events", events);
-        
-        request.getRequestDispatcher("/WEB-INF/views/admin/event-management.jsp").forward(request, response);
+
+        request.getRequestDispatcher("/WEB-INF/views/admin-event-management.jsp").forward(request, response);
     }
     
     @Override
@@ -58,12 +58,14 @@ public class EventManagementServlet extends HttpServlet {
                     // JSP 폼에서 넘어온 데이터를 AdminEvent 객체로 만듦
                     AdminEvent newEvent = new AdminEvent();
                     newEvent.setTitle(request.getParameter("title"));
-                    newEvent.setDescription(request.getParameter("description"));
+                    newEvent.setSummary(request.getParameter("summary"));
+                    newEvent.setContent(request.getParameter("content"));
+                    newEvent.setImage(request.getParameter("image"));
                     // 날짜 형식 변환
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     newEvent.setStartDate(sdf.parse(request.getParameter("startDate")));
                     newEvent.setEndDate(sdf.parse(request.getParameter("endDate")));
-                    
+
                     eventService.addEvent(newEvent); // Service를 통해 DB에 추가
                     request.setAttribute("successMessage", "새 이벤트가 성공적으로 등록되었습니다.");
                     break;

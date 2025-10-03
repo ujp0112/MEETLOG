@@ -51,14 +51,16 @@ public class BranchStatisticsServlet extends HttpServlet {
         branch1.setRevenue(50000000);
         branch1.setEmployeeCount(15);
         branch1.setCustomerCount(1200);
+        branch1.setReservationCount(350);
         branch1.setRating(4.5);
         branchPerformances.add(branch1);
-        
+
         BranchPerformance branch2 = new BranchPerformance();
         branch2.setBranchName("홍대점");
         branch2.setRevenue(35000000);
         branch2.setEmployeeCount(12);
         branch2.setCustomerCount(800);
+        branch2.setReservationCount(220);
         branch2.setRating(4.2);
         branchPerformances.add(branch2);
         
@@ -97,8 +99,9 @@ public class BranchStatisticsServlet extends HttpServlet {
         private int revenue;
         private int employeeCount;
         private int customerCount;
+        private int reservationCount;
         private double rating;
-        
+
         // Getters and Setters
         public String getBranchName() { return branchName; }
         public void setBranchName(String branchName) { this.branchName = branchName; }
@@ -108,6 +111,8 @@ public class BranchStatisticsServlet extends HttpServlet {
         public void setEmployeeCount(int employeeCount) { this.employeeCount = employeeCount; }
         public int getCustomerCount() { return customerCount; }
         public void setCustomerCount(int customerCount) { this.customerCount = customerCount; }
+        public int getReservationCount() { return reservationCount; }
+        public void setReservationCount(int reservationCount) { this.reservationCount = reservationCount; }
         public double getRating() { return rating; }
         public void setRating(double rating) { this.rating = rating; }
     }

@@ -43,15 +43,15 @@
                     
                     <div class="bg-white shadow rounded-lg mb-8">
                         <div class="px-4 py-5 sm:p-6">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">문의 유형별 통계</h3>
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">문의 상태별 통계</h3>
                             <div class="space-y-4">
-                                <c:forEach var="type" items="${dashboardData.inquiryTypeStats}">
+                                <c:forEach var="type" items="${dashboardData.inquiryCategories}">
                                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                         <div class="flex items-center">
                                             <div class="flex-shrink-0 h-10 w-10"><div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center"><span class="text-blue-600 text-sm font-medium">📋</span></div></div>
                                             <div class="ml-4">
-                                                <p class="text-sm font-medium text-gray-900">${type.type}</p>
-                                                <p class="text-sm text-gray-500">총 ${type.count}건 (${type.percentage}%)</p>
+                                                <p class="text-sm font-medium text-gray-900">${type.category}</p>
+                                                <p class="text-sm text-gray-500">총 ${type.count}건 (<fmt:formatNumber value="${type.percentage}" pattern="0.0"/>%)</p>
                                             </div>
                                         </div>
                                         <div class="text-right">

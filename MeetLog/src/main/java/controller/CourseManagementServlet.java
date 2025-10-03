@@ -30,8 +30,8 @@ public class CourseManagementServlet extends HttpServlet {
         
         List<AdminCourse> courses = courseService.getAllCoursesForAdmin();
         request.setAttribute("courses", courses);
-        
-        request.getRequestDispatcher("/WEB-INF/views/admin/course-management.jsp").forward(request, response);
+
+        request.getRequestDispatcher("/WEB-INF/views/admin-course-management.jsp").forward(request, response);
     }
     
     @Override

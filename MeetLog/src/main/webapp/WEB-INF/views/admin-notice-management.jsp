@@ -50,15 +50,10 @@
                                             <div class="ml-4">
                                                 <div class="flex items-center">
                                                     <p class="text-lg font-medium text-gray-900">${notice.title}</p>
-                                                    <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${notice.status == 'PUBLISHED' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                                                        ${notice.status == 'PUBLISHED' ? '발행됨' : '임시저장'}
-                                                    </span>
                                                 </div>
-                                                <p class="text-sm text-gray-500">${notice.content}</p>
+                                                <p class="text-sm text-gray-500 mt-1">${notice.content}</p>
                                                 <div class="flex items-center mt-1">
-                                                    <span class="text-sm text-gray-500">카테고리: ${notice.category}</span>
-                                                    <span class="ml-4 text-sm text-gray-500">작성일: <fmt:formatDate value="${notice.createdAt}" pattern="yyyy.MM.dd"/></span>
-                                                    <span class="ml-4 text-sm text-gray-500">조회수: ${notice.viewCount}</span>
+                                                    <span class="text-sm text-gray-500">작성일: <fmt:formatDate value="${notice.createdAt}" pattern="yyyy.MM.dd"/></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -66,28 +61,10 @@
                                             <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                 수정
                                             </button>
-                                            <c:if test="${notice.status == 'DRAFT'}">
-                                                <form method="post" class="inline">
-                                                    <input type="hidden" name="action" value="publish">
-                                                    <input type="hidden" name="noticeId" value="${notice.id}">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                                                        발행
-                                                    </button>
-                                                </form>
-                                            </c:if>
-                                            <c:if test="${notice.status == 'PUBLISHED'}">
-                                                <form method="post" class="inline">
-                                                    <input type="hidden" name="action" value="unpublish">
-                                                    <input type="hidden" name="noticeId" value="${notice.id}">
-                                                    <button type="submit" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700">
-                                                        발행 취소
-                                                    </button>
-                                                </form>
-                                            </c:if>
                                             <form method="post" class="inline">
                                                 <input type="hidden" name="action" value="delete">
-                                                <input type="hidden" name="noticeId" value="${notice.id}">
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                                                <input type="hidden" name="id" value="${notice.id}">
+                                                <button type="submit" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
                                                         onclick="return confirm('정말로 이 공지사항을 삭제하시겠습니까?')">
                                                     삭제
                                                 </button>
