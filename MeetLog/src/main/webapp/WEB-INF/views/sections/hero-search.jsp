@@ -79,7 +79,10 @@
                 <span class="text-slate-400">|</span>
 
                 <button type="button"
+                        id="advancedSearchToggle"
                         onclick="toggleAdvancedSearch()"
+                        aria-expanded="false"
+                        aria-controls="advancedSearchSection"
                         class="inline-flex items-center gap-2 text-slate-700 font-semibold
                                hover:text-slate-900 transition group">
                     <svg class="w-5 h-5 transform group-hover:rotate-180 transition" fill="currentColor" viewBox="0 0 20 20">

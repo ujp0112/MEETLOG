@@ -458,34 +458,35 @@ to {
 
 	<div id="app" class="flex flex-col min-h-screen">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
-		<main id="main-content" role="main" aria-label="메인 콘텐츠" class="flex-grow container mx-auto p-4 md:p-8">
+		<main id="main-content" role="main" aria-label="메인 콘텐츠" class="flex-grow bg-slate-50">
 			<h1 class="sr-only">MEET LOG 메인 페이지</h1>
 
 			<!-- Hero Section: 가치 제안 + 빠른 검색 -->
 			<jsp:include page="/WEB-INF/views/sections/hero-search.jsp" />
 
-			<!-- 로그인 사용자용 레이아웃 -->
-			<c:if test="${not empty user}">
-				<!-- 1. 맞춤 추천 (최우선) -->
-				<jsp:include page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
+			<div class="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 pb-16 md:px-6 lg:px-8">
+				<!-- 로그인 사용자용 레이아웃 -->
+				<c:if test="${not empty user}">
+					<!-- 1. 맞춤 추천 (최우선) -->
+					<jsp:include page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
 
-				<!-- 2. 실시간 랭킹 -->
-				<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
-			</c:if>
+					<!-- 2. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+				</c:if>
 
-			<!-- 비로그인 사용자용 레이아웃 -->
-			<c:if test="${empty user}">
-				<!-- 1. 실시간 랭킹 -->
-				<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
-			</c:if>
+				<!-- 비로그인 사용자용 레이아웃 -->
+				<c:if test="${empty user}">
+					<!-- 1. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+				</c:if>
 
-			<!-- 비로그인 사용자용 로그인 유도 -->
-			<c:if test="${empty user}">
-				<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
-			</c:if>
+				<!-- 비로그인 사용자용 로그인 유도 -->
+				<c:if test="${empty user}">
+					<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
+				</c:if>
 
-			<!-- 상세 검색 섹션 (Progressive Disclosure) -->
-			<section id="advancedSearchSection" class="bg-white p-6 rounded-xl my-12 shadow-md" aria-labelledby="search-title" style="display: none;">
+				<!-- 상세 검색 섹션 (Progressive Disclosure) -->
+				<section id="advancedSearchSection" class="hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl" aria-labelledby="search-title" aria-hidden="true">
 				<h2 id="search-title" class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기 🔎</h2>
 
 				<%-- [수정] 폼 전체 구조 변경 --%>
@@ -697,6 +698,7 @@ to {
 					</c:choose>
 				</div>
 			</section>
+		</div>
 		</main>
 		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 	</div>
@@ -741,11 +743,27 @@ function handleFormSubmit(event, form) {
 // 상세 검색 토글 함수
 function toggleAdvancedSearch() {
     const section = document.getElementById('advancedSearchSection');
-    if (section.style.display === 'none') {
-        section.style.display = 'block';
-        section.scrollIntoView({ behavior: 'smooth' });
+    const toggleButton = document.getElementById('advancedSearchToggle');
+
+    if (!section) {
+        return;
+    }
+
+    const isHidden = section.classList.contains('hidden');
+
+    if (isHidden) {
+        section.classList.remove('hidden');
+        section.setAttribute('aria-hidden', 'false');
+        if (toggleButton) {
+            toggleButton.setAttribute('aria-expanded', 'true');
+        }
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-        section.style.display = 'none';
+        section.classList.add('hidden');
+        section.setAttribute('aria-hidden', 'true');
+        if (toggleButton) {
+            toggleButton.setAttribute('aria-expanded', 'false');
+        }
     }
 }
 
