@@ -9,7 +9,7 @@ from transformers import AutoTokenizer, AutoModel
 app = FastAPI()
 
 # 디바이스 설정: Apple Silicon(MPS) > CUDA > CPU 순으로 자동 선택
-# Mac 사용자를 위해 MPS를 우선적으로 확인합니다.
+
 print("PyTorch device checking...")
 if torch.backends.mps.is_available():
     device = torch.device("mps")
@@ -22,7 +22,7 @@ else:
     print("CPU will be used.")
 
 # KoBERT 모델과 토크나이저 로드 (Hugging Face Hub 사용)
-# 'skt/kobert-base-v1'은 원본 KoBERT를 개선한 버전입니다.
+
 MODEL_NAME = 'skt/kobert-base-v1'
 print(f"Loading model: {MODEL_NAME}...")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
