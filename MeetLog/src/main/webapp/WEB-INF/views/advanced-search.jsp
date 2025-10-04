@@ -20,194 +20,635 @@
     <title>통합 검색 - MEET LOG</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Noto Sans KR', sans-serif; }
-        body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; }
-        .glass-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08); }
-        .gradient-text { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .search-tab-active { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff !important; box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25); }
-        .search-tab { transition: all 0.25s ease; cursor: pointer; }
-        .search-tab:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12); border-color: rgba(37, 99, 235, 0.35); }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        /* Glass morphism 카드 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        /* 그라데이션 텍스트 */
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* 타입별 그라데이션 배경 */
+        .gradient-bg-restaurants { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .gradient-bg-reviews { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .gradient-bg-reservations { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .gradient-bg-columns { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+        /* 활성화된 검색 타입 탭 */
+        .search-tab-active {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.3);
+        }
+
+        .search-tab-active.type-restaurants { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+        .search-tab-active.type-reviews { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+        .search-tab-active.type-reservations { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        .search-tab-active.type-columns { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+
+        .search-tab {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .search-tab:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
         .search-tab-active h3,
         .search-tab-active p { color: #fff !important; }
-        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card-hover:hover { transform: translateY(-6px); box-shadow: 0 25px 55px rgba(15, 23, 42, 0.12); }
+
+        .search-tab-active .icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.25) !important;
+            color: #fff !important;
+        }
+
+        /* 필터 카드 */
+        .filter-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+            transition: all 0.25s ease;
+            border: 1px solid #e2e8f0;
+        }
+
+        .filter-card:hover {
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .filter-card label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .filter-card input,
+        .filter-card select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .filter-card input:focus,
+        .filter-card select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 활성 필터 칩 */
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #1e40af;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        .filter-chip button {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(30, 64, 175, 0.15);
+            color: #1e40af;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip button:hover {
+            background: rgba(30, 64, 175, 0.25);
+            transform: scale(1.1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* 검색 버튼 */
+        .btn-search {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.25);
+            transition: all 0.3s ease;
+            min-width: 160px;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-search:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-reset {
+            background: white;
+            color: #64748b;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn-reset:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+
+        /* 카드 호버 효과 */
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 55px rgba(15, 23, 42, 0.12);
+        }
+
+        /* 폼 전환 애니메이션 */
+        .search-section {
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 아이콘 래퍼 */
+        .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* 스티키 검색 버튼 (모바일) */
+        @media (max-width: 768px) {
+            .search-actions-sticky {
+                position: sticky;
+                bottom: 0;
+                background: white;
+                border-top: 1px solid #e2e8f0;
+                padding: 16px;
+                box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.08);
+                z-index: 10;
+            }
+        }
+
+        /* 결과 카운트 배지 */
+        .result-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 빈 상태 일러스트레이션 */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* 터치 친화적 크기 (모바일) */
+        @media (max-width: 768px) {
+            .search-tab {
+                padding: 20px !important;
+            }
+
+            .filter-card input,
+            .filter-card select {
+                padding: 14px 16px;
+                font-size: 16px; /* iOS 줌 방지 */
+            }
+
+            .btn-search,
+            .btn-reset {
+                padding: 18px 32px;
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-100">
     <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
-    <main class="container mx-auto p-4 md:p-8">
+    <main class="container mx-auto px-4 py-8 md:px-6 lg:px-8 max-w-7xl">
         <input type="hidden" id="activeSearchType" value="${empty searchType ? 'restaurants' : searchType}" />
-        <div class="space-y-8">
-            <!-- 헤더 및 검색 유형 토글 -->
-            <div class="glass-card p-8 rounded-3xl">
-                <h1 class="text-4xl font-bold gradient-text mb-2">통합 검색</h1>
-                <p class="text-slate-600 mb-8">음식점 · 리뷰 · 예약 순위 · 칼럼을 하나의 화면에서 찾아보세요</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button type="button" class="search-tab w-full text-left bg-white border border-slate-200 rounded-2xl p-6 flex items-center gap-4 ${searchType == 'restaurants' ? 'search-tab-active' : ''}" data-type="restaurants" id="tab-restaurants" onclick="setSearchType('restaurants')">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">🍽️</div>
+        <div class="space-y-8">
+            <!-- 헤더 섹션 -->
+            <div class="glass-card p-8 md:p-10 rounded-3xl">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl md:text-5xl font-black gradient-text mb-3">통합 검색</h1>
+                    <p class="text-slate-600 text-lg">음식점 · 리뷰 · 예약 순위 · 칼럼을 하나의 화면에서 찾아보세요</p>
+                </div>
+
+                <!-- 검색 타입 선택 탭 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" role="tablist" aria-label="검색 타입 선택">
+                    <button type="button"
+                            class="search-tab type-restaurants w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'restaurants' ? 'search-tab-active' : ''}"
+                            data-type="restaurants"
+                            id="tab-restaurants"
+                            onclick="setSearchType('restaurants')"
+                            role="tab"
+                            aria-selected="${searchType == 'restaurants' ? 'true' : 'false'}"
+                            aria-controls="form-restaurants">
+                        <div class="icon-wrapper bg-blue-100 text-blue-600">🍽️</div>
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800">음식점 검색</h3>
-                            <p class="text-sm text-slate-500">키워드로 맛집을 찾아보세요.</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">음식점 검색</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집을 찾아보세요</p>
                         </div>
                     </button>
-                    <button type="button" class="search-tab w-full text-left bg-white border border-slate-200 rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reviews' ? 'search-tab-active' : ''}" data-type="reviews" id="tab-reviews" onclick="setSearchType('reviews')">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl">📝</div>
+
+                    <button type="button"
+                            class="search-tab type-reviews w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reviews' ? 'search-tab-active' : ''}"
+                            data-type="reviews"
+                            id="tab-reviews"
+                            onclick="setSearchType('reviews')"
+                            role="tab"
+                            aria-selected="${searchType == 'reviews' ? 'true' : 'false'}"
+                            aria-controls="form-reviews">
+                        <div class="icon-wrapper bg-purple-100 text-purple-600">📝</div>
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800">리뷰 검색</h3>
-                            <p class="text-sm text-slate-500">평점, 음식점, 작성자 기준으로 리뷰를 찾아보세요.</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">리뷰 검색</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">평점과 키워드로</p>
                         </div>
                     </button>
-                    <button type="button" class="search-tab w-full text-left bg-white border border-slate-200 rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reservations' ? 'search-tab-active' : ''}" data-type="reservations" id="tab-reservations" onclick="setSearchType('reservations')">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl">📅</div>
+
+                    <button type="button"
+                            class="search-tab type-reservations w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reservations' ? 'search-tab-active' : ''}"
+                            data-type="reservations"
+                            id="tab-reservations"
+                            onclick="setSearchType('reservations')"
+                            role="tab"
+                            aria-selected="${searchType == 'reservations' ? 'true' : 'false'}"
+                            aria-controls="form-reservations">
+                        <div class="icon-wrapper bg-emerald-100 text-emerald-600">📅</div>
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800">예약 순위 검색</h3>
-                            <p class="text-sm text-slate-500">기간별 예약 순위로 음식점을 확인하세요.</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">예약 순위</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">인기 음식점 확인</p>
                         </div>
                     </button>
-                    <button type="button" class="search-tab w-full text-left bg-white border border-slate-200 rounded-2xl p-6 flex items-center gap-4 ${searchType == 'columns' ? 'search-tab-active' : ''}" data-type="columns" id="tab-columns" onclick="setSearchType('columns')">
-                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-2xl">📰</div>
+
+                    <button type="button"
+                            class="search-tab type-columns w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'columns' ? 'search-tab-active' : ''}"
+                            data-type="columns"
+                            id="tab-columns"
+                            onclick="setSearchType('columns')"
+                            role="tab"
+                            aria-selected="${searchType == 'columns' ? 'true' : 'false'}"
+                            aria-controls="form-columns">
+                        <div class="icon-wrapper bg-orange-100 text-orange-600">📰</div>
                         <div>
-                            <h3 class="text-lg font-semibold text-slate-800">칼럼 검색</h3>
-                            <p class="text-sm text-slate-500">키워드로 칼럼을 찾아보세요.</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">칼럼 검색</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집 이야기 탐색</p>
                         </div>
                     </button>
                 </div>
             </div>
 
-            <!-- 검색 폼 영역 -->
-            <div class="glass-card p-8 rounded-3xl">
-                <!-- 음식점 검색 -->
-                <div class="search-section data-section-restaurants" data-type="restaurants" id="form-restaurants" style="display: ${searchType == 'restaurants' ? 'block' : 'none'};">
-                    <form action="${pageContext.request.contextPath}/search" method="post" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 검색 필터 영역 -->
+            <div class="glass-card p-6 md:p-8 rounded-3xl">
+                <!-- 적용된 필터 표시 영역 -->
+                <div id="active-filters" class="mb-6 hidden" role="region" aria-live="polite">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <span>✓</span> 적용된 필터
+                        </h3>
+                        <button type="button"
+                                onclick="resetForm()"
+                                class="text-xs text-blue-600 hover:text-blue-800 font-semibold"
+                                aria-label="모든 필터 초기화">
+                            전체 초기화
+                        </button>
+                    </div>
+                    <div id="filter-chips" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- 음식점 검색 폼 -->
+                <div class="search-section" data-type="restaurants" id="form-restaurants" role="tabpanel" aria-labelledby="tab-restaurants">
+                    <form action="${pageContext.request.contextPath}/search" method="post">
                         <input type="hidden" name="type" value="restaurants" />
                         <input type="hidden" name="submitted" value="true" />
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">키워드</label>
-                            <input type="text" name="keyword" value="${empty searchParams.keyword ? '' : searchParams.keyword}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="맛집 이름, 지역, 메뉴 등" />
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                            <!-- 키워드 필터 -->
+                            <div class="filter-card md:col-span-2 lg:col-span-3">
+                                <label for="restaurant-keyword">
+                                    <span>🔍</span> 키워드
+                                </label>
+                                <input type="text"
+                                       id="restaurant-keyword"
+                                       name="keyword"
+                                       value="${empty searchParams.keyword ? '' : searchParams.keyword}"
+                                       placeholder="맛집 이름, 지역, 메뉴 등을 입력하세요"
+                                       aria-describedby="keyword-help" />
+                                <p id="keyword-help" class="sr-only">검색하고 싶은 음식점의 이름이나 위치를 입력하세요</p>
+                            </div>
+
+                            <!-- 음식 종류 필터 -->
+                            <div class="filter-card">
+                                <label for="restaurant-category">
+                                    <span>🍜</span> 음식 종류
+                                </label>
+                                <select name="category" id="restaurant-category">
+                                    <option value="">전체</option>
+                                    <option value="한식" ${searchParams.category == '한식' ? 'selected' : ''}>한식</option>
+                                    <option value="양식" ${searchParams.category == '양식' ? 'selected' : ''}>양식</option>
+                                    <option value="일식" ${searchParams.category == '일식' ? 'selected' : ''}>일식</option>
+                                    <option value="중식" ${searchParams.category == '중식' ? 'selected' : ''}>중식</option>
+                                    <option value="카페" ${searchParams.category == '카페' ? 'selected' : ''}>카페</option>
+                                    <option value="디저트" ${searchParams.category == '디저트' ? 'selected' : ''}>디저트</option>
+                                </select>
+                            </div>
+
+                            <!-- 가격대 필터 -->
+                            <div class="filter-card">
+                                <label for="restaurant-price">
+                                    <span>💰</span> 가격대 (1인)
+                                </label>
+                                <select name="price" id="restaurant-price">
+                                    <option value="">전체</option>
+                                    <option value="1" ${searchParams.price == '1' ? 'selected' : ''}>~1만원</option>
+                                    <option value="2" ${searchParams.price == '2' ? 'selected' : ''}>1~2만원</option>
+                                    <option value="3" ${searchParams.price == '3' ? 'selected' : ''}>2~4만원</option>
+                                    <option value="4" ${searchParams.price == '4' ? 'selected' : ''}>4만원 이상</option>
+                                </select>
+                            </div>
+
+                            <!-- 주차 여부 필터 -->
+                            <div class="filter-card">
+                                <label for="restaurant-parking">
+                                    <span>🅿️</span> 주차 여부
+                                </label>
+                                <select name="parking" id="restaurant-parking">
+                                    <option value="">전체</option>
+                                    <option value="true" ${searchParams.parking == 'true' ? 'selected' : ''}>가능</option>
+                                    <option value="false" ${searchParams.parking == 'false' ? 'selected' : ''}>불가</option>
+                                </select>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">음식 종류</label>
-                            <select name="category" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">전체</option>
-                                <option value="한식" ${searchParams.category == '한식' ? 'selected' : ''}>한식</option>
-                                <option value="양식" ${searchParams.category == '양식' ? 'selected' : ''}>양식</option>
-                                <option value="일식" ${searchParams.category == '일식' ? 'selected' : ''}>일식</option>
-                                <option value="중식" ${searchParams.category == '중식' ? 'selected' : ''}>중식</option>
-                                <option value="카페" ${searchParams.category == '카페' ? 'selected' : ''}>카페</option>
-                                <option value="디저트" ${searchParams.category == '디저트' ? 'selected' : ''}>디저트</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">가격대 (1인)</label>
-                            <select name="price" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">전체</option>
-                                <option value="1" ${searchParams.price == '1' ? 'selected' : ''}>~1만원</option>
-                                <option value="2" ${searchParams.price == '2' ? 'selected' : ''}>1~2만원</option>
-                                <option value="3" ${searchParams.price == '3' ? 'selected' : ''}>2~4만원</option>
-                                <option value="4" ${searchParams.price == '4' ? 'selected' : ''}>4만원 이상</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">주차 여부</label>
-                            <select name="parking" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">전체</option>
-                                <option value="true" ${searchParams.parking == 'true' ? 'selected' : ''}>가능</option>
-                                <option value="false" ${searchParams.parking == 'false' ? 'selected' : ''}>불가</option>
-                            </select>
-                        </div>
+
                         <input type="hidden" name="sortBy" value="${empty searchParams.sortBy ? '' : searchParams.sortBy}" />
-                        <div class="md:col-span-2 lg:col-span-3 flex flex-wrap gap-3">
-                            <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
-                                🔍 <span>검색</span>
+
+                        <!-- 검색 버튼 -->
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="button"
+                                    onclick="resetForm()"
+                                    class="btn-reset w-full sm:w-auto"
+                                    aria-label="검색 필터 초기화">
+                                <span>🔄</span> 초기화
+                            </button>
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto"
+                                    aria-label="음식점 검색 실행">
+                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- 리뷰 검색 -->
-                <div class="search-section data-section-reviews" data-type="reviews" id="form-reviews" style="display: ${searchType == 'reviews' ? 'block' : 'none'};">
-                    <form action="${pageContext.request.contextPath}/search" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 리뷰 검색 폼 -->
+                <div class="search-section" data-type="reviews" id="form-reviews" role="tabpanel" aria-labelledby="tab-reviews">
+                    <form action="${pageContext.request.contextPath}/search" method="post">
                         <input type="hidden" name="type" value="reviews" />
                         <input type="hidden" name="submitted" value="true" />
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">키워드</label>
-                            <input type="text" name="keyword" value="${empty searchParams.keyword ? '' : searchParams.keyword}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="리뷰 내용, 작성자, 음식점" />
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <!-- 키워드 필터 -->
+                            <div class="filter-card md:col-span-2">
+                                <label for="review-keyword">
+                                    <span>🔍</span> 키워드
+                                </label>
+                                <input type="text"
+                                       id="review-keyword"
+                                       name="keyword"
+                                       value="${empty searchParams.keyword ? '' : searchParams.keyword}"
+                                       placeholder="리뷰 내용, 작성자, 음식점 이름 등" />
+                            </div>
+
+                            <!-- 최소 평점 -->
+                            <div class="filter-card">
+                                <label for="review-min-rating">
+                                    <span>⭐</span> 최소 평점
+                                </label>
+                                <select name="minRating" id="review-min-rating">
+                                    <option value="">전체</option>
+                                    <option value="5" ${searchParams.minRating == '5' ? 'selected' : ''}>5점</option>
+                                    <option value="4" ${searchParams.minRating == '4' ? 'selected' : ''}>4점 이상</option>
+                                    <option value="3" ${searchParams.minRating == '3' ? 'selected' : ''}>3점 이상</option>
+                                    <option value="2" ${searchParams.minRating == '2' ? 'selected' : ''}>2점 이상</option>
+                                    <option value="1" ${searchParams.minRating == '1' ? 'selected' : ''}>1점 이상</option>
+                                </select>
+                            </div>
+
+                            <!-- 최대 평점 -->
+                            <div class="filter-card">
+                                <label for="review-max-rating">
+                                    <span>⭐</span> 최대 평점
+                                </label>
+                                <select name="maxRating" id="review-max-rating">
+                                    <option value="">전체</option>
+                                    <option value="5" ${searchParams.maxRating == '5' ? 'selected' : ''}>5점</option>
+                                    <option value="4" ${searchParams.maxRating == '4' ? 'selected' : ''}>4점 이하</option>
+                                    <option value="3" ${searchParams.maxRating == '3' ? 'selected' : ''}>3점 이하</option>
+                                    <option value="2" ${searchParams.maxRating == '2' ? 'selected' : ''}>2점 이하</option>
+                                    <option value="1" ${searchParams.maxRating == '1' ? 'selected' : ''}>1점 이하</option>
+                                </select>
+                            </div>
+
+                            <!-- 시작 날짜 -->
+                            <div class="filter-card">
+                                <label for="review-start-date">
+                                    <span>📅</span> 시작 날짜
+                                </label>
+                                <input type="date"
+                                       id="review-start-date"
+                                       name="startDate"
+                                       value="${empty searchParams.startDate ? '' : searchParams.startDate}" />
+                            </div>
+
+                            <!-- 종료 날짜 -->
+                            <div class="filter-card">
+                                <label for="review-end-date">
+                                    <span>📅</span> 종료 날짜
+                                </label>
+                                <input type="date"
+                                       id="review-end-date"
+                                       name="endDate"
+                                       value="${empty searchParams.endDate ? '' : searchParams.endDate}" />
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">최소 평점</label>
-                            <select name="minRating" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                <option value="">전체</option>
-                                <option value="5" ${searchParams.minRating == '5' ? 'selected' : ''}>5점</option>
-                                <option value="4" ${searchParams.minRating == '4' ? 'selected' : ''}>4점 이상</option>
-                                <option value="3" ${searchParams.minRating == '3' ? 'selected' : ''}>3점 이상</option>
-                                <option value="2" ${searchParams.minRating == '2' ? 'selected' : ''}>2점 이상</option>
-                                <option value="1" ${searchParams.minRating == '1' ? 'selected' : ''}>1점 이상</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">최대 평점</label>
-                            <select name="maxRating" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                                <option value="">전체</option>
-                                <option value="5" ${searchParams.maxRating == '5' ? 'selected' : ''}>5점</option>
-                                <option value="4" ${searchParams.maxRating == '4' ? 'selected' : ''}>4점 이하</option>
-                                <option value="3" ${searchParams.maxRating == '3' ? 'selected' : ''}>3점 이하</option>
-                                <option value="2" ${searchParams.maxRating == '2' ? 'selected' : ''}>2점 이하</option>
-                                <option value="1" ${searchParams.maxRating == '1' ? 'selected' : ''}>1점 이하</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">시작 날짜</label>
-                            <input type="date" name="startDate" value="${empty searchParams.startDate ? '' : searchParams.startDate}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">종료 날짜</label>
-                            <input type="date" name="endDate" value="${empty searchParams.endDate ? '' : searchParams.endDate}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" />
-                        </div>
-                        <div class="md:col-span-2 flex flex-wrap gap-3">
-                            <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
-                                🔍 <span>검색</span>
+
+                        <!-- 검색 버튼 -->
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="button"
+                                    onclick="resetForm()"
+                                    class="btn-reset w-full sm:w-auto">
+                                <span>🔄</span> 초기화
+                            </button>
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- 예약 검색 -->
-                <div class="search-section data-section-reservations" data-type="reservations" id="form-reservations" style="display: ${searchType == 'reservations' ? 'block' : 'none'};">
-                    <form action="${pageContext.request.contextPath}/search" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 예약 순위 검색 폼 -->
+                <div class="search-section" data-type="reservations" id="form-reservations" role="tabpanel" aria-labelledby="tab-reservations">
+                    <form action="${pageContext.request.contextPath}/search" method="post">
                         <input type="hidden" name="type" value="reservations" />
                         <input type="hidden" name="submitted" value="true" />
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">시작 날짜</label>
-                            <input type="date" name="startDate" value="${empty searchParams.startDate ? '' : searchParams.startDate}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <!-- 시작 날짜 -->
+                            <div class="filter-card">
+                                <label for="reservation-start-date">
+                                    <span>📅</span> 시작 날짜
+                                </label>
+                                <input type="date"
+                                       id="reservation-start-date"
+                                       name="startDate"
+                                       value="${empty searchParams.startDate ? '' : searchParams.startDate}" />
+                            </div>
+
+                            <!-- 종료 날짜 -->
+                            <div class="filter-card">
+                                <label for="reservation-end-date">
+                                    <span>📅</span> 종료 날짜
+                                </label>
+                                <input type="date"
+                                       id="reservation-end-date"
+                                       name="endDate"
+                                       value="${empty searchParams.endDate ? '' : searchParams.endDate}" />
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">종료 날짜</label>
-                            <input type="date" name="endDate" value="${empty searchParams.endDate ? '' : searchParams.endDate}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
-                        </div>
-                        <div class="md:col-span-2 flex flex-wrap gap-3">
-                            <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
-                                🔍 <span>검색</span>
+
+                        <!-- 검색 버튼 -->
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="button"
+                                    onclick="resetForm()"
+                                    class="btn-reset w-full sm:w-auto">
+                                <span>🔄</span> 초기화
+                            </button>
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- 칼럼 검색 -->
-                <div class="search-section data-section-columns" data-type="columns" id="form-columns" style="display: ${searchType == 'columns' ? 'block' : 'none'};">
-                    <form action="${pageContext.request.contextPath}/search" method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 칼럼 검색 폼 -->
+                <div class="search-section" data-type="columns" id="form-columns" role="tabpanel" aria-labelledby="tab-columns">
+                    <form action="${pageContext.request.contextPath}/search" method="post">
                         <input type="hidden" name="type" value="columns" />
                         <input type="hidden" name="submitted" value="true" />
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">키워드</label>
-                            <input type="text" name="keyword" value="${empty searchParams.keyword ? '' : searchParams.keyword}" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="칼럼 내용, 작성자, 칼럼 제목" />
+
+                        <div class="grid grid-cols-1 gap-4 mb-6">
+                            <!-- 키워드 필터 -->
+                            <div class="filter-card">
+                                <label for="column-keyword">
+                                    <span>🔍</span> 키워드
+                                </label>
+                                <input type="text"
+                                       id="column-keyword"
+                                       name="keyword"
+                                       value="${empty searchParams.keyword ? '' : searchParams.keyword}"
+                                       placeholder="칼럼 내용, 작성자, 제목 등" />
+                            </div>
                         </div>
-                        <div class="md:col-span-2 flex flex-wrap gap-3">
-                            <button type="submit" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
-                                🔍 <span>검색</span>
+
+                        <!-- 검색 버튼 -->
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="button"
+                                    onclick="resetForm()"
+                                    class="btn-reset w-full sm:w-auto">
+                                <span>🔄</span> 초기화
+                            </button>
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
@@ -218,30 +659,31 @@
             <!-- 검색 결과 영역 -->
             <c:choose>
                 <c:when test="${searchType == 'restaurants'}">
-                    <div class="glass-card p-8 rounded-3xl">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold gradient-text">음식점 검색 결과</h2>
-                            <span class="text-slate-600">총 <strong>${totalResults != null ? totalResults : 0}</strong>건</span>
-                        </div>
-                        
-                        <%-- JavaScript에 의해 동적으로 채워질 컨테이너 (항상 렌더링) --%>
-                        <div id="restaurant-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="glass-card p-6 md:p-8 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h2 class="text-2xl md:text-3xl font-black gradient-text">음식점 검색 결과</h2>
+                            <span class="result-badge">총 ${totalResults != null ? totalResults : 0}건</span>
                         </div>
 
-                        <%-- 결과 없음 메시지 (JavaScript로 제어) --%>
-                        <div id="no-restaurant-results" class="text-center py-20" style="display: none;">
-                            <div class="text-5xl mb-4">🔍</div>
-                            <p class="text-lg text-slate-600">조건에 맞는 음식점이 없습니다. 필터를 조정해보세요.</p>
+                        <!-- JavaScript에 의해 동적으로 채워질 컨테이너 -->
+                        <div id="restaurant-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+                        <!-- 결과 없음 메시지 -->
+                        <div id="no-restaurant-results" class="empty-state" style="display: none;">
+                            <div class="empty-state-icon">🔍</div>
+                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 음식점이 없습니다</p>
+                            <p class="text-slate-500">필터를 조정하거나 다른 키워드로 검색해보세요</p>
                         </div>
 
-                        <%-- "더 보기" 버튼 컨테이너 --%>
+                        <!-- 더 보기 버튼 -->
                         <div id="load-more-container" class="mt-8 text-center" style="display: none;">
-                            <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            <button id="load-more-btn"
+                                    class="btn-search disabled:opacity-50 disabled:cursor-not-allowed">
                                 더 보기
                             </button>
                         </div>
-                        
-                        <%-- 기존 페이지네이션은 DB 검색 결과에 대해서만 유지 --%>
+
+                        <!-- 기존 페이지네이션 -->
                         <c:if test="${totalPages > 1 and empty searchParams.keyword}">
                             <div class="mt-8 flex justify-center">
                                 <!-- 페이지네이션 UI -->
@@ -251,14 +693,15 @@
                 </c:when>
 
                 <c:when test="${searchType == 'reviews'}">
-                    <div class="glass-card p-8 rounded-3xl">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold gradient-text">리뷰 검색 결과</h2>
-                            <span class="text-slate-600">총 <strong>${searchResults != null ? searchResults.size() : 0}</strong>건</span>
+                    <div class="glass-card p-6 md:p-8 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h2 class="text-2xl md:text-3xl font-black gradient-text">리뷰 검색 결과</h2>
+                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
                         </div>
+
                         <c:choose>
                             <c:when test="${not empty searchResults}">
-                                <div class="space-y-6">
+                                <div class="space-y-4">
                                     <c:forEach var="review" items="${searchResults}">
                                         <div class="bg-white rounded-2xl p-6 card-hover">
                                             <div class="flex justify-between items-start mb-4">
@@ -297,14 +740,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="text-center py-20">
-                                            <div class="text-5xl mb-4">📝</div>
-                                            <p class="text-lg text-slate-600">조건에 맞는 리뷰가 없습니다.</p>
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📝</div>
+                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 리뷰가 없습니다</p>
+                                            <p class="text-slate-500">다른 조건으로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="text-center py-16 text-slate-500">
-                                            검색 조건을 입력한 뒤 검색 버튼을 눌러보세요.
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🔍</div>
+                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -314,11 +759,12 @@
                 </c:when>
 
                 <c:when test="${searchType == 'reservations'}">
-                    <div class="glass-card p-8 rounded-3xl">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold gradient-text">예약 검색 결과</h2>
-                            <span class="text-slate-600">총 <strong>${searchResults != null ? searchResults.size() : 0}</strong>건</span>
+                    <div class="glass-card p-6 md:p-8 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h2 class="text-2xl md:text-3xl font-black gradient-text">예약 검색 결과</h2>
+                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
                         </div>
+
                         <c:choose>
                             <c:when test="${not empty searchResults}">
                                 <div class="space-y-4">
@@ -343,14 +789,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="text-center py-20">
-                                            <div class="text-5xl mb-4">📅</div>
-                                            <p class="text-lg text-slate-600">조건에 맞는 예약 내역이 없습니다.</p>
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📅</div>
+                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 예약 내역이 없습니다</p>
+                                            <p class="text-slate-500">다른 기간으로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="text-center py-16 text-slate-500">
-                                            검색 조건을 입력한 뒤 검색 버튼을 눌러보세요.
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🔍</div>
+                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -360,14 +808,15 @@
                 </c:when>
 
                 <c:when test="${searchType == 'columns'}">
-                    <div class="glass-card p-8 rounded-3xl">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-2xl font-bold gradient-text">칼럼 검색 결과</h2>
-                            <span class="text-slate-600">총 <strong>${searchResults != null ? searchResults.size() : 0}</strong>건</span>
+                    <div class="glass-card p-6 md:p-8 rounded-3xl">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <h2 class="text-2xl md:text-3xl font-black gradient-text">칼럼 검색 결과</h2>
+                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
                         </div>
+
                         <c:choose>
                             <c:when test="${not empty searchResults}">
-                                <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <c:forEach var="column" items="${searchResults}">
                                         <div class="bg-white rounded-2xl p-6 card-hover">
                                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -387,11 +836,14 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                             </p>
-                                            <div class="flex items-center justify-between text-sm text-slate-500">
+                                            <div class="flex items-center justify-between text-sm text-slate-500 mb-4">
                                                 <span>조회수 ${column.views}</span>
                                                 <span>좋아요 ${column.likes}</span>
                                             </div>
-                                            <a href="${pageContext.request.contextPath}/column/detail?id=${column.id}" class="btn-primary mt-4 inline-block text-white px-4 py-2 rounded-lg font-semibold">칼럼 보기</a>
+                                            <a href="${pageContext.request.contextPath}/column/detail?id=${column.id}"
+                                               class="btn-search inline-block text-center w-full py-3 text-sm">
+                                                칼럼 보기
+                                            </a>
                                         </div>
                                     </c:forEach>
                                 </div>
@@ -399,14 +851,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="text-center py-20">
-                                            <div class="text-5xl mb-4">📰</div>
-                                            <p class="text-lg text-slate-600">조건에 맞는 칼럼이 없습니다.</p>
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">📰</div>
+                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 칼럼이 없습니다</p>
+                                            <p class="text-slate-500">다른 키워드로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="text-center py-16 text-slate-500">
-                                            검색 조건을 입력한 뒤 검색 버튼을 눌러보세요.
+                                        <div class="empty-state">
+                                            <div class="empty-state-icon">🔍</div>
+                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -417,7 +871,10 @@
 
                 <c:otherwise>
                     <div class="glass-card p-8 rounded-3xl text-center">
-                        <p class="text-slate-600">검색 유형을 선택하고 조건을 입력해 주세요.</p>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👆</div>
+                            <p class="text-slate-600">검색 유형을 선택하고 조건을 입력해 주세요</p>
+                        </div>
                     </div>
                 </c:otherwise>
             </c:choose>
@@ -435,33 +892,44 @@
         let isKakaoSearchEnd = false;
         let currentSearchCoords = null;
         let currentSearchCategory = '';
-
         let dbResultCount = 0;
         let extResultCount = 0;
+
         function setSearchType(type) {
             const hiddenTypeField = document.getElementById('activeSearchType');
             if (hiddenTypeField) {
                 hiddenTypeField.value = type;
             }
 
+            // 탭 활성화 상태 업데이트
             document.querySelectorAll('.search-tab').forEach(btn => {
-                btn.classList.toggle('search-tab-active', btn.dataset.type === type);
+                const isActive = btn.dataset.type === type;
+                btn.classList.toggle('search-tab-active', isActive);
+                btn.classList.toggle('type-' + btn.dataset.type, isActive);
+                btn.setAttribute('aria-selected', isActive);
             });
 
+            // 폼 섹션 표시/숨김
             document.querySelectorAll('.search-section').forEach(section => {
                 const isActive = section.dataset.type === type;
                 section.style.display = isActive ? 'block' : 'none';
+                section.setAttribute('aria-hidden', !isActive);
+
                 const typeInput = section.querySelector('input[name="type"]');
                 if (typeInput) {
                     typeInput.value = section.dataset.type;
                 }
             });
+
+            // 필터 상태 업데이트
+            updateActiveFilters();
         }
 
         function resetForm() {
             const activeType = document.getElementById('activeSearchType').value || 'restaurants';
             const activeSection = document.querySelector(`.search-section[data-type="${activeType}"]`);
             if (!activeSection) return;
+
             const form = activeSection.querySelector('form');
             if (form) {
                 form.reset();
@@ -470,42 +938,128 @@
                     typeInput.value = activeType;
                 }
             }
+
+            // 필터 칩 초기화
+            updateActiveFilters();
+        }
+
+        // 적용된 필터를 시각적으로 표시
+        function updateActiveFilters() {
+            const filterChipsContainer = document.getElementById('filter-chips');
+            const activeFiltersSection = document.getElementById('active-filters');
+            filterChipsContainer.innerHTML = '';
+
+            const form = document.querySelector('.search-section[style*="display: block"] form');
+            if (!form) return;
+
+            const filters = [];
+            const formData = new FormData(form);
+
+            formData.forEach((value, key) => {
+                if (key !== 'type' && key !== 'submitted' && key !== 'sortBy' && value && value.trim() !== '') {
+                    let label = key;
+                    switch(key) {
+                        case 'keyword': label = '키워드'; break;
+                        case 'category': label = '카테고리'; break;
+                        case 'price': label = '가격대'; break;
+                        case 'parking': label = '주차'; break;
+                        case 'minRating': label = '최소 평점'; break;
+                        case 'maxRating': label = '최대 평점'; break;
+                        case 'startDate': label = '시작일'; break;
+                        case 'endDate': label = '종료일'; break;
+                    }
+
+                    // 값 표시 최적화
+                    let displayValue = value;
+                    if (key === 'parking') displayValue = value === 'true' ? '가능' : '불가';
+                    if (key === 'price') {
+                        const priceLabels = {'1': '~1만원', '2': '1~2만원', '3': '2~4만원', '4': '4만원 이상'};
+                        displayValue = priceLabels[value] || value;
+                    }
+
+                    filters.push({ label, value: displayValue, key });
+                }
+            });
+
+            if (filters.length > 0) {
+                activeFiltersSection.classList.remove('hidden');
+                filters.forEach(filter => {
+                    const chip = document.createElement('span');
+                    chip.className = 'filter-chip';
+                    chip.innerHTML = `
+                        <span>${filter.label}: ${filter.value}</span>
+                        <button
+                            type="button"
+                            onclick="removeFilter('${filter.key}')"
+                            aria-label="${filter.label} 필터 제거">
+                            ×
+                        </button>
+                    `;
+                    filterChipsContainer.appendChild(chip);
+                });
+            } else {
+                activeFiltersSection.classList.add('hidden');
+            }
+        }
+
+        function removeFilter(key) {
+            const form = document.querySelector('.search-section[style*="display: block"] form');
+            if (!form) return;
+
+            const input = form.querySelector(`[name="${key}"]`);
+            if (input) {
+                if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else {
+                    input.value = '';
+                }
+            }
+            updateActiveFilters();
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             const initialType = document.getElementById('activeSearchType').value || 'restaurants';
             setSearchType(initialType);
 
+            // 초기 필터 상태 표시
+            updateActiveFilters();
+
+            // 모든 입력 필드에 change 이벤트 리스너 추가
+            document.querySelectorAll('.search-section input, .search-section select').forEach(input => {
+                input.addEventListener('change', updateActiveFilters);
+                input.addEventListener('input', updateActiveFilters);
+            });
+
             // 검색 폼 제출 이벤트 리스너 추가
             const searchForm = document.getElementById('form-restaurants').querySelector('form');
             searchForm.addEventListener('submit', function(e) {
-                e.preventDefault(); // 기본 폼 제출(페이지 새로고침) 방지
+                e.preventDefault();
                 const keyword = this.elements.keyword.value;
                 const category = this.elements.category.value;
                 performAjaxSearch(keyword, category);
             });
 
-            // "더 보기" 버튼 클릭 이벤트 리스너 추가
+            // 더 보기 버튼 클릭 이벤트
             document.getElementById('load-more-btn').addEventListener('click', function() {
                 if (!isLoading && (!isDbSearchEnd || !isKakaoSearchEnd)) {
                     isLoading = true;
-                    this.textContent = '불러오는 중...';
+                    this.innerHTML = '<span class="spinner"></span>';
                     this.disabled = true;
                     currentPage++;
                     if (kakaoPagination && !isKakaoSearchEnd) {
-                        kakaoPagination.nextPage(); // placesSearchCB가 자동으로 호출됨
+                        kakaoPagination.nextPage();
                     } else {
                         fetchDbResults(currentPage, currentSearchCoords, currentSearchCategory);
                     }
                 }
             });
 
-            // 검색 결과 컨테이너 초기화 및 '결과 없음' 메시지 숨기기
+            // 검색 결과 컨테이너 초기화
             document.getElementById('restaurant-results-list').innerHTML = '';
             document.getElementById('no-restaurant-results').style.display = 'none';
 
-            // 검색 결과가 있을 경우에만 렌더링 함수 호출
-            const dbRestaurants = <% out.print(gson.toJson(request.getAttribute("restaurants") != null ? request.getAttribute("restaurants") : new java.util.ArrayList<>())); %>;            
+            // 검색 결과가 있을 경우 렌더링
+            const dbRestaurants = <%= gson.toJson(request.getAttribute("restaurants") != null ? request.getAttribute("restaurants") : new java.util.ArrayList<>()) %>;
             if (dbRestaurants.length > 0) {
                 displayDbPlaces(dbRestaurants, contextPath);
             }
@@ -520,7 +1074,7 @@
             }
 
             // 페이지네이션으로 전달된 외부 결과 렌더링
-            const externalRestaurants = <% out.print(gson.toJson(request.getAttribute("externalRestaurants") != null ? request.getAttribute("externalRestaurants") : new java.util.ArrayList<>())); %>;
+            const externalRestaurants = <%= gson.toJson(request.getAttribute("externalRestaurants") != null ? request.getAttribute("externalRestaurants") : new java.util.ArrayList<>()) %>;
             if (externalRestaurants.length > 0) {
                 displayPlaces(externalRestaurants, contextPath);
             }
@@ -530,10 +1084,8 @@
             const kakaoData = (status === kakao.maps.services.Status.OK) ? data : [];
             kakaoPagination = pagination;
             isKakaoSearchEnd = !pagination.hasNextPage;
-            
-            // 1. DB 결과를 먼저 가져와서 표시합니다.
+
             fetchDbResults(currentPage, currentSearchCoords, currentSearchCategory, function() {
-                // 2. DB 결과 표시 후, Kakao 결과를 표시합니다.
                 if (kakaoData.length > 0) {
                     const kakaoPlaces = kakaoData.map(function(p) { return ({
                         place_name: p.place_name, address_name: p.address_name,
@@ -572,7 +1124,7 @@
             isLoading = false;
             const loadMoreBtn = document.getElementById('load-more-btn');
             const loadMoreContainer = document.getElementById('load-more-container');
-            
+
             loadMoreBtn.textContent = '더 보기';
             loadMoreBtn.disabled = false;
 
@@ -589,26 +1141,23 @@
         function performAjaxSearch(keyword, category) {
             if (!keyword || keyword.trim() === "") return;
 
-            // 검색 시작 전, 기존 결과 초기화
             currentPage = 1;
             isDbSearchEnd = false;
             isKakaoSearchEnd = false;
             kakaoPagination = null;
             currentSearchCoords = null;
-            // 검색 시 카운터 초기화
             dbResultCount = 0;
             extResultCount = 0;
             currentSearchCategory = category;
             document.getElementById('restaurant-results-list').innerHTML = '';
             document.getElementById('no-restaurant-results').style.display = 'none';
             document.getElementById('load-more-container').style.display = 'none';
-            
-            // URL 업데이트
+
             const newUrl = contextPath + "/search?type=restaurants&submitted=true&keyword=" + encodeURIComponent(keyword) + "&category=" + encodeURIComponent(category);
             history.pushState({keyword, category}, '', newUrl);
 
             const ps = new kakao.maps.services.Places();
-            
+
             ps.keywordSearch(keyword, function(data, status) {
                 if (status === kakao.maps.services.Status.OK && data.length > 0) {
                     const place = data[0];
@@ -621,18 +1170,15 @@
                     };
                     ps.keywordSearch(category || '맛집', placesSearchCB, externalSearchOptions);
                 } else {
-                    // 장소 검색 실패 시 DB만 검색
-                    isKakaoSearchEnd = true; 
+                    isKakaoSearchEnd = true;
                     fetchDbResults(1, null, category, updateLoadMoreButtonState);
                 }
             });
         }
 
-
         function displayPlaces(places, contextPath) {
             const listEl = document.getElementById('restaurant-results-list');
             places.forEach((place, i) => {
-                // search-map.jsp의 displayPlaces와 형식을 맞춤
                 const placeName = place.place_name || place.name;
                 const addressName = place.address_name || place.address;
                 const phone = place.phone || '';
@@ -640,11 +1186,10 @@
                 const lat = place.y || place.latitude;
                 const lng = place.x || place.longitude;
 
-                // 중복 렌더링 방지
                 if (document.querySelector('[data-place-name="' + placeName + '"]')) return;
 
                 const detailUrl = contextPath + "/searchRestaurant/external-detail?name=" + encodeURIComponent(placeName) + "&address=" + encodeURIComponent(addressName) + "&phone=" + encodeURIComponent(phone) + "&category=" + encodeURIComponent(categoryName) + "&lat=" + lat + "&lng=" + lng;
-                const uniqueId = "ext-" + extResultCount; // 전역 카운터 사용
+                const uniqueId = "ext-" + extResultCount;
                 extResultCount++;
                 const placeholderUrl = "https://placehold.co/400x250/e2e8f0/94a3b8?text=Image";
                 const errorImageUrl = "https://placehold.co/400x250/fecaca/991b1b?text=Error";
@@ -654,7 +1199,7 @@
                         '<a href="' + detailUrl + '">' +
                             '<div class="h-48 w-full overflow-hidden" data-place-name="' + placeName + '">' +
                                 '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + placeName + '" class="w-full h-full object-cover" ' +
-                                     'onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
+                                     'onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';" loading="lazy">' +
                             '</div>' +
                         '</a>' +
                         '<div class="p-6 space-y-3">' +
@@ -669,7 +1214,7 @@
                             '<div class="flex items-center justify-between">' +
                                 '<span class="text-slate-500 text-sm">' + (phone || '전화번호 정보 없음') + '</span>' +
                             '</div>' +
-                            '<a href="' + detailUrl + '" class="btn-primary text-white w-full text-center block px-4 py-2 rounded-lg font-semibold">상세 보기</a>' +
+                            '<a href="' + detailUrl + '" class="btn-search text-center block w-full py-3 text-sm">상세 보기</a>' +
                         '</div>' +
                     '</div>';
                 listEl.insertAdjacentHTML('beforeend', itemHtml);
@@ -690,9 +1235,8 @@
         function displayDbPlaces(dbRestaurants, contextPath) {
             const listEl = document.getElementById('restaurant-results-list');
             dbRestaurants.forEach((r, i) => {
-                // 중복 렌더링 방지
                 const restaurantName = r.name;
-                const uniqueId = "db-" + dbResultCount; // 전역 카운터 사용
+                const uniqueId = "db-" + dbResultCount;
                 dbResultCount++;
                 if (document.querySelector('[data-place-name="' + restaurantName + '"]')) return;
 
@@ -706,7 +1250,7 @@
                     '<div class="bg-white rounded-2xl overflow-hidden card-hover">' +
                         '<a href="' + detailUrl + '">' +
                             '<div class="h-48 w-full overflow-hidden" data-place-name="' + restaurantName + '">' +
-                                '<img id="img-' + uniqueId + '" src="' + imageUrl + '" alt="' + r.name + '" class="w-full h-full object-cover" onerror="this.onerror=null;this.src=\'https://placehold.co/400x250/fecaca/991b1b?text=Error\';">' +
+                                '<img id="img-' + uniqueId + '" src="' + imageUrl + '" alt="' + r.name + '" class="w-full h-full object-cover" onerror="this.onerror=null;this.src=\'https://placehold.co/400x250/fecaca/991b1b?text=Error\';" loading="lazy">' +
                             '</div>' +
                         '</a>' +
                         '<div class="p-6 space-y-3">' +
@@ -726,12 +1270,11 @@
                                 '<span class="text-slate-500 text-sm">주차 ' + (r.parking ? '가능' : '불가') + '</span>' +
                                 '<span class="text-slate-500 text-sm">찜 ' + (r.likes || 0) + '</span>' +
                             '</div>' +
-                            '<a href="' + detailUrl + '" class="btn-primary text-white w-full text-center block px-4 py-2 rounded-lg font-semibold">상세 보기</a>' +
+                            '<a href="' + detailUrl + '" class="btn-search text-center block w-full py-3 text-sm">상세 보기</a>' +
                         '</div>' +
                     '</div>';
                 listEl.insertAdjacentHTML('beforeend', itemHtml);
 
-                // DB 결과에 대해서도 이미지 프록시 적용
                 if (!r.image || r.image.trim() === '') {
                     setTimeout(() => {
                         const searchQuery = r.name + " " + (r.address ? r.address.split(' ')[0] : '');

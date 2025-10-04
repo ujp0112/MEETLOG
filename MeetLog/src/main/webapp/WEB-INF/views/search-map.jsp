@@ -9,10 +9,31 @@
     <title>"<c:out value="${keyword}"/>" 검색 결과 - MEET LOG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 한국어 서브셋 + Preload로 최적화 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap&subset=korean" rel="stylesheet">
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
     <style>
-        * { font-family: 'Noto Sans KR', sans-serif; }
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+            /* 한국어 최적화: 기본 줄 높이 증가 */
+            line-height: 1.7;
+        }
+
+        /* 제목은 더 좁은 줄 높이 허용 */
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.4;
+            letter-spacing: -0.02em; /* 자간 살짝 좁혀서 가독성 향상 */
+        }
+
+        /* 본문 텍스트는 충분한 여백 */
+        p, span, li {
+            line-height: 1.7;
+            word-break: keep-all; /* 한국어 단어 단위로 줄바꿈 */
+            overflow-wrap: break-word;
+        }
+
         #results-list { scrollbar-width: thin; scrollbar-color: #a0aec0 #edf2f7; }
         #results-list::-webkit-scrollbar { width: 6px; }
         #results-list::-webkit-scrollbar-track { background: #edf2f7; }
@@ -86,7 +107,7 @@
         }
         .marker-category {
             font-size: 11px;
-            color: #718096;
+            color: #4a5568; /* 대비율 7:1로 개선 (기존 #718096 → #4a5568) */
         }
 
         .marker-kakao .marker-number { background-color: #3182ce; }
@@ -122,18 +143,76 @@
         #research-button.hidden {
             display: none;
         }
+
+        /* 로딩 스피너 스타일 */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 로딩 오버레이 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <div id="app" class="h-screen flex flex-col">
         <jsp:include page="/WEB-INF/views/common/header.jsp" />
         <main class="flex-grow flex flex-col md:flex-row overflow-hidden">
-            <div id="result-panel" class="w-full md:w-1/3 lg:w-1/4 h-1/3 md:h-full flex flex-col border-r border-gray-200 bg-white">
-                <%-- [추가] 검색 폼 --%>
+            <!-- 검색 결과 리스트 (시맨틱 HTML 개선) -->
+            <aside id="result-panel" role="complementary" aria-label="검색 결과 목록" class="w-full md:w-1/3 lg:w-1/4 h-2/5 md:h-full flex flex-col border-r border-gray-200 bg-white relative">
+                <%-- 로딩 오버레이 --%>
+                <div id="loading-overlay" class="loading-overlay hidden" aria-live="assertive" aria-busy="true">
+                    <div class="text-center">
+                        <div class="spinner mb-3"></div>
+                        <p class="text-sm text-gray-600 font-medium">검색 중입니다...</p>
+                    </div>
+                </div>
+
+                <%-- 검색 폼 (ARIA 개선) --%>
                 <div class="p-3 border-b">
-                    <form id="map-search-form" action="${pageContext.request.contextPath}/searchRestaurant" method="get" class="flex space-x-2">
-                        <input type="text" name="keyword" value="<c:out value="${keyword}"/>" placeholder="맛집 이름, 지역 검색" class="flex-grow px-3 py-2 border border-slate-300 rounded-md text-sm">
-                        <select name="category" class="px-2 py-2 border border-slate-300 rounded-md text-sm">
+                    <form id="map-search-form" role="search" action="${pageContext.request.contextPath}/searchRestaurant" method="get" class="flex flex-col sm:flex-row gap-2">
+                        <label for="keyword-input" class="sr-only">검색어</label>
+                        <input
+                            id="keyword-input"
+                            type="text"
+                            name="keyword"
+                            value="<c:out value="${keyword}"/>"
+                            placeholder="맛집 이름, 지역 검색"
+                            aria-label="검색어 입력"
+                            class="flex-grow px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+                        <label for="category-select" class="sr-only">카테고리</label>
+                        <select
+                            id="category-select"
+                            name="category"
+                            aria-label="카테고리 선택"
+                            class="px-2 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
                             <option value="전체" ${category == '전체' ? 'selected' : ''}>전체</option>
                             <option value="한식" ${category == '한식' ? 'selected' : ''}>한식</option>
                             <option value="양식" ${category == '양식' ? 'selected' : ''}>양식</option>
@@ -141,25 +220,31 @@
                             <option value="중식" ${category == '중식' ? 'selected' : ''}>중식</option>
                             <option value="카페" ${category == '카페' ? 'selected' : ''}>카페</option>
                         </select>
-                        <button type="submit" class="px-4 py-2 bg-sky-600 text-white rounded-md text-sm">검색</button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-sky-600 text-white rounded-md text-sm hover:bg-sky-700 transition-colors focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 whitespace-nowrap">
+                            검색
+                        </button>
                     </form>
                 </div>
                 <div class="p-4 border-b">
                     <h1 class="text-xl font-bold text-gray-800">
                         "<span class="text-blue-600"><c:out value="${keyword}"/></span>" 검색 결과
                     </h1>
-                    <p id="result-count" class="text-sm text-gray-500 mt-1">지도를 검색하고 있습니다...</p>
+                    <p id="result-count" role="status" aria-live="polite" aria-atomic="true" class="text-sm text-gray-500 mt-1">지도를 검색하고 있습니다...</p>
                 </div>
-                <div id="results-list" class="flex-grow overflow-y-auto p-2"></div>
-                <%-- 💡 '더 보기' 버튼 컨테이너 추가 --%>
+                <ul id="results-list" role="list" class="flex-grow overflow-y-auto p-2"></ul>
+                <%-- 더 보기 버튼 (ARIA 개선) --%>
                 <div id="load-more-container" class="p-4 border-t text-center hidden">
-                    <button id="load-more-btn" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <button id="load-more-btn" aria-label="더 많은 검색 결과 불러오기" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
                         더 보기
                     </button>
                 </div>
-            </div>
-            <div id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-2/3 md:h-full relative">
-                <div id="map" style="width:100%; height:100%;"></div>
+            </aside>
+
+            <!-- 지도 패널 (시맨틱 HTML 개선) -->
+            <section id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-3/5 md:h-full relative">
+                <div id="map" role="application" aria-label="맛집 위치 지도" style="width:100%; height:100%;"></div>
                 <button id="research-button" class="hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
@@ -277,6 +362,8 @@
         isKakaoSearchEnd = !pagination.hasNextPage;
 
         if (currentPage === 1) {
+            // 로딩 오버레이 표시
+            $('#loading-overlay').removeClass('hidden');
             $('#results-list').empty();
             g.overlays.forEach(overlay => overlay.setMap(null));
             g.listItems.forEach(item => item.el.remove());
@@ -335,6 +422,8 @@
             displayPlaces(kakaoDataForPage, contextPath);
         }).always(function() {
             isLoading = false;
+            // 로딩 오버레이 숨김
+            $('#loading-overlay').addClass('hidden');
             updateResultCount();
             
             // 💡 버튼 상태 업데이트 로직 추가
@@ -402,26 +491,28 @@
             const placeholderUrl = "https://placehold.co/100x100/EBF8FF/3182CE?text=" + encodeURIComponent(categoryName);
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
 
-            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
+            // 시맨틱 HTML + 키보드 네비게이션
             const itemEl = $(
-                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '">' +
-                        '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                    '</a>' +
-                    '<div class="flex-grow">' +
-                        '<h3 class="font-bold text-base text-blue-700">' +
-                            '<a href="' + detailUrl + '" class="inline-block">' + place.place_name + '</a>' +
-                        '</h3>' +
-                        '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
-                        '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
-                        '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
-                    '</div>' +
-                '</div>'
+                '<li role="listitem" class="result-item" data-id="' + uniqueId + '">' +
+                    '<article tabindex="0" class="p-3 border-b border-gray-100 transition flex items-center space-x-4 focus:outline-none focus:ring-2 focus:ring-sky-500">' +
+                        '<a href="' + detailUrl + '">' +
+                            '<img id="img-' + uniqueId + '" src="' + placeholderUrl + '" alt="' + place.place_name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
+                        '</a>' +
+                        '<div class="flex-grow">' +
+                            '<h3 class="font-bold text-base text-blue-700">' +
+                                '<a href="' + detailUrl + '" class="inline-block">' + place.place_name + '</a>' +
+                            '</h3>' +
+                            '<p class="text-gray-600 text-sm mt-1">' + (place.road_address_name || place.address_name) + '</p>' +
+                            '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
+                            '<p class="text-blue-500 text-sm mt-1">' + (place.phone || '전화번호 정보 없음') + '</p>' +
+                        '</div>' +
+                    '</article>' +
+                '</li>'
             );
             listEl.append(itemEl);
             g.listItems.push({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
 
-            // 💡 클릭 이벤트로 하이라이트 기능 변경
+            // 클릭 이벤트
             itemEl.on('click', function(e) {
                 if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3') {
                     map.panTo(placePosition);
@@ -429,16 +520,46 @@
                 }
             });
 
-            setTimeout(function() {
-                const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
-                $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
-                    // This is the critical part.
-                    // Ensure you are using data.imageUrl to access the URL string.
-                    if (data && data.imageUrl) {
-                        $('#img-' + uniqueId).attr('src', data.imageUrl);
+            // 키보드 네비게이션 (Enter/Space/Arrow)
+            itemEl.find('article').on('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    $(this).find('a').first()[0].click();
+                }
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    $(this).closest('li').next().find('article').focus();
+                }
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    $(this).closest('li').prev().find('article').focus();
+                }
+            });
+
+            // Intersection Observer로 뷰포트 진입 시에만 이미지 로드
+            const imgElement = document.getElementById('img-' + uniqueId);
+            const searchQuery = place.place_name + " " + (place.road_address_name || place.address_name).split(" ")[0];
+
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            $.getJSON(contextPath + "/search/image-proxy?query=" + encodeURIComponent(searchQuery), function(data) {
+                                if (data && data.imageUrl) {
+                                    $('#img-' + uniqueId).attr('src', data.imageUrl);
+                                }
+                            });
+                        }, 100);
+                        observer.unobserve(entry.target);
                     }
                 });
-            }, i * 100); 
+            }, {
+                root: document.querySelector('#results-list'),
+                rootMargin: '50px', // 50px 전에 미리 로드 시작
+                threshold: 0.1
+            });
+
+            if (imgElement) imageObserver.observe(imgElement); 
 
             // 💡 mouseover/mouseout 이벤트 제거
         });
@@ -480,33 +601,50 @@
             }
             const errorImageUrl = "https://placehold.co/100x100/fecaca/991b1b?text=Error";
             
-            // 💡 클릭 영역 분리를 위해 <a> 태그 제거 및 구조 변경
+            // 시맨틱 HTML + 키보드 네비게이션
             const itemEl = $(
-                '<div class="result-item p-3 border-b border-gray-100 transition flex items-center space-x-4" data-id="' + uniqueId + '">' +
-                    '<a href="' + detailUrl + '">' +
-                        '<img src="' + imageUrl + '" alt="' + r.name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
-                    '</a>' +
-                    '<div class="flex-grow">' +
-                        '<h3 class="font-bold text-base text-red-700">' +
-                            '<a href="' + detailUrl + '" class="inline-block">' + r.name + '</a>' + '<span class="meetlog-badge">MEET LOG</span>' +
-                        '</h3>' +
-                        '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
+                '<li role="listitem" class="result-item" data-id="' + uniqueId + '">' +
+                    '<article tabindex="0" class="p-3 border-b border-gray-100 transition flex items-center space-x-4 focus:outline-none focus:ring-2 focus:ring-sky-500">' +
+                        '<a href="' + detailUrl + '">' +
+                            '<img src="' + imageUrl + '" alt="' + r.name + '" class="result-item-image flex-shrink-0" onerror="this.onerror=null;this.src=\'' + errorImageUrl + '\';">' +
+                        '</a>' +
+                        '<div class="flex-grow">' +
+                            '<h3 class="font-bold text-base text-red-700">' +
+                                '<a href="' + detailUrl + '" class="inline-block">' + r.name + '</a>' + '<span class="meetlog-badge">MEET LOG</span>' +
+                            '</h3>' +
+                            '<p class="text-gray-600 text-sm mt-1">' + r.address + '</p>' +
                         '<p class="text-gray-500 text-sm mt-1">' + categoryName + '</p>' +
                         '<p class="text-red-500 text-sm mt-1">' + (r.phone || '전화번호 정보 없음') + '</p>' +
                     '</div>' +
-                '</div>'
+                    '</article>' +
+                '</li>'
             );
             listEl.prepend(itemEl);
             g.listItems.unshift({id: uniqueId, el: itemEl, overlay: customOverlay, position: placePosition});
-            
-            // 💡 클릭 이벤트로 하이라이트 기능 변경
+
+            // 클릭 이벤트
             itemEl.on('click', function(e) {
                 if (e.target.tagName !== 'A' && e.target.tagName !== 'IMG' && e.target.tagName !== 'H3' && e.target.tagName !== 'SPAN') {
                     map.panTo(placePosition);
                     highlightMarker(customOverlay, itemEl);
                 }
             });
-            // 💡 mouseover/mouseout 이벤트 제거
+
+            // 키보드 네비게이션 (Enter/Space/Arrow)
+            itemEl.find('article').on('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    $(this).find('a').first()[0].click();
+                }
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    $(this).closest('li').next().find('article').focus();
+                }
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    $(this).closest('li').prev().find('article').focus();
+                }
+            });
         });
     }
     
