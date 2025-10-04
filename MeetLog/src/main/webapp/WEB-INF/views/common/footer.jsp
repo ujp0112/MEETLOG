@@ -129,7 +129,7 @@
           <span class="hidden sm:inline" aria-hidden="true">|</span>
           <span>통신판매업 2025-서울금천-1234</span>
           <span class="hidden sm:inline" aria-hidden="true">|</span>
-          <span>대표 이재호</span>
+          <span>머표 이재호</span>
         </div>
         <!-- <span class="text-xs font-medium text-slate-600">함께하세요</span>
         <div class="flex gap-2" role="group" aria-label="소셜 미디어">
