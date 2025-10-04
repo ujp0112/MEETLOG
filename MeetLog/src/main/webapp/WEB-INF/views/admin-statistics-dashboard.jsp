@@ -9,6 +9,7 @@
     <title>MEET LOG - 통계 대시보드</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100">
 
@@ -51,24 +52,27 @@
                     </div>
                 </div>
                 
-                <div class="bg-white shadow rounded-lg mb-8">
-                    <div class="px-4 py-5 sm:p-6">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">월별 성장 추이</h3>
-                        <div class="space-y-4">
-                            <c:forEach var="month" items="${statisticsData.monthlyGrowths}">
-                                <div class="p-4 bg-gray-50 rounded-lg">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <h4 class="text-lg font-medium text-gray-900">${month.yearMonth}</h4>
-                                    </div>
-                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        <div class="text-center"><p class="text-sm text-gray-500">사용자</p><p class="text-lg font-medium text-gray-900">${month.totalUsers}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">맛집</p><p class="text-lg font-medium text-gray-900">${month.totalRestaurants}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">예약</p><p class="text-lg font-medium text-gray-900">${month.totalReservations}</p></div>
-                                        <div class="text-center"><p class="text-sm text-gray-500">매출</p><p class="text-lg font-medium text-gray-900"><fmt:formatNumber value="${month.totalRevenue}" type="currency" currencySymbol="₩"/></p></div>
-                                    </div>
-                                </div>
-                            </c:forEach>
-                        </div>
+                <!-- 월별 성장 추이 차트 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">월별 사용자 & 예약 추이</h3>
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">월별 매출 추이</h3>
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 카테고리별 분포 차트 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">카테고리별 매출 분포</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">지역별 예약 분포</h3>
+                        <canvas id="regionChart"></canvas>
                     </div>
                 </div>
                 
@@ -97,6 +101,151 @@
     </div>
 
     <jsp:include page="/WEB-INF/views/common/loading.jsp" />
+
+    <script>
+        // 월별 사용자 & 예약 추이 차트
+        const growthCtx = document.getElementById('growthChart').getContext('2d');
+        const growthChart = new Chart(growthCtx, {
+            type: 'line',
+            data: {
+                labels: [
+                    <c:forEach var="month" items="${statisticsData.monthlyGrowths}" varStatus="status">
+                        '${month.yearMonth}'${!status.last ? ',' : ''}
+                    </c:forEach>
+                ],
+                datasets: [{
+                    label: '사용자',
+                    data: [
+                        <c:forEach var="month" items="${statisticsData.monthlyGrowths}" varStatus="status">
+                            ${month.totalUsers}${!status.last ? ',' : ''}
+                        </c:forEach>
+                    ],
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: '예약',
+                    data: [
+                        <c:forEach var="month" items="${statisticsData.monthlyGrowths}" varStatus="status">
+                            ${month.totalReservations}${!status.last ? ',' : ''}
+                        </c:forEach>
+                    ],
+                    borderColor: 'rgb(16, 185, 129)',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 월별 매출 추이 차트
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueChart = new Chart(revenueCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    <c:forEach var="month" items="${statisticsData.monthlyGrowths}" varStatus="status">
+                        '${month.yearMonth}'${!status.last ? ',' : ''}
+                    </c:forEach>
+                ],
+                datasets: [{
+                    label: '매출',
+                    data: [
+                        <c:forEach var="month" items="${statisticsData.monthlyGrowths}" varStatus="status">
+                            ${month.totalRevenue}${!status.last ? ',' : ''}
+                        </c:forEach>
+                    ],
+                    backgroundColor: 'rgba(147, 51, 234, 0.6)',
+                    borderColor: 'rgb(147, 51, 234)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 카테고리별 매출 분포 차트
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        const categoryChart = new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    <c:forEach var="category" items="${statisticsData.popularCategories}" varStatus="status">
+                        '${category.categoryName}'${!status.last ? ',' : ''}
+                    </c:forEach>
+                ],
+                datasets: [{
+                    data: [
+                        <c:forEach var="category" items="${statisticsData.popularCategories}" varStatus="status">
+                            ${category.revenue}${!status.last ? ',' : ''}
+                        </c:forEach>
+                    ],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(147, 51, 234, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+
+        // 지역별 예약 분포 차트
+        const regionCtx = document.getElementById('regionChart').getContext('2d');
+        const regionChart = new Chart(regionCtx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    <c:forEach var="region" items="${statisticsData.regionalDistributions}" varStatus="status">
+                        '${region.region}'${!status.last ? ',' : ''}
+                    </c:forEach>
+                ],
+                datasets: [{
+                    data: [
+                        <c:forEach var="region" items="${statisticsData.regionalDistributions}" varStatus="status">
+                            ${region.reservationCount}${!status.last ? ',' : ''}
+                        </c:forEach>
+                    ],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(251, 191, 36, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(147, 51, 234, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+    </script>
 
 </body>
 </html>

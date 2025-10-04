@@ -105,8 +105,11 @@ public class CouponManagementServlet extends HttpServlet {
                     .count();
             int expiredCoupons = totalCoupons - activeCoupons;
 
-            // TODO: 향후 사용 통계를 위한 별도 추적 필드가 추가되면 실제 사용량을 계산하도록 수정
-            int usedCoupons = 0;
+            // 실제 사용량 계산: 각 쿠폰의 usage_count 합계
+            int usedCoupons = coupons.stream()
+                    .filter(Objects::nonNull)
+                    .mapToInt(Coupon::getUsageCount)
+                    .sum();
 
             if (session != null) {
                 String successMessage = (String) session.getAttribute("couponSuccessMessage");

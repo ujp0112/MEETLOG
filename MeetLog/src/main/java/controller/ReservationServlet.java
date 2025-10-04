@@ -390,7 +390,21 @@ public class ReservationServlet extends HttpServlet {
 
 		try {
 			int reservationId = Integer.parseInt(request.getParameter("reservationId"));
-			// TODO: 이 예약을 요청한 사용자가 실제 예약자인지 검증하는 로직 필요
+			User currentUser = (User) session.getAttribute("user");
+
+			// 예약자 검증: 해당 예약을 요청한 사용자가 실제 예약자인지 확인
+			Reservation reservation = reservationService.getReservationById(reservationId);
+			if (reservation == null) {
+				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+				response.getWriter().write("{\"success\": false, \"message\": \"예약을 찾을 수 없습니다.\"}");
+				return;
+			}
+
+			if (reservation.getUserId() != currentUser.getId()) {
+				response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+				response.getWriter().write("{\"success\": false, \"message\": \"본인의 예약만 취소할 수 있습니다.\"}");
+				return;
+			}
 
 			if (reservationService.cancelReservation(reservationId)) {
 				response.getWriter().write("{\"success\": true}");
