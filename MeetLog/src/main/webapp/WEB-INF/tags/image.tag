@@ -26,5 +26,5 @@
     </c:otherwise>
 </c:choose>
 
-<%-- 최종적으로 생성된 URL을 img 태그에 적용 --%>
-<img src="${imageUrl}" alt="${altText}" class="${cssClass}">
+<%-- 최종적으로 생성된 URL을 img 태그에 적용 (지연 로딩 및 최적화) --%>
+<img src="${imageUrl}" alt="${altText}" class="${cssClass}" loading="lazy" decoding="async">
