@@ -1,10 +1,10 @@
 # KoBERT 기반 추천 시스템 사용 가이드
 
-## 📋 개요
+## 개요
 
 KoBERT(Korean BERT) 모델을 활용한 지능형 레스토랑 추천 시스템입니다. 사용자의 리뷰 취향과 레스토랑 콘텐츠 간의 의미적 유사도를 계산하여 개인화된 추천을 제공합니다.
 
-## 🏗️ 아키텍처
+## 아키텍처
 
 ```
 Controller (RecommendationController)
@@ -23,7 +23,7 @@ Adapter (KoBertAdapter) → FastAPI 서버 (http://127.0.0.1:8000)
 3. **IntelligentRecommendationService**: 하이브리드 추천 알고리즘 (협업 필터링 + 콘텐츠 기반 + 트렌드)
 4. **RecommendationDAO**: 벡터 데이터 영속성 관리
 
-## 🚀 초기 설정
+## 초기 설정
 
 ### 1. 데이터베이스 테이블 생성
 
@@ -80,7 +80,7 @@ java -cp target/MeetLog.war util.VectorPrecomputeBatch 50
 
 **예상 소요 시간**: 레스토랑 100개 기준 약 2-3분 (KoBERT API 응답 속도에 따라 변동)
 
-## 📡 API 사용법
+## API 사용법
 
 ### 엔드포인트
 
@@ -129,7 +129,7 @@ GET /recommendations/intelligent?limit=10
 - `404 Not Found`: 잘못된 경로
 - `500 Internal Server Error`: 추천 생성 실패
 
-## 🔄 추천 알고리즘 흐름
+## 추천 알고리즘 흐름
 
 ### 1단계: 사용자 행동 패턴 분석
 - 최근 30일 리뷰 데이터 분석
@@ -165,7 +165,7 @@ GET /recommendations/intelligent?limit=10
 - 카테고리/지역 중복 제거
 - 최종 N개 선정
 
-## 🔧 성능 최적화
+## 성능 최적화
 
 ### 1. 벡터 캐싱
 현재는 모든 레스토랑 벡터를 DB에서 조회합니다. 트래픽이 증가하면 다음 개선이 필요합니다:
@@ -193,7 +193,7 @@ Cron 작업으로 새 레스토랑 자동 벡터화:
 - 다중 FastAPI 인스턴스 + Nginx 로드 밸런싱
 - GPU 서버 사용 (CPU 대비 10배 이상 속도 향상)
 
-## 🐛 문제 해결
+## 문제 해결
 
 ### Q1: "KoBERT API 호출 3회 모두 실패"
 **원인**: FastAPI 서버 미실행 또는 네트워크 문제
@@ -231,7 +231,7 @@ SELECT COUNT(*) FROM reviews WHERE user_id = 1 AND rating >= 4;
        .map(entry -> calculateSimilarity(...))
    ```
 
-## 📊 메트릭 추적
+## 메트릭 추적
 
 추천 성능은 자동으로 `recommendation_metrics` 테이블에 기록됩니다:
 
@@ -252,7 +252,7 @@ LIMIT 10;
 - `average_score`: 평균 추천 점수
 - `category_diversity`: 카테고리 다양성 (높을수록 좋음)
 
-## 🚧 향후 개선 사항
+## 향후 개선 사항
 
 1. **실시간 벡터 업데이트**: 레스토랑 정보 수정 시 자동 재계산
 2. **A/B 테스팅**: KoBERT vs 기존 추천 성능 비교
@@ -260,6 +260,6 @@ LIMIT 10;
 4. **설명 가능성**: "이 레스토랑을 추천한 이유" 상세 제공
 5. **벡터 압축**: 768차원 → 128차원 (PCA/AutoEncoder)
 
-## 📞 문의
+## 문의
 
-기술 문의: claude-code-recommendations@example.com
+기술 문의: 하지말아주세여
