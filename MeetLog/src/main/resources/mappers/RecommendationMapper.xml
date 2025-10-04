@@ -168,7 +168,7 @@
 
     <!-- 맛집 유사도 계산을 위한 데이터 조회 -->
     <select id="getRestaurantSimilarityData" parameterType="int" resultType="map">
-        SELECT 
+        SELECT
             r.category,
             r.price_range,
             r.atmosphere,
@@ -183,6 +183,69 @@
         WHERE r.id = #{restaurantId}
         AND r.is_active = true
         GROUP BY r.id, r.category, r.price_range, r.atmosphere, r.rating, r.review_count
+    </select>
+
+    <!-- 사용자의 최근 긍정적 리뷰 텍스트 조회 (평점 4점 이상) -->
+    <select id="findRecentPositiveReviewsByUserId" parameterType="map" resultType="string">
+        SELECT content
+        FROM reviews
+        WHERE user_id = #{userId}
+        AND rating >= 4
+        AND is_active = true
+        AND content IS NOT NULL
+        AND CHAR_LENGTH(content) > 10
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 특정 레스토랑의 콘텐츠 벡터 조회 -->
+    <select id="getRestaurantContentVectorById" parameterType="int" resultType="string">
+        SELECT content_vector
+        FROM restaurant_vectors
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 모든 레스토랑의 콘텐츠 벡터 조회 -->
+    <select id="getAllRestaurantContentVectors" resultType="map">
+        SELECT restaurant_id, content_vector
+        FROM restaurant_vectors
+    </select>
+
+    <!-- 레스토랑 ID로 레스토랑 조회 -->
+    <select id="getRestaurantById" parameterType="int" resultType="model.Restaurant">
+        SELECT *
+        FROM restaurants
+        WHERE id = #{restaurantId}
+        AND is_active = true
+    </select>
+
+    <!-- 레스토랑 콘텐츠 벡터 저장/업데이트 -->
+    <insert id="upsertRestaurantVector" parameterType="map">
+        INSERT INTO restaurant_vectors (restaurant_id, content_vector, source_text, updated_at)
+        VALUES (#{restaurantId}, #{contentVector}, #{sourceText}, NOW())
+        ON DUPLICATE KEY UPDATE
+            content_vector = VALUES(content_vector),
+            source_text = VALUES(source_text),
+            updated_at = NOW()
+    </insert>
+
+    <!-- 사용자 리뷰 벡터 저장 -->
+    <insert id="insertUserReviewVector" parameterType="map">
+        INSERT INTO user_review_vectors (user_id, review_id, review_vector, rating, created_at)
+        VALUES (#{userId}, #{reviewId}, #{reviewVector}, #{rating}, NOW())
+        ON DUPLICATE KEY UPDATE
+            review_vector = VALUES(review_vector),
+            rating = VALUES(rating)
+    </insert>
+
+    <!-- 벡터가 없는 레스토랑 ID 목록 조회 (배치 작업용) -->
+    <select id="getRestaurantsWithoutVectors" parameterType="int" resultType="int">
+        SELECT r.id
+        FROM restaurants r
+        LEFT JOIN restaurant_vectors rv ON r.id = rv.restaurant_id
+        WHERE r.is_active = true
+        AND rv.restaurant_id IS NULL
+        LIMIT #{limit}
     </select>
 
 </mapper>

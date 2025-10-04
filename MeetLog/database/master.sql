@@ -707,6 +707,38 @@ CREATE TABLE `review_images` (
   KEY `review_id` (`review_id`),
   CONSTRAINT `review_images_ibfk_1` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='리뷰에 첨부된 이미지 정보';
+
+-- ===================================================================
+-- KoBERT 벡터 저장 테이블 (AI 추천 시스템용)
+-- ===================================================================
+
+-- 레스토랑 콘텐츠 벡터 테이블
+CREATE TABLE `restaurant_vectors` (
+  `restaurant_id` int(11) NOT NULL,
+  `content_vector` longtext NOT NULL COMMENT '768차원 KoBERT 임베딩 벡터 (JSON 배열)',
+  `source_text` text DEFAULT NULL COMMENT '벡터 생성에 사용된 원본 텍스트 (디버깅용)',
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`restaurant_id`),
+  KEY `idx_rv_updated_at` (`updated_at`),
+  CONSTRAINT `restaurant_vectors_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='레스토랑 KoBERT 벡터 저장소';
+
+-- 사용자 리뷰 벡터 캐시 테이블 (선택적)
+CREATE TABLE `user_review_vectors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `review_id` int(11) NOT NULL,
+  `review_vector` longtext NOT NULL COMMENT '768차원 KoBERT 임베딩 벡터 (JSON 배열)',
+  `rating` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_review_vector` (`review_id`),
+  KEY `idx_urv_user_rating` (`user_id`,`rating`),
+  KEY `idx_urv_created_at` (`created_at`),
+  CONSTRAINT `user_review_vectors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `user_review_vectors_ibfk_2` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자 리뷰 벡터 캐시';
+
 CREATE TABLE `tags` (
   `tag_id` int(11) NOT NULL AUTO_INCREMENT,
   `tag_name` varchar(50) NOT NULL,

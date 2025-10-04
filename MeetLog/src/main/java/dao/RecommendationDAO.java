@@ -130,4 +130,130 @@ public class RecommendationDAO {
             return sqlSession.selectList(NAMESPACE + ".getRestaurantSimilarityData", restaurantId);
         }
     }
+
+    /**
+     * 사용자의 최근 긍정적 리뷰 텍스트 조회 (평점 4점 이상)
+     */
+    public List<String> findRecentPositiveReviewsByUserId(int userId, int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of("userId", userId, "limit", limit);
+            return sqlSession.selectList(NAMESPACE + ".findRecentPositiveReviewsByUserId", params);
+        }
+    }
+
+    /**
+     * 특정 레스토랑의 콘텐츠 벡터 조회
+     */
+    public double[] getRestaurantContentVectorById(int restaurantId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            String vectorJson = sqlSession.selectOne(NAMESPACE + ".getRestaurantContentVectorById", restaurantId);
+            if (vectorJson == null) return null;
+            return parseVectorFromJson(vectorJson);
+        }
+    }
+
+    /**
+     * 모든 레스토랑의 콘텐츠 벡터 조회 (restaurant_id -> vector 맵)
+     */
+    public Map<Integer, double[]> getAllRestaurantContentVectors() {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            List<Map<String, Object>> results = sqlSession.selectList(NAMESPACE + ".getAllRestaurantContentVectors");
+            Map<Integer, double[]> vectorMap = new java.util.HashMap<>();
+            for (Map<String, Object> row : results) {
+                Integer restaurantId = (Integer) row.get("restaurant_id");
+                String vectorJson = (String) row.get("content_vector");
+                if (restaurantId != null && vectorJson != null) {
+                    vectorMap.put(restaurantId, parseVectorFromJson(vectorJson));
+                }
+            }
+            return vectorMap;
+        }
+    }
+
+    /**
+     * 레스토랑 ID로 레스토랑 조회
+     */
+    public Restaurant getRestaurantById(int restaurantId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".getRestaurantById", restaurantId);
+        }
+    }
+
+    /**
+     * 레스토랑 콘텐츠 벡터 저장/업데이트
+     */
+    public int upsertRestaurantVector(int restaurantId, double[] vector, String sourceText) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            String vectorJson = serializeVectorToJson(vector);
+            Map<String, Object> params = Map.of(
+                "restaurantId", restaurantId,
+                "contentVector", vectorJson,
+                "sourceText", sourceText != null ? sourceText : ""
+            );
+            int result = sqlSession.insert(NAMESPACE + ".upsertRestaurantVector", params);
+            sqlSession.commit();
+            return result;
+        }
+    }
+
+    /**
+     * 사용자 리뷰 벡터 저장
+     */
+    public int insertUserReviewVector(int userId, int reviewId, double[] vector, int rating) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            String vectorJson = serializeVectorToJson(vector);
+            Map<String, Object> params = Map.of(
+                "userId", userId,
+                "reviewId", reviewId,
+                "reviewVector", vectorJson,
+                "rating", rating
+            );
+            int result = sqlSession.insert(NAMESPACE + ".insertUserReviewVector", params);
+            sqlSession.commit();
+            return result;
+        }
+    }
+
+    /**
+     * 벡터가 없는 레스토랑 ID 목록 조회 (배치 작업용)
+     */
+    public List<Integer> getRestaurantsWithoutVectors(int limit) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectList(NAMESPACE + ".getRestaurantsWithoutVectors", limit);
+        }
+    }
+
+    // ========== Helper Methods ==========
+
+    /**
+     * JSON 문자열을 double[] 배열로 파싱
+     */
+    private double[] parseVectorFromJson(String json) {
+        try {
+            // JSON 배열 파싱 (간단한 구현)
+            String cleanJson = json.trim().replace("[", "").replace("]", "");
+            String[] parts = cleanJson.split(",");
+            double[] vector = new double[parts.length];
+            for (int i = 0; i < parts.length; i++) {
+                vector[i] = Double.parseDouble(parts[i].trim());
+            }
+            return vector;
+        } catch (Exception e) {
+            System.err.println("벡터 JSON 파싱 실패: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * double[] 배열을 JSON 문자열로 직렬화
+     */
+    private String serializeVectorToJson(double[] vector) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < vector.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append(vector[i]);
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }
