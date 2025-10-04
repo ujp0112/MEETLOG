@@ -39,12 +39,6 @@
                             </p>
                             <h1 class="mt-3 text-3xl font-black text-slate-900 md:text-4xl">다른 사람들의 미식 루트를 탐험해보세요</h1>
                             <p class="mt-4 text-sm text-slate-500 md:text-base">지역과 테마별로 취향이 맞는 코스를 찾고, 마음에 드는 일정은 내 코스로 저장할 수 있어요.</p>
-                            <div class="mt-6 flex flex-wrap gap-2 text-xs">
-                                <span class="chip">인기 코스</span>
-                                <span class="chip">데이트</span>
-                                <span class="chip">회식</span>
-                                <span class="chip">브런치</span>
-                            </div>
                         </div>
                         <a href="${pageContext.request.contextPath}/course/create" class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:-translate-y-0.5 hover:bg-sky-600">
                             ➕ 나만의 코스 만들기
@@ -59,29 +53,13 @@
                                 <h2 class="section-title text-xl">코스 검색</h2>
                                 <p class="section-sub">지역/테마/키워드로 원하는 일정을 쉽게 찾으세요.</p>
                             </div>
-                            <div class="flex gap-2 text-xs text-slate-400">
-                                <span class="chip">#서울</span>
-                                <span class="chip">#디저트</span>
-                                <span class="chip">#로맨틱</span>
-                            </div>
                         </div>
                         <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
                             <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">키워드</label>
                                 <input type="text" name="query" placeholder="지역, 테마, 맛집 이름 등" class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200" />
                             </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500">지역</label>
-                                <select name="area" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200">
-                                    <option value="">전체</option>
-                                    <option value="홍대">홍대</option>
-                                    <option value="강남">강남</option>
-                                    <option value="성수">성수</option>
-                                    <option value="연남">연남</option>
-                                </select>
-                            </div>
                             <div class="flex items-end">
-                                <button type="submit" class="w-full rounded-2xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/40 transition hover:-translate-y-0.5 hover:bg-sky-600">검색</button>
+                                <button type="submit" class="w-full rounded-2xl bg-sky-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-sky-500/40 transition hover:-translate-y-0.5 hover:bg-sky-600">코스 검색</button>
                             </div>
                         </div>
                     </form>
