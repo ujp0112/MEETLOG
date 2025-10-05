@@ -10,6 +10,12 @@
     <title>MEET LOG - 맛집 칼럼</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        .subtle-card { @apply rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8; }
+        .search-hero-pill { @apply inline-flex items-center gap-2 rounded-full bg-amber-100/80 px-3 py-1 text-xs font-semibold text-amber-700; }
+        .search-input { @apply w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200; }
+        .search-cta { @apply inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800; }
+    </style>
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; }
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -24,13 +30,13 @@
             <section class="border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-amber-50/70">
                 <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12 md:flex-row md:items-center md:justify-between md:px-10">
                     <div class="max-w-3xl space-y-4">
-                        <span class="inline-flex items-center gap-2 rounded-full bg-amber-100/80 px-3 py-1 text-xs font-semibold text-amber-700">
+                        <span class="search-hero-pill">
                             <span class="text-base">🍽️</span>
                             Meet Log Column
                         </span>
-                        <h1 class="text-3xl font-bold leading-tight text-slate-900 md:text-4xl">전문가가 추천하는 미식 칼럼 모음</h1>
+                        <h1 class="text-3xl font-bold leading-tight text-slate-900 md:text-4xl">모두가 함께하는 미식 칼럼 모음</h1>
                         <p class="text-sm text-slate-600 md:text-base">
-                            셰프와 미식가들이 남긴 인사이트를 모았습니다. 지역별 이야기부터 숨은 맛집의 비하인드까지, 오늘의 식사를 위한 영감을 얻어보세요.
+                            미식가들이 남긴 인사이트를 모았습니다. 지역별 이야기부터 숨은 맛집의 비하인드까지, 오늘의 식사를 위한 영감을 얻어보세요.
                         </p>
                     </div>
                     <c:if test="${not empty sessionScope.user}">
@@ -46,25 +52,23 @@
             </section>
 
             <section class="mx-auto w-full max-w-6xl px-6 py-10 md:px-10">
-                <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                <div class="subtle-card">
                     <form action="${pageContext.request.contextPath}/column/list" method="get" class="space-y-6">
-                        <div class="flex flex-wrap items-center justify-between gap-4">
-                            <div>
-                                <h2 class="text-xl font-bold text-slate-900">칼럼 검색</h2>
-                                <p class="text-sm text-slate-1000">키워드와 지역을 선택해 원하는 칼럼을 찾아보세요.</p>
-                            </div>
-                        </div>
-                        <div class="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                            <div>
+                        <header class="space-y-3 text-center">
+                            <h2 class="text-xl font-bold text-slate-900">관심 있는 칼럼을 빠르게 찾아보세요</h2>
+                            <p class="text-sm text-slate-500">키워드로 검색하고, 미식가들의 이야기 속에서 오늘의 맛집 영감을 얻어보세요.</p>
+                        </header>
+
+                        <div class="flex flex-col items-center gap-4 md:flex-row md:justify-center md:gap-6">
+                            <div class="w-full max-w-2xl">
                                 <input type="text" name="query" value="${param.query}"
                                        placeholder="칼럼 제목, 작가명, 맛집 이름 등"
-                                       class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-200" />
+                                       class="search-input" />
                             </div>
-                            <div class="flex flex-wrap items-center justify-between gap-8">
-                                <button type="submit" class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800">칼럼 검색</button>
-                            </div>
+                            <button type="submit" class="search-cta">
+                                칼럼 검색
+                            </button>
                         </div>
-
                     </form>
                 </div>
 
