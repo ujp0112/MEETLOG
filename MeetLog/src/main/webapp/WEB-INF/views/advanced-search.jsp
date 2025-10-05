@@ -20,30 +20,17 @@
     <title>통합 검색 - MEET LOG</title>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style type="text/tailwindcss">
+        .search-hero-pill { @apply inline-flex items-center gap-2 rounded-full bg-indigo-100/80 px-3 py-1 text-xs font-semibold text-indigo-700; }
+        .subtle-card { @apply rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8; }
+        .chip { @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition hover:border-indigo-400 hover:text-indigo-600; }
+    </style>
     <style>
-        * { font-family: 'Noto Sans KR', sans-serif; }
+        body { font-family: 'Noto Sans KR', sans-serif; }
 
-        body {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            min-height: 100vh;
-        }
-
-        /* Glass morphism 카드 */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-        }
-
-        /* 그라데이션 텍스트 */
-        .gradient-text {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
         /* 타입별 그라데이션 배경 */
         .gradient-bg-restaurants { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
@@ -51,17 +38,7 @@
         .gradient-bg-reservations { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
         .gradient-bg-columns { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
 
-        /* 활성화된 검색 타입 탭 */
-        .search-tab-active {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 50px rgba(37, 99, 235, 0.3);
-        }
-
-        .search-tab-active.type-restaurants { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
-        .search-tab-active.type-reviews { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
-        .search-tab-active.type-reservations { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-        .search-tab-active.type-columns { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-
+        /* 검색 타입 탭 스타일 */
         .search-tab {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
@@ -69,18 +46,44 @@
         }
 
         .search-tab:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
-            border-color: rgba(59, 130, 246, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
         }
 
-        .search-tab-active h3,
-        .search-tab-active p { color: #fff !important; }
-
-        .search-tab-active .icon-wrapper {
-            background-color: rgba(255, 255, 255, 0.25) !important;
-            color: #fff !important;
+        /* 활성화된 검색 타입 탭 */
+        .search-tab-active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+            border-color: currentColor;
         }
+
+        .search-tab-active.type-restaurants {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-color: #3b82f6;
+        }
+        .search-tab-active.type-reviews {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+            border-color: #8b5cf6;
+        }
+        .search-tab-active.type-reservations {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            border-color: #10b981;
+        }
+        .search-tab-active.type-columns {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border-color: #f59e0b;
+        }
+
+        .search-tab-active h3 { font-weight: 700; }
+
+        .search-tab-active.type-restaurants h3,
+        .search-tab-active.type-restaurants p { color: #1e40af; }
+        .search-tab-active.type-reviews h3,
+        .search-tab-active.type-reviews p { color: #6d28d9; }
+        .search-tab-active.type-reservations h3,
+        .search-tab-active.type-reservations p { color: #047857; }
+        .search-tab-active.type-columns h3,
+        .search-tab-active.type-columns p { color: #b45309; }
 
         /* 필터 카드 */
         .filter-card {
@@ -311,21 +314,37 @@
 <body class="bg-slate-100">
     <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
-    <main class="container mx-auto px-4 py-8 md:px-6 lg:px-8 max-w-7xl">
+    <!-- 히어로 섹션 -->
+    <section class="border-b border-slate-200 bg-gradient-to-r from-slate-50 via-white to-blue-50/70">
+        <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-12 md:px-10">
+            <div class="max-w-4xl space-y-4">
+                <span class="inline-flex items-center gap-2 rounded-full bg-blue-100/80 px-3 py-1 text-xs font-semibold text-blue-700">
+                    <span class="text-base">🔍</span>
+                    Meet Log Search
+                </span>
+                <h1 class="text-3xl font-bold leading-tight text-slate-900 md:text-4xl">통합 검색</h1>
+                <p class="text-sm text-slate-600 md:text-base">
+                    음식점, 리뷰, 예약 순위, 칼럼을 하나의 화면에서 찾아보세요. 다양한 필터로 원하는 정보를 빠르게 검색할 수 있습니다.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-4 py-8 md:px-6 lg:px-8 max-w-6xl">
         <input type="hidden" id="activeSearchType" value="${empty searchType ? 'restaurants' : searchType}" />
 
         <div class="space-y-8">
-            <!-- 헤더 섹션 -->
-            <div class="glass-card p-8 md:p-10 rounded-3xl">
-                <div class="text-center mb-8">
-                    <h1 class="text-4xl md:text-5xl font-black gradient-text mb-3">통합 검색</h1>
-                    <p class="text-slate-600 text-lg">음식점 · 리뷰 · 예약 순위 · 칼럼을 하나의 화면에서 찾아보세요</p>
-                </div>
+            <!-- 검색 타입 선택 섹션 -->
+            <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                <header class="mb-6 text-center">
+                    <h2 class="text-xl font-bold text-slate-900">검색 카테고리 선택</h2>
+                    <p class="mt-2 text-sm text-slate-500">원하는 검색 유형을 선택하고 상세 조건을 설정하세요.</p>
+                </header>
 
                 <!-- 검색 타입 선택 탭 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" role="tablist" aria-label="검색 타입 선택">
                     <button type="button"
-                            class="search-tab type-restaurants w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'restaurants' ? 'search-tab-active' : ''}"
+                            class="search-tab type-restaurants w-full text-left bg-slate-50 rounded-2xl p-5 flex items-center gap-4 transition hover:shadow-md ${searchType == 'restaurants' ? 'search-tab-active' : ''}"
                             data-type="restaurants"
                             id="tab-restaurants"
                             onclick="setSearchType('restaurants')"
@@ -334,13 +353,13 @@
                             aria-controls="form-restaurants">
                         <div class="icon-wrapper bg-blue-100 text-blue-600">🍽️</div>
                         <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800">음식점 검색</h3>
-                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집을 찾아보세요</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">음식점</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집 찾기</p>
                         </div>
                     </button>
 
                     <button type="button"
-                            class="search-tab type-reviews w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reviews' ? 'search-tab-active' : ''}"
+                            class="search-tab type-reviews w-full text-left bg-slate-50 rounded-2xl p-5 flex items-center gap-4 transition hover:shadow-md ${searchType == 'reviews' ? 'search-tab-active' : ''}"
                             data-type="reviews"
                             id="tab-reviews"
                             onclick="setSearchType('reviews')"
@@ -349,13 +368,13 @@
                             aria-controls="form-reviews">
                         <div class="icon-wrapper bg-purple-100 text-purple-600">📝</div>
                         <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800">리뷰 검색</h3>
-                            <p class="text-xs md:text-sm text-slate-500 mt-1">평점과 키워드로</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">리뷰</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">평점·키워드</p>
                         </div>
                     </button>
 
                     <button type="button"
-                            class="search-tab type-reservations w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'reservations' ? 'search-tab-active' : ''}"
+                            class="search-tab type-reservations w-full text-left bg-slate-50 rounded-2xl p-5 flex items-center gap-4 transition hover:shadow-md ${searchType == 'reservations' ? 'search-tab-active' : ''}"
                             data-type="reservations"
                             id="tab-reservations"
                             onclick="setSearchType('reservations')"
@@ -365,12 +384,12 @@
                         <div class="icon-wrapper bg-emerald-100 text-emerald-600">📅</div>
                         <div>
                             <h3 class="text-base md:text-lg font-bold text-slate-800">예약 순위</h3>
-                            <p class="text-xs md:text-sm text-slate-500 mt-1">인기 음식점 확인</p>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">인기 음식점</p>
                         </div>
                     </button>
 
                     <button type="button"
-                            class="search-tab type-columns w-full text-left bg-white rounded-2xl p-6 flex items-center gap-4 ${searchType == 'columns' ? 'search-tab-active' : ''}"
+                            class="search-tab type-columns w-full text-left bg-slate-50 rounded-2xl p-5 flex items-center gap-4 transition hover:shadow-md ${searchType == 'columns' ? 'search-tab-active' : ''}"
                             data-type="columns"
                             id="tab-columns"
                             onclick="setSearchType('columns')"
@@ -379,8 +398,8 @@
                             aria-controls="form-columns">
                         <div class="icon-wrapper bg-orange-100 text-orange-600">📰</div>
                         <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800">칼럼 검색</h3>
-                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집 이야기 탐색</p>
+                            <h3 class="text-base md:text-lg font-bold text-slate-800">칼럼</h3>
+                            <p class="text-xs md:text-sm text-slate-500 mt-1">맛집 스토리</p>
                         </div>
                     </button>
                 </div>
@@ -659,20 +678,22 @@
             <!-- 검색 결과 영역 -->
             <c:choose>
                 <c:when test="${searchType == 'restaurants'}">
-                    <div class="glass-card p-6 md:p-8 rounded-3xl">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                            <h2 class="text-2xl md:text-3xl font-black gradient-text">음식점 검색 결과</h2>
-                            <span class="result-badge">총 ${totalResults != null ? totalResults : 0}건</span>
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-100 pb-4">
+                            <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">음식점 검색 결과</h2>
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                                총 ${totalResults != null ? totalResults : 0}건
+                            </span>
                         </div>
 
                         <!-- JavaScript에 의해 동적으로 채워질 컨테이너 -->
                         <div id="restaurant-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
                         <!-- 결과 없음 메시지 -->
-                        <div id="no-restaurant-results" class="empty-state" style="display: none;">
-                            <div class="empty-state-icon">🔍</div>
-                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 음식점이 없습니다</p>
-                            <p class="text-slate-500">필터를 조정하거나 다른 키워드로 검색해보세요</p>
+                        <div id="no-restaurant-results" class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center" style="display: none;">
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-4xl">🔍</div>
+                            <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 음식점이 없습니다</p>
+                            <p class="mt-2 text-sm text-slate-500">필터를 조정하거나 다른 키워드로 검색해보세요</p>
                         </div>
 
                         <!-- 더 보기 버튼 -->
@@ -693,17 +714,19 @@
                 </c:when>
 
                 <c:when test="${searchType == 'reviews'}">
-                    <div class="glass-card p-6 md:p-8 rounded-3xl">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                            <h2 class="text-2xl md:text-3xl font-black gradient-text">리뷰 검색 결과</h2>
-                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-100 pb-4">
+                            <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">리뷰 검색 결과</h2>
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                                총 ${searchResults != null ? searchResults.size() : 0}건
+                            </span>
                         </div>
 
                         <c:choose>
                             <c:when test="${not empty searchResults}">
                                 <div class="space-y-4">
                                     <c:forEach var="review" items="${searchResults}">
-                                        <div class="bg-white rounded-2xl p-6 card-hover">
+                                        <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                                             <div class="flex justify-between items-start mb-4">
                                                 <div class="flex items-center space-x-4">
                                                     <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -740,16 +763,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">📝</div>
-                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 리뷰가 없습니다</p>
-                                            <p class="text-slate-500">다른 조건으로 검색해보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-4xl">📝</div>
+                                            <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 리뷰가 없습니다</p>
+                                            <p class="mt-2 text-sm text-slate-500">다른 조건으로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">🔍</div>
-                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl">🔍</div>
+                                            <p class="mt-6 text-base text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -759,17 +782,19 @@
                 </c:when>
 
                 <c:when test="${searchType == 'reservations'}">
-                    <div class="glass-card p-6 md:p-8 rounded-3xl">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                            <h2 class="text-2xl md:text-3xl font-black gradient-text">예약 검색 결과</h2>
-                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-100 pb-4">
+                            <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">예약 검색 결과</h2>
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                                총 ${searchResults != null ? searchResults.size() : 0}건
+                            </span>
                         </div>
 
                         <c:choose>
                             <c:when test="${not empty searchResults}">
                                 <div class="space-y-4">
                                     <c:forEach var="reservation" items="${searchResults}">
-                                        <div class="bg-white rounded-2xl p-6 card-hover flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                                             <div>
                                                 <h3 class="text-lg font-semibold text-slate-800">${reservation.restaurantName}</h3>
                                                 <p class="text-slate-600 text-sm">예약자: ${reservation.customerName} · 인원: ${reservation.partySize}명</p>
@@ -789,16 +814,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">📅</div>
-                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 예약 내역이 없습니다</p>
-                                            <p class="text-slate-500">다른 기간으로 검색해보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-4xl">📅</div>
+                                            <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 예약 내역이 없습니다</p>
+                                            <p class="mt-2 text-sm text-slate-500">다른 기간으로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">🔍</div>
-                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl">🔍</div>
+                                            <p class="mt-6 text-base text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>
@@ -808,17 +833,19 @@
                 </c:when>
 
                 <c:when test="${searchType == 'columns'}">
-                    <div class="glass-card p-6 md:p-8 rounded-3xl">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                            <h2 class="text-2xl md:text-3xl font-black gradient-text">칼럼 검색 결과</h2>
-                            <span class="result-badge">총 ${searchResults != null ? searchResults.size() : 0}건</span>
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-100 pb-4">
+                            <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">칼럼 검색 결과</h2>
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
+                                총 ${searchResults != null ? searchResults.size() : 0}건
+                            </span>
                         </div>
 
                         <c:choose>
                             <c:when test="${not empty searchResults}">
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     <c:forEach var="column" items="${searchResults}">
-                                        <div class="bg-white rounded-2xl p-6 card-hover">
+                                        <div class="overflow-hidden rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                                             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                                                 <div>
                                                     <h3 class="text-xl font-bold text-slate-800">${column.title}</h3>
@@ -851,16 +878,16 @@
                             <c:otherwise>
                                 <c:choose>
                                     <c:when test="${submitted}">
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">📰</div>
-                                            <p class="text-xl font-bold text-slate-700 mb-2">조건에 맞는 칼럼이 없습니다</p>
-                                            <p class="text-slate-500">다른 키워드로 검색해보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-orange-50 text-4xl">📰</div>
+                                            <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 칼럼이 없습니다</p>
+                                            <p class="mt-2 text-sm text-slate-500">다른 키워드로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
-                                        <div class="empty-state">
-                                            <div class="empty-state-icon">🔍</div>
-                                            <p class="text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
+                                        <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl">🔍</div>
+                                            <p class="mt-6 text-base text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>
                                 </c:choose>

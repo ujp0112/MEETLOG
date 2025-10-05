@@ -1,8 +1,11 @@
 package service;
 
+import dao.AdminStatisticsDAO;
 import dao.RecommendationDAO;
 import model.*;
 import service.port.RecommendationPort; // ✨ 구체 클래스가 아닌 '포트(인터페이스)'를 import
+
+import dto.RestaurantPopularity;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -509,15 +512,526 @@ public class IntelligentRecommendationService {
         return trend;
     }
 
-    // TODO: 다음 메서드들 구현 필요
-    private List<String> extractTopTimeSlots(Map<String, Integer> timePatterns) { return new ArrayList<>(); }
-    private Map<String, Double> calculateTrendingCategories(LocalDateTime start, LocalDateTime end) { return new HashMap<>(); }
-    private List<Restaurant> findRisingStarRestaurants(LocalDateTime start, LocalDateTime end) { return new ArrayList<>(); }
-    private Map<String, List<String>> analyzeLocationTrends(LocalDateTime start, LocalDateTime end) { return new HashMap<>(); }
-    private Map<String, Map<String, Double>> analyzeTimeBasedTrends(LocalDateTime start, LocalDateTime end) { return new HashMap<>(); }
-    private Map<String, Integer> analyzeSocialBuzz(LocalDateTime start, LocalDateTime end) { return new HashMap<>(); }
-    private List<RestaurantRecommendation> getEnhancedCollaborativeRecommendations(int userId, UserBehaviorPattern pattern, int limit) { return new ArrayList<>(); }
-    private List<RestaurantRecommendation> getBehaviorBasedRecommendations(UserBehaviorPattern pattern, int limit) { return new ArrayList<>(); }
-    private List<RestaurantRecommendation> fuseRecommendations(List<RestaurantRecommendation> collab, List<RestaurantRecommendation> content, List<RestaurantRecommendation> behavior, int limit) { return new ArrayList<>(); }
-    private List<RestaurantRecommendation> generateTrendBasedRecommendations(TrendAnalysis trend, UserBehaviorPattern pattern, int limit) { return new ArrayList<>(); }
+    private List<String> extractTopTimeSlots(Map<String, Integer> timePatterns) {
+        if (timePatterns == null || timePatterns.isEmpty()) {
+            return List.of("점심", "저녁");
+        }
+
+        return timePatterns.entrySet().stream()
+            .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+            .limit(3)
+            .map(Map.Entry::getKey)
+            .collect(Collectors.toList());
+    }
+
+    private Map<String, Double> calculateTrendingCategories(LocalDateTime start, LocalDateTime end) {
+        Map<String, Double> scores = new HashMap<>();
+
+        try {
+            List<Restaurant> recent = Optional.ofNullable(recommendationDAO.getRecentRestaurants(60)).orElse(List.of());
+            List<Restaurant> popular = Optional.ofNullable(recommendationDAO.getPopularRestaurants(60)).orElse(List.of());
+
+            for (Restaurant restaurant : recent) {
+                if (restaurant == null || restaurant.getCategory() == null) continue;
+                double baseScore = 1.2;
+                baseScore += Math.min(Math.max(restaurant.getRating(), 0.0), 5.0) / 5.0;
+                baseScore += Math.min(Math.max(restaurant.getReviewCount(), 0), 200) / 200.0;
+                scores.merge(restaurant.getCategory(), baseScore, Double::sum);
+            }
+
+            for (Restaurant restaurant : popular) {
+                if (restaurant == null || restaurant.getCategory() == null) continue;
+                double baseScore = 1.0;
+                baseScore += Math.min(Math.max(restaurant.getRating(), 0.0), 5.0) / 6.0;
+                scores.merge(restaurant.getCategory(), baseScore, Double::sum);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (scores.isEmpty()) {
+            return Map.of(
+                "한식", 0.4,
+                "일식", 0.3,
+                "양식", 0.2,
+                "중식", 0.1
+            );
+        }
+
+        double maxScore = scores.values().stream().mapToDouble(Double::doubleValue).max().orElse(1.0);
+        return scores.entrySet().stream()
+            .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> Math.max(0.05, Math.min(1.0, entry.getValue() / maxScore)),
+                (a, b) -> a,
+                LinkedHashMap::new
+            ));
+    }
+
+    private List<Restaurant> findRisingStarRestaurants(LocalDateTime start, LocalDateTime end) {
+        Set<Integer> seen = new HashSet<>();
+        List<Restaurant> rising = new ArrayList<>();
+
+        try {
+            AdminStatisticsDAO statisticsDAO = new AdminStatisticsDAO();
+            List<RestaurantPopularity> topThisWeek = statisticsDAO.getTopRestaurantsThisWeek(15);
+
+            if (topThisWeek != null) {
+                for (RestaurantPopularity popularity : topThisWeek) {
+                    if (popularity == null) continue;
+                    int restaurantId = popularity.getRestaurantId();
+                    if (seen.contains(restaurantId)) continue;
+
+                    Restaurant restaurant = recommendationDAO.getRestaurantById(restaurantId);
+                    if (restaurant != null) {
+                        double growth = popularity.getReservationGrowthRate() != null
+                            ? popularity.getReservationGrowthRate().doubleValue()
+                            : 0.0;
+                        double rating = popularity.getRating() != null ? popularity.getRating().doubleValue() : restaurant.getRating();
+
+                        if (growth > 0.1 || rating >= 4.0) {
+                            rising.add(restaurant);
+                            seen.add(restaurantId);
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (rising.size() < 10) {
+            List<Restaurant> recent = Optional.ofNullable(recommendationDAO.getRecentRestaurants(20)).orElse(List.of());
+            for (Restaurant restaurant : recent) {
+                if (restaurant == null || seen.contains(restaurant.getId())) continue;
+                if (restaurant.getReviewCount() > 10 && restaurant.getRating() >= 4.2) {
+                    rising.add(restaurant);
+                    seen.add(restaurant.getId());
+                }
+                if (rising.size() >= 10) break;
+            }
+        }
+
+        return rising;
+    }
+
+    private Map<String, List<String>> analyzeLocationTrends(LocalDateTime start, LocalDateTime end) {
+        Map<String, Map<String, Integer>> counts = new HashMap<>();
+
+        List<Restaurant> candidates = new ArrayList<>();
+        candidates.addAll(Optional.ofNullable(recommendationDAO.getPopularRestaurants(80)).orElse(List.of()));
+        candidates.addAll(Optional.ofNullable(recommendationDAO.getRecentRestaurants(80)).orElse(List.of()));
+
+        for (Restaurant restaurant : candidates) {
+            if (restaurant == null) continue;
+            String location = Optional.ofNullable(restaurant.getLocation()).orElse("기타");
+            String category = Optional.ofNullable(restaurant.getCategory()).orElse("기타");
+
+            counts.computeIfAbsent(location, key -> new HashMap<>())
+                .merge(category, 1, Integer::sum);
+        }
+
+        Map<String, List<String>> result = new HashMap<>();
+        for (Map.Entry<String, Map<String, Integer>> entry : counts.entrySet()) {
+            List<String> topCategories = entry.getValue().entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                .limit(5)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+            result.put(entry.getKey(), topCategories);
+        }
+
+        return result;
+    }
+
+    private Map<String, Map<String, Double>> analyzeTimeBasedTrends(LocalDateTime start, LocalDateTime end) {
+        Map<String, Double> trendingCategories = calculateTrendingCategories(start, end);
+        if (trendingCategories.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<String, Map<String, Double>> timeTrends = new LinkedHashMap<>();
+        Map<String, Double> slotWeights = Map.of(
+            "아침", 0.6,
+            "브런치", 0.75,
+            "점심", 1.0,
+            "저녁", 1.0,
+            "야식", 0.8
+        );
+
+        for (Map.Entry<String, Double> slot : slotWeights.entrySet()) {
+            double slotMultiplier = slot.getValue();
+            Map<String, Double> categoryScores = new LinkedHashMap<>();
+
+            int index = 0;
+            for (Map.Entry<String, Double> categoryEntry : trendingCategories.entrySet()) {
+                double decay = 1.0 - (index * 0.08);
+                double score = categoryEntry.getValue() * slotMultiplier * Math.max(decay, 0.5);
+                categoryScores.put(categoryEntry.getKey(), Math.max(0.05, Math.min(1.0, score)));
+                index++;
+                if (index >= 5) break;
+            }
+
+            timeTrends.put(slot.getKey(), categoryScores);
+        }
+
+        return timeTrends;
+    }
+
+    private Map<String, Integer> analyzeSocialBuzz(LocalDateTime start, LocalDateTime end) {
+        Map<String, Double> trendingCategories = calculateTrendingCategories(start, end);
+        List<Restaurant> risingStars = findRisingStarRestaurants(start, end);
+
+        Map<String, Integer> buzz = new LinkedHashMap<>();
+        int baseWeight = 500;
+        int index = 0;
+        for (Map.Entry<String, Double> entry : trendingCategories.entrySet()) {
+            int weight = (int) Math.round(baseWeight * entry.getValue() * (1 - index * 0.1));
+            buzz.put("#" + entry.getKey(), Math.max(80, weight));
+            index++;
+            if (index >= 6) break;
+        }
+
+        int restaurantWeight = 400;
+        for (Restaurant restaurant : risingStars) {
+            if (restaurant == null || restaurant.getName() == null) continue;
+            buzz.put(restaurant.getName(), Math.max(60, restaurantWeight));
+            restaurantWeight = Math.max(80, restaurantWeight - 40);
+        }
+
+        buzz.putIfAbsent("#미식기행", 120);
+        buzz.putIfAbsent("#신상맛집", 140);
+
+        return buzz;
+    }
+
+    private List<RestaurantRecommendation> getEnhancedCollaborativeRecommendations(int userId, UserBehaviorPattern pattern, int limit) {
+        List<SimilarUser> similarUsers = Optional.ofNullable(recommendationDAO.findSimilarUsers(userId, Math.max(limit * 3, 12))).orElse(List.of());
+        if (similarUsers.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Integer> similarUserIds = similarUsers.stream()
+            .map(SimilarUser::getUserId)
+            .distinct()
+            .collect(Collectors.toList());
+
+        List<Restaurant> restaurants = Optional.ofNullable(
+            recommendationDAO.getRestaurantsLikedBySimilarUsers(similarUserIds, userId, Math.max(limit * 3, 30))
+        ).orElse(List.of());
+
+        if (restaurants.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        double maxSimilarity = similarUsers.stream().mapToDouble(SimilarUser::getSimilarityScore).max().orElse(1.0);
+        double averageSimilarityBoost = similarUsers.stream()
+            .filter(user -> user.getSimilarityScore() > 0 && user.getCommonReviews() > 0)
+            .mapToDouble(user -> user.getSimilarityScore() / maxSimilarity)
+            .average()
+            .orElse(0.6);
+        Map<String, Double> categoryAffinity = pattern != null && pattern.getCategoryAffinities() != null
+            ? pattern.getCategoryAffinities()
+            : Map.of();
+        Map<String, Double> locationAffinity = pattern != null && pattern.getLocationAffinities() != null
+            ? pattern.getLocationAffinities()
+            : Map.of();
+
+        Map<Integer, RestaurantRecommendation> aggregated = new LinkedHashMap<>();
+
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant == null) continue;
+
+            double similarityBoost = averageSimilarityBoost;
+
+            double categoryScore = categoryAffinity.getOrDefault(restaurant.getCategory(), 0.2);
+            double locationScore = locationAffinity.getOrDefault(restaurant.getLocation(), 0.1);
+            double ratingScore = Math.min(Math.max(restaurant.getRating(), 0.0), 5.0) / 5.0;
+
+            double finalScore = (similarityBoost * 0.45) + (ratingScore * 0.3) + (categoryScore * 0.15) + (locationScore * 0.1);
+            finalScore = Math.max(0.1, Math.min(1.0, finalScore));
+
+            RestaurantRecommendation recommendation = new RestaurantRecommendation();
+            recommendation.setRestaurant(restaurant);
+            recommendation.setRecommendationScore(finalScore);
+            recommendation.setPredictedRating(Math.max(restaurant.getRating(), 4.0));
+            recommendation.setPersonalized(true);
+
+            List<String> factors = new ArrayList<>();
+            factors.add("비슷한 회원 추천");
+            if (categoryAffinity.containsKey(restaurant.getCategory())) {
+                factors.add("선호 카테고리 일치");
+            }
+            if (locationAffinity.containsKey(restaurant.getLocation())) {
+                factors.add("선호 지역 일치");
+            }
+            recommendation.setMatchingFactors(factors);
+
+            String reason = String.format("비슷한 취향의 회원들이 자주 찾은 맛집 (예상 평점 %.1f)", recommendation.getPredictedRating());
+            recommendation.setReason(reason);
+
+            aggregated.put(restaurant.getId(), recommendation);
+        }
+
+        return aggregated.values().stream()
+            .sorted((a, b) -> Double.compare(b.getRecommendationScore(), a.getRecommendationScore()))
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
+
+    private List<RestaurantRecommendation> getBehaviorBasedRecommendations(UserBehaviorPattern pattern, int limit) {
+        if (pattern == null) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Double> categoryAffinity = Optional.ofNullable(pattern.getCategoryAffinities()).orElse(Map.of());
+        Map<String, Double> locationAffinity = Optional.ofNullable(pattern.getLocationAffinities()).orElse(Map.of());
+        Map<String, Integer> pricePreference = Optional.ofNullable(pattern.getPreferredPriceRanges()).orElse(Map.of());
+
+        List<UserPreference> storedPreferences = Optional.ofNullable(
+            recommendationDAO.getUserPreferences(pattern.getUserId())
+        ).orElse(List.of());
+
+        Map<Integer, RestaurantRecommendation> aggregated = new LinkedHashMap<>();
+
+        for (UserPreference preference : storedPreferences) {
+            if (preference == null) continue;
+            List<Restaurant> matchedRestaurants = Optional.ofNullable(
+                recommendationDAO.getRestaurantsByPreferences(preference, Math.max(limit, 10))
+            ).orElse(List.of());
+
+            for (Restaurant restaurant : matchedRestaurants) {
+                if (restaurant == null) continue;
+
+                double categoryScore = categoryAffinity.getOrDefault(restaurant.getCategory(), 0.2);
+                double locationScore = locationAffinity.getOrDefault(restaurant.getLocation(), 0.2);
+                double priceScore = pricePreference.isEmpty() ? 0.15 : pricePreference.entrySet().stream()
+                    .filter(entry -> entry.getKey().equalsIgnoreCase("high") && restaurant.getPriceRange() >= 4
+                        || entry.getKey().equalsIgnoreCase("medium") && restaurant.getPriceRange() == 3
+                        || entry.getKey().equalsIgnoreCase("low") && restaurant.getPriceRange() <= 2)
+                    .mapToDouble(entry -> Math.min(entry.getValue() / 10.0, 0.3)).sum();
+
+                double preferenceScore = Math.max(preference.getPreferenceScore(), 0.3);
+                double finalScore = (preferenceScore * 0.4) + (categoryScore * 0.3) + (locationScore * 0.2) + (priceScore * 0.1);
+                finalScore = Math.max(0.05, Math.min(1.0, finalScore));
+
+                RestaurantRecommendation recommendation = aggregated.computeIfAbsent(restaurant.getId(), id -> {
+                    RestaurantRecommendation rec = new RestaurantRecommendation();
+                    rec.setRestaurant(restaurant);
+                    rec.setMatchingFactors(new ArrayList<>());
+                    rec.setPredictedRating(Math.max(restaurant.getRating(), 3.8));
+                    rec.setPersonalized(true);
+                    return rec;
+                });
+
+                recommendation.setRecommendationScore(Math.max(recommendation.getRecommendationScore(), finalScore));
+
+                List<String> factors = recommendation.getMatchingFactors();
+                if (!factors.contains("사용자 선호 패턴")) {
+                    factors.add("사용자 선호 패턴");
+                }
+                if (categoryAffinity.containsKey(restaurant.getCategory()) && !factors.contains("카테고리 선호 일치")) {
+                    factors.add("카테고리 선호 일치");
+                }
+                if (locationAffinity.containsKey(restaurant.getLocation()) && !factors.contains("지역 선호 일치")) {
+                    factors.add("지역 선호 일치");
+                }
+
+                recommendation.setReason("회원님의 행동 패턴과 가장 잘 맞는 맛집");
+            }
+        }
+
+        if (aggregated.size() < limit) {
+            List<Restaurant> fallback = Optional.ofNullable(recommendationDAO.getUnvisitedRestaurants(pattern.getUserId(), limit * 2)).orElse(List.of());
+            for (Restaurant restaurant : fallback) {
+                if (restaurant == null || aggregated.containsKey(restaurant.getId())) continue;
+
+                double categoryScore = categoryAffinity.getOrDefault(restaurant.getCategory(), 0.3);
+                double locationScore = locationAffinity.getOrDefault(restaurant.getLocation(), 0.2);
+                double finalScore = Math.max(0.1, Math.min(1.0, (categoryScore * 0.6) + (locationScore * 0.4)));
+
+                RestaurantRecommendation recommendation = new RestaurantRecommendation();
+                recommendation.setRestaurant(restaurant);
+                recommendation.setRecommendationScore(finalScore);
+                recommendation.setPersonalized(true);
+                recommendation.setPredictedRating(Math.max(restaurant.getRating(), 3.7));
+                recommendation.setMatchingFactors(new ArrayList<>(List.of("새로운 탐험 후보")));
+                recommendation.setReason("선호 지역/카테고리에 기반한 새로운 탐험지");
+
+                aggregated.put(restaurant.getId(), recommendation);
+                if (aggregated.size() >= limit) break;
+            }
+        }
+
+        return aggregated.values().stream()
+            .sorted((a, b) -> Double.compare(b.getRecommendationScore(), a.getRecommendationScore()))
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
+
+    private List<RestaurantRecommendation> fuseRecommendations(List<RestaurantRecommendation> collab, List<RestaurantRecommendation> content, List<RestaurantRecommendation> behavior, int limit) {
+        Map<Integer, RestaurantRecommendation> fused = new LinkedHashMap<>();
+
+        java.util.function.BiConsumer<List<RestaurantRecommendation>, Double> mergeSource = (sourceList, weight) -> {
+            if (sourceList == null) return;
+            for (RestaurantRecommendation source : sourceList) {
+                if (source == null || source.getRestaurant() == null) continue;
+
+                int restaurantId = source.getRestaurant().getId();
+                double weightedScore = Math.max(0.0, Math.min(1.0, source.getRecommendationScore())) * weight;
+
+                RestaurantRecommendation aggregated = fused.computeIfAbsent(restaurantId, id -> {
+                    RestaurantRecommendation copy = new RestaurantRecommendation();
+                    copy.setRestaurant(source.getRestaurant());
+                    copy.setMatchingFactors(new ArrayList<>());
+                    copy.setPersonalized(source.isPersonalized());
+                    copy.setPredictedRating(source.getPredictedRating());
+                    copy.setReason(source.getReason() != null ? source.getReason() : "추천");
+                    return copy;
+                });
+
+                aggregated.setRecommendationScore(
+                    Math.min(1.2, aggregated.getRecommendationScore() + weightedScore)
+                );
+
+                if (source.getPredictedRating() > aggregated.getPredictedRating()) {
+                    aggregated.setPredictedRating(source.getPredictedRating());
+                }
+
+                if (source.getMatchingFactors() != null) {
+                    List<String> factors = aggregated.getMatchingFactors();
+                    for (String factor : source.getMatchingFactors()) {
+                        if (factor != null && !factors.contains(factor)) {
+                            factors.add(factor);
+                        }
+                    }
+                }
+
+                if (source.getReason() != null && !aggregated.getReason().contains(source.getReason())) {
+                    aggregated.setReason(aggregated.getReason() + " + " + source.getReason());
+                }
+            }
+        };
+
+        mergeSource.accept(collab, 0.45);
+        mergeSource.accept(content, 0.35);
+        mergeSource.accept(behavior, 0.25);
+
+        return fused.values().stream()
+            .peek(this::normalizeScore)
+            .sorted((a, b) -> Double.compare(b.getRecommendationScore(), a.getRecommendationScore()))
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
+
+    private List<RestaurantRecommendation> generateTrendBasedRecommendations(TrendAnalysis trend, UserBehaviorPattern pattern, int limit) {
+        if (trend == null) {
+            return new ArrayList<>();
+        }
+
+        Map<String, Double> trendingCategories = Optional.ofNullable(trend.getTrendingCategories()).orElse(calculateTrendingCategories(LocalDateTime.now().minusDays(7), LocalDateTime.now()));
+        Map<String, Map<String, Double>> timeTrends = Optional.ofNullable(trend.getTimeBasedTrends()).orElse(analyzeTimeBasedTrends(LocalDateTime.now().minusDays(7), LocalDateTime.now()));
+        Map<String, Integer> socialBuzz = Optional.ofNullable(trend.getSocialBuzz()).orElse(analyzeSocialBuzz(LocalDateTime.now().minusDays(7), LocalDateTime.now()));
+
+        Map<String, Double> categoryAffinity = pattern != null && pattern.getCategoryAffinities() != null
+            ? pattern.getCategoryAffinities()
+            : Map.of();
+        Map<String, Double> locationAffinity = pattern != null && pattern.getLocationAffinities() != null
+            ? pattern.getLocationAffinities()
+            : Map.of();
+        List<String> preferredTimeSlots = pattern != null && pattern.getPreferredTimeSlots() != null
+            ? pattern.getPreferredTimeSlots()
+            : List.of();
+
+        List<Restaurant> candidates = new ArrayList<>();
+        candidates.addAll(Optional.ofNullable(trend.getRisingStars()).orElse(List.of()));
+        candidates.addAll(Optional.ofNullable(recommendationDAO.getPopularRestaurants(limit * 3)).orElse(List.of()));
+
+        Map<Integer, RestaurantRecommendation> aggregated = new LinkedHashMap<>();
+        double maxBuzz = socialBuzz.values().stream().mapToInt(Integer::intValue).max().orElse(200);
+
+        for (Restaurant restaurant : candidates) {
+            if (restaurant == null || restaurant.getCategory() == null) continue;
+
+            double categoryTrendScore = trendingCategories.getOrDefault(restaurant.getCategory(), 0.2);
+            double locationTrendScore = 0.0;
+            if (trend.getLocationTrends() != null) {
+                List<String> locationCategories = trend.getLocationTrends().getOrDefault(restaurant.getLocation(), List.of());
+                if (locationCategories.contains(restaurant.getCategory())) {
+                    locationTrendScore = 0.6 / (locationCategories.indexOf(restaurant.getCategory()) + 1);
+                }
+            }
+
+            double timeTrendScore = 0.0;
+            for (String timeSlot : preferredTimeSlots) {
+                Map<String, Double> slotData = timeTrends.get(timeSlot);
+                if (slotData != null) {
+                    timeTrendScore = Math.max(timeTrendScore, slotData.getOrDefault(restaurant.getCategory(), 0.0));
+                }
+            }
+
+            double socialScore = socialBuzz.entrySet().stream()
+                .filter(entry -> entry.getKey().contains(restaurant.getName()) || entry.getKey().contains(restaurant.getCategory()))
+                .mapToDouble(entry -> entry.getValue() / (double) maxBuzz)
+                .max().orElse(0.0);
+
+            double userAffinity = Math.max(categoryAffinity.getOrDefault(restaurant.getCategory(), 0.15),
+                locationAffinity.getOrDefault(restaurant.getLocation(), 0.1));
+
+            double trendSensitivity = pattern != null ? Math.max(pattern.getTrendSensitivity(), 0.2) : 0.3;
+
+            double finalScore = (categoryTrendScore * 0.45)
+                + (locationTrendScore * 0.15)
+                + (timeTrendScore * 0.1)
+                + (socialScore * 0.1)
+                + (userAffinity * 0.15)
+                + (trendSensitivity * 0.05);
+
+            finalScore = Math.max(0.05, Math.min(1.0, finalScore));
+
+            RestaurantRecommendation recommendation = aggregated.computeIfAbsent(restaurant.getId(), id -> {
+                RestaurantRecommendation rec = new RestaurantRecommendation();
+                rec.setRestaurant(restaurant);
+                rec.setMatchingFactors(new ArrayList<>());
+                return rec;
+            });
+
+            recommendation.setRecommendationScore(Math.max(recommendation.getRecommendationScore(), finalScore));
+            recommendation.setPredictedRating(Math.max(restaurant.getRating(), 4.1));
+
+            List<String> factors = recommendation.getMatchingFactors();
+            if (!factors.contains("실시간 트렌드")) {
+                factors.add("실시간 트렌드");
+            }
+            if (preferredTimeSlots.isEmpty()) {
+                factors.add("시간대 인기 반영");
+            } else {
+                for (String slot : preferredTimeSlots) {
+                    if (!factors.contains(slot + " 추천")) {
+                        factors.add(slot + " 추천");
+                    }
+                }
+            }
+
+            StringBuilder reason = new StringBuilder("이번 주 트렌드 기반 추천");
+            if (categoryTrendScore > 0.5) {
+                reason.append(" + 인기 카테고리");
+            }
+            if (locationTrendScore > 0.3) {
+                reason.append(" + 지역 트렌드");
+            }
+            if (userAffinity > 0.2) {
+                reason.append(" + 선호도 반영");
+            }
+            recommendation.setReason(reason.toString());
+        }
+
+        return aggregated.values().stream()
+            .sorted((a, b) -> Double.compare(b.getRecommendationScore(), a.getRecommendationScore()))
+            .limit(limit)
+            .collect(Collectors.toList());
+    }
 }
