@@ -37,14 +37,6 @@ public class HqNoticeServlet extends HttpServlet {
 	NoticeService noticeService = new NoticeService();
 	private final Gson gson = new Gson();
 
-	/**
-	 * @see HttpServlet#HttpServlet()
-	 */
-	public HqNoticeServlet() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-
 	// HqNoticeServlet.java의 doGet 메소드 수정
 
 	private static final int PAGE_SIZE = 10; // 페이지당 보여줄 공지 개수

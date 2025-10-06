@@ -54,7 +54,7 @@ public class ReviewReplyServlet extends HttpServlet {
             }
 
             // 4. 서비스 호출하여 답글 저장 (수정된 메소드 호출)
-            boolean isSuccess = reviewService.addOwnerReply(reviewId, replyContent);
+            boolean isSuccess = reviewService.addOwnerReply(reviewId, currentUser.getId(), replyContent);
             
             // 5. 결과에 따라 리다이렉트
             if (isSuccess) {

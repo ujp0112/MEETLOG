@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -213,7 +214,12 @@ public class Reservation {
 	}
 
 	public void setCreatedAtAsDate(Date createdAtAsDate) {
-		// TODO Auto-generated method stub
-		this.createdAtAsDate = createdAtAsDate;
+		if (createdAtAsDate != null) {
+			this.createdAtAsDate = createdAtAsDate;
+		} else if (this.createdAt != null) {
+			this.createdAtAsDate = Timestamp.valueOf(this.createdAt);
+		} else {
+			this.createdAtAsDate = null;
+		}
 	}
 }

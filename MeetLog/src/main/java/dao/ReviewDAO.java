@@ -76,6 +76,12 @@ public class ReviewDAO {
 		}
 	}
 
+	public List<Review> search(Map<String, Object> params) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			return sqlSession.selectList(NAMESPACE + ".search", params);
+		}
+	}
+
 	// [수정] 리뷰 기본 정보를 저장하는 메소드
 	public int insertReview(SqlSession session, Review review) {
 		return session.insert(NAMESPACE + ".insertReview", review);

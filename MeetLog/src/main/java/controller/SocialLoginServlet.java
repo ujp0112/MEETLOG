@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import util.KakaoLoginBO;
 import util.NaverLoginBO;
 import util.GoogleLoginBO;
-// import util.GoogleLoginBO; // 추후 구글 로그인 BO 클래스를 만들면 추가
 
 @WebServlet("/auth/login/*")
 public class SocialLoginServlet extends HttpServlet {
@@ -19,25 +18,40 @@ public class SocialLoginServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String provider = request.getPathInfo().substring(1); // URL에서 /naver, /kakao 등을 추출
+		String pathInfo = request.getPathInfo();
+		if (pathInfo == null || pathInfo.length() <= 1) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Provider is required");
+			return;
+		}
+
+		String provider = pathInfo.substring(1).toLowerCase();
 		String authUrl = null;
 
 		System.out.println("Social Login 요청 수신: " + provider); // 디버깅용 로그
 
-		if ("naver".equals(provider)) {
-			authUrl = NaverLoginBO.getAuthorizationUrl(request.getSession());
-		} else if ("kakao".equals(provider)) {
-			authUrl = KakaoLoginBO.getAuthorizationUrl();
-		} else if ("google".equals(provider)) {
-			authUrl = GoogleLoginBO.getAuthorizationUrl(); // 구글 로그인 로직 추가 시 주석 해제
-			System.out.println("Google login is not yet implemented."); // 임시 로그
+		try {
+			switch (provider) {
+			case "naver":
+				authUrl = NaverLoginBO.getAuthorizationUrl(request.getSession());
+				break;
+			case "kakao":
+				authUrl = KakaoLoginBO.getAuthorizationUrl();
+				break;
+			case "google":
+				authUrl = GoogleLoginBO.getAuthorizationUrl();
+				break;
+			default:
+				System.err.println("지원하지 않는 provider: " + provider);
+			}
+		} catch (Exception e) {
+			System.err.println("소셜 로그인 URL 생성 실패: " + e.getMessage());
+			e.printStackTrace();
 		}
 
-		if (authUrl != null) {
+		if (authUrl != null && !authUrl.isEmpty()) {
 			System.out.println("인증 URL로 리디렉션: " + authUrl); // 디버깅용 로그
 			response.sendRedirect(authUrl);
 		} else {
-			System.err.println("유효하지 않은 provider 또는 미구현: " + provider); // 디버깅용 로그
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Unknown provider: " + provider);
 		}
 	}

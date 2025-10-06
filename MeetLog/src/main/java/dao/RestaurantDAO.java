@@ -27,6 +27,10 @@ public class RestaurantDAO {
 		}
 	}
 
+	public Restaurant findById(SqlSession session, int id) {
+		return session.selectOne(NAMESPACE + ".findById", id);
+	}
+
 	public List<Restaurant> findByCategory(String category) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectList(NAMESPACE + ".findByCategory", category);

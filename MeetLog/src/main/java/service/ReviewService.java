@@ -8,6 +8,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import dao.RestaurantDAO;
 import dao.ReviewDAO;
+import model.Restaurant;
 import model.Review;
 import model.ReviewInfo;
 import util.MyBatisSqlSessionFactory;
@@ -60,7 +61,10 @@ public class ReviewService {
 	}
 
 	public List<Review> searchReviews(Map<String, Object> searchParams) {
-		return reviewDAO.findAll(); // 임시로 모든 리뷰 반환
+		if (searchParams == null || searchParams.isEmpty()) {
+			return reviewDAO.findAll();
+		}
+		return reviewDAO.search(searchParams);
 	}
 
 	public boolean addReview(Review review) {
@@ -170,13 +174,31 @@ public class ReviewService {
 		return false;
 	}
 
-	public boolean addOwnerReply(int reviewId, String replyContent) {
+	public boolean addOwnerReply(int reviewId, int ownerId, String replyContent) {
 		// 1. SqlSession을 try-with-resources로 안전하게 가져옵니다.
 		try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
 			try {
-				// TODO: 현재 로그인한 유저가 해당 리뷰의 레스토랑 주인인지 확인하는 보안 로직을 추가하면 더 좋습니다.
 				if (replyContent == null || replyContent.trim().isEmpty()) {
 					throw new IllegalArgumentException("답글 내용은 비워둘 수 없습니다.");
+				}
+
+				if (ownerId <= 0) {
+					throw new IllegalArgumentException("유효하지 않은 소유자 정보입니다.");
+				}
+
+				Review targetReview = reviewDAO.findByIdWithLikes(session, reviewId);
+				if (targetReview == null) {
+					throw new IllegalArgumentException("존재하지 않는 리뷰입니다. reviewId=" + reviewId);
+				}
+
+				Restaurant restaurant = restaurantDAO.findById(session, targetReview.getRestaurantId());
+				if (restaurant == null) {
+					throw new IllegalStateException("리뷰와 연결된 레스토랑 정보를 찾을 수 없습니다. restaurantId="
+							+ targetReview.getRestaurantId());
+				}
+
+				if (restaurant.getOwnerId() == null || restaurant.getOwnerId() != ownerId) {
+					throw new SecurityException("리뷰에 답글을 작성할 권한이 없습니다. ownerId=" + ownerId);
 				}
 
 				Map<String, Object> params = new HashMap<>();

@@ -184,9 +184,35 @@ public class UserService {
 		if (socialProfile.getEmail() != null && !socialProfile.getEmail().isEmpty()) {
 			User existingUser = userDAO.findByEmail(socialProfile.getEmail());
 			if (existingUser != null) {
-				// TODO: 여기에 기존 계정과 소셜 계정을 연동하는 로직을 추가할 수 있습니다.
-				// (예: users 테이블의 social_provider, social_id를 업데이트)
-				System.out.println("기존 이메일 계정으로 로그인 성공 (소셜 연동됨): " + existingUser.getEmail());
+				String provider = socialProfile.getSocialProvider();
+				String socialId = socialProfile.getSocialId();
+
+				if (provider == null || provider.trim().isEmpty() || socialId == null || socialId.trim().isEmpty()) {
+					System.err.println("소셜 연동 실패: provider 또는 socialId가 비어있습니다.");
+					return existingUser;
+				}
+
+				boolean alreadyLinked = existingUser.getSocialProvider() != null && existingUser.getSocialId() != null;
+				if (alreadyLinked) {
+					boolean matches = provider.equalsIgnoreCase(existingUser.getSocialProvider())
+							&& socialId.equals(existingUser.getSocialId());
+					if (!matches) {
+						System.err.println("소셜 연동 충돌: 이미 다른 소셜 계정이 연결되어 있습니다. userId="
+								+ existingUser.getId());
+					}
+					return existingUser;
+				}
+
+				int updated = userDAO.linkSocialAccount(existingUser.getId(), provider, socialId);
+				if (updated > 0) {
+					existingUser.setSocialProvider(provider);
+					existingUser.setSocialId(socialId);
+					System.out.println("이메일 기반 기존 계정과 소셜 계정이 성공적으로 연동되었습니다. userId="
+							+ existingUser.getId());
+				} else {
+					System.err.println("소셜 연동 업데이트 실패: userId=" + existingUser.getId());
+				}
+
 				return existingUser;
 			}
 		}
@@ -370,21 +396,43 @@ public class UserService {
 	}
 
 	public List<model.UserCollection> getUserCollections(int userId) {
-		// 사용자의 컬렉션 목록을 가져옴
-		// 임시로 빈 리스트 반환 (실제 구현 필요)
-		return new java.util.ArrayList<>();
+		if (userStorageService == null) {
+			return new ArrayList<>();
+		}
+
+		List<UserStorage> storages = userStorageService.getUserStorages(userId);
+		List<model.UserCollection> collections = new ArrayList<>();
+		for (UserStorage storage : storages) {
+			model.UserCollection collection = new model.UserCollection();
+			collection.setId(storage.getStorageId());
+			collection.setUserId(storage.getUserId());
+			collection.setName(storage.getName());
+			collection.setDescription(storage.getColorClass());
+			collections.add(collection);
+		}
+		return collections;
 	}
 
 	public model.UserCollection getUserCollection(int collectionId, int userId) {
-		// 특정 컬렉션 정보를 가져옴 (권한 확인 포함)
-		// 임시로 null 반환 (실제 구현 필요)
-		return null;
+		if (userStorageService == null) {
+			return null;
+		}
+
+		UserStorage storage = userStorageService.getStorageById(collectionId);
+		if (storage == null || storage.getUserId() != userId) {
+			return null;
+		}
+
+		model.UserCollection collection = new model.UserCollection();
+		collection.setId(storage.getStorageId());
+		collection.setUserId(storage.getUserId());
+		collection.setName(storage.getName());
+		collection.setDescription(storage.getColorClass());
+		return collection;
 	}
 
 	public List<model.Restaurant> getCollectionRestaurants(int collectionId) {
-		// 컬렉션에 속한 레스토랑들을 가져옴
-		// 임시로 빈 리스트 반환 (실제 구현 필요)
-		return new java.util.ArrayList<>();
+		return getStorageRestaurants(collectionId);
 	}
 
 	public boolean addToCollection(int userId, int restaurantId, int collectionId) {

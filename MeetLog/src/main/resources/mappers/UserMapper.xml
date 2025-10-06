@@ -112,4 +112,12 @@
 		updated_at = NOW()
 		WHERE id = #{id}
 	</update>
+
+	<update id="linkSocialAccount" parameterType="map">
+		UPDATE users
+		SET social_provider = #{socialProvider},
+			social_id = #{socialId},
+			updated_at = NOW()
+		WHERE id = #{id}
+	</update>
 </mapper>

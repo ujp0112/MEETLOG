@@ -1,18 +1,24 @@
 package controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import model.BusinessQnA;
 import model.User;
+import service.BusinessQnAService;
 
 public class BusinessInquiriesServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private final BusinessQnAService businessQnAService = new BusinessQnAService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,13 +32,38 @@ public class BusinessInquiriesServlet extends HttpServlet {
                 return;
             }
 
-            // 임시 데이터 (추후 실제 데이터로 교체)
-            int totalInquiries = 5;
-            int pendingInquiries = 2;
-            int answeredInquiries = 3;
+            List<BusinessQnA> qnaList = businessQnAService.getQnAByOwnerId(user.getId());
 
-            // JSP로 데이터 전달
-            request.setAttribute("inquiries", new ArrayList<>());
+            int totalInquiries = qnaList.size();
+            int pendingInquiries = (int) qnaList.stream()
+                    .filter(qna -> "PENDING".equalsIgnoreCase(qna.getStatus()))
+                    .count();
+            int answeredInquiries = (int) qnaList.stream()
+                    .filter(qna -> {
+                        String status = qna.getStatus();
+                        return "ANSWERED".equalsIgnoreCase(status) || "RESOLVED".equalsIgnoreCase(status)
+                                || "CLOSED".equalsIgnoreCase(status);
+                    })
+                    .count();
+
+            List<Map<String, Object>> inquiryViews = qnaList.stream().map(qna -> {
+                Map<String, Object> view = new HashMap<>();
+                view.put("id", qna.getId());
+                String title = qna.getRestaurantName() != null && !qna.getRestaurantName().isBlank()
+                        ? qna.getRestaurantName() + " 문의"
+                        : qna.getQuestion();
+                view.put("title", title);
+                view.put("content", qna.getQuestion());
+                view.put("userName", qna.getUserName());
+                view.put("userEmail", qna.getUserEmail());
+                view.put("status", qna.getStatus());
+                view.put("answer", qna.getAnswer());
+                view.put("createdAt", qna.getCreatedAt() != null ? Timestamp.valueOf(qna.getCreatedAt()) : null);
+                view.put("answeredAt", qna.getAnsweredAt() != null ? Timestamp.valueOf(qna.getAnsweredAt()) : null);
+                return view;
+            }).collect(Collectors.toList());
+
+            request.setAttribute("inquiries", inquiryViews);
             request.setAttribute("totalInquiries", totalInquiries);
             request.setAttribute("pendingInquiries", pendingInquiries);
             request.setAttribute("answeredInquiries", answeredInquiries);

@@ -106,6 +106,16 @@ public class UserDAO {
 		}
 	}
 
+	public int linkSocialAccount(int userId, String socialProvider, String socialId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(true)) {
+			Map<String, Object> params = new HashMap<>();
+			params.put("id", userId);
+			params.put("socialProvider", socialProvider);
+			params.put("socialId", socialId);
+			return sqlSession.update(NAMESPACE + ".linkSocialAccount", params);
+		}
+	}
+
 	public User findBySocial(String socialProvider, String socialId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			Map<String, Object> params = new HashMap<>();
