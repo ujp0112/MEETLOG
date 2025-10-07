@@ -515,6 +515,12 @@ CREATE TABLE `reservations` (
   `status` enum('PENDING','CONFIRMED','COMPLETED','CANCELLED') DEFAULT 'PENDING',
   `special_requests` text DEFAULT NULL,
   `contact_phone` varchar(20) DEFAULT NULL,
+  `deposit_required` tinyint(1) NOT NULL DEFAULT 0,
+  `deposit_amount` decimal(10,2) NOT NULL DEFAULT 0,
+  `payment_status` varchar(20) NOT NULL DEFAULT 'NONE',
+  `payment_order_id` varchar(120) DEFAULT NULL,
+  `payment_provider` varchar(50) DEFAULT NULL,
+  `payment_approved_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -591,6 +597,9 @@ CREATE TABLE `restaurant_reservation_settings` (
   `time_slots` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT '[	09:00, 10:00, 11:00, 12:00, 13:00, 14:00, 15:00, 16:00, 17:00, 18:00, 19:00, 20:00, 21:00]' CHECK (json_valid(`time_slots`)),
   `blackout_dates` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`blackout_dates`)),
   `special_notes` text DEFAULT NULL,
+  `deposit_required` tinyint(1) DEFAULT 0,
+  `deposit_amount` decimal(10,2) DEFAULT 0,
+  `deposit_description` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `monday_enabled` tinyint(1) DEFAULT 1,
@@ -1171,7 +1180,7 @@ INSERT IGNORE INTO `feed_items` VALUES (6,4,'COURSE',1,1,'2025-09-28 00:42:58'),
 INSERT IGNORE INTO `follows` VALUES (6,10,7,1,'2025-09-27 16:20:45'),(7,10,3,1,'2025-09-27 16:21:01'),(8,10,2,1,'2025-09-27 16:53:42');
 INSERT IGNORE INTO `restaurant_operating_hours` VALUES (8,33,2,'00:00:00','22:00:00'),(9,33,3,'00:00:00','22:00:00'),(10,33,4,'00:00:00','22:00:00'),(11,33,5,'00:00:00','22:00:00'),(12,33,6,'00:00:00','22:00:00'),(13,33,7,'00:00:00','22:00:00');
 INSERT IGNORE INTO `restaurant_qna` (id, restaurant_id, question, answer, is_owner, is_resolved, answered_at) VALUES (4,1,'영업시간이 궁금합니다.','평일 오전 10시부터 오후 10시까지 영업합니다.',1,1,'2025-09-28 00:54:05');
-INSERT IGNORE INTO `restaurant_reservation_settings` VALUES (1,33,1,1,1,10,30,2,'09:00:00','22:00:00',NULL,NULL,'["2025-09-30"]','5','2025-09-28 15:45:05','2025-09-29 09:37:34',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00',0,'09:00:00','22:00:00'),(2,1,1,0,2,8,30,2,'11:00:00','21:00:00','["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]','["11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"]',NULL,NULL,'2025-09-29 07:24:59','2025-09-29 07:24:59',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','21:00:00',1,'11:00:00','22:00:00',1,'10:00:00','22:00:00',1,'10:00:00','21:00:00'),(3,2,1,1,1,6,14,1,'09:00:00','22:00:00','["monday", "tuesday", "thursday", "friday", "saturday", "sunday"]','["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]',NULL,NULL,'2025-09-29 07:25:06','2025-09-29 07:25:06',1,'09:00:00','22:00:00',1,'09:00:00','22:00:00',0,'09:00:00','22:00:00',1,'09:00:00','22:00:00',1,'09:00:00','23:00:00',1,'08:00:00','23:00:00',1,'08:00:00','22:00:00');
+
 INSERT IGNORE INTO `user_storages` (storage_id, user_id, name, color_class) VALUES (6,1,'내가 찜한 로그','bg-blue-100'),(7,9,'내가 찜한 로그','bg-blue-100'),(8,8,'내가 찜한 로그','bg-blue-100'),(9,6,'내가 찜한 로그','bg-blue-100'),(10,7,'내가 찜한 로그','bg-blue-100'),(11,10,'내가 찜한 로그','bg-blue-100'),(12,10,'2','bg-green-100'),(13,10,'3','bg-blue-100');
 INSERT IGNORE INTO `user_storage_items` VALUES (9,6,'COURSE',1,'2025-09-27 20:01:24'),(12,11,'COURSE',3,'2025-09-27 20:29:30'),(13,11,'COURSE',4,'2025-09-27 23:19:20');
 
@@ -1467,3 +1476,53 @@ INSERT INTO reports (reporter_id, reported_type, reported_id, reported_user_id, 
 
 -- 외래 키 제약 조건 다시 활성화
 SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT IGNORE INTO `restaurant_reservation_settings` (
+    `id`, `restaurant_id`, `reservation_enabled`, `auto_accept`,
+    `min_party_size`, `max_party_size`, `advance_booking_days`, `min_advance_hours`,
+    `reservation_start_time`, `reservation_end_time`, `available_days`, `time_slots`,
+    `blackout_dates`, `special_notes`, `deposit_required`, `deposit_amount`, `deposit_description`,
+    `created_at`, `updated_at`,
+    `monday_enabled`, `monday_start`, `monday_end`,
+    `tuesday_enabled`, `tuesday_start`, `tuesday_end`,
+    `wednesday_enabled`, `wednesday_start`, `wednesday_end`,
+    `thursday_enabled`, `thursday_start`, `thursday_end`,
+    `friday_enabled`, `friday_start`, `friday_end`,
+    `saturday_enabled`, `saturday_start`, `saturday_end`,
+    `sunday_enabled`, `sunday_start`, `sunday_end`
+) VALUES
+    (1, 33, 1, 1, 1, 10, 30, 2, '09:00:00', '22:00:00',
+     NULL, NULL,
+     '["2025-09-30"]', '5', 0, 0, NULL,
+     '2025-09-28 15:45:05', '2025-09-29 09:37:34',
+     1, '09:00:00', '22:00:00',
+     1, '09:00:00', '23:00:00',
+     0, '09:00:00', '22:00:00',
+     0, '09:00:00', '22:00:00',
+     0, '09:00:00', '22:00:00',
+     0, '09:00:00', '22:00:00',
+     0, '09:00:00', '22:00:00'),
+    (2, 1, 1, 0, 2, 8, 30, 2, '11:00:00', '21:00:00',
+     '["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]',
+     '["11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30"]',
+     NULL, NULL, 0, 0, NULL,
+     '2025-09-29 07:24:59', '2025-09-29 07:24:59',
+     1, '11:00:00', '21:00:00',
+     1, '11:00:00', '21:00:00',
+     1, '11:00:00', '21:00:00',
+     1, '11:00:00', '21:00:00',
+     1, '11:00:00', '22:00:00',
+     1, '10:00:00', '22:00:00',
+     1, '10:00:00', '21:00:00'),
+    (3, 2, 1, 1, 1, 6, 14, 1, '09:00:00', '22:00:00',
+     '["monday", "tuesday", "thursday", "friday", "saturday", "sunday"]',
+     '["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"]',
+     NULL, NULL, 0, 0, NULL,
+     '2025-09-29 07:25:06', '2025-09-29 07:25:06',
+     1, '09:00:00', '22:00:00',
+     1, '09:00:00', '22:00:00',
+     0, '09:00:00', '22:00:00',
+     1, '09:00:00', '22:00:00',
+     1, '09:00:00', '23:00:00',
+     1, '08:00:00', '23:00:00',
+     1, '08:00:00', '22:00:00');

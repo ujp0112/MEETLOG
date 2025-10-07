@@ -66,4 +66,26 @@ public class ReservationDAO {
     	System.out.println(")))))))))))))))))))))" + reservation);
         return sqlSession.insert(NAMESPACE + ".insert", reservation);
     }
+
+    public int updatePaymentInfo(int reservationId,
+                                 String paymentStatus,
+                                 String paymentOrderId,
+                                 String paymentProvider,
+                                 java.time.LocalDateTime paidAt,
+                                 java.math.BigDecimal depositAmount,
+                                 boolean depositRequired) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("id", reservationId);
+            params.put("paymentStatus", paymentStatus);
+            params.put("paymentOrderId", paymentOrderId);
+            params.put("paymentProvider", paymentProvider);
+            params.put("paymentApprovedAt", paidAt);
+            params.put("depositAmount", depositAmount);
+            params.put("depositRequired", depositRequired);
+            int result = sqlSession.update(NAMESPACE + ".updatePaymentInfo", params);
+            sqlSession.commit();
+            return result;
+        }
+    }
 }

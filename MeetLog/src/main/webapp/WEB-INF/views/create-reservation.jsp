@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -73,6 +74,19 @@ body {
 													${restaurant.phone}</p>
 											</c:if>
 										</div>
+
+										<c:if test="${depositRequired}">
+											<div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+												<h4 class="text-sm font-semibold text-amber-800">예약금 안내</h4>
+												<p class="text-2xl font-bold text-amber-600 mt-2">
+													<fmt:formatNumber value="${depositAmount}" pattern="#,###" />원
+												</p>
+												<c:if test="${not empty depositDescription}">
+													<p class="text-sm text-amber-700 mt-2">${depositDescription}</p>
+												</c:if>
+												<p class="text-xs text-amber-700 mt-3">결제는 예약 제출 후 네이버페이로 진행됩니다.</p>
+											</div>
+										</c:if>
 
 										<!-- 서버에서 전달된 에러 메시지 표시 -->
 										<c:if test="${not empty errorMessage}">

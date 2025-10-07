@@ -13,6 +13,12 @@
         <result property="partySize" column="party_size"/>
         <result property="specialRequests" column="special_requests"/>
         <result property="contactPhone" column="contact_phone"/>
+        <result property="depositRequired" column="deposit_required"/>
+        <result property="depositAmount" column="deposit_amount"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="paymentOrderId" column="payment_order_id"/>
+        <result property="paymentApprovedAt" column="payment_approved_at"/>
+        <result property="paymentProvider" column="payment_provider"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -102,10 +108,16 @@
 
     <!-- 예약 생성 -->
     <insert id="insert" parameterType="model.Reservation" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO reservations (restaurant_id, user_id, restaurant_name, user_name, reservation_time, 
-        party_size, status, special_requests, contact_phone, created_at, updated_at)
-        VALUES (#{restaurantId}, #{userId}, #{restaurantName}, #{userName}, #{reservationTime}, 
-        #{partySize}, #{status}, #{specialRequests}, #{contactPhone}, NOW(), NOW())
+        INSERT INTO reservations (
+            restaurant_id, user_id, restaurant_name, user_name, reservation_time,
+            party_size, status, special_requests, contact_phone,
+            deposit_required, deposit_amount, payment_status, payment_order_id, payment_provider, payment_approved_at,
+            created_at, updated_at)
+        VALUES (
+            #{restaurantId}, #{userId}, #{restaurantName}, #{userName}, #{reservationTime},
+            #{partySize}, #{status}, #{specialRequests}, #{contactPhone},
+            #{depositRequired}, #{depositAmount}, #{paymentStatus}, #{paymentOrderId}, #{paymentProvider}, #{paymentApprovedAt},
+            NOW(), NOW())
     </insert>
 
     <update id="update" parameterType="model.Reservation">
@@ -121,6 +133,18 @@
 
     <update id="updateStatus" parameterType="map">
         UPDATE reservations SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updatePaymentInfo" parameterType="map">
+        UPDATE reservations SET
+            payment_status = #{paymentStatus},
+            payment_order_id = #{paymentOrderId},
+            payment_provider = #{paymentProvider},
+            payment_approved_at = #{paymentApprovedAt},
+            deposit_amount = #{depositAmount},
+            deposit_required = #{depositRequired},
+            updated_at = NOW()
+        WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="int">

@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ import model.User;
 import service.ReservationService;
 import service.RestaurantService;
 import dao.ReservationSettingsDAO;
+import service.payment.NaverPayService;
+import service.payment.NaverPayService.NaverPayJsConfig;
 
 // [아키텍처 오류 수정] 기존 JDBC 서블릿을 삭제하고 Service 계층을 사용하는 컨트롤러로 변경합니다.
 //
@@ -34,6 +37,7 @@ public class ReservationServlet extends HttpServlet {
 	private ReservationService reservationService = new ReservationService();
 	private RestaurantService restaurantService = new RestaurantService();
 	private ReservationSettingsDAO reservationSettingsDAO = new ReservationSettingsDAO();
+	private final NaverPayService naverPayService = new NaverPayService();
 
 	private boolean toBoolean(Object value) {
 		if (value == null) {
@@ -50,6 +54,28 @@ public class ReservationServlet extends HttpServlet {
 			return "true".equalsIgnoreCase(str) || "1".equals(str);
 		}
 		return false;
+	}
+
+	private BigDecimal toBigDecimal(Object value) {
+		if (value == null) {
+			return BigDecimal.ZERO;
+		}
+		if (value instanceof BigDecimal) {
+			return (BigDecimal) value;
+		}
+		if (value instanceof Number) {
+			return BigDecimal.valueOf(((Number) value).doubleValue());
+		}
+		if (value instanceof String) {
+			String str = ((String) value).trim();
+			if (!str.isEmpty()) {
+				try {
+					return new BigDecimal(str);
+				} catch (NumberFormatException ignore) {
+				}
+			}
+		}
+		return BigDecimal.ZERO;
 	}
 
 	private LocalTime toLocalTime(Object value) {
@@ -211,6 +237,10 @@ public class ReservationServlet extends HttpServlet {
 				request.setAttribute("selectedDate", selectedDate);
 				request.setAttribute("lunchStart", LocalTime.of(12, 0));
 				request.setAttribute("dinnerStart", LocalTime.of(17, 0));
+				boolean depositRequired = settings != null && toBoolean(settings.get("deposit_required"));
+				request.setAttribute("depositRequired", depositRequired);
+				request.setAttribute("depositAmount", settings != null ? toBigDecimal(settings.get("deposit_amount")) : BigDecimal.ZERO);
+				request.setAttribute("depositDescription", settings != null ? settings.get("deposit_description") : "");
 
 				// --- ▲▲▲ [ReservationSettings 연동] 로직 끝 ▲▲▲ ---
 				request.setAttribute("restaurant", restaurant);
@@ -344,6 +374,19 @@ public class ReservationServlet extends HttpServlet {
 			Reservation reservation = new Reservation(restaurantId, user.getId(), restaurantName, user.getNickname(),
 					reservationDateTime, partySize, contactPhone);
 
+			boolean depositRequired = toBoolean(settings.get("deposit_required"));
+			BigDecimal depositAmount = depositRequired ? toBigDecimal(settings.get("deposit_amount")) : BigDecimal.ZERO;
+			String depositDescription = (String) settings.get("deposit_description");
+			reservation.setDepositRequired(depositRequired);
+			reservation.setDepositAmount(depositAmount);
+			reservation.setSpecialRequests(request.getParameter("specialRequests"));
+			if (depositRequired && depositAmount != null && depositAmount.compareTo(BigDecimal.ZERO) > 0) {
+				reservation.setPaymentStatus("PENDING");
+				reservation.setPaymentProvider("NAVERPAY");
+			} else {
+				reservation.setPaymentStatus("NOT_REQUIRED");
+			}
+
 			// --- ▼▼▼ [자동 승인] 설정에 따라 예약 상태 결정 ▼▼▼ ---
 			boolean autoAccept = toBoolean(settings.get("auto_accept"));
 			if (autoAccept) {
@@ -356,6 +399,33 @@ public class ReservationServlet extends HttpServlet {
 			// --- ▲▲▲ [자동 승인] 끝 ▲▲▲ ---
 
 			if (reservationService.createReservation(reservation)) {
+				if (reservation.isDepositRequired()
+						&& reservation.getDepositAmount() != null
+						&& reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
+					if (!naverPayService.isConfigured()) {
+						throw new Exception("네이버페이 설정이 완료되지 않았습니다. 관리자에게 문의해주세요.");
+					}
+
+					String merchantPayKey = naverPayService.generateMerchantPayKey(reservation.getId());
+					reservation.setPaymentOrderId(merchantPayKey);
+					reservationService.updatePaymentInfo(
+							reservation.getId(),
+							reservation.getPaymentStatus(),
+							merchantPayKey,
+							reservation.getPaymentProvider(),
+							reservation.getPaymentApprovedAt(),
+							reservation.getDepositAmount(),
+							reservation.isDepositRequired());
+
+					NaverPayJsConfig jsConfig = naverPayService.buildJsConfig(request, user, reservation,
+							reservation.getDepositAmount());
+					request.setAttribute("naverPayConfig", jsConfig);
+					request.setAttribute("reservation", reservation);
+					request.setAttribute("depositDescription", depositDescription);
+					request.getRequestDispatcher("/WEB-INF/views/reservation-payment.jsp").forward(request, response);
+					return;
+				}
+
 				// 예약 성공 시, 내 예약 목록 페이지로 이동
 				response.sendRedirect(request.getContextPath() + "/mypage/reservations");
 			} else {

@@ -229,6 +229,65 @@
                 </div>
             </div>
 
+            <!-- 예약금 설정 -->
+            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+                    <i class="fas fa-receipt text-amber-500"></i>
+                    예약금 설정
+                </h2>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-shield-check text-amber-500 text-xl"></i>
+                            <div>
+                                <h3 class="font-semibold text-slate-800">예약금(선결제) 사용</h3>
+                                <p class="text-sm text-slate-600">노쇼 방지를 위해 예약 시 선결제 금액을 설정합니다.</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" name="depositRequired" class="toggle-switch"
+                               ${reservationSettings.deposit_required ? 'checked' : ''}>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200">
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">
+                                <i class="fas fa-won-sign text-green-500 mr-2"></i>
+                                예약금 금액
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="depositAmount" min="0" step="1"
+                                       value="${reservationSettings.deposit_amount != null ? reservationSettings.deposit_amount : ''}"
+                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="0">
+                                <span class="text-sm text-slate-600">원</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">0원 입력 시 예약금이 청구되지 않습니다.</p>
+                        </div>
+
+                        <div class="md:col-span-2 bg-white p-6 rounded-xl border border-slate-200">
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">
+                                <i class="fas fa-comment-dots text-blue-500 mr-2"></i>
+                                예약금 안내 문구
+                            </label>
+                            <textarea name="depositDescription" rows="4"
+                                      class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="예) 예약 확정 시 10,000원의 예약금이 결제됩니다. 방문 후 최종 금액에서 차감됩니다.">${reservationSettings.deposit_description}</textarea>
+                            <p class="text-xs text-slate-500 mt-2">고객이 결제 과정에서 확인할 수 있는 안내 문구입니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+                        <h4 class="font-medium text-amber-800 mb-2">💡 예약금 운영 가이드</h4>
+                        <ul class="text-sm text-amber-700 list-disc list-inside space-y-1">
+                            <li>네이버페이 결제 완료 시 예약이 확정 상태로 전환됩니다.</li>
+                            <li>환불 정책은 예약금 안내 문구에 명확히 기재해주세요.</li>
+                            <li>예약금 결제 내역은 업주 관리 페이지에서 확인할 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- 운영 시간 설정 -->
             <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
                 <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
@@ -254,7 +313,7 @@
                                    ${reservationSettings.monday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.monday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.monday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="mondayStartVisible"
@@ -288,7 +347,7 @@
                                    ${reservationSettings.tuesday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.tuesday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.tuesday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="tuesdayStartVisible"
@@ -322,7 +381,7 @@
                                    ${reservationSettings.wednesday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.wednesday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.wednesday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="wednesdayStartVisible"
@@ -356,7 +415,7 @@
                                    ${reservationSettings.thursday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.thursday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.thursday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="thursdayStartVisible"
@@ -390,7 +449,7 @@
                                    ${reservationSettings.friday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.friday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.friday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="fridayStartVisible"
@@ -424,7 +483,7 @@
                                    ${reservationSettings.saturday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.saturday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.saturday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="saturdayStartVisible"
@@ -458,7 +517,7 @@
                                    ${reservationSettings.sunday_enabled ? 'checked' : ''}>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times" style="display: ${reservationSettings.sunday_enabled ? 'grid' : 'none'}">
+                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.sunday_enabled ? '' : 'hidden'}">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
                                 <input type="time" name="sundayStartVisible"
@@ -572,10 +631,50 @@
                     console.log("Selected dates:", dateStr);
                 }
             });
+
+            const depositToggle = document.querySelector('input[name="depositRequired"]');
+            const depositAmountInput = document.querySelector('input[name="depositAmount"]');
+            const depositDescription = document.querySelector('textarea[name="depositDescription"]');
+
+            if (depositToggle && depositAmountInput && depositDescription) {
+                const normalizeDepositValue = () => {
+                    if (!depositToggle.checked) {
+                        return;
+                    }
+                    const parsed = parseInt(depositAmountInput.value || '0', 10);
+                    if (Number.isNaN(parsed) || parsed < 0) {
+                        depositAmountInput.value = '';
+                    } else {
+                        depositAmountInput.value = parsed.toString();
+                    }
+                };
+
+                const syncDepositFields = (initial) => {
+                    const enabled = depositToggle.checked;
+                    depositAmountInput.readOnly = !enabled;
+                    depositDescription.readOnly = !enabled;
+                    depositAmountInput.classList.toggle('cursor-not-allowed', !enabled);
+                    depositDescription.classList.toggle('cursor-not-allowed', !enabled);
+                    depositAmountInput.closest('div.bg-white').classList.toggle('opacity-50', !enabled);
+                    depositDescription.closest('div.bg-white').classList.toggle('opacity-50', !enabled);
+                    if (!enabled && !initial) {
+                        depositAmountInput.value = '';
+                        depositDescription.value = '';
+                    }
+                    if (enabled) {
+                        normalizeDepositValue();
+                    }
+                };
+
+                syncDepositFields(true);
+                depositToggle.addEventListener('change', () => syncDepositFields(false));
+                depositAmountInput.addEventListener('blur', normalizeDepositValue);
+            }
         });
 
         // 폼 제출 처리 - 수정된 버전
-        document.getElementById('reservationSettingsForm').addEventListener('submit', function(e) {
+        const reservationForm = document.getElementById('reservationSettingsForm');
+        reservationForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
             console.log('폼 제출 시작');
@@ -608,6 +707,12 @@
 
             formData.append('reservationEnabled', reservationEnabled ? reservationEnabled.checked.toString() : 'false');
             formData.append('autoAccept', autoAccept ? autoAccept.checked.toString() : 'false');
+            const depositToggle = document.querySelector('input[name="depositRequired"]');
+            const depositAmount = document.querySelector('input[name="depositAmount"]');
+            const depositDescription = document.querySelector('textarea[name="depositDescription"]');
+            formData.append('depositRequired', depositToggle ? depositToggle.checked.toString() : 'false');
+            formData.append('depositAmount', depositAmount ? depositAmount.value : '');
+            formData.append('depositDescription', depositDescription ? depositDescription.value : '');
 
             console.log('기본 설정:', {
                 reservationEnabled: reservationEnabled ? reservationEnabled.checked : false,
@@ -683,17 +788,20 @@
             }
             console.log('총 ' + count + '개 항목 전송');
 
-            // FormData를 무조건 URLSearchParams로 대체 (FormData 파라미터 인식 불가 문제)
+            // URLSearchParams 기반으로 전체 데이터 재구성 (서버 단에서 FormData 파라미터 인식 문제 대응)
             if (true) {
-                console.log('FormData가 비어있음, URLSearchParams로 대체');
+                console.log('URLSearchParams 기반으로 전송 데이터를 구성합니다.');
                 const params = new URLSearchParams();
 
-                params.append('reservationEnabled', reservationEnabled ? reservationEnabled.checked.toString() : 'false');
-                params.append('autoAccept', autoAccept ? autoAccept.checked.toString() : 'false');
+                params.set('reservationEnabled', reservationEnabled ? reservationEnabled.checked.toString() : 'false');
+                params.set('autoAccept', autoAccept ? autoAccept.checked.toString() : 'false');
+                params.set('depositRequired', depositToggle ? depositToggle.checked.toString() : 'false');
+                params.set('depositAmount', depositAmount ? depositAmount.value : '');
+                params.set('depositDescription', depositDescription ? depositDescription.value : '');
 
                 // 요일별 체크박스 직접 처리
-                params.append('mondayEnabled', mondayCheckbox ? mondayCheckbox.checked.toString() : 'false');
-                params.append('tuesdayEnabled', tuesdayCheckbox ? tuesdayCheckbox.checked.toString() : 'false');
+                params.set('mondayEnabled', mondayCheckbox ? mondayCheckbox.checked.toString() : 'false');
+                params.set('tuesdayEnabled', tuesdayCheckbox ? tuesdayCheckbox.checked.toString() : 'false');
 
                 // 나머지 요일들
                 const wednesdayCheckbox = document.querySelector('input[name="wednesdayEnabled"]');
@@ -702,17 +810,17 @@
                 const saturdayCheckbox = document.querySelector('input[name="saturdayEnabled"]');
                 const sundayCheckbox = document.querySelector('input[name="sundayEnabled"]');
 
-                params.append('wednesdayEnabled', wednesdayCheckbox ? wednesdayCheckbox.checked.toString() : 'false');
-                params.append('thursdayEnabled', thursdayCheckbox ? thursdayCheckbox.checked.toString() : 'false');
-                params.append('fridayEnabled', fridayCheckbox ? fridayCheckbox.checked.toString() : 'false');
-                params.append('saturdayEnabled', saturdayCheckbox ? saturdayCheckbox.checked.toString() : 'false');
-                params.append('sundayEnabled', sundayCheckbox ? sundayCheckbox.checked.toString() : 'false');
+                params.set('wednesdayEnabled', wednesdayCheckbox ? wednesdayCheckbox.checked.toString() : 'false');
+                params.set('thursdayEnabled', thursdayCheckbox ? thursdayCheckbox.checked.toString() : 'false');
+                params.set('fridayEnabled', fridayCheckbox ? fridayCheckbox.checked.toString() : 'false');
+                params.set('saturdayEnabled', saturdayCheckbox ? saturdayCheckbox.checked.toString() : 'false');
+                params.set('sundayEnabled', sundayCheckbox ? sundayCheckbox.checked.toString() : 'false');
 
                 // 시간 설정들 - 앞서 찾은 요소들 재사용
-                params.append('mondayStart', mondayStartVisible ? mondayStartVisible.value : '09:00');
-                params.append('mondayEnd', mondayEndVisible ? mondayEndVisible.value : '22:00');
-                params.append('tuesdayStart', tuesdayStartVisible ? tuesdayStartVisible.value : '09:00');
-                params.append('tuesdayEnd', tuesdayEndVisible ? tuesdayEndVisible.value : '22:00');
+                params.set('mondayStart', mondayStartVisible ? mondayStartVisible.value : '09:00');
+                params.set('mondayEnd', mondayEndVisible ? mondayEndVisible.value : '22:00');
+                params.set('tuesdayStart', tuesdayStartVisible ? tuesdayStartVisible.value : '09:00');
+                params.set('tuesdayEnd', tuesdayEndVisible ? tuesdayEndVisible.value : '22:00');
 
                 // 나머지 요일들 (체크 안 된 요일들은 기본값)
                 const wednesdayStartVisible = document.querySelector('input[name="wednesdayStartVisible"]');
@@ -726,16 +834,16 @@
                 const sundayStartVisible = document.querySelector('input[name="sundayStartVisible"]');
                 const sundayEndVisible = document.querySelector('input[name="sundayEndVisible"]');
 
-                params.append('wednesdayStart', wednesdayStartVisible ? wednesdayStartVisible.value : '09:00');
-                params.append('wednesdayEnd', wednesdayEndVisible ? wednesdayEndVisible.value : '22:00');
-                params.append('thursdayStart', thursdayStartVisible ? thursdayStartVisible.value : '09:00');
-                params.append('thursdayEnd', thursdayEndVisible ? thursdayEndVisible.value : '22:00');
-                params.append('fridayStart', fridayStartVisible ? fridayStartVisible.value : '09:00');
-                params.append('fridayEnd', fridayEndVisible ? fridayEndVisible.value : '22:00');
-                params.append('saturdayStart', saturdayStartVisible ? saturdayStartVisible.value : '09:00');
-                params.append('saturdayEnd', saturdayEndVisible ? saturdayEndVisible.value : '22:00');
-                params.append('sundayStart', sundayStartVisible ? sundayStartVisible.value : '09:00');
-                params.append('sundayEnd', sundayEndVisible ? sundayEndVisible.value : '22:00');
+                params.set('wednesdayStart', wednesdayStartVisible ? wednesdayStartVisible.value : '09:00');
+                params.set('wednesdayEnd', wednesdayEndVisible ? wednesdayEndVisible.value : '22:00');
+                params.set('thursdayStart', thursdayStartVisible ? thursdayStartVisible.value : '09:00');
+                params.set('thursdayEnd', thursdayEndVisible ? thursdayEndVisible.value : '22:00');
+                params.set('fridayStart', fridayStartVisible ? fridayStartVisible.value : '09:00');
+                params.set('fridayEnd', fridayEndVisible ? fridayEndVisible.value : '22:00');
+                params.set('saturdayStart', saturdayStartVisible ? saturdayStartVisible.value : '09:00');
+                params.set('saturdayEnd', saturdayEndVisible ? saturdayEndVisible.value : '22:00');
+                params.set('sundayStart', sundayStartVisible ? sundayStartVisible.value : '09:00');
+                params.set('sundayEnd', sundayEndVisible ? sundayEndVisible.value : '22:00');
 
                 console.log('시간 값 확인:', {
                     mondayEnd: mondayEndVisible ? mondayEndVisible.value : 'not found',
@@ -750,12 +858,12 @@
                 const specialNotes = document.querySelector('textarea[name="specialNotes"]');
                 const blackoutDates = document.querySelector('input[name="blackoutDates"]');
 
-                if (minPartySize) params.append('minPartySize', minPartySize.value || '1');
-                if (maxPartySize) params.append('maxPartySize', maxPartySize.value || '10');
-                if (advanceBookingDays) params.append('advanceBookingDays', advanceBookingDays.value || '30');
-                if (minAdvanceHours) params.append('minAdvanceHours', minAdvanceHours.value || '2');
-                if (specialNotes) params.append('specialNotes', specialNotes.value || '');
-                if (blackoutDates) params.append('blackoutDates', blackoutDates.value || '');
+                if (minPartySize) params.set('minPartySize', minPartySize.value || '1');
+                if (maxPartySize) params.set('maxPartySize', maxPartySize.value || '10');
+                if (advanceBookingDays) params.set('advanceBookingDays', advanceBookingDays.value || '30');
+                if (minAdvanceHours) params.set('minAdvanceHours', minAdvanceHours.value || '2');
+                if (specialNotes) params.set('specialNotes', specialNotes.value || '');
+                if (blackoutDates) params.set('blackoutDates', blackoutDates.value || '');
 
                 console.log('URLSearchParams 데이터:', params.toString());
 

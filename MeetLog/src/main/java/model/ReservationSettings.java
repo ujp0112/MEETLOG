@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -23,6 +24,9 @@ public class ReservationSettings {
     private List<String> blackoutDates; // 예약 불가 날짜
     private String blackoutDatesJson; // 예약 불가 날짜 (JSON 형태)
     private String specialNotes; // 특별 안내사항
+    private boolean depositRequired;
+    private BigDecimal depositAmount;
+    private String depositDescription;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -60,6 +64,8 @@ public class ReservationSettings {
         this.minAdvanceHours = 2;
         this.reservationStartTime = LocalTime.of(9, 0);
         this.reservationEndTime = LocalTime.of(22, 0);
+        this.depositRequired = false;
+        this.depositAmount = BigDecimal.ZERO;
     }
 
     public ReservationSettings(int restaurantId) {
@@ -178,6 +184,34 @@ public class ReservationSettings {
 
     public void setSpecialNotes(String specialNotes) {
         this.specialNotes = specialNotes;
+    }
+
+    public boolean isDepositRequired() {
+        return depositRequired;
+    }
+
+    public void setDepositRequired(boolean depositRequired) {
+        this.depositRequired = depositRequired;
+    }
+
+    public BigDecimal getDepositAmount() {
+        return depositAmount;
+    }
+
+    public void setDepositAmount(BigDecimal depositAmount) {
+        if (depositAmount != null && depositAmount.compareTo(BigDecimal.ZERO) >= 0) {
+            this.depositAmount = depositAmount;
+        } else {
+            this.depositAmount = BigDecimal.ZERO;
+        }
+    }
+
+    public String getDepositDescription() {
+        return depositDescription;
+    }
+
+    public void setDepositDescription(String depositDescription) {
+        this.depositDescription = depositDescription;
     }
 
     public LocalDateTime getCreatedAt() {

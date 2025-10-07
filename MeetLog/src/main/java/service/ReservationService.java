@@ -1,5 +1,6 @@
 package service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -58,6 +59,22 @@ public class ReservationService {
             }
         }
         return false;
+    }
+
+    public boolean updatePaymentInfo(int reservationId,
+                                     String paymentStatus,
+                                     String paymentOrderId,
+                                     String paymentProvider,
+                                     java.time.LocalDateTime paidAt,
+                                     java.math.BigDecimal depositAmount,
+                                     boolean depositRequired) {
+        try {
+            return reservationDAO.updatePaymentInfo(reservationId, paymentStatus, paymentOrderId,
+                    paymentProvider, paidAt, depositAmount, depositRequired) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean updateReservationStatus(int reservationId, String status) {

@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
+import java.math.RoundingMode;
 
 @WebServlet("/reservation-settings/*")
 public class ReservationSettingsServlet extends HttpServlet {
@@ -315,6 +316,37 @@ public class ReservationSettingsServlet extends HttpServlet {
 
         // 특별 안내사항
         settings.setSpecialNotes(request.getParameter("specialNotes"));
+
+        // 예약금 설정
+        String depositRequiredParam = request.getParameter("depositRequired");
+        String depositAmountParam = request.getParameter("depositAmount");
+        String depositDescriptionParam = request.getParameter("depositDescription");
+
+        System.out.println("[ReservationSettings] depositRequired=" + depositRequiredParam
+                + ", depositAmount=" + depositAmountParam
+                + ", depositDescription=" + depositDescriptionParam);
+
+        boolean depositRequired = Boolean.parseBoolean(depositRequiredParam);
+        settings.setDepositRequired(depositRequired);
+
+        if (depositAmountParam != null && !depositAmountParam.trim().isEmpty()) {
+            String normalized = depositAmountParam.replaceAll("[^0-9.]", "");
+            try {
+                java.math.BigDecimal amount = new java.math.BigDecimal(normalized);
+                amount = amount.setScale(0, RoundingMode.DOWN);
+                settings.setDepositAmount(amount);
+            } catch (NumberFormatException ex) {
+                settings.setDepositAmount(java.math.BigDecimal.ZERO);
+            }
+        } else {
+            settings.setDepositAmount(java.math.BigDecimal.ZERO);
+        }
+
+        settings.setDepositDescription(depositDescriptionParam);
+
+        System.out.println("[ReservationSettings] normalized deposit => required="
+                + settings.isDepositRequired() + ", amount=" + settings.getDepositAmount()
+                + ", description=" + settings.getDepositDescription());
 
         // 예약 불가 날짜
         String blackoutDates = request.getParameter("blackoutDates");

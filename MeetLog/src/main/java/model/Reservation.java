@@ -1,5 +1,6 @@
 package model;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,12 @@ public class Reservation {
 	private String reservationTimeStr;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+	private boolean depositRequired;
+	private BigDecimal depositAmount;
+	private String paymentStatus;
+	private String paymentOrderId;
+	private LocalDateTime paymentApprovedAt;
+	private String paymentProvider;
 	private transient Date reservationTimeAsDate;
 	private transient Date createdAtAsDate;
 	private transient Date updatedAtAsDate;
@@ -71,6 +78,8 @@ public class Reservation {
 
 	public Reservation() {
 		// Default constructor - IDE cache refresh
+		this.depositAmount = BigDecimal.ZERO;
+		this.paymentStatus = "NONE";
 	}
 
 	public Reservation(int restaurantId, int userId, String restaurantName, String userName,
@@ -83,6 +92,9 @@ public class Reservation {
 		this.partySize = partySize;
 		this.contactPhone = contactPhone;
 		this.status = "PENDING";
+		this.depositAmount = BigDecimal.ZERO;
+		this.depositRequired = false;
+		this.paymentStatus = "NONE";
 	}
 
 	// --- 모든 Getters and Setters ---
@@ -172,6 +184,54 @@ public class Reservation {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public boolean isDepositRequired() {
+		return depositRequired;
+	}
+
+	public void setDepositRequired(boolean depositRequired) {
+		this.depositRequired = depositRequired;
+	}
+
+	public BigDecimal getDepositAmount() {
+		return depositAmount;
+	}
+
+	public void setDepositAmount(BigDecimal depositAmount) {
+		this.depositAmount = depositAmount;
+	}
+
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
+
+	public String getPaymentOrderId() {
+		return paymentOrderId;
+	}
+
+	public void setPaymentOrderId(String paymentOrderId) {
+		this.paymentOrderId = paymentOrderId;
+	}
+
+	public LocalDateTime getPaymentApprovedAt() {
+		return paymentApprovedAt;
+	}
+
+	public void setPaymentApprovedAt(LocalDateTime paymentApprovedAt) {
+		this.paymentApprovedAt = paymentApprovedAt;
+	}
+
+	public String getPaymentProvider() {
+		return paymentProvider;
+	}
+
+	public void setPaymentProvider(String paymentProvider) {
+		this.paymentProvider = paymentProvider;
 	}
 
 	public String getCustomerName() {

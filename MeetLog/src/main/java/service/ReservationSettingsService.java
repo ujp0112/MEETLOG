@@ -105,6 +105,15 @@ public class ReservationSettingsService {
 			return false;
 		if (settings.getMinAdvanceHours() < 0)
 			return false;
+		if (settings.isDepositRequired()) {
+			if (settings.getDepositAmount() == null
+					|| settings.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+				return false;
+			}
+		} else if (settings.getDepositAmount() != null
+				&& settings.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+			return false;
+		}
 		return true;
 	}
 
