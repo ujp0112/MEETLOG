@@ -46,6 +46,28 @@
         ORDER BY q.created_at DESC
     </select>
 
+    <select id="findById" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            q.user_id,
+            q.user_name,
+            q.user_email,
+            q.question,
+            q.answer,
+            q.status,
+            q.is_owner,
+            q.is_resolved,
+            q.is_active,
+            q.created_at,
+            q.answered_at,
+            q.updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE q.id = #{qnaId}
+    </select>
+
     <select id="findByRestaurantId" parameterType="int" resultMap="businessQnAResultMap">
         SELECT
             q.id,
@@ -104,6 +126,18 @@
         SET is_resolved = #{isResolved},
             updated_at = NOW()
         WHERE id = #{qnaId}
+    </update>
+
+    <update id="closeQnA" parameterType="map">
+        UPDATE restaurant_qna q
+        JOIN restaurants r ON q.restaurant_id = r.id
+        SET q.status = 'CLOSED',
+            q.is_resolved = 1,
+            q.answered_at = COALESCE(q.answered_at, NOW()),
+            q.updated_at = NOW()
+        WHERE q.id = #{qnaId}
+          AND r.owner_id = #{ownerId}
+          AND q.is_active = 1
     </update>
 
     <delete id="delete" parameterType="int">

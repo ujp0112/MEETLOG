@@ -96,7 +96,7 @@
                     </svg>
                 </button>
             </div>
-            <form method="post" class="space-y-4">
+            <form method="post" class="space-y-4" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="add">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">제목</label>
@@ -111,8 +111,13 @@
                     <textarea name="content" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">이미지 URL</label>
-                    <input type="text" name="image" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <label class="block text-sm font-medium text-gray-700">이미지 업로드</label>
+                    <input type="file" name="imageFile" accept="image/*" class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="mt-1 text-xs text-gray-400">JPG, PNG, GIF, WEBP 형식의 이미지 (최대 5MB)</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">이미지 URL (선택)</label>
+                    <input type="text" name="imageUrl" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="외부 이미지 URL을 입력하세요">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -147,9 +152,10 @@
                     </svg>
                 </button>
             </div>
-            <form method="post" class="space-y-4">
+            <form method="post" class="space-y-4" enctype="multipart/form-data">
                 <input type="hidden" name="action" value="update">
                 <input type="hidden" name="id" id="editId">
+                <input type="hidden" name="existingImage" id="editExistingImage">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">제목</label>
                     <input type="text" name="title" id="editTitle" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
@@ -163,8 +169,13 @@
                     <textarea name="content" id="editContent" rows="4" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">이미지 URL</label>
-                    <input type="text" name="image" id="editImage" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <label class="block text-sm font-medium text-gray-700">새 이미지 업로드 (선택)</label>
+                    <input type="file" name="imageFile" id="editImageFile" accept="image/*" class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    <p class="mt-1 text-xs text-gray-400">업로드하지 않으면 기존 이미지가 유지됩니다.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">이미지 URL (선택)</label>
+                    <input type="text" name="imageUrl" id="editImageUrl" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="외부 이미지 URL로 대체하려면 입력하세요">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -200,7 +211,12 @@
             document.getElementById('editTitle').value = title;
             document.getElementById('editSummary').value = summary;
             document.getElementById('editContent').value = content || '';
-            document.getElementById('editImage').value = image || '';
+            document.getElementById('editImageUrl').value = image || '';
+            document.getElementById('editExistingImage').value = image || '';
+            const fileInput = document.getElementById('editImageFile');
+            if (fileInput) {
+                fileInput.value = '';
+            }
             document.getElementById('editStartDate').value = startDate;
             document.getElementById('editEndDate').value = endDate;
             document.getElementById('editModal').classList.remove('hidden');

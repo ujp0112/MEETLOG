@@ -70,7 +70,7 @@
                 <c:choose>
                     <c:when test="${not empty qnaList}">
                         <c:forEach var="qna" items="${qnaList}">
-                            <div class="glass-card p-6 rounded-2xl card-hover qna-item" data-status="${qna.status}">
+                            <div class="glass-card p-6 rounded-2xl card-hover qna-item" data-status="${qna.status}" data-qna-id="${qna.id}">
                                 <div class="flex justify-between items-start mb-4">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -174,7 +174,32 @@
     
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     
+    <!-- 답변 수정 모달 -->
+    <div id="edit-answer-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-slate-800">답변 수정</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600" onclick="closeEditModal()" aria-label="모달 닫기">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <p class="text-sm text-slate-500">기존 답변을 수정하여 저장할 수 있습니다.</p>
+                <textarea id="edit-answer-content" rows="6" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" placeholder="수정할 답변을 입력해주세요."></textarea>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="px-5 py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50" onclick="closeEditModal()">취소</button>
+                    <button type="button" id="edit-answer-submit" class="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="submitEditedAnswer()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        let currentEditQnaId = null;
+        let isSubmittingEdit = false;
+
         // 상태별 필터링
         function filterByStatus(status) {
             const qnaItems = document.querySelectorAll('.qna-item');
@@ -194,6 +219,28 @@
             });
         }
         
+        function openEditModal(qnaId, existingAnswer) {
+            currentEditQnaId = qnaId;
+            const modal = document.getElementById('edit-answer-modal');
+            const textarea = document.getElementById('edit-answer-content');
+            textarea.value = existingAnswer || '';
+            modal.classList.remove('hidden');
+            textarea.focus();
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('edit-answer-modal');
+            modal.classList.add('hidden');
+            currentEditQnaId = null;
+            isSubmittingEdit = false;
+            document.getElementById('edit-answer-content').value = '';
+            const submitButton = document.getElementById('edit-answer-submit');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = '저장';
+            }
+        }
+
         // Q&A 답변 등록 (AJAX)
         function submitAnswer(qnaId) {
             const answerTextarea = document.getElementById('answer-' + qnaId);
@@ -227,6 +274,65 @@
                 console.error('Error:', error);
                 alert('서버 오류가 발생했습니다.');
             });
+        }
+
+        function submitEditedAnswer() {
+            if (currentEditQnaId == null || isSubmittingEdit) {
+                return;
+            }
+
+            const textarea = document.getElementById('edit-answer-content');
+            const content = textarea.value.trim();
+
+            if (content === '') {
+                alert('답변 내용을 입력해주세요.');
+                textarea.focus();
+                return;
+            }
+
+            isSubmittingEdit = true;
+            const submitButton = document.getElementById('edit-answer-submit');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = '저장 중...';
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('action', 'updateAnswer');
+            formData.append('qnaId', currentEditQnaId);
+            formData.append('answer', content);
+
+            fetch('${pageContext.request.contextPath}/business/qna-management', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('서버 오류가 발생했습니다.');
+                })
+                .finally(() => {
+                    isSubmittingEdit = false;
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = '저장';
+                    }
+                });
+        }
+
+        function editAnswer(qnaId) {
+            const answerElement = document.querySelector('#answer-' + qnaId + ' .answer-content');
+            const currentAnswer = answerElement ? answerElement.textContent.trim() : '';
+            openEditModal(qnaId, currentAnswer);
         }
 
         // 해결완료 상태 토글 (AJAX)
@@ -263,16 +369,41 @@
         // Q&A 종료
         function closeQnA(qnaId) {
             if (confirm('이 Q&A를 종료하시겠습니까?')) {
-                // TODO: Q&A 종료 API 호출
-                alert('Q&A가 종료되었습니다.');
+                const formData = new URLSearchParams();
+                formData.append('action', 'closeQnA');
+                formData.append('qnaId', qnaId);
+
+                fetch('${pageContext.request.contextPath}/business/qna-management', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('서버 오류가 발생했습니다.');
+                    });
             }
         }
 
-        // 답변 수정
-        function editAnswer(qnaId) {
-            // TODO: 답변 수정 모달 또는 페이지로 이동
-            alert('답변 수정 기능은 준비 중입니다.');
-        }
+        // 모달 바깥 클릭 시 닫기
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('edit-answer-modal');
+            if (!modal || modal.classList.contains('hidden')) {
+                return;
+            }
+            if (event.target === modal) {
+                closeEditModal();
+            }
+        });
     </script>
 </body>
 </html>

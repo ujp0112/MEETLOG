@@ -131,10 +131,10 @@
                                     <div class="bg-white p-6 rounded-xl shadow-lg">
                                         <h3 class="text-lg font-bold text-slate-800 mb-4">계정 관리</h3>
                                         <div class="space-y-3">
-                                            <button onclick="exportData()" class="w-full text-left text-slate-600 hover:text-slate-800 text-sm">
+                                            <button type="button" id="export-data-btn" onclick="exportData()" class="w-full text-left text-slate-600 hover:text-slate-800 text-sm">
                                                 📥 데이터 내보내기
                                             </button>
-                                            <button onclick="deleteAccount()" class="w-full text-left text-red-600 hover:text-red-800 text-sm">
+                                            <button type="button" id="delete-account-btn" onclick="deleteAccount()" class="w-full text-left text-red-600 hover:text-red-800 text-sm">
                                                 🗑️ 계정 삭제
                                             </button>
                                         </div>
@@ -161,6 +161,7 @@
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
     <script>
+        const contextPath = '${pageContext.request.contextPath}';
         $(document).ready(function() {
             $('#imageUpload').on('change', function(event) {
                 if (this.files && this.files[0]) {
@@ -176,12 +177,57 @@
             });
         });
         function exportData() {
-            alert('데이터 내보내기 기능은 준비 중입니다.');
+            const button = document.getElementById('export-data-btn');
+            if (button) {
+                button.disabled = true;
+                button.classList.add('opacity-60', 'cursor-not-allowed');
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.classList.remove('opacity-60', 'cursor-not-allowed');
+                }, 1500);
+            }
+            window.location.href = contextPath + '/mypage/settings/export';
         }
         function deleteAccount() {
             if (confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
                 if (confirm('모든 데이터가 영구적으로 삭제됩니다. 계속하시겠습니까?')) {
-                    alert('계정 삭제 기능은 준비 중입니다.');
+                    const button = document.getElementById('delete-account-btn');
+                    if (button) {
+                        button.disabled = true;
+                        button.classList.add('opacity-60', 'cursor-not-allowed');
+                    }
+
+                    fetch(contextPath + '/mypage/settings', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        },
+                        body: new URLSearchParams({ action: 'deleteAccount' })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('서버 응답이 올바르지 않습니다.');
+                        }
+                        return response.json();
+                    })
+                    .then(result => {
+                        if (result.success) {
+                            const redirectUrl = result.redirect || (contextPath + '/');
+                            window.location.href = redirectUrl;
+                        } else {
+                            alert(result.message || '계정 삭제에 실패했습니다.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('계정 삭제 실패:', error);
+                        alert('계정 삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                    })
+                    .finally(() => {
+                        if (button) {
+                            button.disabled = false;
+                            button.classList.remove('opacity-60', 'cursor-not-allowed');
+                        }
+                    });
                 }
             }
         }

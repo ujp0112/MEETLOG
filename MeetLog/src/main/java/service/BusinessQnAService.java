@@ -34,6 +34,18 @@ public class BusinessQnAService {
     }
 
     /**
+     * 단일 Q&A 조회
+     */
+    public BusinessQnA getQnAById(int qnaId) {
+        try {
+            return qnaDAO.findById(qnaId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
      * Q&A 등록
      */
     public boolean addQnA(BusinessQnA qna) {
@@ -152,6 +164,18 @@ public class BusinessQnAService {
     public boolean updateResolvedStatus(int qnaId, boolean isResolved) {
         try {
             return qnaDAO.updateResolvedStatus(qnaId, isResolved) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Q&A 종료 처리
+     */
+    public boolean closeQnA(int qnaId, int ownerId) {
+        try {
+            return qnaDAO.closeQnA(qnaId, ownerId) > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -1,7 +1,11 @@
 package controller;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import model.RestaurantRecommendation;
 import model.User;
 import service.RecommendationService;
+import com.google.gson.Gson;
 
 /**
  * 개인화 추천 시스템을 위한 서블릿
@@ -30,6 +35,11 @@ public class RecommendationServlet extends HttpServlet {
         User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         try {
+            if ("/load-more".equals(pathInfo)) {
+                handleLoadMoreRecommendations(request, response, user);
+                return;
+            }
+
             if (user == null) {
                 // 로그인하지 않은 사용자는 인기 맛집 추천
                 handlePopularRecommendations(request, response);
@@ -60,6 +70,55 @@ public class RecommendationServlet extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("errorMessage", "추천 시스템 처리 중 오류가 발생했습니다.");
             request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
+        }
+    }
+
+    private void handleLoadMoreRecommendations(HttpServletRequest request, HttpServletResponse response, User user)
+            throws IOException {
+        Gson gson = new Gson();
+        response.setContentType("application/json; charset=UTF-8");
+
+        try {
+            String type = request.getParameter("type");
+            if (type == null || type.isBlank()) {
+                type = (user == null) ? "popular" : "personalized";
+            }
+
+            int batchSize = getLimitParameter(request, 6);
+            if (batchSize < 1) {
+                batchSize = 6;
+            }
+
+            Set<Integer> excludeIds = parseExcludeIds(request.getParameter("excludeIds"));
+            int fetchLimit = batchSize + excludeIds.size();
+
+            List<RestaurantRecommendation> raw = resolveRecommendations(type.toLowerCase(), user, request, fetchLimit);
+            List<RestaurantRecommendation> filtered = raw.stream()
+                    .filter(rec -> rec != null && rec.getRestaurant() != null)
+                    .filter(rec -> !excludeIds.contains(rec.getRestaurant().getId()))
+                    .limit(batchSize)
+                    .collect(Collectors.toList());
+
+            response.getWriter().write(gson.toJson(filtered));
+        } catch (SecurityException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write(gson.toJson(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            )));
+        } catch (IllegalArgumentException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write(gson.toJson(Map.of(
+                    "success", false,
+                    "message", e.getMessage()
+            )));
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write(gson.toJson(Map.of(
+                    "success", false,
+                    "message", "추가 추천을 불러오는 중 오류가 발생했습니다."
+            )));
         }
     }
 
@@ -114,6 +173,8 @@ public class RecommendationServlet extends HttpServlet {
         request.setAttribute("recommendations", recommendations);
         request.setAttribute("recommendationType", "personalized");
         request.setAttribute("title", "나만의 맞춤 추천");
+        request.setAttribute("pageSize", limit);
+        request.setAttribute("baseRestaurantId", null);
         
         request.getRequestDispatcher("/WEB-INF/views/recommendation-results.jsp").forward(request, response);
     }
@@ -130,6 +191,8 @@ public class RecommendationServlet extends HttpServlet {
         request.setAttribute("recommendations", recommendations);
         request.setAttribute("recommendationType", "collaborative");
         request.setAttribute("title", "비슷한 취향의 사용자들이 좋아한 맛집");
+        request.setAttribute("pageSize", limit);
+        request.setAttribute("baseRestaurantId", null);
         
         request.getRequestDispatcher("/WEB-INF/views/recommendation-results.jsp").forward(request, response);
     }
@@ -149,6 +212,7 @@ public class RecommendationServlet extends HttpServlet {
             request.setAttribute("recommendations", recommendations);
             request.setAttribute("recommendationType", "preference-based");
             request.setAttribute("title", "당신의 취향에 맞는 맛집");
+            request.setAttribute("baseRestaurantId", null);
         } else {
             // 특정 맛집과 비슷한 맛집 추천
             int restaurantId = Integer.parseInt(restaurantIdStr);
@@ -156,7 +220,9 @@ public class RecommendationServlet extends HttpServlet {
             request.setAttribute("recommendations", recommendations);
             request.setAttribute("recommendationType", "content-based");
             request.setAttribute("title", "이 맛집과 비슷한 맛집들");
+            request.setAttribute("baseRestaurantId", restaurantId);
         }
+        request.setAttribute("pageSize", limit);
         
         request.getRequestDispatcher("/WEB-INF/views/recommendation-results.jsp").forward(request, response);
     }
@@ -173,6 +239,8 @@ public class RecommendationServlet extends HttpServlet {
         request.setAttribute("recommendations", recommendations);
         request.setAttribute("recommendationType", "hybrid");
         request.setAttribute("title", "AI가 추천하는 맞춤 맛집");
+        request.setAttribute("pageSize", limit);
+        request.setAttribute("baseRestaurantId", null);
         
         request.getRequestDispatcher("/WEB-INF/views/recommendation-results.jsp").forward(request, response);
     }
@@ -189,6 +257,8 @@ public class RecommendationServlet extends HttpServlet {
         request.setAttribute("recommendations", recommendations);
         request.setAttribute("recommendationType", "popular");
         request.setAttribute("title", "인기 맛집");
+        request.setAttribute("pageSize", limit);
+        request.setAttribute("baseRestaurantId", null);
         
         request.getRequestDispatcher("/WEB-INF/views/recommendation-results.jsp").forward(request, response);
     }
@@ -223,5 +293,61 @@ public class RecommendationServlet extends HttpServlet {
             }
         }
         return defaultValue;
+    }
+
+    private List<RestaurantRecommendation> resolveRecommendations(String type, User user, HttpServletRequest request, int limit) {
+        switch (type) {
+            case "personalized":
+            case "hybrid":
+                ensureAuthenticated(user);
+                return recommendationService.getHybridRecommendations(user.getId(), limit);
+            case "collaborative":
+                ensureAuthenticated(user);
+                return recommendationService.getCollaborativeRecommendations(user.getId(), limit);
+            case "preference-based":
+                ensureAuthenticated(user);
+                return recommendationService.getPreferenceBasedRecommendations(user.getId(), limit);
+            case "content-based":
+                ensureAuthenticated(user);
+                String restaurantIdStr = request.getParameter("restaurantId");
+                if (restaurantIdStr == null || restaurantIdStr.trim().isEmpty()) {
+                    return recommendationService.getPreferenceBasedRecommendations(user.getId(), limit);
+                }
+                try {
+                    int restaurantId = Integer.parseInt(restaurantIdStr);
+                    return recommendationService.getContentBasedRecommendations(restaurantId, limit);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("유효한 restaurantId가 필요합니다.");
+                }
+            case "popular":
+                return recommendationService.getFallbackRecommendations(limit);
+            default:
+                throw new IllegalArgumentException("지원하지 않는 추천 유형입니다: " + type);
+        }
+    }
+
+    private void ensureAuthenticated(User user) {
+        if (user == null) {
+            throw new SecurityException("로그인이 필요합니다.");
+        }
+    }
+
+    private Set<Integer> parseExcludeIds(String excludeParam) {
+        if (excludeParam == null || excludeParam.isBlank()) {
+            return new HashSet<>();
+        }
+        Set<Integer> result = new HashSet<>();
+        String[] tokens = excludeParam.split(",");
+        for (String token : tokens) {
+            if (token == null || token.isBlank()) {
+                continue;
+            }
+            try {
+                result.add(Integer.parseInt(token.trim()));
+            } catch (NumberFormatException ignore) {
+                // 무시하고 계속 진행
+            }
+        }
+        return result;
     }
 }

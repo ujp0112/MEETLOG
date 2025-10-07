@@ -25,6 +25,7 @@ public class EventManagementDAO {
     public void insertEvent(AdminEvent event) {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             session.insert(NAMESPACE + "insertEvent", event);
+            session.commit();
         }
     }
 
@@ -35,6 +36,7 @@ public class EventManagementDAO {
     public void updateEvent(AdminEvent event) {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             session.update(NAMESPACE + "updateEvent", event);
+            session.commit();
         }
     }
     
@@ -45,6 +47,7 @@ public class EventManagementDAO {
     public void deleteEvent(int eventId) {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             session.delete(NAMESPACE + "deleteEvent", eventId);
+            session.commit();
         }
     }
 }

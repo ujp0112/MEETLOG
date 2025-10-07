@@ -4,14 +4,17 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import model.AdminEvent;
 import model.User;
 import service.EventManagementService; // Service 계층 사용
 
+@MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 20 * 1024 * 1024)
 public class EventManagementServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
@@ -60,13 +63,21 @@ public class EventManagementServlet extends HttpServlet {
                     newEvent.setTitle(request.getParameter("title"));
                     newEvent.setSummary(request.getParameter("summary"));
                     newEvent.setContent(request.getParameter("content"));
-                    newEvent.setImage(request.getParameter("image"));
                     // 날짜 형식 변환
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     newEvent.setStartDate(sdf.parse(request.getParameter("startDate")));
                     newEvent.setEndDate(sdf.parse(request.getParameter("endDate")));
 
-                    eventService.addEvent(newEvent); // Service를 통해 DB에 추가
+                    Part addImagePart = null;
+                    try {
+                        addImagePart = request.getPart("imageFile");
+                    } catch (IllegalStateException ignore) {
+                        // multipart가 아닌 요청일 수 있으므로 무시
+                    }
+
+                    String addImageUrl = request.getParameter("imageUrl");
+
+                    eventService.addEvent(newEvent, addImagePart, addImageUrl); // Service를 통해 DB에 추가
                     request.setAttribute("successMessage", "새 이벤트가 성공적으로 등록되었습니다.");
                     break;
                     
@@ -76,12 +87,20 @@ public class EventManagementServlet extends HttpServlet {
                     updateEvent.setTitle(request.getParameter("title"));
                     updateEvent.setSummary(request.getParameter("summary"));
                     updateEvent.setContent(request.getParameter("content"));
-                    updateEvent.setImage(request.getParameter("image"));
                     SimpleDateFormat sdfUpdate = new SimpleDateFormat("yyyy-MM-dd");
                     updateEvent.setStartDate(sdfUpdate.parse(request.getParameter("startDate")));
                     updateEvent.setEndDate(sdfUpdate.parse(request.getParameter("endDate")));
 
-                    eventService.updateEvent(updateEvent); // Service를 통해 DB 수정
+                    Part updateImagePart = null;
+                    try {
+                        updateImagePart = request.getPart("imageFile");
+                    } catch (IllegalStateException ignore) {
+                        // multipart가 아닌 요청은 무시
+                    }
+                    String updateImageUrl = request.getParameter("imageUrl");
+                    String existingImage = request.getParameter("existingImage");
+
+                    eventService.updateEvent(updateEvent, updateImagePart, updateImageUrl, existingImage); // Service를 통해 DB 수정
                     request.setAttribute("successMessage", "이벤트 정보가 수정되었습니다.");
                     break;
                     
@@ -95,11 +114,13 @@ public class EventManagementServlet extends HttpServlet {
                     request.setAttribute("errorMessage", "알 수 없는 요청입니다.");
                     break;
             }
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errorMessage", "작업 처리 중 오류가 발생했습니다: " + e.getMessage());
         }
-        
+
         doGet(request, response); // 작업 완료 후 목록 페이지 새로고침
     }
 }

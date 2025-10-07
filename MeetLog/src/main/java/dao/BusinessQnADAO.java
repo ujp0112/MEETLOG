@@ -39,6 +39,15 @@ public class BusinessQnADAO {
     }
 
     /**
+     * 개별 Q&A 조회
+     */
+    public BusinessQnA findById(int qnaId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne(NAMESPACE + ".findById", qnaId);
+        }
+    }
+
+    /**
      * Q&A 답변 업데이트
      */
     public int updateAnswer(int qnaId, String answer, SqlSession session) {
@@ -129,6 +138,21 @@ public class BusinessQnADAO {
                     "isResolved", isResolved
             );
             int result = session.update(NAMESPACE + ".updateResolvedStatus", params);
+            session.commit();
+            return result;
+        }
+    }
+
+    /**
+     * Q&A 종료 처리
+     */
+    public int closeQnA(int qnaId, int ownerId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of(
+                    "qnaId", qnaId,
+                    "ownerId", ownerId
+            );
+            int result = session.update(NAMESPACE + ".closeQnA", params);
             session.commit();
             return result;
         }

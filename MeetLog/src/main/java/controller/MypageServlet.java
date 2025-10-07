@@ -2,9 +2,14 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,6 +24,12 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 
 import model.Column;
 import model.Reservation;
@@ -38,12 +49,23 @@ import util.AppConfig;
 //@WebServlet("/mypage/*")
 public class MypageServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
+    private static final DateTimeFormatter EXPORT_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
     private final UserService userService = new UserService();
     private final ReservationService reservationService = new ReservationService();
     private final ReviewService reviewService = new ReviewService();
     private final ColumnService columnService = new ColumnService();
     private final UserCouponService userCouponService = new UserCouponService();
     private final CourseService courseService = new CourseService();
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
+                    src == null ? JsonNull.INSTANCE : new JsonPrimitive(src.format(EXPORT_TIMESTAMP_FORMAT)))
+            .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, typeOfSrc, context) ->
+                    src == null ? JsonNull.INSTANCE : new JsonPrimitive(src.toString()))
+            .registerTypeAdapter(Timestamp.class, (JsonSerializer<Timestamp>) (src, typeOfSrc, context) ->
+                    src == null ? JsonNull.INSTANCE : new JsonPrimitive(src.toLocalDateTime().format(EXPORT_TIMESTAMP_FORMAT)))
+            .setPrettyPrinting()
+            .create();
     
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -85,6 +107,9 @@ public class MypageServlet extends HttpServlet {
                     case "/settings":
                         forwardPath = "/WEB-INF/views/settings.jsp";
                         break;
+                    case "/settings/export":
+                        handleExportUserData(response, user);
+                        return;
                     default:
                         response.sendError(HttpServletResponse.SC_NOT_FOUND);
                         return;
@@ -127,34 +152,48 @@ public class MypageServlet extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            DiskFileItemFactory factory = new DiskFileItemFactory();
-            ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setHeaderEncoding("UTF-8");
+            if (ServletFileUpload.isMultipartContent(request)) {
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                upload.setHeaderEncoding("UTF-8");
 
-            Map<String, String> formFields = new HashMap<>();
-            FileItem imageFileItem = null;
+                Map<String, String> formFields = new HashMap<>();
+                FileItem imageFileItem = null;
 
-            List<FileItem> formItems = upload.parseRequest(request);
+                List<FileItem> formItems = upload.parseRequest(request);
 
-            for (FileItem item : formItems) {
-                if (item.isFormField()) {
-                    formFields.put(item.getFieldName(), item.getString("UTF-8"));
-                } else {
-                    if ("profileImage".equals(item.getFieldName()) && item.getSize() > 0) {
-                        imageFileItem = item;
+                for (FileItem item : formItems) {
+                    if (item.isFormField()) {
+                        formFields.put(item.getFieldName(), item.getString("UTF-8"));
+                    } else {
+                        if ("profileImage".equals(item.getFieldName()) && item.getSize() > 0) {
+                            imageFileItem = item;
+                        }
                     }
                 }
+
+                String action = formFields.get("action");
+
+                if ("updateProfile".equals(action)) {
+                    handleUpdateProfile(session, currentUser, formFields, imageFileItem);
+                } else if ("changePassword".equals(action)) {
+                    handleChangePassword(session, currentUser, formFields);
+                }
+
+                response.sendRedirect(request.getContextPath() + "/mypage/settings");
+                return;
             }
 
-            String action = formFields.get("action");
-
-            if ("updateProfile".equals(action)) {
-                handleUpdateProfile(session, currentUser, formFields, imageFileItem);
-            } else if ("changePassword".equals(action)) {
-                handleChangePassword(session, currentUser, formFields);
+            String action = request.getParameter("action");
+            if ("exportData".equals(action)) {
+                handleExportUserData(response, currentUser);
+                return;
+            } else if ("deleteAccount".equals(action)) {
+                handleDeleteAccount(request, response, session, currentUser);
+                return;
             }
 
-            response.sendRedirect(request.getContextPath() + "/mypage/settings");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 요청입니다.");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -315,5 +354,89 @@ public class MypageServlet extends HttpServlet {
         request.setAttribute("totalCouponCount", totalCouponCount);
         request.setAttribute("availableCouponCount", availableCouponCount);
         request.setAttribute("usedCouponCount", usedCouponCount);
+    }
+
+    private void handleExportUserData(HttpServletResponse response, User user) throws IOException {
+        User latestUser = userService.getUserById(user.getId());
+        if (latestUser == null) {
+            latestUser = user;
+        }
+
+        Map<String, Object> exportPayload = new LinkedHashMap<>();
+        exportPayload.put("generatedAt", LocalDateTime.now().format(EXPORT_TIMESTAMP_FORMAT));
+        exportPayload.put("user", buildUserProfile(latestUser));
+        exportPayload.put("reservations", reservationService.getReservationsByUserId(latestUser.getId()));
+        exportPayload.put("reviews", reviewService.getReviewsByUserId(latestUser.getId()));
+        exportPayload.put("columns", columnService.getColumnsByUserId(latestUser.getId()));
+        exportPayload.put("courses", courseService.getCoursesByUserId(latestUser.getId()));
+        exportPayload.put("coupons", userCouponService.getUserCoupons(latestUser.getId()));
+
+        Map<String, Object> counts = new LinkedHashMap<>();
+        counts.put("reservations", ((List<?>) exportPayload.get("reservations")).size());
+        counts.put("reviews", ((List<?>) exportPayload.get("reviews")).size());
+        counts.put("columns", ((List<?>) exportPayload.get("columns")).size());
+        counts.put("courses", ((List<?>) exportPayload.get("courses")).size());
+        counts.put("coupons", ((List<?>) exportPayload.get("coupons")).size());
+        exportPayload.put("counts", counts);
+
+        String fileName = String.format("meetlog-export-%s.json",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+
+        response.setContentType("application/json; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+        try (PrintWriter writer = response.getWriter()) {
+            writer.write(gson.toJson(exportPayload));
+        }
+    }
+
+    private Map<String, Object> buildUserProfile(User user) {
+        Map<String, Object> profile = new LinkedHashMap<>();
+        profile.put("id", user.getId());
+        profile.put("nickname", user.getNickname());
+        profile.put("email", user.getEmail());
+        profile.put("phone", user.getPhone());
+        profile.put("userType", user.getUserType());
+        profile.put("level", user.getLevel());
+        profile.put("name", user.getName());
+        profile.put("address", user.getAddress());
+        profile.put("createdAt", user.getCreatedAt() != null ? user.getCreatedAt().format(EXPORT_TIMESTAMP_FORMAT) : null);
+        profile.put("updatedAt", user.getUpdatedAt() != null ? user.getUpdatedAt().format(EXPORT_TIMESTAMP_FORMAT) : null);
+        profile.put("socialProvider", user.getSocialProvider());
+        profile.put("socialId", user.getSocialId());
+        profile.put("profileImage", user.getProfileImage());
+        profile.put("followerCount", user.getFollowerCount());
+        profile.put("followingCount", user.getFollowingCount());
+        profile.put("active", user.isActive());
+        return profile;
+    }
+
+    private void handleDeleteAccount(HttpServletRequest request, HttpServletResponse response, HttpSession session,
+            User currentUser) throws IOException {
+
+        response.setContentType("application/json; charset=UTF-8");
+
+        PrintWriter writer = response.getWriter();
+        try {
+            boolean success = userService.deleteUser(currentUser.getId());
+            if (success) {
+                String redirectUrl = request.getContextPath() + "/";
+                session.invalidate();
+                writer.write(gson.toJson(Map.of(
+                        "success", Boolean.TRUE,
+                        "redirect", redirectUrl)));
+            } else {
+                writer.write(gson.toJson(Map.of(
+                        "success", Boolean.FALSE,
+                        "message", "계정 삭제에 실패했습니다.")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            writer.write(gson.toJson(Map.of(
+                    "success", Boolean.FALSE,
+                    "message", "계정 삭제 중 오류가 발생했습니다.")));
+        } finally {
+            writer.flush();
+        }
     }
 }

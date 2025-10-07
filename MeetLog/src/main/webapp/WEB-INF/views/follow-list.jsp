@@ -163,7 +163,7 @@
                                     <h3 class="text-xl font-bold text-slate-800 mb-2">아직 팔로워가 없습니다</h3>
                                     <p class="text-slate-600 mb-6">더 많은 활동을 통해 팔로워를 늘려보세요!</p>
                                     <div class="flex justify-center space-x-4">
-                                        <a href="${pageContext.request.contextPath}/review/write" 
+                                        <a href="${pageContext.request.contextPath}/search" 
                                            class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-6 py-3 rounded-xl font-semibold transition-colors">
                                             리뷰 작성하기
                                         </a>

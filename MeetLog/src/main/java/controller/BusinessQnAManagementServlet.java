@@ -86,6 +86,12 @@ public class BusinessQnAManagementServlet extends HttpServlet {
             } else if ("toggleResolved".equals(action)) {
                 System.out.println("DEBUG - toggleResolved 처리 시작");
                 handleToggleResolved(request, response, user);
+            } else if ("closeQnA".equals(action)) {
+                System.out.println("DEBUG - closeQnA 처리 시작");
+                handleCloseQnA(request, response, user);
+            } else if ("updateAnswer".equals(action)) {
+                System.out.println("DEBUG - updateAnswer 처리 시작");
+                handleUpdateAnswer(request, response, user);
             } else {
                 System.out.println("DEBUG - 유효하지 않은 action: " + action);
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
@@ -128,6 +134,38 @@ public class BusinessQnAManagementServlet extends HttpServlet {
         }
     }
 
+    private void handleUpdateAnswer(HttpServletRequest request, HttpServletResponse response, User user)
+            throws IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            int qnaId = Integer.parseInt(request.getParameter("qnaId"));
+            String answer = request.getParameter("answer");
+
+            if (answer == null || answer.trim().isEmpty()) {
+                response.getWriter().write("{\"success\": false, \"message\": \"답변 내용을 입력해주세요.\"}");
+                return;
+            }
+
+            BusinessQnAService qnaService = new BusinessQnAService();
+            boolean success = qnaService.addAnswer(qnaId, answer.trim(), user.getId());
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"답변이 수정되었습니다.\"}");
+            } else {
+                response.getWriter().write("{\"success\": false, \"message\": \"답변 수정에 실패했습니다.\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 Q&A ID입니다.\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
+    }
+
     private void handleToggleResolved(HttpServletRequest request, HttpServletResponse response, User user)
             throws IOException {
 
@@ -146,6 +184,43 @@ public class BusinessQnAManagementServlet extends HttpServlet {
                 response.getWriter().write("{\"success\": true, \"message\": \"" + message + "\"}");
             } else {
                 response.getWriter().write("{\"success\": false, \"message\": \"상태 변경에 실패했습니다.\"}");
+            }
+
+        } catch (NumberFormatException e) {
+            response.getWriter().write("{\"success\": false, \"message\": \"잘못된 Q&A ID입니다.\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+        }
+    }
+
+    private void handleCloseQnA(HttpServletRequest request, HttpServletResponse response, User user)
+            throws IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        try {
+            int qnaId = Integer.parseInt(request.getParameter("qnaId"));
+
+            BusinessQnAService qnaService = new BusinessQnAService();
+            BusinessQnA target = qnaService.getQnAById(qnaId);
+            if (target == null) {
+                response.getWriter().write("{\"success\": false, \"message\": \"존재하지 않는 Q&A 입니다.\"}");
+                return;
+            }
+
+            if (target.getAnswer() == null || target.getAnswer().trim().isEmpty()) {
+                response.getWriter().write("{\"success\": false, \"message\": \"답변을 등록한 후 종료할 수 있습니다.\"}");
+                return;
+            }
+
+            boolean success = qnaService.closeQnA(qnaId, user.getId());
+
+            if (success) {
+                response.getWriter().write("{\"success\": true, \"message\": \"Q&A가 종료되었습니다.\"}");
+            } else {
+                response.getWriter().write("{\"success\": false, \"message\": \"Q&A 종료 권한이 없거나 이미 종료되었습니다.\"}");
             }
 
         } catch (NumberFormatException e) {
