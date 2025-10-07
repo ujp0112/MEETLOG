@@ -77,6 +77,32 @@
         WHERE report_id = #{reportId}
     </update>
 
+    <insert id="insertReport" parameterType="model.Report" useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO reports (
+            reporter_id,
+            reported_type,
+            reported_id,
+            reported_user_id,
+            reason,
+            status
+        ) VALUES (
+            #{reporterId},
+            #{reportedType},
+            #{reportedId},
+            #{reportedUserId},
+            #{reason},
+            COALESCE(#{status}, 'PENDING')
+        )
+    </insert>
+
+    <select id="countExistingReport" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM reports
+        WHERE reporter_id = #{reporterId}
+          AND reported_type = #{reportedType}
+          AND reported_id = #{reportedId}
+    </select>
+
     <select id="getReportStatistics" resultType="map">
         SELECT
             COUNT(*) as total,

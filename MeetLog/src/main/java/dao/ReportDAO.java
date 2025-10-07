@@ -42,6 +42,25 @@ public class ReportDAO {
         }
     }
 
+    public int insertReport(Report report) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = session.insert(NAMESPACE + ".insertReport", report);
+            session.commit();
+            return result;
+        }
+    }
+
+    public boolean existsReport(int reporterId, String reportedType, int reportedId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = new HashMap<>();
+            params.put("reporterId", reporterId);
+            params.put("reportedType", reportedType);
+            params.put("reportedId", reportedId);
+            Integer count = session.selectOne(NAMESPACE + ".countExistingReport", params);
+            return count != null && count > 0;
+        }
+    }
+
     public Map<String, Integer> getReportStatistics() {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             return session.selectOne(NAMESPACE + ".getReportStatistics");

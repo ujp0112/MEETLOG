@@ -1424,7 +1424,8 @@ translateY(
 																					<%-- 다른 유저일 경우 --%>
 																					<c:otherwise>
 																						<button class="dropdown-item review-report-btn"
-																							data-review-id="${review.id}">리뷰 신고</button>
+																							data-review-id="${review.id}"
+																							data-review-author="${fn:escapeXml(review.author)}">리뷰 신고</button>
 																					</c:otherwise>
 																				</c:choose>
 																			</div>
@@ -1870,6 +1871,53 @@ translateY(
 			</div>
 		</div>
 
+		<div id="reviewReportModal" class="modal-overlay" style="display: none;">
+			<div class="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-xl">
+				<button type="button" class="modal-close-btn">&times;</button>
+				<h3 class="text-xl font-bold text-slate-900 mb-2">리뷰 신고</h3>
+				<p class="text-sm text-slate-500 mb-4">문제가 있는 리뷰를 알려주시면 운영팀이 검토 후 조치합니다.</p>
+				<div id="reportTargetWrapper" class="text-sm text-slate-600 mb-4" style="display: none;">
+					<span class="font-semibold text-slate-800" id="reportTargetNickname"></span>님의 리뷰를 신고합니다.
+				</div>
+				<form id="reviewReportForm" class="space-y-5">
+					<input type="hidden" id="reportReviewId" name="reviewId" value="">
+					<fieldset class="space-y-3">
+						<legend class="text-sm font-semibold text-slate-700">신고 사유</legend>
+						<label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="스팸/홍보성 내용" class="h-4 w-4 border-slate-300">
+							스팸/홍보성 내용
+						</label>
+						<label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="부적절한 언어 및 비속어" class="h-4 w-4 border-slate-300">
+							부적절한 언어 및 비속어
+						</label>
+						<label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="허위 정보 또는 사실 왜곡" class="h-4 w-4 border-slate-300">
+							허위 정보 또는 사실 왜곡
+						</label>
+						<label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="개인정보 노출" class="h-4 w-4 border-slate-300">
+							개인정보 노출
+						</label>
+						<label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="기타 문제" class="h-4 w-4 border-slate-300">
+							기타 문제 (추가 설명 필수)
+						</label>
+					</fieldset>
+					<div>
+						<label for="reportReasonDetail" class="text-sm font-semibold text-slate-700">추가 설명 (선택, '기타 문제' 선택 시 필수)</label>
+						<textarea id="reportReasonDetail" class="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:outline-none" rows="4" maxlength="500" placeholder="신고 사유를 자세히 입력해 주세요. (최대 500자)"></textarea>
+						<p class="mt-1 text-xs text-slate-400">허위 신고는 이용 제한 사유가 될 수 있습니다.</p>
+						<p id="reportReasonCounter" class="mt-1 text-xs text-slate-400 text-right">0 / 500</p>
+					</div>
+					<div class="flex items-center justify-end gap-3">
+						<button type="button" id="cancelReportBtn" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">취소</button>
+						<button type="submit" id="reviewReportSubmit" data-default-text="신고하기" class="px-5 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold shadow hover:bg-red-600 transition-colors">신고하기</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<div id="mapModal" class="modal-overlay" style="display: none;"
 			onclick="this.style.display='none'">
 			<div class="bg-white rounded-xl w-full max-w-4xl h-[80vh] relative"
@@ -1904,10 +1952,156 @@ translateY(
 	const contextPath = "${pageContext.request.contextPath}";
 	const isLoggedIn = ${not empty sessionScope.user};
 	const currentUserId = <c:out value="${sessionScope.user.id}" default="null"/>;
+	const $reviewReportModal = $('#reviewReportModal');
+	const $reviewReportForm = $('#reviewReportForm');
+	const $reportReviewId = $('#reportReviewId');
+	const $reportReasonDetail = $('#reportReasonDetail');
+	const $reportReasonCounter = $('#reportReasonCounter');
+	const $reportTargetWrapper = $('#reportTargetWrapper');
+	const $reportTargetNickname = $('#reportTargetNickname');
+	const $cancelReportBtn = $('#cancelReportBtn');
+	const $reviewReportSubmit = $('#reviewReportSubmit');
+	const defaultReportSubmitText = $reviewReportSubmit.data('default-text') || $reviewReportSubmit.text();
+	let isSubmittingReport = false;
+
+	function setReportSubmittingState(submitting) {
+		if (!$reviewReportSubmit.length) {
+			return;
+		}
+		isSubmittingReport = submitting;
+		if (submitting) {
+			$reviewReportSubmit.prop('disabled', true)
+				.addClass('opacity-60 cursor-not-allowed')
+				.text('신고 접수 중...');
+		} else {
+			$reviewReportSubmit.prop('disabled', false)
+				.removeClass('opacity-60 cursor-not-allowed')
+				.text(defaultReportSubmitText);
+		}
+	}
+
+	function resetReviewReportForm(reviewId) {
+		if (!$reviewReportForm.length) {
+			return;
+		}
+		$reviewReportForm[0].reset();
+		if ($reportReviewId.length) {
+			$reportReviewId.val(reviewId || '');
+		}
+		if ($reportReasonDetail.length) {
+			$reportReasonDetail.val('');
+		}
+		if ($reportReasonCounter.length) {
+			$reportReasonCounter.text('0 / 500');
+		}
+		$('input[name="reportReason"]').prop('checked', false);
+		setReportSubmittingState(false);
+	}
+
+	function openReviewReportModal(reviewId, authorName) {
+		resetReviewReportForm(reviewId);
+		if ($reportTargetWrapper.length) {
+			if (authorName) {
+				$reportTargetNickname.text(authorName);
+				$reportTargetWrapper.show();
+			} else {
+				$reportTargetWrapper.hide();
+			}
+		}
+		if ($reviewReportModal.length) {
+			$reviewReportModal.css('display', 'flex');
+		}
+	}
+
+	function closeReviewReportModal() {
+		if ($reviewReportModal.length) {
+			$reviewReportModal.hide();
+		}
+	}
 	// ✨ [추가] 모달 닫기 버튼에 대한 공통 이벤트 핸들러
 	$('.modal-close-btn').on('click', function() {
 		$(this).closest('.modal-overlay').hide();
 	});
+
+	if ($reportReasonDetail.length) {
+		$reportReasonDetail.on('input', function() {
+			if ($reportReasonCounter.length) {
+				const currentLength = $(this).val().length;
+				$reportReasonCounter.text(currentLength + ' / 500');
+			}
+		});
+	}
+
+	if ($cancelReportBtn.length) {
+		$cancelReportBtn.on('click', function() {
+			closeReviewReportModal();
+		});
+	}
+
+	if ($reviewReportForm.length) {
+		$reviewReportForm.on('submit', function(event) {
+			event.preventDefault();
+			if (isSubmittingReport) {
+				return;
+			}
+			if (!isLoggedIn) {
+				alert('로그인이 필요합니다.');
+				window.location.href = contextPath + '/login';
+				return;
+			}
+			const reviewIdValue = $reportReviewId.val();
+			const parsedReviewId = parseInt(reviewIdValue, 10);
+			if (Number.isNaN(parsedReviewId)) {
+				alert('신고 대상 리뷰를 찾을 수 없습니다.');
+				return;
+			}
+			const selectedReason = $('input[name="reportReason"]:checked').val();
+			if (!selectedReason) {
+				alert('신고 사유를 선택해주세요.');
+				return;
+			}
+			const detailText = $reportReasonDetail.length ? $reportReasonDetail.val().trim() : '';
+			if (selectedReason === '기타 문제' && detailText.length === 0) {
+				alert('기타 문제를 선택한 경우 추가 설명을 입력해주세요.');
+				return;
+			}
+			let reasonToSubmit = selectedReason;
+			if (detailText.length > 0) {
+				reasonToSubmit += ' - ' + detailText;
+			}
+			if (reasonToSubmit.length > 500) {
+				alert('신고 사유는 500자 이내로 입력해주세요.');
+				return;
+			}
+			setReportSubmittingState(true);
+			fetch(contextPath + '/review/report', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					reviewId: parsedReviewId,
+					reason: reasonToSubmit
+				})
+			}).then(async response => {
+				let data = {};
+				try {
+					data = await response.json();
+				} catch (jsonError) {
+					data = {};
+				}
+				if (response.ok && data.status === 'success') {
+					alert(data.message || '신고가 접수되었습니다.');
+					closeReviewReportModal();
+				} else {
+					alert(data.message || '신고 처리 중 오류가 발생했습니다.');
+				}
+				setReportSubmittingState(false);
+			}).catch(error => {
+				console.error('Review report error:', error);
+				alert('신고 처리 중 오류가 발생했습니다.');
+				setReportSubmittingState(false);
+			});
+		});
+	}
 
 
     // 예약 시간 선택 함수
@@ -2402,9 +2596,17 @@ translateY(
 		    }
 		});
 
-		// 12. 리뷰 신고 버튼 (기능은 미구현, 알림창만 표시)
-		$(document).on('click', '.review-report-btn', function() {
-		    alert('리뷰 신고 기능은 현재 준비 중입니다.');
+		// 12. 리뷰 신고 버튼 클릭 시 신고 모달 열기
+		$(document).on('click', '.review-report-btn', function(e) {
+			e.preventDefault();
+			if (!isLoggedIn) {
+				alert('로그인이 필요합니다.');
+				window.location.href = contextPath + '/login';
+				return;
+			}
+			const reviewId = $(this).data('review-id');
+			const authorName = $(this).data('review-author');
+			openReviewReportModal(reviewId, authorName);
 		});
 		
 	});
