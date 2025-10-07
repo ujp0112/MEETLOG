@@ -42,6 +42,8 @@ public class NaverPayService {
     private final String merchantId;
     private final String confirmEndpointOverride;
     private final String chainId;
+    private final boolean skipConfirm;
+    private final boolean fallbackOnFailure;
     private final Gson gson = new Gson();
 
     public NaverPayService() {
@@ -51,6 +53,8 @@ public class NaverPayService {
         this.merchantId = AppConfig.getProperty("naverpay.merchantId", "");
         this.confirmEndpointOverride = AppConfig.getProperty("naverpay.confirmEndpoint");
         this.chainId = AppConfig.getProperty("naverpay.chainId", "");
+        this.skipConfirm = Boolean.parseBoolean(AppConfig.getProperty("naverpay.skipConfirm", "false"));
+        this.fallbackOnFailure = Boolean.parseBoolean(AppConfig.getProperty("naverpay.fallbackOnFailure", "false"));
     }
 
     public boolean isConfigured() {
@@ -75,6 +79,14 @@ public class NaverPayService {
 
     public String getChainId() {
         return chainId;
+    }
+
+    public boolean isSkipConfirm() {
+        return skipConfirm;
+    }
+
+    public boolean isFallbackOnFailure() {
+        return fallbackOnFailure;
     }
 
     /**
@@ -109,6 +121,7 @@ public class NaverPayService {
         config.setReservationId(reservation.getId());
         config.setMerchantId(getMerchantId());
         config.setChainId(getChainId());
+        config.setSkipConfirm(skipConfirm);
         return config;
     }
 
@@ -155,6 +168,21 @@ public class NaverPayService {
 
         if (merchantId == null || merchantId.isBlank()) {
             return PaymentConfirmResult.failure("MISSING_MERCHANT_ID", "merchantId 설정이 필요합니다.");
+        }
+
+        if (skipConfirm) {
+            if (paymentId == null || paymentId.isBlank()) {
+                paymentId = "DEV-MOCK-" + System.currentTimeMillis();
+            }
+            if (merchantPayKey == null || merchantPayKey.isBlank()) {
+                merchantPayKey = "DEV-MOCK-" + System.currentTimeMillis();
+            }
+            return PaymentConfirmResult.success(
+                    paymentId != null ? paymentId : "DEV-MOCK",
+                    "Success",
+                    "Development mode auto-confirm",
+                    null
+            );
         }
 
         if (paymentId == null || paymentId.isBlank()) {
@@ -288,6 +316,7 @@ public class NaverPayService {
         private int reservationId;
         private String merchantId;
         private String chainId;
+        private boolean skipConfirm;
 
         public String getClientId() {
             return clientId;
@@ -391,6 +420,14 @@ public class NaverPayService {
 
         public void setChainId(String chainId) {
             this.chainId = chainId;
+        }
+
+        public boolean isSkipConfirm() {
+            return skipConfirm;
+        }
+
+        public void setSkipConfirm(boolean skipConfirm) {
+            this.skipConfirm = skipConfirm;
         }
 
         public String getTotalPayAmountAsString() {

@@ -40,7 +40,7 @@
             </div>
 
             <!-- 통계 카드 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
                 <div class="bg-blue-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('ALL')">
                     <div class="text-3xl font-bold text-blue-600" id="totalCount">0</div>
                     <div class="text-slate-600">총 예약</div>
@@ -57,6 +57,17 @@
                     <div class="text-3xl font-bold text-red-600" id="cancelledCount">0</div>
                     <div class="text-slate-600">취소</div>
                 </div>
+                <div class="bg-emerald-50 p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-emerald-600" id="depositPaidCount">${depositPaidCount}</div>
+                    <div class="text-slate-600">예약금 결제 완료</div>
+                    <p class="text-xs text-emerald-700 mt-2">총 수납: <span id="depositPaidAmount"><fmt:formatNumber value="${paidDepositAmount}" pattern="#,##0"/></span>원</p>
+                    <p class="text-xs text-slate-500 mt-1">전체 예약금: <span id="totalDepositAmount"><fmt:formatNumber value="${totalDepositAmount}" pattern="#,##0"/></span>원</p>
+                </div>
+                <div class="bg-amber-50 p-6 rounded-xl text-center">
+                    <div class="text-3xl font-bold text-amber-600" id="depositPendingCount">${depositPendingCount}</div>
+                    <div class="text-slate-600">예약금 결제 대기</div>
+                    <p class="text-xs text-amber-700 mt-2">미수금: <span id="depositOutstandingAmount"><fmt:formatNumber value="${outstandingDepositAmount}" pattern="#,##0"/></span>원</p>
+                </div>
             </div>
 
             <div class="space-y-6">
@@ -67,7 +78,10 @@
                                 <h2 class="text-2xl font-semibold text-slate-800 mb-4">${restaurant.name}의 예약 목록</h2>
                                 <div class="reservation-list" data-restaurant-id="${restaurant.id}">
                                     <c:forEach var="reservation" items="${restaurant.reservationList}">
-                                        <div class="reservation-card glass-card p-6 rounded-2xl card-hover mb-4" data-status="${reservation.status}">
+                                        <div class="reservation-card glass-card p-6 rounded-2xl card-hover mb-4" data-status="${reservation.status}"
+                                             data-payment-status="${empty reservation.paymentStatus ? 'NONE' : reservation.paymentStatus}"
+                                             data-deposit-required="${reservation.depositRequired}"
+                                             data-deposit-amount="${reservation.depositAmount != null ? reservation.depositAmount : 0}">
                                             <div class="flex items-start justify-between mb-4">
                                                 <div class="flex-1">
                                                     <h3 class="text-xl font-bold text-slate-800">${reservation.userName}님의 예약</h3>
@@ -107,6 +121,50 @@
                                                     <p class="text-blue-800">${reservation.specialRequests}</p>
                                                 </div>
                                             </c:if>
+
+                                            <c:choose>
+                                                <c:when test="${reservation.depositRequired}">
+                                                    <div class="p-4 rounded-xl mb-4 border ${reservation.paymentStatus == 'PAID' ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'}">
+                                                        <div class="flex items-start justify-between">
+                                                            <div>
+                                                                <p class="text-sm text-slate-600">예약금</p>
+                                                                <p class="font-semibold text-slate-800">
+                                                                    <fmt:formatNumber value="${reservation.depositAmount}" pattern="#,##0"/>원
+                                                                </p>
+                                                                <c:if test="${not empty reservation.paymentProvider}">
+                                                                    <span class="mt-2 inline-block px-3 py-1 rounded-full text-xs font-semibold text-slate-600 bg-white border border-slate-200">${reservation.paymentProvider}</span>
+                                                                </c:if>
+                                                            </div>
+                                                            <div class="text-right">
+                                                                <c:choose>
+                                                                    <c:when test="${reservation.paymentStatus == 'PAID'}">
+                                                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-emerald-700 bg-emerald-100">결제 완료</span>
+                                                                        <c:if test="${reservation.paymentApprovedAt != null}">
+                                                                            <c:set var="paidDateTimeParts" value="${fn:split(reservation.paymentApprovedAt, 'T')}" />
+                                                                            <div class="text-xs text-emerald-700 mt-2">
+                                                                                승인: ${paidDateTimeParts[0]} ${fn:length(paidDateTimeParts) > 1 ? fn:substring(paidDateTimeParts[1],0,5) : ''}
+                                                                            </div>
+                                                                        </c:if>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-amber-700 bg-amber-100">
+                                                                            ${reservation.paymentStatus == 'FAILED' ? '결제 실패' : '결제 대기'}
+                                                                        </span>
+                                                                        <c:if test="${reservation.paymentStatus == 'FAILED'}">
+                                                                            <div class="text-xs text-amber-700 mt-2">재결제나 안내가 필요합니다.</div>
+                                                                        </c:if>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div class="p-4 bg-slate-50 rounded-xl mb-4">
+                                                        <p class="text-sm text-slate-500">이 예약은 예약금이 필요하지 않습니다.</p>
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
 
                                             <div class="flex space-x-2">
                                                 <c:if test="${reservation.status == 'PENDING'}">
@@ -154,13 +212,19 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 통계 계산
             calculateStats();
         });
+
+        function formatCurrency(value) {
+            const numeric = Number.isFinite(value) ? value : Number(value) || 0;
+            return new Intl.NumberFormat('ko-KR').format(Math.max(0, Math.floor(numeric)));
+        }
 
         function calculateStats() {
             const allCards = document.querySelectorAll('.reservation-card');
             let total = 0, pending = 0, confirmed = 0, cancelled = 0;
+            let depositPaid = 0, depositPending = 0;
+            let totalDeposit = 0, paidDeposit = 0, outstandingDeposit = 0;
 
             allCards.forEach(card => {
                 total++;
@@ -168,12 +232,44 @@
                 if (status === 'PENDING') pending++;
                 else if (status === 'CONFIRMED') confirmed++;
                 else if (status === 'CANCELLED') cancelled++;
+
+                const depositRequired = card.dataset.depositRequired === 'true';
+                if (!depositRequired) {
+                    return;
+                }
+
+                const amount = Number(card.dataset.depositAmount || 0);
+                if (amount <= 0) {
+                    return;
+                }
+                totalDeposit += amount;
+
+                const paymentStatus = (card.dataset.paymentStatus || '').toUpperCase();
+                if (paymentStatus === 'PAID') {
+                    depositPaid++;
+                    paidDeposit += amount;
+                } else {
+                    depositPending++;
+                    outstandingDeposit += amount;
+                }
             });
 
             document.getElementById('totalCount').textContent = total;
             document.getElementById('pendingCount').textContent = pending;
             document.getElementById('confirmedCount').textContent = confirmed;
             document.getElementById('cancelledCount').textContent = cancelled;
+
+            const depositPaidCountEl = document.getElementById('depositPaidCount');
+            const depositPendingCountEl = document.getElementById('depositPendingCount');
+            if (depositPaidCountEl) depositPaidCountEl.textContent = depositPaid;
+            if (depositPendingCountEl) depositPendingCountEl.textContent = depositPending;
+
+            const paidAmountEl = document.getElementById('depositPaidAmount');
+            const outstandingAmountEl = document.getElementById('depositOutstandingAmount');
+            const totalDepositAmountEl = document.getElementById('totalDepositAmount');
+            if (paidAmountEl) paidAmountEl.textContent = formatCurrency(paidDeposit);
+            if (outstandingAmountEl) outstandingAmountEl.textContent = formatCurrency(outstandingDeposit);
+            if (totalDepositAmountEl) totalDepositAmountEl.textContent = formatCurrency(totalDeposit);
         }
 
         function filterByStatus(status) {

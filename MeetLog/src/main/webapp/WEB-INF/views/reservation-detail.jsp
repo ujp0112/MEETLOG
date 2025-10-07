@@ -159,7 +159,7 @@
         // This client-side script remains the same as it contains no JSP code.
         function cancelReservation(reservationId) {
             if (confirm('정말로 이 예약을 취소하시겠습니까?')) {
-                fetch('${pageContext.request.contextPath}/reservation', {
+                fetch('${pageContext.request.contextPath}/reservation/cancel', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

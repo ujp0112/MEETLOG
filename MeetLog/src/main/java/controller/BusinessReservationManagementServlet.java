@@ -16,6 +16,7 @@ import service.RestaurantService;
 import service.ReservationService;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
+import java.math.BigDecimal;
 
 @WebServlet("/business/reservation-management")
 public class BusinessReservationManagementServlet extends HttpServlet {
@@ -57,37 +58,68 @@ public class BusinessReservationManagementServlet extends HttpServlet {
                 restaurant.setReservationList(reservations); // Restaurant 객체에 예약 리스트 설정
             }
             
-            // 예약 통계 계산
+            // 예약 및 예약금 통계 계산
             int totalReservations = 0;
             int pendingReservations = 0;
             int confirmedReservations = 0;
             int cancelledReservations = 0;
-            
+
+            int depositPaidCount = 0;
+            int depositPendingCount = 0;
+            BigDecimal totalDepositAmount = BigDecimal.ZERO;
+            BigDecimal paidDepositAmount = BigDecimal.ZERO;
+            BigDecimal outstandingDepositAmount = BigDecimal.ZERO;
+
             for (Restaurant restaurant : myRestaurants) {
-                List<Reservation> reservations = reservationService.getReservationsByRestaurantId(restaurant.getId());
-                if (reservations != null) {
-                    totalReservations += reservations.size();
-                    for (Reservation reservation : reservations) {
-                        switch (reservation.getStatus()) {
-                            case "PENDING":
-                                pendingReservations++;
-                                break;
-                            case "CONFIRMED":
-                                confirmedReservations++;
-                                break;
-                            case "CANCELLED":
-                                cancelledReservations++;
-                                break;
+                List<Reservation> reservations = restaurant.getReservationList();
+                if (reservations == null) {
+                    reservations = new java.util.ArrayList<>();
+                    restaurant.setReservationList(reservations);
+                }
+
+                totalReservations += reservations.size();
+
+                for (Reservation reservation : reservations) {
+                    String status = reservation.getStatus();
+                    if ("PENDING".equals(status)) {
+                        pendingReservations++;
+                    } else if ("CONFIRMED".equals(status)) {
+                        confirmedReservations++;
+                    } else if ("CANCELLED".equals(status)) {
+                        cancelledReservations++;
+                    }
+
+                    if (reservation.isDepositRequired()
+                            && reservation.getDepositAmount() != null
+                            && reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
+                        BigDecimal depositAmount = reservation.getDepositAmount();
+                        totalDepositAmount = totalDepositAmount.add(depositAmount);
+
+                        String paymentStatus = reservation.getPaymentStatus() != null
+                                ? reservation.getPaymentStatus().toUpperCase()
+                                : "";
+
+                        if ("PAID".equals(paymentStatus)) {
+                            depositPaidCount++;
+                            paidDepositAmount = paidDepositAmount.add(depositAmount);
+                        } else {
+                            depositPendingCount++;
+                            outstandingDepositAmount = outstandingDepositAmount.add(depositAmount);
                         }
                     }
                 }
             }
-            
+
             request.setAttribute("myRestaurants", myRestaurants);
             request.setAttribute("totalReservations", totalReservations);
             request.setAttribute("pendingReservations", pendingReservations);
             request.setAttribute("confirmedReservations", confirmedReservations);
             request.setAttribute("cancelledReservations", cancelledReservations);
+            request.setAttribute("depositPaidCount", depositPaidCount);
+            request.setAttribute("depositPendingCount", depositPendingCount);
+            request.setAttribute("totalDepositAmount", totalDepositAmount);
+            request.setAttribute("paidDepositAmount", paidDepositAmount);
+            request.setAttribute("outstandingDepositAmount", outstandingDepositAmount);
             request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();

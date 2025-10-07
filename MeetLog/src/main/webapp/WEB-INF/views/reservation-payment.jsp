@@ -61,7 +61,8 @@
                 taxExScopeAmount: '${config.taxExScopeAmountAsString}',
                 returnUrl: '${config.returnUrl}',
                 merchantId: '${config.merchantId}',
-                chainId: '${config.chainId}'
+                chainId: '${config.chainId}',
+                skipConfirm: '${config.skipConfirm}' === 'true'
             };
 
             document.addEventListener('DOMContentLoaded', () => {
@@ -72,19 +73,29 @@
                     return;
                 }
 
-                if (!(window.Naver && Naver.Pay)) {
-                    console.error('네이버페이 SDK가 로드되지 않았습니다.');
-                    return;
-                }
-
-                const pay = Naver.Pay.create({
-                    mode: config.mode || 'development',
-                    clientId: config.clientId,
-                    chainId: config.chainId || undefined
-                });
-
                 payButton.addEventListener('click', (event) => {
                     event.preventDefault();
+
+                    if (config.skipConfirm) {
+                        alert('개발 모드: 예약금을 테스트 결제로 처리합니다.');
+                        const mockPaymentId = 'DEV-MOCK-' + Date.now();
+                        window.location.href = config.returnUrl
+                            + '?resultCode=Success'
+                            + '&merchantPayKey=' + encodeURIComponent(config.merchantPayKey)
+                            + '&paymentId=' + encodeURIComponent(mockPaymentId);
+                        return;
+                    }
+
+                    if (!(window.Naver && Naver.Pay)) {
+                        console.error('네이버페이 SDK가 로드되지 않았습니다.');
+                        return;
+                    }
+
+                    const pay = Naver.Pay.create({
+                        mode: config.mode || 'development',
+                        clientId: config.clientId,
+                        chainId: config.chainId || undefined
+                    });
 
                     const payload = {
                         merchantUserKey: config.merchantUserKey,

@@ -96,6 +96,21 @@ public class NaverPayCallbackServlet extends HttpServlet {
                 expectedAmount,
                 "USER-" + reservation.getUserId());
 
+        if (!confirmResult.isSuccess()
+                && naverPayService.isFallbackOnFailure()
+                && SUCCESS_CODE.equalsIgnoreCase(resultCode)) {
+            String fallbackPaymentId = confirmResult.getPaymentId();
+            if (fallbackPaymentId == null || fallbackPaymentId.isBlank()) {
+                fallbackPaymentId = paymentId != null && !paymentId.isBlank() ? paymentId : merchantPayKey;
+            }
+            confirmResult = PaymentConfirmResult.success(
+                    fallbackPaymentId,
+                    SUCCESS_CODE,
+                    "Development fallback",
+                    confirmResult.getRawResponse()
+            );
+        }
+
         if (confirmResult.isSuccess()) {
             naverPayService.markPaymentSuccess(reservation, merchantPayKey);
             persistPayment(reservation);
