@@ -303,8 +303,17 @@ public class ReservationServlet extends HttpServlet {
 		try {
 			restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
 			String restaurantName = request.getParameter("restaurantName");
-			String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
-			String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
+				String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
+				if (reservationDate == null || reservationDate.trim().isEmpty()) {
+					throw new Exception("예약 날짜를 선택해주세요.");
+				}
+				reservationDate = reservationDate.trim();
+
+				String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
+				if (reservationTimeStr == null || reservationTimeStr.trim().isEmpty()) {
+					throw new Exception("예약 시간을 선택해주세요.");
+				}
+				reservationTimeStr = reservationTimeStr.trim();
 			int partySize = Integer.parseInt(request.getParameter("partySize"));
 			String contactPhone = request.getParameter("contactPhone");
 
@@ -440,7 +449,11 @@ public class ReservationServlet extends HttpServlet {
 			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("errorMessage", "예약 처리 중 오류가 발생했습니다.");
+			String message = e.getMessage();
+			if (message == null || message.trim().isEmpty()) {
+				message = "예약 처리 중 오류가 발생했습니다.";
+			}
+			request.setAttribute("errorMessage", message);
 			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId); // 폼 재전송을 위해 식당정보 로드
 			request.setAttribute("restaurant", restaurant);
 			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
