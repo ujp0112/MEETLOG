@@ -204,9 +204,9 @@
                                         </div>
 
                                         <c:choose>
-                                            <c:when test="${not empty comments}">
+                                            <c:when test="${not empty courseComments}">
                                                 <ul id="comment-list" class="space-y-4">
-                                                    <c:forEach var="comment" items="${comments}">
+                                                    <c:forEach var="comment" items="${courseComments}">
                                                         <li class="comment-item comment-bubble" data-comment-id="${comment.id}">
                                                             <div class="flex items-start gap-3">
                                                                 <mytag:image fileName="${comment.profileImage}" altText="${comment.nickname}" cssClass="h-10 w-10 rounded-full object-cover" />
@@ -214,7 +214,7 @@
                                                                     <div class="flex items-start justify-between">
                                                                         <div>
                                                                             <p class="font-semibold text-slate-900">${comment.nickname}</p>
-                                                                            <p class="text-xs text-slate-400"><fmt:formatDate value="${comment.createdAt}" pattern="yyyy.MM.dd HH:mm" /></p>
+                                                                            <p class="text-xs text-slate-400">${comment.createdAtFormatted}</p>
                                                                         </div>
                                                                         <div class="flex gap-2 text-xs text-slate-400">
                                                                             <c:if test="${not empty sessionScope.user && sessionScope.user.id == comment.userId}">
