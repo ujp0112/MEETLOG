@@ -37,7 +37,7 @@
                       hover:bg-purple-700 transition shadow-lg hover:shadow-xl transform hover:scale-105">
                 로그인하고 시작하기 →
             </a>
-            <a href="${pageContext.request.contextPath}/join"
+            <a href="${pageContext.request.contextPath}/register"
                class="inline-block bg-white text-purple-600 px-8 py-4 rounded-full font-bold text-lg
                       border-2 border-purple-600 hover:bg-purple-50 transition">
                 회원가입
