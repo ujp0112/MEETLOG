@@ -40,8 +40,7 @@
 		resultMap="userResultMap">
 		SELECT * FROM users
 		WHERE social_provider = #{socialProvider}
-		AND social_id = #{socialId} AND
-		is_active = true
+		AND social_id = #{socialId}
 	</select>
 
 	<select id="findByEmail" parameterType="string"

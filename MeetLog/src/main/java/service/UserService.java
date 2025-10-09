@@ -173,9 +173,15 @@ public class UserService {
 	 * @return 로그인 또는 신규 가입 처리된 User 객체
 	 */
 	public User getOrCreateSocialUser(User socialProfile) {
-		// 1. 소셜 제공자와 소셜 ID로 기존 사용자인지 확인
+		// 1. 소셜 제공자와 소셜 ID로 기존 사용자인지 확인 (활성/비활성 무관)
 		User user = userDAO.findBySocial(socialProfile.getSocialProvider(), socialProfile.getSocialId());
 		if (user != null) {
+			// 1-1. 사용자를 찾았으나 비활성 상태인 경우, 다시 활성화 처리
+			if (!user.isActive()) {
+				System.out.println("비활성 상태의 기존 소셜 계정 발견. 계정을 다시 활성화합니다: " + user.getEmail());
+				userDAO.updateActiveStatus(user.getId(), true);
+				user.setActive(true); // 메모리의 객체 상태도 동기화
+			}
 			System.out.println("기존 소셜 계정으로 로그인 성공: " + user.getEmail());
 			return user;
 		}
@@ -197,8 +203,7 @@ public class UserService {
 					boolean matches = provider.equalsIgnoreCase(existingUser.getSocialProvider())
 							&& socialId.equals(existingUser.getSocialId());
 					if (!matches) {
-						System.err.println("소셜 연동 충돌: 이미 다른 소셜 계정이 연결되어 있습니다. userId="
-								+ existingUser.getId());
+						System.err.println("소셜 연동 충돌: 이미 다른 소셜 계정이 연결되어 있습니다. userId=" + existingUser.getId());
 					}
 					return existingUser;
 				}
@@ -207,8 +212,7 @@ public class UserService {
 				if (updated > 0) {
 					existingUser.setSocialProvider(provider);
 					existingUser.setSocialId(socialId);
-					System.out.println("이메일 기반 기존 계정과 소셜 계정이 성공적으로 연동되었습니다. userId="
-							+ existingUser.getId());
+					System.out.println("이메일 기반 기존 계정과 소셜 계정이 성공적으로 연동되었습니다. userId=" + existingUser.getId());
 				} else {
 					System.err.println("소셜 연동 업데이트 실패: userId=" + existingUser.getId());
 				}
@@ -243,6 +247,9 @@ public class UserService {
 
 		// [필수] 사용자 유형 기본값 설정
 		socialProfile.setUserType("PERSONAL");
+
+		// [수정] 신규 가입 시 사용자를 활성 상태로 설정
+		socialProfile.setActive(true);
 
 		// 4. 보정된 정보로 DB에 사용자 정보 삽입
 		int result = userDAO.insert(socialProfile);
