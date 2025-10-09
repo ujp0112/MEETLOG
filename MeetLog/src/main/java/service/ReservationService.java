@@ -1,6 +1,7 @@
 package service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -93,8 +94,28 @@ public class ReservationService {
         return false;
     }
 
+    public boolean cancelReservation(int reservationId, String cancelReason) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            try {
+                int result = reservationDAO.updateCancellation(
+                        reservationId,
+                        cancelReason,
+                        LocalDateTime.now(),
+                        sqlSession);
+                if (result > 0) {
+                    sqlSession.commit();
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sqlSession.rollback();
+            }
+        }
+        return false;
+    }
+
     public boolean cancelReservation(int reservationId) {
-        return updateReservationStatus(reservationId, "CANCELLED");
+        return cancelReservation(reservationId, null);
     }
 
     public boolean deleteReservation(int reservationId) {

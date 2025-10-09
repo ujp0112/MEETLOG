@@ -303,8 +303,17 @@ public class ReservationServlet extends HttpServlet {
 		try {
 			restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
 			String restaurantName = request.getParameter("restaurantName");
-			String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
-			String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
+				String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
+				if (reservationDate == null || reservationDate.trim().isEmpty()) {
+					throw new Exception("예약 날짜를 선택해주세요.");
+				}
+				reservationDate = reservationDate.trim();
+
+				String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
+				if (reservationTimeStr == null || reservationTimeStr.trim().isEmpty()) {
+					throw new Exception("예약 시간을 선택해주세요.");
+				}
+				reservationTimeStr = reservationTimeStr.trim();
 			int partySize = Integer.parseInt(request.getParameter("partySize"));
 			String contactPhone = request.getParameter("contactPhone");
 
@@ -440,7 +449,11 @@ public class ReservationServlet extends HttpServlet {
 			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
 		} catch (Exception e) {
 			e.printStackTrace();
-			request.setAttribute("errorMessage", "예약 처리 중 오류가 발생했습니다.");
+			String message = e.getMessage();
+			if (message == null || message.trim().isEmpty()) {
+				message = "예약 처리 중 오류가 발생했습니다.";
+			}
+			request.setAttribute("errorMessage", message);
 			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId); // 폼 재전송을 위해 식당정보 로드
 			request.setAttribute("restaurant", restaurant);
 			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
@@ -462,6 +475,19 @@ public class ReservationServlet extends HttpServlet {
 			int reservationId = Integer.parseInt(request.getParameter("reservationId"));
 			User currentUser = (User) session.getAttribute("user");
 
+			String cancelReason = request.getParameter("cancelReason");
+			if (cancelReason == null || cancelReason.trim().isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"success\": false, \"message\": \"취소 사유를 입력해주세요.\"}");
+				return;
+			}
+			cancelReason = cancelReason.trim();
+			if (cancelReason.length() > 500) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"success\": false, \"message\": \"취소 사유는 500자 이내로 입력해주세요.\"}");
+				return;
+			}
+
 			// 예약자 검증: 해당 예약을 요청한 사용자가 실제 예약자인지 확인
 			Reservation reservation = reservationService.getReservationById(reservationId);
 			if (reservation == null) {
@@ -476,7 +502,7 @@ public class ReservationServlet extends HttpServlet {
 				return;
 			}
 
-			if (reservationService.cancelReservation(reservationId)) {
+			if (reservationService.cancelReservation(reservationId, cancelReason)) {
 				response.getWriter().write("{\"success\": true}");
 				//response.sendRedirect(request.getContextPath() + "/mypage/reservations");
 			} else {

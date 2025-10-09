@@ -119,6 +119,20 @@
                                         </div>
                                     </div>
 
+                                    <c:if test="${reservation.status == 'CANCELLED'}">
+                                        <div class="mb-6">
+                                            <h2 class="text-lg font-bold text-slate-800 mb-3">취소 정보</h2>
+                                            <div class="bg-slate-50 p-4 rounded-lg space-y-2">
+                                                <c:if test="${not empty reservation.cancelReason}">
+                                                    <p class="text-slate-700"><span class="font-semibold">사유:</span> ${reservation.cancelReason}</p>
+                                                </c:if>
+                                                <c:if test="${reservation.cancelledAtAsDate ne null}">
+                                                    <p class="text-slate-600 text-sm">취소일: <fmt:formatDate value="${reservation.cancelledAtAsDate}" pattern="yyyy-MM-dd HH:mm" /></p>
+                                                </c:if>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
                                     <div class="flex justify-between items-center pt-6 border-t border-slate-200">
                                         <a href="${pageContext.request.contextPath}/mypage/reservations" class="text-slate-600 hover:text-slate-800 text-sm font-medium">
                                             ← 예약 목록으로 돌아가기
@@ -156,30 +170,50 @@
     </div>
 
     <script>
-        // This client-side script remains the same as it contains no JSP code.
         function cancelReservation(reservationId) {
-            if (confirm('정말로 이 예약을 취소하시겠습니까?')) {
-                fetch('${pageContext.request.contextPath}/reservation/cancel', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: 'action=cancel&reservationId=' + reservationId
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('예약이 취소되었습니다.');
-                        location.reload();
-                    } else {
-                        alert('예약 취소 중 오류가 발생했습니다.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('예약 취소 중 오류가 발생했습니다.');
-                });
+            if (!confirm('정말로 이 예약을 취소하시겠습니까?')) {
+                return;
             }
+
+            const reasonInput = prompt('취소 사유를 입력해주세요 (500자 이내):');
+            if (reasonInput === null) {
+                return;
+            }
+
+            const cancelReason = reasonInput.trim();
+            if (!cancelReason) {
+                alert('취소 사유를 입력해주세요.');
+                return;
+            }
+            if (cancelReason.length > 500) {
+                alert('취소 사유는 500자 이내로 입력해주세요.');
+                return;
+            }
+
+            const payload = new URLSearchParams();
+            payload.append('reservationId', reservationId);
+            payload.append('cancelReason', cancelReason);
+
+            fetch('${pageContext.request.contextPath}/reservation/cancel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: payload.toString()
+            })
+            .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
+            .then(({ ok, body }) => {
+                if (ok && body.success) {
+                    alert('예약이 취소되었습니다.');
+                    location.reload();
+                } else {
+                    alert(body.message || '예약 취소 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('예약 취소 중 오류가 발생했습니다.');
+            });
         }
     </script>
 </body>
