@@ -63,6 +63,13 @@
             </svg>
             <span>이용약관</span>
           </a> -->
+          <a href="${pageContext.request.contextPath}/admin/login"
+             class="group inline-flex items-center gap-2 text-sm text-slate-600 transition-all duration-300 ease-out hover:translate-x-1 hover:text-blue-600">
+            <svg class="h-3.5 w-3.5 opacity-0 -ml-5 transition-all duration-300 group-hover:opacity-100 group-hover:ml-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+            <span>관리자</span>
+          </a>
         </nav>
       </div>
 

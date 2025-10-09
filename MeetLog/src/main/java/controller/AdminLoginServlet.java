@@ -25,7 +25,7 @@ public class AdminLoginServlet extends HttpServlet {
             throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
 
-        String adminEmail = request.getParameter("adminId");
+        String adminEmail = request.getParameter("email");
         String password = request.getParameter("password");
 
         if (adminEmail == null || adminEmail.trim().isEmpty() || password == null || password.trim().isEmpty()) {

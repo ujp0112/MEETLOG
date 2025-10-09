@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 // 로그인이 필요한 경로만 감시
-@WebFilter(urlPatterns = { "/mypage/*", "/admin/*", "/review/write", "/reservation/*" })
+@WebFilter(urlPatterns = { "/mypage/*", "/review/write", "/reservation/*" })
 public class LoginFilter implements Filter {
 
     @Override
