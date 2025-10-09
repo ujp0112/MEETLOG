@@ -1,18 +1,22 @@
 package service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import dao.ReservationDAO;
 import model.Reservation;
 import util.MyBatisSqlSessionFactory;
 
 public class ReservationService {
     private final ReservationDAO reservationDAO = new ReservationDAO();
-
+    private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
+    
     // --- Read Operations ---
     public List<Reservation> getReservationsByRestaurantId(int restaurantId) {
         return reservationDAO.findByRestaurantId(restaurantId);
