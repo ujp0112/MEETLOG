@@ -56,8 +56,9 @@ public class RegisterServlet extends HttpServlet {
         User user = new User();
         user.setEmail(email);
         user.setNickname(nickname);
-        user.setPassword(PasswordUtil.hashPassword(password)); // 비밀번호 해싱
+        user.setPassword(password);
         user.setUserType("PERSONAL");
+        user.setActive(true); 
         
 		if (userService.registerUser(user)) {
 			// 성공 시 로그인 페이지로 이동

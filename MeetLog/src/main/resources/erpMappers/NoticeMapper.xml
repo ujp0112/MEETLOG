@@ -17,7 +17,7 @@
 		deleted_yn = 'N'
 	</select>
 
-	<resultMap id="NoticeResultMap" type="ErpNotice">
+	<resultMap id="ErpNoticeResultMap" type="ErpNotice">
 		<id property="id" column="notice_id" />
 		<result property="companyId" column="company_id" />
 		<result property="title" column="title" />
@@ -36,7 +36,7 @@
 		</collection>
 	</resultMap>
 
-    <select id="selectNoticeById" parameterType="map" resultMap="NoticeResultMap">
+    <select id="selectNoticeById" parameterType="map" resultMap="ErpNoticeResultMap">
         SELECT 
             n.id AS notice_id, n.company_id, n.title, n.content, n.view_count, n.created_at,
             i.id AS image_id, i.file_path AS image_file_path, i.display_order,

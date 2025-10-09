@@ -19,20 +19,21 @@
 		<result property="socialId" column="social_id" />
 	</resultMap>
 
-	<select id="findByEmailAndUserType" parameterType="map" resultMap="userResultMap">
+	<select id="findByEmailAndUserType" parameterType="map"
+		resultMap="userResultMap">
 		SELECT *
 		FROM users
 		WHERE email = #{email}
-		  AND is_active = true
-		  AND
-		  <choose>
+		AND is_active = true
+		AND
+		<choose>
 			<when test="userType == 'BUSINESS'">
-			  user_type IN ('BUSINESS', 'ADMIN')
+				user_type IN ('BUSINESS', 'ADMIN')
 			</when>
 			<otherwise>
-			  user_type = #{userType}
+				user_type = #{userType}
 			</otherwise>
-		  </choose>
+		</choose>
 	</select>
 
 	<select id="findBySocial" parameterType="map"
@@ -66,7 +67,8 @@
 	</select>
 
 	<select id="findAllIncludingInactive" resultMap="userResultMap">
-		SELECT * FROM users
+		SELECT * FROM
+		users
 	</select>
 
 	<insert id="insert" parameterType="model.User"
@@ -74,12 +76,14 @@
 		INSERT INTO users
 		(email, nickname,
 		password, user_type, name, phone, address, profile_image,
-		social_provider, social_id, created_at, updated_at)
+		social_provider, social_id, is_active, created_at, updated_at)
 		VALUES
 		(#{email},
-		#{nickname}, #{password}, #{userType}, #{name}, #{phone}, #{address},
+		#{nickname}, #{password}, #{userType}, #{name}, #{phone},
+		#{address},
 		#{profileImage},
-		#{socialProvider}, #{socialId}, NOW(), NOW())
+		#{socialProvider}, #{socialId},
+		#{isActive}, NOW(), NOW())
 	</insert>
 
 	<update id="update" parameterType="model.User">
@@ -115,9 +119,10 @@
 
 	<update id="linkSocialAccount" parameterType="map">
 		UPDATE users
-		SET social_provider = #{socialProvider},
-			social_id = #{socialId},
-			updated_at = NOW()
+		SET
+		social_provider = #{socialProvider},
+		social_id = #{socialId},
+		updated_at = NOW()
 		WHERE id = #{id}
 	</update>
 </mapper>
