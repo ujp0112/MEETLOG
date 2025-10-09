@@ -515,6 +515,8 @@ CREATE TABLE `reservations` (
   `status` enum('PENDING','CONFIRMED','COMPLETED','CANCELLED') DEFAULT 'PENDING',
   `special_requests` text DEFAULT NULL,
   `contact_phone` varchar(20) DEFAULT NULL,
+  `cancel_reason` text DEFAULT NULL COMMENT '사용자 예약 취소 사유',
+  `cancelled_at` timestamp NULL DEFAULT NULL COMMENT '예약 취소 처리 시각',
   `deposit_required` tinyint(1) NOT NULL DEFAULT 0,
   `deposit_amount` decimal(10,2) NOT NULL DEFAULT 0,
   `payment_status` varchar(20) NOT NULL DEFAULT 'NONE',

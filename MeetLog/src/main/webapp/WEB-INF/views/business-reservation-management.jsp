@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -78,6 +79,12 @@
                                                             <h4 class="font-medium text-slate-900">${reservation.customerName}</h4>
                                                             <p class="text-sm text-slate-600">예약 시간: ${reservation.reservationTime}</p>
                                                             <p class="text-sm text-slate-600">인원: ${reservation.partySize}명</p>
+                                                            <c:if test="${reservation.status == 'CANCELLED' && not empty reservation.cancelReason}">
+                                                                <p class="text-sm text-red-600 mt-2">취소 사유: ${reservation.cancelReason}</p>
+                                                                <c:if test="${reservation.cancelledAtAsDate ne null}">
+                                                                    <p class="text-xs text-slate-500 mt-1">취소일: <fmt:formatDate value="${reservation.cancelledAtAsDate}" pattern="yyyy-MM-dd HH:mm" /></p>
+                                                                </c:if>
+                                                            </c:if>
                                                         </div>
                                                         <div class="flex items-center">
                                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

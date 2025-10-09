@@ -13,6 +13,8 @@
         <result property="partySize" column="party_size"/>
         <result property="specialRequests" column="special_requests"/>
         <result property="contactPhone" column="contact_phone"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelledAt" column="cancelled_at"/>
         <result property="depositRequired" column="deposit_required"/>
         <result property="depositAmount" column="deposit_amount"/>
         <result property="paymentStatus" column="payment_status"/>
@@ -133,6 +135,16 @@
 
     <update id="updateStatus" parameterType="map">
         UPDATE reservations SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateCancellation" parameterType="map">
+        UPDATE reservations
+        SET
+            status = #{status},
+            cancel_reason = #{cancelReason},
+            cancelled_at = #{cancelledAt},
+            updated_at = NOW()
+        WHERE id = #{id}
     </update>
 
     <update id="updatePaymentInfo" parameterType="map">

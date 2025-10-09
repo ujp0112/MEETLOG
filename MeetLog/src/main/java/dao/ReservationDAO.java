@@ -39,6 +39,16 @@ public class ReservationDAO {
         params.put("status", status);
         return sqlSession.update(NAMESPACE + ".updateStatus", params);
     }
+
+    public int updateCancellation(int reservationId, String cancelReason,
+                                  java.time.LocalDateTime cancelledAt, SqlSession sqlSession) {
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        params.put("id", reservationId);
+        params.put("status", "CANCELLED");
+        params.put("cancelReason", cancelReason);
+        params.put("cancelledAt", cancelledAt);
+        return sqlSession.update(NAMESPACE + ".updateCancellation", params);
+    }
     
     public int delete(int reservationId, SqlSession sqlSession) {
         return sqlSession.delete(NAMESPACE + ".delete", reservationId);

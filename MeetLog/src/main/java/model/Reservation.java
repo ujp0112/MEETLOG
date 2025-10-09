@@ -19,6 +19,8 @@ public class Reservation {
 	private String status; // PENDING, CONFIRMED, COMPLETED, CANCELLED
 	private String specialRequests;
 	private String contactPhone;
+	private String cancelReason;
+	private LocalDateTime cancelledAt;
 	private String customerName;
 	private String customerPhone;
 	private String reservationDate;
@@ -34,6 +36,7 @@ public class Reservation {
 	private transient Date reservationTimeAsDate;
 	private transient Date createdAtAsDate;
 	private transient Date updatedAtAsDate;
+	private transient Date cancelledAtAsDate;
 	private transient List<Reservation> reservations;
 	
 	public List<Reservation> getReservations() {
@@ -168,6 +171,41 @@ public class Reservation {
 
 	public void setContactPhone(String contactPhone) {
 		this.contactPhone = contactPhone;
+	}
+
+	public String getCancelReason() {
+		return cancelReason;
+	}
+
+	public void setCancelReason(String cancelReason) {
+		this.cancelReason = cancelReason;
+	}
+
+	public LocalDateTime getCancelledAt() {
+		return cancelledAt;
+	}
+
+	public void setCancelledAt(LocalDateTime cancelledAt) {
+		this.cancelledAt = cancelledAt;
+		if (cancelledAt != null) {
+			this.cancelledAtAsDate = Timestamp.valueOf(cancelledAt);
+		} else {
+			this.cancelledAtAsDate = null;
+		}
+	}
+
+	public Date getCancelledAtAsDate() {
+		return cancelledAtAsDate;
+	}
+
+	public void setCancelledAtAsDate(Date cancelledAtAsDate) {
+		if (cancelledAtAsDate != null) {
+			this.cancelledAtAsDate = cancelledAtAsDate;
+		} else if (this.cancelledAt != null) {
+			this.cancelledAtAsDate = Timestamp.valueOf(this.cancelledAt);
+		} else {
+			this.cancelledAtAsDate = null;
+		}
 	}
 
 	public LocalDateTime getCreatedAt() {

@@ -462,6 +462,19 @@ public class ReservationServlet extends HttpServlet {
 			int reservationId = Integer.parseInt(request.getParameter("reservationId"));
 			User currentUser = (User) session.getAttribute("user");
 
+			String cancelReason = request.getParameter("cancelReason");
+			if (cancelReason == null || cancelReason.trim().isEmpty()) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"success\": false, \"message\": \"취소 사유를 입력해주세요.\"}");
+				return;
+			}
+			cancelReason = cancelReason.trim();
+			if (cancelReason.length() > 500) {
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				response.getWriter().write("{\"success\": false, \"message\": \"취소 사유는 500자 이내로 입력해주세요.\"}");
+				return;
+			}
+
 			// 예약자 검증: 해당 예약을 요청한 사용자가 실제 예약자인지 확인
 			Reservation reservation = reservationService.getReservationById(reservationId);
 			if (reservation == null) {
@@ -476,7 +489,7 @@ public class ReservationServlet extends HttpServlet {
 				return;
 			}
 
-			if (reservationService.cancelReservation(reservationId)) {
+			if (reservationService.cancelReservation(reservationId, cancelReason)) {
 				response.getWriter().write("{\"success\": true}");
 				//response.sendRedirect(request.getContextPath() + "/mypage/reservations");
 			} else {
