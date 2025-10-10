@@ -10,8 +10,16 @@ public class MonthlyStatistics {
     private int newRestaurants;
     private int totalReservations;
     private BigDecimal totalRevenue;
+    
 
-    public MonthlyStatistics() {}
+    @Override
+	public String toString() {
+		return "MonthlyStatistics [yearMonth=" + yearMonth + ", totalUsers=" + totalUsers + ", newUsers=" + newUsers
+				+ ", totalRestaurants=" + totalRestaurants + ", newRestaurants=" + newRestaurants
+				+ ", totalReservations=" + totalReservations + ", totalRevenue=" + totalRevenue + "]";
+	}
+
+	public MonthlyStatistics() {}
 
     public String getYearMonth() {
         return yearMonth;

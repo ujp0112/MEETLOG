@@ -20,7 +20,18 @@ public class StatisticsDashboardData {
     private List<MonthlyStatistics> monthlyGrowths;
     private List<RegionalStatistics> regionalDistributions;
 
-    // Getters and Setters
+    @Override
+	public String toString() {
+		return "StatisticsDashboardData [totalUsers=" + totalUsers + ", totalRestaurants=" + totalRestaurants
+				+ ", totalReservations=" + totalReservations + ", totalReviews=" + totalReviews + ", totalRevenue="
+				+ totalRevenue + ", totalBranches=" + totalBranches + ", totalEmployees=" + totalEmployees
+				+ ", averageRating=" + averageRating + ", userGrowthRate=" + userGrowthRate + ", revenueGrowthRate="
+				+ revenueGrowthRate + ", restaurantGrowthRate=" + restaurantGrowthRate + ", reservationGrowthRate="
+				+ reservationGrowthRate + ", popularCategories=" + popularCategories + ", monthlyGrowths="
+				+ monthlyGrowths + ", regionalDistributions=" + regionalDistributions + "]";
+	}
+
+	// Getters and Setters
     public int getTotalUsers() {
         return totalUsers;
     }

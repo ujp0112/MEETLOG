@@ -1093,6 +1093,16 @@ CREATE TABLE IF NOT EXISTS branches (
     INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='지점 정보';
 
+ALTER TABLE branches
+ADD COLUMN company_id INT NULL;
+
+ALTER TABLE branches
+ADD COLUMN manager_name VARCHAR(100);
+
+ALTER TABLE branches
+ADD CONSTRAINT fk_branches_to_companies
+FOREIGN KEY (company_id) REFERENCES companies(id);
+
 -- 지점 월별 성과 테이블
 CREATE TABLE IF NOT EXISTS branch_monthly_performance (
     performance_id BIGINT PRIMARY KEY AUTO_INCREMENT,

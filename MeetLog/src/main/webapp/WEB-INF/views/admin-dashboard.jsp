@@ -39,7 +39,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-slate-600">총 회원 수</p>
                                 <p class="text-2xl font-bold text-slate-900">
-                                    <c:out value="${totalUsers}" default="0" />명
+                                    <c:out value="${dashboardData.totalUsers}" default="0" />명
                                 </p>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-slate-600">총 맛집 수</p>
                                 <p class="text-2xl font-bold text-slate-900">
-                                    <c:out value="${totalRestaurants}" default="0" />개
+                                    <c:out value="${dashboardData.totalRestaurants}" default="0" />개
                                 </p>
                             </div>
                         </div>
@@ -73,7 +73,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-slate-600">오늘의 예약</p>
                                 <p class="text-2xl font-bold text-slate-900">
-                                    <c:out value="${todayReservations}" default="0" />건
+                                    <c:out value="${dashboardData.totalReservations}" default="0" />건
                                 </p>
                             </div>
                         </div>
@@ -90,7 +90,7 @@
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-slate-600">전체 리뷰 수</p>
                                 <p class="text-2xl font-bold text-slate-900">
-                                    <c:out value="${totalReviews}" default="0" />개
+                                    <c:out value="${dashboardData.totalReviews}" default="0" />개
                                 </p>
                             </div>
                         </div>
