@@ -16,30 +16,76 @@
 body {
 	font-family: 'Noto Sans KR', sans-serif;
 }
+
+.form-input {
+	width: 100%;
+	padding: 0.75rem;
+	border: 1px solid #cbd5e1;
+	border-radius: 0.5rem;
+	transition: border-color 0.2s;
+}
+
+.form-input:focus {
+	border-color: #3b82f6;
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.form-btn-primary {
+	background-color: #3b82f6;
+	color: white;
+	padding: 0.75rem 1.5rem;
+	border-radius: 0.5rem;
+	font-weight: 500;
+	text-align: center;
+	transition: background-color 0.2s;
+}
+
+.form-btn-primary:hover {
+	background-color: #2563eb;
+}
+
+.form-btn-secondary {
+	background-color: #e2e8f0;
+	color: #475569;
+	padding: 0.75rem 1.5rem;
+	border-radius: 0.5rem;
+	font-weight: 500;
+	text-align: center;
+	transition: background-color 0.2s;
+}
+
+.form-btn-secondary:hover {
+	background-color: #cbd5e1;
+}
+
 .request-btn {
-        display: inline-flex;
-        align-items: center;
-        background-color: #f1f5f9; /* slate-100 */
-        color: #475569; /* slate-600 */
-        padding: 0.5rem 1rem;
-        border-radius: 9999px; /* rounded-full */
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: 1px solid #e2e8f0; /* slate-200 */
-        transition: all 0.2s ease-in-out;
-    }
-    .request-btn:hover {
-        background-color: #e2e8f0; /* slate-200 */
-        border-color: #cbd5e1; /* slate-300 */
-    }
-    .request-btn.active {
-        background-color: #e0f2fe; /* sky-100 */
-        color: #0c4a6e; /* sky-800 */
-        border-color: #7dd3fc; /* sky-300 */
-    }
-    .request-input-wrapper {
-        padding-top: 0.5rem;
-    }
+	display: inline-flex;
+	align-items: center;
+	background-color: #f1f5f9; /* slate-100 */
+	color: #475569; /* slate-600 */
+	padding: 0.5rem 1rem;
+	border-radius: 9999px; /* rounded-full */
+	font-size: 0.875rem;
+	font-weight: 500;
+	border: 1px solid #e2e8f0; /* slate-200 */
+	transition: all 0.2s ease-in-out;
+}
+
+.request-btn:hover {
+	background-color: #e2e8f0; /* slate-200 */
+	border-color: #cbd5e1; /* slate-300 */
+}
+
+.request-btn.active {
+	background-color: #e0f2fe; /* sky-100 */
+	color: #0c4a6e; /* sky-800 */
+	border-color: #7dd3fc; /* sky-300 */
+}
+
+.request-input-wrapper {
+	padding-top: 0.5rem;
+}
 </style>
 </head>
 <body class="bg-slate-100">
@@ -47,13 +93,29 @@ body {
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
 		<main class="flex-grow">
+			<%
+			// 서블릿에서 전달된 값을 스크립틀릿 변수로 받습니다.
+			String reservationDate = (String) request.getAttribute("reservationDate");
+			String reservationTime = (String) request.getAttribute("reservationTime");
+			String partySize = (String) request.getAttribute("partySize");
+			java.util.List<String> timeSlots = (java.util.List<String>) request.getAttribute("timeSlots");
+
+			// JSP 페이지에서 Null 오류가 발생하지 않도록 기본값을 설정합니다.
+			if (reservationDate == null)
+				reservationDate = java.time.LocalDate.now().toString();
+			if (reservationTime == null)
+				reservationTime = "";
+			if (partySize == null)
+				partySize = "";
+			if (timeSlots == null)
+				timeSlots = new java.util.ArrayList<>();
+			%>
+
 			<div class="container mx-auto p-4 md:p-8">
 				<div class="max-w-2xl mx-auto">
 
-					<%-- 1. 로그인 여부 확인 --%>
 					<c:choose>
 						<c:when test="${not empty sessionScope.user}">
-							<%-- 2. 예약할 맛집 정보가 있는지 확인 --%>
 							<c:choose>
 								<c:when test="${not empty restaurant}">
 									<div class="mb-6">
@@ -61,7 +123,6 @@ body {
 										<p class="text-slate-600">예약 정보를 정확히 입력해주세요.</p>
 									</div>
 									<div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
-										<!-- 맛집 정보 표시 -->
 										<div
 											class="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
 											<h3 class="text-lg font-bold text-slate-800 mb-2">${restaurant.name}</h3>
@@ -76,31 +137,31 @@ body {
 										</div>
 
 										<c:if test="${depositRequired}">
-											<div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+											<div
+												class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
 												<h4 class="text-sm font-semibold text-amber-800">예약금 안내</h4>
 												<p class="text-2xl font-bold text-amber-600 mt-2">
-													<fmt:formatNumber value="${depositAmount}" pattern="#,###" />원
+													<fmt:formatNumber value="${depositAmount}" pattern="#,###" />
+													원
 												</p>
 												<c:if test="${not empty depositDescription}">
 													<p class="text-sm text-amber-700 mt-2">${depositDescription}</p>
 												</c:if>
-												<p class="text-xs text-amber-700 mt-3">결제는 예약 제출 후 네이버페이로 진행됩니다.</p>
+												<p class="text-xs text-amber-700 mt-3">결제는 예약 제출 후
+													네이버페이로 진행됩니다.</p>
 											</div>
 										</c:if>
 
-										<!-- 서버에서 전달된 에러 메시지 표시 -->
 										<c:if test="${not empty errorMessage}">
 											<div
-												class="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg">
-												${errorMessage}</div>
+												class="mb-4 p-4 bg-red-100 border border-red-300 text-red-700 rounded-lg">${errorMessage}</div>
 										</c:if>
 
-										<!-- 예약 폼 -->
 										<form
-											action="${pageContext.request.contextPath}/reservation/create" method="post"
-											class="space-y-6"
+											action="${pageContext.request.contextPath}/reservation/create"
+											method="post" class="space-y-6"
 											data-fetch-url="${pageContext.request.contextPath}/reservation"
-											data-initial-time="${param.reservationTime}">
+											data-initial-time="<%= reservationTime %>">
 											<input type="hidden" name="restaurantId"
 												value="${restaurant.id}"> <input type="hidden"
 												name="restaurantName" value="${restaurant.name}">
@@ -108,10 +169,8 @@ body {
 											<div>
 												<label for="reservationDate"
 													class="block text-sm font-medium text-slate-700 mb-2">예약
-													날짜</label>
-												<%-- [수정] param.reservationDate 값을 기본값으로 설정 --%>
-												<input type="date" id="reservationDate"
-													name="reservationDate" value="${param.reservationDate}"
+													날짜</label> <input type="date" id="reservationDate"
+													name="reservationDate" value="<%=reservationDate%>"
 													required class="form-input">
 											</div>
 
@@ -120,32 +179,37 @@ body {
 													class="block text-sm font-medium text-slate-700 mb-2">예약
 													시간</label> <select id="reservationTime" name="reservationTime"
 													required class="form-input">
-													<%-- [수정] 아래의 option들을 동적으로 생성 --%>
-													<c:choose>
-														<c:when test="${not empty timeSlots}">
-															<option value="">시간을 선택하세요</option>
-
-															<%-- "오전", "점심", "저녁" 그룹화를 위한 변수 설정 --%>
-															<c:set var="lastCategory" value="" />
-
-															<c:forEach var="time" items="${timeSlots}">
-																<%-- JSTL로 시간 비교를 위해 LocalTime 객체 생성 --%>
-																<c:set var="currentTime"
-																	value="${LocalTime.parse(time)}" />
-
-
-																<option value="${time}"
-																	${param.reservationTime == time ? 'selected' : ''}>${time}</option>
-
-																<c:set var="lastCategory" value="${currentCategory}" />
-															</c:forEach>
-														</c:when>
-														<c:otherwise>
-															<option value="">선택 가능한 시간이 없습니다.</option>
-														</c:otherwise>
-													</c:choose>
+													<%
+													if (!timeSlots.isEmpty()) {
+													%>
+													<option value="">시간을 선택하세요</option>
+													<%
+													for (String time : timeSlots) {
+													%>
+													<%-- 현재 시간이 선택된 시간과 일치하면 'selected' 속성을 추가합니다. --%>
+													<option value="<%=time%>"
+														<%=time.equals(reservationTime) ? "selected" : ""%>><%=time%></option>
+													<%
+													}
+													%>
+													<%
+													} else {
+													%>
+													<%-- 선택 가능한 시간은 없지만, 이전 페이지에서 넘어온 시간이 있다면 그 값이라도 표시해줍니다. --%>
+													<%
+													if (reservationTime != null && !reservationTime.isEmpty()) {
+													%>
+													<option value="<%=reservationTime%>" selected><%=reservationTime%></option>
+													<%
+													}
+													%>
+													<option value="" disabled>선택 가능한 시간이 없습니다.</option>
+													<%
+													}
+													%>
 												</select>
-												<p id="timeSlotMessage" class="text-sm text-red-600 mt-2 hidden"></p>
+												<p id="timeSlotMessage"
+													class="text-sm text-red-600 mt-2 hidden"></p>
 											</div>
 
 											<div>
@@ -154,42 +218,62 @@ body {
 													수</label> <select id="partySize" name="partySize" required
 													class="form-input">
 													<option value="">인원을 선택하세요</option>
-													<c:forEach var="i" begin="1" end="10">
-														<%-- [수정] param.partySize 값과 일치하는 옵션을 'selected'로 설정 --%>
-														<option value="${i}"
-															${param.partySize == i ? 'selected' : ''}>${i}명</option>
-													</c:forEach>
+													<%
+													for (int i = 1; i <= 10; i++) {
+													%>
+													<%-- 현재 인원수가 선택된 인원수와 일치하면 'selected' 속성을 추가합니다. --%>
+													<option value="<%=i%>"
+														<%=String.valueOf(i).equals(partySize) ? "selected" : ""%>><%=i%>명
+													</option>
+													<%
+													}
+													%>
 												</select>
 											</div>
 
 											<div>
 												<label for="contactPhone"
 													class="block text-sm font-medium text-slate-700 mb-2">연락처</label>
-												<input type="tel" id="contactPhone" name="contactPhone"
-													required class="form-input" placeholder="010-1234-5678">
+												<c:choose>
+													<c:when test="${not empty sessionScope.user.phone}">
+														<input type="tel" id="contactPhone" name="contactPhone"
+															required
+															class="form-input bg-slate-100 cursor-not-allowed"
+															value="${sessionScope.user.phone}" readonly>
+													</c:when>
+													<c:otherwise>
+														<input type="tel" id="contactPhone" name="contactPhone"
+															required class="form-input" placeholder="010-1234-5678">
+													</c:otherwise>
+												</c:choose>
 											</div>
 
 											<div>
-											    <label class="block text-sm font-medium text-slate-700 mb-2">세부 요청사항 (선택)</label>
-											    <div class="space-y-2" id="requests-container">
-											        <%-- 요청사항 버튼들 --%>
-											        <button type="button" class="request-btn" data-target="allergy-input">🍤&nbsp; 알러지 정보 추가</button>
-											        <button type="button" class="request-btn" data-target="seat-input">🪑&nbsp; 좌석 요청 추가</button>
-											        <button type="button" class="request-btn" data-target="other-input">🗒️&nbsp; 기타 특이사항 추가</button>
-											        
-											        <%-- 숨겨진 입력창들 --%>
-											        <div id="allergy-input" class="request-input-wrapper hidden">
-											            <input type="text" class="form-input request-input" data-key="알러지" placeholder="예: 갑각류, 견과류 알러지가 있습니다.">
-											        </div>
-											        <div id="seat-input" class="request-input-wrapper hidden">
-											            <input type="text" class="form-input request-input" data-key="좌석 요청" placeholder="예: 창가 쪽 자리로 부탁드립니다.">
-											        </div>
-											        <div id="other-input" class="request-input-wrapper hidden">
-											            <textarea class="form-input request-input" data-key="특이사항" rows="3" placeholder="예: 아이와 함께 방문합니다. 아기 의자 부탁드려요."></textarea>
-											        </div>
-											    </div>
-											    <%-- 최종적으로 조합된 요청사항이 저장될 hidden input --%>
-											    <input type="hidden" id="specialRequests" name="specialRequests">
+												<label class="block text-sm font-medium text-slate-700 mb-2">세부
+													요청사항 (선택)</label>
+												<div class="space-y-2" id="requests-container">
+													<button type="button" class="request-btn"
+														data-target="allergy-input">🍤&nbsp; 알러지 정보 추가</button>
+													<button type="button" class="request-btn"
+														data-target="seat-input">🪑&nbsp; 좌석 요청 추가</button>
+													<button type="button" class="request-btn"
+														data-target="other-input">🗒️&nbsp; 기타 특이사항 추가</button>
+													<div id="allergy-input"
+														class="request-input-wrapper hidden">
+														<input type="text" class="form-input request-input"
+															data-key="알러지" placeholder="예: 갑각류, 견과류 알러지가 있습니다.">
+													</div>
+													<div id="seat-input" class="request-input-wrapper hidden">
+														<input type="text" class="form-input request-input"
+															data-key="좌석 요청" placeholder="예: 창가 쪽 자리로 부탁드립니다.">
+													</div>
+													<div id="other-input" class="request-input-wrapper hidden">
+														<textarea class="form-input request-input" data-key="특이사항"
+															rows="3" placeholder="예: 아이와 함께 방문합니다. 아기 의자 부탁드려요."></textarea>
+													</div>
+												</div>
+												<input type="hidden" id="specialRequests"
+													name="specialRequests">
 											</div>
 
 											<div class="bg-blue-50 p-4 rounded-lg">
@@ -204,7 +288,7 @@ body {
 
 											<div class="flex justify-end space-x-3 pt-4">
 												<a
-													href="${pageContext.request.contextPath}/restaurant/detail?id=${restaurant.id}"
+													href="${pageContext.request.contextPath}/restaurant-detail/${restaurant.id}"
 													class="form-btn-secondary">취소</a>
 												<button type="submit" class="form-btn-primary">예약
 													신청하기</button>
@@ -244,18 +328,32 @@ body {
 
 	<script>
     document.addEventListener('DOMContentLoaded', function() {
-        // --- ▼▼▼ [수정] 모든 스크립트를 이 안으로 통합 ▼▼▼ ---
-
         // 1. 공통으로 사용할 변수 선언
         const reservationForm = document.querySelector('form');
         const dateInput = document.getElementById('reservationDate');
         const timeSelect = document.getElementById('reservationTime');
         const timeMessage = document.getElementById('timeSlotMessage');
         const restaurantInput = document.querySelector('input[name="restaurantId"]');
+        const contactPhoneInput = document.getElementById('contactPhone');
+        
         const fetchUrl = reservationForm ? reservationForm.dataset.fetchUrl : '';
-        const initialSelectedTime = reservationForm ? reservationForm.dataset.initialTime : '';
+        // [ ✨ 수정 ✨ ] 'param' 대신 'requestScope'에서 값을 가져오도록 변경하여 안정성 확보
+        const initialSelectedTime = reservationForm ? reservationForm.dataset.initialTime : '${reservationTime}';
 
-        // 2. 예약 가능 날짜 제한 로직
+        // 2. [ ✨ 신규 ✨ ] 연락처 자동 입력 기능
+        // 서블릿에서 전달된 사용자의 전화번호 값을 가져옵니다.
+        const userPhone = '${sessionScope.user.phone}'; 
+
+        if (contactPhoneInput) {
+            // 사용자 전화번호가 있고('null' 이나 빈 문자열이 아님), 입력창이 존재할 경우
+            if (userPhone && userPhone.trim() !== '' && userPhone !== 'null') {
+                contactPhoneInput.value = userPhone; // 값을 설정
+                contactPhoneInput.readOnly = true;   // 읽기 전용으로 변경
+                contactPhoneInput.classList.add('bg-slate-100', 'cursor-not-allowed'); // 스타일 변경
+            }
+        }
+
+        // 3. 예약 가능 날짜 제한 로직 (기존과 동일)
         if (dateInput) {
             const today = new Date().toISOString().split('T')[0];
             const maxDate = new Date();
@@ -268,6 +366,7 @@ body {
             }
         }
 
+        // 4. AJAX로 예약 가능 시간 불러오는 함수
         async function loadTimeSlots(date, preferredTime) {
             if (!fetchUrl || !restaurantInput || !timeSelect || !date) {
                 return;
@@ -290,15 +389,10 @@ body {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: params.toString()
                 });
-                const raw = await response.text();
-                let data;
-                try {
-                    data = raw ? JSON.parse(raw) : {};
-                } catch (parseError) {
-                    throw new Error('시간 슬롯 응답 파싱 실패');
-                }
+                const data = await response.json();
+                
                 if (!response.ok) {
-                    throw new Error(data && (data.message || data.error) ? data.message || data.error : '시간 정보 요청 실패');
+                    throw new Error(data.message || data.error || '시간 정보 요청 실패');
                 }
                 const slots = Array.isArray(data.timeSlots) ? data.timeSlots : [];
 
@@ -318,28 +412,22 @@ body {
                     timeSelect.appendChild(option);
                 });
 
-                if (timeMessage) {
-                    const message = data.message || data.error || '';
-                    if (message) {
-                        timeMessage.textContent = message;
-                        timeMessage.classList.remove('hidden');
-                    }
+                if (timeMessage && data.message) {
+                    timeMessage.textContent = data.message;
+                    timeMessage.classList.remove('hidden');
                 }
-
                 timeSelect.disabled = slots.length === 0;
+
             } catch (error) {
-                timeSelect.innerHTML = '';
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = '시간 정보를 불러오지 못했습니다.';
-                timeSelect.appendChild(option);
+                timeSelect.innerHTML = '<option value="">시간 정보를 불러오지 못했습니다.</option>';
                 if (timeMessage) {
-                    timeMessage.textContent = error && error.message ? error.message : '시간 정보를 불러오는 중 오류가 발생했습니다.';
+                    timeMessage.textContent = error.message || '시간 정보를 불러오는 중 오류가 발생했습니다.';
                     timeMessage.classList.remove('hidden');
                 }
             }
         }
 
+        // 5. 날짜 변경 시 시간 다시 불러오기 (기존과 동일)
         if (dateInput) {
             loadTimeSlots(dateInput.value, initialSelectedTime);
             dateInput.addEventListener('change', function() {
@@ -347,7 +435,7 @@ body {
             });
         }
 
-        // 3. 세부 요청사항 UI 스크립트
+        // 6. 세부 요청사항 UI 스크립트 (기존과 동일)
         const requestButtons = document.querySelectorAll('.request-btn');
 		const requestInputs = document.querySelectorAll('.request-input');
 		const finalRequestsInput = document.getElementById('specialRequests');
@@ -364,19 +452,20 @@ body {
 		    });
 		});
 
-        // 4. 폼 제출 시 유효성 검사 및 요청사항 조합 로직
+        // 7. 폼 제출 시 유효성 검사 및 요청사항 조합 로직
         if (reservationForm) {
             reservationForm.addEventListener('submit', function(e) {
-                // 연락처 유효성 검사
-                const contactPhone = document.getElementById('contactPhone').value;
-                const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
-                if (!phoneRegex.test(contactPhone)) {
-                    e.preventDefault();
-                    alert('연락처를 올바른 형식으로 입력해주세요. (예: 010-1234-5678)');
-                    return; // 검사 실패 시 더 이상 진행하지 않음
+                // [ ✨ 수정 ✨ ] 연락처가 읽기 전용이 아닐 때만 유효성 검사 실행
+                if (contactPhoneInput && !contactPhoneInput.readOnly) {
+                    const phoneRegex = /^01[0-9]-\d{3,4}-\d{4}$/;
+                    if (!phoneRegex.test(contactPhoneInput.value)) {
+                        e.preventDefault();
+                        alert('연락처를 올바른 형식으로 입력해주세요. (예: 010-1234-5678)');
+                        return;
+                    }
                 }
 
-                // 요청사항 조합
+                // 요청사항 조합 (기존과 동일)
                 let requests = [];
 		        requestInputs.forEach(input => {
 		            const wrapper = input.parentElement;
@@ -387,7 +476,6 @@ body {
 		        finalRequestsInput.value = requests.join(', ');
             });
         }
-        // --- ▲▲▲ [수정] 통합 끝 ▲▲▲ ---
     });
 </script>
 </body>

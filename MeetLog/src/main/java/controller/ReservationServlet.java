@@ -143,113 +143,83 @@ public class ReservationServlet extends HttpServlet {
 
 	private void handleReservationCreateForm(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// 예약 폼을 보여주기 전, 대상 식당 정보가 필요합니다.
 		try {
+			// [ ✨ 1. 이전 페이지에서 사용자가 선택한 모든 정보를 파라미터로 받습니다 ✨ ]
 			int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
+			String reservationDate = request.getParameter("reservationDate");
+			String reservationTime = request.getParameter("reservationTime"); // 가장 중요한 선택된 시간 값
+			String partySize = request.getParameter("partySize");
+
 			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+
 			if (restaurant != null) {
-// --- ▼▼▼ [ReservationSettings 연동] 시간 슬롯 계산 로직 ▼▼▼ ---
+				// [ ✨ 2. 받은 모든 정보를 request attribute에 담아 JSP로 그대로 전달합니다 ✨ ]
+				// 이렇게 해야 JSP에서 ${reservationTime} 등으로 값을 사용할 수 있습니다.
+				request.setAttribute("restaurant", restaurant);
+				request.setAttribute("reservationDate", reservationDate);
+				request.setAttribute("reservationTime", reservationTime);
+				request.setAttribute("partySize", partySize);
 
-				// 1. 파라미터로 받은 날짜 확인 (없으면 오늘 날짜)
-				String dateStr = request.getParameter("reservationDate");
-				LocalDate selectedDate = (dateStr != null && !dateStr.isEmpty()) ? LocalDate.parse(dateStr)
+				// --- JSP의 시간 선택 <select> dropdown을 채우기 위한 로직 ---
+				// 사용자가 예약 페이지에서 날짜를 변경할 경우를 대비해, 선택된 날짜의 전체 시간 목록을 다시 계산하여 전달합니다.
+				LocalDate selectedDate = (reservationDate != null && !reservationDate.isEmpty())
+						? LocalDate.parse(reservationDate)
 						: LocalDate.now();
-				int dayOfWeek = selectedDate.getDayOfWeek().getValue(); // 1=월요일, 7=일요일
+				int dayOfWeek = selectedDate.getDayOfWeek().getValue();
 
-				// 2. 해당 가게의 예약 설정 정보 조회
+				java.util.Map<String, Object> settings = reservationSettingsDAO.findByRestaurantId(restaurantId);
 				List<String> timeSlots = new ArrayList<>();
 
-				// 3. DAO를 통한 예약 설정 조회
-				java.util.Map<String, Object> settings = reservationSettingsDAO.findByRestaurantId(restaurantId);
-
-				System.out.println("=== 예약 설정 디버깅 ===");
-				System.out.println("Restaurant ID: " + restaurantId);
-				System.out.println("Selected Date: " + selectedDate + " (요일: " + dayOfWeek + ")");
-				System.out.println("Settings found: " + (settings != null));
-				if (settings != null) {
-					System.out.println("Settings data: " + settings);
-					System.out.println("Reservation enabled: " + settings.get("reservation_enabled"));
-				}
-
-				// 설정이 있고 예약이 활성화된 경우 실제 설정 사용, 없으면 기본 설정
-				boolean useActualSettings = (settings != null && toBoolean(settings.get("reservation_enabled")));
-
-				if (settings == null) {
-					System.out.println("⚠️ 예약 설정이 없어서 기본 시간 슬롯을 생성합니다.");
-				} else if (!useActualSettings) {
-					System.out.println("⚠️ 예약이 비활성화되어 있어서 기본 시간 슬롯을 생성합니다.");
-				} else {
-					System.out.println("✅ 예약 설정이 활성화되어 있습니다. 실제 설정을 사용합니다.");
-				}
-
-				// 4. 시간 슬롯 생성 (실제 설정 또는 기본 설정)
-				LocalTime startTime = LocalTime.of(11, 0); // 기본 시작 시간
-				LocalTime endTime = LocalTime.of(21, 0);   // 기본 종료 시간
-
-				if (useActualSettings) {
-					// 실제 설정이 있는 경우 요일별 시간 사용
-					String dayColumn = "";
-					String startColumn = "";
-					String endColumn = "";
-
+				if (settings != null && toBoolean(settings.get("reservation_enabled"))) {
+					String dayKey = "";
 					switch (dayOfWeek) {
-						case 1: dayColumn = "monday_enabled"; startColumn = "monday_start"; endColumn = "monday_end"; break;
-						case 2: dayColumn = "tuesday_enabled"; startColumn = "tuesday_start"; endColumn = "tuesday_end"; break;
-						case 3: dayColumn = "wednesday_enabled"; startColumn = "wednesday_start"; endColumn = "wednesday_end"; break;
-						case 4: dayColumn = "thursday_enabled"; startColumn = "thursday_start"; endColumn = "thursday_end"; break;
-						case 5: dayColumn = "friday_enabled"; startColumn = "friday_start"; endColumn = "friday_end"; break;
-						case 6: dayColumn = "saturday_enabled"; startColumn = "saturday_start"; endColumn = "saturday_end"; break;
-						case 7: dayColumn = "sunday_enabled"; startColumn = "sunday_start"; endColumn = "sunday_end"; break;
+					case 1:
+						dayKey = "monday";
+						break;
+					case 2:
+						dayKey = "tuesday";
+						break;
+					case 3:
+						dayKey = "wednesday";
+						break;
+					case 4:
+						dayKey = "thursday";
+						break;
+					case 5:
+						dayKey = "friday";
+						break;
+					case 6:
+						dayKey = "saturday";
+						break;
+					case 7:
+						dayKey = "sunday";
+						break;
 					}
 
-					boolean dayEnabled = toBoolean(settings.get(dayColumn));
-					if (dayEnabled) {
-						LocalTime configuredStart = toLocalTime(settings.get(startColumn));
-						LocalTime configuredEnd = toLocalTime(settings.get(endColumn));
-						if (configuredStart != null && configuredEnd != null) {
-							startTime = configuredStart;
-							endTime = configuredEnd;
-							System.out.println("실제 설정 사용 - " + startColumn + ": " + startTime + " ~ " + endTime);
+					if (!dayKey.isEmpty() && toBoolean(settings.get(dayKey + "_enabled"))) {
+						LocalTime startTime = toLocalTime(settings.get(dayKey + "_start"));
+						LocalTime endTime = toLocalTime(settings.get(dayKey + "_end"));
+						if (startTime != null && endTime != null) {
+							LocalTime currentTime = startTime;
+							while (currentTime.isBefore(endTime)) {
+								timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+								currentTime = currentTime.plusMinutes(30);
+							}
 						}
-					} else {
-						System.out.println("해당 요일(" + dayOfWeek + ")은 예약 불가능합니다.");
-						// 예약 불가능한 요일이면 빈 슬롯 반환
-						timeSlots = new ArrayList<>();
 					}
 				}
-
-				if (!timeSlots.isEmpty() || !useActualSettings) {
-					System.out.println("최종 예약 시간: " + startTime + " ~ " + endTime);
-
-					// 5. 30분 간격으로 시간 슬롯 생성
-					LocalTime currentTime = startTime;
-					while (currentTime.isBefore(endTime)) {
-						timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-						currentTime = currentTime.plusMinutes(30);
-					}
-					System.out.println("생성된 시간 슬롯 수: " + timeSlots.size());
-				}
-
-				Collections.sort(timeSlots);
-
-				// 6. 계산된 시간 목록을 request에 저장
 				request.setAttribute("timeSlots", timeSlots);
-				request.setAttribute("selectedDate", selectedDate);
-				request.setAttribute("lunchStart", LocalTime.of(12, 0));
-				request.setAttribute("dinnerStart", LocalTime.of(17, 0));
-				boolean depositRequired = settings != null && toBoolean(settings.get("deposit_required"));
-				request.setAttribute("depositRequired", depositRequired);
-				request.setAttribute("depositAmount", settings != null ? toBigDecimal(settings.get("deposit_amount")) : BigDecimal.ZERO);
-				request.setAttribute("depositDescription", settings != null ? settings.get("deposit_description") : "");
+				// --- Time Slot 전달 로직 끝 ---
 
-				// --- ▲▲▲ [ReservationSettings 연동] 로직 끝 ▲▲▲ ---
-				request.setAttribute("restaurant", restaurant);
 				request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
+
 			} else {
-				response.sendError(HttpServletResponse.SC_NOT_FOUND, "식당 정보 없음");
+				response.sendError(HttpServletResponse.SC_NOT_FOUND, "식당 정보를 찾을 수 없습니다.");
 			}
-		} catch (NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 식당 ID");
+		} catch (Exception e) {
+			// 오류 발생 시 스택 트레이스를 출력하여 원인 파악을 돕습니다.
+			e.printStackTrace();
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 요청입니다.");
 		}
 	}
 
@@ -303,17 +273,17 @@ public class ReservationServlet extends HttpServlet {
 		try {
 			restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
 			String restaurantName = request.getParameter("restaurantName");
-				String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
-				if (reservationDate == null || reservationDate.trim().isEmpty()) {
-					throw new Exception("예약 날짜를 선택해주세요.");
-				}
-				reservationDate = reservationDate.trim();
+			String reservationDate = request.getParameter("reservationDate"); // "YYYY-MM-DD"
+			if (reservationDate == null || reservationDate.trim().isEmpty()) {
+				throw new Exception("예약 날짜를 선택해주세요.");
+			}
+			reservationDate = reservationDate.trim();
 
-				String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
-				if (reservationTimeStr == null || reservationTimeStr.trim().isEmpty()) {
-					throw new Exception("예약 시간을 선택해주세요.");
-				}
-				reservationTimeStr = reservationTimeStr.trim();
+			String reservationTimeStr = request.getParameter("reservationTime"); // "HH:MM"
+			if (reservationTimeStr == null || reservationTimeStr.trim().isEmpty()) {
+				throw new Exception("예약 시간을 선택해주세요.");
+			}
+			reservationTimeStr = reservationTimeStr.trim();
 			int partySize = Integer.parseInt(request.getParameter("partySize"));
 			String contactPhone = request.getParameter("contactPhone");
 
@@ -331,8 +301,7 @@ public class ReservationServlet extends HttpServlet {
 			int minPartySize = minObj instanceof Integer ? (Integer) minObj : 1;
 			int maxPartySize = maxObj instanceof Integer ? (Integer) maxObj : 10;
 			if (partySize < minPartySize || partySize > maxPartySize) {
-				throw new Exception(String.format("예약 가능 인원은 %d명부터 %d명까지입니다.",
-					minPartySize, maxPartySize));
+				throw new Exception(String.format("예약 가능 인원은 %d명부터 %d명까지입니다.", minPartySize, maxPartySize));
 			}
 
 			// 3. 예약 날짜/시간 검증
@@ -347,13 +316,27 @@ public class ReservationServlet extends HttpServlet {
 			String dayKey = null;
 
 			switch (dayOfWeek) {
-				case 1: dayKey = "monday"; break;
-				case 2: dayKey = "tuesday"; break;
-				case 3: dayKey = "wednesday"; break;
-				case 4: dayKey = "thursday"; break;
-				case 5: dayKey = "friday"; break;
-				case 6: dayKey = "saturday"; break;
-				case 7: dayKey = "sunday"; break;
+			case 1:
+				dayKey = "monday";
+				break;
+			case 2:
+				dayKey = "tuesday";
+				break;
+			case 3:
+				dayKey = "wednesday";
+				break;
+			case 4:
+				dayKey = "thursday";
+				break;
+			case 5:
+				dayKey = "friday";
+				break;
+			case 6:
+				dayKey = "saturday";
+				break;
+			case 7:
+				dayKey = "sunday";
+				break;
 			}
 
 			if (dayKey != null) {
@@ -371,9 +354,9 @@ public class ReservationServlet extends HttpServlet {
 			}
 
 			if (selectedTime.isBefore(dayStart) || selectedTime.isAfter(dayEnd.minusMinutes(30))) {
-				throw new Exception(String.format("예약 가능 시간은 %s부터 %s까지입니다.",
-					dayStart.format(DateTimeFormatter.ofPattern("HH:mm")),
-					dayEnd.minusMinutes(30).format(DateTimeFormatter.ofPattern("HH:mm"))));
+				throw new Exception(
+						String.format("예약 가능 시간은 %s부터 %s까지입니다.", dayStart.format(DateTimeFormatter.ofPattern("HH:mm")),
+								dayEnd.minusMinutes(30).format(DateTimeFormatter.ofPattern("HH:mm"))));
 			}
 			// --- ▲▲▲ [예약 검증] 끝 ▲▲▲ ---
 
@@ -408,8 +391,7 @@ public class ReservationServlet extends HttpServlet {
 			// --- ▲▲▲ [자동 승인] 끝 ▲▲▲ ---
 
 			if (reservationService.createReservation(reservation)) {
-				if (reservation.isDepositRequired()
-						&& reservation.getDepositAmount() != null
+				if (reservation.isDepositRequired() && reservation.getDepositAmount() != null
 						&& reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
 					if (!naverPayService.isConfigured()) {
 						throw new Exception("네이버페이 설정이 완료되지 않았습니다. 관리자에게 문의해주세요.");
@@ -417,14 +399,9 @@ public class ReservationServlet extends HttpServlet {
 
 					String merchantPayKey = naverPayService.generateMerchantPayKey(reservation.getId());
 					reservation.setPaymentOrderId(merchantPayKey);
-					reservationService.updatePaymentInfo(
-							reservation.getId(),
-							reservation.getPaymentStatus(),
-							merchantPayKey,
-							reservation.getPaymentProvider(),
-							reservation.getPaymentApprovedAt(),
-							reservation.getDepositAmount(),
-							reservation.isDepositRequired());
+					reservationService.updatePaymentInfo(reservation.getId(), reservation.getPaymentStatus(),
+							merchantPayKey, reservation.getPaymentProvider(), reservation.getPaymentApprovedAt(),
+							reservation.getDepositAmount(), reservation.isDepositRequired());
 
 					NaverPayJsConfig jsConfig = naverPayService.buildJsConfig(request, user, reservation,
 							reservation.getDepositAmount());
@@ -504,7 +481,7 @@ public class ReservationServlet extends HttpServlet {
 
 			if (reservationService.cancelReservation(reservationId, cancelReason)) {
 				response.getWriter().write("{\"success\": true}");
-				//response.sendRedirect(request.getContextPath() + "/mypage/reservations");
+				// response.sendRedirect(request.getContextPath() + "/mypage/reservations");
 			} else {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.getWriter().write("{\"success\": false, \"message\": \"예약 취소에 실패했습니다.\"}");
@@ -513,8 +490,8 @@ public class ReservationServlet extends HttpServlet {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().write("{\"success\": false, \"message\": \"서버 오류가 발생했습니다.\"}");
 //			request.setAttribute("errorMessage", "예약 취소 처리 중 오류.");
 //			request.getRequestDispatcher("/WEB-INF/views/error/500.jsp").forward(request, response);
 		}
@@ -563,13 +540,27 @@ public class ReservationServlet extends HttpServlet {
 				// 요일별 설정 확인
 				String dayKey = null;
 				switch (dayOfWeek) {
-					case 1: dayKey = "monday"; break;
-					case 2: dayKey = "tuesday"; break;
-					case 3: dayKey = "wednesday"; break;
-					case 4: dayKey = "thursday"; break;
-					case 5: dayKey = "friday"; break;
-					case 6: dayKey = "saturday"; break;
-					case 7: dayKey = "sunday"; break;
+				case 1:
+					dayKey = "monday";
+					break;
+				case 2:
+					dayKey = "tuesday";
+					break;
+				case 3:
+					dayKey = "wednesday";
+					break;
+				case 4:
+					dayKey = "thursday";
+					break;
+				case 5:
+					dayKey = "friday";
+					break;
+				case 6:
+					dayKey = "saturday";
+					break;
+				case 7:
+					dayKey = "sunday";
+					break;
 				}
 
 				if (dayKey != null && toBoolean(settings.get(dayKey + "_enabled"))) {
@@ -593,7 +584,8 @@ public class ReservationServlet extends HttpServlet {
 			StringBuilder json = new StringBuilder();
 			json.append("{\"timeSlots\": [");
 			for (int i = 0; i < timeSlots.size(); i++) {
-				if (i > 0) json.append(",");
+				if (i > 0)
+					json.append(",");
 				json.append("\"").append(timeSlots.get(i)).append("\"");
 			}
 			json.append("]}");

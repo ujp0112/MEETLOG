@@ -23,10 +23,6 @@
                         <h2 class="text-2xl md:text-3xl font-bold mb-2">내 예약</h2>
                         <p class="text-slate-600">예약 내역을 관리하세요.</p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/reservation/create" 
-                       class="bg-sky-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-sky-700">
-                        새 예약하기
-                    </a>
                 </div>
 
                 <c:choose>

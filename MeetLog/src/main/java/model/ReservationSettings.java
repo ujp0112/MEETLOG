@@ -19,8 +19,8 @@ public class ReservationSettings {
     private int minAdvanceHours; // 최소 예약 시간 (몇 시간 전까지)
     private LocalTime reservationStartTime; // 예약 시작 시간
     private LocalTime reservationEndTime; // 예약 종료 시간
-    private List<String> availableDays; // 예약 가능 요일
-    private List<String> timeSlots; // 예약 가능 시간대
+    private String availableDays; // [수정] 타입을 String으로 변경
+    private String timeSlots; // 예약 가능 시간대
     private List<String> blackoutDates; // 예약 불가 날짜
     private String blackoutDatesJson; // 예약 불가 날짜 (JSON 형태)
     private String specialNotes; // 특별 안내사항
@@ -53,6 +53,7 @@ public class ReservationSettings {
     private LocalTime sundayStart;
     private LocalTime sundayEnd;
 
+
     // 기본 생성자
     public ReservationSettings() {
         // 기본값 설정
@@ -66,6 +67,7 @@ public class ReservationSettings {
         this.reservationEndTime = LocalTime.of(22, 0);
         this.depositRequired = false;
         this.depositAmount = BigDecimal.ZERO;
+        
     }
 
     public ReservationSettings(int restaurantId) {
@@ -154,19 +156,19 @@ public class ReservationSettings {
         this.reservationEndTime = reservationEndTime;
     }
 
-    public List<String> getAvailableDays() {
+    public String getAvailableDays() {
         return availableDays;
     }
 
-    public void setAvailableDays(List<String> availableDays) {
+    public void setAvailableDays(String availableDays) {
         this.availableDays = availableDays;
     }
 
-    public List<String> getTimeSlots() {
+    public String getTimeSlots() {
         return timeSlots;
     }
 
-    public void setTimeSlots(List<String> timeSlots) {
+    public void setTimeSlots(String timeSlots) {
         this.timeSlots = timeSlots;
     }
 
