@@ -82,4 +82,37 @@ public class UserCouponDAO {
             session.commit();
         }
     }
+
+    /**
+     * 쿠폰 롤백 처리 (예약 취소 시)
+     * is_used = false, used_at = NULL로 되돌림
+     */
+    public void rollbackCoupon(int userCouponId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            session.update("dao.UserCouponDAO.rollbackCoupon", userCouponId);
+            session.commit();
+        }
+    }
+
+    /**
+     * ID로 사용자 쿠폰 조회
+     */
+    public UserCoupon findById(int userCouponId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne("dao.UserCouponDAO.findById", userCouponId);
+        }
+    }
+
+    /**
+     * 사용자가 특정 쿠폰을 받은 횟수 조회 (per_user_limit 검증용)
+     */
+    public int countUserCouponByCouponId(int userId, int couponId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Integer> params = new java.util.HashMap<>();
+            params.put("userId", userId);
+            params.put("couponId", couponId);
+            Integer count = session.selectOne("dao.UserCouponDAO.countUserCouponByCouponId", params);
+            return count != null ? count : 0;
+        }
+    }
 }

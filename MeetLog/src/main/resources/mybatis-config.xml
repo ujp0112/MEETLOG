@@ -89,6 +89,9 @@
 		<mapper resource="mappers/CourseStatisticsMapper.xml" />
 		<mapper resource="mappers/CouponMapper.xml" />
 		<mapper resource="mappers/UserCouponMapper.xml" />
+		<mapper resource="mappers/PointMapper.xml" />
+		<mapper resource="mappers/TgLinkMapper.xml" />
+		<mapper resource="mappers/TelegramMessageLogMapper.xml" />
 		<mapper resource="mappers/NewsMapper.xml" />
 		<mapper resource="mappers/QnAMapper.xml" />
 		<mapper resource="mappers/OperatingHourMapper.xml" />

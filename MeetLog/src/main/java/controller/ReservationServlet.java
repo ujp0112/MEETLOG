@@ -23,11 +23,14 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import model.Coupon;
 import model.Reservation;
 import model.Restaurant;
 import model.User;
 import service.ReservationService;
 import service.RestaurantService;
+import service.UserCouponService;
+import service.UserCouponService.CouponValidationResult;
 import dao.ReservationSettingsDAO;
 import service.payment.NaverPayService;
 import service.payment.NaverPayService.NaverPayJsConfig;
@@ -42,6 +45,7 @@ public class ReservationServlet extends HttpServlet {
 	private RestaurantService restaurantService = new RestaurantService();
 	private ReservationSettingsDAO reservationSettingsDAO = new ReservationSettingsDAO();
 	private final NaverPayService naverPayService = new NaverPayService();
+	private final UserCouponService userCouponService = new UserCouponService();
 
 	private boolean toBoolean(Object value) {
 		if (value == null) {
@@ -356,6 +360,32 @@ public class ReservationServlet extends HttpServlet {
 			boolean depositRequired = toBoolean(settings.get("deposit_required"));
 			BigDecimal depositAmount = depositRequired ? toBigDecimal(settings.get("deposit_amount")) : BigDecimal.ZERO;
 			String depositDescription = (String) settings.get("deposit_description");
+
+			// 쿠폰 선택만 저장 (할인은 가게에서 처리)
+			String userCouponIdParam = request.getParameter("userCouponId");
+			if (userCouponIdParam != null && !userCouponIdParam.trim().isEmpty()) {
+				try {
+					int userCouponId = Integer.parseInt(userCouponIdParam);
+					log.info("쿠폰 선택: userCouponId={}, userId={}", userCouponId, user.getId());
+
+					// 쿠폰 소유권 및 사용 가능 여부만 검증
+					CouponValidationResult validationResult = userCouponService.validateCouponUsable(
+							userCouponId, user.getId(), BigDecimal.ZERO);
+
+					if (validationResult.isValid()) {
+						// 예약에 쿠폰 ID만 저장 (할인은 적용하지 않음)
+						reservation.setUserCouponId(userCouponId);
+						log.info("쿠폰 선택 저장 완료: userCouponId={}", userCouponId);
+					} else {
+						log.warn("쿠폰 검증 실패: {}", validationResult.getMessage());
+						throw new Exception("쿠폰 사용 불가: " + validationResult.getMessage());
+					}
+				} catch (NumberFormatException e) {
+					log.error("잘못된 쿠폰 ID 형식: {}", userCouponIdParam);
+					throw new Exception("잘못된 쿠폰 정보입니다.");
+				}
+			}
+
 			reservation.setDepositRequired(depositRequired);
 			reservation.setDepositAmount(depositAmount);
 			reservation.setSpecialRequests(request.getParameter("specialRequests"));

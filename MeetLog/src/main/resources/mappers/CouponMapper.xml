@@ -125,4 +125,12 @@
         WHERE id = #{couponId}
     </select>
 
+    <!-- 쿠폰 사용 횟수 증가 (usage_limit 체크 포함) -->
+    <update id="incrementUsageCount" parameterType="int">
+        UPDATE coupons
+        SET usage_count = usage_count + 1
+        WHERE id = #{couponId}
+          AND (usage_limit IS NULL OR usage_count &lt; usage_limit)
+    </update>
+
 </mapper>

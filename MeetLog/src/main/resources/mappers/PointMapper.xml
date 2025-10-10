@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.PointMapper">
+
+    <!-- PointBalance ResultMap -->
+    <resultMap id="PointBalanceMap" type="model.PointBalance">
+        <id property="userId" column="user_id"/>
+        <result property="balance" column="balance"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- PointTransaction ResultMap -->
+    <resultMap id="PointTransactionMap" type="model.PointTransaction">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="changeAmount" column="change_amount"/>
+        <result property="type" column="type"/>
+        <result property="referenceType" column="reference_type"/>
+        <result property="referenceId" column="reference_id"/>
+        <result property="balanceAfter" column="balance_after"/>
+        <result property="expiresAt" column="expires_at"/>
+        <result property="memo" column="memo"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 사용자 포인트 잔액 조회 (FOR UPDATE로 동시성 제어) -->
+    <select id="getBalance" parameterType="int" resultMap="PointBalanceMap">
+        SELECT user_id, balance, updated_at
+        FROM user_points
+        WHERE user_id = #{userId}
+        FOR UPDATE
+    </select>
+
+    <!-- 포인트 계정 초기화 -->
+    <insert id="initBalance" parameterType="int">
+        INSERT INTO user_points (user_id, balance)
+        VALUES (#{userId}, 0)
+        ON DUPLICATE KEY UPDATE balance = balance
+    </insert>
+
+    <!-- 포인트 잔액 업데이트 (원자적 연산) -->
+    <update id="updateBalance" parameterType="map">
+        UPDATE user_points
+        SET balance = balance + #{changeAmount},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+          AND balance + #{changeAmount} >= 0
+    </update>
+
+    <!-- 포인트 차감 (잔액 체크 포함) -->
+    <update id="redeemBalance" parameterType="map">
+        UPDATE user_points
+        SET balance = balance - #{changeAmount},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+          AND balance >= #{minBalance}
+    </update>
+
+    <!-- 포인트 거래 내역 삽입 -->
+    <insert id="insertTransaction" parameterType="model.PointTransaction" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO point_transactions (
+            user_id,
+            change_amount,
+            type,
+            reference_type,
+            reference_id,
+            balance_after,
+            expires_at,
+            memo,
+            created_at
+        ) VALUES (
+            #{userId},
+            #{changeAmount},
+            #{type},
+            #{referenceType},
+            #{referenceId},
+            #{balanceAfter},
+            #{expiresAt},
+            #{memo},
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 포인트 거래 내역 조회 -->
+    <select id="findTransactions" parameterType="map" resultMap="PointTransactionMap">
+        SELECT
+            id,
+            user_id,
+            change_amount,
+            type,
+            reference_type,
+            reference_id,
+            balance_after,
+            expires_at,
+            memo,
+            created_at
+        FROM point_transactions
+        WHERE user_id = #{userId}
+        <if test="type != null">
+            AND type = #{type}
+        </if>
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 만료 예정 포인트 합계 조회 -->
+    <select id="sumExpiringPoints" parameterType="map" resultType="int">
+        SELECT COALESCE(SUM(change_amount), 0)
+        FROM point_transactions
+        WHERE user_id = #{userId}
+          AND type = 'EARN'
+          AND expires_at IS NOT NULL
+          AND expires_at <![CDATA[<=]]> #{beforeDate}
+    </select>
+
+</mapper>

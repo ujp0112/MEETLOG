@@ -29,6 +29,13 @@ public class Reservation {
 	private LocalDateTime updatedAt;
 	private boolean depositRequired;
 	private BigDecimal depositAmount;
+	private Integer userCouponId;  // 사용된 사용자 쿠폰 ID
+	private BigDecimal couponDiscountAmount;  // 쿠폰 할인 금액
+	private String couponName;  // 쿠폰 이름
+	private String couponDiscountType;  // 쿠폰 할인 타입 (PERCENTAGE, FIXED)
+	private Boolean couponIsUsed;  // 쿠폰 사용 여부
+	private Integer pointsUsed;  // 사용한 포인트
+	private Integer pointsEarned;  // 적립된 포인트
 	private String paymentStatus;
 	private String paymentOrderId;
 	private LocalDateTime paymentApprovedAt;
@@ -311,6 +318,63 @@ public class Reservation {
 
 	public void setReservationTime(String reservationTime) {
 		this.reservationTimeStr = reservationTime;
+	}
+
+	// 쿠폰 및 포인트 관련 메서드
+	public Integer getUserCouponId() {
+		return userCouponId;
+	}
+
+	public void setUserCouponId(Integer userCouponId) {
+		this.userCouponId = userCouponId;
+	}
+
+	public BigDecimal getCouponDiscountAmount() {
+		return couponDiscountAmount;
+	}
+
+	public void setCouponDiscountAmount(BigDecimal couponDiscountAmount) {
+		this.couponDiscountAmount = couponDiscountAmount;
+	}
+
+	public Integer getPointsUsed() {
+		return pointsUsed;
+	}
+
+	public void setPointsUsed(Integer pointsUsed) {
+		this.pointsUsed = pointsUsed;
+	}
+
+	public Integer getPointsEarned() {
+		return pointsEarned;
+	}
+
+	public void setPointsEarned(Integer pointsEarned) {
+		this.pointsEarned = pointsEarned;
+	}
+
+	public String getCouponName() {
+		return couponName;
+	}
+
+	public void setCouponName(String couponName) {
+		this.couponName = couponName;
+	}
+
+	public String getCouponDiscountType() {
+		return couponDiscountType;
+	}
+
+	public void setCouponDiscountType(String couponDiscountType) {
+		this.couponDiscountType = couponDiscountType;
+	}
+
+	public Boolean getCouponIsUsed() {
+		return couponIsUsed;
+	}
+
+	public void setCouponIsUsed(Boolean couponIsUsed) {
+		this.couponIsUsed = couponIsUsed;
 	}
 
 	// 편의 메서드
