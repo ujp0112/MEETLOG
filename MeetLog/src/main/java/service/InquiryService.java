@@ -20,6 +20,10 @@ public class InquiryService {
         return inquiryDAO.findById(id);
     }
 
+    public List<Inquiry> getInquiriesByUserId(int userId) {
+        return inquiryDAO.findByUserId(userId);
+    }
+
     public boolean createInquiry(Inquiry inquiry) {
         try {
             return inquiryDAO.insert(inquiry) > 0;

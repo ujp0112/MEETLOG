@@ -400,22 +400,129 @@ keyframes pulseGlow { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
 %
 {
 box-shadow
+
+
+
+
+
+
+
+
+
+
 :
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
 30px
-rgba(
+
+
+
+
+
+
+
+
+
+
+rgba
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
 59
 ,
 130
 ,
 246
 ,
-0.5
-);
+0
+
+
+
+
+
+
+
+
+.5
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+;
 }
 }
 .shimmer {
@@ -430,12 +537,60 @@ keyframes shimmer { 0% {
 }
 
 100
+
+
+
+
+
+
+
+
+
+
 %
 {
 background-position
+
+
+
+
+
+
+
+
+
+
 :
-200%
-0;
+
+
+
+
+
+
+
+
+
+
+200
+
+
+
+
+
+
+
+
+%
+0
+
+
+
+
+
+
+
+
+;
 }
 }
 .progress-bar {
@@ -483,22 +638,129 @@ keyframes couponGlow { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
 %
 {
 box-shadow
+
+
+
+
+
+
+
+
+
+
 :
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
 0
+
+
+
+
+
+
+
+
+
+
 30px
-rgba(
+
+
+
+
+
+
+
+
+
+
+rgba
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
 245
 ,
 158
 ,
 11
 ,
-0.5
-);
+0
+
+
+
+
+
+
+
+
+.5
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+;
 }
 }
 .review-card {
@@ -562,13 +824,81 @@ keyframes float { 0%, 100% {
 }
 
 50
+
+
+
+
+
+
+
+
+
+
 %
 {
 transform
+
+
+
+
+
+
+
+
+
+
 :
-translateY(
+
+
+
+
+
+
+
+
+
+
+translateY
+
+
+
+
+
+
+
+
+(
+
+
+
+
+
+
+
+
+
+
 -10px
-);
+
+
+
+
+
+
+
+
+
+
+)
+
+
+
+
+
+
+
+
+;
 }
 }
 .section-divider {
@@ -1160,9 +1490,11 @@ translateY(
 												<div class="text-right">
 													<c:if test="${restaurant.rating > 0}">
 														<div class="text-5xl font-black rating-badge mb-2">
-															<fmt:formatNumber value="${restaurant.rating}" maxFractionDigits="1" />
+															<fmt:formatNumber value="${restaurant.rating}"
+																maxFractionDigits="1" />
 														</div>
-														<div class="text-sm text-slate-500">${restaurant.reviewCount}개 Google 리뷰</div>
+														<div class="text-sm text-slate-500">${restaurant.reviewCount}개
+															Google 리뷰</div>
 													</c:if>
 												</div>
 											</c:when>
@@ -1170,7 +1502,8 @@ translateY(
 											<c:otherwise>
 												<div class="text-right">
 													<div class="text-5xl font-black rating-badge mb-2">
-														<fmt:formatNumber value="${restaurant.rating}" maxFractionDigits="1" />
+														<fmt:formatNumber value="${restaurant.rating}"
+															maxFractionDigits="1" />
 													</div>
 													<div class="flex items-center justify-center mb-2">
 														<div class="rating-stars flex space-x-1">
@@ -1186,7 +1519,8 @@ translateY(
 															</c:forEach>
 														</div>
 													</div>
-													<div class="text-sm text-slate-500">${restaurant.reviewCount}개 리뷰</div>
+													<div class="text-sm text-slate-500">${restaurant.reviewCount}개
+														리뷰</div>
 												</div>
 											</c:otherwise>
 										</c:choose>
@@ -1195,13 +1529,13 @@ translateY(
 									<c:if test="${!isExternal}">
 										<div class="flex space-x-4">
 											<div class="text-right">
-											<button
-												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
-												찜하기</button>
-											<button
-												class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
-												공유하기</button>
-										</div>
+												<button
+													class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
+													찜하기</button>
+												<button
+													class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
+													공유하기</button>
+											</div>
 										</div>
 									</c:if>
 								</section>
@@ -1235,17 +1569,18 @@ translateY(
 													<%-- 1. 외부(Google) 데이터일 경우 --%>
 													<c:when test="${isExternal and not empty restaurant.hours}">
 														<%-- ▼▼▼ [수정] pre 태그를 사용하여 줄바꿈과 공백을 그대로 표시하도록 변경 ▼▼▼ --%>
-                                                        <pre class="mt-2 text-sm text-slate-600 font-sans whitespace-pre-wrap break-words">${restaurant.hours}</pre>
-                                                        <%-- ▲▲▲ [수정] 로직 끝 ▲▲▲ --%>
+														<pre
+															class="mt-2 text-sm text-slate-600 font-sans whitespace-pre-wrap break-words">${restaurant.hours}</pre>
+														<%-- ▲▲▲ [수정] 로직 끝 ▲▲▲ --%>
 													</c:when>
 													<%-- 2. 내부 DB 데이터일 경우 --%>
-													<c:when test="${not isExternal and not empty operatingHours}">
+													<c:when
+														test="${not isExternal and not empty operatingHours}">
 														<div class="mt-2 space-y-1">
 															<%-- ▼▼▼ [수정] mytag 제거 및 JSTL로 요일/시간 직접 출력 ▼▼▼ --%>
 															<c:forEach var="hour" items="${operatingHours}">
 																<div class="flex justify-between text-sm">
-																	<span class="text-slate-600">
-																		<c:choose>
+																	<span class="text-slate-600"> <c:choose>
 																			<c:when test="${hour.dayOfWeek == 1}">월요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 2}">화요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 3}">수요일</c:when>
@@ -1254,12 +1589,11 @@ translateY(
 																			<c:when test="${hour.dayOfWeek == 6}">토요일</c:when>
 																			<c:when test="${hour.dayOfWeek == 7}">일요일</c:when>
 																		</c:choose>
-																	</span>
-																	<span class="text-slate-600">
-																		<c:if test="${not empty hour.openingTime and not empty hour.closingTime}">
+																	</span> <span class="text-slate-600"> <c:if
+																			test="${not empty hour.openingTime and not empty hour.closingTime}">
 																			${fn:substring(hour.openingTime, 0, 5)} - ${fn:substring(hour.closingTime, 0, 5)}
-																		</c:if>
-																		<c:if test="${empty hour.openingTime or empty hour.closingTime}">
+																		</c:if> <c:if
+																			test="${empty hour.openingTime or empty hour.closingTime}">
 																			<span class="text-red-500">휴무</span>
 																		</c:if>
 																	</span>
@@ -1276,7 +1610,8 @@ translateY(
 											</div>
 										</div>
 										<c:if test="${!isExternal}">
-											<div class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
+											<div
+												class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
 												<div class="text-2xl">🚗</div>
 												<div>
 													<span class="font-bold text-slate-700">주차</span>
@@ -1330,108 +1665,117 @@ translateY(
 										</section>
 									</c:if>
 								</c:if>
-								
+
 								<%-- ▼▼▼ [수정] 리뷰 섹션 시작 ▼▼▼ --%>
 								<section class="glass-card p-8 rounded-3xl slide-up">
-										<div class="flex justify-between items-center mb-6">
-											<%-- 외부/내부 데이터에 따라 리뷰 개수 표시 --%>
-											<c:choose>
-												<c:when test="${isExternal}">
-													<h2 class="text-2xl font-bold gradient-text">리뷰 (${restaurant.reviewCount})</h2>
-												</c:when>
-												<c:otherwise>
-													<h2 class="text-2xl font-bold gradient-text">리뷰 (${fn:length(reviews)})</h2>
-												</c:otherwise>
-											</c:choose>
-											
-											<%-- 내부 DB 맛집이고, 소유자가 아닐 때만 리뷰 작성 버튼 표시 --%>
-											<c:if test="${!isExternal and !isOwner and not empty sessionScope.user}">
-												<a
-													href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
-													class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰
-													작성</a>
-											</c:if>
-										</div>
-										<c:set var="reviewList" value="${isExternal ? restaurant.reviews : reviews}" />
+									<div class="flex justify-between items-center mb-6">
+										<%-- 외부/내부 데이터에 따라 리뷰 개수 표시 --%>
 										<c:choose>
-											<c:when test="${not empty reviewList}">
-												<div id="review-list-container" class="space-y-6">
-													<c:forEach var="review" items="${reviewList}">
-														<div class="review-item" style="display: none;">
-															<div
-																class="bg-white p-6 rounded-2xl h-full flex flex-col">
-																<div class="flex justify-between items-start mb-4">
-																	<div class="flex items-start">
-																		<c:choose>
-																			<c:when test="${isExternal}">
-																				<img src="${review.profileImage}"
-																					alt="${review.author}" onerror="this.onerror=null;"
-																					class="w-12 h-12 rounded-full object-cover mr-4"><div>
-																			</c:when>
-																			<c:otherwise>
-																				<div><img
+											<c:when test="${isExternal}">
+												<h2 class="text-2xl font-bold gradient-text">리뷰
+													(${restaurant.reviewCount})</h2>
+											</c:when>
+											<c:otherwise>
+												<h2 class="text-2xl font-bold gradient-text">리뷰
+													(${fn:length(reviews)})</h2>
+											</c:otherwise>
+										</c:choose>
+
+										<%-- 내부 DB 맛집이고, 소유자가 아닐 때만 리뷰 작성 버튼 표시 --%>
+										<c:if
+											test="${!isExternal and !isOwner and not empty sessionScope.user}">
+											<a
+												href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
+												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰
+												작성</a>
+										</c:if>
+									</div>
+									<c:set var="reviewList"
+										value="${isExternal ? restaurant.reviews : reviews}" />
+									<c:choose>
+										<c:when test="${not empty reviewList}">
+											<div id="review-list-container" class="space-y-6">
+												<c:forEach var="review" items="${reviewList}">
+													<div class="review-item" style="display: none;">
+														<div class="bg-white p-6 rounded-2xl h-full flex flex-col">
+															<div class="flex justify-between items-start mb-4">
+																<div class="flex items-start">
+																	<c:choose>
+																		<c:when test="${isExternal}">
+																			<img src="${review.profileImage}"
+																				alt="${review.author}" onerror="this.onerror=null;"
+																				class="w-12 h-12 rounded-full object-cover mr-4">
+																			<div>
+																		</c:when>
+																		<c:otherwise>
+																			<div>
+																				<img
 																					src="${pageContext.request.contextPath}/images/${review.profileImage}"
-																					alt="${review.author}" onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=${review.author }';"
+																					alt="${review.author}"
+																					onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=${review.author }';"
 																					class="w-12 h-12 rounded-full object-cover mr-4">
+																		</c:otherwise>
+																	</c:choose>
+																	<c:choose>
+																		<c:when test="${isExternal or review.userId == 0}">
+																			<span class="font-bold text-slate-800">${review.author}</span>
+																		</c:when>
+																		<c:otherwise>
+																			<a
+																				href="${pageContext.request.contextPath}/feed/user/${review.userId}"
+																				class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
+																		</c:otherwise>
+																	</c:choose>
+																	<div
+																		class="flex items-center text-sm text-slate-500 mt-1">
+																		<div class="flex">
+																			<c:forEach begin="1" end="5" var="i">
+																				<span
+																					class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★
+																				</span>
+																			</c:forEach>
+																		</div>
+																		<%-- Google 리뷰는 createdAt, DB 리뷰는 createdAtAsDate 사용 --%>
+																		<span class="mx-2">·</span> <span><fmt:formatDate
+																				value="${isExternal ? review.createdAt : review.createdAtAsDate}"
+																				pattern="yy.MM.dd" /></span>
+																	</div>
+																</div>
+															</div>
+
+															<%-- ▼▼▼ [추가] '더보기' 메뉴 버튼 및 드롭다운 메뉴 ▼▼▼ --%>
+															<c:if test="${not empty sessionScope.user}">
+																<div class="review-options-container">
+																	<button class="review-options-btn"
+																		data-review-id="${review.id}">
+																		<img
+																			src="${pageContext.request.contextPath}/img/icon_more_vertical.png"
+																			alt="더보기" class="w-5 h-5">
+																	</button>
+																	<div class="review-options-dropdown">
+																		<c:choose>
+																			<%-- 리뷰 작성자와 현재 로그인한 유저가 같을 경우 --%>
+																			<c:when
+																				test="${sessionScope.user.id == review.userId}">
+																				<a
+																					href="${pageContext.request.contextPath}/review/edit?reviewId=${review.id}"
+																					class="dropdown-item">리뷰 수정</a>
+																				<button
+																					class="dropdown-item delete review-delete-btn"
+																					data-review-id="${review.id}">리뷰 삭제</button>
+																			</c:when>
+																			<%-- 다른 유저일 경우 --%>
+																			<c:otherwise>
+																				<button class="dropdown-item review-report-btn"
+																					data-review-id="${review.id}"
+																					data-review-author="${fn:escapeXml(review.author)}">리뷰
+																					신고</button>
 																			</c:otherwise>
 																		</c:choose>
-																			<c:choose>
-																				<c:when test="${isExternal or review.userId == 0}">
-																					<span class="font-bold text-slate-800">${review.author}</span>
-																				</c:when>
-																				<c:otherwise>
-																					<a href="${pageContext.request.contextPath}/feed/user/${review.userId}" class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
-																				</c:otherwise>
-																			</c:choose>
-																			<div
-																				class="flex items-center text-sm text-slate-500 mt-1">
-																				<div class="flex">
-																					<c:forEach begin="1" end="5" var="i">
-																						<span
-																							class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★
-                                                                                        </span>
-																					</c:forEach>
-																				</div>
-																				<%-- Google 리뷰는 createdAt, DB 리뷰는 createdAtAsDate 사용 --%>
-																				<span class="mx-2">·</span> <span><fmt:formatDate
-																						value="${isExternal ? review.createdAt : review.createdAtAsDate}"
-																						pattern="yy.MM.dd" /></span>
-																			</div>
-																		</div>
 																	</div>
-
-																	<%-- ▼▼▼ [추가] '더보기' 메뉴 버튼 및 드롭다운 메뉴 ▼▼▼ --%>
-																	<c:if test="${not empty sessionScope.user}">
-																		<div class="review-options-container">
-																			<button class="review-options-btn"
-																				data-review-id="${review.id}">
-																				<img
-																					src="${pageContext.request.contextPath}/img/icon_more_vertical.png"
-																					alt="더보기" class="w-5 h-5">
-																			</button>
-																			<div class="review-options-dropdown">
-																				<c:choose>
-																					<%-- 리뷰 작성자와 현재 로그인한 유저가 같을 경우 --%>
-																					<c:when
-																						test="${sessionScope.user.id == review.userId}">
-																						<a
-																							href="${pageContext.request.contextPath}/review/edit?reviewId=${review.id}"
-																							class="dropdown-item">리뷰 수정</a>
-																						<button
-																							class="dropdown-item delete review-delete-btn"
-																							data-review-id="${review.id}">리뷰 삭제</button>
-																					</c:when>
-																					<%-- 다른 유저일 경우 --%>
-																					<c:otherwise>
-																						<button class="dropdown-item review-report-btn"
-																							data-review-id="${review.id}"
-																							data-review-author="${fn:escapeXml(review.author)}">리뷰 신고</button>
-																					</c:otherwise>
-																				</c:choose>
-																			</div>
-																		</div>
-																	</c:if>
-																	<!-- <c:if
+																</div>
+															</c:if>
+															<!-- <c:if
 																		test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
 																		<c:choose>
 																			<c:when
@@ -1447,193 +1791,196 @@ translateY(
 																			</c:otherwise>
 																		</c:choose>
 																	</c:if> -->
-																</div>
-
-																<c:if test="${not empty review.images}">
-																	<div class="review-image-container mb-4 rounded-lg">
-																		<div class="review-image-track">
-																			<c:forEach var="imagePath" items="${review.images}"
-																				varStatus="loop">
-																				<div
-																					class="review-image-item aspect-video bg-slate-100 rounded-lg">	
-																					<%-- [수정] 외부 리뷰는 URL을 직접 사용, 내부 리뷰는 contextPath 사용 --%>
-																					<c:choose>
-																						<c:when test="${isExternal}">
-																							<img src="${imagePath}" alt="리뷰 사진"
-																						class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger"/>
-																						</c:when>
-																						<c:otherwise>
-																							<img src="${pageContext.request.contextPath}/images/${imagePath}" alt="리뷰 사진"
-																						class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger"/>
-																						</c:otherwise>
-																					</c:choose>
-																				</div>
-																			</c:forEach>
-																		</div>
-																		<c:if test="${fn:length(review.images) > 1}">
-																			<button class="review-image-arrow prev">&lt;</button>
-																			<button class="review-image-arrow next">&gt;</button>
-																			<div class="review-image-pagination"></div>
-																		</c:if>
-																	</div>
-																</c:if>
-																<div class="review-content-wrapper mb-4 flex-grow">
-																	<p
-																		class="review-text text-slate-700 leading-relaxed truncated break-words">${review.content}</p>
-																	<span
-																		class="read-more-btn mt-2 inline-block cursor-pointer">더
-																		보기</span>
-																</div>
-																<c:if test="${not empty review.keywords}">
-																	<div class="flex flex-wrap gap-2 mb-4">
-																		<c:forEach var="keyword" items="${review.keywords}">
-																			<span class="review-keyword-tag">${keyword}</span>
-																		</c:forEach>
-																	</div>
-																</c:if>
-																<%-- 외부 리뷰는 좋아요/댓글 기능 미제공 --%>
-																<c:if test="${!isExternal}">
-																<div
-																	class="border-t pt-3 text-sm text-slate-500 flex items-center gap-2">
-																	<button type="button"
-																		class="like-btn text-2xl leading-none ${review.likedByCurrentUser ? 'text-red-500' : 'text-slate-300'} ${not empty sessionScope.user ? 'hover:text-red-400' : ''} transition-colors duration-200"
-																		data-review-id="${review.id}"
-																		${empty sessionScope.user ? 'disabled' : ''}>♥</button>
-																	<span class="likers-modal-trigger cursor-pointer hover:underline"
-																		data-review-id="${review.id}"><strong
-																		class="like-count">${review.likes > 0 ? review.likes : 0}</strong>명이
-																		좋아합니다</span>
-																</div>
-																<c:if test="${not empty review.replyContent}">
-																	<div
-																		class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
-																		<div class="flex items-start text-sm">
-																			<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
-																			<div class="flex-1 break-words">
-																				<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
-																				<c:if test="${not empty review.replyCreatedAt}">
-																					<%-- ▼▼▼ [수정 2] .replyCreatedAtAsDate 사용 및 변수명 오류 수정 ▼▼▼ --%>
-																					<span><fmt:formatDate
-																							value="${review.replyCreatedAtAsDate}"
-																							pattern="yy.MM.dd" /></span>
-																				</c:if>
-																			</div>
-																		</div>
-																	</div>
-																</c:if>
-																<c:if test="${isOwner and empty review.replyContent}">
-																	<div class="mt-4 pt-4 border-t border-dashed">
-																		<form
-																			action="${pageContext.request.contextPath}/review/reply"
-																			method="post" class="space-y-2">
-																			<input type="hidden" name="reviewId"
-																				value="${review.id}"> <input type="hidden"
-																				name="restaurantId" value="${restaurant.id}">
-																			<textarea name="replyContent" rows="2"
-																				placeholder="답글을 작성해주세요..."
-																				class="w-full p-2 border rounded-md text-sm"></textarea>
-																			<div class="text-right">
-																				<button type="submit"
-																					class="text-xs bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors">답글
-																					등록</button>
-																			</div>
-																		</form>
-																	</div>
-																</c:if>
-																<div class="mt-4 pt-4 border-t">
-																	<h4 class="font-bold text-sm mb-3">댓글
-																		(${fn:length(review.comments)})</h4>
-																	<div class="space-y-3 mb-4">
-																		<c:forEach var="comment" items="${review.comments}">
-																			<div class="flex items-start text-sm">
-																				<img
-																					src="${pageContext.request.contextPath}/images/${comment.profileImage}"
-																					alt="${comment.author}"
-																					class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">
-																				<div class="flex-1 bg-gray-100 p-2 rounded-lg">
-																					<a
-																						href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
-																						class="font-bold text-slate-800">${comment.author}</a>
-																					<p class="text-slate-700">${comment.content}</p>
-																				</div>
-																			</div>
-																		</c:forEach>
-																	</div>
-																	<c:choose>
-																		<c:when test="${not empty sessionScope.user}">
-																			<form
-																				action="${pageContext.request.contextPath}/review/addComment"
-																				method="post" class="flex items-center gap-2">
-																				<input type="hidden" name="reviewId"
-																					value="${review.id}" /><input type="hidden"
-																					name="restaurantId" value="${restaurant.id}" /> <input
-																					type="text" name="content"
-																					class="w-full p-2 border rounded-lg text-sm"
-																					placeholder="댓글을 입력하세요..." required />
-																				<button type="submit"
-																					class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap">등록</button>
-																			</form>
-																		</c:when>
-																		<c:otherwise>
-																			<a href="${pageContext.request.contextPath}/login"
-																				class="block w-full p-3 border rounded-lg text-sm text-center text-gray-500 bg-gray-100 hover:bg-gray-200 transition">로그인
-																				후 댓글을 작성할 수 있습니다.</a>
-																		</c:otherwise>
-																	</c:choose>
-																</div>
-																</c:if>
-															</div>
-													</c:forEach>
-												</div>
-												<div id="load-more-container" class="text-center mt-8"></div>
-											</c:when>
-											<c:otherwise>
-												<div class="text-center py-12">
-													<div class="text-6xl mb-4">📝</div>
-													<h4 class="text-xl font-bold text-slate-600 mb-2">아직
-														리뷰가 없습니다</h4>
-													<p class="text-slate-500">첫 번째 리뷰를 작성해보세요!</p>
-												</div>
-											</c:otherwise>
-										</c:choose>
-									</section>
-									<%-- ▲▲▲ [수정] 리뷰 섹션 끝 ▲▲▲ --%>
-									
-									<c:if test="${!isExternal and not empty coupons}">
-										<section class="glass-card p-8 rounded-3xl slide-up">
-											<h2 class="text-2xl font-bold gradient-text mb-6">MEET
-												LOG 단독 쿠폰</h2>
-											<div class="space-y-4">
-												<c:forEach var="coupon" items="${coupons}">
-													<div
-														class="coupon-glow p-6 rounded-3xl relative overflow-hidden">
-														<div
-															class="absolute top-0 right-0 w-20 h-20 bg-yellow-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
-														<div
-															class="absolute bottom-0 left-0 w-16 h-16 bg-orange-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
-														<div class="relative z-10">
-															<div class="flex items-center justify-between">
-																<div class="flex-1">
-																	<h3 class="text-2xl font-black text-yellow-800 mb-2">${coupon.title}</h3>
-																	<p class="text-yellow-700 font-semibold mb-2">${coupon.description}</p>
-																	<p class="text-xs text-yellow-600">유효기간:
-																		${coupon.validity}</p>
-																</div>
-																<div class="text-right">
-																	<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
-																	<button
-																		class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
-																		쿠폰받기</button>
-																</div>
-															</div>
 														</div>
+
+														<c:if test="${not empty review.images}">
+															<div class="review-image-container mb-4 rounded-lg">
+																<div class="review-image-track">
+																	<c:forEach var="imagePath" items="${review.images}"
+																		varStatus="loop">
+																		<div
+																			class="review-image-item aspect-video bg-slate-100 rounded-lg">
+																			<%-- [수정] 외부 리뷰는 URL을 직접 사용, 내부 리뷰는 contextPath 사용 --%>
+																			<c:choose>
+																				<c:when test="${isExternal}">
+																					<img src="${imagePath}" alt="리뷰 사진"
+																						class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger" />
+																				</c:when>
+																				<c:otherwise>
+																					<img
+																						src="${pageContext.request.contextPath}/images/${imagePath}"
+																						alt="리뷰 사진"
+																						class="w-full h-full object-cover rounded-lg cursor-pointer image-lightbox-trigger" />
+																				</c:otherwise>
+																			</c:choose>
+																		</div>
+																	</c:forEach>
+																</div>
+																<c:if test="${fn:length(review.images) > 1}">
+																	<button class="review-image-arrow prev">&lt;</button>
+																	<button class="review-image-arrow next">&gt;</button>
+																	<div class="review-image-pagination"></div>
+																</c:if>
+															</div>
+														</c:if>
+														<div class="review-content-wrapper mb-4 flex-grow">
+															<p
+																class="review-text text-slate-700 leading-relaxed truncated break-words">${review.content}</p>
+															<span
+																class="read-more-btn mt-2 inline-block cursor-pointer">더
+																보기</span>
+														</div>
+														<c:if test="${not empty review.keywords}">
+															<div class="flex flex-wrap gap-2 mb-4">
+																<c:forEach var="keyword" items="${review.keywords}">
+																	<span class="review-keyword-tag">${keyword}</span>
+																</c:forEach>
+															</div>
+														</c:if>
+														<%-- 외부 리뷰는 좋아요/댓글 기능 미제공 --%>
+														<c:if test="${!isExternal}">
+															<div
+																class="border-t pt-3 text-sm text-slate-500 flex items-center gap-2">
+																<button type="button"
+																	class="like-btn text-2xl leading-none ${review.likedByCurrentUser ? 'text-red-500' : 'text-slate-300'} ${not empty sessionScope.user ? 'hover:text-red-400' : ''} transition-colors duration-200"
+																	data-review-id="${review.id}"
+																	${empty sessionScope.user ? 'disabled' : ''}>♥</button>
+																<span
+																	class="likers-modal-trigger cursor-pointer hover:underline"
+																	data-review-id="${review.id}"><strong
+																	class="like-count">${review.likes > 0 ? review.likes : 0}</strong>명이
+																	좋아합니다</span>
+															</div>
+															<c:if test="${not empty review.replyContent}">
+																<div
+																	class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
+																	<div class="flex items-start text-sm">
+																		<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
+																		<div class="flex-1 break-words">
+																			<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
+																			<c:if test="${not empty review.replyCreatedAt}">
+																				<%-- ▼▼▼ [수정 2] .replyCreatedAtAsDate 사용 및 변수명 오류 수정 ▼▼▼ --%>
+																				<span><fmt:formatDate
+																						value="${review.replyCreatedAtAsDate}"
+																						pattern="yy.MM.dd" /></span>
+																			</c:if>
+																		</div>
+																	</div>
+																</div>
+															</c:if>
+															<c:if test="${isOwner and empty review.replyContent}">
+																<div class="mt-4 pt-4 border-t border-dashed">
+																	<form
+																		action="${pageContext.request.contextPath}/review/reply"
+																		method="post" class="space-y-2">
+																		<input type="hidden" name="reviewId"
+																			value="${review.id}"> <input type="hidden"
+																			name="restaurantId" value="${restaurant.id}">
+																		<textarea name="replyContent" rows="2"
+																			placeholder="답글을 작성해주세요..."
+																			class="w-full p-2 border rounded-md text-sm"></textarea>
+																		<div class="text-right">
+																			<button type="submit"
+																				class="text-xs bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors">답글
+																				등록</button>
+																		</div>
+																	</form>
+																</div>
+															</c:if>
+															<div class="mt-4 pt-4 border-t">
+																<h4 class="font-bold text-sm mb-3">댓글
+																	(${fn:length(review.comments)})</h4>
+																<div class="space-y-3 mb-4">
+																	<c:forEach var="comment" items="${review.comments}">
+																		<div class="flex items-start text-sm">
+																			<img
+																				src="${pageContext.request.contextPath}/images/${comment.profileImage}"
+																				alt="${comment.author}"
+																				class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">
+																			<div class="flex-1 bg-gray-100 p-2 rounded-lg">
+																				<a
+																					href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
+																					class="font-bold text-slate-800">${comment.author}</a>
+																				<p class="text-slate-700">${comment.content}</p>
+																			</div>
+																		</div>
+																	</c:forEach>
+																</div>
+																<c:choose>
+																	<c:when test="${not empty sessionScope.user}">
+																		<form
+																			action="${pageContext.request.contextPath}/review/addComment"
+																			method="post" class="flex items-center gap-2">
+																			<input type="hidden" name="reviewId"
+																				value="${review.id}" /><input type="hidden"
+																				name="restaurantId" value="${restaurant.id}" /> <input
+																				type="text" name="content"
+																				class="w-full p-2 border rounded-lg text-sm"
+																				placeholder="댓글을 입력하세요..." required />
+																			<button type="submit"
+																				class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap">등록</button>
+																		</form>
+																	</c:when>
+																	<c:otherwise>
+																		<a href="${pageContext.request.contextPath}/login"
+																			class="block w-full p-3 border rounded-lg text-sm text-center text-gray-500 bg-gray-100 hover:bg-gray-200 transition">로그인
+																			후 댓글을 작성할 수 있습니다.</a>
+																	</c:otherwise>
+																</c:choose>
+															</div>
+														</c:if>
 													</div>
 												</c:forEach>
 											</div>
-										</section>
-									</c:if>
-									
-									<c:if test="${!isExternal}">
+											<div id="load-more-container" class="text-center mt-8"></div>
+										</c:when>
+										<c:otherwise>
+											<div class="text-center py-12">
+												<div class="text-6xl mb-4">📝</div>
+												<h4 class="text-xl font-bold text-slate-600 mb-2">아직
+													리뷰가 없습니다</h4>
+												<p class="text-slate-500">첫 번째 리뷰를 작성해보세요!</p>
+											</div>
+										</c:otherwise>
+									</c:choose>
+								</section>
+								<%-- ▲▲▲ [수정] 리뷰 섹션 끝 ▲▲▲ --%>
+
+								<c:if test="${!isExternal and not empty coupons}">
+									<section class="glass-card p-8 rounded-3xl slide-up">
+										<h2 class="text-2xl font-bold gradient-text mb-6">MEET
+											LOG 단독 쿠폰</h2>
+										<div class="space-y-4">
+											<c:forEach var="coupon" items="${coupons}">
+												<div
+													class="coupon-glow p-6 rounded-3xl relative overflow-hidden">
+													<div
+														class="absolute top-0 right-0 w-20 h-20 bg-yellow-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
+													<div
+														class="absolute bottom-0 left-0 w-16 h-16 bg-orange-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
+													<div class="relative z-10">
+														<div class="flex items-center justify-between">
+															<div class="flex-1">
+																<h3 class="text-2xl font-black text-yellow-800 mb-2">${coupon.title}</h3>
+																<p class="text-yellow-700 font-semibold mb-2">${coupon.description}</p>
+																<p class="text-xs text-yellow-600">유효기간:
+																	${coupon.validity}</p>
+															</div>
+															<div class="text-right">
+																<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
+																<button
+																	class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
+																	쿠폰받기</button>
+															</div>
+														</div>
+													</div>
+												</div>
+											</c:forEach>
+										</div>
+									</section>
+								</c:if>
+
+								<c:if test="${!isExternal}">
 									<section class="glass-card p-8 rounded-3xl slide-up">
 										<div class="flex justify-between items-center mb-6">
 											<h2 class="text-2xl font-bold gradient-text">❓ Q&A</h2>
@@ -1716,7 +2063,7 @@ translateY(
 											</c:otherwise>
 										</c:choose>
 									</section>
-								</c:if> 
+								</c:if>
 							</div>
 
 							<div class="space-y-8">
@@ -1724,116 +2071,149 @@ translateY(
 									class="glass-card p-8 rounded-3xl slide-up map-trigger cursor-pointer">
 									<div id="map" class="w-full h-64 rounded-2xl border"></div>
 								</section>
-								<c:if test="${!isExternal}">
+
+								<%-- 1. 서블릿에서 전달받은 reservationSettings 객체를 사용하여 예약 활성화 여부를 체크합니다. --%>
+								<c:if test="${reservationSettings.reservation_enabled == true}">
 									<form id="reservationForm"
 										action="${pageContext.request.contextPath}/reservation/create"
 										method="GET">
 
 										<input type="hidden" name="restaurantId"
-											value="${restaurant.id}"> <input type="hidden"
-											id="selectedTime" name="reservationTime" value="">
-											<input type="hidden" name="restaurantId"
-												value="${restaurant.id}"><input type="hidden"
-												id="selectedTime" name="reservationTime" value="">
-											<section class="glass-card p-8 rounded-3xl slide-up"
-												style="margin-top: 32px">
-												<h3 class="text-2xl font-bold gradient-text mb-6">온라인
-													예약</h3>
-												<%
-												List<OperatingHour> operatingHours = (List<OperatingHour>) request.getAttribute("operatingHours");
-												if (operatingHours != null && !operatingHours.isEmpty()) {
-													int todayDayOfWeek = LocalDate.now().getDayOfWeek().getValue();
-													List<String> timeSlots = new ArrayList<>();
-													for (OperatingHour oh : operatingHours) {
-														if (oh.getDayOfWeek() == todayDayOfWeek && oh.getOpeningTime() != null && oh.getClosingTime() != null) {
-													LocalTime startTime = oh.getOpeningTime();
-													LocalTime endTime = oh.getClosingTime().minusMinutes(30);
-													LocalTime currentTime = startTime;
-													while (!currentTime.isAfter(endTime)) {
-														timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-														currentTime = currentTime.plusMinutes(30);
-													}
-														}
-													}
-													Collections.sort(timeSlots);
-													pageContext.setAttribute("timeSlots", timeSlots);
-												} else {
-													pageContext.setAttribute("timeSlots", Collections.emptyList());
-												}
-												pageContext.setAttribute("lunchStart", LocalTime.of(12, 0));
-												pageContext.setAttribute("dinnerStart", LocalTime.of(17, 0));
-												%>
-												<div class="space-y-6">
-													<div>
-														<label class="block text-sm font-bold mb-3 text-slate-700">📅
-															날짜</label> <input type="date" name="reservationDate"
-															value="<%=LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)%>"
-															class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
-													</div>
-													<div>
-														<label class="block text-sm font-bold mb-3 text-slate-700">👥
-															인원</label> <select name="partySize"
-															class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
-															<option value="1">1명</option>
-															<option value="2" selected>2명</option>
-															<option value="3">3명</option>
-															<option value="4">4명</option>
-															<option value="5">5명</option>
-															<option value="6">6명 이상</option>
-														</select>
-													</div>
-													<div>
-														<label class="block text-sm font-bold mb-3 text-slate-700">⏰
-															예약가능시간</label>
-														<c:choose>
-															<c:when test="${not empty timeSlots}">
-																<div class="grid grid-cols-3 gap-2">
-																	<c:set var="lastCategory" value="" />
-																	<c:forEach var="time" items="${timeSlots}">
-																		<c:set var="currentTime"
-																			value="${LocalTime.parse(time)}" />
-																		<c:set var="currentCategory" value="" />
-																		<c:if test="${currentTime.isBefore(lunchStart)}">
-																			<c:set var="currentCategory" value="오전" />
-																		</c:if>
-																		<c:if
-																			test="${not currentTime.isBefore(lunchStart) and currentTime.isBefore(dinnerStart)}">
-																			<c:set var="currentCategory" value="점심" />
-																		</c:if>
-																		<c:if test="${not currentTime.isBefore(dinnerStart)}">
-																			<c:set var="currentCategory" value="저녁" />
-																		</c:if>
-																		<c:if test="${empty lastCategory}">
-																			<c:set var="lastCategory" value="${currentCategory}" />
-																		</c:if>
-																		<c:if test="${lastCategory ne currentCategory}">
-																			<div class="col-span-3 flex items-center my-2">
-																				<hr class="flex-grow border-t border-gray-200">
-																				<span class="px-2 text-sm text-gray-500">${currentCategory}</span>
-																				<hr class="flex-grow border-t border-gray-200">
-																			</div>
-																		</c:if>
-																		<button type="button"
-																			class="btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400"
-																			onclick="selectTime(this, '${time}')">${time}</button>
-																		<c:set var="lastCategory" value="${currentCategory}" />
-																	</c:forEach>
-																</div>
-															</c:when>
-															<c:otherwise>
-																<div class="text-center p-4 bg-slate-100 rounded-xl">
-																	<p class="text-slate-500">오늘 예약 가능한 시간이 없습니다.</p>
-																</div>
-															</c:otherwise>
-														</c:choose>
-													</div>
-													<button type="submit"
-														class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">예약하기</button>
+											value="${restaurant.id}">
+										<%-- 2. 사용자가 시간 버튼을 클릭하면 이 hidden input에 값이 저장됩니다. --%>
+										<input type="hidden" id="selectedTime" name="reservationTime"
+											value="">
+
+										<section class="glass-card p-8 rounded-3xl slide-up"
+											style="margin-top: 32px">
+											<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
+
+											<div class="space-y-6">
+												<div>
+													<label class="block text-sm font-bold mb-3 text-slate-700">📅
+														날짜</label> <input type="date" name="reservationDate"
+														value="<%=java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)%>"
+														class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
 												</div>
-											</section>
-										</form>
+												<div>
+													<label class="block text-sm font-bold mb-3 text-slate-700">👥
+														인원</label> <select name="partySize"
+														class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+														<c:forEach var="i"
+															begin="${reservationSettings.min_party_size}"
+															end="${reservationSettings.max_party_size}">
+															<option value="${i}" ${i == 2 ? 'selected' : ''}>${i}명</option>
+														</c:forEach>
+													</select>
+												</div>
+												<div>
+													<label class="block text-sm font-bold mb-3 text-slate-700">⏰
+														예약가능시간</label>
+													<div id="time-slots-container"
+														class="grid grid-cols-3 gap-2">
+														<div id="no-slots-message"
+															class="col-span-3 text-center p-4 bg-slate-100 rounded-xl text-slate-500"
+															style="display: none;">
+															<p>예약 가능한 시간이 없습니다.</p>
+														</div>
+													</div>
+												</div>
+												<button type="submit"
+													class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">예약하기</button>
+											</div>
+										</section>
+									</form>
 								</c:if>
 							</div>
+
+							<%-- [ ✨ 핵심 수정 ✨ ] --%>
+							<%-- 기존의 <script> 블록을 아래의 코드로 완전히 교체해주세요. --%>
+							<script>
+// 페이지의 모든 HTML 콘텐츠가 로드된 후에 이 스크립트를 실행합니다. 
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. DB의 'time_slots' 컬럼 데이터를 JSP 변수로부터 가져옵니다.
+        //    (예: "['09:00', '10:00', '11:00', ...]")
+        //    JSTL이 작은따옴표(')를 사용할 수 있으므로, JSON.parse가 인식하도록 쌍따옴표(")로 바꿔줍니다.
+        const timeSlotsJsonString = '${reservationSettings.time_slots}'.replace(/'/g, '"');
+
+        const container = document.getElementById('time-slots-container');
+        const noSlotsMsg = document.getElementById('no-slots-message');
+        
+        // 시간 버튼을 생성하는 메인 로직
+        if (timeSlotsJsonString && container) {
+            let timeSlots = [];
+            
+            try {
+                // 2. JSON 형태의 문자열을 실제 자바스크립트 배열로 변환합니다.
+                timeSlots = JSON.parse(timeSlotsJsonString);
+            } catch (e) {
+                console.error("time_slots 파싱 오류:", e);
+                console.error("원본 문자열:", timeSlotsJsonString);
+                // 파싱에 실패하면 빈 배열로 처리하여 오류를 방지합니다.
+                timeSlots = [];
+            }
+
+            // 3. 변환된 배열에 시간이 하나라도 있다면, 화면에 버튼을 추가합니다.
+            if (timeSlots.length > 0) {
+                let lastCategory = ""; // "오전", "점심", "저녁" 구분을 위한 변수
+                
+                // 4. 배열을 순회하며 각 시간마다 버튼을 생성합니다.
+                timeSlots.forEach(time => {
+                    // DB에서 가져온 시간 문자열에서 시간(hour) 부분만 추출합니다.
+                    const [h] = time.trim().split(':').map(Number);
+                    
+                    // 시간에 따라 카테고리를 결정합니다.
+                    let currentCategory = (h < 12) ? "오전" : (h < 17) ? "점심" : "저녁";
+
+                    // 첫 카테고리이거나 이전 카테고리와 다를 경우 구분선을 추가합니다.
+                    if (lastCategory !== currentCategory) {
+                        if (lastCategory !== "") { // 첫 번째 카테고리 앞에는 구분선 X
+                            const divider = document.createElement('div');
+                            divider.className = 'col-span-3 flex items-center my-2';
+                            divider.innerHTML = `<hr class="flex-grow border-t border-gray-200"><span class="px-2 text-sm text-gray-500">${currentCategory}</span><hr class="flex-grow border-t border-gray-200">`; 
+                            container.appendChild(divider);
+                        } else {
+                            // 첫 카테고리 타이틀을 구분선 없이 먼저 표시
+                            const firstCategoryTitle = document.createElement('div');
+                            firstCategoryTitle.className = 'col-span-3 text-sm text-gray-500 font-bold mb-1';
+                            firstCategoryTitle.textContent = currentCategory;
+                            container.appendChild(firstCategoryTitle);
+                        }
+                        lastCategory = currentCategory;
+                    }
+                    
+                    // 시간 버튼 요소를 생성합니다.
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400'; 
+                    button.textContent = time.trim(); // 버튼에 시간 텍스트 표시
+                    button.onclick = function() { selectTime(this, time.trim()); }; // 클릭 이벤트 핸들러 연결
+                    container.appendChild(button); // 컨테이너에 최종적으로 버튼 추가
+                });
+            } else {
+                // 생성된 시간 슬롯이 없으면, '예약 가능한 시간이 없습니다' 메시지를 표시합니다.
+                if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
+            }
+        } else {
+            // `time_slots` 데이터가 아예 없는 경우에도 메시지를 표시합니다.
+            if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
+        }
+    });
+
+    // 시간 버튼 클릭 시 호출되는 함수 (이 함수는 수정할 필요 없습니다)
+    function selectTime(button, time) {
+        // 모든 버튼의 선택 스타일을 초기화합니다.
+        document.querySelectorAll('.btn-reserve-time').forEach(btn => {
+            btn.classList.remove('bg-blue-500', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-700');
+        });// 클릭된 버튼에만 선택 스타일을 적용합니다. 
+        button.classList.add('bg-blue-500', 'text-white');
+        button.classList.remove('bg-slate-100', 'text-slate-700');
+        // hidden input에 선택된 시간 값을 저장합니다. 
+        document.getElementById('selectedTime').value = time;
+    }
+</script>
 						</div>
 					</c:when>
 					<c:otherwise>
@@ -1871,48 +2251,60 @@ translateY(
 			</div>
 		</div>
 
-		<div id="reviewReportModal" class="modal-overlay" style="display: none;">
-			<div class="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-xl">
+		<div id="reviewReportModal" class="modal-overlay"
+			style="display: none;">
+			<div
+				class="bg-white rounded-2xl w-full max-w-md p-6 relative shadow-xl">
 				<button type="button" class="modal-close-btn">&times;</button>
 				<h3 class="text-xl font-bold text-slate-900 mb-2">리뷰 신고</h3>
-				<p class="text-sm text-slate-500 mb-4">문제가 있는 리뷰를 알려주시면 운영팀이 검토 후 조치합니다.</p>
-				<div id="reportTargetWrapper" class="text-sm text-slate-600 mb-4" style="display: none;">
-					<span class="font-semibold text-slate-800" id="reportTargetNickname"></span>님의 리뷰를 신고합니다.
+				<p class="text-sm text-slate-500 mb-4">문제가 있는 리뷰를 알려주시면 운영팀이 검토
+					후 조치합니다.</p>
+				<div id="reportTargetWrapper" class="text-sm text-slate-600 mb-4"
+					style="display: none;">
+					<span class="font-semibold text-slate-800"
+						id="reportTargetNickname"></span>님의 리뷰를 신고합니다.
 				</div>
 				<form id="reviewReportForm" class="space-y-5">
 					<input type="hidden" id="reportReviewId" name="reviewId" value="">
 					<fieldset class="space-y-3">
-						<legend class="text-sm font-semibold text-slate-700">신고 사유</legend>
+						<legend class="text-sm font-semibold text-slate-700">신고
+							사유</legend>
 						<label class="flex items-center gap-2 text-sm text-slate-600">
-							<input type="radio" name="reportReason" value="스팸/홍보성 내용" class="h-4 w-4 border-slate-300">
-							스팸/홍보성 내용
-						</label>
-						<label class="flex items-center gap-2 text-sm text-slate-600">
-							<input type="radio" name="reportReason" value="부적절한 언어 및 비속어" class="h-4 w-4 border-slate-300">
-							부적절한 언어 및 비속어
-						</label>
-						<label class="flex items-center gap-2 text-sm text-slate-600">
-							<input type="radio" name="reportReason" value="허위 정보 또는 사실 왜곡" class="h-4 w-4 border-slate-300">
-							허위 정보 또는 사실 왜곡
-						</label>
-						<label class="flex items-center gap-2 text-sm text-slate-600">
-							<input type="radio" name="reportReason" value="개인정보 노출" class="h-4 w-4 border-slate-300">
-							개인정보 노출
-						</label>
-						<label class="flex items-center gap-2 text-sm text-slate-600">
-							<input type="radio" name="reportReason" value="기타 문제" class="h-4 w-4 border-slate-300">
-							기타 문제 (추가 설명 필수)
+							<input type="radio" name="reportReason" value="스팸/홍보성 내용"
+							class="h-4 w-4 border-slate-300"> 스팸/홍보성 내용
+						</label> <label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="부적절한 언어 및 비속어"
+							class="h-4 w-4 border-slate-300"> 부적절한 언어 및 비속어
+						</label> <label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="허위 정보 또는 사실 왜곡"
+							class="h-4 w-4 border-slate-300"> 허위 정보 또는 사실 왜곡
+						</label> <label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="개인정보 노출"
+							class="h-4 w-4 border-slate-300"> 개인정보 노출
+						</label> <label class="flex items-center gap-2 text-sm text-slate-600">
+							<input type="radio" name="reportReason" value="기타 문제"
+							class="h-4 w-4 border-slate-300"> 기타 문제 (추가 설명 필수)
 						</label>
 					</fieldset>
 					<div>
-						<label for="reportReasonDetail" class="text-sm font-semibold text-slate-700">추가 설명 (선택, '기타 문제' 선택 시 필수)</label>
-						<textarea id="reportReasonDetail" class="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:outline-none" rows="4" maxlength="500" placeholder="신고 사유를 자세히 입력해 주세요. (최대 500자)"></textarea>
-						<p class="mt-1 text-xs text-slate-400">허위 신고는 이용 제한 사유가 될 수 있습니다.</p>
-						<p id="reportReasonCounter" class="mt-1 text-xs text-slate-400 text-right">0 / 500</p>
+						<label for="reportReasonDetail"
+							class="text-sm font-semibold text-slate-700">추가 설명 (선택,
+							'기타 문제' 선택 시 필수)</label>
+						<textarea id="reportReasonDetail"
+							class="mt-2 w-full rounded-xl border border-slate-200 p-3 text-sm focus:border-blue-500 focus:outline-none"
+							rows="4" maxlength="500"
+							placeholder="신고 사유를 자세히 입력해 주세요. (최대 500자)"></textarea>
+						<p class="mt-1 text-xs text-slate-400">허위 신고는 이용 제한 사유가 될 수
+							있습니다.</p>
+						<p id="reportReasonCounter"
+							class="mt-1 text-xs text-slate-400 text-right">0 / 500</p>
 					</div>
 					<div class="flex items-center justify-end gap-3">
-						<button type="button" id="cancelReportBtn" class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">취소</button>
-						<button type="submit" id="reviewReportSubmit" data-default-text="신고하기" class="px-5 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold shadow hover:bg-red-600 transition-colors">신고하기</button>
+						<button type="button" id="cancelReportBtn"
+							class="px-4 py-2 text-sm font-medium text-slate-500 hover:text-slate-700">취소</button>
+						<button type="submit" id="reviewReportSubmit"
+							data-default-text="신고하기"
+							class="px-5 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold shadow hover:bg-red-600 transition-colors">신고하기</button>
 					</div>
 				</form>
 			</div>

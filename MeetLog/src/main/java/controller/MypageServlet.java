@@ -191,6 +191,15 @@ public class MypageServlet extends HttpServlet {
             } else if ("deleteAccount".equals(action)) {
                 handleDeleteAccount(request, response, session, currentUser);
                 return;
+            } else if ("changePassword".equals(action)) {
+                // 일반 폼으로 전송된 비밀번호 변경 처리
+                Map<String, String> formFields = new HashMap<>();
+                formFields.put("currentPassword", request.getParameter("currentPassword"));
+                formFields.put("newPassword", request.getParameter("newPassword"));
+                formFields.put("confirmPassword", request.getParameter("confirmPassword"));
+                handleChangePassword(session, currentUser, formFields);
+                response.sendRedirect(request.getContextPath() + "/mypage/settings");
+                return;
             }
 
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "지원하지 않는 요청입니다.");

@@ -629,7 +629,11 @@ CREATE TABLE `restaurant_reservation_settings` (
   UNIQUE KEY `unique_restaurant` (`restaurant_id`),
   KEY `idx_restaurant_id` (`restaurant_id`),
   CONSTRAINT `restaurant_reservation_settings_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_UNICODE_CI;
+ALTER TABLE restaurant_reservation_settings
+ALTER COLUMN available_days
+SET DEFAULT '["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]';
+
 CREATE TABLE `restaurants` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `owner_id` int(11) DEFAULT NULL,

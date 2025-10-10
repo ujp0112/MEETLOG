@@ -32,6 +32,8 @@
 
     # 가상환경 활성화 (macOS/Linux)
     source venv/bin/activate
+    # 가상환경 활성화 (Windows)
+    venv\Scripts\activate
     ```
 
 3.  **필수 라이브러리 설치 (Install Dependencies)**
