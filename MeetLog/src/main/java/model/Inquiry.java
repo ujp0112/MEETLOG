@@ -4,7 +4,11 @@ import java.sql.Timestamp;
 
 public class Inquiry {
     private int id;              // inquiry_id
+    private int user_id;
     private String userName;     // user_name
+    private String email;
+    private String category;
+    private String priority;
     private String subject;      // subject
     private String content;      // content
     private String status;       // status (PENDING, IN_PROGRESS, RESOLVED)
@@ -14,10 +18,14 @@ public class Inquiry {
 
     public Inquiry() {}
 
-    public Inquiry(String userName, String subject, String content) {
-        this.userName = userName;
+    public Inquiry(int user_id, String userName, String subject, String content, String email, String category, String priority) {
+        this.user_id = user_id;
+    	this.userName = userName;
         this.subject = subject;
         this.content = content;
+        this.email = email;
+        this.category = category;
+        this.priority = priority;
         this.status = "PENDING";
     }
 
@@ -108,4 +116,45 @@ public class Inquiry {
                 ", updatedAt=" + updatedAt +
                 '}';
     }
+
+	public int getUser_id() {
+		return user_id;
+	}
+
+	public void setUser_id(int user_id) {
+		this.user_id = user_id;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+	public int getUserId() {
+		// TODO Auto-generated method stub
+		return user_id;
+	}
+	
+	public void setUserId(int id) {
+		this.user_id = id;
+	}
 }

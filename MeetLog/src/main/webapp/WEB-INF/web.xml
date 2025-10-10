@@ -688,6 +688,15 @@
 		<url-pattern>/my-courses</url-pattern>
 		<url-pattern>/my-courses/*</url-pattern>
 	</servlet-mapping>
+	
+	<servlet>
+	    <servlet-name>MyInquiryServlet</servlet-name>
+	    <servlet-class>controller.MyInquiryServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>MyInquiryServlet</servlet-name>
+	    <url-pattern>/my-inquiries</url-pattern>
+	</servlet-mapping>
 
 	<!-- 위시리스트 관련 서블릿 -->
 	<servlet>

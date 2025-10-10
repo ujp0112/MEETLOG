@@ -28,6 +28,12 @@ public class InquiryDAO {
         }
     }
 
+    public List<Inquiry> findByUserId(int userId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectList("InquiryMapper.findByUserId", userId);
+        }
+    }
+
     public int insert(Inquiry inquiry) {
         try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
             int result = session.insert("InquiryMapper.insert", inquiry);

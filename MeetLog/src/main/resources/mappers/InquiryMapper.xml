@@ -7,6 +7,10 @@
     <resultMap id="InquiryResultMap" type="model.Inquiry">
         <id property="id" column="inquiry_id"/>
         <result property="userName" column="user_name"/>
+        <result property="userId" column="user_id"/>
+        <result property="email" column="email"/>
+        <result property="category" column="category"/>
+        <result property="priority" column="priority"/>
         <result property="subject" column="subject"/>
         <result property="content" column="content"/>
         <result property="status" column="status"/>
@@ -32,15 +36,23 @@
 
     <!-- ID로 문의 조회 -->
     <select id="findById" parameterType="int" resultMap="InquiryResultMap">
-        SELECT inquiry_id, user_name, subject, content, status, reply, created_at, updated_at
+        SELECT inquiry_id, user_id, user_name, email, category, priority, subject, content, status, reply, created_at, updated_at
         FROM inquiries
         WHERE inquiry_id = #{id}
     </select>
 
+    <!-- 사용자 ID로 문의 조회 -->
+    <select id="findByUserId" parameterType="int" resultMap="InquiryResultMap">
+        SELECT inquiry_id, user_id, user_name, email, category, priority, subject, content, status, reply, created_at, updated_at
+        FROM inquiries
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
     <!-- 문의 추가 -->
     <insert id="insert" parameterType="model.Inquiry" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO inquiries (user_name, subject, content, status)
-        VALUES (#{userName}, #{subject}, #{content}, #{status})
+        INSERT INTO inquiries (user_id, user_name, subject, content, email, category, priority, status)
+        VALUES (#{userId}, #{userName}, #{subject}, #{content}, #{email}, #{category}, #{priority}, #{status})
     </insert>
 
     <!-- 문의 수정 -->

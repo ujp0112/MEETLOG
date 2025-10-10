@@ -78,7 +78,9 @@
                                                 <div class="ml-4">
                                                     <div class="flex items-center">
                                                         <p class="text-lg font-medium text-gray-900">${branch.branchName}</p>
-                                                        <span class="ml-2 text-xs text-gray-500">(${branch.companyName})</span>
+                                                        <c:if test="${not empty branch.companyName}">
+	                                                        <span class="ml-2 text-xs text-gray-500">(${branch.companyName})</span>
+							                            </c:if>	
                                                         <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${branch.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
                                                             ${branch.status == 'ACTIVE' ? '운영중' : '휴업'}
                                                         </span>

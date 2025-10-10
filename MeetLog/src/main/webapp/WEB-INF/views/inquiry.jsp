@@ -19,7 +19,13 @@
 
         <main id="main-content" class="flex-grow">
             <div class="page-content container mx-auto p-4 md:p-8">
-                <h2 class="text-3xl font-bold mb-8">💬 1:1 문의</h2>
+                <div class="flex justify-between items-center mb-8 max-w-2xl mx-auto">
+                    <h2 class="text-3xl font-bold">💬 1:1 문의</h2>
+                    <a href="${pageContext.request.contextPath}/my-inquiries" 
+                       class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-semibold text-gray-700 hover:bg-gray-50 transition">
+                        내가 쓴 문의 확인
+                    </a>
+                </div>
                 
                 <c:if test="${not empty successMessage}">
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 max-w-2xl mx-auto">
@@ -35,7 +41,7 @@
                 
                 <div class="max-w-2xl mx-auto">
                     <div class="bg-white rounded-lg shadow-md p-8">
-                        <form method="post" "${pageContext.request.contextPath}.do/inquiry">
+                        <form method="post" action="${pageContext.request.contextPath}/inquiry">
                             <div class="mb-6">
                                 <label for="category" class="block text-sm font-medium text-gray-700 mb-2">문의 유형</label>
                                 <select id="category" name="category" required 
