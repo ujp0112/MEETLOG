@@ -39,7 +39,7 @@ public class UserService {
 			company.setName(businessUser.getBusinessName());
 			companyDAO.insert(sqlSession, company);
 			int newCompanyId = company.getId();
-
+			
 			String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
 			user.setPassword(hashedPassword);
 			user.setUserType("BUSINESS");
@@ -49,7 +49,7 @@ public class UserService {
 			businessUser.setUserId(newUserId);
 			businessUser.setCompanyId(newCompanyId);
 			businessUserDAO.insert(businessUser, sqlSession);
-
+			
 			sqlSession.commit();
 			return true;
 		} catch (Exception e) {
@@ -66,15 +66,15 @@ public class UserService {
 	public boolean registerBranchUser(User user, BusinessUser businessUser) {
 		SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession(false);
 		try {
-			String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+			String hashedPassword = PasswordUtil.hashPassword(user.getPassword()); // 예외 처리 불필요
 			user.setPassword(hashedPassword);
 			user.setUserType("BUSINESS");
 			userDAO.insert(user, sqlSession);
 			int newUserId = user.getId();
-
+			
 			businessUser.setUserId(newUserId);
 			businessUserDAO.insert(businessUser, sqlSession);
-
+			
 			sqlSession.commit();
 			return true;
 		} catch (Exception e) {
@@ -98,14 +98,14 @@ public class UserService {
 		if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
 			throw new IllegalArgumentException("비밀번호가 비어있습니다.");
 		}
-
-		String hashedPassword = PasswordUtil.hashPassword(user.getPassword());
+		
+		String hashedPassword = PasswordUtil.hashPassword(user.getPassword()); // 예외 처리 불필요
 		user.setPassword(hashedPassword);
-
+		
 		// DAO의 단독 insert 메소드(auto-commit) 사용
 		int result = userDAO.insert(user);
 		boolean userCreated = result > 0;
-
+		
 		if (userCreated) {
 			// 사용자 등록 성공 시 기본 저장소 생성 (user.getId()는 insert 후 채워짐)
 			try {
@@ -116,7 +116,7 @@ public class UserService {
 				e.printStackTrace();
 			}
 		}
-
+		
 		return userCreated;
 	}
 
@@ -244,16 +244,16 @@ public class UserService {
 		// [필수] 비밀번호 필드가 NOT NULL 이므로, 암호화된 임의의 값 설정
 		String placeholderPassword = "social_login_user_" + UUID.randomUUID().toString();
 		socialProfile.setPassword(PasswordUtil.hashPassword(placeholderPassword));
-
+		
 		// [필수] 사용자 유형 기본값 설정
 		socialProfile.setUserType("PERSONAL");
-
+		
 		// [수정] 신규 가입 시 사용자를 활성 상태로 설정
 		socialProfile.setActive(true);
-
+		
 		// 4. 보정된 정보로 DB에 사용자 정보 삽입
 		int result = userDAO.insert(socialProfile);
-
+		
 		if (result > 0) {
 			// MyBatis의 useGeneratedKeys 덕분에 insert 후 socialProfile 객체에 id가 채워짐
 			int newUserId = socialProfile.getId();
@@ -268,7 +268,7 @@ public class UserService {
 			}
 			return socialProfile; // 가입 완료된 최종 사용자 정보 반환
 		}
-
+		
 		System.err.println("신규 소셜 사용자 DB 저장 실패.");
 		return null; // 모든 과정이 실패한 경우
 	}
@@ -293,11 +293,11 @@ public class UserService {
 		if (user == null) {
 			return false;
 		}
-
+		
 		if (!PasswordUtil.verifyPassword(currentPassword, user.getPassword())) {
 			return false;
 		}
-
+		
 		String newHashedPassword = PasswordUtil.hashPassword(newPassword);
 		return userDAO.updatePassword(userId, newHashedPassword) > 0;
 	}
@@ -352,7 +352,7 @@ public class UserService {
 		if (user != null) {
 			String tempPassword = PasswordUtil.generateTempPassword();
 			String hashedPassword = PasswordUtil.hashPassword(tempPassword);
-
+			
 			if (userDAO.updatePassword(user.getId(), hashedPassword) > 0) {
 				System.out.println("임시 비밀번호 발급 [" + email + ": " + tempPassword + "]");
 				return true;

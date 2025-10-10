@@ -45,7 +45,7 @@
 
             <!-- 아이디 찾기 폼 -->
             <div id="findId-content">
-                <form "${pageContext.request.contextPath}.do/find-account" method="post" class="space-y-5">
+                <form action="${pageContext.request.contextPath}/find-account" method="post" class="space-y-5">
                     <input type="hidden" name="action" value="findId">
                     <div>
                         <label for="nickname" class="block text-sm font-medium text-slate-700">닉네임</label>
@@ -61,7 +61,7 @@
 
             <!-- 비밀번호 찾기 폼 (초기에는 숨김) -->
             <div id="findPw-content" class="hidden">
-                <form "${pageContext.request.contextPath}.do/find-account" method="post" class="space-y-5">
+                <form action="${pageContext.request.contextPath}/find-account" method="post" class="space-y-5">
                     <input type="hidden" name="action" value="findPw">
                     <div>
                         <label for="email" class="block text-sm font-medium text-slate-700">이메일</p>

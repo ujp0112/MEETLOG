@@ -1,97 +1,63 @@
 package util;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.Objects;
 
 public class PasswordUtil {
-	private static final String ALGORITHM = "SHA-256";
-	private static final int SALT_LENGTH = 16;
 
-	/**
-	 * 비밀번호와 Salt를 결합하여 SHA-256 해시를 생성하고 Base64로 인코딩합니다.
-	 * 
-	 * @param password 평문 비밀번호
-	 * @return Salt가 포함된 Base64 인코딩 해시 문자열
-	 */
-	public static String hashPassword(String password) {
-		if (password == null || password.trim().isEmpty()) {
-			throw new IllegalArgumentException("비밀번호는 null이거나 비어있을 수 없습니다.");
-		}
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int DEFAULT_TEMP_PASSWORD_LENGTH = 8;
 
-		try {
-			SecureRandom random = new SecureRandom();
-			byte[] salt = new byte[SALT_LENGTH];
-			random.nextBytes(salt);
+    /**
+     * 지정된 길이의 임시 비밀번호를 생성합니다.
+     * @param length 생성할 비밀번호의 길이
+     * @return 생성된 임시 비밀번호
+     */
+    public static String generateTemporaryPassword(int length) { // FindAccountServlet에서 사용
+        StringBuilder password = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            password.append(CHARACTERS.charAt(RANDOM.nextInt(CHARACTERS.length())));
+        }
+        return password.toString();
+    }
+    
+    /**
+     * 기본 길이(8자)의 임시 비밀번호를 생성합니다. (기존 UserService와의 호환성을 위해 유지)
+     * @return 생성된 임시 비밀번호
+     */
+    public static String generateTempPassword() { // 기존 UserService에서 사용
+        return generateTemporaryPassword(DEFAULT_TEMP_PASSWORD_LENGTH);
+    }
 
-			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
-			md.update(salt);
-
-			// 👇 [수정] 인코딩 방식을 UTF-8로 명시
-			byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
-
-			byte[] combined = new byte[salt.length + hashedPassword.length];
-			System.arraycopy(salt, 0, combined, 0, salt.length);
-			System.arraycopy(hashedPassword, 0, combined, salt.length, hashedPassword.length);
-
-			return Base64.getEncoder().encodeToString(combined);
-		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("SHA-256 해시 알고리즘을 찾을 수 없습니다.", e);
-		}
-	}
-
-	/**
-	 * 입력된 평문 비밀번호와 저장된 해시를 비교하여 일치 여부를 확인합니다.
-	 * 
-	 * @param plainPassword  사용자가 입력한 평문 비밀번호
-	 * @param hashedPassword 데이터베이스에 저장된 해시 문자열
-	 * @return 비밀번호 일치 여부 (true/false)
-	 */
-	public static boolean verifyPassword(String plainPassword, String hashedPassword) {
-		if (plainPassword == null || plainPassword.trim().isEmpty() || hashedPassword == null
-				|| hashedPassword.trim().isEmpty()) {
-			return false;
-		}
-
-		try {
-			byte[] combined = Base64.getDecoder().decode(hashedPassword);
-
-			if (combined.length < SALT_LENGTH) {
-				return false; // 해시 길이가 Salt 길이보다 짧으면 유효하지 않음
-			}
-
-			byte[] salt = new byte[SALT_LENGTH];
-			System.arraycopy(combined, 0, salt, 0, SALT_LENGTH);
-
-			byte[] storedHash = new byte[combined.length - SALT_LENGTH];
-			System.arraycopy(combined, SALT_LENGTH, storedHash, 0, storedHash.length);
-
-			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
-			md.update(salt);
-
-			// 👇 [수정] 인코딩 방식을 UTF-8로 명시 (hashPassword와 동일하게)
-			byte[] hashedInput = md.digest(plainPassword.getBytes(StandardCharsets.UTF_8));
-
-			return MessageDigest.isEqual(hashedInput, storedHash);
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
-	/**
-	 * 임시 비밀번호를 생성합니다.
-	 * 
-	 * @return 8자리의 랜덤 문자열
-	 */
-	public static String generateTempPassword() {
-		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		SecureRandom random = new SecureRandom();
-		StringBuilder password = new StringBuilder(8);
-		for (int i = 0; i < 8; i++) {
-			password.append(chars.charAt(random.nextInt(chars.length())));
-		}
-		return password.toString();
-	}
+    /**
+     * 비밀번호를 SHA-256으로 해싱합니다. (실제 서비스에서는 BCrypt 권장)
+     * @param password 해싱할 원본 비밀번호
+     * @return 해싱된 비밀번호 문자열
+     */
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            // SHA-256은 기본 알고리즘이므로 이 예외가 발생할 가능성은 거의 없습니다.
+            // 하지만 발생 시, 시스템이 더 이상 동작할 수 없음을 의미하므로 RuntimeException으로 처리합니다.
+            throw new RuntimeException("SHA-256 hashing algorithm not found", e);
+        }
+    }
+    
+    /**
+     * 입력된 비밀번호와 해싱된 비밀번호가 일치하는지 확인합니다.
+     */
+    public static boolean verifyPassword(String rawPassword, String hashedPassword) {
+        String newHashedPassword = hashPassword(rawPassword);
+        return Objects.equals(newHashedPassword, hashedPassword);
+    }
 }
