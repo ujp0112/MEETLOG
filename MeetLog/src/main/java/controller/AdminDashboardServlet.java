@@ -5,6 +5,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,8 +59,20 @@ public class AdminDashboardServlet extends HttpServlet {
         data.setTotalUsers(users != null ? users.size() : 0);
         data.setTotalRestaurants(restaurantService.findAll().size());
         data.setTotalReviews(reviewService.findAll().size());
+        
+        Map<String, Object> params = new HashMap<>();
 
-        final List<Reservation> reservations = reservationService.searchReservations(new HashMap<>());
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        // DB의 DATETIME 형식과 유사한 문자열로 포맷 지정
+        DateTimeFormatter formatterDate = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 포맷터를 사용해 LocalDateTime을 String으로 변환하여 전달
+        params.put("startDate", startOfDay.format(formatterDate)); 
+        params.put("endDate", endOfDay.format(formatterDate));
+
+        final List<Reservation> reservations = reservationService.searchReservations(params);
         data.setTotalReservations(reservations != null ? reservations.size() : 0);
 
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -134,6 +149,13 @@ public class AdminDashboardServlet extends HttpServlet {
         public void setTotalReservations(int totalReservations) { this.totalReservations = totalReservations; }
         public List<RecentActivity> getRecentActivities() { return recentActivities; }
         public void setRecentActivities(List<RecentActivity> recentActivities) { this.recentActivities = recentActivities; }
+		@Override
+		public String toString() {
+			return "DashboardData [totalUsers=" + totalUsers + ", totalRestaurants=" + totalRestaurants
+					+ ", totalReviews=" + totalReviews + ", totalReservations=" + totalReservations
+					+ ", recentActivities=" + recentActivities + "]";
+		}
+        
     }
     
     // 최근 활동 클래스

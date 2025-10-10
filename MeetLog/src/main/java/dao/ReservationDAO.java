@@ -73,7 +73,6 @@ public class ReservationDAO {
     }
     
     public int insert(Reservation reservation, SqlSession sqlSession) {
-    	System.out.println(")))))))))))))))))))))" + reservation);
         return sqlSession.insert(NAMESPACE + ".insert", reservation);
     }
 
