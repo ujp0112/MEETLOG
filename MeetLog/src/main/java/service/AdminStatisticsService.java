@@ -67,9 +67,15 @@ public class AdminStatisticsService {
 
         // 최근 월 통계에서 매출과 지점 정보
         MonthlyStatistics latest = dao.getLatestMonthlyStatistics();
-        if (latest != null && latest.getTotalRevenue() != null) {
-            data.setTotalRevenue(latest.getTotalRevenue().doubleValue());
+        String latestYearMonth = null;
+        if (latest != null) {
+            latestYearMonth = latest.getYearMonth(); // 예: "2025-02"
+            if (latest.getTotalRevenue() != null) {
+                data.setTotalRevenue(latest.getTotalRevenue().doubleValue());
+            }
         }
+        
+        
 
         // 지점 및 직원 수
         data.setTotalBranches(dao.getTotalBranchCount());
@@ -83,13 +89,13 @@ public class AdminStatisticsService {
         data.setRevenueGrowthRate(dao.getRevenueGrowthRate());
 
         // 카테고리별 통계 (TOP 5)
-        data.setPopularCategories(dao.getCategoryStatistics(currentMonth, 5));
+        data.setPopularCategories(dao.getCategoryStatistics(latestYearMonth, 5));
 
         // 월별 성장 추이 (최근 4개월)
         data.setMonthlyGrowths(dao.getMonthlyStatistics(4));
 
         // 지역별 분포 (TOP 5)
-        data.setRegionalDistributions(dao.getRegionalStatistics(currentMonth, 5));
+        data.setRegionalDistributions(dao.getRegionalStatistics(latestYearMonth, 5));
 
         return data;
     }

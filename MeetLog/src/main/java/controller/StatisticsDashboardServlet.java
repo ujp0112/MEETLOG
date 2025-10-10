@@ -33,6 +33,8 @@ public class StatisticsDashboardServlet extends HttpServlet {
             System.out.println("DEBUG: statisticsData 생성 완료 - totalUsers=" + statisticsData.getTotalUsers());
 
             request.setAttribute("statisticsData", statisticsData);
+            
+            System.out.println("))))))))))))))))))))))))))))"+statisticsData);
 
             request.getRequestDispatcher("/WEB-INF/views/admin-statistics-dashboard.jsp").forward(request, response);
         } catch (Exception e) {
