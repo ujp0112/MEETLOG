@@ -134,11 +134,14 @@
 
 	<!-- CourseServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
-	<!-- CourseManagementServlet은 @WebServlet 어노테이션으로 /admin/course-management에 매핑됨 -->
+	<!-- CourseManagementServlet은 @WebServlet 어노테이션으로 /admin/course-management에 
+		매핑됨 -->
 
-	<!-- CourseReservationServlet은 @WebServlet 어노테이션으로 /admin/course-reservation에 매핑됨 -->
+	<!-- CourseReservationServlet은 @WebServlet 어노테이션으로 /admin/course-reservation에 
+		매핑됨 -->
 
-	<!-- ReservationStatisticsServlet은 @WebServlet 어노테이션으로 /admin/reservation-statistics에 매핑됨 -->
+	<!-- ReservationStatisticsServlet은 @WebServlet 어노테이션으로 /admin/reservation-statistics에 
+		매핑됨 -->
 
 	<servlet>
 		<servlet-name>CourseReviewManagementServlet</servlet-name>
@@ -149,7 +152,8 @@
 		<url-pattern>/admin/course-review</url-pattern>
 	</servlet-mapping>
 
-	<!-- CourseStatisticsServlet은 @WebServlet 어노테이션으로 /admin/course-statistics에 매핑됨 -->
+	<!-- CourseStatisticsServlet은 @WebServlet 어노테이션으로 /admin/course-statistics에 
+		매핑됨 -->
 
 	<servlet>
 		<servlet-name>RegisterServlet</servlet-name>
@@ -220,17 +224,16 @@
 		<url-pattern>/column/*</url-pattern>
 		<url-pattern>/api/columns/*</url-pattern>
 	</servlet-mapping>
-	
 
-	<servlet>
+
+<!-- 	<servlet>
 		<servlet-name>AdminServlet</servlet-name>
 		<servlet-class>controller.AdminServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>AdminServlet</servlet-name>
-		<url-pattern>/admin</url-pattern>
-		<url-pattern>/admin/home</url-pattern>
-	</servlet-mapping>
+		<url-pattern>/admin/*</url-pattern>
+	</servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>AdminLoginServlet</servlet-name>
@@ -524,7 +527,8 @@
 		<url-pattern>/admin/report-management</url-pattern>
 	</servlet-mapping>
 
-	<!-- BranchStatisticsServlet은 @WebServlet 어노테이션으로 /admin/branch-statistics에 매핑됨 -->
+	<!-- BranchStatisticsServlet은 @WebServlet 어노테이션으로 /admin/branch-statistics에 
+		매핑됨 -->
 	<servlet>
 		<servlet-name>BranchStatisticsServlet</servlet-name>
 		<servlet-class>controller.BranchStatisticsServlet</servlet-class>
@@ -543,9 +547,11 @@
 		<url-pattern>/admin/revenue-analysis</url-pattern>
 	</servlet-mapping>
 
-	<!-- StatisticsDashboardServlet은 @WebServlet 어노테이션으로 /admin/statistics-dashboard에 매핑됨 -->
+	<!-- StatisticsDashboardServlet은 @WebServlet 어노테이션으로 /admin/statistics-dashboard에 
+		매핑됨 -->
 
-	<!-- SupportDashboardServlet 삭제됨 - SupportStatisticsServlet이 @WebServlet으로 /admin/support-dashboard 처리 -->
+	<!-- SupportDashboardServlet 삭제됨 - SupportStatisticsServlet이 @WebServlet으로 
+		/admin/support-dashboard 처리 -->
 
 	<servlet>
 		<servlet-name>SupportServlet</servlet-name>
@@ -557,14 +563,9 @@
 	</servlet-mapping>
 
 	<!-- SupportStatisticsServlet은 @WebServlet 어노테이션으로 매핑됨 (/admin/support-dashboard) -->
-	<!-- <servlet>
-		<servlet-name>SupportStatisticsServlet</servlet-name>
-		<servlet-class>controller.SupportStatisticsServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>SupportStatisticsServlet</servlet-name>
-		<url-pattern>/admin/support-statistics</url-pattern>
-	</servlet-mapping> -->
+	<!-- <servlet> <servlet-name>SupportStatisticsServlet</servlet-name> <servlet-class>controller.SupportStatisticsServlet</servlet-class> 
+		</servlet> <servlet-mapping> <servlet-name>SupportStatisticsServlet</servlet-name> 
+		<url-pattern>/admin/support-statistics</url-pattern> </servlet-mapping> -->
 
 	<servlet>
 		<servlet-name>UserAnalysisServlet</servlet-name>
@@ -621,7 +622,8 @@
 	<!-- ErpImageViewServlet은 @WebServlet 어노테이션으로 매핑됨 -->
 
 	<!-- 지점 관리 서블릿들 -->
-	<!-- BranchManagementServlet은 @WebServlet 어노테이션으로 /admin/branch-management에 매핑됨 -->
+	<!-- BranchManagementServlet은 @WebServlet 어노테이션으로 /admin/branch-management에 
+		매핑됨 -->
 	<servlet>
 		<servlet-name>ErpBranchManagementServlet</servlet-name>
 		<servlet-class>erpController.BranchManagementServlet</servlet-class>

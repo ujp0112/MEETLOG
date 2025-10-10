@@ -744,20 +744,30 @@ function handleFormSubmit(event, form) {
 function toggleAdvancedSearch() {
     const section = document.getElementById('advancedSearchSection');
     const toggleButton = document.getElementById('advancedSearchToggle');
-
     if (!section) {
         return;
     }
 
     const isHidden = section.classList.contains('hidden');
-
     if (isHidden) {
         section.classList.remove('hidden');
         section.setAttribute('aria-hidden', 'false');
         if (toggleButton) {
             toggleButton.setAttribute('aria-expanded', 'true');
         }
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // --- [수정된 스크롤 로직] ---
+        // 헤더의 높이를 가져옵니다. (header.jsp의 태그가 header가 아니면 이 부분을 수정해야 할 수 있습니다.)
+        const header = document.querySelector('header'); 
+        const headerHeight = header ? header.offsetHeight : 80; // 헤더 높이를 못 찾으면 기본값 80px
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        
+        // 헤더 높이와 추가 여백(20px)을 고려한 위치로 부드럽게 스크롤
+        window.scrollTo({
+            top: sectionTop - headerHeight - 20,
+            behavior: 'smooth'
+        });
+        
     } else {
         section.classList.add('hidden');
         section.setAttribute('aria-hidden', 'true');

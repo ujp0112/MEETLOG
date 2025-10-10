@@ -1,5 +1,6 @@
 package util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -9,17 +10,17 @@ public class PasswordUtil {
 	private static final String ALGORITHM = "SHA-256";
 	private static final int SALT_LENGTH = 16;
 
+	/**
+	 * 비밀번호와 Salt를 결합하여 SHA-256 해시를 생성하고 Base64로 인코딩합니다.
+	 * 
+	 * @param password 평문 비밀번호
+	 * @return Salt가 포함된 Base64 인코딩 해시 문자열
+	 */
 	public static String hashPassword(String password) {
-		// null 체크 추가
 		if (password == null || password.trim().isEmpty()) {
-			throw new IllegalArgumentException("비밀번호가 null이거나 비어있습니다.");
+			throw new IllegalArgumentException("비밀번호는 null이거나 비어있을 수 없습니다.");
 		}
-		
-		// BCrypt 형식인지 확인
-		if (password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$")) {
-			return password; // 이미 BCrypt로 해시된 경우 그대로 반환
-		}
-		
+
 		try {
 			SecureRandom random = new SecureRandom();
 			byte[] salt = new byte[SALT_LENGTH];
@@ -27,7 +28,9 @@ public class PasswordUtil {
 
 			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
 			md.update(salt);
-			byte[] hashedPassword = md.digest(password.getBytes());
+
+			// 👇 [수정] 인코딩 방식을 UTF-8로 명시
+			byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
 			byte[] combined = new byte[salt.length + hashedPassword.length];
 			System.arraycopy(salt, 0, combined, 0, salt.length);
@@ -35,50 +38,53 @@ public class PasswordUtil {
 
 			return Base64.getEncoder().encodeToString(combined);
 		} catch (NoSuchAlgorithmException e) {
-			throw new RuntimeException("해시 알고리즘을 찾을 수 없습니다.", e);
+			throw new RuntimeException("SHA-256 해시 알고리즘을 찾을 수 없습니다.", e);
 		}
 	}
 
-	public static boolean verifyPassword(String password, String hashedPassword) {
-		// 간단한 평문 비교 (테스트용)
-		if (hashedPassword != null && hashedPassword.equals(password)) {
-			return true;
+	/**
+	 * 입력된 평문 비밀번호와 저장된 해시를 비교하여 일치 여부를 확인합니다.
+	 * 
+	 * @param plainPassword  사용자가 입력한 평문 비밀번호
+	 * @param hashedPassword 데이터베이스에 저장된 해시 문자열
+	 * @return 비밀번호 일치 여부 (true/false)
+	 */
+	public static boolean verifyPassword(String plainPassword, String hashedPassword) {
+		if (plainPassword == null || plainPassword.trim().isEmpty() || hashedPassword == null
+				|| hashedPassword.trim().isEmpty()) {
+			return false;
 		}
-		
-		// BCrypt 형식인지 확인
-		if (hashedPassword != null && (hashedPassword.startsWith("$2a$") || hashedPassword.startsWith("$2b$") || hashedPassword.startsWith("$2y$"))) {
-			// BCrypt 검증 - 샘플 데이터의 비밀번호들을 허용
-			return "password123".equals(password) || 
-				   "123456".equals(password) || 
-				   "test123".equals(password) ||
-				   "admin123".equals(password);
-		}
-		
-		// Base64 디코딩이 가능한지 먼저 확인
+
 		try {
 			byte[] combined = Base64.getDecoder().decode(hashedPassword);
-			
-			// SHA-256 + Salt 형식 검증
+
+			if (combined.length < SALT_LENGTH) {
+				return false; // 해시 길이가 Salt 길이보다 짧으면 유효하지 않음
+			}
+
 			byte[] salt = new byte[SALT_LENGTH];
 			System.arraycopy(combined, 0, salt, 0, SALT_LENGTH);
-
-			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
-			md.update(salt);
-			byte[] hashedInput = md.digest(password.getBytes());
 
 			byte[] storedHash = new byte[combined.length - SALT_LENGTH];
 			System.arraycopy(combined, SALT_LENGTH, storedHash, 0, storedHash.length);
 
+			MessageDigest md = MessageDigest.getInstance(ALGORITHM);
+			md.update(salt);
+
+			// 👇 [수정] 인코딩 방식을 UTF-8로 명시 (hashPassword와 동일하게)
+			byte[] hashedInput = md.digest(plainPassword.getBytes(StandardCharsets.UTF_8));
+
 			return MessageDigest.isEqual(hashedInput, storedHash);
 		} catch (Exception e) {
-			// Base64 디코딩 실패 시 테스트 비밀번호 허용
-			return "password123".equals(password) || 
-				   "123456".equals(password) || 
-				   "test123".equals(password) ||
-				   "admin123".equals(password);
+			return false;
 		}
 	}
 
+	/**
+	 * 임시 비밀번호를 생성합니다.
+	 * 
+	 * @return 8자리의 랜덤 문자열
+	 */
 	public static String generateTempPassword() {
 		String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		SecureRandom random = new SecureRandom();

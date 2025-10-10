@@ -1528,3 +1528,17 @@ INSERT IGNORE INTO `restaurant_reservation_settings` (
      1, '09:00:00', '23:00:00',
      1, '08:00:00', '23:00:00',
      1, '08:00:00', '22:00:00');
+     
+     
+UPDATE meetlog.users
+SET password = 'rNErKm1GH/XfNdjBFNhP2ls/ekypcIwFEzn4yitLBcIid4wavwUs4YLw6zHfeOjV'
+WHERE nickname = 'admin';
+
+INSERT INTO meetlog.users 
+(email, nickname, password, user_type, level, is_active, created_at, updated_at) 
+VALUES 
+('superadmin@meetlog.com', '슈퍼관리자', 'dr1F+Phuj3SRwd/0drJXSngaRHWEnZWQC6bDgjVHnpPpIeEbeh7hpFIw82qCbGdE', 'ADMIN', 1, 1, NOW(), NOW());
+
+-- admin Id: admin@meetlog.com pw: admin123
+-- superadmin Id: superadmin@meetlog.com pw: superadmin123
+

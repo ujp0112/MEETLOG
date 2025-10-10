@@ -1,15 +1,20 @@
 package dao;
 
-import model.User;
-import util.MyBatisSqlSessionFactory;
-import org.apache.ibatis.session.SqlSession;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import model.User;
+import util.MyBatisSqlSessionFactory;
 
 public class UserDAO {
 	private static final String NAMESPACE = "dao.UserDAO";
-
+	private static final Logger log = LoggerFactory.getLogger(UserDAO.class);
+	
 	public User findByEmail(String email) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
 			return sqlSession.selectOne(NAMESPACE + ".findByEmail", email);

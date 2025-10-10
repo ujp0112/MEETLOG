@@ -1,13 +1,18 @@
 package service;
 
 import java.util.List;
-import model.ReviewComment;
-import dao.ReviewCommentDAO;
-import util.MyBatisSqlSessionFactory;
+
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import dao.ReviewCommentDAO;
+import model.ReviewComment;
+import util.MyBatisSqlSessionFactory;
 
 public class ReviewCommentService {
     private ReviewCommentDAO reviewCommentDAO = new ReviewCommentDAO();
+    private static final Logger log = LoggerFactory.getLogger(ReviewCommentService.class);
     
     /**
      * 리뷰 답글 추가 (트랜잭션 포함)

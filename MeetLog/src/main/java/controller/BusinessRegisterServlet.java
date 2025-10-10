@@ -56,11 +56,12 @@ public class BusinessRegisterServlet extends HttpServlet {
             User user = new User();
             user.setEmail(email);
             user.setNickname(businessName);
-            user.setPassword(PasswordUtil.hashPassword(password));
+            user.setPassword(password);
             user.setUserType("BUSINESS");
             user.setName(ownerName);
             user.setPhone(phone);
             user.setAddress(address);
+            user.setActive(true); 
 
             Restaurant restaurant = new Restaurant();
             restaurant.setName(businessName);

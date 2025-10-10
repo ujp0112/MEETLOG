@@ -56,6 +56,8 @@ public class SocialLoginCallbackServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 					session.setAttribute("user", user);
 					session.setMaxInactiveInterval(30 * 60);
+					
+					session.setAttribute("socialProvider", provider); 
 
 					System.out.println("로그인 성공, 메인 페이지로 리디렉션: " + user.getEmail()); // 성공 로그 추가
 					response.sendRedirect(request.getContextPath() + "/main");
