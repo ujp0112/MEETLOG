@@ -19,6 +19,9 @@
         <result property="depositAmount" column="deposit_amount"/>
         <result property="userCouponId" column="user_coupon_id"/>
         <result property="couponDiscountAmount" column="coupon_discount_amount"/>
+        <result property="couponName" column="coupon_name"/>
+        <result property="couponDiscountType" column="coupon_discount_type"/>
+        <result property="couponIsUsed" column="coupon_is_used"/>
         <result property="paymentStatus" column="payment_status"/>
         <result property="paymentOrderId" column="payment_order_id"/>
         <result property="paymentApprovedAt" column="payment_approved_at"/>
