@@ -4,6 +4,7 @@ import dao.AdminStatisticsDAO;
 import dao.RecommendationDAO;
 import model.*;
 import service.port.RecommendationPort; // ✨ 구체 클래스가 아닌 '포트(인터페이스)'를 import
+import service.UserVectorService;
 
 import dto.RestaurantPopularity;
 
@@ -24,6 +25,7 @@ public class IntelligentRecommendationService {
     private final UserAnalyticsService userAnalyticsService;
     private final RecommendationPort recommendationPort;
     private final dao.RecommendationMetricDAO metricDAO;
+    private final UserVectorService userVectorService = UserVectorService.getInstance();
 
     // --- 추천 성능 지표 ---
     private static final double TREND_WEIGHT = 0.15;      // 트렌드 가중치
@@ -328,13 +330,7 @@ public class IntelligentRecommendationService {
 
         // KoBERT 기반 '의미 유사도' 신규 피처 추가
         try {
-            List<String> userReviews = recommendationDAO.findRecentPositiveReviewsByUserId(userId, 5);
-            List<double[]> userVectors = userReviews.stream()
-                .map(recommendationPort::getVectorFromText)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-            double[] userVector = calculateAverageVector(userVectors);
-
+            double[] userVector = userVectorService.getOrComputeVector(userId);
             double[] restaurantVector = recommendationDAO.getRestaurantContentVectorById(restaurant.getId());
 
             if (userVector != null && restaurantVector != null) {
@@ -415,21 +411,6 @@ public class IntelligentRecommendationService {
     // 벡터 계산을 위한 헬퍼(Helper) 메소드들
     // =================================================================
 
-    private double[] calculateAverageVector(List<double[]> vectors) {
-        if (vectors == null || vectors.isEmpty()) return null;
-        int vectorSize = vectors.get(0).length;
-        double[] averageVector = new double[vectorSize];
-        for (double[] vector : vectors) {
-            for (int i = 0; i < vectorSize; i++) {
-                averageVector[i] += vector[i];
-            }
-        }
-        for (int i = 0; i < vectorSize; i++) {
-            averageVector[i] /= vectors.size();
-        }
-        return averageVector;
-    }
-
     private double calculateCosineSimilarity(double[] vecA, double[] vecB) {
         if (vecA == null || vecB == null || vecA.length != vecB.length) return 0.0;
         double dotProduct = 0.0;
@@ -450,16 +431,8 @@ public class IntelligentRecommendationService {
      */
     private List<RestaurantRecommendation> getDeepLearningContentRecommendations(
             int userId, UserBehaviorPattern pattern, int limit) {
-        // 1. 사용자의 '취향 벡터' 생성 (최근 긍정 리뷰 기반)
-        List<String> userPositiveReviews = recommendationDAO.findRecentPositiveReviewsByUserId(userId, 10);
-        if (userPositiveReviews.isEmpty()) return new ArrayList<>();
-
-        List<double[]> userReviewVectors = userPositiveReviews.stream()
-                .map(recommendationPort::getVectorFromText) // ✨ 주입받은 포트를 통해 벡터 변환
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        double[] userPreferenceVector = calculateAverageVector(userReviewVectors);
+        // 1. 사용자의 '취향 벡터' 생성 (캐시 기반)
+        double[] userPreferenceVector = userVectorService.getOrComputeVector(userId);
         if (userPreferenceVector == null) return new ArrayList<>();
 
         // 2. (사전 계산된) 맛집들의 콘텐츠 벡터와 유사도 계산

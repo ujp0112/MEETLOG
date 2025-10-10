@@ -19,7 +19,9 @@ public class KoBertAdapter implements RecommendationPort {
     private static final int MAX_RETRIES = 3;
     private static final int INITIAL_BACKOFF_MS = 100;
 
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override

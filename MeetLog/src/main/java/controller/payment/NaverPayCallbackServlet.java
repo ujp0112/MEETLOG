@@ -39,25 +39,46 @@ public class NaverPayCallbackServlet extends HttpServlet {
         String merchantPayKey = request.getParameter("merchantPayKey");
         String paymentId = request.getParameter("paymentId");
         String errorMessage = request.getParameter("errorMessage");
+        String reservationIdParam = request.getParameter("reservationId");
+
+        log.info("NaverPay return received: resultCode={}, merchantPayKey={}, paymentId={}, reservationIdParam={}",
+                resultCode, merchantPayKey, paymentId, reservationIdParam);
 
         HttpSession session = request.getSession(false);
         User currentUser = session != null ? (User) session.getAttribute("user") : null;
 
-        if (merchantPayKey == null || merchantPayKey.isBlank()) {
-            redirectFailure(request, response, "INVALID_PAY_KEY");
-            return;
-        }
+        // merchantPayKey는 네이버페이 콜백에서 전달되지 않을 수 있으므로 체크 제거
+        // if (merchantPayKey == null || merchantPayKey.isBlank()) {
+        //     redirectFailure(request, response, "INVALID_PAY_KEY");
+        //     return;
+        // }
 
-        int reservationId = extractReservationId(merchantPayKey);
+        int reservationId = parseInt(reservationIdParam);
+        log.info("Parsed reservationId from param: {}", reservationId);
+
         if (reservationId <= 0) {
-            redirectFailure(request, response, "INVALID_PAY_KEY");
-            return;
+            reservationId = extractReservationId(merchantPayKey);
+            log.info("Extracted reservationId from merchantPayKey: {}", reservationId);
         }
 
-        Reservation reservation = reservationService.getReservationById(reservationId);
+        Reservation reservation = reservationId > 0
+                ? reservationService.getReservationById(reservationId)
+                : null;
+        log.info("Reservation lookup by ID {}: {}", reservationId, reservation != null ? "found" : "null");
+
+        if (reservation == null && merchantPayKey != null && !merchantPayKey.isBlank()) {
+            reservation = reservationService.getReservationByPaymentOrderId(merchantPayKey);
+            log.info("Reservation lookup by merchantPayKey {}: {}", merchantPayKey, reservation != null ? "found" : "null");
+        }
+
         if (reservation == null) {
+            log.error("Reservation not found! reservationIdParam={}, merchantPayKey={}", reservationIdParam, merchantPayKey);
             redirectFailure(request, response, "RESERVATION_NOT_FOUND");
             return;
+        }
+
+        if (reservationId <= 0) {
+            reservationId = reservation.getId();
         }
 
         if (currentUser == null || reservation.getUserId() != currentUser.getId()) {
@@ -65,15 +86,22 @@ public class NaverPayCallbackServlet extends HttpServlet {
             return;
         }
 
-        if (reservation.getPaymentOrderId() != null
-                && !reservation.getPaymentOrderId().isBlank()
-                && !reservation.getPaymentOrderId().equals(merchantPayKey)) {
-            redirectFailure(request, response, "PAY_KEY_MISMATCH");
-            return;
-        }
+        log.info("Payment info check: reservationId={}, paymentOrderId={}, incoming merchantPayKey={}",
+                reservationId, reservation.getPaymentOrderId(), merchantPayKey);
 
-        if (reservation.getPaymentOrderId() == null || reservation.getPaymentOrderId().isBlank()) {
-            reservation.setPaymentOrderId(merchantPayKey);
+        if (merchantPayKey != null && !merchantPayKey.isBlank()) {
+            if (reservation.getPaymentOrderId() == null || reservation.getPaymentOrderId().isBlank()) {
+                log.debug("Assigning merchantPayKey {} to reservation {}", merchantPayKey, reservationId);
+                reservation.setPaymentOrderId(merchantPayKey);
+            } else if (!reservation.getPaymentOrderId().equals(merchantPayKey)) {
+                log.warn("merchantPayKey mismatch. existing={}, incoming={}. Updating to incoming.", reservation.getPaymentOrderId(), merchantPayKey);
+                reservation.setPaymentOrderId(merchantPayKey);
+            }
+        } else if (reservation.getPaymentOrderId() != null) {
+            merchantPayKey = reservation.getPaymentOrderId();
+            log.info("Using existing paymentOrderId {} as merchantPayKey.", merchantPayKey);
+        } else {
+            log.error("No merchantPayKey available! reservationId={}, paymentOrderId is null", reservationId);
         }
 
         if (!SUCCESS_CODE.equalsIgnoreCase(resultCode)) {
@@ -91,6 +119,14 @@ public class NaverPayCallbackServlet extends HttpServlet {
         if (expectedAmount == null || expectedAmount.compareTo(BigDecimal.ZERO) <= 0) {
             handleFailure(reservation, merchantPayKey, request, response, "INVALID_DEPOSIT_AMOUNT");
             return;
+        }
+
+        if (merchantPayKey == null || merchantPayKey.isBlank()) {
+            merchantPayKey = reservation.getPaymentOrderId();
+        }
+        if (merchantPayKey == null || merchantPayKey.isBlank()) {
+            merchantPayKey = "RES-" + reservation.getId();
+            log.warn("merchantPayKey missing. Using fallback key {}.", merchantPayKey);
         }
 
         PaymentConfirmResult confirmResult = naverPayService.confirmPayment(
@@ -115,6 +151,13 @@ public class NaverPayCallbackServlet extends HttpServlet {
         }
 
         if (confirmResult.isSuccess()) {
+            naverPayService.markPaymentSuccess(reservation, merchantPayKey);
+            persistPayment(reservation);
+            reservationService.updateReservationStatus(reservation.getId(), reservation.getStatus());
+            redirectSuccess(request, response);
+        } else if (naverPayService.isAutoApproveOnReturn() && SUCCESS_CODE.equalsIgnoreCase(resultCode)) {
+            log.info("Auto-approving payment on return (dev mode fallback): reservationId={}, merchantPayKey={}",
+                    reservation.getId(), merchantPayKey);
             naverPayService.markPaymentSuccess(reservation, merchantPayKey);
             persistPayment(reservation);
             reservationService.updateReservationStatus(reservation.getId(), reservation.getStatus());
@@ -161,6 +204,9 @@ public class NaverPayCallbackServlet extends HttpServlet {
     }
 
     private int extractReservationId(String merchantPayKey) {
+        if (merchantPayKey == null || merchantPayKey.isBlank()) {
+            return -1;
+        }
         try {
             if (merchantPayKey.startsWith("RES-")) {
                 String[] parts = merchantPayKey.split("-");
@@ -171,5 +217,16 @@ public class NaverPayCallbackServlet extends HttpServlet {
         } catch (NumberFormatException ignore) {
         }
         return -1;
+    }
+
+    private int parseInt(String value) {
+        if (value == null || value.isBlank()) {
+            return -1;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 }

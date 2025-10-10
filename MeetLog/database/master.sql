@@ -734,6 +734,19 @@ CREATE TABLE `restaurant_vectors` (
   CONSTRAINT `restaurant_vectors_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='레스토랑 KoBERT 벡터 저장소';
 
+-- 사용자 취향 벡터 캐시 테이블
+CREATE TABLE `user_preference_vectors` (
+  `user_id` int(11) NOT NULL,
+  `vector_json` longtext DEFAULT NULL COMMENT '평균화된 사용자 취향 벡터 (JSON 배열)',
+  `status` varchar(20) NOT NULL DEFAULT 'EMPTY' COMMENT 'READY / PROCESSING / EMPTY / FAILED',
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `last_error` text DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `idx_upv_status` (`status`),
+  KEY `idx_upv_updated_at` (`updated_at`),
+  CONSTRAINT `user_preference_vectors_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자 리뷰 기반 취향 벡터 캐시';
+
 -- 사용자 리뷰 벡터 캐시 테이블 (선택적)
 CREATE TABLE `user_review_vectors` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1541,4 +1554,3 @@ VALUES
 
 -- admin Id: admin@meetlog.com pw: admin123
 -- superadmin Id: superadmin@meetlog.com pw: superadmin123
-

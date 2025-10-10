@@ -122,5 +122,6 @@
 		<mapper resource="erpMappers/PromotionMapper.xml" />
 		<mapper resource="mappers/ReportMapper.xml" />
 		<mapper resource="mappers/CourseReservationMapper.xml" />
+		<mapper resource="mappers/UserVectorMapper.xml" />
 	</mappers>
 </configuration>

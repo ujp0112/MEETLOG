@@ -26,6 +26,10 @@ public class ReservationService {
         return reservationDAO.findById(reservationId);
     }
 
+    public Reservation getReservationByPaymentOrderId(String paymentOrderId) {
+        return reservationDAO.findByPaymentOrderId(paymentOrderId);
+    }
+
     public List<Reservation> getTodayReservations(int restaurantId) {
         return reservationDAO.findTodayReservations(restaurantId);
     }

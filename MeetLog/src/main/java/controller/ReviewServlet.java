@@ -25,6 +25,7 @@ import model.User;
 import service.ReviewService;
 import service.RestaurantService;
 import service.FeedService;
+import service.UserVectorService;
 import util.AppConfig; // AppConfig 임포트 확인
 
 @WebServlet({ "/review/*" })
@@ -152,9 +153,13 @@ public class ReviewServlet extends HttpServlet {
 			review.setKeywords(keywords);
 			review.setImages(imageFileNames);
 
-			reviewService.addReview(review);
+		boolean success = reviewService.addReview(review);
 
-			response.sendRedirect(request.getContextPath() + "/restaurant/detail/" + restaurantId);
+		if (success) {
+			UserVectorService.getInstance().requestVectorUpdate(user.getId());
+		}
+
+		response.sendRedirect(request.getContextPath() + "/restaurant/detail/" + restaurantId);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -249,10 +254,11 @@ public class ReviewServlet extends HttpServlet {
 
 			boolean success = reviewService.updateReview(review);
 
-			if (success) {
-				response.sendRedirect(
-						request.getContextPath() + "/restaurant/detail/" + existingReview.getRestaurantId());
-			} else {
+		if (success) {
+			UserVectorService.getInstance().requestVectorUpdate(user.getId());
+			response.sendRedirect(
+					request.getContextPath() + "/restaurant/detail/" + existingReview.getRestaurantId());
+		} else {
 				request.setAttribute("errorMessage", "리뷰 수정에 실패했습니다.");
 				showEditReviewForm(request, response);
 			}
@@ -429,9 +435,10 @@ public class ReviewServlet extends HttpServlet {
 			// 리뷰 삭제 (내부적으로 평점 업데이트까지 처리됨)
 			boolean success = reviewService.deleteReview(reviewId);
 
-			if (success) {
-				response.getWriter().write("{\"success\": true, \"message\": \"리뷰가 삭제되었습니다.\"}");
-			} else {
+		if (success) {
+			UserVectorService.getInstance().requestVectorUpdate(user.getId());
+			response.getWriter().write("{\"success\": true, \"message\": \"리뷰가 삭제되었습니다.\"}");
+		} else {
 				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				response.getWriter().write("{\"success\": false, \"message\": \"리뷰 삭제에 실패했습니다.\"}");
 			}

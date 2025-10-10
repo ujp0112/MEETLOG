@@ -20,11 +20,19 @@ public class ReservationDAO {
 		}
 	}
 
-	public Reservation findById(int reservationId) {
-		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-			return sqlSession.selectOne(NAMESPACE + ".findById", reservationId);
-		}
-	}
+    public Reservation findById(int reservationId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            return sqlSession.selectOne(NAMESPACE + ".findById", reservationId);
+        }
+    }
+
+    public Reservation findByPaymentOrderId(String paymentOrderId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Object> params = new java.util.HashMap<>();
+            params.put("paymentOrderId", paymentOrderId);
+            return sqlSession.selectOne(NAMESPACE + ".findByPaymentOrderId", params);
+        }
+    }
 
 	public List<Reservation> findByUserId(int userId) {
 		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {

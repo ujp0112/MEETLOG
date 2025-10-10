@@ -134,52 +134,166 @@
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
 
+    <div id="cancel-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-slate-900/50" data-cancel-overlay="true"></div>
+        <div class="relative z-10 flex min-h-full items-center justify-center p-4">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-xl font-semibold text-slate-800">예약 취소</h2>
+                        <p class="mt-1 text-sm text-slate-500">취소 사유를 입력한 후 확정해 주세요. (최대 500자)</p>
+                    </div>
+                    <button type="button" class="text-slate-400 hover:text-slate-600" data-cancel-close="true" aria-label="닫기">
+                        &times;
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <label for="cancel-reason" class="mb-2 block text-sm font-medium text-slate-700">취소 사유</label>
+                    <textarea id="cancel-reason" rows="5" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200" placeholder="예: 갑작스러운 일정 변경으로 방문이 어려워요."></textarea>
+                    <div class="mt-2 flex items-center justify-between text-xs text-slate-500">
+                        <span id="cancel-error" class="text-red-500"></span>
+                        <span id="cancel-char-count">0 / 500</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100" data-cancel-close="true">
+                        돌아가기
+                    </button>
+                    <button type="button" id="cancel-confirm-btn" data-success-message="예약이 성공적으로 취소되었습니다." class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
+                        예약 취소 확정
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function cancelReservation(reservationId) {
-            if (!confirm('정말로 이 예약을 취소하시겠습니까?')) {
+        (function() {
+            const cancelModal = document.getElementById('cancel-modal');
+            const cancelReasonField = document.getElementById('cancel-reason');
+            const cancelConfirmBtn = document.getElementById('cancel-confirm-btn');
+            const cancelError = document.getElementById('cancel-error');
+            const cancelCharCount = document.getElementById('cancel-char-count');
+            const cancelCloseButtons = document.querySelectorAll('[data-cancel-close]');
+            let pendingReservationId = null;
+
+            if (!cancelModal || !cancelReasonField || !cancelConfirmBtn) {
                 return;
             }
 
-            const reasonInput = prompt('취소 사유를 입력해주세요 (500자 이내):');
-            if (reasonInput === null) {
-                return;
-            }
+            const successMessage = cancelConfirmBtn.dataset.successMessage || '예약이 취소되었습니다.';
 
-            const cancelReason = reasonInput.trim();
-            if (!cancelReason) {
-                alert('취소 사유를 입력해주세요.');
-                return;
-            }
-            if (cancelReason.length > 500) {
-                alert('취소 사유는 500자 이내로 입력해주세요.');
-                return;
-            }
+            const setConfirmDisabled = (disabled) => {
+                cancelConfirmBtn.disabled = disabled;
+                cancelConfirmBtn.classList.toggle('cursor-not-allowed', disabled);
+                cancelConfirmBtn.classList.toggle('opacity-50', disabled);
+            };
 
-            const payload = new URLSearchParams();
-            payload.append('reservationId', reservationId);
-            payload.append('cancelReason', cancelReason);
-
-            fetch('${pageContext.request.contextPath}/reservation/cancel', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: payload.toString()
-            })
-            .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
-            .then(({ ok, body }) => {
-                if (ok && body.success) {
-                    alert('예약이 성공적으로 취소되었습니다.');
-                    location.reload();
+            const updateCharCount = () => {
+                const length = cancelReasonField.value.trim().length;
+                cancelCharCount.textContent = `${length} / 500`;
+                let disabled = false;
+                if (length === 0) {
+                    cancelError.textContent = '';
+                    disabled = true;
+                } else if (length > 500) {
+                    cancelError.textContent = '취소 사유는 500자 이내로 입력해주세요.';
+                    disabled = true;
                 } else {
-                    alert(body.message || '예약 취소 중 오류가 발생했습니다.');
+                    cancelError.textContent = '';
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('예약 취소 중 오류가 발생했습니다.');
+                setConfirmDisabled(disabled);
+            };
+
+            const openCancelModal = (reservationId) => {
+                pendingReservationId = reservationId;
+                cancelReasonField.value = '';
+                cancelError.textContent = '';
+                updateCharCount();
+                cancelModal.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                setTimeout(() => cancelReasonField.focus(), 50);
+            };
+
+            const closeCancelModal = () => {
+                pendingReservationId = null;
+                cancelModal.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            const submitCancellation = () => {
+                const reason = cancelReasonField.value.trim();
+                if (!pendingReservationId) {
+                    return;
+                }
+                if (!reason) {
+                    cancelError.textContent = '취소 사유를 입력해주세요.';
+                    setConfirmDisabled(true);
+                    cancelReasonField.focus();
+                    cancelCharCount.textContent = '0 / 500';
+                    return;
+                }
+                if (reason.length > 500) {
+                    cancelError.textContent = '취소 사유는 500자 이내로 입력해주세요.';
+                    setConfirmDisabled(true);
+                    return;
+                }
+
+                const payload = new URLSearchParams();
+                payload.append('reservationId', pendingReservationId);
+                payload.append('cancelReason', reason);
+
+                const originalText = cancelConfirmBtn.dataset.originalText || cancelConfirmBtn.textContent;
+                cancelConfirmBtn.dataset.originalText = originalText;
+                cancelConfirmBtn.textContent = '처리 중...';
+                setConfirmDisabled(true);
+
+                fetch('${pageContext.request.contextPath}/reservation/cancel', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: payload.toString()
+                })
+                .then(response => response.json().then(data => ({ ok: response.ok, body: data })))
+                .then(({ ok, body }) => {
+                    if (ok && body.success) {
+                        closeCancelModal();
+                        alert(successMessage);
+                        location.reload();
+                    } else {
+                        cancelError.textContent = body.message || '예약 취소 중 오류가 발생했습니다.';
+                        setConfirmDisabled(false);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    cancelError.textContent = '예약 취소 중 오류가 발생했습니다.';
+                    setConfirmDisabled(false);
+                })
+                .finally(() => {
+                    cancelConfirmBtn.textContent = cancelConfirmBtn.dataset.originalText || '예약 취소 확정';
+                });
+            };
+
+            cancelReasonField.addEventListener('input', updateCharCount);
+            cancelConfirmBtn.addEventListener('click', submitCancellation);
+            cancelCloseButtons.forEach(button => button.addEventListener('click', closeCancelModal));
+            cancelModal.addEventListener('click', (event) => {
+                if (event.target.dataset.cancelOverlay === 'true') {
+                    closeCancelModal();
+                }
             });
-        }
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && !cancelModal.classList.contains('hidden')) {
+                    closeCancelModal();
+                }
+            });
+
+            window.cancelReservation = openCancelModal;
+        })();
     </script>
 </body>
 </html>

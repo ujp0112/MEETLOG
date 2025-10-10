@@ -44,6 +44,7 @@ public class NaverPayService {
     private final String chainId;
     private final boolean skipConfirm;
     private final boolean fallbackOnFailure;
+    private final boolean autoApproveOnReturn;
     private final Gson gson = new Gson();
 
     public NaverPayService() {
@@ -55,6 +56,7 @@ public class NaverPayService {
         this.chainId = AppConfig.getProperty("naverpay.chainId", "");
         this.skipConfirm = Boolean.parseBoolean(AppConfig.getProperty("naverpay.skipConfirm", "false"));
         this.fallbackOnFailure = Boolean.parseBoolean(AppConfig.getProperty("naverpay.fallbackOnFailure", "false"));
+        this.autoApproveOnReturn = Boolean.parseBoolean(AppConfig.getProperty("naverpay.autoApproveOnReturn", "false"));
     }
 
     public boolean isConfigured() {
@@ -89,6 +91,10 @@ public class NaverPayService {
         return fallbackOnFailure;
     }
 
+    public boolean isAutoApproveOnReturn() {
+        return autoApproveOnReturn;
+    }
+
     /**
      * 네이버페이에서 요구하는 merchantPayKey 생성. 예약 ID 기반으로 생성한다.
      */
@@ -117,7 +123,10 @@ public class NaverPayService {
         config.setTaxScopeAmount(config.getTotalPayAmount());
         config.setTaxExScopeAmount(BigDecimal.ZERO);
         config.setProductCount(1);
-        config.setReturnUrl(resolveReturnUrl(request));
+        String returnUrl = skipConfirm
+                ? resolveAbsoluteUrl(request, "/payment-result")
+                : resolveReturnUrl(request);
+        config.setReturnUrl(appendQueryParam(returnUrl, "reservationId", String.valueOf(reservation.getId())));
         config.setReservationId(reservation.getId());
         config.setMerchantId(getMerchantId());
         config.setChainId(getChainId());
@@ -130,6 +139,10 @@ public class NaverPayService {
         if (explicit != null && !explicit.isBlank()) {
             return explicit;
         }
+        return resolveAbsoluteUrl(request, DEFAULT_RETURN_PATH);
+    }
+
+    private String resolveAbsoluteUrl(HttpServletRequest request, String path) {
         String scheme = request.getScheme();
         String serverName = request.getServerName();
         int serverPort = request.getServerPort();
@@ -140,8 +153,20 @@ public class NaverPayService {
                 && !("https".equalsIgnoreCase(scheme) && serverPort == 443)) {
             sb.append(":" + serverPort);
         }
-        sb.append(contextPath).append(DEFAULT_RETURN_PATH);
+        if (path.startsWith("/")) {
+            sb.append(contextPath).append(path);
+        } else {
+            sb.append(contextPath).append("/").append(path);
+        }
         return sb.toString();
+    }
+
+    private String appendQueryParam(String url, String key, String value) {
+        if (value == null || value.isBlank()) {
+            return url;
+        }
+        String separator = url.contains("?") ? "&" : "?";
+        return url + separator + key + "=" + java.net.URLEncoder.encode(value, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     /**
