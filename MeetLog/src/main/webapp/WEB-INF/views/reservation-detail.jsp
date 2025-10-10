@@ -102,7 +102,52 @@
                                             </div>
                                         </div>
                                     </c:if>
-                                    
+
+                                    <c:if test="${reservation.depositRequired}">
+                                        <div class="mb-6">
+                                            <h2 class="text-lg font-bold text-slate-800 mb-3">예약금 정보</h2>
+                                            <div class="p-4 rounded-lg border ${reservation.paymentStatus == 'PAID' ? 'bg-emerald-50 border-emerald-200' : reservation.paymentStatus == 'PENDING' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}">
+                                                <div class="flex items-start justify-between">
+                                                    <div class="flex-1">
+                                                        <h3 class="font-medium text-slate-700 mb-1">예약금 금액</h3>
+                                                        <p class="text-2xl font-bold ${reservation.paymentStatus == 'PAID' ? 'text-emerald-700' : reservation.paymentStatus == 'PENDING' ? 'text-amber-700' : 'text-red-700'}">
+                                                            <fmt:formatNumber value="${reservation.depositAmount}" pattern="#,##0"/>원
+                                                        </p>
+                                                        <c:if test="${not empty reservation.paymentProvider}">
+                                                            <p class="text-sm text-slate-600 mt-2">결제 수단: ${reservation.paymentProvider}</p>
+                                                        </c:if>
+                                                        <c:if test="${not empty reservation.paymentOrderId}">
+                                                            <p class="text-xs text-slate-500 mt-1">주문번호: ${reservation.paymentOrderId}</p>
+                                                        </c:if>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <c:choose>
+                                                            <c:when test="${reservation.paymentStatus == 'PAID'}">
+                                                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-emerald-700 bg-emerald-100">결제 완료</span>
+                                                                <c:if test="${reservation.paymentApprovedAt != null}">
+                                                                    <p class="text-xs text-emerald-700 mt-2">
+                                                                        승인: <fmt:formatDate value="${reservation.paymentApprovedAtAsDate}" pattern="yyyy-MM-dd HH:mm" />
+                                                                    </p>
+                                                                </c:if>
+                                                            </c:when>
+                                                            <c:when test="${reservation.paymentStatus == 'PENDING'}">
+                                                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-amber-700 bg-amber-100">결제 대기</span>
+                                                                <p class="text-xs text-amber-700 mt-2">결제를 완료해주세요</p>
+                                                            </c:when>
+                                                            <c:when test="${reservation.paymentStatus == 'FAILED'}">
+                                                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-red-700 bg-red-100">결제 실패</span>
+                                                                <p class="text-xs text-red-700 mt-2">다시 시도해주세요</p>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold text-slate-700 bg-slate-100">${reservation.paymentStatus}</span>
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:if>
+
                                     <div class="mb-6">
                                         <h2 class="text-lg font-bold text-slate-800 mb-3">예약 일정</h2>
                                         <div class="space-y-2 text-sm">

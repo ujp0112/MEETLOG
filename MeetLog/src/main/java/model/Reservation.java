@@ -37,6 +37,7 @@ public class Reservation {
 	private transient Date createdAtAsDate;
 	private transient Date updatedAtAsDate;
 	private transient Date cancelledAtAsDate;
+	private transient Date paymentApprovedAtAsDate;
 	private transient List<Reservation> reservations;
 	
 	public List<Reservation> getReservations() {
@@ -270,6 +271,14 @@ public class Reservation {
 
 	public void setPaymentProvider(String paymentProvider) {
 		this.paymentProvider = paymentProvider;
+	}
+
+	public Date getPaymentApprovedAtAsDate() {
+		return paymentApprovedAtAsDate;
+	}
+
+	public void setPaymentApprovedAtAsDate(Date paymentApprovedAtAsDate) {
+		this.paymentApprovedAtAsDate = paymentApprovedAtAsDate;
 	}
 
 	public String getCustomerName() {

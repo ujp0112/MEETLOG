@@ -166,7 +166,7 @@ body {
 												<label for="contactPhone"
 													class="block text-sm font-medium text-slate-700 mb-2">연락처</label>
 												<input type="tel" id="contactPhone" name="contactPhone"
-													required class="form-input" placeholder="010-1234-5678">
+													required class="form-input" placeholder="010-1234-5678" maxlength="13">
 											</div>
 
 											<div>
@@ -363,6 +363,31 @@ body {
 		        }
 		    });
 		});
+
+        // 3-1. 전화번호 자동 포맷팅 (010-0000-0000)
+        const contactPhoneInput = document.getElementById('contactPhone');
+        if (contactPhoneInput) {
+            contactPhoneInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 추출
+
+                // 11자리 제한
+                if (value.length > 11) {
+                    value = value.slice(0, 11);
+                }
+
+                // 자동 대시 삽입
+                let formatted = '';
+                if (value.length <= 3) {
+                    formatted = value;
+                } else if (value.length <= 7) {
+                    formatted = value.slice(0, 3) + '-' + value.slice(3);
+                } else {
+                    formatted = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+                }
+
+                e.target.value = formatted;
+            });
+        }
 
         // 4. 폼 제출 시 유효성 검사 및 요청사항 조합 로직
         if (reservationForm) {

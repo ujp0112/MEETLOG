@@ -284,6 +284,9 @@ public class ReservationServlet extends HttpServlet {
 				if (reservation.getUpdatedAt() != null) {
 					reservation.setUpdatedAtAsDate(Timestamp.valueOf(reservation.getUpdatedAt()));
 				}
+				if (reservation.getPaymentApprovedAt() != null) {
+					reservation.setPaymentApprovedAtAsDate(Timestamp.valueOf(reservation.getPaymentApprovedAt()));
+				}
 				Restaurant restaurant = restaurantService.getRestaurantById(reservation.getRestaurantId());
 				request.setAttribute("restaurant", restaurant);
 				request.setAttribute("reservation", reservation);
