@@ -4,6 +4,7 @@ import model.User;
 import service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.PasswordUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -44,6 +45,12 @@ public class AdminLoginServlet extends HttpServlet {
 			if (adminUser == null) {
 				log.warn("관리자 로그인 실패: 계정 정보 불일치 (email={})", adminEmail.trim());
 				request.setAttribute("errorMessage", "관리자 계정 정보가 올바르지 않습니다.");
+
+				// [디버깅] 비밀번호 불일치 시, 암호화된 값 비교 출력
+				User userInDb = userService.findByEmail(adminEmail.trim());
+				log.debug("DB 저장된 암호: {}", userInDb != null ? userInDb.getPassword() : "사용자 없음");
+				log.debug("입력된 암호의 해시: {}", PasswordUtil.hashPassword(password));
+
 				request.getRequestDispatcher("/WEB-INF/views/admin-login.jsp").forward(request, response);
 				return;
 			}

@@ -3,7 +3,7 @@ package util; // PasswordUtil과 같은 패키지에 만들면 import가 필요 
 public class GeneratePassword {
     public static void main(String[] args) {
         // 원하는 비밀번호를 여기에 입력하세요.
-        String passwordToHash = "superadmin123";
+        String passwordToHash = "admin123";
 
         // 프로젝트의 PasswordUtil 클래스를 사용하여 비밀번호를 해시합니다.
         String hashedPassword = PasswordUtil.hashPassword(passwordToHash);

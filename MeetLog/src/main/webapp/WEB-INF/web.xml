@@ -35,6 +35,8 @@
 		<servlet-name>AddMenuServlet</servlet-name>
 		<url-pattern>/business/menus/add/*</url-pattern>
 	</servlet-mapping>
+	
+	
 
 	<servlet>
 		<servlet-name>EditMenuServlet</servlet-name>
