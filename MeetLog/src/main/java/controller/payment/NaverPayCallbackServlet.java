@@ -2,6 +2,7 @@ package controller.payment;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -18,8 +19,12 @@ import org.slf4j.LoggerFactory;
 import model.Reservation;
 import model.User;
 import service.ReservationService;
+import service.UserCouponService;
+import service.PointService;
+import service.TelegramService;
 import service.payment.NaverPayService;
 import service.payment.NaverPayService.PaymentConfirmResult;
+import dao.CouponDAO;
 
 @WebServlet("/payment/naver/return")
 public class NaverPayCallbackServlet extends HttpServlet {
@@ -29,6 +34,13 @@ public class NaverPayCallbackServlet extends HttpServlet {
 
     private final ReservationService reservationService = new ReservationService();
     private final NaverPayService naverPayService = new NaverPayService();
+    private final UserCouponService userCouponService = new UserCouponService();
+    private final PointService pointService = new PointService();
+    private final TelegramService telegramService = new TelegramService();
+    private final CouponDAO couponDAO = new CouponDAO();
+
+    // 포인트 적립률: 결제 금액의 1% (설정으로 분리 가능)
+    private static final BigDecimal POINT_EARNING_RATE = new BigDecimal("0.01");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -153,6 +165,7 @@ public class NaverPayCallbackServlet extends HttpServlet {
         if (confirmResult.isSuccess()) {
             naverPayService.markPaymentSuccess(reservation, merchantPayKey);
             persistPayment(reservation);
+            handlePaymentSuccessBenefits(reservation);  // 쿠폰 사용 처리 & 포인트 적립
             reservationService.updateReservationStatus(reservation.getId(), reservation.getStatus());
             redirectSuccess(request, response);
         } else if (naverPayService.isAutoApproveOnReturn() && SUCCESS_CODE.equalsIgnoreCase(resultCode)) {
@@ -160,6 +173,7 @@ public class NaverPayCallbackServlet extends HttpServlet {
                     reservation.getId(), merchantPayKey);
             naverPayService.markPaymentSuccess(reservation, merchantPayKey);
             persistPayment(reservation);
+            handlePaymentSuccessBenefits(reservation);  // 쿠폰 사용 처리 & 포인트 적립
             reservationService.updateReservationStatus(reservation.getId(), reservation.getStatus());
             redirectSuccess(request, response);
         } else {
@@ -177,6 +191,88 @@ public class NaverPayCallbackServlet extends HttpServlet {
                 reservation.getPaymentApprovedAt(),
                 reservation.getDepositAmount(),
                 reservation.isDepositRequired());
+    }
+
+    /**
+     * 결제 성공 시 포인트 적립 및 텔레그램 알림
+     * (쿠폰 사용은 가게에서 처리하므로 여기서는 하지 않음)
+     *
+     * @param reservation 예약 정보
+     */
+    private void handlePaymentSuccessBenefits(Reservation reservation) {
+        try {
+            // 1. 포인트 적립
+            BigDecimal paymentAmount = reservation.getDepositAmount();
+            if (paymentAmount != null && paymentAmount.compareTo(BigDecimal.ZERO) > 0) {
+                // 결제 금액의 1% 적립 (소수점 버림)
+                int pointsToEarn = paymentAmount.multiply(POINT_EARNING_RATE)
+                        .setScale(0, RoundingMode.DOWN)
+                        .intValue();
+
+                if (pointsToEarn > 0) {
+                    log.info("Awarding points: userId={}, amount={}, reservationId={}",
+                            reservation.getUserId(), pointsToEarn, reservation.getId());
+
+                    boolean pointsAwarded = pointService.awardPoints(
+                            reservation.getUserId(),
+                            pointsToEarn,
+                            "PAYMENT",
+                            Long.valueOf(reservation.getId()),
+                            "예약 결제 적립 (예약번호: " + reservation.getId() + ")");
+
+                    if (pointsAwarded) {
+                        log.info("Points awarded successfully: userId={}, points={}",
+                                reservation.getUserId(), pointsToEarn);
+                        reservation.setPointsEarned(pointsToEarn);
+                    } else {
+                        log.warn("Failed to award points: userId={}, amount={}",
+                                reservation.getUserId(), pointsToEarn);
+                    }
+                }
+            }
+
+            // 2. 텔레그램 알림 발송
+            try {
+                String notificationMessage = String.format(
+                        "💳 *결제 완료 알림*\n\n" +
+                        "예약이 성공적으로 결제되었습니다!\n\n" +
+                        "📌 예약번호: %d\n" +
+                        "🏪 식당: %s\n" +
+                        "💰 결제 금액: %,d원\n" +
+                        "📅 예약 시간: %s\n\n" +
+                        "예약 확인 및 관리는 마이페이지에서 가능합니다.",
+                        reservation.getId(),
+                        reservation.getRestaurantName() != null ? reservation.getRestaurantName() : "식당",
+                        reservation.getDepositAmount().intValue(),
+                        reservation.getFormattedReservationTime()
+                );
+
+                boolean sent = telegramService.sendMessageToUser(
+                        reservation.getUserId(),
+                        notificationMessage,
+                        "PAYMENT_SUCCESS",
+                        "reservation",
+                        Long.valueOf(reservation.getId())
+                );
+
+                if (sent) {
+                    log.info("텔레그램 결제 알림 발송 완료: userId={}, reservationId={}",
+                            reservation.getUserId(), reservation.getId());
+                } else {
+                    log.debug("텔레그램 연결 없음 또는 발송 실패: userId={}", reservation.getUserId());
+                }
+
+            } catch (Exception telegramEx) {
+                log.warn("텔레그램 알림 발송 중 오류: reservationId={}", reservation.getId(), telegramEx);
+                // 알림 실패해도 결제는 성공 처리
+            }
+
+        } catch (Exception e) {
+            // 쿠폰/포인트 처리 실패해도 결제 자체는 성공 상태 유지
+            // 로그만 남기고 계속 진행
+            log.error("Error processing payment benefits (coupon/points): reservationId={}",
+                    reservation.getId(), e);
+        }
     }
 
     private void handleFailure(Reservation reservation,

@@ -519,6 +519,8 @@ CREATE TABLE `reservations` (
   `cancelled_at` timestamp NULL DEFAULT NULL COMMENT '예약 취소 처리 시각',
   `deposit_required` tinyint(1) NOT NULL DEFAULT 0,
   `deposit_amount` decimal(10,2) NOT NULL DEFAULT 0,
+  `user_coupon_id` int(11) DEFAULT NULL COMMENT '사용된 사용자 쿠폰 ID',
+  `coupon_discount_amount` decimal(10,2) DEFAULT 0.00 COMMENT '쿠폰 할인 금액',
   `payment_status` varchar(20) NOT NULL DEFAULT 'NONE',
   `payment_order_id` varchar(120) DEFAULT NULL,
   `payment_provider` varchar(50) DEFAULT NULL,
@@ -529,8 +531,10 @@ CREATE TABLE `reservations` (
   KEY `idx_reservations_restaurant_id` (`restaurant_id`),
   KEY `idx_reservations_user_id` (`user_id`),
   KEY `idx_reservations_reservation_time` (`reservation_time`),
+  KEY `idx_reservations_user_coupon` (`user_coupon_id`),
   CONSTRAINT `reservations_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+  CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_reservations_user_coupon` FOREIGN KEY (`user_coupon_id`) REFERENCES `user_coupons` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE `restaurant_images` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1566,3 +1570,95 @@ VALUES
 
 -- admin Id: admin@meetlog.com pw: admin123
 -- superadmin Id: superadmin@meetlog.com pw: superadmin123
+
+-- 쿠폰 사용 이력 로그 테이블
+CREATE TABLE IF NOT EXISTS `coupon_usage_logs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_coupon_id` int(11) NOT NULL COMMENT '사용자 쿠폰 ID',
+  `reservation_id` int(11) DEFAULT NULL COMMENT '관련 예약 ID',
+  `action` enum('USE','ROLLBACK') NOT NULL COMMENT '동작 유형',
+  `discount_amount` decimal(10,2) NOT NULL COMMENT '할인 금액',
+  `created_at` timestamp NULL DEFAULT current_timestamp() COMMENT '생성 시각',
+  PRIMARY KEY (`id`),
+  KEY `idx_coupon_usage_logs_user_coupon` (`user_coupon_id`),
+  KEY `idx_coupon_usage_logs_reservation` (`reservation_id`),
+  CONSTRAINT `fk_coupon_usage_logs_user_coupon` FOREIGN KEY (`user_coupon_id`) REFERENCES `user_coupons` (`id`),
+  CONSTRAINT `fk_coupon_usage_logs_reservation` FOREIGN KEY (`reservation_id`) REFERENCES `reservations` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='쿠폰 사용 이력 로그';
+
+-- =========================================================
+-- 포인트 시스템 테이블 (2025-01-11 추가)
+-- =========================================================
+
+-- 사용자 포인트 잔액 테이블
+CREATE TABLE IF NOT EXISTS `user_points` (
+  `user_id` int(11) NOT NULL COMMENT '사용자 ID',
+  `balance` int(11) NOT NULL DEFAULT 0 COMMENT '현재 포인트 잔액',
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '최종 수정 시각',
+  PRIMARY KEY (`user_id`),
+  CONSTRAINT `fk_user_points_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chk_balance_positive` CHECK (`balance` >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='사용자 포인트 잔액';
+
+-- 포인트 거래 내역 테이블
+CREATE TABLE IF NOT EXISTS `point_transactions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '거래 ID',
+  `user_id` int(11) NOT NULL COMMENT '사용자 ID',
+  `change_amount` int(11) NOT NULL COMMENT '변동 포인트 (양수: 적립, 음수: 차감)',
+  `type` enum('EARN','REDEEM','REFUND','EXPIRE','ADMIN') NOT NULL COMMENT '거래 유형',
+  `reference_type` enum('RESERVATION','REVIEW','PAYMENT','CANCEL','MANUAL') DEFAULT NULL COMMENT '참조 유형',
+  `reference_id` bigint(20) DEFAULT NULL COMMENT '참조 ID',
+  `balance_after` int(11) NOT NULL COMMENT '거래 후 잔액 (검증용)',
+  `expires_at` date DEFAULT NULL COMMENT '만료일 (적립 시에만 설정)',
+  `memo` varchar(500) DEFAULT NULL COMMENT '메모',
+  `created_at` timestamp NULL DEFAULT current_timestamp() COMMENT '생성 시각',
+  PRIMARY KEY (`id`),
+  KEY `idx_point_tx_user` (`user_id`),
+  KEY `idx_point_tx_type` (`type`),
+  KEY `idx_point_tx_created` (`created_at`),
+  KEY `idx_point_tx_expires` (`expires_at`),
+  CONSTRAINT `fk_point_tx_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='포인트 거래 내역';
+
+-- =========================================================
+-- 텔레그램 알림 연동 테이블 (2025-01-11 추가)
+-- =========================================================
+
+-- 텔레그램 사용자 연결 정보 테이블
+CREATE TABLE IF NOT EXISTS `tg_link` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '고유 ID',
+  `user_id` int(11) NOT NULL COMMENT '회원 ID (users.id)',
+  `tg_user_id` bigint(20) DEFAULT NULL COMMENT '텔레그램 사용자 ID',
+  `chat_id` varchar(32) DEFAULT NULL COMMENT '채팅방 ID (DM용)',
+  `start_token` varchar(64) NOT NULL COMMENT '온보딩 토큰',
+  `state` enum('PENDING','ACTIVE','BLOCKED') NOT NULL DEFAULT 'PENDING' COMMENT '연결 상태',
+  `created_at` timestamp NULL DEFAULT current_timestamp() COMMENT '생성 시각',
+  `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp() COMMENT '수정 시각',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_tg_user` (`user_id`),
+  UNIQUE KEY `start_token` (`start_token`),
+  KEY `ix_tg_state` (`state`),
+  KEY `ix_start_token` (`start_token`),
+  CONSTRAINT `fk_tg_link_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='텔레그램 사용자 연결 정보';
+
+-- 텔레그램 메시지 발송 로그 테이블
+CREATE TABLE IF NOT EXISTS `telegram_message_logs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '로그 ID',
+  `tg_link_id` bigint(20) DEFAULT NULL COMMENT 'tg_link.id',
+  `chat_id` varchar(32) NOT NULL COMMENT '수신자 chat_id',
+  `message_type` enum('RESERVATION_CONFIRM','RESERVATION_CANCEL','PAYMENT_SUCCESS','PAYMENT_FAIL','WELCOME','CUSTOM') NOT NULL COMMENT '메시지 유형',
+  `message_text` text NOT NULL COMMENT '발송한 메시지 내용',
+  `reference_type` varchar(50) DEFAULT NULL COMMENT '참조 타입 (reservation, payment 등)',
+  `reference_id` bigint(20) DEFAULT NULL COMMENT '참조 ID',
+  `status` enum('SENT','FAILED','BLOCKED') NOT NULL DEFAULT 'SENT' COMMENT '발송 상태',
+  `error_message` varchar(500) DEFAULT NULL COMMENT '오류 메시지',
+  `sent_at` timestamp NULL DEFAULT current_timestamp() COMMENT '발송 시각',
+  PRIMARY KEY (`id`),
+  KEY `ix_tg_link` (`tg_link_id`),
+  KEY `ix_sent_at` (`sent_at`),
+  KEY `ix_status` (`status`),
+  CONSTRAINT `fk_telegram_log_link` FOREIGN KEY (`tg_link_id`) REFERENCES `tg_link` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='텔레그램 메시지 발송 로그';
+
+SET FOREIGN_KEY_CHECKS = 1;

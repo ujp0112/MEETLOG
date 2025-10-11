@@ -166,6 +166,34 @@
                                                 </c:otherwise>
                                             </c:choose>
 
+                                            <!-- 쿠폰 정보 표시 -->
+                                            <c:if test="${not empty reservation.userCouponId and reservation.userCouponId > 0}">
+                                                <div class="p-4 rounded-xl mb-4 border ${reservation.couponIsUsed ? 'bg-slate-50 border-slate-200' : 'bg-purple-50 border-purple-200'}">
+                                                    <div class="flex items-start justify-between">
+                                                        <div>
+                                                            <p class="text-sm ${reservation.couponIsUsed ? 'text-slate-600' : 'text-purple-600'} font-semibold">쿠폰 정보</p>
+                                                            <p class="font-semibold ${reservation.couponIsUsed ? 'text-slate-800' : 'text-purple-800'}">
+                                                                ${reservation.couponName}
+                                                            </p>
+                                                            <p class="text-sm ${reservation.couponIsUsed ? 'text-slate-600' : 'text-purple-700'} mt-1">
+                                                                할인: <fmt:formatNumber value="${reservation.couponDiscountAmount}" pattern="#,##0"/>원
+                                                                <c:if test="${reservation.couponDiscountType == 'PERCENTAGE'}"> (%)</c:if>
+                                                            </p>
+                                                        </div>
+                                                        <div class="text-right">
+                                                            <c:choose>
+                                                                <c:when test="${reservation.couponIsUsed}">
+                                                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-slate-700 bg-slate-200">사용 완료</span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold text-purple-700 bg-purple-100">사용 대기</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </c:if>
+
                                             <div class="flex space-x-2">
                                                 <c:if test="${reservation.status == 'PENDING'}">
                                                     <form method="post" action="${pageContext.request.contextPath}/business/reservation/update-status" style="display: inline;">
@@ -185,10 +213,18 @@
                                                         <input type="hidden" name="status" value="COMPLETED">
                                                         <button type="submit" class="text-white px-4 py-2 rounded-lg text-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">완료</button>
                                                     </form>
+                                                    <!-- 쿠폰 사용 완료 버튼 -->
+                                                    <c:if test="${not empty reservation.userCouponId and reservation.userCouponId > 0 and not reservation.couponIsUsed}">
+                                                        <form method="post" action="${pageContext.request.contextPath}/business/reservation/use-coupon" style="display: inline;">
+                                                            <input type="hidden" name="userCouponId" value="${reservation.userCouponId}">
+                                                            <input type="hidden" name="reservationId" value="${reservation.id}">
+                                                            <button type="submit" class="text-white px-4 py-2 rounded-lg text-sm" style="background: linear-gradient(135deg, #9333ea 0%, #7e22ce 100%);">쿠폰 사용 완료</button>
+                                                        </form>
+                                                    </c:if>
                                                 </c:if>
                                                 <a href="${pageContext.request.contextPath}/reservation/detail/${reservation.id}"
        class="bg-slate-500 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm">상세보기</a>
-                                                
+
                                             </div>
                                         </div>
                                     </c:forEach>

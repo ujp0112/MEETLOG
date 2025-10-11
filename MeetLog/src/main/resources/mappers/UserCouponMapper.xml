@@ -102,4 +102,36 @@
         WHERE id = #{userCouponId}
     </update>
 
+    <!-- 쿠폰 롤백 처리 (예약 취소 시) -->
+    <update id="rollbackCoupon" parameterType="int">
+        UPDATE user_coupons
+        SET is_used = 0, used_at = NULL
+        WHERE id = #{userCouponId}
+    </update>
+
+    <!-- ID로 사용자 쿠폰 조회 -->
+    <select id="findById" parameterType="int" resultMap="UserCouponResultMap">
+        SELECT uc.id,
+               uc.user_id,
+               uc.coupon_id,
+               uc.received_at,
+               uc.used_at,
+               uc.is_used,
+               c.title,
+               c.description,
+               c.validity,
+               r.name as restaurant_name
+        FROM user_coupons uc
+        JOIN coupons c ON uc.coupon_id = c.id
+        JOIN restaurants r ON c.restaurant_id = r.id
+        WHERE uc.id = #{userCouponId}
+    </select>
+
+    <!-- 사용자가 특정 쿠폰을 받은 횟수 조회 (per_user_limit 검증용) -->
+    <select id="countUserCouponByCouponId" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM user_coupons
+        WHERE user_id = #{userId} AND coupon_id = #{couponId}
+    </select>
+
 </mapper>

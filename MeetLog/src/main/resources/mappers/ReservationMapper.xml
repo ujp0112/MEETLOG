@@ -17,6 +17,11 @@
         <result property="cancelledAt" column="cancelled_at"/>
         <result property="depositRequired" column="deposit_required"/>
         <result property="depositAmount" column="deposit_amount"/>
+        <result property="userCouponId" column="user_coupon_id"/>
+        <result property="couponDiscountAmount" column="coupon_discount_amount"/>
+        <result property="couponName" column="coupon_name"/>
+        <result property="couponDiscountType" column="coupon_discount_type"/>
+        <result property="couponIsUsed" column="coupon_is_used"/>
         <result property="paymentStatus" column="payment_status"/>
         <result property="paymentOrderId" column="payment_order_id"/>
         <result property="paymentApprovedAt" column="payment_approved_at"/>
@@ -35,9 +40,18 @@
 
     <!-- 음식점별 예약 목록 조회 -->
     <select id="findByRestaurantId" resultMap="reservationResultMap">
-        SELECT r.*, u.nickname as user_name
+        SELECT
+            r.*,
+            u.nickname as user_name,
+            uc.id as user_coupon_id,
+            uc.discount_amount as coupon_discount_amount,
+            c.name as coupon_name,
+            c.discount_type as coupon_discount_type,
+            uc.is_used as coupon_is_used
         FROM reservations r
         LEFT JOIN users u ON r.user_id = u.id
+        LEFT JOIN user_coupons uc ON r.user_coupon_id = uc.id
+        LEFT JOIN coupons c ON uc.coupon_id = c.id
         WHERE r.restaurant_id = #{restaurantId}
         ORDER BY r.reservation_time DESC
     </select>

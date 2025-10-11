@@ -152,6 +152,20 @@
                                         <h4 class="font-bold text-slate-800">내 코스</h4>
                                          <p class="text-sm text-slate-600">내가 만든 코스 관리</p>
                                     </a>
+
+                                    <!-- 텔레그램 연결 카드 -->
+                                    <div id="telegram-card" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center cursor-pointer">
+                                         <div class="text-3xl mb-2">💬</div>
+                                        <h4 class="font-bold text-slate-800">텔레그램 알림</h4>
+                                         <p id="telegram-status" class="text-sm text-slate-600">연결 확인 중...</p>
+                                        <button id="telegram-connect-btn" class="hidden mt-3 bg-sky-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-sky-700">
+                                            연결하기
+                                        </button>
+                                        <button id="telegram-disconnect-btn" class="hidden mt-3 bg-red-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-red-700">
+                                            연결 해제
+                                        </button>
+                                    </div>
+
                                     <a href="${pageContext.request.contextPath}/mypage/settings"
                                          class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
                                         <div class="text-3xl mb-2">⚙️</div>
@@ -183,5 +197,137 @@
         <%-- Replaced the inline footer with a reusable JSP include --%>
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
+
+    <!-- 텔레그램 QR 코드 모달 -->
+    <div id="telegram-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">텔레그램 알림 연결</h3>
+            <div class="text-center mb-6">
+                <p class="text-sm text-slate-600 mb-4">아래 QR 코드를 스캔하거나 버튼을 클릭하여 텔레그램 봇을 시작하세요.</p>
+                <div id="qr-code" class="flex justify-center mb-4"></div>
+                <a id="telegram-link" href="#" target="_blank" class="inline-block bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-700">
+                    텔레그램에서 열기
+                </a>
+            </div>
+            <button id="close-modal" class="w-full bg-slate-300 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-400">
+                닫기
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const telegramCard = document.getElementById('telegram-card');
+        const telegramStatus = document.getElementById('telegram-status');
+        const connectBtn = document.getElementById('telegram-connect-btn');
+        const disconnectBtn = document.getElementById('telegram-disconnect-btn');
+        const modal = document.getElementById('telegram-modal');
+        const closeModal = document.getElementById('close-modal');
+        const telegramLink = document.getElementById('telegram-link');
+        const qrCodeDiv = document.getElementById('qr-code');
+
+        let currentState = null;
+
+        // 연결 상태 확인
+        function checkTelegramStatus() {
+            fetch('${pageContext.request.contextPath}/telegram/link')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.connected) {
+                        telegramStatus.textContent = '연결됨 ✓';
+                        telegramStatus.classList.remove('text-slate-600');
+                        telegramStatus.classList.add('text-green-600');
+                        connectBtn.classList.add('hidden');
+                        disconnectBtn.classList.remove('hidden');
+                        currentState = 'connected';
+                    } else {
+                        telegramStatus.textContent = '연결 안됨';
+                        telegramStatus.classList.remove('text-green-600');
+                        telegramStatus.classList.add('text-slate-600');
+                        connectBtn.classList.remove('hidden');
+                        disconnectBtn.classList.add('hidden');
+                        currentState = 'disconnected';
+                    }
+                })
+                .catch(err => {
+                    console.error('상태 확인 실패:', err);
+                    telegramStatus.textContent = '상태 확인 실패';
+                });
+        }
+
+        // 연결하기 버튼 클릭
+        connectBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            fetch('${pageContext.request.contextPath}/telegram/link', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // QR 코드 생성
+                        qrCodeDiv.innerHTML = '';
+                        new QRCode(qrCodeDiv, {
+                            text: data.deepLink,
+                            width: 200,
+                            height: 200
+                        });
+
+                        // 링크 설정
+                        telegramLink.href = data.deepLink;
+
+                        // 모달 표시
+                        modal.classList.remove('hidden');
+                    } else {
+                        alert('연결 토큰 발급 실패: ' + (data.error || '알 수 없는 오류'));
+                    }
+                })
+                .catch(err => {
+                    console.error('연결 실패:', err);
+                    alert('연결 요청 중 오류가 발생했습니다.');
+                });
+        });
+
+        // 연결 해제 버튼 클릭
+        disconnectBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            if (!confirm('텔레그램 알림 연결을 해제하시겠습니까?')) {
+                return;
+            }
+
+            fetch('${pageContext.request.contextPath}/telegram/link', { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('연결이 해제되었습니다.');
+                        checkTelegramStatus();
+                    } else {
+                        alert('연결 해제 실패: ' + (data.error || data.message || '알 수 없는 오류'));
+                    }
+                })
+                .catch(err => {
+                    console.error('연결 해제 실패:', err);
+                    alert('연결 해제 중 오류가 발생했습니다.');
+                });
+        });
+
+        // 모달 닫기
+        closeModal.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            checkTelegramStatus(); // 상태 다시 확인
+        });
+
+        // 모달 배경 클릭 시 닫기
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                checkTelegramStatus();
+            }
+        });
+
+        // 초기 상태 확인
+        checkTelegramStatus();
+    });
+    </script>
 </body>
 </html>

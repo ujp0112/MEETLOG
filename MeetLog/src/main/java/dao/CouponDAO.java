@@ -90,4 +90,22 @@ public class CouponDAO {
             return null;
         }
     }
+
+    /**
+     * 쿠폰 사용 횟수 증가 (usage_limit 체크 포함)
+     *
+     * @param couponId 쿠폰 ID
+     * @return 업데이트된 행 수 (0이면 실패 - 이미 한도 초과)
+     */
+    public int incrementUsageCount(int couponId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            int result = sqlSession.update("CouponMapper.incrementUsageCount", couponId);
+            sqlSession.commit();
+            return result;
+        } catch (Exception e) {
+            System.err.println("쿠폰 사용 횟수 증가 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }
