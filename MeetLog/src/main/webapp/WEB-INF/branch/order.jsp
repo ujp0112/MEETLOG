@@ -56,7 +56,7 @@
 
         /* Table */
         .table-wrap { border: 1px solid var(--border); border-radius: 14px; overflow: auto; background: #fff; }
-        table.sheet { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 720px; }
+        table.sheet { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 500px; }
         .sheet thead th { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); font-weight: 800; text-align: left; padding: 12px 10px; font-size: 13px; }
         .sheet tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         .cell-num { text-align: right; }
@@ -174,7 +174,7 @@
                             <span>합계 (<span class="cart-count">0</span>건)</span>
                             <span><span class="cart-sum">0</span>원</span>
                         </div>
-                        <form id="orderForm" method="post" action="${contextPath}/branch/order" style="margin-top: 16px; display: none;">
+                        <form id="orderForm" method="post" action="${contextPath}/orderForm" style="margin-top: 16px; display: none;">
                             <input type="hidden" name="orderJson" id="orderJson" />
                             <button type="submit" class="btn primary" style="width: 100%;">발주 요청</button>
                         </form>

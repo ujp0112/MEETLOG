@@ -1021,8 +1021,6 @@ CREATE TABLE reports (
     INDEX idx_reports_reported_user (reported_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='신고 관리 테이블';
 
--- Admin user
-INSERT INTO users (id, email, nickname, password, user_type, profile_image, follower_count, is_active) VALUES (11, 'admin@meetlog.com', 'admin', 'admin123', 'ADMIN', NULL, 0, 1);
 -- 칼럼과 맛집의 다대다(N:M) 관계를 위한 연결 테이블 생성
 CREATE TABLE column_restaurants (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1561,10 +1559,10 @@ INSERT IGNORE INTO `restaurant_reservation_settings` (
      1, '08:00:00', '22:00:00');
      
      
-UPDATE meetlog.users
-SET password = 'rNErKm1GH/XfNdjBFNhP2ls/ekypcIwFEzn4yitLBcIid4wavwUs4YLw6zHfeOjV'
-WHERE nickname = 'admin';
-
+-- Admin user (password: admin123)
+INSERT INTO users (id, email, nickname, password, user_type, profile_image, follower_count, is_active) VALUES
+(11, 'admin@meetlog.com', 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 'ADMIN', NULL, 0, 1);
+-- Superadmin user (password: superadmin123)
 INSERT INTO meetlog.users 
 (email, nickname, password, user_type, level, is_active, created_at, updated_at) 
 VALUES 

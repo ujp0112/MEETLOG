@@ -16,7 +16,11 @@ import model.BusinessUser;
 
 @WebServlet(urlPatterns = {"/branch/order", "/branch/order/*"})
 public class BranchOrderPageServlet extends HttpServlet {
-  private final MaterialService materialService = new MaterialService();
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private final MaterialService materialService = new MaterialService();
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {

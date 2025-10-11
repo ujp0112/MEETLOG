@@ -65,9 +65,6 @@ public class LoginServlet extends HttpServlet {
 	            String targetUrl = redirectUrl;
 	            if (targetUrl == null || targetUrl.trim().isEmpty()) {
 	                switch (user.getUserType()) {
-	                    case "ADMIN":
-	                        targetUrl = request.getContextPath() + "/admin";
-	                        break;
 	                    case "BUSINESS":
 	                        // 세션에서 businessUser 정보를 다시 가져와 역할(role)에 따라 분기
 	                        BusinessUser bizUser = (BusinessUser) session.getAttribute("businessUser");

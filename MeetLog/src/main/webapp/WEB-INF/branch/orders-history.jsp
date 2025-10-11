@@ -48,7 +48,7 @@
     
     /* Table */
     .table-wrap { border: 1px solid var(--border); border-radius: 14px; overflow: auto; background: #fff; }
-    table.sheet { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 960px; }
+    table.sheet { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 560px; }
     .sheet thead th { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); font-weight: 800; text-align: left; padding: 12px 10px; font-size: 13px; }
     .sheet tbody td { padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     .cell-num { text-align: right; }
@@ -56,7 +56,8 @@
     .empty-row td { text-align: center; color: var(--muted); padding: 24px; }
 
     /* Button */
-    .btn { appearance: none; border: 1px solid var(--border); background: #fff; padding: 8px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; text-decoration: none; color:#111827; display: inline-flex; align-items: center; justify-content: center; }
+    .btn { appearance: none; border: 1px solid var(--border); background: #fff; padding: 8px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; text-decoration: none; color:#111827; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+    }
     .btn:hover { background: #f8fafc; }
     .btn.sm { padding: 6px 8px; border-radius: 8px; }
     .btn[aria-disabled="true"], .btn:disabled { opacity: .5; cursor: not-allowed; }
@@ -216,53 +217,6 @@
       var metaEl = document.getElementById('modalMeta');
       var state = { orderId:null, page:1, size:5, total:0, totalPages:1 };
       
-      document.addEventListener('click', function(e){
-        var openBtn = e.target.closest('button[data-action="open-detail"]');
-        if(openBtn){
-          var id = openBtn.getAttribute('data-id');
-          state.orderId = id;
-          state.page = 1;
-          metaEl.textContent = '#' + id;
-          modal.classList.add('show');
-          modal.setAttribute('aria-hidden','false');
-          loadPage(1);
-          return;
-        }
-
-        var closeBtn = e.target.closest('[data-action="close-modal"]');
-        if(closeBtn){ closeModal(); }
-        
-        var receiveBtn = e.target.closest('button[data-action="receive"]');
-        if(receiveBtn) {
-            if(!confirm('해당 발주를 입고 처리하시겠습니까? 재고가 즉시 증가합니다.')) return;
-            var orderId = receiveBtn.getAttribute('data-id');
-            var url = ctx + '/branch/orders/' + orderId + '/receive';
-            
-            receiveBtn.disabled = true;
-            receiveBtn.textContent = '처리 중...';
-            
-            fetch(url, { method: 'POST' })
-                .then(res => {
-                    if (!res.ok) throw new Error('Network response was not ok.');
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert('입고 처리가 완료되었습니다.');
-                        window.location.reload();
-                    } else {
-                        throw new Error(data.message || 'Server returned an error.');
-                    }
-                })
-                .catch(err => {
-                    console.error('Fetch error:', err);
-                    alert('오류가 발생했습니다: ' + err.message);
-                    receiveBtn.disabled = false;
-                    receiveBtn.textContent = '입고 처리';
-                });
-        }
-      });
-
       modal.addEventListener('click', function(e){ if(e.target===modal) closeModal(); });
       document.addEventListener('keydown', function(e){ if(e.key==='Escape' && modal.classList.contains('show')) closeModal(); });
       
@@ -276,6 +230,58 @@
       pager.querySelector('[data-role="prev"]').addEventListener('click', function(){ loadPage(Math.max(1, state.page-1)); });
       pager.querySelector('[data-role="next"]').addEventListener('click', function(){ loadPage(Math.min(state.totalPages, state.page+1)); });
       pager.querySelector('[data-role="last"]').addEventListener('click', function(){ loadPage(state.totalPages); });
+      
+      // DOMContentLoaded 이벤트 리스너 추가
+      document.addEventListener('DOMContentLoaded', function() {
+          document.body.addEventListener('click', function(e) {
+              var target = e.target;
+              
+              // 상세보기 버튼 처리
+              var openBtn = target.closest('button[data-action="open-detail"]');
+              if (openBtn) {
+                  var id = openBtn.getAttribute('data-id');
+                  state.orderId = id;
+                  state.page = 1;
+                  metaEl.textContent = '#' + id;
+                  modal.classList.add('show');
+                  modal.setAttribute('aria-hidden', 'false');
+                  loadPage(1);
+                  return;
+              }
+
+              // 모달 닫기 버튼 처리
+              var closeBtn = target.closest('[data-action="close-modal"]');
+              if (closeBtn) {
+                  closeModal();
+              }
+
+              // 입고 처리 버튼 처리
+              var receiveBtn = target.closest('button[data-action="receive"]');
+              if (receiveBtn) {
+                  if (!confirm('해당 발주를 입고 처리하시겠습니까? 재고가 즉시 증가합니다.')) return;
+                  var orderId = receiveBtn.getAttribute('data-id');
+                  var url = ctx + '/branch/orders/' + orderId + '/receive';
+
+                  receiveBtn.disabled = true;
+                  receiveBtn.textContent = '처리 중...';
+
+                  fetch(url, { method: 'POST' })
+                      .then(res => res.ok ? res.json() : Promise.reject('Network response was not ok.'))
+                      .then(data => {
+                          if (data.success) {
+                              alert('입고 처리가 완료되었습니다.');
+                              window.location.reload();
+                          } else { throw new Error(data.message || 'Server returned an error.'); }
+                      })
+                      .catch(err => {
+                          console.error('Fetch error:', err);
+                          alert('오류가 발생했습니다: ' + (err.message || err));
+                          receiveBtn.disabled = false;
+                          receiveBtn.textContent = '입고 처리';
+                      });
+              }
+          });
+      });
       
       function loadPage(page){
         if(!state.orderId) return;
@@ -323,23 +329,19 @@
                 badgeHtml = '<span class="badge status-pending">요청중</span>';
             }
 
-            var imgTag = it.imgPath 
-                ? `<mytag:image fileName="\${it.imgPath}" altText="\${escapeHtml(name)}" cssClass="thumb"/>` // Custom tag usage is tricky in JS
-                : `<span class="thumb" style="display:grid;place-items:center">📦</span>`;
-            
-            // For now, use simple img tag in JS, as JSP custom tags can't be processed here.
-            var imageUrl = it.imgPath ? `${ctx}/images/${encodeURIComponent(it.imgPath)}` : '';
+            // JSP custom tag은 JS 내에서 직접 렌더링할 수 없으므로, 순수 JS로 img 태그를 생성합니다.
+            var imageUrl = it.imgPath ? "" + ctx + "/images/" + encodeURIComponent(it.imgPath) : '';
             var imgHtml = imageUrl 
-                ? `<img class="thumb" src="${imageUrl}" alt="${escapeHtml(name)}">`
-                : `<span class="thumb" style="display:grid;place-items:center;font-size:24px;">📦</span>`;
+                ? '<img class="thumb" src="' + imageUrl + '" alt="' + escapeHtml(name) + '">'
+                : '<span class="thumb" style="display:grid;place-items:center;font-size:24px;">📦</span>';
 
-            return `<tr>
-                      <td>${imgHtml}</td>
-                      <td>${escapeHtml(name)}</td>
-                      <td class="cell-num">${nf.format(total)}원</td>
-                      <td class="cell-num">${nf.format(qty)} <span style="color:var(--muted)">${escapeHtml(unit)}</span></td>
-                      <td>${badgeHtml}</td>
-                    </tr>`;
+            return '<tr>'
+                      + '<td>' + imgHtml + '</td>'
+                      + '<td>' + escapeHtml(name) + '</td>'
+                      + '<td class="cell-num">' + nf.format(total) + '원</td>'
+                      + '<td class="cell-num">' + nf.format(qty) + ' <span style="color:var(--muted)">' + escapeHtml(unit) + '</span></td>'
+                      + '<td>' + badgeHtml + '</td>'
+                    + '</tr>';
           }).join('');
           tbody.innerHTML = html;
       }
@@ -352,7 +354,7 @@
         pager.style.display = 'flex';
         var start = (state.page - 1) * state.size + 1;
         var end = Math.min(state.page * state.size, state.total);
-        pageInfo.textContent = `${start}–${end} / ${state.total} (페이지 ${state.page} / ${state.totalPages})`;
+        pageInfo.textContent = "" + start + "–" + end + " / " + state.total + " (페이지 " + state.page + " / " + state.totalPages + ")";
         pager.querySelector('[data-role="first"]').disabled = state.page <= 1;
         pager.querySelector('[data-role="prev"]').disabled  = state.page <= 1;
         pager.querySelector('[data-role="next"]').disabled  = state.page >= state.totalPages;

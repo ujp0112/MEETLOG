@@ -38,6 +38,8 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:760px
 .thumb{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);object-fit:cover;background:#fafafa;display:block}
 .row-actions{display:flex;gap:6px}
 .empty{color:var(--muted);text-align:center;padding:24px}
+.empty-row td { text-align: center; padding: 24px; color: var(--muted); }
+
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);z-index:100}
 .modal.show{display:flex}
 .dialog{width:100%;max-width:1100px;background:#fff;border-radius:20px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,.12)}
@@ -121,17 +123,7 @@ table.sheet{width:100%;border-collapse:separate;border-spacing:0;min-width:760px
           </c:forEach>
 
           <c:if test="${empty menus}">
-            <tr id="row-demo" data-id="0" data-name="데모 메뉴" data-saleprice="10000" data-img="">
-              <td><span class="thumb" style="display:grid;place-items:center">🍽️</span></td>
-              <td>데모 메뉴</td>
-              <td class="cell-num">10,000</td>
-              <td>
-                <div class="row-actions">
-                  <button type="button" class="btn-sm" data-action="edit">수정</button>
-                  <button type="button" class="btn-sm btn-danger" data-action="delete" data-delete-url="#mock">삭제</button>
-                </div>
-              </td>
-            </tr>
+            <tr class="empty-row"><td colspan="4">메뉴가 없습니다.</td></tr>
           </c:if>
         </tbody>
       </table>

@@ -100,7 +100,7 @@ public class BranchOrdersHistoryServlet extends HttpServlet {
                 new OrderService().markReceivedAndIncreaseInventory(companyId, orderId);
 
                 resp.setContentType("application/json");
-                resp.getWriter().write("{\"status\":\"OK\"}");
+                resp.getWriter().write("{\"success\":true}");
             } catch (Exception e) {
                 e.printStackTrace();
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to process receipt.");

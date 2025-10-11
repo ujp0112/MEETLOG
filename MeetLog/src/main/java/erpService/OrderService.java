@@ -122,7 +122,7 @@ public class OrderService {
 				q.put("branchId", branchId);
 				q.put("materialId", l.getMaterialId());
 				q.put("qty", l.getQty());
-				s.insert("mapper.OrderMapper.increaseInventory", q);
+				s.insert("erpMapper.OrderMapper.increaseInventory", q);
 			}
 			Map<String, Object> p2 = new HashMap<>();
 			p2.put("companyId", companyId);
