@@ -122,4 +122,15 @@ public class PointDAO {
             return sum != null ? sum : 0;
         }
     }
+
+    /**
+     * 만료된 포인트 거래 조회 (EARN 타입, 만료일 지남)
+     *
+     * @return 만료된 포인트 거래 리스트
+     */
+    public List<PointTransaction> findExpiredTransactions() {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectList("mapper.PointMapper.findExpiredTransactions");
+        }
+    }
 }

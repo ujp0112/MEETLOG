@@ -1,6 +1,7 @@
 package service;
 
 import dao.CouponDAO;
+import dao.CouponUsageLogDAO;
 import dao.UserCouponDAO;
 import model.Coupon;
 import model.UserCoupon;
@@ -16,6 +17,7 @@ import java.util.List;
 public class UserCouponService {
     private final UserCouponDAO userCouponDAO = new UserCouponDAO();
     private final CouponDAO couponDAO = new CouponDAO();
+    private final CouponUsageLogDAO couponUsageLogDAO = new CouponUsageLogDAO();
 
     /**
      * 사용자의 모든 쿠폰 조회
@@ -87,8 +89,7 @@ public class UserCouponService {
             userCouponDAO.useCoupon(userCouponId);
 
             // 3. 쿠폰 사용 로그 기록 (coupon_usage_logs 테이블)
-            // TODO: CouponUsageLogDAO 추가 필요 (현재는 생략)
-            // couponUsageLogDAO.insertLog(userCouponId, reservationId, "USE", discountAmount);
+            couponUsageLogDAO.insertLog(userCouponId, reservationId, "USE", discountAmount);
 
             // 4. 원본 쿠폰의 usage_count 증가
             int couponId = userCoupon.getCouponId();
@@ -200,10 +201,9 @@ public class UserCouponService {
             discount = orderAmount.multiply(percentage).divide(new BigDecimal(100), 2, RoundingMode.DOWN);
 
             // 최대 할인 금액 제한이 있는 경우
-            if (coupon.getMinOrderAmount() != null) { // 주의: 필드명 확인 필요 (maxDiscountAmount가 있어야 함)
-                // TODO: Coupon 모델에 maxDiscountAmount 필드 추가 필요
-                // BigDecimal maxDiscount = new BigDecimal(coupon.getMaxDiscountAmount());
-                // discount = discount.min(maxDiscount);
+            if (coupon.getMaxDiscountAmount() != null) {
+                BigDecimal maxDiscount = new BigDecimal(coupon.getMaxDiscountAmount());
+                discount = discount.min(maxDiscount);
             }
         }
 

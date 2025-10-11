@@ -212,11 +212,66 @@ public class PointService {
     /**
      * 포인트 만료 처리 (배치 작업용)
      * 이 메서드는 스케줄러나 크론 작업에서 호출됩니다.
+     *
+     * @return 만료 처리된 거래 건수
      */
-    public void expirePoints() {
-        // TODO: 배치 작업으로 구현
-        // 1. 만료일이 지난 EARN 거래를 찾기
-        // 2. 해당 포인트를 차감
-        // 3. EXPIRE 타입의 거래 내역 생성
+    public int expirePoints() {
+        int expiredCount = 0;
+
+        try {
+            // 1. 만료일이 지난 EARN 거래를 찾기
+            List<PointTransaction> expiredTransactions = pointDAO.findExpiredTransactions();
+
+            for (PointTransaction expired : expiredTransactions) {
+                try {
+                    // 2. 해당 포인트를 차감
+                    int userId = expired.getUserId();
+                    int expiredAmount = expired.getChangeAmount(); // EARN 타입이므로 양수
+
+                    // 잔액 확인
+                    PointBalance balance = pointDAO.getBalance(userId);
+                    if (balance == null || balance.getBalance() < expiredAmount) {
+                        System.err.println("포인트 만료 실패 (잔액 부족): userId=" + userId + ", amount=" + expiredAmount);
+                        continue; // 다음 거래로
+                    }
+
+                    // 원자적 차감
+                    int rows = pointDAO.updateBalance(userId, -expiredAmount);
+                    if (rows == 0) {
+                        System.err.println("포인트 만료 실패 (업데이트 실패): userId=" + userId);
+                        continue;
+                    }
+
+                    // 3. EXPIRE 타입의 거래 내역 생성
+                    PointBalance newBalance = pointDAO.getBalance(userId);
+                    PointTransaction expireTransaction = new PointTransaction();
+                    expireTransaction.setUserId(userId);
+                    expireTransaction.setChangeAmount(-expiredAmount);
+                    expireTransaction.setType("EXPIRE");
+                    expireTransaction.setReferenceType("EARN");
+                    expireTransaction.setReferenceId(expired.getId() != null ? Long.valueOf(expired.getId()) : null);
+                    expireTransaction.setBalanceAfter(newBalance.getBalance());
+                    expireTransaction.setMemo("포인트 만료 (적립일: " + expired.getCreatedAt() + ")");
+
+                    pointDAO.insertTransaction(expireTransaction);
+                    expiredCount++;
+
+                    System.out.println("포인트 만료 완료: userId=" + userId + ", amount=" + expiredAmount);
+
+                } catch (Exception e) {
+                    System.err.println("포인트 만료 처리 중 오류: transactionId=" + expired.getId());
+                    e.printStackTrace();
+                    // 다음 거래 계속 처리
+                }
+            }
+
+            System.out.println("포인트 만료 배치 작업 완료: " + expiredCount + "건 처리");
+
+        } catch (Exception e) {
+            System.err.println("포인트 만료 배치 작업 실패: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return expiredCount;
     }
 }

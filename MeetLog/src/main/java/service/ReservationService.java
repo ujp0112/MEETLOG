@@ -9,6 +9,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import dao.CouponUsageLogDAO;
 import dao.ReservationDAO;
 import dao.UserCouponDAO;
 import model.Reservation;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 public class ReservationService {
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final UserCouponDAO userCouponDAO = new UserCouponDAO();
+    private final CouponUsageLogDAO couponUsageLogDAO = new CouponUsageLogDAO();
     private final PointService pointService = new PointService();
     private final TelegramService telegramService = new TelegramService();
     private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
@@ -135,8 +137,13 @@ public class ReservationService {
                             userCouponDAO.rollbackCoupon(reservation.getUserCouponId());
                             log.info("쿠폰 롤백 완료: userCouponId={}", reservation.getUserCouponId());
 
-                            // TODO: coupon_usage_logs에 ROLLBACK 로그 추가
-                            // couponUsageLogDAO.insertLog(userCouponId, reservationId, "ROLLBACK", discountAmount);
+                            // coupon_usage_logs에 ROLLBACK 로그 추가
+                            BigDecimal discountAmount = reservation.getCouponDiscountAmount() != null
+                                ? reservation.getCouponDiscountAmount()
+                                : BigDecimal.ZERO;
+                            couponUsageLogDAO.insertLog(reservation.getUserCouponId(), reservationId, "ROLLBACK", discountAmount);
+                            log.info("쿠폰 롤백 로그 기록 완료: userCouponId={}, reservationId={}",
+                                reservation.getUserCouponId(), reservationId);
 
                         } catch (Exception couponEx) {
                             log.error("쿠폰 롤백 실패: userCouponId={}",

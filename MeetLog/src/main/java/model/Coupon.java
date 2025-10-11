@@ -18,6 +18,7 @@ public class Coupon {
     private String discountType;    // PERCENTAGE, FIXED
     private Integer discountValue;
     private Integer minOrderAmount;
+    private Integer maxDiscountAmount;  // 최대 할인 금액
     private Date validFrom;
     private Date validTo;
     private Integer usageLimit;
@@ -110,6 +111,14 @@ public class Coupon {
 
     public void setMinOrderAmount(Integer minOrderAmount) {
         this.minOrderAmount = minOrderAmount;
+    }
+
+    public Integer getMaxDiscountAmount() {
+        return maxDiscountAmount;
+    }
+
+    public void setMaxDiscountAmount(Integer maxDiscountAmount) {
+        this.maxDiscountAmount = maxDiscountAmount;
     }
 
     public Date getValidFrom() {

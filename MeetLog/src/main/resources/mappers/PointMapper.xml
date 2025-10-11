@@ -115,4 +115,24 @@
           AND expires_at <![CDATA[<=]]> #{beforeDate}
     </select>
 
+    <!-- 만료된 포인트 거래 조회 (EARN 타입, 만료일 지남) -->
+    <select id="findExpiredTransactions" resultMap="PointTransactionMap">
+        SELECT
+            id,
+            user_id,
+            change_amount,
+            type,
+            reference_type,
+            reference_id,
+            balance_after,
+            expires_at,
+            memo,
+            created_at
+        FROM point_transactions
+        WHERE type = 'EARN'
+          AND expires_at IS NOT NULL
+          AND expires_at <![CDATA[<]]> CURDATE()
+        ORDER BY expires_at ASC, user_id ASC
+    </select>
+
 </mapper>

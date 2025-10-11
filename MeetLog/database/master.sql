@@ -169,6 +169,7 @@ CREATE TABLE `coupons` (
   `discount_type` ENUM('PERCENTAGE', 'FIXED') DEFAULT NULL,
   `discount_value` int(11) DEFAULT NULL,
   `min_order_amount` int(11) DEFAULT 0,
+  `max_discount_amount` int(11) DEFAULT NULL COMMENT '최대 할인 금액 (퍼센트 할인 시 적용)',
   `valid_from` date DEFAULT NULL,
   `valid_to` date DEFAULT NULL,
   `usage_limit` int(11) DEFAULT NULL,
@@ -984,6 +985,18 @@ CREATE TABLE user_coupons (
     CONSTRAINT fk_user_coupons_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_user_coupons_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE coupon_usage_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_coupon_id INT NOT NULL,
+    reservation_id INT NULL,
+    action VARCHAR(20) NOT NULL COMMENT 'USE or ROLLBACK',
+    discount_amount DECIMAL(10, 2) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_coupon_id (user_coupon_id),
+    INDEX idx_reservation_id (reservation_id),
+    CONSTRAINT fk_coupon_usage_logs_user_coupon FOREIGN KEY (user_coupon_id) REFERENCES user_coupons(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='쿠폰 사용 로그 테이블';
 
 CREATE TABLE faqs (
     id INT AUTO_INCREMENT PRIMARY KEY,
