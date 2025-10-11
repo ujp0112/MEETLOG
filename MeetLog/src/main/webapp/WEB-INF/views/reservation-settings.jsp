@@ -1,607 +1,744 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${restaurant.name} 예약 설정 - MEET LOG</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Flatpickr for date picker -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-    <!-- Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${restaurant.name}예약설정- MEET LOG</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
+	rel="stylesheet">
+<!-- Flatpickr for date picker -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<!-- Icons -->
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+	rel="stylesheet">
 
-    <style>
-        * { font-family: 'Noto Sans KR', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        .gradient-text {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .slide-up {
-            animation: slideUp 0.6s ease-out;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .toggle-switch {
-            appearance: none;
-            width: 48px;
-            height: 24px;
-            background: #cbd5e1;
-            border-radius: 12px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .toggle-switch:checked {
-            background: #3b82f6;
-        }
-        .toggle-switch::before {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: white;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        .toggle-switch:checked::before {
-            transform: translateX(24px);
-        }
-        .time-slot {
-            transition: all 0.2s ease;
-        }
-        .time-slot:hover {
-            transform: scale(1.05);
-        }
-        .time-slot.selected {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-        }
-        .flatpickr-calendar {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-radius: 12px;
-            border: none;
-        }
-    </style>
+<style>
+* {
+	font-family: 'Noto Sans KR', sans-serif;
+}
+
+.glass-card {
+	background: rgba(255, 255, 255, 0.9);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-text {
+	background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+.slide-up {
+	animation: slideUp 0.6s ease-out;
+}
+
+@
+keyframes slideUp {from { opacity:0;
+	transform: translateY(30px);
+}
+
+to {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+}
+.toggle-switch {
+	appearance: none;
+	width: 48px;
+	height: 24px;
+	background: #cbd5e1;
+	border-radius: 12px;
+	position: relative;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.toggle-switch:checked {
+	background: #3b82f6;
+}
+
+.toggle-switch::before {
+	content: '';
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: white;
+	top: 2px;
+	left: 2px;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch:checked::before {
+	transform: translateX(24px);
+}
+
+.time-slot {
+	transition: all 0.2s ease;
+}
+
+.time-slot:hover {
+	transform: scale(1.05);
+}
+
+.time-slot.selected {
+	background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+	color: white;
+}
+
+.flatpickr-calendar {
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px
+		rgba(0, 0, 0, 0.04);
+	border-radius: 12px;
+	border: none;
+}
+</style>
 </head>
 <body class="bg-slate-100">
-    <jsp:include page="/WEB-INF/views/common/header.jsp" />
+	<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
-    <main class="container mx-auto p-4 md:p-8 max-w-6xl">
-        <!-- 헤더 -->
-        <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-            <div class="flex items-center gap-3 mb-4">
-                <a href="${pageContext.request.contextPath}/business/restaurants"
-                   class="text-slate-500 hover:text-sky-600 transition-colors flex items-center gap-2">
-                    <i class="fas fa-arrow-left"></i> 내 음식점 관리
-                </a>
-            </div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl">
-                    <i class="fas fa-utensils"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold gradient-text">${restaurant.name}</h1>
-                    <p class="text-slate-600">예약 시스템 설정</p>
-                </div>
-            </div>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div class="flex items-center gap-2 text-blue-800">
-                    <i class="fas fa-info-circle"></i>
-                    <span class="font-semibold">알림</span>
-                </div>
-                <p class="text-blue-700 mt-1">고객이 온라인으로 예약할 수 있도록 상세한 설정을 구성해보세요. 설정 후 바로 적용됩니다.</p>
-            </div>
-        </div>
+	<main class="container mx-auto p-4 md:p-8 max-w-6xl">
+		<!-- 헤더 -->
+		<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+			<div class="flex items-center gap-3 mb-4">
+				<a href="${pageContext.request.contextPath}/business/restaurants"
+					class="text-slate-500 hover:text-sky-600 transition-colors flex items-center gap-2">
+					<i class="fas fa-arrow-left"></i> 내 음식점 관리
+				</a>
+			</div>
+			<div class="flex items-center gap-4 mb-4">
+				<div
+					class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl">
+					<i class="fas fa-utensils"></i>
+				</div>
+				<div>
+					<h1 class="text-3xl font-bold gradient-text">${restaurant.name}</h1>
+					<p class="text-slate-600">예약 시스템 설정</p>
+				</div>
+			</div>
+			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+				<div class="flex items-center gap-2 text-blue-800">
+					<i class="fas fa-info-circle"></i> <span class="font-semibold">알림</span>
+				</div>
+				<p class="text-blue-700 mt-1">고객이 온라인으로 예약할 수 있도록 상세한 설정을
+					구성해보세요. 설정 후 바로 적용됩니다.</p>
+			</div>
+		</div>
 
-        <form id="reservationSettingsForm" action="${pageContext.request.contextPath}/reservation-settings/${restaurant.id}/save" method="post">
+		<form id="reservationSettingsForm"
+			action="${pageContext.request.contextPath}/reservation-settings/${restaurant.id}/save"
+			method="post">
 
-            <!-- Hidden inputs to ensure all day time values are always sent -->
-            <input type="hidden" name="mondayStart" value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}">
-            <input type="hidden" name="mondayEnd" value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}">
-            <input type="hidden" name="tuesdayStart" value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}">
-            <input type="hidden" name="tuesdayEnd" value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}">
-            <input type="hidden" name="wednesdayStart" value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}">
-            <input type="hidden" name="wednesdayEnd" value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}">
-            <input type="hidden" name="thursdayStart" value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}">
-            <input type="hidden" name="thursdayEnd" value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}">
-            <input type="hidden" name="fridayStart" value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}">
-            <input type="hidden" name="fridayEnd" value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}">
-            <input type="hidden" name="saturdayStart" value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}">
-            <input type="hidden" name="saturdayEnd" value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}">
-            <input type="hidden" name="sundayStart" value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}">
-            <input type="hidden" name="sundayEnd" value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}">
+			<!-- Hidden inputs to ensure all day time values are always sent -->
+			<input type="hidden" name="mondayStart"
+				value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}">
+			<input type="hidden" name="mondayEnd"
+				value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}">
+			<input type="hidden" name="tuesdayStart"
+				value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}">
+			<input type="hidden" name="tuesdayEnd"
+				value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}">
+			<input type="hidden" name="wednesdayStart"
+				value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}">
+			<input type="hidden" name="wednesdayEnd"
+				value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}">
+			<input type="hidden" name="thursdayStart"
+				value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}">
+			<input type="hidden" name="thursdayEnd"
+				value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}">
+			<input type="hidden" name="fridayStart"
+				value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}">
+			<input type="hidden" name="fridayEnd"
+				value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}">
+			<input type="hidden" name="saturdayStart"
+				value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}">
+			<input type="hidden" name="saturdayEnd"
+				value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}">
+			<input type="hidden" name="sundayStart"
+				value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}">
+			<input type="hidden" name="sundayEnd"
+				value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}">
 
-            <!-- 기본 설정 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-toggle-on text-blue-500"></i>
-                    기본 설정
-                </h2>
+			<!-- 기본 설정 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-toggle-on text-blue-500"></i> 기본 설정
+				</h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- 예약 활성화 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-calendar-check text-green-500 text-xl"></i>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">예약 시스템 활성화</h3>
-                                    <p class="text-sm text-slate-600">고객이 온라인으로 예약할 수 있습니다</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="reservationEnabled" class="toggle-switch"
-                                   ${reservationSettings.reservation_enabled ? 'checked' : ''}>
-                        </div>
-                    </div>
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<!-- 예약 활성화 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<i class="fas fa-calendar-check text-green-500 text-xl"></i>
+								<div>
+									<h3 class="font-semibold text-slate-800">예약 시스템 활성화</h3>
+									<p class="text-sm text-slate-600">고객이 온라인으로 예약할 수 있습니다</p>
+								</div>
+							</div>
+							<input type="checkbox" name="reservationEnabled"
+								class="toggle-switch"
+								${reservationSettings.reservation_enabled ? 'checked' : ''}>
+						</div>
+					</div>
 
-                    <!-- 자동 승인 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <i class="fas fa-check-circle text-blue-500 text-xl"></i>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">예약 자동 승인</h3>
-                                    <p class="text-sm text-slate-600">예약 요청을 자동으로 승인합니다</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="autoAccept" class="toggle-switch"
-                                   ${reservationSettings.auto_accept ? 'checked' : ''}>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<!-- 자동 승인 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<i class="fas fa-check-circle text-blue-500 text-xl"></i>
+								<div>
+									<h3 class="font-semibold text-slate-800">예약 자동 승인</h3>
+									<p class="text-sm text-slate-600">예약 요청을 자동으로 승인합니다</p>
+								</div>
+							</div>
+							<input type="checkbox" name="autoAccept" class="toggle-switch"
+								${reservationSettings.auto_accept ? 'checked' : ''}>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            <!-- 예약 조건 설정 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-users text-purple-500"></i>
-                    예약 조건 설정
-                </h2>
+			<!-- 예약 조건 설정 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-users text-purple-500"></i> 예약 조건 설정
+				</h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- 최소 인원 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">
-                            <i class="fas fa-user-minus text-orange-500 mr-2"></i>
-                            최소 예약 인원
-                        </label>
-                        <input type="number" name="minPartySize" min="1" max="20"
-                               value="${reservationSettings.min_party_size != null ? reservationSettings.min_party_size : 1}"
-                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-slate-500 mt-2">명 이상 예약 가능</p>
-                    </div>
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+					<!-- 최소 인원 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<label class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-user-minus text-orange-500 mr-2"></i> 최소 예약 인원
+						</label> <input type="number" name="minPartySize" min="1" max="20"
+							value="${reservationSettings.min_party_size != null ? reservationSettings.min_party_size : 1}"
+							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<p class="text-xs text-slate-500 mt-2">명 이상 예약 가능</p>
+					</div>
 
-                    <!-- 최대 인원 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">
-                            <i class="fas fa-user-plus text-green-500 mr-2"></i>
-                            최대 예약 인원
-                        </label>
-                        <input type="number" name="maxPartySize" min="1" max="50"
-                               value="${reservationSettings.max_party_size != null ? reservationSettings.max_party_size : 10}"
-                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-slate-500 mt-2">명 이하 예약 가능</p>
-                    </div>
+					<!-- 최대 인원 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<label class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-user-plus text-green-500 mr-2"></i> 최대 예약 인원
+						</label> <input type="number" name="maxPartySize" min="1" max="50"
+							value="${reservationSettings.max_party_size != null ? reservationSettings.max_party_size : 10}"
+							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<p class="text-xs text-slate-500 mt-2">명 이하 예약 가능</p>
+					</div>
 
-                    <!-- 예약 가능 일수 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">
-                            <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
-                            예약 가능 기간
-                        </label>
-                        <input type="number" name="advanceBookingDays" min="1" max="365"
-                               value="${reservationSettings.advance_booking_days != null ? reservationSettings.advance_booking_days : 30}"
-                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-slate-500 mt-2">일 전까지 예약 가능</p>
-                    </div>
+					<!-- 예약 가능 일수 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<label class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-calendar-alt text-blue-500 mr-2"></i> 예약 가능 기간
+						</label> <input type="number" name="advanceBookingDays" min="1" max="365"
+							value="${reservationSettings.advance_booking_days != null ? reservationSettings.advance_booking_days : 30}"
+							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<p class="text-xs text-slate-500 mt-2">일 전까지 예약 가능</p>
+					</div>
 
-                    <!-- 최소 예약 시간 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">
-                            <i class="fas fa-clock text-red-500 mr-2"></i>
-                            최소 예약 시간
-                        </label>
-                        <input type="number" name="minAdvanceHours" min="1" max="72"
-                               value="${reservationSettings.min_advance_hours != null ? reservationSettings.min_advance_hours : 2}"
-                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-slate-500 mt-2">시간 전까지 예약 가능</p>
-                    </div>
-                </div>
-            </div>
+					<!-- 최소 예약 시간 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<label class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-clock text-red-500 mr-2"></i> 최소 예약 시간
+						</label> <input type="number" name="minAdvanceHours" min="1" max="72"
+							value="${reservationSettings.min_advance_hours != null ? reservationSettings.min_advance_hours : 2}"
+							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+						<p class="text-xs text-slate-500 mt-2">시간 전까지 예약 가능</p>
+					</div>
+				</div>
+			</div>
 
-            <!-- 예약금 설정 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-receipt text-amber-500"></i>
-                    예약금 설정
-                </h2>
+			<!-- 예약금 설정 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-receipt text-amber-500"></i> 예약금 설정
+				</h2>
 
-                <div class="space-y-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-shield-check text-amber-500 text-xl"></i>
-                            <div>
-                                <h3 class="font-semibold text-slate-800">예약금(선결제) 사용</h3>
-                                <p class="text-sm text-slate-600">노쇼 방지를 위해 예약 시 선결제 금액을 설정합니다.</p>
-                            </div>
-                        </div>
-                        <input type="checkbox" name="depositRequired" class="toggle-switch"
-                               ${reservationSettings.deposit_required ? 'checked' : ''}>
-                    </div>
+				<div class="space-y-6">
+					<div
+						class="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between">
+						<div class="flex items-center gap-3">
+							<i class="fas fa-shield-check text-amber-500 text-xl"></i>
+							<div>
+								<h3 class="font-semibold text-slate-800">예약금(선결제) 사용</h3>
+								<p class="text-sm text-slate-600">노쇼 방지를 위해 예약 시 선결제 금액을
+									설정합니다.</p>
+							</div>
+						</div>
+						<input type="checkbox" name="depositRequired"
+							class="toggle-switch"
+							${reservationSettings.deposit_required ? 'checked' : ''}>
+					</div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-white p-6 rounded-xl border border-slate-200">
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-won-sign text-green-500 mr-2"></i>
-                                예약금 금액
-                            </label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" name="depositAmount" min="0" step="1"
-                                       value="${reservationSettings.deposit_amount != null ? reservationSettings.deposit_amount : ''}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       placeholder="0">
-                                <span class="text-sm text-slate-600">원</span>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-2">0원 입력 시 예약금이 청구되지 않습니다.</p>
-                        </div>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+						<div class="bg-white p-6 rounded-xl border border-slate-200">
+							<label class="block text-sm font-semibold text-slate-700 mb-3">
+								<i class="fas fa-won-sign text-green-500 mr-2"></i> 예약금 금액
+							</label>
+							<div class="flex items-center gap-2">
+								<input type="number" name="depositAmount" min="0" step="1"
+									value="${reservationSettings.deposit_amount != null ? reservationSettings.deposit_amount : ''}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									placeholder="0"> <span class="text-sm text-slate-600">원</span>
+							</div>
+							<p class="text-xs text-slate-500 mt-2">0원 입력 시 예약금이 청구되지
+								않습니다.</p>
+						</div>
 
-                        <div class="md:col-span-2 bg-white p-6 rounded-xl border border-slate-200">
-                            <label class="block text-sm font-semibold text-slate-700 mb-3">
-                                <i class="fas fa-comment-dots text-blue-500 mr-2"></i>
-                                예약금 안내 문구
-                            </label>
-                            <textarea name="depositDescription" rows="4"
-                                      class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="예) 예약 확정 시 10,000원의 예약금이 결제됩니다. 방문 후 최종 금액에서 차감됩니다.">${reservationSettings.deposit_description}</textarea>
-                            <p class="text-xs text-slate-500 mt-2">고객이 결제 과정에서 확인할 수 있는 안내 문구입니다.</p>
-                        </div>
-                    </div>
+						<div
+							class="md:col-span-2 bg-white p-6 rounded-xl border border-slate-200">
+							<label class="block text-sm font-semibold text-slate-700 mb-3">
+								<i class="fas fa-comment-dots text-blue-500 mr-2"></i> 예약금 안내 문구
+							</label>
+							<textarea name="depositDescription" rows="4"
+								class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+								placeholder="예) 예약 확정 시 10,000원의 예약금이 결제됩니다. 방문 후 최종 금액에서 차감됩니다.">${reservationSettings.deposit_description}</textarea>
+							<p class="text-xs text-slate-500 mt-2">고객이 결제 과정에서 확인할 수 있는
+								안내 문구입니다.</p>
+						</div>
+					</div>
 
-                    <div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
-                        <h4 class="font-medium text-amber-800 mb-2">💡 예약금 운영 가이드</h4>
-                        <ul class="text-sm text-amber-700 list-disc list-inside space-y-1">
-                            <li>네이버페이 결제 완료 시 예약이 확정 상태로 전환됩니다.</li>
-                            <li>환불 정책은 예약금 안내 문구에 명확히 기재해주세요.</li>
-                            <li>예약금 결제 내역은 업주 관리 페이지에서 확인할 수 있습니다.</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+					<div class="bg-amber-50 p-4 rounded-lg border border-amber-200">
+						<h4 class="font-medium text-amber-800 mb-2">💡 예약금 운영 가이드</h4>
+						<ul class="text-sm text-amber-700 list-disc list-inside space-y-1">
+							<li>네이버페이 결제 완료 시 예약이 확정 상태로 전환됩니다.</li>
+							<li>환불 정책은 예약금 안내 문구에 명확히 기재해주세요.</li>
+							<li>예약금 결제 내역은 업주 관리 페이지에서 확인할 수 있습니다.</li>
+						</ul>
+					</div>
+				</div>
+			</div>
 
-            <!-- 운영 시간 설정 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-business-time text-indigo-500"></i>
-                    요일별 운영 시간
-                </h2>
+			<!-- 운영 시간 설정 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-business-time text-indigo-500"></i> 요일별 운영 시간
+				</h2>
 
-                <div class="space-y-4">
-                    <!-- 월요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    월
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">월요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <!-- DEBUG: monday_enabled=[${reservationSettings.monday_enabled}] -->
-                            <input type="checkbox" name="mondayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.monday_enabled ? 'checked' : ''}>
-                        </div>
+				<div class="flex justify-end mb-4">
+					<button type="button" id="enable-all-days-btn"
+						class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200 ease-in-out transform hover:scale-105">
+						<i class="fas fa-check-double mr-2"></i>모든 요일 활성화
+					</button>
+				</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.monday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="mondayStartVisible"
-                                       value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=mondayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="mondayEndVisible"
-                                       value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=mondayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+				<div class="space-y-4">
+					<!-- 월요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center text-white font-bold">
+									월</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">월요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<!-- DEBUG: monday_enabled=[${reservationSettings.monday_enabled}] -->
+							<input type="checkbox" name="mondayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.monday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 화요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    화
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">화요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="tuesdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.tuesday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.monday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="mondayStartVisible"
+									value="${reservationSettings.monday_start != null ? reservationSettings.monday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=mondayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="mondayEndVisible"
+									value="${reservationSettings.monday_end != null ? reservationSettings.monday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=mondayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.tuesday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="tuesdayStartVisible"
-                                       value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=tuesdayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="tuesdayEndVisible"
-                                       value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=tuesdayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+					<!-- 화요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">
+									화</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">화요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="tuesdayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.tuesday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 수요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    수
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">수요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="wednesdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.wednesday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.tuesday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="tuesdayStartVisible"
+									value="${reservationSettings.tuesday_start != null ? reservationSettings.tuesday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=tuesdayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="tuesdayEndVisible"
+									value="${reservationSettings.tuesday_end != null ? reservationSettings.tuesday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=tuesdayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.wednesday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="wednesdayStartVisible"
-                                       value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=wednesdayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="wednesdayEndVisible"
-                                       value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=wednesdayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+					<!-- 수요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-bold">
+									수</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">수요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="wednesdayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.wednesday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 목요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    목
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">목요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="thursdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.thursday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.wednesday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="wednesdayStartVisible"
+									value="${reservationSettings.wednesday_start != null ? reservationSettings.wednesday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=wednesdayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="wednesdayEndVisible"
+									value="${reservationSettings.wednesday_end != null ? reservationSettings.wednesday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=wednesdayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.thursday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="thursdayStartVisible"
-                                       value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=thursdayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="thursdayEndVisible"
-                                       value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=thursdayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+					<!-- 목요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold">
+									목</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">목요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="thursdayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.thursday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 금요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    금
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">금요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="fridayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.friday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.thursday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="thursdayStartVisible"
+									value="${reservationSettings.thursday_start != null ? reservationSettings.thursday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=thursdayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="thursdayEndVisible"
+									value="${reservationSettings.thursday_end != null ? reservationSettings.thursday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=thursdayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.friday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="fridayStartVisible"
-                                       value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=fridayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="fridayEndVisible"
-                                       value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=fridayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+					<!-- 금요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">
+									금</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">금요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="fridayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.friday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 토요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    토
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">토요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="saturdayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.saturday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.friday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="fridayStartVisible"
+									value="${reservationSettings.friday_start != null ? reservationSettings.friday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=fridayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="fridayEndVisible"
+									value="${reservationSettings.friday_end != null ? reservationSettings.friday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=fridayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.saturday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="saturdayStartVisible"
-                                       value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=saturdayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="saturdayEndVisible"
-                                       value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=saturdayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
+					<!-- 토요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold">
+									토</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">토요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="saturdayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.saturday_enabled ? 'checked' : ''}>
+						</div>
 
-                    <!-- 일요일 -->
-                    <div class="bg-white p-6 rounded-xl border border-slate-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                    일
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-slate-800">일요일</h3>
-                                    <p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
-                                </div>
-                            </div>
-                            <input type="checkbox" name="sundayEnabled" class="toggle-switch day-toggle"
-                                   ${reservationSettings.sunday_enabled ? 'checked' : ''}>
-                        </div>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.saturday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="saturdayStartVisible"
+									value="${reservationSettings.saturday_start != null ? reservationSettings.saturday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=saturdayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="saturdayEndVisible"
+									value="${reservationSettings.saturday_end != null ? reservationSettings.saturday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=saturdayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
 
-                        <div class="grid grid-cols-2 gap-4 day-times ${reservationSettings.sunday_enabled ? '' : 'hidden'}">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">시작 시간</label>
-                                <input type="time" name="sundayStartVisible"
-                                       value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=sundayStart]').value = this.value">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-2">종료 시간</label>
-                                <input type="time" name="sundayEndVisible"
-                                       value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}"
-                                       class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                       onchange="document.querySelector('input[name=sundayEnd]').value = this.value">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+					<!-- 일요일 -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<div class="flex items-center justify-between mb-4">
+							<div class="flex items-center gap-3">
+								<div
+									class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+									일</div>
+								<div>
+									<h3 class="font-semibold text-slate-800">일요일</h3>
+									<p class="text-sm text-slate-600">영업일 설정 및 운영 시간</p>
+								</div>
+							</div>
+							<input type="checkbox" name="sundayEnabled"
+								class="toggle-switch day-toggle"
+								${reservationSettings.sunday_enabled ? 'checked' : ''}>
+						</div>
 
-            <!-- 예약 불가 날짜 설정 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-calendar-times text-red-500"></i>
-                    예약 불가 날짜 설정
-                </h2>
+						<div
+							class="grid grid-cols-2 gap-4 day-times ${reservationSettings.sunday_enabled ? '' : 'hidden'}">
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">시작
+									시간</label> <input type="time" name="sundayStartVisible"
+									value="${reservationSettings.sunday_start != null ? reservationSettings.sunday_start : '09:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=sundayStart]').value = this.value">
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-slate-700 mb-2">종료
+									시간</label> <input type="time" name="sundayEndVisible"
+									value="${reservationSettings.sunday_end != null ? reservationSettings.sunday_end : '22:00'}"
+									class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									onchange="document.querySelector('input[name=sundayEnd]').value = this.value">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-slate-700 mb-3">
-                            <i class="fas fa-ban text-red-500 mr-2"></i>
-                            휴무일 또는 특별한 날짜 선택
-                        </label>
-                        <p class="text-sm text-slate-600 mb-4">여러 날짜를 선택할 수 있습니다. 선택된 날짜는 예약이 불가능합니다.</p>
-                        <input type="text" id="blackoutDates" name="blackoutDates" placeholder="날짜를 선택하세요..." readonly
-                               class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
-                               value="${reservationSettings.blackout_dates != null ? reservationSettings.blackout_dates : ''}">
-                    </div>
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <div class="flex items-center gap-2 text-yellow-800">
-                            <i class="fas fa-lightbulb"></i>
-                            <span class="font-semibold">팁</span>
-                        </div>
-                        <p class="text-yellow-700 text-sm mt-1">정기 휴무일이나 특별 행사로 인한 휴무일을 미리 설정하면 고객 혼란을 방지할 수 있습니다.</p>
-                    </div>
-                </div>
-            </div>
+			<!-- 예약 불가 날짜 설정 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-calendar-times text-red-500"></i> 예약 불가 날짜 설정
+				</h2>
 
-            <!-- 특별 안내사항 -->
-            <div class="glass-card p-6 rounded-2xl mb-6 slide-up">
-                <h2 class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
-                    <i class="fas fa-comment-alt text-teal-500"></i>
-                    특별 안내사항
-                </h2>
+				<div class="bg-white p-6 rounded-xl border border-slate-200">
+					<div class="mb-4">
+						<label class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-ban text-red-500 mr-2"></i> 휴무일 또는 특별한 날짜 선택
+						</label>
+						<p class="text-sm text-slate-600 mb-4">여러 날짜를 선택할 수 있습니다. 선택된
+							날짜는 예약이 불가능합니다.</p>
+						<input type="text" id="blackoutDates" name="blackoutDates"
+							placeholder="날짜를 선택하세요..." readonly
+							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+							value="${reservationSettings.blackout_dates != null ? reservationSettings.blackout_dates : ''}">
+					</div>
+					<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+						<div class="flex items-center gap-2 text-yellow-800">
+							<i class="fas fa-lightbulb"></i> <span class="font-semibold">팁</span>
+						</div>
+						<p class="text-yellow-700 text-sm mt-1">정기 휴무일이나 특별 행사로 인한
+							휴무일을 미리 설정하면 고객 혼란을 방지할 수 있습니다.</p>
+					</div>
+				</div>
+			</div>
 
-                <div class="bg-white p-6 rounded-xl border border-slate-200">
-                    <label class="block text-sm font-semibold text-slate-700 mb-3">
-                        <i class="fas fa-pen text-teal-500 mr-2"></i>
-                        고객에게 전달할 메시지
-                    </label>
-                    <textarea name="specialNotes" rows="4" placeholder="예약 시 고객에게 안내할 특별한 사항을 입력하세요. (예: 주차 안내, 복장 규정, 특별 요청사항 등)"
-                              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none">${reservationSettings.special_notes != null ? reservationSettings.special_notes : ''}</textarea>
-                    <p class="text-xs text-slate-500 mt-2">이 메시지는 예약 확인 시 고객에게 표시됩니다.</p>
-                </div>
-            </div>
+			<!-- 특별 안내사항 -->
+			<div class="glass-card p-6 rounded-2xl mb-6 slide-up">
+				<h2
+					class="text-2xl font-bold gradient-text mb-6 flex items-center gap-3">
+					<i class="fas fa-comment-alt text-teal-500"></i> 특별 안내사항
+				</h2>
 
-            <!-- 저장 버튼 -->
-            <div class="flex justify-center">
-                <button type="submit" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3">
-                    <i class="fas fa-save"></i>
-                    설정 저장하기
-                </button>
-            </div>
-        </form>
-    </main>
+				<div class="bg-white p-6 rounded-xl border border-slate-200">
+					<label class="block text-sm font-semibold text-slate-700 mb-3">
+						<i class="fas fa-pen text-teal-500 mr-2"></i> 고객에게 전달할 메시지
+					</label>
+					<textarea name="specialNotes" rows="4"
+						placeholder="예약 시 고객에게 안내할 특별한 사항을 입력하세요. (예: 주차 안내, 복장 규정, 특별 요청사항 등)"
+						class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none">${reservationSettings.special_notes != null ? reservationSettings.special_notes : ''}</textarea>
+					<p class="text-xs text-slate-500 mt-2">이 메시지는 예약 확인 시 고객에게
+						표시됩니다.</p>
+				</div>
+			</div>
 
-    <jsp:include page="/WEB-INF/views/common/footer.jsp" />
+			<!-- 저장 버튼 -->
+			<div class="flex justify-center">
+				<button type="submit"
+					class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-3">
+					<i class="fas fa-save"></i> 설정 저장하기
+				</button>
+			</div>
+		</form>
+	</main>
 
-    <script>
+	<jsp:include page="/WEB-INF/views/common/footer.jsp" />
+
+	<script>
         // JSP 변수를 JavaScript로 전달
         var contextPath = '${pageContext.request.contextPath}';
         var restaurantId = '${restaurant.id}';
 
         // 요일별 토글 처리
         document.addEventListener('DOMContentLoaded', function() {
+        	// 1. HTML 요소 선택
+            // 메인 토글: '예약 시스템 활성화' 스위치
+            const mainToggle = document.querySelector('input[name="reservationEnabled"]');
+
+            // 요일별 설정 컨테이너들: 각 요일의 설정 전체를 감싸는 부모 div 요소들
+            // 각 요일 토글('.day-toggle')을 기준으로 가장 가까운 부모 컨테이너를 찾습니다.
+            const daySettingContainers = Array.from(document.querySelectorAll('.day-toggle')).map(toggle => 
+                toggle.closest('.bg-white.p-6.rounded-xl.border.border-slate-200')
+            );
+            
+            /**
+             * @param {boolean} isEnabled - 메인 토글의 활성화 여부 (true: 켬, false: 끔)
+             * 요일별 설정 영역 전체의 활성/비활성 상태를 업데이트하는 함수
+             */
+            function updateDaySettingsState(isEnabled) {
+                // 모든 요일별 설정 컨테이너를 순회합니다.
+                daySettingContainers.forEach(container => {
+                    if (isEnabled) {
+                        // 🟢 메인 토글이 켜졌을 때:
+                        // 회색 오버레이 효과를 제거하고 모든 입력 필드를 활성화합니다.
+                        container.style.opacity = '1';
+                        container.style.pointerEvents = 'auto';
+                        
+                        // 컨테이너 내부의 모든 input(checkbox, time)을 찾아 disabled 속성을 제거합니다.
+                        container.querySelectorAll('input').forEach(input => {
+                            input.disabled = false;
+                        });
+                    } else {
+                        // 🔴 메인 토글이 꺼졌을 때:
+                        // 회색으로 비활성화된 것처럼 보이게 하고, 클릭(상호작용)을 막습니다.
+                        container.style.opacity = '0.5';
+                        container.style.pointerEvents = 'none';
+
+                        // 컨테이너 내부의 모든 input(checkbox, time)을 찾아 disabled 속성을 추가합니다.
+                        container.querySelectorAll('input').forEach(input => {
+                            input.disabled = true;
+                        });
+                    }
+                });
+            }
+
+            // 2. 이벤트 리스너 연결
+            // 메인 토글의 상태가 변경될 때마다(클릭할 때마다) updateDaySettingsState 함수를 호출합니다.
+            if (mainToggle) {
+                mainToggle.addEventListener('change', function() {
+                    // this.checked는 현재 토글의 on(true)/off(false) 상태를 의미합니다.
+                    updateDaySettingsState(this.checked);
+                });
+
+                // 3. 페이지 최초 로드 시 실행
+                // 페이지가 처음 열렸을 때 메인 토글의 초기 상태를 반영하기 위해 함수를 한 번 실행해줍니다.
+                updateDaySettingsState(mainToggle.checked);
+            }
+            
+         // 1. 새로 추가한 '모든 요일 활성화' 버튼과 각 요일의 토글 스위치들을 선택합니다.
+            const enableAllDaysBtn = document.querySelector('#enable-all-days-btn');
+            const allDayToggles = document.querySelectorAll('.day-toggle');
+
+            // 2. 버튼에 'click' 이벤트 리스너를 추가합니다.
+            if (enableAllDaysBtn && allDayToggles.length > 0) {
+                enableAllDaysBtn.addEventListener('click', function() {
+                    
+                    // 3. 모든 요일 토글들을 순회하면서 상태를 변경합니다.
+                    allDayToggles.forEach(toggle => {
+                        // 스위치를 'on' 상태로 변경합니다.
+                        toggle.checked = true;
+
+                        // 4. 중요: UI(시간 입력창 표시)를 업데이트하기 위해 'change' 이벤트를 강제로 발생시킵니다.
+                        // 이렇게 해야 스위치를 직접 클릭한 것처럼 시간 입력창이 나타납니다.
+                        toggle.dispatchEvent(new Event('change'));
+                    });
+                });
+            }
+        	
             const dayToggles = document.querySelectorAll('.day-toggle');
 
             dayToggles.forEach(toggle => {
