@@ -699,6 +699,18 @@ to {
 				</div>
 			</section>
 		</div>
+
+		<!-- 쿠팡 파트너스 광고 배너 -->
+		<section class="bg-white py-8 border-t border-slate-100">
+			<div class="container mx-auto px-4 flex justify-center">
+				<div>
+					<script src="https://ads-partners.coupang.com/g.js"></script>
+					<script>
+						new PartnersCoupang.G({"id":930603,"template":"carousel","trackingCode":"AF6566533","width":"680","height":"140","tsource":""});
+					</script>
+				</div>
+			</div>
+		</section>
 		</main>
 		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 	</div>
