@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.BranchManagementMapper">
+
+    <resultMap id="BranchManagementMap" type="dto.BranchManagement">
+        <id property="branchId" column="branch_id"/>
+        <result property="companyId" column="company_id"/>
+        <result property="branchName" column="branch_name"/>
+        <result property="status" column="status"/>
+        <result property="address" column="address"/>
+        <result property="phone" column="phone"/>
+        <result property="managerName" column="manager_name"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="companyName" column="company_name"/>
+        <result property="employeeCount" column="employee_count"/>
+        <result property="monthlyRevenue" column="monthly_revenue"/>
+    </resultMap>
+
+    <!-- 모든 회사 조회 -->
+    <select id="getAllCompanies" resultType="map">
+        SELECT id, name FROM companies ORDER BY name
+    </select>
+
+    <!-- 회사별 지점 목록 조회 -->
+    <select id="getBranchesByCompanyId" parameterType="int" resultMap="BranchManagementMap">
+        SELECT
+            b.branch_id,
+            b.company_id,
+            b.branch_name,
+            b.status,
+            b.address,
+            b.phone,
+            b.manager_name,
+            b.created_at,
+            c.name as company_name,
+            (SELECT COUNT(*) FROM business_users WHERE branch_id = b.branch_id) as employee_count,
+            (SELECT COALESCE(SUM(revenue), 0) FROM branch_monthly_performance WHERE branch_id = b.branch_id ORDER BY `year_month` DESC LIMIT 1) as monthly_revenue
+        FROM branches b
+        LEFT JOIN companies c ON b.company_id = c.id
+        WHERE b.company_id = #{companyId}
+        ORDER BY b.created_at DESC
+    </select>
+
+    <!-- 모든 지점 조회 -->
+    <select id="getAllBranches" resultMap="BranchManagementMap">
+        SELECT
+            b.branch_id,
+            b.company_id,
+            b.branch_name,
+            b.status,
+            b.address,
+            b.phone,
+            b.manager_name,
+            b.created_at,
+            c.name as company_name,
+            (SELECT COUNT(*) FROM business_users WHERE branch_id = b.branch_id) as employee_count,
+            (SELECT COALESCE(SUM(revenue), 0) FROM branch_monthly_performance WHERE branch_id = b.branch_id ORDER BY `year_month` DESC LIMIT 1) as monthly_revenue
+        FROM branches b
+        LEFT JOIN companies c ON b.company_id = c.id
+        ORDER BY b.created_at DESC
+    </select>
+
+    <!-- 지점 ID로 조회 -->
+    <select id="getBranchById" parameterType="long" resultMap="BranchManagementMap">
+        SELECT
+            b.branch_id,
+            b.company_id,
+            b.branch_name,
+            b.status,
+            b.address,
+            b.phone,
+            b.manager_name,
+            b.created_at,
+            c.name as company_name
+        FROM branches b
+        LEFT JOIN companies c ON b.company_id = c.id
+        WHERE b.branch_id = #{branchId}
+    </select>
+
+    <!-- 지점 추가 -->
+    <insert id="insertBranch" parameterType="dto.BranchManagement" useGeneratedKeys="true" keyProperty="branchId">
+        INSERT INTO branches (company_id, branch_name, status, address, phone, manager_name, created_at)
+        VALUES (#{companyId}, #{branchName}, #{status}, #{address}, #{phone}, #{managerName}, NOW())
+    </insert>
+
+    <!-- 지점 수정 -->
+    <update id="updateBranch" parameterType="dto.BranchManagement">
+        UPDATE branches
+        SET
+            branch_name = #{branchName},
+            address = #{address},
+            phone = #{phone},
+            manager_name = #{managerName}
+        WHERE branch_id = #{branchId}
+    </update>
+
+    <!-- 지점 상태 변경 -->
+    <update id="updateBranchStatus" parameterType="map">
+        UPDATE branches
+        SET status = #{status}
+        WHERE branch_id = #{branchId}
+    </update>
+
+    <!-- 지점 삭제 -->
+    <delete id="deleteBranch" parameterType="long">
+        DELETE FROM branches WHERE branch_id = #{branchId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.RestaurantDAO">
+
+	<resultMap id="restaurantResultMap" type="model.Restaurant"
+		autoMapping="true">
+		<id property="id" column="id" />
+		<result property="ownerId" column="owner_id" />
+		<result property="image" column="image" />
+		<result property="jibunAddress" column="jibun_address" />
+		<result property="reviewCount" column="review_count" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+
+	<resultMap id="restaurantSummaryResultMap"
+		type="model.RestaurantSummaryDTO">
+		<id property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="category" column="category" />
+		<result property="location" column="location" />
+		<result property="address" column="address" />
+		<result property="image" column="image" />
+		<result property="rating" column="rating" />
+		<result property="reviewCount" column="reviewCount" />
+	</resultMap>
+
+	<select id="getRankedByRegion" parameterType="String"
+		resultType="model.Restaurant">
+		SELECT
+		id,
+		name,
+		address,
+		latitude,
+		longitude,
+		rating AS
+		average_rating
+		FROM
+		restaurants
+		WHERE
+		kakao_place_id IS NULL AND
+		name LIKE CONCAT('%',
+		#{region}, '%')
+		OR address LIKE CONCAT('%', #{region}, '%')
+		ORDER BY
+		average_rating DESC
+		LIMIT 10
+	</select>
+
+	<select id="findAll" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE
+		is_active = true AND kakao_place_id IS NULL
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="findById" parameterType="int"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE id = #{id} AND is_active =
+		true
+	</select>
+
+	<select id="findByCategory" parameterType="String"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE category = #{category} AND kakao_place_id IS NULL AND
+		is_active = true
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="findByLocation" parameterType="String"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE location = #{location} AND kakao_place_id IS NULL AND
+		is_active = true
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="findByOwnerId" parameterType="int"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE owner_id = #{ownerId} AND kakao_place_id IS NULL AND
+		is_active = true
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="findSummariesByOwnerId" parameterType="int"
+		resultMap="restaurantSummaryResultMap">
+		SELECT id, name, category, location, address, image, rating,
+		review_count as
+		reviewCount
+		FROM restaurants
+		WHERE owner_id = #{ownerId} AND kakao_place_id IS NULL
+		AND is_active = true
+		ORDER BY created_at DESC
+	</select>
+
+	<select id="findTopRestaurants" parameterType="int"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE is_active = true AND kakao_place_id IS NULL
+		ORDER BY
+		rating DESC, review_count DESC
+		LIMIT #{limit}
+	</select>
+
+	<select id="findWithFilters" parameterType="map"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		<where>
+			is_active = true AND kakao_place_id IS NULL
+			<if test="keyword != null and keyword != ''">
+				AND (name LIKE CONCAT('%', #{keyword}, '%')
+				OR location
+				LIKE CONCAT('%', #{keyword}, '%')
+				OR category LIKE CONCAT('%',
+				#{keyword}, '%')
+				OR description LIKE CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="location != null and location != ''">
+				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+			<if test="price != null and price != ''">
+				<choose>
+					<when test="price == '1'">
+						AND price_range &lt;= 10000
+					</when>
+					<when test="price == '2'">
+						AND price_range BETWEEN 10001 AND 20000
+					</when>
+					<when test="price == '3'">
+						AND price_range BETWEEN 20001 AND 40000
+					</when>
+					<when test="price == '4'">
+						AND price_range &gt;= 40001
+					</when>
+				</choose>
+			</if>
+			<if test="parking != null and parking != ''">
+				AND parking = #{parking}
+			</if>
+		</where>
+		<choose>
+			<when test="sortBy == 'rating'">
+				ORDER BY rating DESC, review_count DESC
+			</when>
+			<when test="sortBy == 'likes'">
+				ORDER BY likes DESC, rating DESC
+			</when>
+			<otherwise>
+				ORDER BY id DESC
+			</otherwise>
+		</choose>
+		LIMIT #{limit} OFFSET #{offset}
+	</select>
+
+	<select id="countWithFilters" parameterType="map"
+		resultType="int">
+		SELECT count(*) FROM restaurants
+		<where>
+			is_active = true AND kakao_place_id IS NULL
+			<if test="keyword != null and keyword != ''">
+				AND (name LIKE CONCAT('%', #{keyword}, '%')
+				OR location
+				LIKE CONCAT('%', #{keyword}, '%')
+				OR category LIKE CONCAT('%',
+				#{keyword}, '%')
+				OR description LIKE CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="category != null and category != ''">
+				AND category = #{category}
+			</if>
+			<if test="location != null and location != ''">
+				AND location LIKE CONCAT('%', #{location}, '%')
+			</if>
+			<if test="price != null and price != ''">
+				<choose>
+					<when test="price == '1'">
+						AND price_range &lt;= 10000
+					</when>
+					<when test="price == '2'">
+						AND price_range BETWEEN 10001 AND 20000
+					</when>
+					<when test="price == '3'">
+						AND price_range BETWEEN 20001 AND 40000
+					</when>
+					<when test="price == '4'">
+						AND price_range &gt;= 40001
+					</when>
+				</choose>
+			</if>
+			<if test="parking != null and parking != ''">
+				AND parking = #{parking}
+			</if>
+		</where>
+	</select>
+
+	<select id="searchRestaurants" parameterType="map"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE is_active = true AND kakao_place_id IS NULL
+		<if test="category != null and category != ''">
+			AND category = #{category}
+		</if>
+		<if test="location != null and location != ''">
+			AND location = #{location}
+		</if>
+		<if test="name != null and name != ''">
+			AND name LIKE CONCAT('%', #{name}, '%')
+		</if>
+		<if test="minRating != null">
+			AND id IN (
+			SELECT restaurant_id FROM reviews
+			GROUP BY
+			restaurant_id
+			HAVING AVG(rating) >= #{minRating}
+			)
+		</if>
+		ORDER BY created_at DESC
+	</select>
+
+	<insert id="insert" parameterType="model.Restaurant"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO restaurants
+		(owner_id,
+		name, category, location, address, jibun_address, phone, hours,
+		description, image, parking, latitude, longitude,
+		operating_days,
+		operating_times_text, break_time_text,
+		kakao_place_id, created_at,
+		updated_at)
+		VALUES
+		(#{ownerId}, #{name}, #{category},
+		#{location},
+		#{address}, #{jibunAddress}, #{phone}, #{hours},
+		#{description},
+		#{image}, #{parking}, #{latitude}, #{longitude},
+		#{operatingDays},
+		#{operatingTimesText}, #{breakTimeText},
+		#{kakaoPlaceId}, NOW(), NOW())
+	</insert>
+
+	<select id="findByKakaoPlaceId" parameterType="String"
+		resultMap="restaurantResultMap">
+		SELECT * FROM restaurants WHERE kakao_place_id = #{kakaoPlaceId} AND
+		is_active = true
+	</select>
+
+	<!-- <update id="update" parameterType="model.Restaurant"> UPDATE restaurants 
+		<set> <if test="name != null">name = #{name},</if> <if test="category != 
+		null">category = #{category},</if> <if test="address != null">address = #{address},</if> 
+		<if test="phone != null">phone = #{phone},</if> <if test="description != 
+		null">description = #{description},</if> <if test="image != null">image = 
+		#{image},</if> updated_at = NOW() </set> WHERE id = #{id} </update> -->
+
+	<update id="update" parameterType="model.Restaurant">
+		UPDATE restaurants
+		SET
+		name = #{name},
+		category = #{category},
+		location =
+		#{location},
+		address = #{address},
+		jibun_address = #{jibunAddress},
+		phone = #{phone},
+		description = #{description},
+		parking = #{parking},
+		latitude = #{latitude},
+		longitude = #{longitude},
+		operating_days =
+		#{operatingDays},
+		operating_times_text = #{operatingTimesText},
+		break_time_text = #{breakTimeText},
+		<if test="image != null">
+			image = #{image},
+		</if>
+		updated_at = NOW()
+		WHERE id = #{id} AND owner_id = #{ownerId}
+	</update>
+
+
+	<delete id="deleteRestaurantImages" parameterType="int">
+		DELETE FROM
+		restaurant_images WHERE restaurant_id = #{restaurantId}
+	</delete>
+
+	<delete id="deleteOperatingHours" parameterType="int">
+		DELETE FROM
+		restaurant_operating_hours WHERE restaurant_id = #{restaurantId}
+	</delete>
+
+
+	<update id="delete" parameterType="int">
+		UPDATE restaurants SET
+		is_active = false, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<resultMap id="restaurantDetailResultMap"
+		type="model.Restaurant" extends="restaurantResultMap">
+		<id property="id" column="id" />
+		<result property="ownerId" column="owner_id" />
+		<result property="image" column="image" />
+		<result property="jibunAddress" column="jibun_address" />
+		<result property="reviewCount" column="review_count" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+		<collection property="additionalImages"
+			ofType="java.lang.String">
+			<result column="additional_image_path" />
+		</collection>
+	</resultMap>
+
+	<select id="findDetailById" parameterType="int"
+		resultMap="restaurantDetailResultMap">
+		SELECT
+		r.*,
+		ri.image_path AS additional_image_path
+		FROM
+		restaurants r
+		LEFT JOIN restaurant_images ri ON r.id = ri.restaurant_id
+		WHERE r.id = #{id} AND r.is_active = true
+		ORDER BY ri.display_order ASC
+	</select>
+	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. 
+		▼▼▼ -->
+	<select id="findAllWithLocation" resultMap="restaurantResultMap">
+		SELECT * FROM restaurants
+		WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND is_active = true
+	</select>
+	
+	<!-- ▼▼▼ [수정] 이 쿼리를 기존의 findNearbyRestaurantsByPage 쿼리 대신 사용하거나, 새로 추가합니다. 
+		▼▼▼ -->
+	<select id="findNearbyRestaurantsByPage" parameterType="map"
+		resultType="model.Restaurant">
+		SELECT
+		id, name, address, location, phone, category, description,
+		image, latitude, longitude, parking, created_at, updated_at,
+		(6371 *
+		ACOS(
+		COS(RADIANS(#{latitude})) * COS(RADIANS(latitude)) *
+		COS(RADIANS(longitude) - RADIANS(#{longitude})) +
+		SIN(RADIANS(#{latitude})) * SIN(RADIANS(latitude))
+		)) AS distance
+		FROM
+		restaurants
+		WHERE kakao_place_id IS NULL AND
+		latitude IS NOT NULL AND longitude IS NOT NULL
+		<if test="categories != null and !categories.isEmpty()">
+			AND category IN
+			<foreach item="item" collection="categories" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="excludeIds != null and !excludeIds.isEmpty()">
+			AND id NOT IN
+			<foreach item="id" collection="excludeIds" open="("
+				separator="," close=")">
+				#{id}
+			</foreach>
+		</if>
+		HAVING
+		distance &lt;= #{radiusKm}
+		ORDER BY
+		distance ASC
+		LIMIT #{limit}
+		OFFSET #{offset}
+	</select>
+
+	<insert id="insertRestaurantImages" parameterType="map">
+		INSERT INTO restaurant_images (restaurant_id, image_path,
+		display_order)
+		VALUES
+		<foreach collection="imageList" item="image" index="index"
+			separator=",">
+			(#{restaurantId}, #{image}, #{index})
+		</foreach>
+	</insert>
+
+	<delete id="deleteRestaurantImagesByNames" parameterType="map">
+		DELETE FROM restaurant_images
+		WHERE restaurant_id = #{restaurantId}
+		AND
+		image_path IN
+		<foreach collection="imageList" item="imageName" open="("
+			separator="," close=")">
+			#{imageName}
+		</foreach>
+	</delete>
+
+	<!-- 비즈니스 통계 쿼리 -->
+	<select id="getOwnerStatistics" parameterType="int"
+		resultType="map">
+		SELECT
+		COUNT(DISTINCT r.id) as totalRestaurants,
+		COALESCE(SUM(r.review_count), 0) as totalReviews,
+		COALESCE(AVG(r.rating), 0.0) as averageRating,
+		COUNT(DISTINCT res.id)
+		as totalReservations
+		FROM restaurants r
+		LEFT JOIN reservations
+		res ON
+		r.id = res.restaurant_id
+		WHERE r.owner_id = #{ownerId} AND
+		r.is_active =
+		1
+	</select>
+
+	<select id="getOwnerRestaurantsWithStats" parameterType="int"
+		resultType="map">
+		SELECT
+		r.id,
+		r.name,
+		r.category,
+		r.location,
+		r.image,
+		r.rating,
+		r.review_count as reviewCount,
+		r.is_active as isActive
+		FROM restaurants
+		r
+		WHERE r.owner_id = #{ownerId}
+		ORDER BY
+		r.created_at DESC
+	</select>
+
+	<update id="updateRatingAndReviewCount" parameterType="int">
+		UPDATE
+		restaurants
+		SET
+		rating = COALESCE((SELECT AVG(rating) FROM reviews WHERE
+		restaurant_id =
+		#{restaurantId} AND is_active = true), 0),
+		review_count
+		= (SELECT COUNT(*) FROM reviews WHERE restaurant_id = #{restaurantId}
+		AND is_active = true)
+		WHERE id = #{restaurantId}
+	</update>
+
+</mapper>

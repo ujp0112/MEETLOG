@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="NoticeMapper">
+
+    <!-- Result Map -->
+    <resultMap id="NoticeResultMap" type="model.Notice">
+        <id property="id" column="notice_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 모든 공지사항 조회 (최신순) -->
+    <select id="findAll" resultMap="NoticeResultMap">
+        SELECT notice_id, title, content, created_at
+        FROM notices
+        ORDER BY created_at DESC, notice_id DESC
+    </select>
+
+    <!-- ID로 공지사항 조회 -->
+    <select id="findById" parameterType="int" resultMap="NoticeResultMap">
+        SELECT notice_id, title, content, created_at
+        FROM notices
+        WHERE notice_id = #{id}
+    </select>
+
+    <!-- 최신 공지사항 N개 조회 -->
+    <select id="findRecent" parameterType="int" resultMap="NoticeResultMap">
+        SELECT notice_id, title, content, created_at
+        FROM notices
+        ORDER BY created_at DESC, notice_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 공지사항 추가 -->
+    <insert id="insert" parameterType="model.Notice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notices (title, content, created_at)
+        VALUES (#{title}, #{content}, #{createdAt})
+    </insert>
+
+    <!-- 공지사항 수정 -->
+    <update id="update" parameterType="model.Notice">
+        UPDATE notices SET
+            title = #{title},
+            content = #{content}
+        WHERE notice_id = #{id}
+    </update>
+
+    <!-- 공지사항 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM notices WHERE notice_id = #{id}
+    </delete>
+
+    <!-- 전체 공지사항 개수 -->
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM notices
+    </select>
+
+</mapper>

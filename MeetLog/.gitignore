@@ -17,3 +17,4 @@ config.properties
 
 # Database properties
 db.properties
+.DS_Store

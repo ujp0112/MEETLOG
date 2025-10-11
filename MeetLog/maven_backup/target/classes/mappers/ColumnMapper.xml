@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ColumnDAO">
+	<resultMap id="columnResultMap" type="model.Column"
+		autoMapping="true">
+		<id property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="profileImage" column="profile_image" />
+		<result property="tags" column="tags"
+			typeHandler="typehandler.JsonArrayTypeHandler" />
+		<result property="isActive" column="is_active" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at" />
+	</resultMap>
+
+	<sql id="selectColumnWithUser">
+		SELECT
+		c.*,
+		u.nickname AS author,
+		u.profile_image
+		FROM
+		`columns` c
+		JOIN
+		users u ON c.user_id = u.id
+	</sql>
+
+	<select id="findRankedByRegion" parameterType="String"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE
+		c.is_active = true AND
+		(c.title LIKE CONCAT('%', #{region}, '%')
+		OR c.content LIKE CONCAT('%',
+		#{region}, '%'))
+		ORDER BY
+		c.likes DESC,
+		c.views DESC
+		LIMIT 5
+	</select>
+	<!-- [추가] 맛집 ID 목록으로 관련 칼럼 조회 -->
+	<select id="findColumnsByRestaurantIds" parameterType="java.util.List" resultType="model.Column">
+	    SELECT 
+	        c.id, 
+	        c.title,
+	        c.content,
+	        c.image,
+	        u.nickname as author
+	    FROM columns c
+	    JOIN users u ON c.user_id = u.id
+	    WHERE c.is_active = true 
+	      AND c.id IN (
+	        SELECT DISTINCT cr.column_id
+	        FROM column_restaurants cr
+	        WHERE cr.restaurant_id IN
+	        <foreach item="id" collection="list" open="(" separator="," close=")">
+	            #{id}
+	        </foreach>
+	    )
+	    ORDER BY c.likes DESC, c.views DESC
+	    LIMIT 10;
+	</select>
+
+	<select id="findAll" resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.is_active = true ORDER BY c.created_at DESC
+	</select>
+
+	<select id="findTopColumns" parameterType="int"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.is_active = true ORDER BY c.likes DESC, c.views DESC LIMIT
+		#{limit}
+	</select>
+
+	<select id="findRecentColumns" parameterType="int"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.is_active = true ORDER BY c.created_at DESC LIMIT #{limit}
+	</select>
+
+	<select id="findById" parameterType="int"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.id = #{id} AND c.is_active = true
+	</select>
+
+	<select id="findByUserId" parameterType="int"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.user_id = #{userId} AND c.is_active = true ORDER BY
+		c.created_at DESC
+	</select>
+
+	<select id="findRecentByUserId" parameterType="map"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.user_id = #{userId} AND c.is_active = true
+		ORDER BY
+		c.created_at DESC
+		LIMIT #{limit}
+	</select>
+
+	<insert id="insert" parameterType="model.Column"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO columns (user_id,
+		title, content, image, tags, created_at,
+		updated_at)
+		VALUES (#{userId},
+		#{title}, #{content}, #{image},
+		#{tags,
+		typeHandler=typehandler.JsonArrayTypeHandler}, NOW(), NOW())
+	</insert>
+
+	<update id="update" parameterType="model.Column">
+		UPDATE columns SET
+		title =
+		#{title},
+		content = #{content},
+		image = #{image},
+		tags = #{tags,
+		typeHandler=typehandler.JsonArrayTypeHandler},
+		updated_at = NOW()
+		WHERE
+		id = #{id}
+	</update>
+
+	<update id="delete" parameterType="int">
+		UPDATE columns SET is_active =
+		false, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<update id="incrementViews" parameterType="int">
+		UPDATE columns SET
+		views = views + 1 WHERE id = #{id}
+	</update>
+
+	<update id="likeColumn" parameterType="int">
+		UPDATE columns SET likes =
+		likes + 1, updated_at = NOW() WHERE id = #{id}
+	</update>
+
+	<update id="incrementLikes" parameterType="int">
+		UPDATE columns SET
+		likes = likes + 1 WHERE id = #{id}
+	</update>
+
+	<update id="decrementLikes" parameterType="int">
+		UPDATE columns SET
+		likes = GREATEST(likes - 1, 0) WHERE id = #{id}
+	</update>
+
+	<select id="searchColumns" parameterType="map"
+		resultMap="columnResultMap">
+		<include refid="selectColumnWithUser" />
+		WHERE c.is_active = true
+		<if test="keyword != null and keyword != ''">
+			AND (c.title LIKE CONCAT('%', #{keyword}, '%')
+			OR c.content
+			LIKE CONCAT('%', #{keyword}, '%')
+			OR u.nickname LIKE CONCAT('%',
+			#{keyword}, '%'))
+		</if>
+		ORDER BY c.created_at DESC
+	</select>
+
+	<select id="findAttachedRestaurantsByColumnId"
+		parameterType="int" resultType="model.Restaurant">
+		SELECT
+		r.id,
+		r.name,
+		r.address,
+		r.image, r.latitude, r.longitude
+		FROM restaurants r
+		JOIN column_restaurants cr ON r.id = cr.restaurant_id
+		WHERE cr.column_id = #{columnId}
+	</select>
+
+	<insert id="insertColumnRestaurantLinks" parameterType="map">
+		INSERT INTO column_restaurants (column_id, restaurant_id)
+		VALUES
+		<foreach collection="restaurantIds" item="restaurantId"
+			separator=",">
+			(#{columnId}, #{restaurantId})
+		</foreach>
+	</insert>
+
+	<delete id="deleteColumnRestaurantLinks" parameterType="int">
+		DELETE FROM column_restaurants WHERE column_id = #{columnId}
+	</delete>
+</mapper>

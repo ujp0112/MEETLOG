@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="RestaurantTableMapper">
+
+    <!-- Result Map -->
+    <resultMap id="RestaurantTableResultMap" type="model.RestaurantTable">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="tableName" column="table_name"/>
+        <result property="tableNumber" column="table_number"/>
+        <result property="capacity" column="capacity"/>
+        <result property="tableTypeString" column="table_type"/>
+        <result property="isActive" column="is_active"/>
+        <result property="notes" column="notes"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="restaurantName" column="restaurant_name"/>
+    </resultMap>
+
+    <!-- 특정 음식점의 테이블 목록 조회 -->
+    <select id="findByRestaurantId" parameterType="int" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        ORDER BY rt.table_number ASC
+    </select>
+
+    <!-- 특정 음식점의 활성화된 테이블 목록 조회 -->
+    <select id="findActiveByRestaurantId" parameterType="int" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.is_active = TRUE
+        ORDER BY rt.table_number ASC
+    </select>
+
+    <!-- 특정 인원수를 수용할 수 있는 테이블 목록 조회 -->
+    <select id="findByCapacity" parameterType="map" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.capacity >= #{partySize}
+        AND rt.is_active = TRUE
+        ORDER BY rt.capacity ASC, rt.table_number ASC
+    </select>
+
+    <!-- 특정 시간대에 예약 가능한 테이블 목록 조회 -->
+    <select id="findAvailableByDateTime" parameterType="map" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.capacity >= #{partySize}
+        AND rt.is_active = TRUE
+        AND rt.id NOT IN (
+            SELECT DISTINCT rtbl.table_id
+            FROM reservation_tables rtbl
+            INNER JOIN reservations res ON rtbl.reservation_id = res.id
+            WHERE res.restaurant_id = #{restaurantId}
+            AND res.reservation_time = #{reservationTime}
+            AND res.status IN ('PENDING', 'CONFIRMED')
+        )
+        ORDER BY rt.capacity ASC, rt.table_number ASC
+    </select>
+
+    <!-- 테이블 유형별 목록 조회 -->
+    <select id="findByTableType" parameterType="map" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.table_type = #{tableType}
+        AND rt.is_active = TRUE
+        ORDER BY rt.table_number ASC
+    </select>
+
+    <!-- ID로 테이블 조회 -->
+    <select id="findById" parameterType="int" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.id = #{id}
+    </select>
+
+    <!-- 테이블 번호로 조회 -->
+    <select id="findByRestaurantAndTableNumber" parameterType="map" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.table_number = #{tableNumber}
+    </select>
+
+    <!-- 테이블 추가 -->
+    <insert id="insert" parameterType="model.RestaurantTable" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_tables (
+            restaurant_id,
+            table_name,
+            table_number,
+            capacity,
+            table_type,
+            is_active,
+            notes,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{restaurantId},
+            #{tableName},
+            #{tableNumber},
+            #{capacity},
+            #{tableTypeString},
+            #{isActive},
+            #{notes},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 테이블 수정 -->
+    <update id="update" parameterType="model.RestaurantTable">
+        UPDATE restaurant_tables
+        SET table_name = #{tableName},
+            table_number = #{tableNumber},
+            capacity = #{capacity},
+            table_type = #{tableTypeString},
+            is_active = #{isActive},
+            notes = #{notes},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 테이블 활성화/비활성화 -->
+    <update id="updateActiveStatus" parameterType="map">
+        UPDATE restaurant_tables
+        SET is_active = #{isActive},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 테이블 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM restaurant_tables
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 테이블 번호 중복 확인 -->
+    <select id="countByTableNumber" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM restaurant_tables
+        WHERE restaurant_id = #{restaurantId}
+        AND table_number = #{tableNumber}
+        <if test="excludeId != null and excludeId &gt; 0">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <!-- 테이블 통계 조회 -->
+    <select id="getTableStats" parameterType="int" resultType="map">
+        SELECT
+            COUNT(*) AS total_tables,
+            COUNT(CASE WHEN is_active = TRUE THEN 1 END) AS active_tables,
+            SUM(CASE WHEN is_active = TRUE THEN capacity ELSE 0 END) AS total_capacity,
+            AVG(CASE WHEN is_active = TRUE THEN capacity ELSE NULL END) AS avg_capacity,
+            COUNT(CASE WHEN table_type = 'VIP' AND is_active = TRUE THEN 1 END) AS vip_tables,
+            COUNT(CASE WHEN table_type = 'PRIVATE' AND is_active = TRUE THEN 1 END) AS private_tables
+        FROM restaurant_tables
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 테이블 예약 현황 조회 -->
+    <select id="getTableReservationStatus" parameterType="map" resultType="map">
+        SELECT
+            rt.id AS table_id,
+            rt.table_name,
+            rt.table_number,
+            rt.capacity,
+            rt.table_type,
+            CASE WHEN res.id IS NOT NULL THEN 'RESERVED' ELSE 'AVAILABLE' END AS status,
+            res.id AS reservation_id,
+            res.user_name AS customer_name,
+            res.party_size
+        FROM restaurant_tables rt
+        LEFT JOIN reservation_tables rtbl ON rt.id = rtbl.table_id
+        LEFT JOIN reservations res ON rtbl.reservation_id = res.id
+            AND res.reservation_time = #{dateTime}
+            AND res.status IN ('PENDING', 'CONFIRMED')
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.is_active = TRUE
+        ORDER BY rt.table_number ASC
+    </select>
+
+    <!-- 최적의 테이블 추천 -->
+    <select id="recommendOptimalTables" parameterType="map" resultMap="RestaurantTableResultMap">
+        SELECT rt.*, r.name AS restaurant_name
+        FROM restaurant_tables rt
+        LEFT JOIN restaurants r ON rt.restaurant_id = r.id
+        WHERE rt.restaurant_id = #{restaurantId}
+        AND rt.capacity >= #{partySize}
+        AND rt.is_active = TRUE
+        AND rt.id NOT IN (
+            SELECT DISTINCT rtbl.table_id
+            FROM reservation_tables rtbl
+            INNER JOIN reservations res ON rtbl.reservation_id = res.id
+            WHERE res.restaurant_id = #{restaurantId}
+            AND res.reservation_time = #{reservationTime}
+            AND res.status IN ('PENDING', 'CONFIRMED')
+        )
+        ORDER BY
+            CASE
+                WHEN rt.capacity = #{partySize} THEN 1  -- 정확히 맞는 테이블 우선
+                WHEN rt.capacity = #{partySize} + 1 THEN 2  -- 1명 여유 있는 테이블
+                WHEN rt.capacity &lt;= #{partySize} + 2 THEN 3  -- 2명 이하 여유
+                ELSE 4  -- 그 외
+            END,
+            rt.table_type DESC,  -- VIP, PRIVATE 테이블 우선
+            rt.table_number ASC
+        LIMIT 5
+    </select>
+
+</mapper>

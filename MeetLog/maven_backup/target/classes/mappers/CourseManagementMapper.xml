@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.CourseManagementMapper">
+    <resultMap id="adminCourseResult" type="model.AdminCourse">
+        <id property="id" column="course_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="area" column="area"/>
+        <result property="duration" column="duration"/>
+        <result property="price" column="price"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="type" column="type"/>
+        <result property="previewImage" column="preview_image"/>
+        <result property="authorId" column="author_id"/>
+        <result property="authorName" column="author_name"/>
+        <result property="reservationCount" column="reservation_count"/>
+        </resultMap>
+
+    <select id="selectAllCoursesForAdmin" resultMap="adminCourseResult">
+        SELECT
+            c.*,
+            u.nickname as author_name,
+            (SELECT COUNT(*) FROM course_reservations cr WHERE cr.course_id = c.course_id) as reservation_count
+        FROM courses c
+        LEFT JOIN users u ON c.author_id = u.id
+        ORDER BY c.created_at DESC
+    </select>
+    
+    <insert id="insertCourse" parameterType="model.AdminCourse">
+        INSERT INTO courses (title, description, area, duration, price, max_participants, status, created_at)
+        VALUES (#{title}, #{description}, #{area}, #{duration}, #{price}, #{maxParticipants}, 'PENDING', NOW())
+    </insert>
+    
+    <update id="updateCourse" parameterType="model.AdminCourse">
+        UPDATE courses
+        SET 
+            title = #{title},
+            description = #{description},
+            area = #{area},
+            duration = #{duration},
+            price = #{price},
+            max_participants = #{maxParticipants},
+            status = #{status}
+        WHERE course_id = #{id}
+    </update>
+    
+    <delete id="deleteCourse" parameterType="int">
+        DELETE FROM courses WHERE course_id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.UserStorageDAO">
+
+    <!-- UserStorage ResultMap -->
+    <resultMap id="UserStorageResultMap" type="UserStorage">
+        <id property="storageId" column="storage_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="colorClass" column="color_class"/>
+        <result property="itemCount" column="item_count"/>
+    </resultMap>
+
+    <!-- UserStorageItem ResultMap -->
+    <resultMap id="UserStorageItemResultMap" type="UserStorageItem">
+        <id property="itemId" column="item_id"/>
+        <result property="storageId" column="storage_id"/>
+        <result property="itemType" column="item_type"/>
+        <result property="contentId" column="content_id"/>
+        <result property="addedAt" column="added_at"/>
+    </resultMap>
+
+    <!-- 사용자별 저장소 목록 조회 (아이템 개수 포함) -->
+    <select id="findByUserId" parameterType="int" resultMap="UserStorageResultMap">
+        SELECT
+            us.storage_id,
+            us.user_id,
+            us.name,
+            us.color_class,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.user_id = #{userId}
+        ORDER BY us.created_at DESC
+    </select>
+
+    <!-- 저장소 ID로 조회 -->
+    <select id="findById" parameterType="int" resultMap="UserStorageResultMap">
+        SELECT
+            us.storage_id,
+            us.user_id,
+            us.name,
+            us.color_class,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.storage_id = #{storageId}
+    </select>
+
+    <!-- 저장소 생성 -->
+    <insert id="insert" parameterType="UserStorage" useGeneratedKeys="true" keyProperty="storageId">
+        INSERT INTO user_storages (user_id, name, color_class, created_at, updated_at)
+        VALUES (#{userId}, #{name}, #{colorClass}, NOW(), NOW())
+    </insert>
+
+    <!-- 저장소 수정 -->
+    <update id="update" parameterType="UserStorage">
+        UPDATE user_storages
+        SET name = #{name},
+            color_class = #{colorClass},
+            updated_at = NOW()
+        WHERE storage_id = #{storageId}
+    </update>
+
+    <!-- 저장소 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM user_storages WHERE storage_id = #{storageId}
+    </delete>
+
+    <!-- 저장소에 아이템 추가 -->
+    <insert id="addItem" parameterType="UserStorageItem">
+        INSERT INTO user_storage_items (storage_id, item_type, content_id, added_at)
+        VALUES (#{storageId}, #{itemType}, #{contentId}, NOW())
+        ON DUPLICATE KEY UPDATE added_at = NOW()
+    </insert>
+
+    <!-- 저장소에서 아이템 제거 -->
+    <delete id="removeItem" parameterType="map">
+        DELETE FROM user_storage_items
+        WHERE storage_id = #{storageId}
+        AND item_type = #{itemType}
+        AND content_id = #{contentId}
+    </delete>
+
+    <!-- 저장소의 아이템 목록 조회 -->
+    <select id="findItemsByStorageId" parameterType="int" resultMap="UserStorageItemResultMap">
+        SELECT item_id, storage_id, item_type, content_id, added_at
+        FROM user_storage_items
+        WHERE storage_id = #{storageId}
+        ORDER BY added_at DESC
+    </select>
+
+    <!-- 특정 아이템이 저장소에 있는지 확인 -->
+    <select id="countItem" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM user_storage_items
+        WHERE storage_id = #{storageId}
+        AND item_type = #{itemType}
+        AND content_id = #{contentId}
+    </select>
+
+    <!-- 사용자의 기본 저장소 조회 -->
+    <select id="findDefaultStorage" parameterType="int" resultMap="UserStorageResultMap">
+        SELECT
+            us.storage_id,
+            us.user_id,
+            us.name,
+            us.color_class,
+            COALESCE(item_counts.item_count, 0) as item_count
+        FROM user_storages us
+        LEFT JOIN (
+            SELECT storage_id, COUNT(*) as item_count
+            FROM user_storage_items
+            GROUP BY storage_id
+        ) item_counts ON us.storage_id = item_counts.storage_id
+        WHERE us.user_id = #{userId}
+        AND us.name = '내 찜 목록'
+        LIMIT 1
+    </select>
+
+</mapper>

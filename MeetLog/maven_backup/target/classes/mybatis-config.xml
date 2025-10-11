@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<properties resource="db.properties" />
+
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+
+	<typeAliases>
+		<!-- dto 패키지 개별 등록 (Company 충돌 방지) -->
+		<typeAlias type="dto.AppUser" alias="DtoAppUser" />
+		<typeAlias type="dto.Branch" alias="DtoBranch" />
+		<typeAlias type="dto.BranchMenu" alias="DtoBranchMenu" />
+		<typeAlias type="dto.Company" alias="DtoCompany" />
+		<typeAlias type="dto.InventoryItem" alias="DtoInventoryItem" />
+		<typeAlias type="dto.Material" alias="DtoMaterial" />
+		<typeAlias type="dto.MenuIngredient"
+			alias="DtoMenuIngredient" />
+		<typeAlias type="dto.MenuToggle" alias="DtoMenuToggle" />
+		<typeAlias type="dto.PurchaseOrder" alias="DtoPurchaseOrder" />
+		<typeAlias type="dto.PurchaseOrderLine"
+			alias="DtoPurchaseOrderLine" />
+		<!-- erpDto 패키지 개별 등록 (Company 충돌 방지) -->
+		<typeAlias type="erpDto.AppUser" alias="ErpAppUser" />
+		<typeAlias type="erpDto.Branch" alias="ErpBranch" />
+		<typeAlias type="erpDto.BranchMenu" alias="ErpBranchMenu" />
+		<typeAlias type="erpDto.Company" alias="ErpCompany" />
+		<typeAlias type="erpDto.InventoryItem"
+			alias="ErpInventoryItem" />
+		<typeAlias type="erpDto.Material" alias="ErpMaterial" />
+		<typeAlias type="erpDto.MenuIngredient"
+			alias="ErpMenuIngredient" />
+		<typeAlias type="erpDto.MenuToggle" alias="ErpMenuToggle" />
+		<typeAlias type="erpDto.Notice" alias="ErpNotice" />
+		<typeAlias type="erpDto.NoticeFile" alias="ErpNoticeFile" />
+		<typeAlias type="erpDto.NoticeImage" alias="ErpNoticeImage" />
+		<typeAlias type="erpDto.PurchaseOrder"
+			alias="ErpPurchaseOrder" />
+		<typeAlias type="erpDto.PurchaseOrderLine"
+			alias="ErpPurchaseOrderLine" />
+		<typeAlias type="erpDto.Promotion" alias="ErpPromotion" />
+		<!-- 패키지 자동 등록 -->
+		<package name="model" />
+	</typeAliases>
+	<typeHandlers>
+		<typeHandler handler="typehandler.JsonArrayTypeHandler" />
+	</typeHandlers>
+
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${db.driver}" />
+				<property name="url" value="${db.url}" />
+				<property name="username" value="${db.username}" />
+				<property name="password" value="${db.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+
+	<mappers>
+		<mapper resource="mappers/UserMapper.xml" />
+		<mapper resource="mappers/BusinessUserMapper.xml" />
+		<mapper resource="mappers/RestaurantMapper.xml" />
+		<mapper resource="mappers/BranchManagementMapper.xml" />
+		<mapper resource="mappers/ReviewMapper.xml" />
+		<mapper resource="mappers/ColumnMapper.xml" />
+		<mapper resource="mappers/ReservationMapper.xml" />
+		<mapper resource="mappers/ReservationSettingsMapper.xml" />
+		<mapper resource="mappers/ReservationTableAssignmentMapper.xml" />
+		<mapper resource="mappers/ReservationBlackoutDateMapper.xml" />
+		<mapper resource="mappers/ReservationNotificationMapper.xml" />
+		<mapper resource="mappers/RestaurantTableMapper.xml" />
+		<mapper resource="mappers/RecommendationMetricMapper.xml" />
+		<mapper resource="mappers/MenuMapper.xml" />
+		<mapper resource="mappers/EventMapper.xml" />
+		<mapper resource="mappers/EventManagementMapper.xml" />
+		<mapper resource="mappers/CourseMapper.xml" />
+		<mapper resource="mappers/CommunityCourseMapper.xml" />
+		<mapper resource="mappers/OfficialCourseMapper.xml" />
+		<mapper resource="mappers/CourseManagementMapper.xml" />
+		<mapper
+			resource="mappers/CourseReservationManagementMapper.xml" />
+		<mapper resource="mappers/CourseReviewManagementMapper.xml" />
+		<mapper resource="mappers/CourseStatisticsMapper.xml" />
+		<mapper resource="mappers/CouponMapper.xml" />
+		<mapper resource="mappers/UserCouponMapper.xml" />
+		<mapper resource="mappers/PointMapper.xml" />
+		<mapper resource="mappers/TgLinkMapper.xml" />
+		<mapper resource="mappers/TelegramMessageLogMapper.xml" />
+		<mapper resource="mappers/NewsMapper.xml" />
+		<mapper resource="mappers/QnAMapper.xml" />
+		<mapper resource="mappers/OperatingHourMapper.xml" />
+		<mapper resource="mappers/RatingMapper.xml" />
+		<mapper resource="mappers/ReviewCommentMapper.xml" />
+		<mapper resource="mappers/ReviewLikeMapper.xml" />
+		<mapper resource="mappers/ColumnCommentMapper.xml" />
+		<mapper resource="mappers/ColumnLikeMapper.xml" />
+		<mapper resource="mappers/CommentLikeMapper.xml" />
+		<mapper resource="mappers/ReviewStatisticsMapper.xml" />
+		<mapper resource="mappers/BusinessQnAMapper.xml" />
+		<mapper resource="mappers/NotificationMapper.xml" />
+		<mapper resource="mappers/CompanyMapper.xml" />
+		<mapper resource="mappers/FeedMapper.xml" />
+		<mapper resource="mappers/FollowMapper.xml" />
+		<mapper resource="mappers/UserCollectionMapper.xml" />
+		<mapper resource="mappers/UserStorageMapper.xml" />
+		<mapper resource="mappers/CourseCommentMapper.xml" />
+		<mapper resource="mappers/FaqMapper.xml" />
+		<mapper resource="mappers/NoticeMapper.xml" />
+		<mapper resource="mappers/InquiryMapper.xml" />
+		<mapper resource="mappers/FeedbackMapper.xml" />
+		<mapper resource="mappers/EmployeeMapper.xml" />
+		<mapper resource="mappers/AdminStatisticsMapper.xml" />
+		<mapper resource="erpMappers/AuthMapper.xml" />
+		<mapper resource="erpMappers/MaterialMapper.xml" />
+		<mapper resource="erpMappers/BranchMenuMapper.xml" />
+		<mapper resource="erpMappers/BranchMapper.xml" />
+		<mapper resource="erpMappers/OrderMapper.xml" />
+		<mapper resource="erpMappers/NoticeMapper.xml" />
+		<mapper resource="erpMappers/PromotionMapper.xml" />
+		<mapper resource="mappers/ReportMapper.xml" />
+		<mapper resource="mappers/CourseReservationMapper.xml" />
+		<mapper resource="mappers/UserVectorMapper.xml" />
+	</mappers>
+</configuration>

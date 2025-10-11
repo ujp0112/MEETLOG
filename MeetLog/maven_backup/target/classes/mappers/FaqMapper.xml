@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="FaqMapper">
+
+    <!-- Result Map -->
+    <resultMap id="FaqResultMap" type="model.Faq">
+        <id property="id" column="id"/>
+        <result property="category" column="category"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="displayOrder" column="display_order"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 모든 FAQ 조회 -->
+    <select id="findAll" resultMap="FaqResultMap">
+        SELECT id, category, question, answer, display_order, is_active, created_at, updated_at
+        FROM faqs
+        ORDER BY display_order ASC, id ASC
+    </select>
+
+    <!-- 활성화된 FAQ만 순서대로 조회 -->
+    <select id="findActiveOrdered" resultMap="FaqResultMap">
+        SELECT id, category, question, answer, display_order, is_active, created_at, updated_at
+        FROM faqs
+        WHERE is_active = 1
+        ORDER BY display_order ASC, id ASC
+    </select>
+
+    <!-- 카테고리별 FAQ 조회 -->
+    <select id="findByCategory" parameterType="string" resultMap="FaqResultMap">
+        SELECT id, category, question, answer, display_order, is_active, created_at, updated_at
+        FROM faqs
+        WHERE category = #{category} AND is_active = 1
+        ORDER BY display_order ASC, id ASC
+    </select>
+
+    <!-- ID로 FAQ 조회 -->
+    <select id="findById" parameterType="int" resultMap="FaqResultMap">
+        SELECT id, category, question, answer, display_order, is_active, created_at, updated_at
+        FROM faqs
+        WHERE id = #{id}
+    </select>
+
+    <!-- FAQ 추가 -->
+    <insert id="insert" parameterType="model.Faq" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO faqs (category, question, answer, display_order, is_active)
+        VALUES (#{category}, #{question}, #{answer}, #{displayOrder}, #{isActive})
+    </insert>
+
+    <!-- FAQ 수정 -->
+    <update id="update" parameterType="model.Faq">
+        UPDATE faqs SET
+            category = #{category},
+            question = #{question},
+            answer = #{answer},
+            display_order = #{displayOrder},
+            is_active = #{isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <!-- FAQ 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM faqs WHERE id = #{id}
+    </delete>
+
+    <!-- FAQ 활성화 상태 변경 -->
+    <update id="updateActiveStatus" parameterType="map">
+        UPDATE faqs SET
+            is_active = #{isActive},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <!-- 카테고리 목록 조회 -->
+    <select id="findDistinctCategories" resultType="string">
+        SELECT DISTINCT category
+        FROM faqs
+        WHERE is_active = 1
+        ORDER BY category
+    </select>
+
+    <!-- 전체 FAQ 개수 조회 -->
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM faqs
+    </select>
+
+    <!-- 활성화된 FAQ 개수 조회 -->
+    <select id="countActive" resultType="int">
+        SELECT COUNT(*) FROM faqs WHERE is_active = 1
+    </select>
+
+</mapper>

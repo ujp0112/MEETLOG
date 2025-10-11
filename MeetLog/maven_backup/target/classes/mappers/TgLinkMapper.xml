@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.TgLinkMapper">
+
+    <!-- TgLink ResultMap -->
+    <resultMap id="TgLinkResultMap" type="model.TgLink">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="tgUserId" column="tg_user_id"/>
+        <result property="chatId" column="chat_id"/>
+        <result property="startToken" column="start_token"/>
+        <result property="state" column="state"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 사용자 ID로 조회 -->
+    <select id="findByUserId" parameterType="int" resultMap="TgLinkResultMap">
+        SELECT id, user_id, tg_user_id, chat_id, start_token, state, created_at, updated_at
+        FROM tg_link
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 토큰으로 조회 -->
+    <select id="findByToken" parameterType="string" resultMap="TgLinkResultMap">
+        SELECT id, user_id, tg_user_id, chat_id, start_token, state, created_at, updated_at
+        FROM tg_link
+        WHERE start_token = #{token}
+    </select>
+
+    <!-- chat_id로 조회 -->
+    <select id="findByChatId" parameterType="string" resultMap="TgLinkResultMap">
+        SELECT id, user_id, tg_user_id, chat_id, start_token, state, created_at, updated_at
+        FROM tg_link
+        WHERE chat_id = #{chatId}
+    </select>
+
+    <!-- 토큰 발급 (PENDING 상태로 upsert) -->
+    <insert id="upsertPending" parameterType="map">
+        INSERT INTO tg_link (user_id, start_token, state)
+        VALUES (#{userId}, #{token}, 'PENDING')
+        ON DUPLICATE KEY UPDATE
+            start_token = VALUES(start_token),
+            state = 'PENDING',
+            tg_user_id = NULL,
+            chat_id = NULL,
+            updated_at = CURRENT_TIMESTAMP
+    </insert>
+
+    <!-- 온보딩 완료 (PENDING -> ACTIVE) -->
+    <update id="activateByToken" parameterType="map">
+        UPDATE tg_link
+        SET state = 'ACTIVE',
+            tg_user_id = #{tgUserId},
+            chat_id = #{chatId},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE start_token = #{token}
+          AND state = 'PENDING'
+    </update>
+
+    <!-- 상태 변경 (user_id 기준) -->
+    <update id="updateState" parameterType="map">
+        UPDATE tg_link
+        SET state = #{state},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 상태 변경 (chat_id 기준) -->
+    <update id="updateStateByChatId" parameterType="map">
+        UPDATE tg_link
+        SET state = #{state},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE chat_id = #{chatId}
+    </update>
+
+    <!-- 연결 삭제 -->
+    <delete id="deleteByUserId" parameterType="int">
+        DELETE FROM tg_link
+        WHERE user_id = #{userId}
+    </delete>
+
+</mapper>
