@@ -192,6 +192,7 @@ table.sheet {
 .cell-id {
 	text-align: left
 }
+.empty-row td { text-align: center; padding: 24px; color: var(--muted); }
 
 .thumb {
 	width: 40px;
@@ -408,21 +409,7 @@ table.sheet {
 
 							<c:if test="${empty materials}">
 								<!-- MOCK 예시(서버 데이터 없을 때만 노출) -->
-								<tr id="row-m1" data-id="m1" data-name="로메인" data-unit="kg"
-									data-unitprice="4500" data-step="5" data-img="">
-									<td><span class="thumb"
-										style="display: grid; place-items: center">🥬</span></td>
-									<td>로메인</td>
-									<td>kg</td>
-									<td class="cell-id">4,500</td>
-									<td class="cell-id">5</td>
-									<td class="cell-id">22,500</td>
-									<td><div class="row-actions">
-											<button type="button" class="btn-sm" data-action="edit">수정</button>
-											<button type="button" class="btn-sm btn-danger"
-												data-action="delete" data-delete-url="#mock">삭제</button>
-										</div></td>
-								</tr>
+									<tr class="empty-row"><td colspan="7">재료가 없습니다.</td></tr>
 							</c:if>
 						</tbody>
 					</table>

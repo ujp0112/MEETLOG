@@ -16,13 +16,13 @@
         a { text-decoration: none; color: inherit; }
         
         main { max-width: 980px; margin: 20px auto; padding: 0 20px; }
-        .panel { background:var(--surface); border:1px solid var(--border); border-radius:16px; box-shadow:0 8px 20px rgba(16,24,40,.05); }
+        .panel { background:var(--surface); border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 8px 20px rgba(16,24,40,.05); }
         .panel .hd { display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border); }
         .panel .bd { padding:16px 18px; }
         .panel .ft { display:flex; justify-content:flex-end; padding: 12px 18px; border-top:1px solid var(--border); background: #f9fafb; border-radius: 0 0 16px 16px;}
         .title { margin:0; font-size:20px; font-weight:800; }
 
-        .btn { display: inline-flex; appearance:none; border:1px solid var(--border); background:#fff; padding:10px 14px; border-radius:999px; font-weight:700; cursor:pointer; text-decoration:none; color:#111827; }
+        .btn { display: inline-flex; appearance:none; border:1px solid #e5e7eb; background:#fff; padding:10px 14px; border-radius:999px; font-weight:700; cursor:pointer; text-decoration:none; color:#111827; }
         .btn:hover { background:#f8fafc; }
         
         .promo-images { margin-bottom: 24px; }

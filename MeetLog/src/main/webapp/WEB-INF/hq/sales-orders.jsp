@@ -95,6 +95,7 @@ table.sheet {
 	border-spacing: 0;
 	min-width: 960px
 }
+.empty-row td { text-align: center; padding: 24px; color: var(--muted); }
 
 .sheet thead th {
 	position: sticky;
@@ -126,10 +127,6 @@ table.sheet {
 	font-weight: 700;
 	cursor: pointer;
 	text-decoration: none
-}
-
-.btn:hover {
-	background: #f8fafc
 }
 
 .btn.primary {
@@ -333,40 +330,7 @@ table.sheet {
 								</tr>
 							</c:forEach>
 							<c:if test="${empty orders}">
-								<!-- MOCK 예시 발주 -->
-								<tr data-id="101" data-branch="강남점" data-status="미검"
-									data-mock="1">
-									<td>#101</td>
-									<td>강남점</td>
-									<td>브로콜리 외 1건</td>
-									<td class="cell-num">154,000</td>
-									<td>2025-09-10</td>
-									<td><span class="badge na">미검</span></td>
-									<td><button type="button" class="btn sm"
-											data-action="open-inspect" data-id="101">입고검수서</button></td>
-								</tr>
-								<tr data-id="102" data-branch="홍대점" data-status="검수완"
-									data-mock="1">
-									<td>#102</td>
-									<td>홍대점</td>
-									<td>닭가슴살 외 3건</td>
-									<td class="cell-num">412,500</td>
-									<td>2025-09-11</td>
-									<td><span class="badge ok">검수완</span></td>
-									<td><button type="button" class="btn sm"
-											data-action="open-inspect" data-id="102">입고검수서</button></td>
-								</tr>
-								<tr data-id="103" data-branch="수원점" data-status="입고완"
-									data-mock="1">
-									<td>#103</td>
-									<td>수원점</td>
-									<td>방울토마토 외 2건</td>
-									<td class="cell-num">238,900</td>
-									<td>2025-09-12</td>
-									<td><span class="badge rcv">입고완</span></td>
-									<td><button type="button" class="btn sm"
-											data-action="open-inspect" data-id="103">입고검수서</button></td>
-								</tr>
+								<tr class="empty-row"><td colspan="7">발주 신청이 없습니다.</td></tr>
 							</c:if>
 						</tbody>
 					</table>

@@ -10,7 +10,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>지점 · 판매 메뉴 설정</title>
 <style>
+:root { --bg: #f6faf8; --surface: #ffffff; --border: #e5e7eb; --muted: #6b7280; --title: #0f172a; --primary: #2f855a; --primary-600: #27764f; --ring: #93c5aa; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--title); font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 20px rgba(16, 24, 40, .05); }
+    .panel .hd { display: flex; align-items: center; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--border); }
+    .panel .bd { padding: 16px 18px; }
+    .title { margin: 0; font-weight: 800; font-size: 20px; }
+    
+    /* Table */
+    .table-wrap { border: 1px solid var(--border); border-radius: 14px; overflow: auto; background: #fff; }
+    table.sheet { width: 100%; border-collapse: separate; border-spacing: 0;}
+    .sheet thead th { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--border); font-weight: 800; text-align: left; padding: 12px 10px; font-size: 13px; }
+    .sheet tbody td {max-width:300px; padding: 12px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .cell-num { text-align: right; }
+    .thumb { width: 44px; height: 250px; border-radius: 8px; border: 1px solid var(--border); object-fit: cover; background: #fafafa; display: block; }
+    .empty-row td { text-align: center; color: var(--muted); padding: 24px; }
+
+    /* Button */
+    .btn { appearance: none; border: 1px solid var(--border); background: #fff; padding: 8px 12px; border-radius: 10px; font-weight: 700; cursor: pointer; text-decoration: none; color:#111827; display: inline-flex; align-items: center; justify-content: center; }
+    .btn:hover { background: #f8fafc; }
+    .btn.sm { padding: 6px 8px; border-radius: 8px; }
+    .btn[aria-disabled="true"], .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Badge */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid transparent; font-size: 12px; font-weight: 700; }
+    .status-pending { background: #f1f5f9; color: #475569; border-color: #e2e8f0; } /* 요청중/미검 */
+    .status-approved { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; } /* 검수완료 */
+    .status-received { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; } /* 입고완료 */
+    
+    /* Pager */
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+    .pager .left, .pager .right { display: flex; align-items: center; gap: 8px; }
+    .pager .btn-group { display: flex; gap: 6px; }
+    .pager .info { font-size: 12px; color: var(--muted); }
+
 /* 이 페이지 전용 스타일 */
+
 .field { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:4px 10px; }
 .field > span { font-size: 13px; color: var(--text-muted); }
 .field > input { border:0; outline:0; min-width:220px; background: transparent; padding: 6px 4px; }
@@ -39,7 +77,7 @@
 /* Popover */
 .popover-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:200}
 .popover-mask.show{display:flex}
-.popover{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.popover{width:100%;max-width:800px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .popover .hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
 .popover .hd > strong { font-size: 16px; font-weight: 700; }
 .popover .bd{padding:16px}

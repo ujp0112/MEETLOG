@@ -52,6 +52,7 @@ body {
 		grid-template-columns: 1fr
 	}
 }
+.empty-row td { text-align: center; padding: 24px; color: var(--muted); }
 
 /* Card */
 .panel {
@@ -388,20 +389,7 @@ table.sheet {
 							</c:forEach>
 
 							<c:if test="${empty menus}">
-								<tr id="row-demo" data-id="0" data-name="데모 메뉴"
-									data-saleprice="10000" data-img="">
-									<td><span class="thumb"
-										style="display: grid; place-items: center">🍽️</span></td>
-									<td>데모 메뉴</td>
-									<td class="cell-num">10,000</td>
-									<td>
-										<div class="row-actions">
-											<button type="button" class="btn-sm" data-action="edit">수정</button>
-											<button type="button" class="btn-sm btn-danger"
-												data-action="delete" data-delete-url="#mock">삭제</button>
-										</div>
-									</td>
-								</tr>
+								<tr class="empty-row"><td colspan="4">메뉴가 없습니다.</td></tr>
 							</c:if>
 						</tbody>
 					</table>
