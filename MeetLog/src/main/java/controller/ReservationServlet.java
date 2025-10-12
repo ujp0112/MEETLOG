@@ -428,7 +428,7 @@ public class ReservationServlet extends HttpServlet {
 			        request.setAttribute("depositDescription", depositDescription);
 
 			        // 5. 새로 만들 공통 결제 페이지로 포워딩
-			        request.getRequestDispatcher("/WEB-INF/views/payment.jsp").forward(request, response);
+			        request.getRequestDispatcher("/WEB-INF/views/reservation-payment.jsp").forward(request, response);
 			        return;
 			    }
 			    response.sendRedirect(request.getContextPath() + "/mypage/reservations");

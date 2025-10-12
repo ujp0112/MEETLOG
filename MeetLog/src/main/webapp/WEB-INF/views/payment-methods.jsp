@@ -59,7 +59,6 @@ body {
 							value="NAVERPAY" class="hidden payment-method-input" checked>
 						<label for="naverpay-method"
 							class="payment-method-label flex items-center p-4 rounded-lg cursor-pointer">
-							<%-- ✨ CHANGED: 로고를 담는 div와 img의 스타일을 변경하여 크기를 키웠습니다. --%>
 							<div class="flex items-center justify-center w-24 h-10">
 								<img
 									src="${pageContext.request.contextPath}/img/naverpay_logo.svg"
@@ -73,7 +72,6 @@ body {
 							value="KAKAOPAY" class="hidden payment-method-input"> <label
 							for="kakaopay-method"
 							class="payment-method-label flex items-center p-4 rounded-lg cursor-pointer">
-							<%-- ✨ CHANGED: 로고를 담는 div와 img의 스타일을 변경하여 크기를 키웠습니다. --%>
 							<div class="flex items-center justify-center w-24 h-10">
 								<img
 									src="${pageContext.request.contextPath}/img/kakaopay_logo.png"
@@ -96,25 +94,27 @@ body {
 		</div>
 	</div>
 
+	<%-- ▼▼▼ [수정] 스크립트 전체를 교체해주세요 ▼▼▼ --%>
 	<script>
-    // JavaScript 부분은 변경사항 없습니다.
+    // 1. JSP 변수를 JavaScript 변수로 안전하게 변환합니다.
+    // 숫자는 따옴표 없이, 문자열은 따옴표를 사용하여 JS 문법 오류를 방지합니다.
     const paymentConfigs = {
         NAVERPAY: {
-            clientId: '${naverConfig.clientId}',
-            mode: '${naverConfig.mode}',
-            merchantUserKey: '${naverConfig.merchantUserKey}',
-            merchantPayKey: '${naverConfig.merchantPayKey}',
-            productName: '${naverConfig.productName}',
-            productCount: '${naverConfig.productCount}',
-            totalPayAmount: '${naverConfig.totalPayAmountAsString}',
-            taxScopeAmount: '${naverConfig.taxScopeAmountAsString}',
-            taxExScopeAmount: '${naverConfig.taxExScopeAmountAsString}',
-            returnUrl: '${naverConfig.returnUrl}',
-            merchantId: '${naverConfig.merchantId}',
-            chainId: '${naverConfig.chainId}'
+            clientId: '<c:out value="${naverConfig.clientId}" default=""/>',
+            mode: '<c:out value="${naverConfig.mode}" default="production"/>',
+            merchantUserKey: '<c:out value="${naverConfig.merchantUserKey}" default=""/>',
+            merchantPayKey: '<c:out value="${naverConfig.merchantPayKey}" default=""/>',
+            productName: '<c:out value="${naverConfig.productName}" escapeXml="true"/>',
+            productCount: <c:out value="${naverConfig.productCount}" default="0"/>,
+            totalPayAmount: <c:out value="${naverConfig.totalPayAmountAsString}" default="0"/>,
+            taxScopeAmount: <c:out value="${naverConfig.taxScopeAmountAsString}" default="0"/>,
+            taxExScopeAmount: <c:out value="${naverConfig.taxExScopeAmountAsString}" default="0"/>,
+            returnUrl: '<c:out value="${naverConfig.returnUrl}" default=""/>',
+            merchantId: '<c:out value="${naverConfig.merchantId}" default=""/>',
+            chainId: '<c:out value="${naverConfig.chainId}" default=""/>'
         },
         KAKAOPAY: {
-            redirectUrl: '${kakaoConfig.next_redirect_pc_url}'
+            redirectUrl: '<c:out value="${kakaoConfig.next_redirect_pc_url}" default=""/>'
         }
     };
 
@@ -124,23 +124,28 @@ body {
         if (selectedMethod === 'NAVERPAY') {
             const config = paymentConfigs.NAVERPAY;
             const pay = Naver.Pay.create({ mode: config.mode, clientId: config.clientId, chainId: config.chainId });
+            
+            // 2. pay.open()에 모든 필수 금액 필드를 '숫자' 타입으로 전달합니다.
             pay.open({
                 merchantUserKey: config.merchantUserKey,
                 merchantPayKey: config.merchantPayKey,
                 productName: config.productName,
                 totalPayAmount: config.totalPayAmount,
+                taxScopeAmount: config.taxScopeAmount,
+                taxExScopeAmount: config.taxExScopeAmount,
+                productCount: config.productCount, // 상품 수량도 전달하는 것이 좋습니다.
                 returnUrl: config.returnUrl,
             });
         } else if (selectedMethod === 'KAKAOPAY') {
             const config = paymentConfigs.KAKAOPAY;
-            if (config.redirectUrl && config.redirectUrl !== '') {
+            if (config.redirectUrl) {
                 window.location.href = config.redirectUrl;
             } else {
                 alert('카카오페이 결제를 시작할 수 없습니다. 잠시 후 다시 시도해주세요.');
             }
         }
     });
-</script>
+	</script>
 
 </body>
 </html>
