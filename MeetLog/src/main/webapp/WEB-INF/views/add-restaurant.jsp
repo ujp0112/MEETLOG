@@ -296,7 +296,7 @@ body {
 				<%-- 운영 시간 / 예약 시간 설정 --%>
 				<div class="space-y-4 border-t pt-6">
 					<%-- 대표 운영시간 --%>
-					<div>
+					<%-- <div>
 						<div class="accordion-header flex justify-between items-center">
 							<h3 class="text-lg font-semibold text-gray-800">🕒 가게 대표
 								운영시간 설정</h3>
@@ -304,15 +304,15 @@ body {
 						</div>
 						<div class="accordion-content space-y-4">
 							<div id="main-hours-container" class="space-y-4">
-								<%-- JS로 동적 생성 --%>
+								JS로 동적 생성
 							</div>
 						</div>
-					</div>
+					</div> --%>
 					<%-- 온라인 예약 시간 --%>
 					<div>
 						<div class="accordion-header flex justify-between items-center">
-							<h3 class="text-lg font-semibold text-gray-800">📅 온라인 예약 시간
-								설정</h3>
+							<h3 class="text-lg font-semibold text-gray-800">🕒 가게 대표
+								운영시간 설정</h3>
 							<span class="transform transition-transform duration-300">▼</span>
 						</div>
 						<div class="accordion-content">
@@ -368,7 +368,7 @@ body {
 	        console.log("수정모드 오퍼레이팅 아워", existingOperatingHours);
 	        initializeEditForm();
 	    } else {
-	        buildTimeSlots('main-hours-container', 1, false);
+	        //buildTimeSlots('main-hours-container', 1, false);
 	        buildTimeSlots('hours-container', 1, true);
 	    }
 	    kakao.maps.load(() => console.log("Kakao Maps API가 준비되었습니다."));

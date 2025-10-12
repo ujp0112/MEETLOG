@@ -37,9 +37,8 @@ public class ReservationSettingsService {
             java.util.Map<String, Object> existingSettings = reservationDAO.findByRestaurantId(settings.getRestaurantId());
 
             int result;
-            if (existingSettings != null && existingSettings.get("id") != null) {
+            if (settings.getId() > 0) { // 서블릿에서 ID를 설정해줬으므로 ID 존재 여부로 판단
                 // 기존 설정이 있으면 업데이트
-                settings.setId((Integer) existingSettings.get("id"));
                 result = reservationDAO.update(settings);
             } else {
                 // 새 설정 등록
@@ -105,6 +104,10 @@ public class ReservationSettingsService {
 			return false;
 		if (settings.getMinAdvanceHours() < 0)
 			return false;
+			// 예약 시간 간격 유효성 검사
+		if (settings.getTimeSlotInterval() <= 0) {
+			return false;
+		}
 		if (settings.isDepositRequired()) {
 			if (settings.getDepositAmount() == null
 					|| settings.getDepositAmount().compareTo(java.math.BigDecimal.ZERO) <= 0) {

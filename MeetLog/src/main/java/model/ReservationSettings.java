@@ -52,6 +52,7 @@ public class ReservationSettings {
     private boolean sundayEnabled;
     private LocalTime sundayStart;
     private LocalTime sundayEnd;
+    private int timeSlotInterval; // 예약 시간 간격 (분)
 
 
     // 기본 생성자
@@ -67,6 +68,7 @@ public class ReservationSettings {
         this.reservationEndTime = LocalTime.of(22, 0);
         this.depositRequired = false;
         this.depositAmount = BigDecimal.ZERO;
+        this.timeSlotInterval = 30; // 기본값 30분
         
     }
 
@@ -284,4 +286,13 @@ public class ReservationSettings {
 
     public String getBlackoutDatesJson() { return blackoutDatesJson; }
     public void setBlackoutDatesJson(String blackoutDatesJson) { this.blackoutDatesJson = blackoutDatesJson; }
+
+    // timeSlotInterval Getter and Setter
+    public int getTimeSlotInterval() {
+        return timeSlotInterval;
+    }
+
+    public void setTimeSlotInterval(int timeSlotInterval) {
+        this.timeSlotInterval = timeSlotInterval;
+    }
 }

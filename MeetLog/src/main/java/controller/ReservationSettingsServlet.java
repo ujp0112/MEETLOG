@@ -269,8 +269,16 @@ public class ReservationSettingsServlet extends HttpServlet {
 	}
 
 	private ReservationSettings parseSettingsFromRequest(HttpServletRequest request, int restaurantId) {
-		ReservationSettings settings = new ReservationSettings(restaurantId);
-
+		// ▼▼▼ [수정] 먼저 기존 설정을 불러와 ID를 확보합니다. ▼▼▼
+		java.util.Map<String, Object> existingSettingsMap = reservationService.getReservationSettings(restaurantId);
+		ReservationSettings settings;
+		if (existingSettingsMap != null && existingSettingsMap.get("id") != null) {
+			settings = new ReservationSettings(restaurantId);
+			settings.setId((Integer) existingSettingsMap.get("id"));
+		} else {
+			settings = new ReservationSettings(restaurantId);
+		}
+		
 		// 기본 설정
 		settings.setReservationEnabled(Boolean.parseBoolean(request.getParameter("reservationEnabled")));
 		settings.setAutoAccept(Boolean.parseBoolean(request.getParameter("autoAccept")));
@@ -293,6 +301,13 @@ public class ReservationSettingsServlet extends HttpServlet {
 			settings.setMinAdvanceHours(2);
 		}
 
+		// 예약 시간 간격 설정
+		try {
+			settings.setTimeSlotInterval(Integer.parseInt(request.getParameter("timeSlotInterval")));
+		} catch (NumberFormatException e) {
+			settings.setTimeSlotInterval(30); // 기본값 30분
+		}
+
 		// 시간 설정
 		try {
 			String startTime = request.getParameter("reservationStartTime");
@@ -311,14 +326,16 @@ public class ReservationSettingsServlet extends HttpServlet {
 		// reservationStartTime과 reservationEndTime을 기반으로 time_slots JSON 생성
 		List<String> timeSlotsList = new ArrayList<>();
 		LocalTime current = settings.getReservationStartTime();
-		LocalTime end = settings.getReservationEndTime();
+		if (current != null) {
+			LocalTime end = settings.getReservationEndTime();
+			// ▼▼▼ [수정] 설정된 시간 간격을 가져와서 사용합니다. ▼▼▼
+			int interval = settings.getTimeSlotInterval(); 
 
-		while (current.isBefore(end)) {
-			// 큰따옴표로 감싸서 JSON 문자열 형식으로 추가
-			timeSlotsList.add("\"" + current.toString() + "\"");
-			current = current.plusHours(1); // 1시간 간격
+			while (current.isBefore(end)) {
+				timeSlotsList.add("\"" + current.toString() + "\"");
+				current = current.plusMinutes(interval);
+			}
 		}
-
 		String timeSlotsJson = "[" + String.join(",", timeSlotsList) + "]";
 		settings.setTimeSlots(timeSlotsJson);
 

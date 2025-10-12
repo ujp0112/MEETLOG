@@ -1690,22 +1690,24 @@ translateY
 												작성</a>
 										</c:if>
 									</div>
-									<c:set var="reviewList"
-										value="${isExternal ? restaurant.reviews : reviews}" />
+									<%-- ▼▼▼ [수정] isExternal 값에 따라 reviewList 변수에 적절한 리뷰 목록을 할당합니다. ▼▼▼ --%>
+									<c:set var="reviewList" value="${isExternal ? restaurant.reviews : reviews}" />									
 									<c:choose>
-										<c:when test="${not empty reviewList}">
+										<c:when test="${not empty reviews or not empty restaurant.reviews}">
 											<div id="review-list-container" class="space-y-6">
 												<c:forEach var="review" items="${reviewList}">
-													<div class="review-item" style="display: none;">
+													<div class="review-item" style="display: none;"> 
 														<div class="bg-white p-6 rounded-2xl h-full flex flex-col">
 															<div class="flex justify-between items-start mb-4">
 																<div class="flex items-start">
 																	<c:choose>
+																		<%-- 외부(Google) 리뷰 프로필 이미지 --%>
 																		<c:when test="${isExternal}">
+																		<div>
 																			<img src="${review.profileImage}"
 																				alt="${review.author}" onerror="this.onerror=null;"
 																				class="w-12 h-12 rounded-full object-cover mr-4">
-																			<div>
+																				</div>
 																		</c:when>
 																		<c:otherwise>
 																			<div>
@@ -1714,6 +1716,7 @@ translateY
 																					alt="${review.author}"
 																					onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=${review.author }';"
 																					class="w-12 h-12 rounded-full object-cover mr-4">
+																					</div>
 																		</c:otherwise>
 																	</c:choose>
 																	<c:choose>
@@ -1888,24 +1891,31 @@ translateY
 																</div>
 															</c:if>
 															<div class="mt-4 pt-4 border-t">
-																<h4 class="font-bold text-sm mb-3">댓글
-																	(${fn:length(review.comments)})</h4>
-																<div class="space-y-3 mb-4">
-																	<c:forEach var="comment" items="${review.comments}">
-																		<div class="flex items-start text-sm">
-																			<img
-																				src="${pageContext.request.contextPath}/images/${comment.profileImage}"
-																				alt="${comment.author}"
-																				class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">
-																			<div class="flex-1 bg-gray-100 p-2 rounded-lg">
-																				<a
-																					href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
-																					class="font-bold text-slate-800">${comment.author}</a>
-																				<p class="text-slate-700">${comment.content}</p>
-																			</div>
-																		</div>
-																	</c:forEach>
-																</div>
+																<c:choose>
+																    <c:when test="${not empty review.comments and empty review.comments[0].content}">
+																        <h4 class="font-bold text-sm mb-3">댓글 (0)</h4>
+																        <%-- 첫 번째 댓글 내용이 비어있으면 댓글 목록을 아예 표시하지 않음 --%>
+																    </c:when>
+																    <c:otherwise>
+																        <h4 class="font-bold text-sm mb-3">댓글 (${fn:length(review.comments)})</h4>
+																        <div class="space-y-3 mb-4">
+																            <c:forEach var="comment" items="${review.comments}">
+																                <div class="flex items-start text-sm">
+																                    <img
+																                        src="${pageContext.request.contextPath}/images/${comment.profileImage}"
+																                        alt="${comment.author}"
+																                        class="w-8 h-8 rounded-full object-cover mr-3 flex-shrink-0">
+																                    <div class="flex-1 bg-gray-100 p-2 rounded-lg">
+																                        <a
+																                            href="${pageContext.request.contextPath}/feed/user/${comment.userId}"
+																                            class="font-bold text-slate-800">${comment.author}</a>
+																                        <p class="text-slate-700">${comment.content}</p>
+																                    </div>
+																                </div>
+																            </c:forEach>
+																        </div>
+																    </c:otherwise>
+																</c:choose>
 																<c:choose>
 																	<c:when test="${not empty sessionScope.user}">
 																		<form
@@ -1932,7 +1942,8 @@ translateY
 													</div>
 												</c:forEach>
 											</div>
-											<div id="load-more-container" class="text-center mt-8"></div>
+											<!-- [수정] '더보기' 버튼 컨테이너를 c:when 블록 바깥으로 이동하여 항상 렌더링되도록 합니다. -->
+											
 										</c:when>
 										<c:otherwise>
 											<div class="text-center py-12">
@@ -1943,6 +1954,8 @@ translateY
 											</div>
 										</c:otherwise>
 									</c:choose>
+									<!-- [수정] '더보기' 버튼이 생성될 컨테이너를 이곳으로 이동 -->
+									<div id="load-more-container" class="text-center mt-8"></div>
 								</section>
 								<%-- ▲▲▲ [수정] 리뷰 섹션 끝 ▲▲▲ --%>
 
@@ -2126,94 +2139,6 @@ translateY
 								</c:if>
 							</div>
 
-							<%-- [ ✨ 핵심 수정 ✨ ] --%>
-							<%-- 기존의 <script> 블록을 아래의 코드로 완전히 교체해주세요. --%>
-							<script>
-// 페이지의 모든 HTML 콘텐츠가 로드된 후에 이 스크립트를 실행합니다. 
-    document.addEventListener('DOMContentLoaded', function () {
-
-        // 1. DB의 'time_slots' 컬럼 데이터를 JSP 변수로부터 가져옵니다.
-        //    (예: "['09:00', '10:00', '11:00', ...]")
-        //    JSTL이 작은따옴표(')를 사용할 수 있으므로, JSON.parse가 인식하도록 쌍따옴표(")로 바꿔줍니다.
-        const timeSlotsJsonString = '${reservationSettings.time_slots}'.replace(/'/g, '"');
-
-        const container = document.getElementById('time-slots-container');
-        const noSlotsMsg = document.getElementById('no-slots-message');
-        
-        // 시간 버튼을 생성하는 메인 로직
-        if (timeSlotsJsonString && container) {
-            let timeSlots = [];
-            
-            try {
-                // 2. JSON 형태의 문자열을 실제 자바스크립트 배열로 변환합니다.
-                timeSlots = JSON.parse(timeSlotsJsonString);
-            } catch (e) {
-                console.error("time_slots 파싱 오류:", e);
-                console.error("원본 문자열:", timeSlotsJsonString);
-                // 파싱에 실패하면 빈 배열로 처리하여 오류를 방지합니다.
-                timeSlots = [];
-            }
-
-            // 3. 변환된 배열에 시간이 하나라도 있다면, 화면에 버튼을 추가합니다.
-            if (timeSlots.length > 0) {
-                let lastCategory = ""; // "오전", "점심", "저녁" 구분을 위한 변수
-                
-                // 4. 배열을 순회하며 각 시간마다 버튼을 생성합니다.
-                timeSlots.forEach(time => {
-                    // DB에서 가져온 시간 문자열에서 시간(hour) 부분만 추출합니다.
-                    const [h] = time.trim().split(':').map(Number);
-                    
-                    // 시간에 따라 카테고리를 결정합니다.
-                    let currentCategory = (h < 12) ? "오전" : (h < 17) ? "점심" : "저녁";
-
-                    // 첫 카테고리이거나 이전 카테고리와 다를 경우 구분선을 추가합니다.
-                    if (lastCategory !== currentCategory) {
-                        if (lastCategory !== "") { // 첫 번째 카테고리 앞에는 구분선 X
-                            const divider = document.createElement('div');
-                            divider.className = 'col-span-3 flex items-center my-2';
-                            divider.innerHTML = `<hr class="flex-grow border-t border-gray-200"><span class="px-2 text-sm text-gray-500">${currentCategory}</span><hr class="flex-grow border-t border-gray-200">`; 
-                            container.appendChild(divider);
-                        } else {
-                            // 첫 카테고리 타이틀을 구분선 없이 먼저 표시
-                            const firstCategoryTitle = document.createElement('div');
-                            firstCategoryTitle.className = 'col-span-3 text-sm text-gray-500 font-bold mb-1';
-                            firstCategoryTitle.textContent = currentCategory;
-                            container.appendChild(firstCategoryTitle);
-                        }
-                        lastCategory = currentCategory;
-                    }
-                    
-                    // 시간 버튼 요소를 생성합니다.
-                    const button = document.createElement('button');
-                    button.type = 'button';
-                    button.className = 'btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400'; 
-                    button.textContent = time.trim(); // 버튼에 시간 텍스트 표시
-                    button.onclick = function() { selectTime(this, time.trim()); }; // 클릭 이벤트 핸들러 연결
-                    container.appendChild(button); // 컨테이너에 최종적으로 버튼 추가
-                });
-            } else {
-                // 생성된 시간 슬롯이 없으면, '예약 가능한 시간이 없습니다' 메시지를 표시합니다.
-                if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
-            }
-        } else {
-            // `time_slots` 데이터가 아예 없는 경우에도 메시지를 표시합니다.
-            if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
-        }
-    });
-
-    // 시간 버튼 클릭 시 호출되는 함수 (이 함수는 수정할 필요 없습니다)
-    function selectTime(button, time) {
-        // 모든 버튼의 선택 스타일을 초기화합니다.
-        document.querySelectorAll('.btn-reserve-time').forEach(btn => {
-            btn.classList.remove('bg-blue-500', 'text-white');
-            btn.classList.add('bg-slate-100', 'text-slate-700');
-        });// 클릭된 버튼에만 선택 스타일을 적용합니다. 
-        button.classList.add('bg-blue-500', 'text-white');
-        button.classList.remove('bg-slate-100', 'text-slate-700');
-        // hidden input에 선택된 시간 값을 저장합니다. 
-        document.getElementById('selectedTime').value = time;
-    }
-</script>
 						</div>
 					</c:when>
 					<c:otherwise>
@@ -2713,27 +2638,33 @@ translateY
 		// 6. '리뷰 더보기' 기능 (2개씩 보여주기)
 		const reviewContainer = document.getElementById('review-list-container');
 		if (reviewContainer) {
-			const reviews = Array.from(reviewContainer.querySelectorAll('.review-item'));
+			// [수정] JSP 변수에서 전체 리뷰 개수를 가져옵니다.
+			const totalReviews = parseInt('${isExternal ? fn:length(restaurant.reviews) : fn:length(reviews)}', 10) || 0;
+			const reviewItems = Array.from(reviewContainer.querySelectorAll('.review-item'));
 			const loadMoreCount = 2;
 			let shownCount = 0;
 
+			// 모든 리뷰를 초기에 숨깁니다.
+			reviewItems.forEach(review => review.style.display = 'none');
+
 			function showMoreReviews() {
-				const nextReviews = reviews.slice(shownCount, shownCount + loadMoreCount);
+				const nextReviews = reviewItems.slice(shownCount, shownCount + loadMoreCount);
 				nextReviews.forEach(review => review.style.display = 'block');
 				shownCount += nextReviews.length;
 
-				if (shownCount >= reviews.length) {
+				if (shownCount >= reviewItems.length) { // [수정] 화면에 렌더링된 아이템 기준으로 변경
 					$('#load-more-container').hide();
 				}
 			}
 
 			// 초기에 2개 리뷰를 먼저 보여줍니다.
-			if (reviews.length > 0) {
+			if (totalReviews > 0) {
 				showMoreReviews();
 			}
 
-			// [수정] 초기 리뷰를 보여준 후, 남은 리뷰가 있으면 '더보기' 버튼을 표시합니다.
-			if (reviews.length > 2) {
+
+			// [수정] JSP에서 가져온 totalReviews를 기준으로 '더보기' 버튼 표시 여부를 결정합니다.
+			if (totalReviews > 2) {
 				const loadMoreContainer = document.getElementById('load-more-container');
 				if (loadMoreContainer) {
 					$(loadMoreContainer).html('<button id="load-more-reviews-btn" class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰 더보기</button>').show();
@@ -3004,5 +2935,85 @@ translateY
 	});
 </script>
 
+							<%-- [ ✨ 핵심 수정 ✨ ] --%>
+							<%-- 기존의 <script> 블록을 아래의 코드로 완전히 교체해주세요. --%>
+							<script>
+// 페이지의 모든 HTML 콘텐츠가 로드된 후에 이 스크립트를 실행합니다. 
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // 1. DB의 'time_slots' 컬럼 데이터를 JSP 변수로부터 가져옵니다.
+        //    (예: "['09:00', '10:00', '11:00', ...]")
+        //    JSTL이 작은따옴표(')를 사용할 수 있으므로, JSON.parse가 인식하도록 쌍따옴표(")로 바꿔줍니다.
+        const timeSlotsJsonString = '${reservationSettings.time_slots}'.replace(/'/g, '"');
+
+        const container = document.getElementById('time-slots-container');
+        const noSlotsMsg = document.getElementById('no-slots-message');
+        
+        // 시간 버튼을 생성하는 메인 로직
+        if (timeSlotsJsonString && container) {
+            let timeSlots = [];
+            
+            try {
+                // 2. JSON 형태의 문자열을 실제 자바스크립트 배열로 변환합니다.
+                timeSlots = JSON.parse(timeSlotsJsonString);
+            } catch (e) {
+                console.error("time_slots 파싱 오류:", e);
+                console.error("원본 문자열:", timeSlotsJsonString);
+                // 파싱에 실패하면 빈 배열로 처리하여 오류를 방지합니다.
+                timeSlots = [];
+            }
+
+            // 3. 변환된 배열에 시간이 하나라도 있다면, 화면에 버튼을 추가합니다.
+            if (timeSlots.length > 0) {
+                let lastCategory = ""; // "오전", "점심", "저녁" 구분을 위한 변수
+                
+                // 4. 배열을 순회하며 각 시간마다 버튼을 생성합니다.
+                timeSlots.forEach(time => {
+                    // DB에서 가져온 시간 문자열에서 시간(hour) 부분만 추출합니다.
+                    const [h] = time.trim().split(':').map(Number);
+                    
+                    // 시간에 따라 카테고리를 결정합니다.
+                    let currentCategory = (h < 12) ? "오전" : (h < 17) ? "점심" : "저녁";
+
+                    // 첫 카테고리이거나 이전 카테고리와 다를 경우 구분선을 추가합니다.
+                    if (lastCategory !== currentCategory) {
+                        const divider = document.createElement('div');
+                        divider.className = 'col-span-3 flex items-center my-2';
+                        divider.innerHTML = '<hr class="flex-grow border-t border-gray-200"><span class="px-2 text-sm text-gray-500">' + currentCategory + '</span><hr class="flex-grow border-t border-gray-200">';
+                        container.appendChild(divider);
+                        lastCategory = currentCategory;
+                    }
+                    
+                    // 시간 버튼 요소를 생성합니다.
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'btn-reserve-time bg-slate-100 text-slate-700 border border-slate-200 py-2 px-4 rounded-lg font-medium hover:bg-slate-200 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400'; 
+                    button.textContent = time.trim(); // 버튼에 시간 텍스트 표시
+                    button.onclick = function() { selectTime(this, time.trim()); }; // 클릭 이벤트 핸들러 연결
+                    container.appendChild(button); // 컨테이너에 최종적으로 버튼 추가
+                });
+            } else {
+                // 생성된 시간 슬롯이 없으면, '예약 가능한 시간이 없습니다' 메시지를 표시합니다.
+                if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
+            }
+        } else {
+            // `time_slots` 데이터가 아예 없는 경우에도 메시지를 표시합니다.
+            if (noSlotsMsg) noSlotsMsg.style.display = 'block'; 
+        }
+    });
+
+    // 시간 버튼 클릭 시 호출되는 함수 (이 함수는 수정할 필요 없습니다)
+    function selectTime(button, time) {
+        // 모든 버튼의 선택 스타일을 초기화합니다.
+        document.querySelectorAll('.btn-reserve-time').forEach(btn => {
+            btn.classList.remove('bg-blue-500', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-700');
+        });// 클릭된 버튼에만 선택 스타일을 적용합니다. 
+        button.classList.add('bg-blue-500', 'text-white');
+        button.classList.remove('bg-slate-100', 'text-slate-700');
+        // hidden input에 선택된 시간 값을 저장합니다. 
+        document.getElementById('selectedTime').value = time;
+    }
+</script>
 </body>
 </html>
