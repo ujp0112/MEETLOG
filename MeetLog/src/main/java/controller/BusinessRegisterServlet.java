@@ -5,6 +5,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import model.BusinessUser;
 import model.Restaurant;
@@ -40,12 +41,26 @@ public class BusinessRegisterServlet extends HttpServlet {
         String address = request.getParameter("address");
         String phone = request.getParameter("phone");
         String description = request.getParameter("description");
+        String verificationCode = request.getParameter("verificationCode");
+
+        // 세션에서 인증 정보 가져오기
+        Object sessionCodeObj = request.getSession().getAttribute("verificationCode");
+        Object sessionEmailObj = request.getSession().getAttribute("verificationEmail");
+
+        if (sessionCodeObj == null || sessionEmailObj == null ||
+            !sessionEmailObj.toString().equals(email) || !sessionCodeObj.toString().equals(verificationCode)) {
+            request.setAttribute("errorMessage", "이메일 인증 정보가 올바르지 않습니다. 다시 시도해주세요.");
+            request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
+            return;
+        }
 
         if (password == null || !password.equals(confirmPassword)) {
             request.setAttribute("errorMessage", "비밀번호가 일치하지 않습니다.");
             request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
             return;
         }
+        
+        // EmailVerificationServlet에서 이미 중복 검사를 하지만, 최종 제출 시 한 번 더 확인
         if (userService.isEmailExists(email)) {
             request.setAttribute("errorMessage", "이미 사용 중인 이메일입니다.");
             request.getRequestDispatcher("/WEB-INF/views/business-register.jsp").forward(request, response);
@@ -85,6 +100,10 @@ public class BusinessRegisterServlet extends HttpServlet {
             } else {
                 throw new ServletException("잘못된 회원 유형입니다.");
             }
+
+            // 회원가입 성공 시 세션의 인증 정보 제거
+            request.getSession().removeAttribute("verificationCode");
+            request.getSession().removeAttribute("verificationEmail");
 
             response.sendRedirect(request.getContextPath() + "/login?register=success");
 

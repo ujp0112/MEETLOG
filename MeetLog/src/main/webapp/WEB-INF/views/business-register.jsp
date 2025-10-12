@@ -74,8 +74,20 @@
                     </div>
                     <div>
                         <label for="hqEmail" class="block text-sm font-medium text-slate-700">로그인 이메일</label>
-                        <input id="hqEmail" name="email" type="email" required class="form-input" placeholder="로그인 시 사용할 이메일">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input id="hqEmail" name="email" type="email" required class="form-input rounded-none rounded-l-md" placeholder="로그인 시 사용할 이메일">
+                            <button type="button" id="sendVerificationBtnHq"
+                                    class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+                                인증번호 발송
+                            </button>
+                        </div>
+                        <p id="emailMessageHq" class="mt-2 text-sm"></p>
                     </div>
+                    <div id="verificationCodeGroupHq" class="hidden">
+                        <label for="verificationCodeHq" class="block text-sm font-medium text-slate-700">인증번호</label>
+                        <input type="text" id="verificationCodeHq" name="verificationCode" required class="form-input" placeholder="이메일로 받은 인증번호 6자리를 입력하세요">
+                    </div>
+
                     <div>
                         <label for="hqPassword" class="block text-sm font-medium text-slate-700">비밀번호</label>
                         <input id="hqPassword" name="password" type="password" required class="form-input" placeholder="영문, 숫자 포함 8자 이상">
@@ -134,7 +146,18 @@
                     </div>
                     <div>
                         <label for="branchEmail" class="block text-sm font-medium text-slate-700">로그인 이메일</label>
-                        <input id="branchEmail" name="email" type="email" required class="form-input" placeholder="로그인 시 사용할 이메일">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input id="branchEmail" name="email" type="email" required class="form-input rounded-none rounded-l-md" placeholder="로그인 시 사용할 이메일">
+                            <button type="button" id="sendVerificationBtnBranch"
+                                    class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+                                인증번호 발송
+                            </button>
+                        </div>
+                        <p id="emailMessageBranch" class="mt-2 text-sm"></p>
+                    </div>
+                    <div id="verificationCodeGroupBranch" class="hidden">
+                        <label for="verificationCodeBranch" class="block text-sm font-medium text-slate-700">인증번호</label>
+                        <input type="text" id="verificationCodeBranch" name="verificationCode" required class="form-input" placeholder="이메일로 받은 인증번호 6자리를 입력하세요">
                     </div>
                     <div>
                         <label for="branchPassword" class="block text-sm font-medium text-slate-700">비밀번호</label>
@@ -190,7 +213,18 @@
                     </div>
                     <div>
                         <label for="individualEmail" class="block text-sm font-medium text-slate-700">로그인 이메일</label>
-                        <input id="individualEmail" name="email" type="email" required class="form-input" placeholder="로그인 시 사용할 이메일">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input id="individualEmail" name="email" type="email" required class="form-input rounded-none rounded-l-md" placeholder="로그인 시 사용할 이메일">
+                            <button type="button" id="sendVerificationBtnIndividual"
+                                    class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+                                인증번호 발송
+                            </button>
+                        </div>
+                        <p id="emailMessageIndividual" class="mt-2 text-sm"></p>
+                    </div>
+                    <div id="verificationCodeGroupIndividual" class="hidden">
+                        <label for="verificationCodeIndividual" class="block text-sm font-medium text-slate-700">인증번호</label>
+                        <input type="text" id="verificationCodeIndividual" name="verificationCode" required class="form-input" placeholder="이메일로 받은 인증번호 6자리를 입력하세요">
                     </div>
                     <div>
                         <label for="individualPassword" class="block text-sm font-medium text-slate-700">비밀번호</label>
@@ -248,6 +282,66 @@
                     }
                 });
             });
+
+            // --- 이메일 인증 스크립트 ---
+            const handleSendVerification = async (emailInput, messageEl, codeGroupEl, buttonEl) => {
+                const email = emailInput.value;
+                if (!email) {
+                    messageEl.textContent = '이메일을 입력해주세요.';
+                    messageEl.className = 'mt-2 text-sm text-red-600';
+                    return;
+                }
+
+                buttonEl.disabled = true;
+                buttonEl.textContent = '전송 중...';
+
+                try {
+                    const response = await fetch('${pageContext.request.contextPath}/verify-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'email=' + encodeURIComponent(email)
+                    });
+
+                    const result = await response.json();
+                    messageEl.textContent = result.message;
+
+                    if (response.ok) {
+                        messageEl.className = 'mt-2 text-sm text-green-600';
+                        codeGroupEl.classList.remove('hidden');
+                    } else {
+                        messageEl.className = 'mt-2 text-sm text-red-600';
+                        buttonEl.disabled = false;
+                        buttonEl.textContent = '인증번호 발송';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    messageEl.textContent = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                    messageEl.className = 'mt-2 text-sm text-red-600';
+                    buttonEl.disabled = false;
+                    buttonEl.textContent = '인증번호 발송';
+                }
+            };
+
+            // HQ 회원
+            document.getElementById('sendVerificationBtnHq').addEventListener('click', () => {
+                handleSendVerification(
+                    document.getElementById('hqEmail'),
+                    document.getElementById('emailMessageHq'),
+                    document.getElementById('verificationCodeGroupHq'),
+                    document.getElementById('sendVerificationBtnHq')
+                );
+            });
+
+            // 지점 회원
+            document.getElementById('sendVerificationBtnBranch').addEventListener('click', () => {
+                handleSendVerification(document.getElementById('branchEmail'), document.getElementById('emailMessageBranch'), document.getElementById('verificationCodeGroupBranch'), document.getElementById('sendVerificationBtnBranch'));
+            });
+
+            // 개인 사업자 회원
+            document.getElementById('sendVerificationBtnIndividual').addEventListener('click', () => {
+                handleSendVerification(document.getElementById('individualEmail'), document.getElementById('emailMessageIndividual'), document.getElementById('verificationCodeGroupIndividual'), document.getElementById('sendVerificationBtnIndividual'));
+            });
+
         });
     </script>
 </body>
