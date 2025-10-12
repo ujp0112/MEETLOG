@@ -34,10 +34,21 @@
                 <input type="hidden" name="userType" value="PERSONAL">
                 <div class="space-y-5">
                     <div>
-                         <label for="email" class="text-sm font-medium text-slate-700">이메일 주소</label>
-                        <input type="email" id="email" name="email" required 
-                               class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
-                                placeholder="example@email.com">
+                        <label for="email" class="text-sm font-medium text-slate-700">이메일 주소</label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                            <input type="email" id="email" name="email" required
+                                   class="relative block w-full px-3 py-3 border border-slate-300 rounded-none rounded-l-md focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                                   placeholder="example@email.com">
+                            <button type="button" id="sendVerificationBtn"
+                                    class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+                                인증번호 발송
+                            </button>
+                        </div>
+                        <p id="emailMessage" class="mt-2 text-sm"></p>
+                    </div>
+                    <div id="verificationCodeGroup" class="hidden">
+                        <label for="verificationCode" class="text-sm font-medium text-slate-700">인증번호</label>
+                        <input type="text" id="verificationCode" name="verificationCode" required class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" placeholder="이메일로 받은 인증번호 6자리를 입력하세요">
                     </div>
                     <div>
                         <label for="nickname" class="text-sm font-medium text-slate-700">닉네임</label>
@@ -151,6 +162,49 @@
                     this.setCustomValidity('');
                  }
             });
+        });
+
+        const sendVerificationBtn = document.getElementById('sendVerificationBtn');
+        const emailInput = document.getElementById('email');
+        const emailMessage = document.getElementById('emailMessage');
+        const verificationCodeGroup = document.getElementById('verificationCodeGroup');
+
+        sendVerificationBtn.addEventListener('click', async function() {
+            const email = emailInput.value;
+            if (!email) {
+                emailMessage.textContent = '이메일을 입력해주세요.';
+                emailMessage.className = 'mt-2 text-sm text-red-600';
+                return;
+            }
+
+            sendVerificationBtn.disabled = true;
+            sendVerificationBtn.textContent = '전송 중...';
+
+            try {
+                const response = await fetch('${pageContext.request.contextPath}/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'email=' + encodeURIComponent(email)
+                });
+
+                const result = await response.json();
+                emailMessage.textContent = result.message;
+
+                if (response.ok) {
+                    emailMessage.className = 'mt-2 text-sm text-green-600';
+                    verificationCodeGroup.classList.remove('hidden');
+                } else {
+                    emailMessage.className = 'mt-2 text-sm text-red-600';
+                    sendVerificationBtn.disabled = false;
+                    sendVerificationBtn.textContent = '인증번호 발송';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                emailMessage.textContent = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                emailMessage.className = 'mt-2 text-sm text-red-600';
+                sendVerificationBtn.disabled = false;
+                sendVerificationBtn.textContent = '인증번호 발송';
+            }
         });
     </script>
 </body>
