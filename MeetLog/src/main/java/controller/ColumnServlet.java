@@ -46,14 +46,14 @@ public class ColumnServlet extends HttpServlet {
 
 		try {
 			if (pathInfo == null || pathInfo.equals("/") || "/list".equals(pathInfo)) {
-				// [수정] 검색어(query) 파라미터 처리 로직 추가
-				String query = request.getParameter("query");
+				// [수정] 검색어(keyword) 파라미터 처리 로직 추가
+				String keyword = request.getParameter("keyword");
 				List<Column> columns;
 
-				if (query != null && !query.trim().isEmpty()) {
+				if (keyword != null && !keyword.trim().isEmpty()) {
 					// 검색어가 있으면 검색 실행
 					Map<String, Object> searchParams = new HashMap<>();
-					searchParams.put("query", query.trim());
+					searchParams.put("keyword", keyword.trim());
 					columns = columnService.searchColumns(searchParams);
 				} else {
 					// 검색어가 없으면 전체 목록 조회

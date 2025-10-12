@@ -61,7 +61,7 @@
 
                         <div class="flex flex-col items-center gap-4 md:flex-row md:justify-center md:gap-6">
                             <div class="w-full max-w-2xl">
-                                <input type="text" name="query" value="${param.query}"
+                                <input type="text" name="keyword" value="${param.keyword}"
                                        placeholder="칼럼 제목, 작가명, 맛집 이름 등"
                                        class="search-input" />
                             </div>
@@ -116,8 +116,16 @@
                     <c:otherwise>
                         <div class="mt-10 flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-8 py-16 text-center">
                             <div class="flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-4xl">📰</div>
-                            <h3 class="mt-6 text-xl font-bold text-slate-800">아직 등록된 칼럼이 없습니다.</h3>
-                            <p class="mt-2 text-sm text-slate-500">첫 번째 맛집 칼럼을 작성하고 미식 경험을 공유해보세요.</p>
+                            <c:choose>
+                                <c:when test="${not empty param.keyword}">
+                                    <h3 class="mt-6 text-xl font-bold text-slate-800">'${param.keyword}'에 대한 검색 결과가 없습니다.</h3>
+                                    <p class="mt-2 text-sm text-slate-500">다른 키워드로 다시 검색해보세요.</p>
+                                </c:when>
+                                <c:otherwise>
+                                    <h3 class="mt-6 text-xl font-bold text-slate-800">아직 등록된 칼럼이 없습니다.</h3>
+                                    <p class="mt-2 text-sm text-slate-500">첫 번째 맛집 칼럼을 작성하고 미식 경험을 공유해보세요.</p>
+                                </c:otherwise>
+                            </c:choose>
                             <c:if test="${not empty sessionScope.user}">
                                 <a href="${pageContext.request.contextPath}/column/write"
                                    class="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600">
