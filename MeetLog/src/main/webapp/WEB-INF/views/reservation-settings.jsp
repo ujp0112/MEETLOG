@@ -223,7 +223,7 @@ to {
 					<i class="fas fa-users text-purple-500"></i> 예약 조건 설정
 				</h2>
 
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+				<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
 					<!-- 최소 인원 -->
 					<div class="bg-white p-6 rounded-xl border border-slate-200">
 						<label class="block text-sm font-semibold text-slate-700 mb-3">
@@ -263,7 +263,24 @@ to {
 							class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
 						<p class="text-xs text-slate-500 mt-2">시간 전까지 예약 가능</p>
 					</div>
+					
+					<!-- ▼▼▼ [수정] 예약 타임 간격 설정 (위치를 여기로 이동) ▼▼▼ -->
+					<div class="bg-white p-6 rounded-xl border border-slate-200">
+						<label for="time-slot-interval" class="block text-sm font-semibold text-slate-700 mb-3">
+							<i class="fas fa-hourglass-half text-indigo-500 mr-2"></i> 예약 시간 간격
+						</label>
+						<select id="time-slot-interval" name="timeSlotInterval" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+							<option value="5" ${reservationSettings.time_slot_interval == 5 ? 'selected' : ''}>5분</option>
+							<option value="10" ${reservationSettings.time_slot_interval == 10 ? 'selected' : ''}>10분</option>
+							<option value="15" ${reservationSettings.time_slot_interval == 15 ? 'selected' : ''}>15분</option>
+							<option value="30" ${reservationSettings.time_slot_interval == 30 ? 'selected' : ''}>30분</option>
+							<option value="60" ${reservationSettings.time_slot_interval == 60 || empty reservationSettings.time_slot_interval ? 'selected' : ''}>1시간 (기본)</option>
+							<option value="120" ${reservationSettings.time_slot_interval == 120 ? 'selected' : ''}>2시간</option>
+						</select>
+						<p class="text-xs text-slate-500 mt-2">예약 시간 버튼의 간격을 설정합니다.</p>
+					</div>
 				</div>
+				
 			</div>
 
 			<!-- 예약금 설정 -->
@@ -994,6 +1011,7 @@ to {
                 const minAdvanceHours = document.querySelector('input[name="minAdvanceHours"]');
                 const specialNotes = document.querySelector('textarea[name="specialNotes"]');
                 const blackoutDates = document.querySelector('input[name="blackoutDates"]');
+                const timeSlotInterval = document.querySelector('select[name="timeSlotInterval"]');
 
                 if (minPartySize) params.set('minPartySize', minPartySize.value || '1');
                 if (maxPartySize) params.set('maxPartySize', maxPartySize.value || '10');
@@ -1001,6 +1019,7 @@ to {
                 if (minAdvanceHours) params.set('minAdvanceHours', minAdvanceHours.value || '2');
                 if (specialNotes) params.set('specialNotes', specialNotes.value || '');
                 if (blackoutDates) params.set('blackoutDates', blackoutDates.value || '');
+                if (timeSlotInterval) params.set('timeSlotInterval', timeSlotInterval.value || '30');
 
                 console.log('URLSearchParams 데이터:', params.toString());
 

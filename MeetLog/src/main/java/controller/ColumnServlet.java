@@ -46,7 +46,20 @@ public class ColumnServlet extends HttpServlet {
 
 		try {
 			if (pathInfo == null || pathInfo.equals("/") || "/list".equals(pathInfo)) {
-				List<Column> columns = columnService.getAllColumns();
+				// [수정] 검색어(query) 파라미터 처리 로직 추가
+				String query = request.getParameter("query");
+				List<Column> columns;
+
+				if (query != null && !query.trim().isEmpty()) {
+					// 검색어가 있으면 검색 실행
+					Map<String, Object> searchParams = new HashMap<>();
+					searchParams.put("query", query.trim());
+					columns = columnService.searchColumns(searchParams);
+				} else {
+					// 검색어가 없으면 전체 목록 조회
+					columns = columnService.getAllColumns();
+				}
+
 				request.setAttribute("columns", columns);
 				request.getRequestDispatcher("/WEB-INF/views/column-list.jsp").forward(request, response);
 

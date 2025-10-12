@@ -54,7 +54,7 @@ CREATE TABLE `branch_inventory` (
   KEY `fk_bi_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_bi_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_bi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `branch_menu_toggle` (
   `company_id` int(11) NOT NULL,
   `branch_id` int(11) NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE `branch_menu_toggle` (
   KEY `fk_bmt_menu` (`company_id`,`menu_id`),
   CONSTRAINT `fk_bmt_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_bmt_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `business_notice` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE `business_notice` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_company` (`company_id`),
   CONSTRAINT `fk_notice_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `business_users` (
   `user_id` int(11) NOT NULL,
   `business_name` varchar(200) NOT NULL,
@@ -333,7 +333,7 @@ CREATE TABLE `material` (
   UNIQUE KEY `uq_material_company_id` (`company_id`,`id`),
   KEY `idx_material_company` (`company_id`),
   CONSTRAINT `fk_material_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -349,7 +349,7 @@ CREATE TABLE `menu` (
   UNIQUE KEY `uq_menu_company_id` (`company_id`,`id`),
   KEY `idx_menu_company` (`company_id`),
   CONSTRAINT `fk_menu_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menu_ingredient` (
   `company_id` int(11) NOT NULL,
   `menu_id` int(11) NOT NULL,
@@ -361,7 +361,7 @@ CREATE TABLE `menu_ingredient` (
   KEY `fk_mi_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_mi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
   CONSTRAINT `fk_mi_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menus` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -387,7 +387,7 @@ CREATE TABLE `notice_file` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_file_notice` (`notice_id`),
   CONSTRAINT `fk_notice_file_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `notice_image` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `notice_id` int(11) NOT NULL,
@@ -398,7 +398,7 @@ CREATE TABLE `notice_image` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_image_notice` (`notice_id`),
   CONSTRAINT `fk_notice_image_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `notices` (
   `notice_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
@@ -437,7 +437,7 @@ CREATE TABLE `promotion` (
   PRIMARY KEY (`id`),
   KEY `fk_promotion_company` (`company_id`),
   CONSTRAINT `fk_promotion_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `promotion_file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `promotion_id` int(11) NOT NULL,
@@ -449,7 +449,7 @@ CREATE TABLE `promotion_file` (
   PRIMARY KEY (`id`),
   KEY `fk_promo_file_promo` (`promotion_id`),
   CONSTRAINT `fk_promo_file_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `promotion_image` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `promotion_id` int(11) NOT NULL,
@@ -460,7 +460,7 @@ CREATE TABLE `promotion_image` (
   PRIMARY KEY (`id`),
   KEY `fk_promo_image_promo` (`promotion_id`),
   CONSTRAINT `fk_promo_image_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `purchase_order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -475,7 +475,7 @@ CREATE TABLE `purchase_order` (
   KEY `idx_po_branch` (`branch_id`),
   KEY `fk_po_branch` (`company_id`,`branch_id`),
   CONSTRAINT `fk_po_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `purchase_order_line` (
   `company_id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL,
@@ -490,7 +490,7 @@ CREATE TABLE `purchase_order_line` (
   KEY `fk_pol_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_pol_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
   CONSTRAINT `fk_pol_order` FOREIGN KEY (`company_id`, `order_id`) REFERENCES `purchase_order` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `rating_distributions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -537,6 +537,10 @@ CREATE TABLE `reservations` (
   CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_reservations_user_coupon` FOREIGN KEY (`user_coupon_id`) REFERENCES `user_coupons` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ▼▼▼ [수정] 예약 설정에 포함되어야 할 컬럼이므로 reservations 테이블에서 삭제합니다. ▼▼▼
+ALTER TABLE reservations DROP COLUMN IF EXISTS time_slot_interval;
+
 CREATE TABLE `restaurant_images` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -546,7 +550,7 @@ CREATE TABLE `restaurant_images` (
   PRIMARY KEY (`id`),
   KEY `fk_res_images_restaurant` (`restaurant_id`),
   CONSTRAINT `fk_res_images_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `restaurant_news` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -607,6 +611,7 @@ CREATE TABLE `restaurant_reservation_settings` (
   `deposit_required` tinyint(1) DEFAULT 0,
   `deposit_amount` decimal(10,2) DEFAULT 0,
   `deposit_description` varchar(255) DEFAULT NULL,
+  `time_slot_interval` int(11) DEFAULT 60 COMMENT '예약 시간 간격 (분 단위)',
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `monday_enabled` tinyint(1) DEFAULT 1,

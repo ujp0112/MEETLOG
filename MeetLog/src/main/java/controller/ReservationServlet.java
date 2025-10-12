@@ -205,11 +205,16 @@ public class ReservationServlet extends HttpServlet {
 					if (!dayKey.isEmpty() && toBoolean(settings.get(dayKey + "_enabled"))) {
 						LocalTime startTime = toLocalTime(settings.get(dayKey + "_start"));
 						LocalTime endTime = toLocalTime(settings.get(dayKey + "_end"));
+						// ▼▼▼ [수정] DB에서 time_slot_interval 값을 가져옵니다. ▼▼▼
+						Object intervalObj = settings.get("time_slot_interval"); // MyBatis는 보통 Integer로 반환합니다.
+						int interval = (intervalObj instanceof Number) ? ((Number) intervalObj).intValue() : 30;
+
 						if (startTime != null && endTime != null) {
 							LocalTime currentTime = startTime;
 							while (currentTime.isBefore(endTime)) {
 								timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-								currentTime = currentTime.plusMinutes(30);
+								// ▼▼▼ [수정] 설정된 간격만큼 시간을 증가시킵니다. ▼▼▼
+								currentTime = currentTime.plusMinutes(interval);
 							}
 						}
 					}
@@ -590,12 +595,16 @@ public class ReservationServlet extends HttpServlet {
 				if (dayKey != null && toBoolean(settings.get(dayKey + "_enabled"))) {
 					LocalTime startTime = toLocalTime(settings.get(dayKey + "_start"));
 					LocalTime endTime = toLocalTime(settings.get(dayKey + "_end"));
+					// ▼▼▼ [수정] DB에서 time_slot_interval 값을 가져옵니다. ▼▼▼
+					Object intervalObj = settings.get("time_slot_interval"); // MyBatis는 보통 Integer로 반환합니다.
+					int interval = (intervalObj instanceof Number) ? ((Number) intervalObj).intValue() : 30;
 
 					if (startTime != null && endTime != null) {
 						LocalTime currentTime = startTime;
 						while (currentTime.isBefore(endTime)) {
 							timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-							currentTime = currentTime.plusMinutes(30);
+							// ▼▼▼ [수정] 설정된 간격만큼 시간을 증가시킵니다. ▼▼▼
+							currentTime = currentTime.plusMinutes(interval);
 						}
 					}
 				}

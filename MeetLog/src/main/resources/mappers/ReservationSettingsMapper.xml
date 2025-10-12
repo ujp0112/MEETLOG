@@ -84,6 +84,7 @@
 		rs.max_party_size,
 		rs.advance_booking_days,
 		rs.min_advance_hours,
+		rs.time_slot_interval,
 		rs.reservation_start_time,
 		rs.reservation_end_time,
 		rs.available_days,
@@ -147,7 +148,7 @@
 	<insert id="insert" parameterType="model.ReservationSettings">
 		INSERT INTO
 		restaurant_reservation_settings (
-		restaurant_id, reservation_enabled,
+		restaurant_id, time_slot_interval, reservation_enabled,
 		auto_accept, min_party_size, max_party_size,
 		advance_booking_days,
 		min_advance_hours, reservation_start_time,
@@ -169,7 +170,7 @@
 		created_at
 		) VALUES (
 		#{restaurantId},
-		#{reservationEnabled}, #{autoAccept}, #{minPartySize},
+		#{timeSlotInterval}, #{reservationEnabled}, #{autoAccept}, #{minPartySize},
 		#{maxPartySize},
 		#{advanceBookingDays}, #{minAdvanceHours},
 		#{reservationStartTime}, #{reservationEndTime},
@@ -200,6 +201,7 @@
 		max_party_size = #{maxPartySize},
 		advance_booking_days = #{advanceBookingDays},
 		min_advance_hours = #{minAdvanceHours},
+		time_slot_interval = #{timeSlotInterval},
 		reservation_start_time = #{reservationStartTime},
 		reservation_end_time = #{reservationEndTime},
 		available_days = #{availableDays}, time_slots = #{timeSlots}, blackout_dates =
