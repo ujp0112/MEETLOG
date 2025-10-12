@@ -1,0 +1,89 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Build WAR
+        run: |
+          chmod +x scripts/build-war.sh
+          scripts/build-war.sh
+
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meetlog-war
+          path: build/deploy/MeetLog.war
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: meetlog-war
+          path: build/deploy
+
+      - name: Make scripts executable
+        run: chmod +x scripts/deploy-war.sh
+
+      - name: Prepare SSH key
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "DEPLOY_KEY secret is required" >&2
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "SSH_KEY_PATH=$HOME/.ssh/deploy_key" >> "$GITHUB_ENV"
+
+      - name: Add remote host key
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          if [ -z "$DEPLOY_HOST" ]; then
+            echo "DEPLOY_HOST secret is required" >&2
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          PORT=${DEPLOY_PORT:-22}
+          ssh-keyscan -p "$PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy to Tomcat
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_TARGET_DIR: ${{ secrets.DEPLOY_TARGET_DIR }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          REMOTE_WAR_NAME: ${{ secrets.REMOTE_WAR_NAME }}
+          REMOTE_CONTEXT_NAME: ${{ secrets.REMOTE_CONTEXT_NAME }}
+          TOMCAT_SERVICE: ${{ secrets.TOMCAT_SERVICE }}
+          REMOTE_OWNER: ${{ secrets.REMOTE_OWNER }}
+          REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
+          SSH_OPTIONS: ${{ secrets.SSH_OPTIONS }}
+        run: scripts/deploy-war.sh build/deploy/MeetLog.war
