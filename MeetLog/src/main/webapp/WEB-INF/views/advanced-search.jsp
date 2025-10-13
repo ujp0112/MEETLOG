@@ -954,7 +954,7 @@
 
         function resetForm() {
             const activeType = document.getElementById('activeSearchType').value || 'restaurants';
-            const activeSection = document.querySelector(`.search-section[data-type="${activeType}"]`);
+            const activeSection = document.querySelector('.search-section[data-type="' + activeType + '"]');
             if (!activeSection) return;
 
             const form = activeSection.querySelector('form');
@@ -1013,15 +1013,14 @@
                 filters.forEach(filter => {
                     const chip = document.createElement('span');
                     chip.className = 'filter-chip';
-                    chip.innerHTML = `
-                        <span>${filter.label}: ${filter.value}</span>
-                        <button
-                            type="button"
-                            onclick="removeFilter('${filter.key}')"
-                            aria-label="${filter.label} 필터 제거">
-                            ×
-                        </button>
-                    `;
+                    chip.innerHTML =
+                        '<span>' + filter.label + ': ' + filter.value + '</span>' +
+                        '<button ' +
+                            'type="button" ' +
+                            'onclick="removeFilter(\'' + filter.key + '\')" ' +
+                            'aria-label="' + filter.label + ' 필터 제거">' +
+                            '×' +
+                        '</button>';
                     filterChipsContainer.appendChild(chip);
                 });
             } else {
@@ -1033,7 +1032,7 @@
             const form = document.querySelector('.search-section[style*="display: block"] form');
             if (!form) return;
 
-            const input = form.querySelector(`[name="${key}"]`);
+            const input = form.querySelector('[name="' + key + '"]');
             if (input) {
                 if (input.tagName === 'SELECT') {
                     input.selectedIndex = 0;
