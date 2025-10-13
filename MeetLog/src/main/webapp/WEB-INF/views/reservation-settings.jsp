@@ -676,6 +676,11 @@ to {
 	<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 
 	<script>
+        // JSP의 날짜 데이터를 자바스크립트 변수로 미리 저장합니다.
+        var initialBlackoutDates = '${reservationSettings.blackout_dates}';
+    </script>
+
+	<script>
         // JSP 변수를 JavaScript로 전달
         var contextPath = '${pageContext.request.contextPath}';
         var restaurantId = '${restaurant.id}';
@@ -778,6 +783,7 @@ to {
                 inline: false,
                 altInput: true,
                 altFormat: "Y년 m월 d일",
+                defaultDate: initialBlackoutDates ? initialBlackoutDates.split(',') : [],
                 allowInput: false,
                 clickOpens: true,
                 appendTo: document.body,
@@ -1040,9 +1046,15 @@ to {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        showNotification('success', '예약 설정이 성공적으로 저장되었습니다!');
+                        showNotification('success', '예약 설정이 성공적으로 저장되었습니다! 잠시 후 내 음식점 목록으로 이동합니다.');
+                     // 2초 후에 페이지 이동
+                        setTimeout(() => {
+                            window.location.href = contextPath + '/business/restaurants';
+                        }, 2000);
                     } else {
                         showNotification('error', '설정 저장 중 오류가 발생했습니다: ' + (data.message || '알 수 없는 오류'));
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.disabled = false;
                     }
                 })
                 .catch(error => {

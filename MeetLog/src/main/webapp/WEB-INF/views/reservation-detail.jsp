@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
 <html lang="ko">
@@ -123,19 +123,23 @@
 									<div class="mb-6">
 										<h2 class="text-lg font-bold text-slate-800 mb-3">예약 정보</h2>
 										<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-										<%-- 원본 날짜시간 문자열을 변수에 저장합니다. --%>
-											<c:set var="datetimeString" value="${reservation.reservationTime}" />
-											
+											<%-- 원본 날짜시간 문자열을 변수에 저장합니다. --%>
+											<c:set var="datetimeString"
+												value="${reservation.reservationTime}" />
+
 											<%-- 'T'를 기준으로 문자열을 분리하여 배열로 만듭니다. --%>
-											<c:set var="dateTimeArray" value="${fn:split(datetimeString, 'T')}" />
-											
+											<c:set var="dateTimeArray"
+												value="${fn:split(datetimeString, 'T')}" />
+
 											<%-- 배열의 각 요소를 개별 변수에 할당합니다. --%>
-											<c:set var="dateValue" value="${dateTimeArray[0]}" /> <%-- 날짜 부분: 2025-10-13 --%>
-											<c:set var="timeValue" value="${dateTimeArray[1]}" /> <%-- 시간 부분: 13:00 --%>
-										
+											<c:set var="dateValue" value="${dateTimeArray[0]}" />
+											<%-- 날짜 부분: 2025-10-13 --%>
+											<c:set var="timeValue" value="${dateTimeArray[1]}" />
+											<%-- 시간 부분: 13:00 --%>
+
 											<div class="bg-slate-50 p-4 rounded-lg">
 												<h3 class="font-medium text-slate-700 mb-2">예약 날짜</h3>
-													<p class="text-slate-800">${dateValue}</p>
+												<p class="text-slate-800">${dateValue}</p>
 											</div>
 											<div class="bg-slate-50 p-4 rounded-lg">
 												<h3 class="font-medium text-slate-700 mb-2">예약 시간</h3>
@@ -503,15 +507,13 @@
 					<div>
 						<label for="meeting-date"
 							class="block text-sm font-medium text-slate-700">만날 날짜</label> <input
-							type="date" id="meeting-date"
-							value="<fmt:formatDate value="${reservation.reservationDate}" pattern="yyyy-MM-dd" />"
+							type="date" id="meeting-date" value="${dateValue}"
 							class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">
 					</div>
 					<div>
 						<label for="meeting-time"
 							class="block text-sm font-medium text-slate-700">만날 시간</label> <input
-							type="time" id="meeting-time"
-							value="${reservation.reservationTimeStr}"
+							type="time" id="meeting-time" value="${timeValue}"
 							class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500">
 					</div>
 					<div>
@@ -589,7 +591,7 @@
                 }
 
                 const restaurantName = `<c:out value="${restaurant.name}" escapeXml="true"/>`;
-                const pageUrl = window.location.pathname + window.location.search;
+                const pageUrl = (window.location.pathname + window.location.search).substring(1);
                 const mapRedirectUrl = `${pageContext.request.contextPath}/location-map?query=\${encodeURIComponent(place)}`;
                 
                 const rating = parseFloat(${restaurant.rating}).toFixed(1);
