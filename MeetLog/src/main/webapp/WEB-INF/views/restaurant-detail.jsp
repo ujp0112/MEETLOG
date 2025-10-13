@@ -1698,25 +1698,21 @@ translateY
 												<c:forEach var="review" items="${reviewList}">
 													<div class="review-item" style="display: none;"> 
 														<div class="bg-white p-6 rounded-2xl h-full flex flex-col">
-															<div class="flex justify-between items-start mb-4">
+															<div class="flex justify-between items-start mb-4"> <%-- 이 div 안에 '더보기' 메뉴를 넣습니다. --%>
 																<div class="flex items-start">
 																	<c:choose>
 																		<%-- 외부(Google) 리뷰 프로필 이미지 --%>
 																		<c:when test="${isExternal}">
-																		<div>
 																			<img src="${review.profileImage}"
 																				alt="${review.author}" onerror="this.onerror=null;"
 																				class="w-12 h-12 rounded-full object-cover mr-4">
-																				</div>
 																		</c:when>
 																		<c:otherwise>
-																			<div>
 																				<img
 																					src="${pageContext.request.contextPath}/images/${review.profileImage}"
 																					alt="${review.author}"
 																					onerror="this.onerror=null; this.src='https://placehold.co/600x400/e2e8f0/64748b?text=${review.author }';"
 																					class="w-12 h-12 rounded-full object-cover mr-4">
-																					</div>
 																		</c:otherwise>
 																	</c:choose>
 																	<c:choose>
@@ -1744,56 +1740,56 @@ translateY
 																				pattern="yy.MM.dd" /></span>
 																	</div>
 																</div>
-															</div>
 
-															<%-- ▼▼▼ [추가] '더보기' 메뉴 버튼 및 드롭다운 메뉴 ▼▼▼ --%>
-															<c:if test="${not empty sessionScope.user}">
-																<div class="review-options-container">
-																	<button class="review-options-btn"
-																		data-review-id="${review.id}">
-																		<img
-																			src="${pageContext.request.contextPath}/img/icon_more_vertical.png"
-																			alt="더보기" class="w-5 h-5">
-																	</button>
-																	<div class="review-options-dropdown">
-																		<c:choose>
-																			<%-- 리뷰 작성자와 현재 로그인한 유저가 같을 경우 --%>
-																			<c:when
-																				test="${sessionScope.user.id == review.userId}">
-																				<a
-																					href="${pageContext.request.contextPath}/review/edit?reviewId=${review.id}"
-																					class="dropdown-item">리뷰 수정</a>
-																				<button
-																					class="dropdown-item delete review-delete-btn"
-																					data-review-id="${review.id}">리뷰 삭제</button>
-																			</c:when>
-																			<%-- 다른 유저일 경우 --%>
-																			<c:otherwise>
-																				<button class="dropdown-item review-report-btn"
-																					data-review-id="${review.id}"
-																					data-review-author="${fn:escapeXml(review.author)}">리뷰
-																					신고</button>
-																			</c:otherwise>
-																		</c:choose>
+																<%-- ▼▼▼ [수정] '더보기' 메뉴 버튼 및 드롭다운 메뉴를 이곳으로 이동 ▼▼▼ --%>
+																<c:if test="${not empty sessionScope.user}">
+																	<div class="review-options-container">
+																		<button class="review-options-btn"
+																			data-review-id="${review.id}">
+																			<img
+																				src="${pageContext.request.contextPath}/img/icon_more_vertical.png"
+																				alt="더보기" class="w-5 h-5">
+																		</button>
+																		<div class="review-options-dropdown">
+																			<c:choose>
+																				<%-- 리뷰 작성자와 현재 로그인한 유저가 같을 경우 --%>
+																				<c:when
+																					test="${sessionScope.user.id == review.userId}">
+																					<a
+																						href="${pageContext.request.contextPath}/review/edit?reviewId=${review.id}"
+																						class="dropdown-item">리뷰 수정</a>
+																					<button
+																						class="dropdown-item delete review-delete-btn"
+																						data-review-id="${review.id}">리뷰 삭제</button>
+																				</c:when>
+																				<%-- 다른 유저일 경우 --%>
+																				<c:otherwise>
+																					<button class="dropdown-item review-report-btn"
+																						data-review-id="${review.id}"
+																						data-review-author="${fn:escapeXml(review.author)}">리뷰
+																						신고</button>
+																				</c:otherwise>
+																			</c:choose>
+																		</div>
 																	</div>
-																</div>
-															</c:if>
-															<!-- <c:if
-																		test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
-																		<c:choose>
-																			<c:when
-																				test="${review.authorIsFollowedByCurrentUser}">
-																				<button
-																					class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-gray-200 text-gray-700 transition-colors"
-																					data-user-id="${review.userId}">팔로잉</button>
-																			</c:when>
-																			<c:otherwise>
-																				<button
-																					class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-																					data-user-id="${review.userId}">팔로우</button>
-																			</c:otherwise>
-																		</c:choose>
-																	</c:if> -->
+																</c:if>
+																<!-- <c:if
+																			test="${not empty sessionScope.user and sessionScope.user.id != review.userId}">
+																			<c:choose>
+																				<c:when
+																					test="${review.authorIsFollowedByCurrentUser}">
+																					<button
+																						class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-gray-200 text-gray-700 transition-colors"
+																						data-user-id="${review.userId}">팔로잉</button>
+																				</c:when>
+																				<c:otherwise>
+																					<button
+																						class="follow-btn text-xs font-bold py-1 px-3 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors"
+																						data-user-id="${review.userId}">팔로우</button>
+																				</c:otherwise>
+																			</c:choose>
+																		</c:if> -->
+															</div>
 														</div>
 
 														<c:if test="${not empty review.images}">

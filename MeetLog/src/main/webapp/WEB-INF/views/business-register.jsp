@@ -42,7 +42,14 @@
                     <input type="hidden" name="userType" value="BUSINESS_HQ">
                     <div>
                         <label for="hqBusinessName" class="block text-sm font-medium text-slate-700">사업체명 (본사)</label>
-                        <input id="hqBusinessName" name="businessName" type="text" required class="form-input" placeholder="상호명을 입력하세요">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+	                        <input id="hqBusinessName" name="businessName" type="text" required class="form-input rounded-none rounded-l-md" placeholder="상호명을 입력하세요">
+	                        <button type="button" id="checkNicknameBtnHq"
+	                                class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500" style="white-space:nowrap;">
+	                            중복 확인
+	                        </button>
+                        </div>
+                        <p id="nicknameMessageHq" class="mt-2 text-sm"></p>
                     </div>
                     <div>
                         <label for="hqOwnerName" class="block text-sm font-medium text-slate-700">대표자명</label>
@@ -114,7 +121,14 @@
                     </div>
                     <div>
                         <label for="branchBusinessName" class="block text-sm font-medium text-slate-700">사업체명 (지점명)</label>
-                        <input id="branchBusinessName" name="businessName" type="text" required class="form-input" placeholder="상호명(지점명)을 입력하세요">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+	                        <input id="branchBusinessName" name="businessName" type="text" required class="form-input rounded-none rounded-l-md" placeholder="상호명(지점명)을 입력하세요">
+	                        <button type="button" id="checkNicknameBtnBranch"
+	                                class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+	                            중복 확인
+	                        </button>
+                        </div>
+                        <p id="nicknameMessageBranch" class="mt-2 text-sm"></p>
                     </div>
                     <div>
                         <label for="branchOwnerName" class="block text-sm font-medium text-slate-700">대표자명</label>
@@ -181,7 +195,14 @@
                     <input type="hidden" name="userType" value="BUSINESS_INDIVIDUAL">
                     <div>
                         <label for="individualBusinessName" class="block text-sm font-medium text-slate-700">사업체명 (개인 사업자명)</label>
-                        <input id="individualBusinessName" name="businessName" type="text" required class="form-input" placeholder="상호명을 입력하세요">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+	                        <input id="individualBusinessName" name="businessName" type="text" required class="form-input rounded-none rounded-l-md" placeholder="상호명을 입력하세요">
+	                        <button type="button" id="checkNicknameBtnIndividual"
+	                                class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500">
+	                            중복 확인
+	                        </button>
+                        </div>
+                        <p id="nicknameMessageIndividual" class="mt-2 text-sm"></p>
                     </div>
                     <div>
                         <label for="individualOwnerName" class="block text-sm font-medium text-slate-700">대표자명</label>
@@ -342,6 +363,57 @@
                 handleSendVerification(document.getElementById('individualEmail'), document.getElementById('emailMessageIndividual'), document.getElementById('verificationCodeGroupIndividual'), document.getElementById('sendVerificationBtnIndividual'));
             });
 
+            // --- 닉네임 중복 확인 스크립트 ---
+            const handleCheckNickname = async (nicknameInput, messageEl, buttonEl) => {
+                const nickname = nicknameInput.value;
+                if (!nickname) {
+                    messageEl.textContent = '사업체명을 입력해주세요.';
+                    messageEl.className = 'mt-2 text-sm text-red-600';
+                    return;
+                }
+
+                buttonEl.disabled = true;
+                buttonEl.textContent = '확인 중...';
+
+                try {
+                    const response = await fetch('${pageContext.request.contextPath}/check-nickname', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'nickname=' + encodeURIComponent(nickname)
+                    });
+
+                    const result = await response.json();
+                    messageEl.textContent = result.message;
+
+                    if (response.ok) {
+                        messageEl.className = 'mt-2 text-sm text-green-600';
+                    } else {
+                        messageEl.className = 'mt-2 text-sm text-red-600';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    messageEl.textContent = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                    messageEl.className = 'mt-2 text-sm text-red-600';
+                } finally {
+                    buttonEl.disabled = false;
+                    buttonEl.textContent = '중복 확인';
+                }
+            };
+
+            // HQ 회원 닉네임(사업체명) 중복 확인
+            document.getElementById('checkNicknameBtnHq').addEventListener('click', () => {
+                handleCheckNickname(document.getElementById('hqBusinessName'), document.getElementById('nicknameMessageHq'), document.getElementById('checkNicknameBtnHq'));
+            });
+
+            // 지점 회원 닉네임(사업체명) 중복 확인
+            document.getElementById('checkNicknameBtnBranch').addEventListener('click', () => {
+                handleCheckNickname(document.getElementById('branchBusinessName'), document.getElementById('nicknameMessageBranch'), document.getElementById('checkNicknameBtnBranch'));
+            });
+
+            // 개인 사업자 회원 닉네임(사업체명) 중복 확인
+            document.getElementById('checkNicknameBtnIndividual').addEventListener('click', () => {
+                handleCheckNickname(document.getElementById('individualBusinessName'), document.getElementById('nicknameMessageIndividual'), document.getElementById('checkNicknameBtnIndividual'));
+            });
         });
     </script>
 </body>

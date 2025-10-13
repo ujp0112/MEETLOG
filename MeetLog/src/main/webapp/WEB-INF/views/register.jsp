@@ -52,10 +52,17 @@
                     </div>
                     <div>
                         <label for="nickname" class="text-sm font-medium text-slate-700">닉네임</label>
-                         <input type="text" id="nickname" name="nickname" required 
-                               class="mt-1 relative block w-full px-3 py-3 border border-slate-300 rounded-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
-                               placeholder="멋진 닉네임을 입력하세요">
-                     </div>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+	                        <input type="text" id="nickname" name="nickname" required 
+	                               class="relative block w-full px-3 py-3 border border-slate-300 rounded-none rounded-l-md focus:outline-none focus:ring-sky-500 focus:border-sky-500" 
+	                               placeholder="멋진 닉네임을 입력하세요">
+	                        <button type="button" id="checkNicknameBtn"
+                                    class="relative -ml-px inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-r-md text-slate-700 bg-slate-50 hover:bg-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500"style="white-space:nowrap;">
+                                중복 확인
+                            </button>
+                        </div>
+                        <p id="nicknameMessage" class="mt-2 text-sm"></p>
+                    </div>
                     <div>
                         <label for="password" class="text-sm font-medium text-slate-700">비밀번호</label>
                         <input type="password" id="password" name="password" required 
@@ -204,6 +211,46 @@
                 emailMessage.className = 'mt-2 text-sm text-red-600';
                 sendVerificationBtn.disabled = false;
                 sendVerificationBtn.textContent = '인증번호 발송';
+            }
+        });
+        
+        const checkNicknameBtn = document.getElementById('checkNicknameBtn');
+        const nicknameInput = document.getElementById('nickname');
+        const nicknameMessage = document.getElementById('nicknameMessage');
+
+        checkNicknameBtn.addEventListener('click', async function() {
+            const nickname = nicknameInput.value;
+            if (!nickname) {
+                nicknameMessage.textContent = '닉네임을 입력해주세요.';
+                nicknameMessage.className = 'mt-2 text-sm text-red-600';
+                return;
+            }
+
+            checkNicknameBtn.disabled = true;
+            checkNicknameBtn.textContent = '확인 중...';
+
+            try {
+                const response = await fetch('${pageContext.request.contextPath}/check-nickname', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'nickname=' + encodeURIComponent(nickname)
+                });
+
+                const result = await response.json();
+                nicknameMessage.textContent = result.message;
+
+                if (response.ok) {
+                    nicknameMessage.className = 'mt-2 text-sm text-green-600';
+                } else {
+                    nicknameMessage.className = 'mt-2 text-sm text-red-600';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                nicknameMessage.textContent = '오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+                nicknameMessage.className = 'mt-2 text-sm text-red-600';
+            } finally {
+                checkNicknameBtn.disabled = false;
+                checkNicknameBtn.textContent = '중복 확인';
             }
         });
     </script>
