@@ -1,307 +1,416 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>"<c:out value="${keyword}"/>" 검색 결과 - MEET LOG</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <!-- 한국어 서브셋 + Preload로 최적화 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap&subset=korean" rel="stylesheet">
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
-    <style>
-        * {
-            font-family: 'Noto Sans KR', sans-serif;
-            /* 한국어 최적화: 기본 줄 높이 증가 */
-            line-height: 1.7;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>"<c:out value="${keyword}" />" 검색 결과 - MEET LOG
+</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- 한국어 서브셋 + Preload로 최적화 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+	href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap&subset=korean"
+	rel="stylesheet">
+<script type="text/javascript"
+	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services"></script>
+<style>
+* {
+	font-family: 'Noto Sans KR', sans-serif;
+	/* 한국어 최적화: 기본 줄 높이 증가 */
+	line-height: 1.7;
+}
 
-        /* 제목은 더 좁은 줄 높이 허용 */
-        h1, h2, h3, h4, h5, h6 {
-            line-height: 1.4;
-            letter-spacing: -0.02em; /* 자간 살짝 좁혀서 가독성 향상 */
-        }
+/* 제목은 더 좁은 줄 높이 허용 */
+h1, h2, h3, h4, h5, h6 {
+	line-height: 1.4;
+	letter-spacing: -0.02em; /* 자간 살짝 좁혀서 가독성 향상 */
+}
 
-        /* 본문 텍스트는 충분한 여백 */
-        p, span, li {
-            line-height: 1.7;
-            word-break: keep-all; /* 한국어 단어 단위로 줄바꿈 */
-            overflow-wrap: break-word;
-        }
+/* 본문 텍스트는 충분한 여백 */
+p, span, li {
+	line-height: 1.7;
+	word-break: keep-all; /* 한국어 단어 단위로 줄바꿈 */
+	overflow-wrap: break-word;
+}
 
-        #results-list { scrollbar-width: thin; scrollbar-color: #a0aec0 #edf2f7; }
-        #results-list::-webkit-scrollbar { width: 6px; }
-        #results-list::-webkit-scrollbar-track { background: #edf2f7; }
-        #results-list::-webkit-scrollbar-thumb { background-color: #a0aec0; border-radius: 10px; border: 3px solid #edf2f7; }
-        .result-item:hover { background-color: #f0f7ff; }
-        .result-item.highlighted { background-color: #ebf8ff; border-right: 4px solid #3182ce; }
- 	   	.meetlog-badge {
-            background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
-            color: white; font-size: 0.7rem; font-weight: bold;
-            padding: 2px 8px; border-radius: 9999px; margin-left: 8px;
-        }
-        .result-item-image {
-            width: 80px; height: 80px; object-fit: cover;
-            border-radius: 0.5rem; background-color: #e2e8f0;
-        }
-        
-        /* Custom Marker (Overlay) Styles */
-        .marker-overlay {
-            display: flex;
-            align-items: center;
-            background-color: white;
-            border: 1px solid #ccc;
-            border-radius: 999px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            padding: 6px;
-            position: relative;
-            transform: translate(0, -100%); /* [수정] 마커를 오른쪽으로 50% 이동 */
-            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-            cursor: pointer;
-            z-index: 1;
-        }
-        .marker-overlay.highlight, .marker-overlay:hover { transform: translate(0, -100%) scale(1.05); z-index: 10; border-color: #3182ce; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-        .marker-overlay::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid white;
-            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
-        }
-        .marker-number {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .marker-info {
-            padding: 0 10px 0 8px;
-            white-space: nowrap;
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .marker-title {
-            font-weight: bold;
-            font-size: 14px;
-            color: #2d3748;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .marker-category {
-            font-size: 11px;
-            color: #4a5568; /* 대비율 7:1로 개선 (기존 #718096 → #4a5568) */
-        }
+#results-list {
+	scrollbar-width: thin;
+	scrollbar-color: #a0aec0 #edf2f7;
+}
 
-        .marker-kakao .marker-number { background-color: #3182ce; }
-        .marker-kakao .marker-title { color: #2b6cb0; }
-        .marker-db .marker-number { background-color: #c53030; font-size: 18px; }
-        .marker-db .marker-title { color: #c53030; }
+#results-list::-webkit-scrollbar {
+	width: 6px;
+}
 
-        /* Re-search Button Style */
-        #research-button {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 5;
-            background-color: white;
-            border: 1px solid #dbdbdb;
-            border-radius: 9999px;
-            padding: 8px 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #3182ce;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease-in-out;
-        }
-        #research-button:hover {
-            background-color: #f7fafc;
-            border-color: #a0aec0;
-        }
-        #research-button.hidden {
-            display: none;
-        }
+#results-list::-webkit-scrollbar-track {
+	background: #edf2f7;
+}
 
-        /* 로딩 스피너 스타일 */
-        .spinner {
-            border: 3px solid #f3f4f6;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 0.8s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
+#results-list::-webkit-scrollbar-thumb {
+	background-color: #a0aec0;
+	border-radius: 10px;
+	border: 3px solid #edf2f7;
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+.result-item:hover {
+	background-color: #f0f7ff;
+}
 
-        /* 로딩 오버레이 */
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            backdrop-filter: blur(4px);
-        }
+.result-item.highlighted {
+	background-color: #ebf8ff;
+	border-right: 4px solid #3182ce;
+}
 
-        .loading-overlay.hidden {
-            display: none;
-        }
-    </style>
+.meetlog-badge {
+	background: linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%);
+	color: white;
+	font-size: 0.7rem;
+	font-weight: bold;
+	padding: 2px 8px;
+	border-radius: 9999px;
+	margin-left: 8px;
+}
+
+.result-item-image {
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: 0.5rem;
+	background-color: #e2e8f0;
+}
+
+/* Custom Marker (Overlay) Styles */
+.marker-overlay {
+	display: flex;
+	align-items: center;
+	background-color: white;
+	border: 1px solid #ccc;
+	border-radius: 999px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	padding: 6px;
+	position: relative;
+	transform: translate(0, -100%); /* [수정] 마커를 오른쪽으로 50% 이동 */
+	transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+	cursor: pointer;
+	z-index: 1;
+}
+
+.marker-overlay.highlight, .marker-overlay:hover {
+	transform: translate(0, -100%) scale(1.05);
+	z-index: 10;
+	border-color: #3182ce;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.marker-overlay::after {
+	content: '';
+	position: absolute;
+	bottom: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 8px solid white;
+	filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+.marker-number {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	color: white;
+	font-weight: bold;
+	font-size: 14px;
+	flex-shrink: 0;
+}
+
+.marker-info {
+	padding: 0 10px 0 8px;
+	white-space: nowrap;
+	max-width: 150px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.marker-title {
+	font-weight: bold;
+	font-size: 14px;
+	color: #2d3748;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.marker-category {
+	font-size: 11px;
+	color: #4a5568; /* 대비율 7:1로 개선 (기존 #718096 → #4a5568) */
+}
+
+.marker-kakao .marker-number {
+	background-color: #3182ce;
+}
+
+.marker-kakao .marker-title {
+	color: #2b6cb0;
+}
+
+.marker-db .marker-number {
+	background-color: #c53030;
+	font-size: 18px;
+}
+
+.marker-db .marker-title {
+	color: #c53030;
+}
+
+/* Re-search Button Style */
+#research-button {
+	position: absolute;
+	top: 15px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 5;
+	background-color: white;
+	border: 1px solid #dbdbdb;
+	border-radius: 9999px;
+	padding: 8px 16px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	color: #3182ce;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	transition: all 0.2s ease-in-out;
+}
+
+#research-button:hover {
+	background-color: #f7fafc;
+	border-color: #a0aec0;
+}
+
+#research-button.hidden {
+	display: none;
+}
+
+/* 로딩 스피너 스타일 */
+.spinner {
+	border: 3px solid #f3f4f6;
+	border-top: 3px solid #3b82f6;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	animation: spin 0.8s linear infinite;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+@
+keyframes spin { 0% {
+	transform: rotate(0deg);
+}
+
+100
+%
+{
+transform
+:
+rotate(
+360deg
+);
+}
+}
+
+/* 로딩 오버레이 */
+.loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.9);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	backdrop-filter: blur(4px);
+}
+
+.loading-overlay.hidden {
+	display: none;
+}
+</style>
 </head>
 <body class="bg-gray-50">
-    <div id="app" class="h-screen flex flex-col">
-        <jsp:include page="/WEB-INF/views/common/header.jsp" />
-        <main class="flex-grow flex flex-col md:flex-row overflow-hidden">
-            <!-- 검색 결과 리스트 (시맨틱 HTML 개선) -->
-            <aside id="result-panel" role="complementary" aria-label="검색 결과 목록" class="w-full md:w-1/3 lg:w-1/4 h-2/5 md:h-full flex flex-col border-r border-gray-200 bg-white relative">
-                <%-- 로딩 오버레이 --%>
-                <div id="loading-overlay" class="loading-overlay hidden" aria-live="assertive" aria-busy="true">
-                    <div class="text-center">
-                        <div class="spinner mb-3"></div>
-                        <p class="text-sm text-gray-600 font-medium">검색 중입니다...</p>
-                    </div>
-                </div>
+	<div id="app" class="h-screen flex flex-col">
+		<jsp:include page="/WEB-INF/views/common/header.jsp" />
+		<main class="flex-grow flex flex-col md:flex-row overflow-hidden">
+			<!-- 검색 결과 리스트 (시맨틱 HTML 개선) -->
+			<aside id="result-panel" role="complementary" aria-label="검색 결과 목록"
+				class="w-full md:w-1/3 lg:w-1/4 h-2/5 md:h-full flex flex-col border-r border-gray-200 bg-white relative">
+				<%-- 로딩 오버레이 --%>
+				<div id="loading-overlay" class="loading-overlay hidden"
+					aria-live="assertive" aria-busy="true">
+					<div class="text-center">
+						<div class="spinner mb-3"></div>
+						<p class="text-sm text-gray-600 font-medium">검색 중입니다...</p>
+					</div>
+				</div>
 
-                <%-- 검색 폼 (ARIA 개선) --%>
-                <div class="p-3 border-b">
-                    <form id="map-search-form" role="search" action="${pageContext.request.contextPath}/searchRestaurant" method="get" class="flex flex-col sm:flex-row gap-2">
-                        <label for="keyword-input" class="sr-only">검색어</label>
-                        <input
-                            id="keyword-input"
-                            type="text"
-                            name="keyword"
-                            value="<c:out value="${keyword}"/>"
-                            placeholder="맛집 이름, 지역 검색"
-                            aria-label="검색어 입력"
-                            class="flex-grow px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                        <label for="category-select" class="sr-only">카테고리</label>
-                        <select
-                            id="category-select"
-                            name="category"
-                            aria-label="카테고리 선택"
-                            class="px-2 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                            <option value="전체" ${category == '전체' ? 'selected' : ''}>전체</option>
-                            <option value="한식" ${category == '한식' ? 'selected' : ''}>한식</option>
-                            <option value="양식" ${category == '양식' ? 'selected' : ''}>양식</option>
-                            <option value="일식" ${category == '일식' ? 'selected' : ''}>일식</option>
-                            <option value="중식" ${category == '중식' ? 'selected' : ''}>중식</option>
-                            <option value="카페" ${category == '카페' ? 'selected' : ''}>카페</option>
-                        </select>
-                        <button
-                            type="submit"
-                            class="px-4 py-2 bg-sky-600 text-white rounded-md text-sm hover:bg-sky-700 transition-colors focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 whitespace-nowrap">
-                            검색
-                        </button>
-                    </form>
-                </div>
-                <div class="p-4 border-b">
-                    <h1 class="text-xl font-bold text-gray-800">
-                        "<span class="text-blue-600"><c:out value="${keyword}"/></span>" 검색 결과
-                    </h1>
-                    <p id="result-count" role="status" aria-live="polite" aria-atomic="true" class="text-sm text-gray-500 mt-1">지도를 검색하고 있습니다...</p>
-                </div>
-                <ul id="results-list" role="list" class="flex-grow overflow-y-auto p-2"></ul>
-                <%-- 더 보기 버튼 (ARIA 개선) --%>
-                <div id="load-more-container" class="p-4 border-t text-center hidden">
-                    <button id="load-more-btn" aria-label="더 많은 검색 결과 불러오기" class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
-                        더 보기
-                    </button>
-                </div>
-            </aside>
+				<%-- 검색 폼 (ARIA 개선) --%>
+				<div class="p-3 border-b">
+					<form id="map-search-form" role="search"
+						action="${pageContext.request.contextPath}/searchRestaurant"
+						method="get" class="flex flex-col sm:flex-row gap-2">
+						<label for="keyword-input" class="sr-only">검색어</label> <input
+							id="keyword-input" type="text" name="keyword"
+							value="<c:out value="${keyword}"/>" placeholder="맛집 이름, 지역 검색"
+							aria-label="검색어 입력"
+							class="flex-grow px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+						<label for="category-select" class="sr-only">카테고리</label> <select
+							id="category-select" name="category" aria-label="카테고리 선택"
+							class="px-2 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+							<option value="전체" ${category == '전체' ? 'selected' : ''}>전체</option>
+							<option value="한식" ${category == '한식' ? 'selected' : ''}>한식</option>
+							<option value="양식" ${category == '양식' ? 'selected' : ''}>양식</option>
+							<option value="일식" ${category == '일식' ? 'selected' : ''}>일식</option>
+							<option value="중식" ${category == '중식' ? 'selected' : ''}>중식</option>
+							<option value="카페" ${category == '카페' ? 'selected' : ''}>카페</option>
+						</select>
+						<button type="submit"
+							class="px-4 py-2 bg-sky-600 text-white rounded-md text-sm hover:bg-sky-700 transition-colors focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 whitespace-nowrap">
+							검색</button>
+					</form>
+				</div>
+				<div class="p-4 border-b">
+					<h1 class="text-xl font-bold text-gray-800">
+						"<span class="text-blue-600"><c:out value="${keyword}" /></span>"
+						검색 결과
+					</h1>
+					<p id="result-count" role="status" aria-live="polite"
+						aria-atomic="true" class="text-sm text-gray-500 mt-1">지도를 검색하고
+						있습니다...</p>
+				</div>
+				<ul id="results-list" role="list"
+					class="flex-grow overflow-y-auto p-2"></ul>
+				<%-- 더 보기 버튼 (ARIA 개선) --%>
+				<div id="load-more-container"
+					class="p-4 border-t text-center hidden">
+					<button id="load-more-btn" aria-label="더 많은 검색 결과 불러오기"
+						class="bg-blue-500 text-white font-bold py-2 px-6 rounded-full hover:bg-blue-600 transition duration-300 ease-in-out disabled:bg-gray-400 disabled:cursor-not-allowed">
+						더 보기</button>
+				</div>
+			</aside>
 
-            <!-- 지도 패널 (시맨틱 HTML 개선) -->
-            <section id="map-panel" class="w-full md:w-2/3 lg:w-3/4 h-3/5 md:h-full relative">
-                <div id="map" role="application" aria-label="맛집 위치 지도" style="width:100%; height:100%;"></div>
-                <button id="research-button" class="hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5A5.002 5.002 0 0 0 8 3zM3.143 8.182a.5.5 0 1 1 .771.636A5.002 5.002 0 0 0 12.5 13H11A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 1 0v2.143a.5.5 0 0 1-.143.357z"/>
+			<!-- 지도 패널 (시맨틱 HTML 개선) -->
+			<section id="map-panel"
+				class="w-full md:w-2/3 lg:w-3/4 h-3/5 md:h-full relative">
+				<div id="map" role="application" aria-label="맛집 위치 지도"
+					style="width: 100%; height: 100%;"></div>
+				<button id="research-button" class="hidden">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+						fill="currentColor" viewBox="0 0 16 16">
+                        <path
+							d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z" />
+                        <path fill-rule="evenodd"
+							d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5A5.002 5.002 0 0 0 8 3zM3.143 8.182a.5.5 0 1 1 .771.636A5.002 5.002 0 0 0 12.5 13H11A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 0-1H.5a.5.5 0 0 1-.5-.5V4a.5.5 0 0 1 1 0v2.143a.5.5 0 0 1-.143.357z" />
                     </svg>
-                    <span>이 지역에서 다시 검색</span>
-                </button>
-            </div>
-        </main>
-    </div>
-    <script>
+					<span>이 지역에서 다시 검색</span>
+				</button>
+	</div>
+	</main>
+	</div>
+	<script>
     const g = { overlays: [], listItems: [] };
     let map, ps, kakaoPagination;
     let isLoading = false;
     let isDbSearchEnd = false;
     let isKakaoSearchEnd = false;
     let currentPage = 1;
-    let displayedDbIds = []; // 💡 이미 표시된 DB 맛집 ID를 저장할 배열
+    let displayedDbIds = []; 
 
     $(document).ready(function() {
-        const keyword = "<c:out value='${keyword}'/>";
         const contextPath = "${pageContext.request.contextPath}";
-        const category = "<c:out value='${category}' default='전체'/>"; 
         
-        if (!keyword && category === '전체') { 
-            $('#result-count').text('검색어가 없습니다.'); 
-            return; 
-        }
+        // 💡 --- [수정] URL에서 lat, lng 파라미터 가져오기 ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const lat = urlParams.get('lat');
+        const lng = urlParams.get('lng');
+        const keyword = urlParams.get('keyword') || "<c:out value='${keyword}'/>";
+        const category = urlParams.get('category') || "<c:out value='${category}' default='전체'/>";
+
+        // 💡 --- [수정] lat, lng 유무에 따라 지도 초기 옵션 설정 ---
+        const initialCenter = (lat && lng) ? new kakao.maps.LatLng(lat, lng) : new kakao.maps.LatLng(37.566826, 126.97865);
+        const initialLevel = (lat && lng) ? 5 : 8; // 위치값이 있으면 더 확대된 레벨로 시작
 
         const mapContainer = document.getElementById('map');
-        const mapOption = { center: new kakao.maps.LatLng(37.566826, 126.97865), level: 8 };
+        const mapOption = { center: initialCenter, level: initialLevel };
         map = new kakao.maps.Map(mapContainer, mapOption);
         ps = new kakao.maps.services.Places();
         
-        let initialSearchKeyword = keyword;
-        if ((category === '전체' || category === '') && keyword) {
-            initialSearchKeyword = keyword + " 맛집";
-        } else if (!keyword && category !== '전체' && category !== '') {
-            initialSearchKeyword = category;
-        }
-        
-        $('#result-panel h1').html('"<span class="text-blue-600">' + (keyword || category) + '</span>" 검색 결과');
-
-        let searchOptions = {
-            size: 10,
-            category_group_code: 'FD6'
-        };
-        
-        ps.keywordSearch(initialSearchKeyword, (data, status, pagination) => {
-            if (status === kakao.maps.services.Status.ZERO_RESULT && initialSearchKeyword !== keyword) {
-                 ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
-                    placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
-                }, searchOptions);
-            } else {
-                placesSearchCB(data, status, pagination, contextPath);
+        // 💡 --- [수정] lat, lng 유무에 따라 최초 검색 로직 분기 ---
+        if (lat && lng) {
+            // 1. 위치 기반 검색 (main.jsp에서 '지도로 검색'을 통해 진입)
+            let searchKeyword = keyword || category;
+            if (searchKeyword === '전체' || searchKeyword === '') {
+                searchKeyword = '맛집'; // 키워드나 카테고리가 없으면 '맛집'으로 검색
             }
-        }, searchOptions);
+            $('#result-panel h1').html('내 주변에서 <span class="text-blue-600">"' + searchKeyword + '"</span> 검색 결과');
+            
+            const searchOptions = {
+                size: 10,
+                category_group_code: 'FD6',
+                location: new kakao.maps.LatLng(lat, lng),
+                radius: 2000 // 초기 검색 반경 2km
+            };
+
+            ps.keywordSearch(searchKeyword, (data, status, pagination) => {
+                // placesSearchCB는 더 이상 최초 검색에 사용되지 않으므로, 직접 로직 처리
+                kakaoPagination = pagination;
+                isKakaoSearchEnd = !pagination.hasNextPage;
+                $('#loading-overlay').removeClass('hidden'); // 로딩 시작
+                fetchDbAndDisplayCombined(1, data || [], contextPath, false);
+            }, searchOptions);
+
+        } else {
+            // 2. 기존의 키워드 기반 검색 (직접 URL로 접근했거나, 위치 정보가 없을 때)
+            if (!keyword && category === '전체') { 
+                $('#result-count').text('검색어가 없습니다.'); 
+                return; 
+            }
+
+            let initialSearchKeyword = keyword;
+            if ((category === '전체' || category === '') && keyword) {
+                initialSearchKeyword = keyword + " 맛집";
+            } else if (!keyword && category !== '전체' && category !== '') {
+                initialSearchKeyword = category;
+            }
+            
+            $('#result-panel h1').html('"<span class="text-blue-600">' + (keyword || category) + '</span>" 검색 결과');
+
+            const searchOptions = { size: 10, category_group_code: 'FD6' };
+            
+            ps.keywordSearch(initialSearchKeyword, (data, status, pagination) => {
+                if (status === kakao.maps.services.Status.ZERO_RESULT && initialSearchKeyword !== keyword) {
+                    ps.keywordSearch(keyword, (retryData, retryStatus, retryPagination) => {
+                        placesSearchCB(retryData, retryStatus, retryPagination, contextPath);
+                    }, searchOptions);
+                } else {
+                    placesSearchCB(data, status, pagination, contextPath);
+                }
+            }, searchOptions);
+        }
 
         kakao.maps.event.addListener(map, 'dragend', function() {
             $('#research-button').removeClass('hidden');
