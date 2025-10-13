@@ -19,8 +19,7 @@ import javax.servlet.http.HttpSession;
 @WebFilter(urlPatterns = {
     "/mypage/*", 
     "/review/write/*", 
-    "/reservation/create/*",
-    "/reservation/cancel/*",
+    "/reservation/*",
     "/course/create",      // [수정] '코스 만들기' 페이지만 정확히 지정
     "/course/edit/*",      // [수정] '코스 수정' 관련 페이지만 보호
     "/course/delete/*"     // [수정] '코스 삭제' 관련 페이지만 보호
