@@ -1,10 +1,12 @@
 package service;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
+import org.slf4j.LoggerFactory;
 
 import dao.RestaurantDAO;
 import dao.ReviewDAO;
@@ -12,10 +14,12 @@ import model.Restaurant;
 import model.Review;
 import model.ReviewInfo;
 import util.MyBatisSqlSessionFactory;
+import org.slf4j.Logger;
 
 public class ReviewService {
 	private final ReviewDAO reviewDAO = new ReviewDAO();
 	private final RestaurantDAO restaurantDAO = new RestaurantDAO();
+	private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
 
 	// --- Read Operations ---
 	public List<Review> findAll() {
@@ -42,7 +46,7 @@ public class ReviewService {
 	    Map<String, Object> params = new HashMap<>();
 	    params.put("restaurantId", restaurantId);
 	    params.put("currentUserId", currentUserId); // 쿼리에 전달할 파라미터
-	    return reviewDAO.findByRestaurantId(params);
+		return reviewDAO.findByRestaurantId(params);
 	}
 
 	public List<Review> getReviewsByUserId(int userId) {

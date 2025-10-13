@@ -54,7 +54,7 @@ CREATE TABLE `branch_inventory` (
   KEY `fk_bi_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_bi_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_bi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `branch_menu_toggle` (
   `company_id` int(11) NOT NULL,
   `branch_id` int(11) NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE `branch_menu_toggle` (
   KEY `fk_bmt_menu` (`company_id`,`menu_id`),
   CONSTRAINT `fk_bmt_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_bmt_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `business_notice` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE `business_notice` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_company` (`company_id`),
   CONSTRAINT `fk_notice_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `business_users` (
   `user_id` int(11) NOT NULL,
   `business_name` varchar(200) NOT NULL,
@@ -333,7 +333,7 @@ CREATE TABLE `material` (
   UNIQUE KEY `uq_material_company_id` (`company_id`,`id`),
   KEY `idx_material_company` (`company_id`),
   CONSTRAINT `fk_material_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -349,7 +349,7 @@ CREATE TABLE `menu` (
   UNIQUE KEY `uq_menu_company_id` (`company_id`,`id`),
   KEY `idx_menu_company` (`company_id`),
   CONSTRAINT `fk_menu_company` FOREIGN KEY (`company_id`) REFERENCES `business_users` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menu_ingredient` (
   `company_id` int(11) NOT NULL,
   `menu_id` int(11) NOT NULL,
@@ -361,7 +361,7 @@ CREATE TABLE `menu_ingredient` (
   KEY `fk_mi_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_mi_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
   CONSTRAINT `fk_mi_menu` FOREIGN KEY (`company_id`, `menu_id`) REFERENCES `menu` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `menus` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -387,7 +387,7 @@ CREATE TABLE `notice_file` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_file_notice` (`notice_id`),
   CONSTRAINT `fk_notice_file_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `notice_image` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `notice_id` int(11) NOT NULL,
@@ -398,7 +398,7 @@ CREATE TABLE `notice_image` (
   PRIMARY KEY (`id`),
   KEY `fk_notice_image_notice` (`notice_id`),
   CONSTRAINT `fk_notice_image_notice` FOREIGN KEY (`notice_id`) REFERENCES `business_notice` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `notices` (
   `notice_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
@@ -437,7 +437,7 @@ CREATE TABLE `promotion` (
   PRIMARY KEY (`id`),
   KEY `fk_promotion_company` (`company_id`),
   CONSTRAINT `fk_promotion_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `promotion_file` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `promotion_id` int(11) NOT NULL,
@@ -449,7 +449,7 @@ CREATE TABLE `promotion_file` (
   PRIMARY KEY (`id`),
   KEY `fk_promo_file_promo` (`promotion_id`),
   CONSTRAINT `fk_promo_file_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `promotion_image` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `promotion_id` int(11) NOT NULL,
@@ -460,7 +460,7 @@ CREATE TABLE `promotion_image` (
   PRIMARY KEY (`id`),
   KEY `fk_promo_image_promo` (`promotion_id`),
   CONSTRAINT `fk_promo_image_promo` FOREIGN KEY (`promotion_id`) REFERENCES `promotion` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `purchase_order` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `company_id` int(11) NOT NULL,
@@ -475,7 +475,7 @@ CREATE TABLE `purchase_order` (
   KEY `idx_po_branch` (`branch_id`),
   KEY `fk_po_branch` (`company_id`,`branch_id`),
   CONSTRAINT `fk_po_branch` FOREIGN KEY (`company_id`, `branch_id`) REFERENCES `business_users` (`company_id`, `user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `purchase_order_line` (
   `company_id` int(11) NOT NULL,
   `order_id` int(11) NOT NULL,
@@ -490,7 +490,7 @@ CREATE TABLE `purchase_order_line` (
   KEY `fk_pol_material` (`company_id`,`material_id`),
   CONSTRAINT `fk_pol_material` FOREIGN KEY (`company_id`, `material_id`) REFERENCES `material` (`company_id`, `id`),
   CONSTRAINT `fk_pol_order` FOREIGN KEY (`company_id`, `order_id`) REFERENCES `purchase_order` (`company_id`, `id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `rating_distributions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -537,6 +537,10 @@ CREATE TABLE `reservations` (
   CONSTRAINT `reservations_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_reservations_user_coupon` FOREIGN KEY (`user_coupon_id`) REFERENCES `user_coupons` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ▼▼▼ [수정] 예약 설정에 포함되어야 할 컬럼이므로 reservations 테이블에서 삭제합니다. ▼▼▼
+ALTER TABLE reservations DROP COLUMN IF EXISTS time_slot_interval;
+
 CREATE TABLE `restaurant_images` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -546,7 +550,7 @@ CREATE TABLE `restaurant_images` (
   PRIMARY KEY (`id`),
   KEY `fk_res_images_restaurant` (`restaurant_id`),
   CONSTRAINT `fk_res_images_restaurant` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_uca1400_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 ;
 CREATE TABLE `restaurant_news` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11) NOT NULL,
@@ -607,6 +611,7 @@ CREATE TABLE `restaurant_reservation_settings` (
   `deposit_required` tinyint(1) DEFAULT 0,
   `deposit_amount` decimal(10,2) DEFAULT 0,
   `deposit_description` varchar(255) DEFAULT NULL,
+  `time_slot_interval` int(11) DEFAULT 60 COMMENT '예약 시간 간격 (분 단위)',
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `monday_enabled` tinyint(1) DEFAULT 1,
@@ -1673,5 +1678,193 @@ CREATE TABLE IF NOT EXISTS `telegram_message_logs` (
   KEY `ix_status` (`status`),
   CONSTRAINT `fk_telegram_log_link` FOREIGN KEY (`tg_link_id`) REFERENCES `tg_link` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='텔레그램 메시지 발송 로그';
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+-- ===================================================================
+-- [수정본] ID 자동 부여 기능 테스트용 종합 샘플 데이터 생성 스크립트
+-- ===================================================================
+
+-- 외래 키 제약 조건 임시 비활성화
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 1. 테스트 사용자 3명 생성 (ID 자동 생성)
+INSERT INTO `users` (`email`, `nickname`, `password`, `user_type`, `profile_image`, `name`, `phone`, `address`, `is_active`, `follower_count`, `following_count`)
+VALUES
+('testuser1@meetlog.com', '테스트유저1', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'PERSONAL', 'https://placehold.co/150x150/a5f3fc/000000?text=Test1', '김테스트', '010-1111-1111', '서울시 강남구 테스트로 1', 1, 1, 1),
+('business.owner@meetlog.com', '가게사장님', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'BUSINESS', 'https://placehold.co/150x150/fde047/000000?text=Biz', '박사장', '010-2222-2222', '서울시 종로구 성공길 2', 1, 15, 2),
+('power.blogger@meetlog.com', '맛집탐험가', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'PERSONAL', 'https://placehold.co/150x150/d8b4fe/ffffff?text=Power', '최고맛', '010-4444-4444', '경기도 성남시 분당구', 1, 1, 1);
+
+-- 방금 생성된 사용자들의 ID를 변수에 저장
+SET @user1_id = (SELECT id FROM users WHERE email = 'testuser1@meetlog.com');
+SET @owner_id = (SELECT id FROM users WHERE email = 'business.owner@meetlog.com');
+SET @blogger_id = (SELECT id FROM users WHERE email = 'power.blogger@meetlog.com');
+
+
+-- ===================================================================
+-- 2. '가게사장님'(@owner_id)을 위한 비즈니스 및 가게 데이터 생성
+-- ===================================================================
+INSERT INTO `companies` (`id`, `name`) VALUES (2, '박사장네 파스타') ON DUPLICATE KEY UPDATE name=name;
+INSERT INTO `business_users` (`user_id`, `business_name`, `owner_name`, `business_number`, `role`, `status`, `company_id`)
+VALUES (@owner_id, '박사장네 파스타', '박사장', '123-45-67890', 'HQ', 'ACTIVE', 2);
+
+INSERT INTO `restaurants` (`owner_id`, `name`, `category`, `location`, `address`, `phone`, `description`, `image`, `is_active`)
+VALUES (@owner_id, '박사장네 파스타', '양식', '종로', '서울 종로구 성공길 2 1층', '010-2222-2222', '정통 이탈리안 파스타를 맛볼 수 있는 곳', 'https://placehold.co/600x400/84cc16/ffffff?text=Pasta', 1);
+SET @restaurant_id = LAST_INSERT_ID(); -- '박사장네 파스타'의 ID 저장
+
+INSERT INTO `menus` (`restaurant_id`, `name`, `price`, `description`)
+VALUES
+(@restaurant_id, '오늘의 파스타', '15000원', '매일 신선한 재료로 만드는 셰프 추천 파스타'),
+(@restaurant_id, '트러플 크림 뇨끼', '18000원', '진한 트러플 향이 일품인 크림 뇨끼');
+
+-- 수정된 코드 (time_slots 값 추가)
+INSERT INTO `restaurant_reservation_settings` (`restaurant_id`, `reservation_enabled`, `auto_accept`, `min_party_size`, `max_party_size`, `time_slot_interval`, `time_slots`)
+VALUES (@restaurant_id, 1, 1, 2, 6, 30, '["12:00", "13:00", "14:00", "18:00", "19:00", "20:00"]');
+
+INSERT INTO `coupons` (`restaurant_id`, `title`, `description`, `discount_type`, `discount_value`, `validity`)
+VALUES (@restaurant_id, '첫 방문 10% 할인 쿠폰', '박사장네 파스타에 처음 오신 분들을 위한 웰컴 쿠폰', 'PERCENTAGE', 10, '~ 2025.12.31');
+SET @coupon_id = LAST_INSERT_ID();
+
+
+-- ===================================================================
+-- 3. 사용자 간 상호작용 데이터 생성
+-- ===================================================================
+INSERT INTO `reviews` (`restaurant_id`, `user_id`, `rating`, `content`, `images`, `keywords`, `likes`)
+VALUES (@restaurant_id, @blogger_id, 5, '새로 생긴 곳이라 방문해봤는데 정말 맛있네요! 특히 뇨끼가 환상적입니다. 사장님도 친절하시고 분위기도 좋아서 데이트 장소로 추천해요!', '["https://placehold.co/400x300/e0e7ff/000000?text=Review+IMG"]', '["#음식이 맛있어요", "#데이트하기 좋아요"]', 1);
+SET @review_id = LAST_INSERT_ID();
+
+INSERT INTO `review_likes` (`user_id`, `review_id`) VALUES (@user1_id, @review_id);
+
+INSERT INTO `columns` (`user_id`, `title`, `content`, `image`, `likes`, `views`)
+VALUES (@blogger_id, '2025년 종로 신상 맛집 BEST 3', '최근 종로에 새로 생긴 맛집들을 다녀왔습니다. 그 중에서도 최고는 바로..', 'https://placehold.co/600x400/d8b4fe/ffffff?text=Column', 1, 10);
+SET @column_id = LAST_INSERT_ID();
+
+INSERT INTO `column_comments` (`column_id`, `user_id`, `content`) VALUES (@column_id, @user1_id, '오, 좋은 정보 감사합니다! 박사장네 파스타 가봐야겠네요.');
+INSERT INTO `column_likes` (`column_id`, `user_id`) VALUES (@column_id, @user1_id);
+
+INSERT INTO `follows` (`follower_id`, `following_id`) VALUES (@user1_id, @blogger_id), (@blogger_id, @user1_id);
+
+INSERT INTO `reservations` (`restaurant_id`, `user_id`, `restaurant_name`, `user_name`, `reservation_time`, `party_size`, `status`)
+VALUES (@restaurant_id, @user1_id, '박사장네 파스타', '테스트유저1', '2025-10-25 19:30:00', 2, 'CONFIRMED');
+
+INSERT INTO `restaurant_qna` (`restaurant_id`, `user_id`, `user_name`, `question`, `status`)
+VALUES (@restaurant_id, @user1_id, '테스트유저1', '혹시 예약 없이 워크인으로도 방문 가능한가요?', 'PENDING');
+
+INSERT INTO `inquiries` (`user_id`, `user_name`, `email`, `subject`, `content`, `category`, `priority`)
+VALUES (@user1_id, '김테스트', 'testuser1@meetlog.com', '포인트 적립 문의', '리뷰를 작성했는데 포인트가 적립되지 않았어요.', 'GENERAL', 'MEDIUM');
+
+INSERT INTO `reports` (`reporter_id`, `reported_type`, `reported_id`, `reported_user_id`, `reason`, `status`)
+VALUES (@user1_id, 'REVIEW', @review_id, @blogger_id, '지나친 광고성 리뷰로 의심됩니다.', 'PENDING');
+
+INSERT INTO `notifications` (`user_id`, `type`, `title`, `content`)
+VALUES (@blogger_id, 'follow', '새로운 팔로워', '<span class="font-bold">테스트유저1</span>님이 회원님을 팔로우하기 시작했습니다.');
+
+
+-- ===================================================================
+-- 4. '테스트유저1'(@user1_id)을 위한 개인 기능 데이터 생성
+-- ===================================================================
+INSERT INTO `courses` (`author_id`, `title`, `description`, `area`, `duration`, `type`, `preview_image`)
+VALUES (@user1_id, '테스트유저의 종로 데이트', '제가 추천하는 종로 데이트 코스입니다.', '종로', '4시간', 'COMMUNITY', 'https://placehold.co/600x400/fecdd3/ffffff?text=Course');
+SET @course_id = LAST_INSERT_ID();
+
+INSERT INTO `course_steps` (`course_id`, `step_order`, `step_type`, `emoji`, `name`, `description`)
+VALUES
+(@course_id, 1, 'RESTAURANT', '🍝', CONCAT('박사장네 파스타 (ID: ', @restaurant_id, ')'), '분위기 좋은 곳에서 맛있는 파스타로 시작!'),
+(@course_id, 2, 'ETC', '🚶', '익선동 골목길 산책', '고즈넉한 한옥 골목길을 걸으며 소화시키기'),
+(@course_id, 3, 'RESTAURANT', '🍗', '치맥 하우스 (ID: 4)', '시원한 수제맥주와 치킨으로 하루 마무리!');
+
+INSERT INTO `user_storages` (`user_id`, `name`, `color_class`) VALUES (@user1_id, '종로 맛집 리스트', 'text-amber-500');
+SET @storage_id = LAST_INSERT_ID();
+
+INSERT INTO `user_storage_items` (`storage_id`, `item_type`, `content_id`)
+VALUES
+(@storage_id, 'RESTAURANT', @restaurant_id),
+(@storage_id, 'COURSE', @course_id);
+
+INSERT INTO `user_coupons` (`user_id`, `coupon_id`, `is_used`) VALUES (@user1_id, @coupon_id, 0);
+
+-- 외래 키 제약 조건 다시 활성화
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ===================================================================
+-- 지점(Branch) 및 개인사업자(Individual) 테스트 데이터 추가 스크립트
+-- ===================================================================
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ===================================================================
+-- 1. 프랜차이즈 본사 및 지점 사용자 생성
+-- ===================================================================
+
+-- 1-1. '맛잘알 프랜차이즈' 회사 생성
+INSERT INTO `companies` (`name`) VALUES ('맛잘알 프랜차이즈')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+SET @franchise_company_id = (SELECT id FROM companies WHERE name = '맛잘알 프랜차이즈');
+
+-- 1-2. 본사(HQ) 직원 계정 생성
+INSERT INTO `users` (`email`, `nickname`, `password`, `user_type`, `name`)
+VALUES ('franchise.hq@meetlog.com', '프랜차이즈본사', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'BUSINESS', '김본사');
+SET @hq_user_id = LAST_INSERT_ID();
+
+-- 1-3. 본사 비즈니스 정보 연결
+INSERT INTO `business_users` (`user_id`, `business_name`, `owner_name`, `business_number`, `role`, `status`, `company_id`)
+VALUES (@hq_user_id, '맛잘알 프랜차이즈', '김본사', '200-81-12345', 'HQ', 'ACTIVE', @franchise_company_id);
+
+-- 1-4. '강남점' 지점 정보 생성
+INSERT INTO `branches` (`branch_name`, `status`, `address`, `phone`, `company_id`, `manager_name`)
+VALUES ('강남점', 'ACTIVE', '서울 강남구 테헤란로 124', '02-555-1111', @franchise_company_id, '이점장');
+SET @branch_id = LAST_INSERT_ID();
+
+-- 1-5. 강남점장(Branch) 계정 생성
+INSERT INTO `users` (`email`, `nickname`, `password`, `user_type`, `name`)
+VALUES ('branch.manager@meetlog.com', '강남점장', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'BUSINESS', '이점장');
+SET @branch_manager_id = LAST_INSERT_ID();
+
+-- 1-6. 강남점장 비즈니스 정보 연결
+INSERT INTO `business_users` (`user_id`, `business_name`, `owner_name`, `business_number`, `role`, `status`, `company_id`)
+VALUES (@branch_manager_id, '맛잘알 프랜차이즈 강남점', '이점장', '200-81-12345', 'BRANCH', 'ACTIVE', @franchise_company_id);
+
+-- 1-7. 강남점 레스토랑 정보 생성 (점장 계정이 소유자)
+INSERT INTO `restaurants` (`owner_id`, `name`, `category`, `location`, `address`, `phone`, `description`, `image`, `is_active`)
+VALUES (@branch_manager_id, '맛잘알 프랜차이즈 강남점', '한식', '강남', '서울 강남구 테헤란로 124', '02-555-1111', '본사 직영으로 운영되는 깔끔한 한식 프랜차이즈입니다.', 'https://placehold.co/600x400/22c55e/ffffff?text=Franchise', 1);
+SET @branch_restaurant_id = LAST_INSERT_ID();
+
+-- 1-8. 강남점 메뉴 추가
+INSERT INTO `menus` (`restaurant_id`, `name`, `price`)
+VALUES
+(@branch_restaurant_id, '프리미엄 비빔밥', '12000원'),
+(@branch_restaurant_id, '특선 불고기 덮밥', '14000원');
+
+
+-- ===================================================================
+-- 2. 개인사업자 사용자 생성
+-- ===================================================================
+
+-- 2-1. 개인사업자용 회사 정보 생성 (가게 이름과 동일하게)
+INSERT INTO `companies` (`name`) VALUES ('나홀로식당')
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+SET @solo_company_id = (SELECT id FROM companies WHERE name = '나홀로식당');
+
+-- 2-2. 개인사업자(Individual) 계정 생성
+INSERT INTO `users` (`email`, `nickname`, `password`, `user_type`, `name`)
+VALUES ('solo.chef@meetlog.com', '나홀로셰프', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'BUSINESS', '오너셰프');
+SET @solo_user_id = LAST_INSERT_ID();
+
+-- 2-3. 개인사업자 비즈니스 정보 연결
+INSERT INTO `business_users` (`user_id`, `business_name`, `owner_name`, `business_number`, `role`, `status`, `company_id`)
+VALUES (@solo_user_id, '나홀로식당', '오너셰프', '111-22-33333', 'INDIVIDUAL', 'ACTIVE', @solo_company_id);
+
+-- 2-4. 개인사업자 레스토랑 정보 생성
+INSERT INTO `restaurants` (`owner_id`, `name`, `category`, `location`, `address`, `phone`, `description`, `image`, `is_active`)
+VALUES (@solo_user_id, '나홀로식당', '일식', '홍대', '서울 마포구 와우산로 90', '02-333-7777', '셰프 혼자 운영하는 작은 심야식당입니다.', 'https://placehold.co/600x400/6366f1/ffffff?text=Solo+Chef', 1);
+SET @solo_restaurant_id = LAST_INSERT_ID();
+
+-- 2-5. 개인사업자 식당 메뉴 추가
+INSERT INTO `menus` (`restaurant_id`, `name`, `price`)
+VALUES
+(@solo_restaurant_id, '오늘의 초밥 (10pcs)', '25000원'),
+(@solo_restaurant_id, '나가사키 짬뽕', '18000원');
+
 
 SET FOREIGN_KEY_CHECKS = 1;

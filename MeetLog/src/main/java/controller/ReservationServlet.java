@@ -10,7 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -23,7 +25,7 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import model.Coupon;
+import dao.ReservationSettingsDAO;
 import model.Reservation;
 import model.Restaurant;
 import model.User;
@@ -31,9 +33,8 @@ import service.ReservationService;
 import service.RestaurantService;
 import service.UserCouponService;
 import service.UserCouponService.CouponValidationResult;
-import dao.ReservationSettingsDAO;
 import service.payment.NaverPayService;
-import service.payment.NaverPayService.NaverPayJsConfig;
+import service.payment.PaymentGatewayService;
 
 @WebServlet("/reservation/*")
 public class ReservationServlet extends HttpServlet {
@@ -204,11 +205,16 @@ public class ReservationServlet extends HttpServlet {
 					if (!dayKey.isEmpty() && toBoolean(settings.get(dayKey + "_enabled"))) {
 						LocalTime startTime = toLocalTime(settings.get(dayKey + "_start"));
 						LocalTime endTime = toLocalTime(settings.get(dayKey + "_end"));
+						// ▼▼▼ [수정] DB에서 time_slot_interval 값을 가져옵니다. ▼▼▼
+						Object intervalObj = settings.get("time_slot_interval"); // MyBatis는 보통 Integer로 반환합니다.
+						int interval = (intervalObj instanceof Number) ? ((Number) intervalObj).intValue() : 30;
+
 						if (startTime != null && endTime != null) {
 							LocalTime currentTime = startTime;
 							while (currentTime.isBefore(endTime)) {
 								timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-								currentTime = currentTime.plusMinutes(30);
+								// ▼▼▼ [수정] 설정된 간격만큼 시간을 증가시킵니다. ▼▼▼
+								currentTime = currentTime.plusMinutes(interval);
 							}
 						}
 					}
@@ -403,48 +409,61 @@ public class ReservationServlet extends HttpServlet {
 				reservation.setStatus("PENDING");
 			}
 
+			// ...
 			if (reservationService.createReservation(reservation)) {
-				if (reservation.isDepositRequired() && reservation.getDepositAmount() != null
-						&& reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
-					if (!naverPayService.isConfigured()) {
-						throw new Exception("네이버페이 설정이 완료되지 않았습니다. 관리자에게 문의해주세요.");
-					}
-					String merchantPayKey = naverPayService.generateMerchantPayKey(reservation.getId());
-					reservation.setPaymentOrderId(merchantPayKey);
-					reservationService.updatePaymentInfo(reservation.getId(), reservation.getPaymentStatus(),
-							merchantPayKey, reservation.getPaymentProvider(), reservation.getPaymentApprovedAt(),
-							reservation.getDepositAmount(), reservation.isDepositRequired());
+			    if (reservation.isDepositRequired() && reservation.getDepositAmount() != null
+			            && reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
+			        
+			        // --- ✨ CHANGED: 결제 수단에 따라 유연하게 대처하도록 변경 ---
 
-					NaverPayJsConfig jsConfig = naverPayService.buildJsConfig(request, user, reservation,
-							reservation.getDepositAmount());
-					request.setAttribute("naverPayConfig", jsConfig);
-					request.setAttribute("reservation", reservation);
-					request.setAttribute("depositDescription", depositDescription);
-					request.getRequestDispatcher("/WEB-INF/views/reservation-payment.jsp").forward(request, response);
-					return;
-				}
-				response.sendRedirect(request.getContextPath() + "/mypage/reservations");
-			} else {
+			        // 1. 사용할 결제 서비스 선택 (지금은 네이버페이만)
+			        PaymentGatewayService paymentService = new NaverPayService();
+
+			        // 2. 결제 요청에 필요한 데이터 생성 (인터페이스의 공통 메소드 사용)
+			        Object providerConfig = paymentService.buildPaymentRequest(request, user, reservation);
+
+			        // 3. JSP에 전달할 공통 결제 컨텍스트 생성
+			        Map<String, Object> paymentContext = new HashMap<>();
+			        paymentContext.put("providerName", paymentService.getProviderName()); // "NAVERPAY"
+			        paymentContext.put("providerConfig", providerConfig); // NaverPayJsConfig 객체
+			        
+			        // 4. request에 공통 이름("paymentContext")으로 저장
+			        request.setAttribute("paymentContext", paymentContext);
+			        request.setAttribute("reservation", reservation);
+			        request.setAttribute("depositDescription", depositDescription);
+
+			        // 5. 새로 만들 공통 결제 페이지로 포워딩
+			        request.getRequestDispatcher("/WEB-INF/views/reservation-payment.jsp").forward(request, response);
+			        return;
+			    }
+			    response.sendRedirect(request.getContextPath() + "/mypage/reservations");
+			}
+			 else {
 				throw new Exception("예약 등록 실패 (DB insert 실패)");
 			}
 
-		} catch (DateTimeParseException e) {
-			log.error("잘못된 날짜/시간 형식으로 예약 시도: restaurantId={}", restaurantId, e);
-			request.setAttribute("errorMessage", "잘못된 날짜 또는 시간 형식입니다.");
-			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
-			request.setAttribute("restaurant", restaurant);
-			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
-		} catch (Exception e) {
-			log.error("예약 처리 중 오류 발생: restaurantId={}, userId={}", restaurantId, user.getId(), e);
-			String message = e.getMessage();
-			if (message == null || message.trim().isEmpty()) {
-				message = "예약 처리 중 오류가 발생했습니다.";
-			}
-			request.setAttribute("errorMessage", message);
-			Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
-			request.setAttribute("restaurant", restaurant);
-			request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
+		}catch(
+
+	DateTimeParseException e)
+	{
+		log.error("잘못된 날짜/시간 형식으로 예약 시도: restaurantId={}", restaurantId, e);
+		request.setAttribute("errorMessage", "잘못된 날짜 또는 시간 형식입니다.");
+		Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+		request.setAttribute("restaurant", restaurant);
+		request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
+	}catch(
+	Exception e)
+	{
+		log.error("예약 처리 중 오류 발생: restaurantId={}, userId={}", restaurantId, user.getId(), e);
+		String message = e.getMessage();
+		if (message == null || message.trim().isEmpty()) {
+			message = "예약 처리 중 오류가 발생했습니다.";
 		}
+		request.setAttribute("errorMessage", message);
+		Restaurant restaurant = restaurantService.getRestaurantById(restaurantId);
+		request.setAttribute("restaurant", restaurant);
+		request.getRequestDispatcher("/WEB-INF/views/create-reservation.jsp").forward(request, response);
+	}
 	}
 
 	private void handleReservationCancel(HttpServletRequest request, HttpServletResponse response)
@@ -576,12 +595,16 @@ public class ReservationServlet extends HttpServlet {
 				if (dayKey != null && toBoolean(settings.get(dayKey + "_enabled"))) {
 					LocalTime startTime = toLocalTime(settings.get(dayKey + "_start"));
 					LocalTime endTime = toLocalTime(settings.get(dayKey + "_end"));
+					// ▼▼▼ [수정] DB에서 time_slot_interval 값을 가져옵니다. ▼▼▼
+					Object intervalObj = settings.get("time_slot_interval"); // MyBatis는 보통 Integer로 반환합니다.
+					int interval = (intervalObj instanceof Number) ? ((Number) intervalObj).intValue() : 30;
 
 					if (startTime != null && endTime != null) {
 						LocalTime currentTime = startTime;
 						while (currentTime.isBefore(endTime)) {
 							timeSlots.add(currentTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-							currentTime = currentTime.plusMinutes(30);
+							// ▼▼▼ [수정] 설정된 간격만큼 시간을 증가시킵니다. ▼▼▼
+							currentTime = currentTime.plusMinutes(interval);
 						}
 					}
 				}

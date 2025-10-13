@@ -153,16 +153,24 @@
 
 	<select id="searchColumns" parameterType="map"
 		resultMap="columnResultMap">
-		<include refid="selectColumnWithUser" />
+		SELECT
+			c.*,
+			u.nickname AS author,
+			u.profile_image
+		FROM
+			`columns` c
+		JOIN
+			users u ON c.user_id = u.id
+		LEFT JOIN 
+			column_restaurants cr ON c.id = cr.column_id
+		LEFT JOIN 
+			restaurants r ON cr.restaurant_id = r.id
 		WHERE c.is_active = true
 		<if test="keyword != null and keyword != ''">
-			AND (c.title LIKE CONCAT('%', #{keyword}, '%')
-			OR c.content
-			LIKE CONCAT('%', #{keyword}, '%')
-			OR u.nickname LIKE CONCAT('%',
-			#{keyword}, '%'))
+			AND (c.title LIKE CONCAT('%', #{keyword}, '%') OR c.content LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR r.name LIKE CONCAT('%', #{keyword}, '%'))
 		</if>
-		ORDER BY c.created_at DESC
+		GROUP BY c.id
+		ORDER BY c.created_at DESC;
 	</select>
 
 	<select id="findAttachedRestaurantsByColumnId"

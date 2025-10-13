@@ -47,6 +47,27 @@ public class Reservation {
 	private transient Date paymentApprovedAtAsDate;
 	private transient List<Reservation> reservations;
 	
+	
+	
+	@Override
+	public String toString() {
+		return "Reservation [id=" + id + ", restaurantId=" + restaurantId + ", userId=" + userId + ", restaurantName="
+				+ restaurantName + ", userName=" + userName + ", reservationTime=" + reservationTime + ", partySize="
+				+ partySize + ", status=" + status + ", specialRequests=" + specialRequests + ", contactPhone="
+				+ contactPhone + ", cancelReason=" + cancelReason + ", cancelledAt=" + cancelledAt + ", customerName="
+				+ customerName + ", customerPhone=" + customerPhone + ", reservationDate=" + reservationDate
+				+ ", reservationTimeStr=" + reservationTimeStr + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt
+				+ ", depositRequired=" + depositRequired + ", depositAmount=" + depositAmount + ", userCouponId="
+				+ userCouponId + ", couponDiscountAmount=" + couponDiscountAmount + ", couponName=" + couponName
+				+ ", couponDiscountType=" + couponDiscountType + ", couponIsUsed=" + couponIsUsed + ", pointsUsed="
+				+ pointsUsed + ", pointsEarned=" + pointsEarned + ", paymentStatus=" + paymentStatus
+				+ ", paymentOrderId=" + paymentOrderId + ", paymentApprovedAt=" + paymentApprovedAt
+				+ ", paymentProvider=" + paymentProvider + ", reservationTimeAsDate=" + reservationTimeAsDate
+				+ ", createdAtAsDate=" + createdAtAsDate + ", updatedAtAsDate=" + updatedAtAsDate
+				+ ", cancelledAtAsDate=" + cancelledAtAsDate + ", paymentApprovedAtAsDate=" + paymentApprovedAtAsDate
+				+ ", reservations=" + reservations + "]";
+	}
+
 	public List<Reservation> getReservations() {
         return reservations;
     }

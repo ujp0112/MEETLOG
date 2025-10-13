@@ -62,8 +62,17 @@ public class LoginServlet extends HttpServlet {
 	            }
 
 	            // ▼▼▼ [수정] 리다이렉션 URL 결정 로직 수정 ▼▼▼
-	            String targetUrl = redirectUrl;
+	            // 1. 세션에서 필터가 저장한 리다이렉션 URL을 먼저 확인합니다.
+	            String targetUrl = (String) session.getAttribute("redirectUrl");
+	            System.out.println("targetUrl: " + targetUrl);
+	            // 2. 사용 후에는 세션에서 즉시 제거합니다.
+	            if (targetUrl != null) {
+	                session.removeAttribute("redirectUrl");
+	            }
+
+	            // 3. 세션에 URL이 없으면, 기존 로직(파라미터 또는 기본값)을 따릅니다.
 	            if (targetUrl == null || targetUrl.trim().isEmpty()) {
+	                targetUrl = redirectUrl; // form에서 전달된 파라미터
 	                switch (user.getUserType()) {
 	                    case "BUSINESS":
 	                        // 세션에서 businessUser 정보를 다시 가져와 역할(role)에 따라 분기
