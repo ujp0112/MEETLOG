@@ -56,11 +56,24 @@ public class SocialLoginCallbackServlet extends HttpServlet {
 					HttpSession session = request.getSession();
 					session.setAttribute("user", user);
 					session.setMaxInactiveInterval(30 * 60);
-					
-					session.setAttribute("socialProvider", provider); 
 
-					System.out.println("로그인 성공, 메인 페이지로 리디렉션: " + user.getEmail()); // 성공 로그 추가
-					response.sendRedirect(request.getContextPath() + "/main");
+					session.setAttribute("socialProvider", provider);
+
+					// 1. 세션에서 필터가 저장한 리디렉션 URL을 확인합니다.
+					String targetUrl = (String) session.getAttribute("redirectUrl");
+
+					// 2. 사용 후에는 세션에서 즉시 제거합니다.
+					if (targetUrl != null) {
+						session.removeAttribute("redirectUrl");
+					}
+
+					// 3. 저장된 URL이 없으면 기본 URL(/main)로 이동합니다.
+					if (targetUrl == null || targetUrl.trim().isEmpty()) {
+						targetUrl = request.getContextPath() + "/main";
+					}
+
+					System.out.println("로그인 성공, 리디렉션: " + targetUrl);
+					response.sendRedirect(targetUrl);
 				} else {
 					System.err.println("UserService에서 user 객체를 생성하지 못함.");
 					request.setAttribute("errorMessage", "사용자 정보를 처리하는 데 실패했습니다.");
