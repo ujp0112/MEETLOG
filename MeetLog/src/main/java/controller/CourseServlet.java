@@ -355,17 +355,16 @@ public class CourseServlet extends HttpServlet {
 			}
 		}
 
+		List<model.CourseComment> comments = courseCommentService.getCommentsByCourse(courseId);
+
 		// [추가] 각 댓글에 대한 현재 사용자의 좋아요 상태 설정
 		if (session != null && session.getAttribute("user") != null) {
 			User user = (User) session.getAttribute("user");
-			List<model.CourseComment> comments = courseCommentService.getCommentsByCourse(courseId);
 			for (model.CourseComment comment : comments) {
 				boolean liked = courseCommentService.isCommentLiked(comment.getId(), user.getId());
 				comment.setLike(liked);
 			}
 		}
-
-		List<model.CourseComment> comments = courseCommentService.getCommentsByCourse(courseId);
 
 		request.setAttribute("course", course);
 		request.setAttribute("steps", steps);

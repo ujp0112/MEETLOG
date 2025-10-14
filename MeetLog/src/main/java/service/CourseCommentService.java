@@ -8,12 +8,14 @@ import java.util.Map;
 import org.apache.ibatis.session.SqlSession;
 
 import dao.CourseCommentDAO;
+import dao.CourseCommentLikeDAO;
 import model.CourseComment;
 import util.MyBatisSqlSessionFactory;
 
 public class CourseCommentService {
 
     private final CourseCommentDAO courseCommentDAO = new CourseCommentDAO();
+    private final CourseCommentLikeDAO courseCommentLikeDAO = new CourseCommentLikeDAO();
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public List<CourseComment> getCommentsByCourse(int courseId) {
@@ -60,13 +62,10 @@ public class CourseCommentService {
      * @return 좋아요를 눌렀으면 true, 아니면 false
      */
 	public boolean isCommentLiked(int commentId, int userId) {
-		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-			Map<String, Object> params = new HashMap<>();
-			params.put("commentId", commentId);
-			params.put("userId", userId);
-			Integer likeId = sqlSession.selectOne("dao.CourseCommentLikeDAO.checkLike", params);
-			return likeId != null;
-		}
+		Map<String, Object> params = new HashMap<>();
+		params.put("commentId", commentId);
+		params.put("userId", userId);
+		return courseCommentLikeDAO.checkLike(params) != null;
 	}
 
     /**
@@ -84,17 +83,17 @@ public class CourseCommentService {
             params.put("userId", userId);
 
             // 1. 사용자가 이미 좋아요를 눌렀는지 확인
-            Integer likeId = sqlSession.selectOne("dao.CourseCommentLikeDAO.checkLike", params);
+            Integer likeId = courseCommentLikeDAO.checkLike(sqlSession, params);
             boolean isLiked;
 
             if (likeId == null) {
                 // 2a. 좋아요 추가
-                sqlSession.insert("dao.CourseCommentLikeDAO.addLike", params);
+                courseCommentLikeDAO.addLike(sqlSession, params);
                 sqlSession.update("dao.CourseCommentDAO.incrementLikes", commentId); // 파라미터는 commentId
                 isLiked = true;
             } else {
                 // 2b. 좋아요 취소
-                sqlSession.delete("dao.CourseCommentLikeDAO.removeLike", params);
+                courseCommentLikeDAO.removeLike(sqlSession, params);
                 sqlSession.update("dao.CourseCommentDAO.decrementLikes", commentId); // 파라미터는 commentId
                 isLiked = false;
             }
