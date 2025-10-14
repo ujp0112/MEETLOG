@@ -71,10 +71,28 @@ public class HqMenusServlet extends HttpServlet {
 				return;
 			}
 		}
-		req.setAttribute("menus", menuService.listMenus(companyId, 500, 0));
-		req.setAttribute("materials", materialService.listByCompany(companyId));
+		
+		// --- 페이지네이션 로직 시작 ---
+		final int pageSize = 10; // 페이지당 10개씩 표시
+		int currentPage = 1;
+		try {
+			String pageParam = req.getParameter("page");
+			if (pageParam != null) {
+				currentPage = Integer.parseInt(pageParam);
+			}
+		} catch (NumberFormatException e) {
+			currentPage = 1; // 숫자가 아닌 파라미터일 경우 1페이지로
+		}
+		int offset = (currentPage - 1) * pageSize;
 
-		// 이 JSP는 반드시 서블릿을 통해 접근
+		// 서비스 호출 시 페이징 정보 전달
+		req.setAttribute("menus", menuService.listMenus(companyId, pageSize, offset));
+		req.setAttribute("totalCount", menuService.getMenuCount(companyId));
+		req.setAttribute("currentPage", currentPage);
+		req.setAttribute("pageSize", pageSize);
+		// --- 페이지네이션 로직 끝 ---
+
+		req.setAttribute("materials", materialService.listByCompany(companyId));
 		req.getRequestDispatcher("/WEB-INF/hq/menu-register.jsp").forward(req, resp);
 	}
 

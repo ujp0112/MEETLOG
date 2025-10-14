@@ -64,6 +64,16 @@ public class OrderService {
 		}
 	}
 
+	public int getTotalOrderCountForCompany(long companyId, String status) {
+	    try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
+	        Map<String, Object> p = new HashMap<>();
+	        p.put("companyId", companyId);
+	        p.put("status", status);
+	        Integer count = s.selectOne("erpMapper.OrderMapper.getTotalOrderCountForCompany", p);
+	        return count != null ? count : 0;
+	    }
+	}
+
 	public List<PurchaseOrderLine> listOrderLines(long companyId, long orderId) {
 		try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
 			Map<String, Object> p = new HashMap<>();

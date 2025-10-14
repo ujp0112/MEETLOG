@@ -2,6 +2,7 @@ package erpService;
 
 import org.apache.ibatis.session.SqlSession;
 
+import dao.MenuDAO;
 import erpDto.*;
 import util.MyBatisSqlSessionFactory;
 
@@ -18,6 +19,11 @@ public class BranchMenuService {
 			return s.selectList("erpMapper.BranchMenuMapper.listMenus", p);
 		}
 	}
+	public int getMenuCount(long companyId) {
+		MenuDAO menuDao = new MenuDAO();
+	    return menuDao.getMenuCount(companyId);
+	}
+
 
 	public long createMenu(BranchMenu m, List<MenuIngredient> ings) {
 		try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {

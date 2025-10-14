@@ -37,4 +37,10 @@ public class MenuDAO {
             return sqlSession.selectList(NAMESPACE + ".findPopularMenus");
         }
     }
+    public int getMenuCount(long companyId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            return session.selectOne("erpMapper.BranchMenuMapper.getMenuCount", companyId);
+        }
+    }
+
 }

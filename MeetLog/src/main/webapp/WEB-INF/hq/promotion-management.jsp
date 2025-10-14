@@ -7,6 +7,17 @@
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
+<%-- 페이지네이션 변수 설정 --%>
+<c:set var="pageSize" value="${requestScope.pageSize}" />
+<c:set var="currentPage" value="${requestScope.currentPage}" />
+<c:set var="totalCount" value="${requestScope.totalCount}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
+<c:set var="hasPrev" value="${currentPage > 1}" />
+<c:set var="hasNext" value="${currentPage < totalPages}" />
+<c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
+<c:set var="nextPage" value="${hasNext ? (currentPage + 1) : totalPages}" />
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -126,6 +137,11 @@ body {
 
 .btn:hover {
 	background: #f8fafc
+}
+
+.btn[aria-disabled="true"] {
+	opacity: .5;
+	cursor: not-allowed;
 }
 
 .btn.primary {
@@ -392,9 +408,30 @@ table.sheet {
 									</td>
 								</tr>
 							</c:forEach>
+							<c:if test="${empty promotions}">
+								<tr>
+									<td colspan="5" class="empty">등록된 프로모션이 없습니다.</td>
+								</tr>
+							</c:if>
 						</tbody>
 					</table>
 				</div>
+				
+				<%-- 페이지네이션 UI 추가 --%>
+				<c:if test="${totalCount > 0}">
+					<div class="pager"
+						style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+						<div class="btn-group" style="display: flex; gap: 6px;">
+							<a class="btn btn-sm" href="?page=1" aria-disabled="${not hasPrev}">≪</a>
+							<a class="btn btn-sm" href="?page=${prevPage}" aria-disabled="${not hasPrev}">‹</a>
+							<a class="btn btn-sm" href="?page=${nextPage}" aria-disabled="${not hasNext}">›</a>
+							<a class="btn btn-sm" href="?page=${totalPages}" aria-disabled="${not hasNext}">≫</a>
+						</div>
+						<div class="info" style="font-size: 13px; color: var(- -muted);">
+							총 ${totalCount}건 (페이지 ${currentPage} / <fmt:formatNumber value="${totalPages}" maxFractionDigits="0" />)
+						</div>
+					</div>
+				</c:if>
 			</div>
 		</section>
 	</main>

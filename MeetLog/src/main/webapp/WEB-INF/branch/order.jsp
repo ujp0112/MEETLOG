@@ -5,32 +5,19 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-<c:set var="pageSize" value="10" />
-<c:set var="currentPage"
-    value="${empty requestScope.page ? (empty param.page ? 1 : param.page) : requestScope.page}" />
-<c:if test="${currentPage lt 1}">
-    <c:set var="currentPage" value="1" />
-</c:if>
+<%-- [수정] inventory.jsp와 동일한 페이지네이션 변수 설정 --%>
+<c:set var="pageSize" value="${requestScope.pageSize}" />
+<c:set var="currentPage" value="${requestScope.currentPage}" />
 <c:set var="totalCount"
     value="${empty requestScope.totalCount ? 0 : requestScope.totalCount}" />
-<c:set var="totalPages"
-    value="${(totalCount + pageSize - 1) / pageSize}" />
-<c:if test="${totalPages lt 1}">
-    <c:set var="totalPages" value="1" />
-</c:if>
-<c:set var="shownCount"
-    value="${empty materials ? 0 : fn:length(materials)}" />
-<c:set var="startIndex" value="${(currentPage - 1) * pageSize + 1}" />
-<c:set var="endIndex"
-    value="${shownCount > 0 ? (startIndex + shownCount - 1) : 0}" />
-<c:set var="showStart" value="${shownCount > 0 ? startIndex : 0}" />
-<c:set var="showEnd" value="${shownCount > 0 ? endIndex : 0}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
 <c:set var="hasPrev" value="${currentPage gt 1}" />
 <c:set var="hasNext" value="${currentPage lt totalPages}" />
 <c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
-<c:set var="nextPage"
-    value="${hasNext ? (currentPage + 1) : totalPages}" />
-<c:set var="baseUrl" value="${pageContext.request.requestURI}" />
+<c:set var="nextPage" value="${hasNext ? (currentPage + 1) : totalPages}" />
+<c:set var="startIndex" value="${(currentPage - 1) * pageSize + 1}" />
+<c:set var="endIndex" value="${startIndex + fn:length(materials) - 1}" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -137,22 +124,21 @@
                             </tbody>
                         </table>
                     </div>
+                    <%-- [수정] inventory.jsp와 동일한 페이지네이션 UI 적용 --%>
                     <c:if test="${totalCount > 0}">
                         <div class="pager" id="materialsPager">
                             <div class="left">
                                 <div class="btn-group">
-                                    <c:url var="firstUrl" value="${baseUrl}"><c:param name="page" value="1" /></c:url>
-                                    <c:url var="prevUrl" value="${baseUrl}"><c:param name="page" value="${prevPage}" /></c:url>
-                                    <c:url var="nextUrl" value="${baseUrl}"><c:param name="page" value="${nextPage}" /></c:url>
-                                    <c:url var="lastUrl" value="${baseUrl}"><c:param name="page" value="${totalPages}" /></c:url>
+                                    <c:url var="firstUrl" value="/branch/order"><c:param name="page" value="1" /></c:url>
+                                    <c:url var="prevUrl" value="/branch/order"><c:param name="page" value="${prevPage}" /></c:url>
+                                    <c:url var="nextUrl" value="/branch/order"><c:param name="page" value="${nextPage}" /></c:url>
+                                    <c:url var="lastUrl" value="/branch/order"><c:param name="page" value="${totalPages}" /></c:url>
                                     
                                     <a class="btn sm" href="${firstUrl}" aria-disabled="${not hasPrev}">≪</a>
                                     <a class="btn sm" href="${prevUrl}" aria-disabled="${not hasPrev}">‹</a>
                                     <a class="btn sm" href="${nextUrl}" aria-disabled="${not hasNext}">›</a>
                                     <a class="btn sm" href="${lastUrl}" aria-disabled="${not hasNext}">≫</a>
                                 </div>
-                            </div>
-                            <div class="right">
                                 <span class="info">${startIndex}–${endIndex} / ${totalCount} (페이지 ${currentPage} / <fmt:formatNumber value='${totalPages}' maxFractionDigits='0' />)</span>
                             </div>
                         </div>

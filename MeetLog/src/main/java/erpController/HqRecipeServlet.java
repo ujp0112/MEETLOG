@@ -21,6 +21,7 @@ public class HqRecipeServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final BranchMenuService menuService = new BranchMenuService();
 	private final Gson gson = new Gson();
+	private static final int PAGE_SIZE = 10; // 페이지당 보여줄 메뉴 개수
 
 	 @Override
 	    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,9 +56,28 @@ public class HqRecipeServlet extends HttpServlet {
 	            return; // API 응답이므로 여기서 종료
 	        }
 	        
-	        // 기본 동작: 메뉴 목록 페이지 표시
-	        List<BranchMenu> menus = menuService.listMenus(companyId, 500, 0);
+	        // --- 페이지네이션 로직 시작 ---
+	        int currentPage = 1;
+	        try {
+	            String pageParam = request.getParameter("page");
+	            if (pageParam != null) {
+	                currentPage = Integer.parseInt(pageParam);
+	            }
+	        } catch (NumberFormatException e) {
+	            currentPage = 1; // 숫자가 아닌 파라미터일 경우 1페이지로
+	        }
+	        int offset = (currentPage - 1) * PAGE_SIZE;
+
+	        // 서비스 호출 시 페이징 정보 전달
+	        List<BranchMenu> menus = menuService.listMenus(companyId, PAGE_SIZE, offset);
+	        int totalCount = menuService.getMenuCount(companyId); // 전체 메뉴 수를 가져오는 서비스 메소드 필요
+
+	        // JSP로 페이징 정보 전달
 	        request.setAttribute("menus", menus);
+	        request.setAttribute("totalCount", totalCount);
+	        request.setAttribute("currentPage", currentPage);
+	        request.setAttribute("pageSize", PAGE_SIZE);
+	        // --- 페이지네이션 로직 끝 ---
 	        request.getRequestDispatcher("/WEB-INF/hq/recipe-management.jsp").forward(request, response);
 	    }
 

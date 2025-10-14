@@ -9,8 +9,8 @@
 <c:set var="pageSize" value="${requestScope.pageSize}" />
 <c:set var="currentPage" value="${requestScope.currentPage}" />
 <c:set var="totalCount" value="${requestScope.totalCount}" />
-<c:set var="totalPages"
-	value="${(totalCount + pageSize - 1) / pageSize}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
 <c:set var="hasPrev" value="${currentPage > 1}" />
 <c:set var="hasNext" value="${currentPage < totalPages}" />
 <c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
@@ -146,6 +146,11 @@ body {
 
 .btn.primary:hover {
 	background: var(- -primary-600)
+}
+
+.btn[aria-disabled="true"] {
+	opacity: .5;
+	cursor: not-allowed;
 }
 
 .btn-sm {
@@ -403,13 +408,10 @@ table.sheet {
 				<div class="pager"
 					style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
 					<div class="btn-group" style="display: flex; gap: 6px;">
-						<a class="btn btn-sm ${hasPrev ? '' : 'disabled'}" href="?page=1">≪</a>
-						<a class="btn btn-sm ${hasPrev ? '' : 'disabled'}"
-							href="?page=${prevPage}">‹</a> <a
-							class="btn btn-sm ${hasNext ? '' : 'disabled'}"
-							href="?page=${nextPage}">›</a> <a
-							class="btn btn-sm ${hasNext ? '' : 'disabled'}"
-							href="?page=${totalPages}">≫</a>
+						<a class="btn btn-sm" href="?page=1" aria-disabled="${not hasPrev}">≪</a>
+						<a class="btn btn-sm" href="?page=${prevPage}" aria-disabled="${not hasPrev}">‹</a>
+						<a class="btn btn-sm" href="?page=${nextPage}" aria-disabled="${not hasNext}">›</a>
+						<a class="btn btn-sm" href="?page=${totalPages}" aria-disabled="${not hasNext}">≫</a>
 					</div>
 					<div class="info" style="font-size: 13px; color: var(- -muted);">
 						총 ${totalCount}건 (페이지 ${currentPage} /

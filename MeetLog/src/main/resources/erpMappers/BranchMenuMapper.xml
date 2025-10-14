@@ -94,4 +94,10 @@
 		  AND mi.menu_id = #{menuId}
 		ORDER BY m.name
 	</select>
+		<select id="getMenuCount" parameterType="long" resultType="int">
+	    SELECT COUNT(*)
+	    FROM menu
+	    WHERE company_id = #{companyId}
+	</select>
+		
 </mapper>

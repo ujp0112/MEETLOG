@@ -7,6 +7,19 @@
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
+<%-- 페이지네이션 변수 설정 --%>
+<c:set var="pageSize" value="${requestScope.pageSize}" />
+<c:set var="currentPage" value="${requestScope.currentPage}" />
+<c:set var="totalCount" value="${requestScope.totalCount}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
+<c:set var="hasPrev" value="${currentPage > 1}" />
+<c:set var="hasNext" value="${currentPage < totalPages}" />
+<c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
+<c:set var="nextPage"
+	value="${hasNext ? (currentPage + 1) : totalPages}" />
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -348,16 +361,6 @@ table.sheet {
 				<button class="btn primary" data-action="append">+ 재료 추가</button>
 			</div>
 			<div class="bd">
-				<!-- toolbar -->
-				<form method="get" class="toolbar" style="margin-bottom: 12px">
-					<div class="field">
-						<span style="color: var(- -muted)">검색</span><input name="q"
-							value="${fn:escapeXml(param.q)}" placeholder="재료명/단위/브랜드" />
-					</div>
-					<button class="btn" type="submit">검색</button>
-					<!-- 초기화는 서블릿 경유로 -->
-					<a class="btn" href="${contextPath}/hq/material">초기화</a>
-				</form>
 
 				<div class="table-wrap" role="region" aria-label="재료 목록">
 					<table class="sheet" role="grid">
@@ -414,6 +417,23 @@ table.sheet {
 						</tbody>
 					</table>
 				</div>
+				<%-- 페이지네이션 UI 추가 --%>
+				<c:if test="${totalCount > 0}">
+				<div class="pager"
+					style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+					<div class="btn-group" style="display: flex; gap: 6px;">
+						<a class="btn btn-sm" href="?page=1" ${not hasPrev ? 'style="pointer-events:none;opacity:0.5;"' : ''}>≪</a>
+						<a class="btn btn-sm" href="?page=${prevPage}" ${not hasPrev ? 'style="pointer-events:none;opacity:0.5;"' : ''}>‹</a>
+						<a class="btn btn-sm" href="?page=${nextPage}" ${not hasNext ? 'style="pointer-events:none;opacity:0.5;"' : ''}>›</a>
+						<a class="btn btn-sm" href="?page=${totalPages}" ${not hasNext ? 'style="pointer-events:none;opacity:0.5;"' : ''}>≫</a>
+					</div>
+					<div class="info" style="font-size: 13px; color: var(--muted);">
+						총 ${totalCount}건 (페이지 ${currentPage} /
+						<fmt:formatNumber value="${totalPages}" maxFractionDigits="0" />
+						)
+					</div>
+				</div>
+				</c:if>
 			</div>
 		</section>
 	</main>
