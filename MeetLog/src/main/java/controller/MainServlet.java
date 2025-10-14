@@ -52,11 +52,32 @@ public class MainServlet extends HttpServlet {
                 column.setSummary(summary);
             }
 
-            // 4. 개인화 추천 (기존과 동일)
+            // 4. 개인화 추천
             HttpSession session = request.getSession(false);
             User user = (session != null) ? (User) session.getAttribute("user") : null;
             List<RestaurantRecommendation> personalizedRecommendations = new ArrayList<>();
-            System.out.println("추천 시스템이 임시로 비활성화되었습니다.");
+
+            if (user != null) {
+                try {
+                    // 로그인한 사용자에게 하이브리드 추천 제공
+                    personalizedRecommendations = recommendationService.getHybridRecommendations(user.getId(), 6);
+                    System.out.println("사용자 " + user.getId() + "에게 추천 " + personalizedRecommendations.size() + "개 생성");
+                } catch (Exception e) {
+                    System.err.println("추천 생성 중 오류: " + e.getMessage());
+                    e.printStackTrace();
+                    // 오류 발생 시 인기 맛집으로 폴백
+                    personalizedRecommendations = recommendationService.getFallbackRecommendations(6);
+                }
+            } else {
+                // 로그인하지 않은 사용자에게 인기 맛집 추천
+                try {
+                    personalizedRecommendations = recommendationService.getFallbackRecommendations(6);
+                    System.out.println("비로그인 사용자에게 인기 맛집 " + personalizedRecommendations.size() + "개 추천");
+                } catch (Exception e) {
+                    System.err.println("인기 맛집 조회 중 오류: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
 
             // JSP로 데이터 전달
             request.setAttribute("topRankedRestaurants", topRestaurants);

@@ -24,9 +24,9 @@
                                  loading="lazy"
                                  decoding="async"
                                  class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
-                            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
-                                <span class="text-sm font-bold text-green-600">
-                                    <fmt:formatNumber value="${rec.recommendationScore * 100}" pattern="0" />%
+                            <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm">
+                                <span class="text-xs font-semibold text-green-700">
+                                    추천 정확도 <span class="text-sm font-bold text-green-600"><fmt:formatNumber value="${rec.recommendationScore * 100}" pattern="0" />%</span>
                                 </span>
                             </div>
                             <div class="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">

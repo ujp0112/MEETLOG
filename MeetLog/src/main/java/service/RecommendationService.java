@@ -194,13 +194,25 @@ public class RecommendationService {
 
     /**
      * 대체 추천 (인기 맛집)
+     * 평점, 리뷰 수, 좋아요 수를 종합하여 점수 계산
      */
     public List<RestaurantRecommendation> getFallbackRecommendations(int limit) {
         try {
             List<Restaurant> restaurants = recommendationDAO.getPopularRestaurants(limit);
             return restaurants.stream()
                 .map(restaurant -> {
-                    double score = 0.5; // 기본 점수
+                    // 1. 평점 정규화 (1-5점 -> 0-1)
+                    double normalizedRating = (restaurant.getRating() - 1.0) / 4.0;
+
+                    // 2. 리뷰 수 신뢰도 (최대 1.0)
+                    double reviewConfidence = Math.min(restaurant.getReviewCount() / 30.0, 1.0);
+
+                    // 3. 인기도 (좋아요 수, 최대 1.0)
+                    double popularity = Math.min(restaurant.getLikes() / 50.0, 1.0);
+
+                    // 4. 종합 점수 = 평점(50%) + 신뢰도(30%) + 인기도(20%)
+                    double score = (normalizedRating * 0.5) + (reviewConfidence * 0.3) + (popularity * 0.2);
+
                     String reason = "인기 맛집";
                     return new RestaurantRecommendation(restaurant, score, reason);
                 })
@@ -227,26 +239,40 @@ public class RecommendationService {
 
     /**
      * 협업 필터링 점수 계산
+     * 유사 사용자들의 평가 + 맛집 평점 + 리뷰 수를 종합
      */
     private double calculateCollaborativeScore(Restaurant restaurant, List<SimilarUser> similarUsers) {
-        // 비슷한 사용자들의 평균 유사도 점수
-        return similarUsers.stream()
+        // 1. 비슷한 사용자들의 평균 유사도 (0-1)
+        double userSimilarity = similarUsers.stream()
             .mapToDouble(SimilarUser::getSimilarityScore)
             .average()
             .orElse(0.0);
+
+        // 2. 맛집 평점 정규화 (1-5점 -> 0-1)
+        double normalizedRating = (restaurant.getRating() - 1.0) / 4.0;
+
+        // 3. 리뷰 수 신뢰도 (리뷰 많을수록 높음, 최대 1.0)
+        double reviewConfidence = Math.min(restaurant.getReviewCount() / 20.0, 1.0);
+
+        // 4. 종합 점수 = 유사도(40%) + 평점(40%) + 신뢰도(20%)
+        return (userSimilarity * 0.4) + (normalizedRating * 0.4) + (reviewConfidence * 0.2);
     }
 
     /**
      * 콘텐츠 기반 점수 계산
+     * 맛집의 품질 지표 종합
      */
     private double calculateContentBasedScore(int originalRestaurantId, Restaurant targetRestaurant) {
-        // 간단한 유사도 계산 (실제로는 더 복잡한 알고리즘 사용 가능)
-        double score = 0.0;
-        
-        // 여기서는 기본적인 매칭 점수만 계산
-        // 실제 구현에서는 더 정교한 유사도 계산이 필요
-        score += 0.3; // 기본 점수
-        
-        return Math.min(score, 1.0);
+        // 1. 평점 정규화 (1-5점 -> 0-1)
+        double normalizedRating = (targetRestaurant.getRating() - 1.0) / 4.0;
+
+        // 2. 리뷰 수 신뢰도 (최대 1.0)
+        double reviewConfidence = Math.min(targetRestaurant.getReviewCount() / 30.0, 1.0);
+
+        // 3. 인기도 (좋아요 수 기반, 최대 1.0)
+        double popularity = Math.min(targetRestaurant.getLikes() / 50.0, 1.0);
+
+        // 4. 종합 점수 = 평점(50%) + 신뢰도(30%) + 인기도(20%)
+        return (normalizedRating * 0.5) + (reviewConfidence * 0.3) + (popularity * 0.2);
     }
 }
