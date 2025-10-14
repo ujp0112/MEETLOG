@@ -57,7 +57,7 @@
                                             <h3 class="text-xl font-bold text-slate-800 mb-2">${storage.name}</h3>
                                             <p class="text-slate-600 text-sm">
                                                 <span class="inline-flex items-center">
-                                                    📁 ${storage.itemCount}개 아이템
+                                                    ${storage.itemCount}개 아이템
                                                 </span>
                                             </p>
                                         </div>
@@ -66,7 +66,7 @@
                                                     data-storage-name="${storage.name}" 
                                                     data-storage-color="${storage.colorClass}"
                                                     class="edit-storage-btn text-slate-600 hover:text-blue-600 p-2 rounded-lg hover:bg-white/50">
-                                                ✏️
+                                                    ✏️
                                             </button>
                                             <c:if test="${storage.itemCount == 0}">
                                                 <button data-storage-id="${storage.storageId}"
@@ -87,7 +87,6 @@
                     </c:when>
                     <c:otherwise>
                         <div class="text-center py-12">
-                            <div class="text-6xl mb-4">📁</div>
                             <h3 class="text-xl font-bold text-slate-800 mb-2">아직 찜 폴더가 없습니다</h3>
                             <p class="text-slate-600 mb-6">새 폴더를 만들어서 좋아하는 콘텐츠를 정리해보세요!</p>
                             <button onclick="openCreateStorageModal()" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">

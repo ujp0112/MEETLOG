@@ -69,7 +69,7 @@
                                 </a>
                                 <a href="${pageContext.request.contextPath}/feed"
                                    class="block w-full btn-primary text-white text-center py-2 px-4 rounded-lg font-semibold">
-                                    내 피드로 이동
+                                    팔로우 피드로 이동
                                 </a>
                             </c:when>
                             <c:otherwise>
@@ -216,7 +216,6 @@
                         <c:otherwise>
                             <!-- 활동이 없을 때 -->
                             <div class="glass-card p-12 rounded-3xl text-center slide-up">
-                                <div class="text-6xl mb-4">🤷‍♂️</div>
                                 <h3 class="text-xl font-bold text-slate-800 mb-2">
                                     <c:choose>
                                         <c:when test="${isOwnProfile}">아직 활동이 없어요</c:when>

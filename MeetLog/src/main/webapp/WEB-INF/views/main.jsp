@@ -480,7 +480,7 @@ keyframes spin {to { transform:rotate(360deg);
 					class="hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl"
 					aria-labelledby="search-title" aria-hidden="true">
 					<h2 id="search-title" class="text-2xl font-bold mb-6 text-center">나에게
-						꼭 맞는 맛집 찾기 🔎</h2>
+						꼭 맞는 맛집 찾기</h2>
 
 					<%-- [수정] 폼 전체 구조 변경 --%>
 					<form id="detailSearchForm"
@@ -558,7 +558,7 @@ keyframes spin {to { transform:rotate(360deg);
 				<section class="mb-16" aria-labelledby="reviews-title">
 					<div class="flex justify-between items-center mb-6">
 						<h2 id="reviews-title" class="text-2xl font-bold text-slate-800">생생한
-							최신 리뷰 📢</h2>
+							최신 리뷰</h2>
 					</div>
 
 					<div class="relative group">
@@ -677,7 +677,7 @@ keyframes spin {to { transform:rotate(360deg);
 					</div>
 				</section>
 				<section class="my-12" aria-labelledby="columns-title">
-					<h2 id="columns-title" class="text-2xl md:text-3xl font-bold mb-6">📝
+					<h2 id="columns-title" class="text-2xl md:text-3xl font-bold mb-6">
 						최신 칼럼</h2>
 					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 						<c:choose>

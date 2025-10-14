@@ -6,7 +6,7 @@
 <!-- 실시간 맛집 랭킹 섹션 -->
 <section class="mb-12" aria-labelledby="ranking-title">
     <h2 id="ranking-title" class="text-2xl md:text-3xl font-bold mb-6">
-        🏆 실시간 맛집 랭킹 TOP 10
+        실시간 맛집 랭킹 TOP 10
     </h2>
     <div class="flex space-x-4 overflow-x-auto pb-4 -mx-4 px-4 horizontal-scroll"
          role="region"
