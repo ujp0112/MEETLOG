@@ -480,20 +480,20 @@ keyframes spin {to { transform:rotate(360deg);
 					<!-- 1. 맞춤 추천 (최우선) -->
 					<jsp:include
 						page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
-
+<%-- 
 					<!-- 2. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
-				</c:if>
-
-				<!-- 비로그인 사용자용 레이아웃 -->
-				<c:if test="${empty user}">
-					<!-- 1. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" /> --%>
 				</c:if>
 
 				<!-- 비로그인 사용자용 로그인 유도 -->
 				<c:if test="${empty user}">
 					<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
+				</c:if>
+				
+				<!-- 비로그인 사용자용 레이아웃 -->
+				<c:if test="${empty user}">
+					<!-- 1. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
 				</c:if>
 
 				<!-- 상세 검색 섹션 (Progressive Disclosure) -->
