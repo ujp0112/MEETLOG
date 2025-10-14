@@ -95,7 +95,7 @@
                                         <!-- 개인화 추천 배지 -->
                                         <c:if test="${recommendation.personalized}">
                                             <div class="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                                ✨ 맞춤 추천
+                                                맞춤 추천
                                             </div>
                                         </c:if>
                                     </div>
