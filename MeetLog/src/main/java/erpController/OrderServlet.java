@@ -3,6 +3,7 @@ package erpController;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,8 +18,6 @@ import model.BusinessUser;
 @WebServlet("/orderForm")
 public class OrderServlet extends HttpServlet {
 	private final OrderService orderService = new OrderService();
-
-//import java.util.stream.Collectors; 필요
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -46,7 +45,7 @@ public class OrderServlet extends HttpServlet {
 		if ((body == null || body.isEmpty())) {
 			String ct = req.getContentType();
 			if (ct != null && ct.startsWith("application/json")) {
-				body = req.getReader().lines().collect(java.util.stream.Collectors.joining());
+				body = req.getReader().lines().collect(Collectors.joining());
 			}
 		}
 
@@ -88,8 +87,7 @@ public class OrderServlet extends HttpServlet {
 		}
 
 		long orderId = orderService.createOrder(companyId, branchId, lines);
-		resp.setContentType("application/json; charset=UTF-8");
-		resp.getWriter().write("{\"orderId\":" + orderId + "}");
+		resp.sendRedirect(req.getContextPath() + "/branch/orders-history");
 	}
 
 	private static Long getLongFlexible(String s, String key) {

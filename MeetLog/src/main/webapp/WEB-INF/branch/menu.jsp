@@ -67,7 +67,7 @@
 .switch input{position:absolute;opacity:0;width:0;height:0}
 .switch .track{width:44px;height:24px;border-radius:999px;background:#e5e7eb;position:relative;transition:.2s}
 .switch .dot{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);transition:.2s}
-.switch input:checked + .track{background:var(--brand-700)}
+.switch input:checked + .track{background:#e5e7eb)}
 .switch input:checked + .track .dot{transform:translateX(20px)}
 
 .badge.on{color:var(--status-green-text);background:var(--status-green-bg);border-color:var(--status-green-border)}
