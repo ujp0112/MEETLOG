@@ -2,15 +2,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 <c:set var="currentMenu" value="${requestScope.adminMenu}" />
-<c:set var="baseNavClass" value="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition" />
-<c:set var="activeNavClass" value="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow" />
+<c:set var="baseNavClass" value="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition whitespace-nowrap" />
+<c:set var="activeNavClass" value="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow whitespace-nowrap" />
 <nav class="bg-white shadow">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 gap-3">
+    <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:justify-center sm:items-center py-4 gap-4">
             <div class="flex items-center">
-                <h1 class="text-xl font-bold text-gray-900">MEET LOG 관리자</h1>
+                <h1 class="text-xl font-bold text-gray-900 whitespace-nowrap">MEET LOG 관리자</h1>
             </div>
-            <div class="flex flex-wrap items-center gap-2 justify-start sm:justify-end">
+            <div class="flex flex-wrap items-center gap-2 justify-center">
                 <a href="${ctx}/admin/dashboard"
                    class="${currentMenu eq 'dashboard' ? activeNavClass : baseNavClass}">대시보드</a>
                 <a href="${ctx}/admin/member-management"
@@ -36,7 +36,7 @@
                 <a href="${ctx}/admin/statistics-dashboard"
                    class="${currentMenu eq 'statistics' ? activeNavClass : baseNavClass}">통계</a>
                 <a href="${ctx}/logout"
-                   class="px-3 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition">로그아웃</a>
+                   class="px-3 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition whitespace-nowrap">로그아웃</a>
             </div>
         </div>
     </div>
