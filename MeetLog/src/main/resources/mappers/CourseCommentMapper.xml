@@ -70,5 +70,21 @@
           AND user_id = #{userId}
           AND is_active = TRUE
     </update>
+	<update id="likeComment" parameterType="int">
+        UPDATE course_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
 
+    <update id="incrementLikes" parameterType="int">
+        UPDATE course_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikes" parameterType="int">
+        UPDATE course_comments SET like_count = GREATEST(COALESCE(like_count, 1) - 1, 0) WHERE id = #{id}
+    </update>
+     <!-- [추가] 특정 댓글의 현재 좋아요 수 조회 -->
+    <select id="getLikeCount" parameterType="int" resultType="int">
+        SELECT like_count
+        FROM course_comments
+        WHERE id = #{commentId}
+    </select>
 </mapper>
