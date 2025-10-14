@@ -106,7 +106,7 @@
                                 <div class="mt-4 pt-4 border-t border-slate-200">
                                     <button onclick="deleteRestaurant('${restaurant.id}')" 
                                             class="w-full btn-danger text-white py-2 px-4 rounded-xl font-semibold text-center">
-                                        🗑️ 삭제
+                                        삭제
                                     </button>
                                 </div>
                             </div>

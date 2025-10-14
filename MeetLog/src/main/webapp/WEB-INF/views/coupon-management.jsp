@@ -70,9 +70,9 @@
                             <p class="text-slate-600 text-sm font-medium">총 쿠폰</p>
                             <p class="text-3xl font-bold text-slate-800">${totalCoupons}</p>
                         </div>
-                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                        <!-- <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                             <span class="text-2xl">🎫</span>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -106,9 +106,9 @@
                             <p class="text-slate-600 text-sm font-medium">소진된 쿠폰</p>
                             <p class="text-3xl font-bold text-purple-600">${usedCoupons}</p>
                         </div>
-                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <!-- <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                             <span class="text-2xl">🎯</span>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -127,42 +127,6 @@
                         + 새 쿠폰 생성
                     </a>
                 </div>
-
-                <!-- 필터 버튼 그룹
-                <c:if test="${not empty coupons}">
-                    <div class="mb-6 flex flex-wrap gap-2">
-                        <button onclick="filterCoupons('all')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-blue-600 text-white"
-                                data-filter="all">
-                            전체 (${totalCoupons})
-                        </button>
-                        <button onclick="filterCoupons('available')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                data-filter="available">
-                            🟢 사용 가능
-                        </button>
-                        <button onclick="filterCoupons('notStarted')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                data-filter="notStarted">
-                            🟡 시작 전
-                        </button>
-                        <button onclick="filterCoupons('expired')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                data-filter="expired">
-                            🔴 만료됨
-                        </button>
-                        <button onclick="filterCoupons('inactive')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                data-filter="inactive">
-                            ⚫ 비활성
-                        </button>
-                        <button onclick="filterCoupons('depleted')"
-                                class="filter-btn px-4 py-2 rounded-lg font-medium transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
-                                data-filter="depleted">
-                            🟠 소진됨
-                        </button>
-                    </div>
-                </c:if> -->
 
                 <c:choose>
                     <c:when test="${not empty coupons}">
@@ -278,7 +242,6 @@
                     </c:when>
                     <c:otherwise>
                         <div class="text-center py-12">
-                            <div class="text-6xl mb-4">🎟️</div>
                             <h3 class="text-xl font-bold text-slate-600 mb-2">생성된 쿠폰이 없습니다</h3>
                             <p class="text-slate-500 mb-6">첫 번째 쿠폰을 생성하여 고객에게 혜택을 제공해보세요!</p>
                             <a href="${createCouponUrl}" class="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold inline-flex items-center justify-center">

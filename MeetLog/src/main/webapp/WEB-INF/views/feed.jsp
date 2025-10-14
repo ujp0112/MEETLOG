@@ -229,7 +229,6 @@
                         </c:when>
                         <c:otherwise>
                             <div class="glass-card p-12 rounded-3xl text-center">
-                                <div class="text-6xl mb-4">📱</div>
                                 <h3 class="text-2xl font-bold text-slate-800 mb-4">아직 피드가 비어있습니다</h3>
                                 <p class="text-slate-600 mb-6">
                                     <c:choose>

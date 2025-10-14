@@ -70,7 +70,7 @@ public class AdvancedSearchServlet extends HttpServlet {
 
         // 개인 정보가 필요한 검색(리뷰, 예약)은 로그인 필수
         if (("reviews".equals(type) || "reservations".equals(type)) && user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 

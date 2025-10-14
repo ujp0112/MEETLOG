@@ -46,7 +46,7 @@
                     </div>
                     <a href="${pageContext.request.contextPath}/course/create" 
                        class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-                        ✨ 새 코스 만들기
+                        + 새 코스 만들기
                     </a>
                 </div>
             </div>
@@ -106,8 +106,8 @@
                                         <!-- 코스 통계 -->
                                         <div class="flex justify-between items-center text-sm text-slate-500 mb-4">
                                             <div class="flex items-center space-x-3">
-                                                <span>🍽️ ${course.restaurantCount}곳</span>
-                                                <span>👥 ${course.likeCount}명</span>
+                                                <span>${course.restaurantCount}곳</span>
+                                                <span>${course.likeCount}명</span>
                                             </div>
                                             <span>
                                                 ${course.createdAt.format(DateTimeFormatter.ofPattern('MM/dd'))}
@@ -118,11 +118,11 @@
                                         <div class="flex space-x-2">
                                             <a href="${pageContext.request.contextPath}/course/edit?id=${course.courseId}"
                                                class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                                                ✏️ 수정
+                                                수정
                                             </a>
                                             <button data-course-id="${course.courseId}"
                                                     class="delete-course-btn flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-2 px-4 rounded-lg font-semibold transition-colors">
-                                                🗑️ 삭제
+                                                삭제
                                             </button>
                                         </div>
                                     </div>
@@ -169,7 +169,6 @@
                     </c:when>
                     <c:otherwise>
                         <div class="text-center py-12">
-                            <div class="text-6xl mb-4">🗺️</div>
                             <h3 class="text-xl font-bold text-slate-800 mb-2">아직 만든 코스가 없습니다</h3>
                             <p class="text-slate-600 mb-6">나만의 특별한 맛집 코스를 만들어보세요!</p>
                             <div class="flex justify-center space-x-4">

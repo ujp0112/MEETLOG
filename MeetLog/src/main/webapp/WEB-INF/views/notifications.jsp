@@ -48,7 +48,7 @@
                             </button>
                         </c:if>
                         <button onclick="refreshNotifications()" class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-                            🔄 새로고침
+                            새로고침
                         </button>
                     </div>
                 </div>
@@ -62,27 +62,24 @@
                             <p class="text-sm font-medium text-slate-600">전체 알림</p>
                             <p class="text-3xl font-bold text-slate-800">${not empty notifications ? notifications.size() : 0}</p>
                         </div>
-                        <div class="text-4xl text-blue-500">📢</div>
                     </div>
                 </div>
                 
                 <div class="glass-card p-6 rounded-2xl card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-slate-600">읽지 않음</p>
-                            <p class="text-3xl font-bold text-slate-800">${not empty unreadCount ? unreadCount : 0}</p>
+                            <p class="text-sm font-medium text-green-600">읽음</p>
+                            <p class="text-3xl font-bold text-green-600">${not empty notifications ? notifications.size() - unreadCount : 0}</p>
                         </div>
-                        <div class="text-4xl text-red-500">🔴</div>
                     </div>
                 </div>
-                
+
                 <div class="glass-card p-6 rounded-2xl card-hover">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-slate-600">읽음</p>
-                            <p class="text-3xl font-bold text-slate-800">${not empty notifications ? notifications.size() - unreadCount : 0}</p>
+                            <p class="text-sm font-medium text-red-600">읽지 않음</p>
+                            <p class="text-3xl font-bold text-red-600">${not empty unreadCount ? unreadCount : 0}</p>
                         </div>
-                        <div class="text-4xl text-green-500">✅</div>
                     </div>
                 </div>
             </div>
@@ -136,7 +133,6 @@
                 <c:otherwise>
                     <div class="glass-card p-8 rounded-3xl slide-up">
                         <div class="text-center py-12">
-                            <div class="text-6xl mb-4">📢</div>
                             <p class="text-slate-600 text-lg">알림이 없습니다</p>
                             <p class="text-slate-500 text-sm mt-2">새로운 소식이 있으면 여기에 표시됩니다</p>
                         </div>
