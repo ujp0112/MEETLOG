@@ -1289,8 +1289,9 @@
             const description = `[약속] ${date} ${time}\n${place}에서 만나요!`;
             
             // ▼▼▼ [최종 수정] 카카오 공식 샘플 이미지 주소로 변경 ▼▼▼
-            const imageUrl = 'https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg';
-
+            const imageUrl = `${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${heroImage}`;
+            const profileImageUrl = `${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${sessionScope.user.profileImage}`;
+            
             const templateId = 124984; // ⚠️ 본인의 템플릿 ID로 교체!
 
             Kakao.Share.sendCustom({

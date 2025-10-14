@@ -3,6 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -103,6 +104,12 @@
 										<div class="bg-slate-50 p-4 rounded-lg">
 											<c:choose>
 												<c:when test="${not empty restaurant}">
+													<%-- [추가] mytag:image를 사용하여 레스토랑 이미지를 표시합니다. --%>
+													<div class="w-full h-48 mb-4 rounded-lg overflow-hidden">
+														<mytag:image fileName="${restaurant.image}"
+															altText="${restaurant.name}"
+															cssClass="w-full h-full object-cover" />
+													</div>
 													<h3 class="font-semibold text-slate-800 mb-2">${restaurant.name}</h3>
 													<p class="text-slate-600 text-sm mb-1">${restaurant.category}
 														• ${restaurant.location}</p>
@@ -539,6 +546,44 @@
 		</div>
 	</div>
 
+	<%-- ▼▼▼ [수정] 카카오 공유를 위한 이미지 URL 사전 처리 로직 (기본 이미지 보강) ▼▼▼ --%>
+	<c:set var="kakaoImageUrl" value="" />
+	<c:choose>
+		<%-- 1. restaurant.image에 http로 시작하는 외부 URL이 있을 경우 --%>
+		<c:when
+			test="${not empty restaurant.image and fn:startsWith(restaurant.image, 'http')}">
+			<c:set var="kakaoImageUrl" value="${restaurant.image}" />
+		</c:when>
+		<%-- 2. restaurant.image에 내부 파일명이 있을 경우 --%>
+		<c:when test="${not empty restaurant.image}">
+			<c:set var="kakaoImageUrl"
+				value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${restaurant.image}" />
+		</c:when>
+		<%-- 3. restaurant.image가 비어있을 경우, 카카오 공식 기본 이미지로 대체 --%>
+		<c:otherwise>
+			<c:set var="kakaoImageUrl"
+				value="https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg" />
+		</c:otherwise>
+	</c:choose>
+
+	<%-- 프로필 이미지 URL 처리 (기존과 동일, 확인용) --%>
+	<c:set var="kakaoProfileImageUrl" value="" />
+	<c:choose>
+		<c:when
+			test="${not empty sessionScope.user.profileImage and fn:startsWith(sessionScope.user.profileImage, 'http')}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${sessionScope.user.profileImage}" />
+		</c:when>
+		<c:when test="${not empty sessionScope.user.profileImage}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${sessionScope.user.profileImage}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="kakaoProfileImageUrl"
+				value="https://i.ibb.co/2qr3d02-a15a-4afa-a88b-989cf2a5ebea.jpg" />
+		</c:otherwise>
+	</c:choose>
+
 	<script>
         document.addEventListener('DOMContentLoaded', function () {
             const fab = document.getElementById('kakao-share-fab');
@@ -597,9 +642,9 @@
                 const rating = parseFloat(${restaurant.rating}).toFixed(1);
                 const description = `⭐ ${rating} \n[약속] ${date} ${time}\n${place}에서 만나요!`;
                 
-                const imageUrl = 'https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg';
-                const profileImageUrl = 'https://i.ibb.co/2qr30k6/avatar-placeholder.png';
-
+                const imageUrl = '${kakaoImageUrl}';
+                const profileImageUrl = '${kakaoProfileImageUrl}';
+                
                 const templateId = 124984; // ⚠️ 실제 템플릿 ID로 교체!
 
                 Kakao.Share.sendCustom({
@@ -613,7 +658,16 @@
                         'profile_name': '${sessionScope.user.nickname}',
                         'profile_image_url': profileImageUrl,
                         'comment_count': ${restaurant.reviewCount}
+                    },
+                    // ▼▼▼ [추가] 에러 확인을 위한 fail 콜백 ▼▼▼
+                    fail: function(error) {
+                        alert('카카오 공유에 실패했습니다. 개발자 도구(F12)의 콘솔 탭에서 에러를 확인해주세요.');
+                        console.log('--- 카카오 공유 실패 에러 ---');
+                        console.log(error);
+                        console.log('---------------------------');
                     }
+                
+                
                 });
                 
                 closeModal();
