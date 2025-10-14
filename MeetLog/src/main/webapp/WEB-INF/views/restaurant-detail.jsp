@@ -22,68 +22,25 @@
 	src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false"></script>
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/css/style.css">
+<style type="text/tailwindcss">
+body { font-family: 'Noto Sans KR', sans-serif; }
+.chip { @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600; }
+.chip-on-dark { @apply inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white/80; }
+.section-title { @apply text-xl font-bold text-slate-900 md:text-2xl; }
+.section-sub { @apply mt-1 text-sm text-slate-500 md:text-base; }
+.stat-card { @apply rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-7; }
+.meta-label { @apply text-xs font-semibold uppercase tracking-wide text-slate-400; }
+.meta-value { @apply mt-1 text-base font-semibold text-slate-900; }
+.comment-bubble { @apply rounded-2xl border border-slate-200 bg-white/60 p-5 shadow-sm transition hover:border-sky-200; }
+.subtle-card { @apply rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8; }
+.prose-content { @apply whitespace-pre-wrap leading-relaxed text-slate-600; }
+</style>
 <style>
-:root {
-	--primary: #3b82f6;
-	--primary-dark: #2563eb;
-	--secondary: #8b5cf6;
-	--accent: #f59e0b;
-	--success: #10b981;
-	--warning: #f59e0b;
-	--error: #ef4444;
-	--gray-50: #f8fafc;
-	--gray-100: #f1f5f9;
-	--gray-200: #e2e8f0;
-	--gray-300: #cbd5e1;
-	--gray-400: #94a3b8;
-	--gray-500: #64748b;
-	--gray-600: #475569;
-	--gray-700: #334155;
-	--gray-800: #1e293b;
-	--gray-900: #0f172a;
-}
-
 * {
 	font-family: 'Noto Sans KR', sans-serif;
 }
 
-body {
-	background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-	min-height: 100vh;
-}
-
-.glass-card {
-	background: rgba(255, 255, 255, 0.9);
-	backdrop-filter: blur(20px);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-.gradient-text {
-	background: linear-gradient(135deg, var(--primary) 0%, var(--secondary)
-		100%);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-
-.btn-primary {
-	background: linear-gradient(135deg, var(--primary) 0%,
-		var(--primary-dark) 100%);
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.btn-primary:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-}
-
+/* 갤러리 관련 스타일 */
 .gallery {
 	display: grid;
 	grid-template-columns: 2fr 1fr;
@@ -122,6 +79,64 @@ body {
 	position: relative;
 	z-index: 2;
 	max-height: 100%;
+}
+
+.hero-media {
+	height: clamp(320px, 45vh, 520px);
+}
+
+.hero-media-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+	grid-template-rows: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	height: clamp(320px, 45vh, 520px);
+}
+
+.hero-main {
+	grid-column: 1 / 2;
+	grid-row: 1 / 3;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.hero-side {
+	grid-column: 2 / 3;
+	border-radius: 12px;
+	overflow: hidden;
+}
+
+.hero-side-top {
+	grid-row: 1 / 2;
+}
+
+.hero-side-bottom {
+	grid-row: 2 / 3;
+}
+
+.hero-side-full {
+	grid-row: 1 / 3;
+}
+
+@media (max-width: 768px) {
+	.hero-media {
+		height: clamp(220px, 40vh, 360px);
+	}
+
+	.hero-media-grid {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
+		height: auto;
+	}
+
+	.hero-main,
+	.hero-side,
+	.hero-side-top,
+	.hero-side-bottom,
+	.hero-side-full {
+		grid-column: 1 / 2;
+		grid-row: auto;
+	}
 }
 
 .card-hover {
@@ -735,29 +750,11 @@ rgba
 
 
 
-
-
-
-
-
 .5
 
 
 
-
-
-
-
-
-
-
 )
-
-
-
-
-
-
 
 
 ;
@@ -825,79 +822,16 @@ keyframes float { 0%, 100% {
 
 50
 
-
-
-
-
-
-
-
-
-
 %
 {
 transform
 
-
-
-
-
-
-
-
-
-
 :
 
-
-
-
-
-
-
-
-
-
 translateY
-
-
-
-
-
-
-
-
 (
-
-
-
-
-
-
-
-
-
-
 -10px
-
-
-
-
-
-
-
-
-
-
 )
-
-
-
-
-
-
-
-
 ;
 }
 }
@@ -1096,8 +1030,10 @@ translateY
 	border: 1px solid #e2e8f0;
 	border-radius: 1.5rem; /* 24px */
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-	margin-top: -1.5rem; /* 갤러리와 살짝 겹치게 */
+	margin: -1.5rem auto 0; /* 갤러리와 살짝 겹치게 */
+	max-width: min(72rem, calc(100% - 2rem));
 	padding: 1.5rem;
+	width: 100%;
 	animation: fadeIn 0.4s ease-out;
 }
 
@@ -1331,217 +1267,188 @@ translateY
 	<div id="app" class="min-h-screen flex flex-col">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
 		<main class="flex-grow bg-slate-50">
-			<div class="mx-auto w-full max-w-6xl px-4 py-10 md:px-6 md:py-14">
 				<c:choose>
 					<c:when test="${not empty restaurant}">
-						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
-							<div class="lg:col-span-2 space-y-8">
-								<%-- ▼▼▼ 이 코드로 기존 갤러리 섹션 전체를 교체하세요 (스크립트는 절대 수정하지 마세요!) ▼▼▼ --%>
+						<%-- ▼▼▼ Hero 섹션: 전체 폭으로 배치 ▼▼▼ --%>
+						<div class="space-y-12">
 								<c:choose>
 									<%-- =================================================================== --%>
 									<%-- 1. 외부 검색(Google 이미지)일 경우                                        --%>
-									<%-- =================================================================== --%>
-									<c:when test="${isExternal}">
-										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-											<c:set var="images" value="${restaurant.additionalImages}" />
-											<c:set var="imageCount" value="${fn:length(images)}" />
-											<c:choose>
-												<c:when test="${imageCount == 0}">
-													<div class="text-center py-12">
-														<p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p>
-													</div>
-												</c:when>
-												<c:when test="${imageCount == 1}">
-													<div class="w-full aspect-video rounded-lg overflow-hidden">
-														<img src="${images[0]}" alt="${restaurant.name}"
-															class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-													</div>
-												</c:when>
-												<c:when test="${imageCount == 2}">
-													<div class="grid grid-cols-2 gap-2 aspect-video">
-														<div class="rounded-lg overflow-hidden">
-															<img src="${images[0]}" alt="${restaurant.name}"
-																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div class="rounded-lg overflow-hidden">
-															<img src="${images[1]}" alt="${restaurant.name}"
-																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-													</div>
-												</c:when>
-												<c:otherwise>
-													<div
-														class="grid grid-cols-3 grid-rows-2 gap-2 aspect-video">
-														<div
-															class="col-span-2 row-span-2 rounded-lg overflow-hidden">
-															<img src="${images[0]}" alt="${restaurant.name}"
-																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div class="rounded-lg overflow-hidden">
-															<img src="${images[1]}" alt="${restaurant.name}"
-																class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div
-															class="relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer bg-gray-800"
-															onclick="cycleImages()">
-															<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
-															<img src="${images[2]}" alt="${restaurant.name}"
-																class="w-full h-full object-cover ${imageCount > 3 ? 'opacity-30' : ''}" />
-															<c:if test="${imageCount > 3}">
-																<span class="absolute text-white text-2xl font-bold">+${imageCount - 3}</span>
+										<%-- =================================================================== --%>
+											<c:when test="${isExternal}">
+												<div class="mx-auto w-full max-w-6xl px-4 md:px-6 mt-8 md:mt-12">
+													<section class="overflow-hidden rounded-3xl bg-white shadow-xl border border-slate-200">
+														<c:set var="images" value="${restaurant.additionalImages}" />
+														<c:set var="imageCount" value="${fn:length(images)}" />
+														<c:choose>
+															<c:when test="${imageCount == 0}">
+																<div class="text-center py-12">
+																	<p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p>
+																</div>
+															</c:when>
+															<c:when test="${imageCount == 1}">
+																<div class="w-full rounded-lg overflow-hidden hero-media">
+																	<img src="${images[0]}" alt="${restaurant.name}"
+																		class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																</div>
+															</c:when>
+															<c:when test="${imageCount == 2}">
+																<div class="hero-media hero-media-grid">
+																	<div class="hero-main">
+																		<img src="${images[0]}" alt="${restaurant.name}"
+																			class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																	</div>
+																	<div class="hero-side hero-side-full">
+																		<img src="${images[1]}" alt="${restaurant.name}"
+																			class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																	</div>
+																</div>
+															</c:when>
+															<c:otherwise>
+																<div class="hero-media hero-media-grid">
+																	<div class="hero-main">
+																		<img src="${images[0]}" alt="${restaurant.name}"
+																			class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																	</div>
+																	<div class="hero-side hero-side-top">
+																		<img src="${images[1]}" alt="${restaurant.name}"
+																			class="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																	</div>
+																	<div
+																		class="hero-side hero-side-bottom relative flex items-center justify-center cursor-pointer bg-gray-800"
+																		onclick="cycleImages()">
+																		<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
+																		<img src="${images[2]}" alt="${restaurant.name}"
+																			class="w-full h-full object-cover ${imageCount > 3 ? 'opacity-30' : ''}" />
+																		<c:if test="${imageCount > 3}">
+																			<span class="absolute text-white text-2xl font-bold">+${imageCount - 3}</span>
+																		</c:if>
+																	</div>
+																</div>
+															</c:otherwise>
+														</c:choose>
+														<%-- 하단 정보바 추가 --%>
+														<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-6 py-5 md:px-8">
+															<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
+															<span class="chip">${restaurant.category}</span>
+															<span class="chip">📍 ${restaurant.location}</span>
+															<c:if test="${!isExternal}">
+																<button class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
+																	❤️ 찜하기
+																</button>
+																<button class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-sky-300 hover:text-sky-600">
+																	📤 공유하기
+																</button>
 															</c:if>
 														</div>
-													</div>
-												</c:otherwise>
-											</c:choose>
-										</section>
-									</c:when>
+													</section>
+												</div>
+										</c:when>
 
 									<%-- =================================================================== --%>
 									<%-- 2. 내부 DB(기존 이미지)일 경우                                         --%>
-									<%-- =================================================================== --%>
-									<c:otherwise>
-										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-											<c:set var="mainImage" value="${restaurant.image}" />
-											<c:set var="additionalImages"
-												value="${restaurant.additionalImages}" />
-											<c:set var="totalCount"
-												value="${(empty mainImage ? 0 : 1) + fn:length(additionalImages)}" />
-											<c:choose>
-												<c:when test="${totalCount == 0}">
-													<div class="text-center py-12">
-														<p class="text-slate-500">등록된 가게 이미지가 없습니다.</p>
+										<%-- =================================================================== --%>
+										<c:otherwise>
+											<div class="mx-auto w-full max-w-6xl px-4 md:px-6 mt-8 md:mt-12">
+												<section class="overflow-hidden rounded-3xl bg-white shadow-xl border border-slate-200">
+													<c:set var="mainImage" value="${restaurant.image}" />
+													<c:set var="additionalImages"
+														value="${restaurant.additionalImages}" />
+													<c:set var="totalCount"
+														value="${(empty mainImage ? 0 : 1) + fn:length(additionalImages)}" />
+													<c:choose>
+														<c:when test="${totalCount == 0}">
+															<div class="text-center py-12">
+																<p class="text-slate-500">등록된 가게 이미지가 없습니다.</p>
+															</div>
+														</c:when>
+														<c:when test="${totalCount == 1}">
+															<div class="w-full rounded-lg overflow-hidden hero-media">
+																<mytag:image fileName="${mainImage}"
+																	altText="${restaurant.name}"
+																	cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+															</div>
+														</c:when>
+														<c:when test="${totalCount == 2}">
+															<div class="hero-media hero-media-grid">
+																<div class="hero-main">
+																	<mytag:image fileName="${mainImage}"
+																		altText="${restaurant.name}"
+																		cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																</div>
+																<div class="hero-side hero-side-full">
+																	<mytag:image fileName="${additionalImages[0]}"
+																		altText="${restaurant.name}"
+																		cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																</div>
+															</div>
+														</c:when>
+														<c:otherwise>
+															<div class="hero-media hero-media-grid">
+																<div class="hero-main">
+																	<mytag:image fileName="${mainImage}"
+																		altText="${restaurant.name}"
+																		cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																</div>
+																<div class="hero-side hero-side-top">
+																	<mytag:image fileName="${additionalImages[0]}"
+																		altText="${restaurant.name}"
+																		cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
+																</div>
+																<div
+																	class="hero-side hero-side-bottom relative flex items-center justify-center cursor-pointer"
+																	onclick="cycleImages()">
+																	<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
+																	<mytag:image fileName="${additionalImages[1]}"
+																		altText="${restaurant.name}"
+																		cssClass="w-full h-full object-cover ${totalCount > 3 ? 'opacity-30' : ''}" />
+																	<c:if test="${totalCount > 3}">
+																		<span class="absolute text-white text-2xl font-bold">+${totalCount - 3}</span>
+																	</c:if>
+																</div>
+															</div>
+														</c:otherwise>
+													</c:choose>
+													<%-- 하단 정보바 추가 --%>
+													<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-6 py-5 md:px-8">
+														<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
+														<span class="chip">${restaurant.category}</span>
+														<span class="chip">📍 ${restaurant.location}</span>
+														<c:if test="${!isExternal}">
+															<button class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
+																❤️ 찜하기
+															</button>
+															<button class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-sky-300 hover:text-sky-600">
+																📤 공유하기
+															</button>
+														</c:if>
 													</div>
-												</c:when>
-												<c:when test="${totalCount == 1}">
-													<div class="w-full aspect-video rounded-lg overflow-hidden">
-														<mytag:image fileName="${mainImage}"
-															altText="${restaurant.name}"
-															cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-													</div>
-												</c:when>
-												<c:when test="${totalCount == 2}">
-													<div class="grid grid-cols-2 gap-2 aspect-video">
-														<div class="rounded-lg overflow-hidden">
-															<mytag:image fileName="${mainImage}"
-																altText="${restaurant.name}"
-																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div class="rounded-lg overflow-hidden">
-															<mytag:image fileName="${additionalImages[0]}"
-																altText="${restaurant.name}"
-																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-													</div>
-												</c:when>
-												<c:otherwise>
-													<div
-														class="grid grid-cols-3 grid-rows-2 gap-2 aspect-video">
-														<div
-															class="col-span-2 row-span-2 rounded-lg overflow-hidden">
-															<mytag:image fileName="${mainImage}"
-																altText="${restaurant.name}"
-																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div class="rounded-lg overflow-hidden">
-															<mytag:image fileName="${additionalImages[0]}"
-																altText="${restaurant.name}"
-																cssClass="w-full h-full object-cover image-lightbox-trigger cursor-pointer" />
-														</div>
-														<div
-															class="relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer"
-															onclick="cycleImages()">
-															<%-- ✨ [수정] '더보기' 이미지에서 image-lightbox-trigger 클래스 제거 --%>
-															<mytag:image fileName="${additionalImages[1]}"
-																altText="${restaurant.name}"
-																cssClass="w-full h-full object-cover ${totalCount > 3 ? 'opacity-30' : ''}" />
-															<c:if test="${totalCount > 3}">
-																<span class="absolute text-white text-2xl font-bold">+${totalCount - 3}</span>
-															</c:if>
-														</div>
-													</div>
-												</c:otherwise>
-											</c:choose>
-										</section>
-									</c:otherwise>
-								</c:choose>
-
-								<%-- ✨ X버튼 오류 해결: 기존 JS와 연동되도록 원래 클래스명으로 복원했습니다 --%>
-								<section id="imageOverlay" class="panel-overlay">
-									<div class="overlay-hd">
-										<h2 class="title">전체 사진 보기</h2>
-										<button id="closeOverlayBtn" class="close-x" type="button">×</button>
-									</div>
-									<div class="overlay-bd" id="overlayGrid"></div>
-								</section>
-								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-									<div class="flex items-start justify-between mb-6">
-										<div class="flex-1">
-											<h1 class="text-3xl font-extrabold text-slate-900 mb-3 md:text-4xl">${restaurant.name}</h1>
-											<div class="flex items-center space-x-3 mb-4">
-												<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">${restaurant.category}</span> <span
-													class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">📍 ${restaurant.location}</span>
+												</section>
 											</div>
-										</div>
-										<%-- ▼▼▼ [수정] isExternal 값에 따라 분기 처리 ▼▼▼ --%>
-										<c:choose>
-											<%-- 외부(Google) 데이터일 경우 --%>
-											<c:when test="${isExternal}">
-												<div class="text-right">
-													<c:if test="${restaurant.rating > 0}">
-														<div class="text-5xl font-black text-orange-500 mb-2">
-															<fmt:formatNumber value="${restaurant.rating}"
-																maxFractionDigits="1" />
-														</div>
-														<div class="text-sm text-slate-500">${restaurant.reviewCount}개
-															Google 리뷰</div>
-													</c:if>
-												</div>
-											</c:when>
-											<%-- 내부 DB 데이터일 경우 --%>
-											<c:otherwise>
-												<div class="text-right">
-													<div class="text-5xl font-black text-orange-500 mb-2">
-														<fmt:formatNumber value="${restaurant.rating}"
-															maxFractionDigits="1" />
-													</div>
-													<div class="flex items-center justify-center mb-2">
-														<div class="flex space-x-1">
-															<c:forEach begin="1" end="5" var="star">
-																<c:choose>
-																	<c:when test="${restaurant.rating >= star}">
-																		<span class="text-orange-400 text-2xl">★</span>
-																	</c:when>
-																	<c:otherwise>
-																		<span class="text-slate-300 text-2xl">☆</span>
-																	</c:otherwise>
-																</c:choose>
-															</c:forEach>
-														</div>
-													</div>
-													<div class="text-sm text-slate-500">${restaurant.reviewCount}개
-														리뷰</div>
-												</div>
-											</c:otherwise>
-										</c:choose>
-										<%-- ▲▲▲ [수정] 분기 처리 끝 ▲▲▲ --%>
-									</div>
-									<c:if test="${!isExternal}">
-										<div class="flex space-x-4">
-											<div class="text-right">
-												<button
-													class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold pulse-glow">❤️
-													찜하기</button>
-												<button
-													class="btn-secondary text-white px-6 py-3 rounded-2xl font-semibold">📤
-													공유하기</button>
-											</div>
-										</div>
-									</c:if>
-								</section>
+										</c:otherwise>
+									</c:choose>
 
-								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-									<h3 class="text-2xl font-bold text-slate-900 mb-6">상세 정보</h3>
+							<%-- ▲▲▲ Hero 섹션 끝 ▲▲▲ --%>
+
+							<%-- ✨ X버튼 오류 해결: 기존 JS와 연동되도록 원래 클래스명으로 복원했습니다 --%>
+							<section id="imageOverlay" class="panel-overlay">
+								<div class="overlay-hd">
+									<h2 class="title">전체 사진 보기</h2>
+									<button id="closeOverlayBtn" class="close-x" type="button">×</button>
+								</div>
+								<div class="overlay-bd" id="overlayGrid"></div>
+							</section>
+
+							<%-- 콘텐츠 영역: 2단 그리드 --%>
+							<div class="mx-auto w-full max-w-6xl px-4 md:px-6">
+								<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
+									<div class="lg:col-span-2 space-y-8">
+
+								<section class="subtle-card space-y-6">
+									<div>
+										<h2 class="section-title">상세 정보</h2>
+										<p class="section-sub">레스토랑의 기본 정보를 확인하세요.</p>
+									</div>
 									<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div
 											class="flex items-start space-x-4 p-5 bg-orange-50 rounded-2xl border border-orange-100 transition hover:shadow-md">
@@ -1631,12 +1538,15 @@ translateY
 								<c:if test="${!isExternal}">
 									<%-- 내부 DB 맛집일 경우에만 메뉴 표시 --%>
 									<c:if test="${not empty menus}">
-										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-											<h2 class="text-2xl font-bold text-slate-900 mb-6">메뉴</h2>
+										<section class="subtle-card space-y-6">
+											<div>
+												<h2 class="section-title">메뉴</h2>
+												<p class="section-sub">다양한 메뉴를 확인해보세요.</p>
+											</div>
 											<div class="space-y-4">
 												<c:forEach var="menu" items="${menus}">
 													<div
-														class="flex justify-between items-center p-6 rounded-2xl bg-orange-50 border border-orange-100 transition hover:shadow-md">
+														class="flex justify-between items-center p-6 rounded-2xl bg-slate-50 border border-slate-200 transition hover:border-sky-200 hover:bg-white">
 														<div class="flex-1">
 															<div class="flex items-center space-x-3">
 																<h3 class="font-bold text-slate-800 text-lg">${menu.name}</h3>
@@ -1667,27 +1577,28 @@ translateY
 								</c:if>
 
 								<%-- ▼▼▼ [수정] 리뷰 섹션 시작 ▼▼▼ --%>
-								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
-									<div class="flex justify-between items-center mb-6">
-										<%-- 외부/내부 데이터에 따라 리뷰 개수 표시 --%>
-										<c:choose>
-											<c:when test="${isExternal}">
-												<h2 class="text-2xl font-bold text-slate-900">리뷰
-													(${restaurant.reviewCount})</h2>
-											</c:when>
-											<c:otherwise>
-												<h2 class="text-2xl font-bold text-slate-900">리뷰
-													(${fn:length(reviews)})</h2>
-											</c:otherwise>
-										</c:choose>
+								<section class="subtle-card space-y-6">
+									<div class="flex items-center justify-between">
+										<div>
+											<%-- 외부/내부 데이터에 따라 리뷰 개수 표시 --%>
+											<c:choose>
+												<c:when test="${isExternal}">
+													<h2 class="section-title">리뷰</h2>
+													<p class="section-sub">총 ${restaurant.reviewCount}개의 리뷰가 있습니다.</p>
+												</c:when>
+												<c:otherwise>
+													<h2 class="section-title">리뷰</h2>
+													<p class="section-sub">총 ${fn:length(reviews)}개의 리뷰가 있습니다.</p>
+												</c:otherwise>
+											</c:choose>
+										</div>
 
 										<%-- 내부 DB 맛집이고, 소유자가 아닐 때만 리뷰 작성 버튼 표시 --%>
 										<c:if
 											test="${!isExternal and !isOwner and not empty sessionScope.user}">
 											<a
 												href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
-												class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">리뷰
-												작성</a>
+												class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-600">리뷰 작성</a>
 										</c:if>
 									</div>
 									<%-- ▼▼▼ [수정] isExternal 값에 따라 reviewList 변수에 적절한 리뷰 목록을 할당합니다. ▼▼▼ --%>
@@ -1697,7 +1608,7 @@ translateY
 											<div id="review-list-container" class="space-y-6">
 												<c:forEach var="review" items="${reviewList}">
 													<div class="review-item" style="display: none;">
-														<div class="bg-slate-50 rounded-xl p-5 h-full flex flex-col border border-slate-100">
+														<div class="comment-bubble">
 															<div class="flex justify-between items-start mb-4"> <%-- 이 div 안에 '더보기' 메뉴를 넣습니다. --%>
 																<div class="flex items-start">
 																	<c:choose>
@@ -1852,9 +1763,9 @@ translateY
 															</div>
 															<c:if test="${not empty review.replyContent}">
 																<div
-																	class="mt-4 pt-4 border-t bg-slate-50 p-4 rounded-lg">
+																	class="mt-4 pt-4 border-t rounded-2xl bg-slate-50/60 p-4">
 																	<div class="flex items-start text-sm">
-																		<span class="font-bold mr-3 text-violet-600">👑&nbsp;사장님&nbsp;답글</span>
+																		<span class="font-bold mr-3 text-sky-600">👑&nbsp;사장님&nbsp;답글</span>
 																		<div class="flex-1 break-words">
 																			<p class="text-slate-800 whitespace-pre-line">${review.replyContent}</p>
 																			<c:if test="${not empty review.replyCreatedAt}">
@@ -1877,11 +1788,10 @@ translateY
 																			name="restaurantId" value="${restaurant.id}">
 																		<textarea name="replyContent" rows="2"
 																			placeholder="답글을 작성해주세요..."
-																			class="w-full p-2 border rounded-md text-sm"></textarea>
+																			class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"></textarea>
 																		<div class="text-right">
 																			<button type="submit"
-																				class="text-xs bg-sky-600 text-white px-3 py-1 rounded-md hover:bg-sky-700 transition-colors">답글
-																				등록</button>
+																				class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-600">답글 등록</button>
 																		</div>
 																	</form>
 																</div>
@@ -1921,10 +1831,10 @@ translateY
 																				value="${review.id}" /><input type="hidden"
 																				name="restaurantId" value="${restaurant.id}" /> <input
 																				type="text" name="content"
-																				class="w-full p-2 border rounded-lg text-sm"
+																				class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
 																				placeholder="댓글을 입력하세요..." required />
 																			<button type="submit"
-																				class="text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 whitespace-nowrap">등록</button>
+																				class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-600 whitespace-nowrap">등록</button>
 																		</form>
 																	</c:when>
 																	<c:otherwise>
@@ -2077,7 +1987,8 @@ translateY
 
 							<div class="space-y-8">
 								<section
-									class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8 map-trigger cursor-pointer">
+									class="stat-card map-trigger cursor-pointer">
+									<h3 class="text-lg font-semibold text-slate-900 mb-4">위치</h3>
 									<div id="map" class="w-full h-64 rounded-2xl border border-slate-200"></div>
 								</section>
 
@@ -2093,21 +2004,24 @@ translateY
 										<input type="hidden" id="selectedTime" name="reservationTime"
 											value="">
 
-										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8"
+										<section class="stat-card space-y-6"
 											style="margin-top: 32px">
-											<h3 class="text-2xl font-bold text-slate-900 mb-6">온라인 예약</h3>
+											<div>
+												<h3 class="text-lg font-semibold text-slate-900">온라인 예약</h3>
+												<p class="text-sm text-slate-500 mt-1">원하는 시간을 선택해보세요.</p>
+											</div>
 
-											<div class="space-y-6">
+											<div class="space-y-4">
 												<div>
-													<label class="block text-sm font-bold mb-3 text-slate-700">📅
-														날짜</label> <input type="date" name="reservationDate"
+													<label class="meta-label">📅 날짜</label>
+													<input type="date" name="reservationDate"
 														value="<%=java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)%>"
-														class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+														class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200">
 												</div>
 												<div>
-													<label class="block text-sm font-bold mb-3 text-slate-700">👥
-														인원</label> <select name="partySize"
-														class="w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-500 focus:outline-none transition-colors duration-300">
+													<label class="meta-label">👥 인원</label>
+													<select name="partySize"
+														class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200">
 														<c:forEach var="i"
 															begin="${reservationSettings.min_party_size}"
 															end="${reservationSettings.max_party_size}">
@@ -2116,40 +2030,39 @@ translateY
 													</select>
 												</div>
 												<div>
-													<label class="block text-sm font-bold mb-3 text-slate-700">⏰
-														예약가능시간</label>
+													<label class="meta-label">⏰ 예약가능시간</label>
 													<div id="time-slots-container"
-														class="grid grid-cols-3 gap-2">
+														class="grid grid-cols-3 gap-2 mt-2">
 														<div id="no-slots-message"
-															class="col-span-3 text-center p-4 bg-slate-100 rounded-xl text-slate-500"
+															class="col-span-3 text-center p-4 bg-slate-50 rounded-xl text-slate-500"
 															style="display: none;">
 															<p>예약 가능한 시간이 없습니다.</p>
 														</div>
 													</div>
 												</div>
 												<button type="submit"
-													class="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-full font-bold block text-center shadow-sm transition hover:-translate-y-0.5">예약하기</button>
+													class="w-full inline-flex items-center justify-center gap-2 rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-600">예약하기</button>
 											</div>
 										</section>
 									</form>
 								</c:if>
+									</div>
+								</div>
 							</div>
 
 						</div>
 					</c:when>
 					<c:otherwise>
-						<div class="glass-card p-12 rounded-3xl text-center fade-in">
-							<h2 class="text-2xl font-bold text-slate-700 mb-4">맛집 정보를 찾을
-								수 없습니다.</h2>
-							<p class="text-slate-500 mb-6">요청하신 맛집이 존재하지 않거나 삭제되었을 수
-								있습니다.</p>
-							<a href="${pageContext.request.contextPath}/"
-								class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">홈으로
-								돌아가기</a>
+						<div class="mx-auto w-full max-w-6xl px-4 py-10 md:px-6 md:py-14">
+							<div class="subtle-card p-12 text-center">
+								<h2 class="text-2xl font-bold text-slate-700 mb-4">맛집 정보를 찾을 수 없습니다.</h2>
+								<p class="text-slate-500 mb-6">요청하신 맛집이 존재하지 않거나 삭제되었을 수 있습니다.</p>
+								<a href="${pageContext.request.contextPath}/"
+									class="inline-flex items-center gap-2 rounded-full bg-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-sky-600">홈으로 돌아가기</a>
+							</div>
 						</div>
 					</c:otherwise>
 				</c:choose>
-			</div>
 		</main>
 
 		<div id="imageLightbox" class="modal-overlay">
