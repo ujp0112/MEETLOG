@@ -475,27 +475,6 @@ keyframes spin {to { transform:rotate(360deg);
 
 			<div
 				class="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 pb-16 md:px-6 lg:px-8">
-				<!-- 로그인 사용자용 레이아웃 -->
-				<c:if test="${not empty user}">
-					<!-- 1. 맞춤 추천 (최우선) -->
-					<jsp:include
-						page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
-<%-- 
-					<!-- 2. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" /> --%>
-				</c:if>
-
-				<!-- 비로그인 사용자용 로그인 유도 -->
-				<c:if test="${empty user}">
-					<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
-				</c:if>
-				
-				<!-- 비로그인 사용자용 레이아웃 -->
-				<c:if test="${empty user}">
-					<!-- 1. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
-				</c:if>
-
 				<!-- 상세 검색 섹션 (Progressive Disclosure) -->
 				<section id="advancedSearchSection"
 					class="hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl"
@@ -554,6 +533,27 @@ keyframes spin {to { transform:rotate(360deg);
 
 					</form>
 				</section>
+				<!-- 로그인 사용자용 레이아웃 -->
+				<c:if test="${not empty user}">
+					<!-- 1. 맞춤 추천 (최우선) -->
+					<jsp:include
+						page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
+<%-- 
+					<!-- 2. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" /> --%>
+				</c:if>
+
+				<!-- 비로그인 사용자용 로그인 유도 -->
+				<c:if test="${empty user}">
+					<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
+				</c:if>
+				
+				<!-- 비로그인 사용자용 레이아웃 -->
+				<c:if test="${empty user}">
+					<!-- 1. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+				</c:if>
+
 				<%-- 생생한 최신 리뷰 섹션 --%>
 				<section class="mb-16" aria-labelledby="reviews-title">
 					<div class="flex justify-between items-center mb-6">
@@ -796,10 +796,10 @@ function toggleAdvancedSearch() {
         const sectionTop = section.getBoundingClientRect().top + window.scrollY;
         
         // 헤더 높이와 추가 여백(20px)을 고려한 위치로 부드럽게 스크롤
-        window.scrollTo({
-            top: sectionTop - headerHeight - 20,
-            behavior: 'smooth'
-        });
+        //window.scrollTo({
+        //    top: sectionTop - headerHeight - 20,
+        //    behavior: 'smooth'
+        //});
         
     } else {
         section.classList.add('hidden');
@@ -842,39 +842,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	// 클래스로 찾은 모든 '지도로 검색' 버튼에 이벤트 연결
 	mapSearchBtns.forEach(btn => {
-        btn.addEventListener('click', function(event) {
+        btn.addEventListener('click', function(event) { // '지도로 검색' 버튼 클릭 시
             event.preventDefault();
 
-            const originalBtnText = this.textContent.trim(); // 원래 버튼 텍스트 저장
-            this.textContent = '위치 찾는 중...';
-            this.disabled = true;
-            
-            // Geolocation API 호출
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    // 성공 콜백
-                    (position) => {
-                        performSearch(position.coords.latitude, position.coords.longitude);
-                    }, 
-                    // ✨ [수정] 실패 콜백: 버튼 상태 복구 및 에러 메시지 콘솔 출력
-                    (error) => {
-                        console.error("Geolocation error:", error.message); // F12 콘솔에서 에러 원인 확인 가능
-                        alert("위치 정보를 가져올 수 없습니다. OS나 브라우저의 위치 서비스가 켜져 있는지 확인해주세요.");
-                        
-                        // 버튼 상태를 원래대로 복구
-                        this.textContent = originalBtnText;
-                        this.disabled = false;
-                        
-                        // 위치 정보 없이 키워드로만 검색 실행 (선택사항)
-                        // performSearch(null, null); 
-                    }, 
-                    { timeout: 8000 } // 타임아웃 8초로 조금 연장
-                );
-            } else {
-                alert("이 브라우저에서는 위치 정보 기능을 사용할 수 없습니다.");
-                this.textContent = originalBtnText; // 버튼 상태 복구
-                this.disabled = false;
-            }
+            // [수정] 위치 정보(lat, lng) 없이 검색을 수행하도록 performSearch 호출
+            // performSearch 함수는 내부적으로 키워드와 카테고리 값을 폼에서 읽어 URL을 생성합니다.
+            performSearch(null, null);
         });
     });
     
