@@ -485,8 +485,7 @@ public class AdvancedReservationManagementServlet extends HttpServlet {
             boolean result = reservationService.updateReservationStatus(reservationId, "CONFIRMED");
 
             if (result) {
-                // 승인 알림 발송
-                sendReservationNotification(reservationId, "예약이 승인되었습니다.");
+                // ReservationService에서 이메일 및 기타 알림을 처리합니다.
                 sendJsonSuccess(response, "예약이 승인되었습니다.");
             } else {
                 sendJsonError(response, "예약 승인에 실패했습니다.");

@@ -16,13 +16,15 @@
 	rel="stylesheet">
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/css/style.css">
-<script src="${pageContext.request.contextPath}/js/main-optimized.js" defer></script>
+<script src="${pageContext.request.contextPath}/js/main-optimized.js"
+	defer></script>
 <style>
 .page-content {
 	animation: fadeIn 0.5s ease-out;
 }
 
-@keyframes fadeIn {from { opacity:0;
+@
+keyframes fadeIn {from { opacity:0;
 	transform: translateY(10px);
 }
 
@@ -30,6 +32,7 @@ to {
 	opacity: 1;
 	transform: translateY(0);
 }
+
 }
 /* 메인 페이지 리뷰 캐러셀을 위한 CSS */
 .main-carousel .review-carousel-track {
@@ -254,7 +257,8 @@ to {
 	animation: zoomIn 0.3s ease-out;
 }
 
-@keyframes zoomIn {from { transform:scale(0.9);
+@
+keyframes zoomIn {from { transform:scale(0.9);
 	opacity: 0;
 }
 
@@ -313,142 +317,146 @@ to {
 
 /* 로딩 스피너 스타일 */
 .spinner {
-    display: inline-block;
-    width: 1rem;
-    height: 1rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
+	display: inline-block;
+	width: 1rem;
+	height: 1rem;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-top-color: white;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
+@
+keyframes spin {to { transform:rotate(360deg);
+	
 }
 
+}
 .btn-loading {
-    position: relative;
-    color: transparent !important;
-    pointer-events: none;
+	position: relative;
+	color: transparent !important;
+	pointer-events: none;
 }
 
 .btn-loading::after {
-    content: '';
-    position: absolute;
-    width: 1rem;
-    height: 1rem;
-    top: 50%;
-    left: 50%;
-    margin-left: -0.5rem;
-    margin-top: -0.5rem;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
+	content: '';
+	position: absolute;
+	width: 1rem;
+	height: 1rem;
+	top: 50%;
+	left: 50%;
+	margin-left: -0.5rem;
+	margin-top: -0.5rem;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-top-color: white;
+	border-radius: 50%;
+	animation: spin 0.6s linear infinite;
 }
+
 .main-search-form {
-    display: flex;
-    flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
-    gap: 16px;
-    align-items: center; /* 요소들을 하단에 정렬 */
+	display: flex;
+	flex-wrap: wrap; /* 작은 화면에서 줄바꿈 허용 */
+	gap: 16px;
+	align-items: center; /* 요소들을 하단에 정렬 */
 }
 
 .search-inputs {
-    flex: 1; /* 남는 공간을 모두 차지 */
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 반응형 그리드 */
-    gap: 16px;
-    min-width: 200px;
+	flex: 1; /* 남는 공간을 모두 차지 */
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	/* 반응형 그리드 */
+	gap: 16px;
+	min-width: 200px;
 }
 
 .search-inputs .input-group.keyword-group {
-    grid-column: 1 / -1; /* 키워드 입력창은 항상 한 줄 전체 차지 */
-    align-items: end;
+	grid-column: 1/-1; /* 키워드 입력창은 항상 한 줄 전체 차지 */
+	align-items: end;
 }
 
-@media (min-width: 1024px) {
+@media ( min-width : 1024px) {
 	.search-inputs .input-group.keyword-group {
 		grid-column: span 2; /* 넓은 화면에서는 키워드 입력창이 2칸 차지 */
 	}
 }
 
-
 .search-inputs .input-group label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #475569; /* slate-600 */
-    margin-bottom: 4px;
+	display: block;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #475569; /* slate-600 */
+	margin-bottom: 4px;
 }
 
-.search-inputs .input-group input,
-.search-inputs .input-group select {
-    width: 100%;
-    border-radius: 0.375rem; /* rounded-md */
-    border: 1px solid #cbd5e1; /* slate-300 */
-    padding: 0.5rem 0.75rem;
-    font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+.search-inputs .input-group input, .search-inputs .input-group select {
+	width: 100%;
+	border-radius: 0.375rem; /* rounded-md */
+	border: 1px solid #cbd5e1; /* slate-300 */
+	padding: 0.5rem 0.75rem;
+	font-size: 1rem;
+	transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-inputs .input-group input:focus,
-.search-inputs .input-group select:focus {
+.search-inputs .input-group input:focus, .search-inputs .input-group select:focus
+	{
 	border-color: #3b82f6; /* blue-500 */
 	box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
 	outline: none;
 }
 
 .search-actions {
-    display: flex;
-    flex-direction: column; /* 버튼을 수직으로 쌓음 */
-    gap: 8px;
-    width: 140px; /* 버튼 그룹 너비 고정 */
+	display: flex;
+	flex-direction: column; /* 버튼을 수직으로 쌓음 */
+	gap: 8px;
+	width: 140px; /* 버튼 그룹 너비 고정 */
 }
 
 .search-actions button {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem; /* rounded-lg */
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.2s;
-    cursor: pointer;
+	width: 100%;
+	padding: 0.75rem 1rem;
+	border-radius: 0.5rem; /* rounded-lg */
+	font-weight: 600;
+	text-align: center;
+	transition: all 0.2s;
+	cursor: pointer;
 }
 
 /* "맛집 찾기" 버튼 (메인 액션) */
 .search-actions .btn-main-search {
-    background-color: #3b82f6; /* blue-600 */
-    color: white;
-    border: 2px solid #3b82f6;
+	background-color: #3b82f6; /* blue-600 */
+	color: white;
+	border: 2px solid #3b82f6;
 }
+
 .search-actions .btn-main-search:hover {
-    background-color: #2563eb; /* blue-700 */
-    border-color: #2563eb;
+	background-color: #2563eb; /* blue-700 */
+	border-color: #2563eb;
 }
 
 /* "지도로 검색" 버튼 (보조 액션) */
 .search-actions .btn-map-search {
-    background-color: white;
-    color: #3b82f6; /* blue-600 */
-    border: 2px solid #3b82f6;
+	background-color: white;
+	color: #3b82f6; /* blue-600 */
+	border: 2px solid #3b82f6;
 }
+
 .search-actions .btn-map-search:hover {
-    background-color: #eff6ff; /* blue-50 */
+	background-color: #eff6ff; /* blue-50 */
 }
 
 /* 작은 화면 대응 */
-@media (max-width: 768px) {
-    .main-search-form {
-        flex-direction: column;
-        align-items: stretch; /* 요소들을 양 옆으로 꽉 채움 */
-    }
-    .search-actions {
-        flex-direction: row; /* 버튼을 수평으로 배치 */
-        width: 100%;
-    }
-    .search-actions button {
-        flex: 1; /* 버튼이 공간을 똑같이 나눠가짐 */
-    }
+@media ( max-width : 768px) {
+	.main-search-form {
+		flex-direction: column;
+		align-items: stretch; /* 요소들을 양 옆으로 꽉 채움 */
+	}
+	.search-actions {
+		flex-direction: row; /* 버튼을 수평으로 배치 */
+		width: 100%;
+	}
+	.search-actions button {
+		flex: 1; /* 버튼이 공간을 똑같이 나눠가짐 */
+	}
 }
 </style>
 </head>
@@ -458,259 +466,274 @@ to {
 
 	<div id="app" class="flex flex-col min-h-screen">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
-		<main id="main-content" role="main" aria-label="메인 콘텐츠" class="flex-grow bg-slate-50">
+		<main id="main-content" role="main" aria-label="메인 콘텐츠"
+			class="flex-grow bg-slate-50">
 			<h1 class="sr-only">MEET LOG 메인 페이지</h1>
 
 			<!-- Hero Section: 가치 제안 + 빠른 검색 -->
 			<jsp:include page="/WEB-INF/views/sections/hero-search.jsp" />
 
-			<div class="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 pb-16 md:px-6 lg:px-8">
+			<div
+				class="mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 pb-16 md:px-6 lg:px-8">
 				<!-- 로그인 사용자용 레이아웃 -->
 				<c:if test="${not empty user}">
 					<!-- 1. 맞춤 추천 (최우선) -->
-					<jsp:include page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
-
+					<jsp:include
+						page="/WEB-INF/views/sections/personalized-recommendations.jsp" />
+<%-- 
 					<!-- 2. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
-				</c:if>
-
-				<!-- 비로그인 사용자용 레이아웃 -->
-				<c:if test="${empty user}">
-					<!-- 1. 실시간 랭킹 -->
-					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" /> --%>
 				</c:if>
 
 				<!-- 비로그인 사용자용 로그인 유도 -->
 				<c:if test="${empty user}">
 					<jsp:include page="/WEB-INF/views/sections/login-cta.jsp" />
 				</c:if>
+				
+				<!-- 비로그인 사용자용 레이아웃 -->
+				<c:if test="${empty user}">
+					<!-- 1. 실시간 랭킹 -->
+					<jsp:include page="/WEB-INF/views/sections/ranking.jsp" />
+				</c:if>
 
 				<!-- 상세 검색 섹션 (Progressive Disclosure) -->
-				<section id="advancedSearchSection" class="hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl" aria-labelledby="search-title" aria-hidden="true">
-				<h2 id="search-title" class="text-2xl font-bold mb-6 text-center">나에게 꼭 맞는 맛집 찾기 🔎</h2>
+				<section id="advancedSearchSection"
+					class="hidden rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-xl"
+					aria-labelledby="search-title" aria-hidden="true">
+					<h2 id="search-title" class="text-2xl font-bold mb-6 text-center">나에게
+						꼭 맞는 맛집 찾기 🔎</h2>
 
-				<%-- [수정] 폼 전체 구조 변경 --%>
-				<form id="detailSearchForm" action="${pageContext.request.contextPath}/restaurant/list" method="get" class="main-search-form" role="search" onsubmit="return handleFormSubmit(event, this)">
+					<%-- [수정] 폼 전체 구조 변경 --%>
+					<form id="detailSearchForm"
+						action="${pageContext.request.contextPath}/restaurant/list"
+						method="get" class="main-search-form" role="search"
+						onsubmit="return handleFormSubmit(event, this)">
 
-					<%-- 1. 입력 필드 그룹 --%>
-					<div class="search-inputs">
-						<div class="input-group keyword-group">
-							<label for="mainSearchKeyword">키워드 <span class="text-xs text-slate-500 font-normal">(선택)</span></label>
-							<input id="mainSearchKeyword" name="keyword" type="text" placeholder="예: 강남 한식, 홍대 카페" autocomplete="off">
+						<%-- 1. 입력 필드 그룹 --%>
+						<div class="search-inputs">
+							<div class="input-group keyword-group">
+								<label for="mainSearchKeyword">키워드 <span
+									class="text-xs text-slate-500 font-normal">(선택)</span></label> <input
+									id="mainSearchKeyword" name="keyword" type="text"
+									placeholder="예: 강남 한식, 홍대 카페" autocomplete="off">
+							</div>
+							<div class="input-group">
+								<label>음식 종류</label> <select name="category">
+									<option value="">전체</option>
+									<option value="한식">한식</option>
+									<option value="양식">양식</option>
+									<option value="일식">일식</option>
+									<option value="중식">중식</option>
+									<option value="카페">카페</option>
+								</select>
+							</div>
+							<div class="input-group">
+								<label>가격대 (1인)</label> <select name="price">
+									<option value="">전체</option>
+									<option value="1">~1만원</option>
+									<option value="2">1~2만원</option>
+									<option value="3">2~4만원</option>
+									<option value="4">4만원~</option>
+								</select>
+							</div>
+							<div class="input-group">
+								<label>주차 여부</label> <select name="parking">
+									<option value="">전체</option>
+									<option value="true">가능</option>
+									<!-- <option value="false">불가</option> -->
+								</select>
+							</div>
 						</div>
-						<div class="input-group">
-							<label>음식 종류</label>
-							<select name="category">
-								<option value="">전체</option>
-								<option value="한식">한식</option>
-								<option value="양식">양식</option>
-								<option value="일식">일식</option>
-								<option value="중식">중식</option>
-								<option value="카페">카페</option>
-							</select>
+
+						<%-- 2. 버튼 그룹 --%>
+						<div class="search-actions">
+							<button id="mapSearchBtn" type="button"
+								class="btn-map-search js-map-search-btn">지도로 검색</button>
+							<button type="submit" class="btn-main-search">맛집 찾기</button>
 						</div>
-						<div class="input-group">
-							<label>가격대 (1인)</label>
-							<select name="price">
-								<option value="">전체</option>
-								<option value="1">~1만원</option>
-								<option value="2">1~2만원</option>
-								<option value="3">2~4만원</option>
-								<option value="4">4만원~</option>
-							</select>
-						</div>
-						<div class="input-group">
-							<label>주차 여부</label>
-							<select name="parking">
-								<option value="">전체</option>
-								<option value="true">가능</option>
-								<!-- <option value="false">불가</option> -->
-							</select>
-						</div>
+
+					</form>
+				</section>
+				<%-- 생생한 최신 리뷰 섹션 --%>
+				<section class="mb-16" aria-labelledby="reviews-title">
+					<div class="flex justify-between items-center mb-6">
+						<h2 id="reviews-title" class="text-2xl font-bold text-slate-800">생생한
+							최신 리뷰 📢</h2>
 					</div>
-					
-					<%-- 2. 버튼 그룹 --%>
-					<div class="search-actions">
-						<button id="mapSearchBtn" type="button" class="btn-map-search">지도로 검색</button>
-						<button type="submit" class="btn-main-search">맛집 찾기</button>
-					</div>
 
-				</form>
-			</section>
-			<%-- 생생한 최신 리뷰 섹션 --%>
-			<section class="mb-16" aria-labelledby="reviews-title">
-				<div class="flex justify-between items-center mb-6">
-					<h2 id="reviews-title" class="text-2xl font-bold text-slate-800">생생한 최신 리뷰 📢</h2>
-				</div>
+					<div class="relative group">
+						<div id="mainReviewCarouselTrack"
+							class="flex overflow-x-auto snap-x snap-mandatory pb-5 -mx-4 px-4"
+							role="region" aria-label="최신 리뷰 캐러셀" tabindex="0"
+							style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;">
 
-				<div class="relative group">
-					<div id="mainReviewCarouselTrack"
-						class="flex overflow-x-auto snap-x snap-mandatory pb-5 -mx-4 px-4"
-						role="region"
-						aria-label="최신 리뷰 캐러셀"
-						tabindex="0"
-						style="scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;">
-
-						<c:forEach var="review" items="${recentReviews}">
-							<%-- [수정] 리뷰 카드 클릭 시 상세 모달을 띄우기 위한 데이터 속성 추가 --%>
-							<div class="flex-shrink-0 w-[90%] md:w-[45%] lg:w-[32%] snap-start pr-4"
-								data-review-id="${review.id}">
-								
-								<%-- [수정] 카드 자체에 review-card-clickable 클래스 추가 --%>
+							<c:forEach var="review" items="${recentReviews}">
+								<%-- [수정] 리뷰 카드 클릭 시 상세 모달을 띄우기 위한 데이터 속성 추가 --%>
 								<div
-									class="bg-white rounded-xl shadow-lg p-5 flex flex-col h-full text-sm cursor-pointer">
+									class="flex-shrink-0 w-[90%] md:w-[45%] lg:w-[32%] snap-start pr-4"
+									data-review-id="${review.id}">
 
-									<%-- 상단: 프로필, 작성자, 팔로우 버튼 --%>
-									<div class="flex justify-between items-center mb-3">
-										<div class="flex items-center ">
-											<mytag:image fileName="${review.profileImage}"
-												altText="${review.author} 프로필"
-												cssClass="w-10 h-10 rounded-full object-cover mr-3" />
-											<span class="font-semibold text-slate-800">${review.author}</span>
-										</div>
-										<!-- <button
+									<%-- [수정] 카드 자체에 review-card-clickable 클래스 추가 --%>
+									<div
+										class="bg-white rounded-xl shadow-lg p-5 flex flex-col h-full text-sm cursor-pointer">
+
+										<%-- 상단: 프로필, 작성자, 팔로우 버튼 --%>
+										<div class="flex justify-between items-center mb-3">
+											<div class="flex items-center ">
+												<mytag:image fileName="${review.profileImage}"
+													altText="${review.author} 프로필"
+													cssClass="w-10 h-10 rounded-full object-cover mr-3" />
+												<span class="font-semibold text-slate-800">${review.author}</span>
+											</div>
+											<!-- <button
 											class="text-xs font-semibold bg-slate-100 text-slate-600 px-3 py-1 rounded-full hover:bg-slate-200 stop-propagation">팔로우</button> -->
-									</div>
-
-									<%-- 중상단: 별점, 날짜 --%>
-									<div
-										class="flex items-center gap-2 mb-4 text-xs text-slate-500">
-										<div class="text-amber-400 flex">
-											<c:forEach begin="1" end="5" var="i">
-												<c:if test="${i <= review.rating}">★</c:if>
-												<c:if test="${i > review.rating}">
-													<span class="text-slate-300">★</span>
-												</c:if>
-											</c:forEach>
 										</div>
-										<span>·</span> <span>${fn:replace(fn:substring(review.createdAt.toString(), 0, 10), '-', '.')}</span>
-									</div>
 
-									<%-- 중간: 리뷰 이미지 캐러셀 --%>
-									<div
-										class="review-image-container mb-4 rounded-lg stop-propagation review-card-clickable">
-										<div class="review-image-track">
-											<c:choose>
-												<c:when test="${not empty review.images}">
-													<c:forEach var="imagePath" items="${review.images}">
-														<div class="review-image-item">
-															<mytag:image fileName="${imagePath}" altText="리뷰 사진" cssClass="w-full h-48 object-cover image-lightbox-trigger cursor-zoom-in" />
-														</div>
-													</c:forEach>
-												</c:when>
-												<%-- <c:otherwise>
+										<%-- 중상단: 별점, 날짜 --%>
+										<div
+											class="flex items-center gap-2 mb-4 text-xs text-slate-500">
+											<div class="text-amber-400 flex">
+												<c:forEach begin="1" end="5" var="i">
+													<c:if test="${i <= review.rating}">★</c:if>
+													<c:if test="${i > review.rating}">
+														<span class="text-slate-300">★</span>
+													</c:if>
+												</c:forEach>
+											</div>
+											<span>·</span> <span>${fn:replace(fn:substring(review.createdAt.toString(), 0, 10), '-', '.')}</span>
+										</div>
+
+										<%-- 중간: 리뷰 이미지 캐러셀 --%>
+										<div
+											class="review-image-container mb-4 rounded-lg stop-propagation review-card-clickable">
+											<div class="review-image-track">
+												<c:choose>
+													<c:when test="${not empty review.images}">
+														<c:forEach var="imagePath" items="${review.images}">
+															<div class="review-image-item">
+																<mytag:image fileName="${imagePath}" altText="리뷰 사진"
+																	cssClass="w-full h-48 object-cover image-lightbox-trigger cursor-zoom-in" />
+															</div>
+														</c:forEach>
+													</c:when>
+													<%-- <c:otherwise>
 													<div class="review-image-item">
 														<mytag:image fileName="https://placehold.co/100x100/fee2e2/b91c1c?text=${review.author }" altText="기본 이미지" cssClass="w-full h-48 object-cover" />
 													</div>
 												</c:otherwise> --%>
-											</c:choose>
-										</div>
-										<c:if test="${fn:length(review.images) > 1}">
-											<button class="review-image-arrow prev" aria-label="이전 리뷰 이미지">
-												<span aria-hidden="true">&lt;</span>
-											</button>
-											<button class="review-image-arrow next" aria-label="다음 리뷰 이미지">
-												<span aria-hidden="true">&gt;</span>
-											</button>
-											<div class="review-image-pagination" role="tablist" aria-label="리뷰 이미지 페이지"></div>
-										</c:if>
-									</div>
-
-									<%-- 하단: 리뷰 내용(스크롤 가능), 키워드, 맛집 정보 링크 --%>
-									<div class="flex flex-col flex-grow">
-										<%-- [수정] a 태그 제거, 스크롤 가능한 p 태그로 변경 --%>
-										<p
-											class="review-content-scrollable text-slate-700 leading-relaxed mb-4 flex-grow">${review.content}</p>
-
-										<div class="flex flex-wrap gap-2 my-4">
-											<c:forEach var="keyword" items="${review.keywords}">
-												<span
-													class="text-xs text-blue-600 bg-blue-100 font-semibold px-2 py-1 rounded-full">${keyword}</span>
-											</c:forEach>
+												</c:choose>
+											</div>
+											<c:if test="${fn:length(review.images) > 1}">
+												<button class="review-image-arrow prev"
+													aria-label="이전 리뷰 이미지">
+													<span aria-hidden="true">&lt;</span>
+												</button>
+												<button class="review-image-arrow next"
+													aria-label="다음 리뷰 이미지">
+													<span aria-hidden="true">&gt;</span>
+												</button>
+												<div class="review-image-pagination" role="tablist"
+													aria-label="리뷰 이미지 페이지"></div>
+											</c:if>
 										</div>
 
-										<div class="mt-auto pt-3 border-t border-slate-100 text-xs">
-											<a href="${pageContext.request.contextPath}/restaurant/detail/${review.restaurantId}"
-												class="font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center stop-propagation">
-												'<c:out value="${review.restaurantName}" />' 맛집 정보 더 보기 <span
-												class="ml-1 font-mono">&gt;</span>
-											</a>
+										<%-- 하단: 리뷰 내용(스크롤 가능), 키워드, 맛집 정보 링크 --%>
+										<div class="flex flex-col flex-grow">
+											<%-- [수정] a 태그 제거, 스크롤 가능한 p 태그로 변경 --%>
+											<p
+												class="review-content-scrollable text-slate-700 leading-relaxed mb-4 flex-grow">${review.content}</p>
+
+											<div class="flex flex-wrap gap-2 my-4">
+												<c:forEach var="keyword" items="${review.keywords}">
+													<span
+														class="text-xs text-blue-600 bg-blue-100 font-semibold px-2 py-1 rounded-full">${keyword}</span>
+												</c:forEach>
+											</div>
+
+											<div class="mt-auto pt-3 border-t border-slate-100 text-xs">
+												<a
+													href="${pageContext.request.contextPath}/restaurant/detail/${review.restaurantId}"
+													class="font-semibold text-blue-600 hover:text-blue-800 transition-colors flex items-center stop-propagation">
+													'<c:out value="${review.restaurantName}" />' 맛집 정보 더 보기 <span
+													class="ml-1 font-mono">&gt;</span>
+												</a>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-						</c:forEach>
-					</div>
+							</c:forEach>
+						</div>
 
-					<button id="prevMainReviewBtn"
-						class="absolute top-1/2 left-2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-xl text-slate-600 disabled:opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-						aria-label="이전 리뷰">
-						<span aria-hidden="true">&lt;</span>
-					</button>
-					<button id="nextMainReviewBtn"
-						class="absolute top-1/2 right-2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-xl text-slate-600 disabled:opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-						aria-label="다음 리뷰">
-						<span aria-hidden="true">&gt;</span>
-					</button>
-				</div>
-			</section>
-			<section class="my-12" aria-labelledby="columns-title">
-				<h2 id="columns-title" class="text-2xl md:text-3xl font-bold mb-6">📝 최신 칼럼</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					<c:choose>
-						<c:when test="${not empty latestColumns}">
-							<c:forEach var="column" items="${latestColumns}">
-								<a
-									href="${pageContext.request.contextPath}/column/detail?id=${column.id}"
-									class="bg-white p-6 rounded-2xl shadow-lg block hover:shadow-xl transition-shadow duration-300">
-									<div class="relative mb-4">
-										<mytag:image fileName="${column.image}"
-											altText="${column.title}"
-											cssClass="w-full h-48 object-cover rounded-xl" />
-									</div>
-									<div class="flex items-center mb-4">
-										<mytag:image fileName="${column.profileImage}"
-											altText="${column.author}"
-											cssClass="w-12 h-12 rounded-full mr-4 object-cover" />
-										<div>
-											<p class="font-bold text-slate-800">${column.author}</p>
-											<p class="text-sm text-slate-500">
-												<c:choose>
-													<c:when test="${column.createdAt != null}">
+						<button id="prevMainReviewBtn"
+							class="absolute top-1/2 left-2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-xl text-slate-600 disabled:opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+							aria-label="이전 리뷰">
+							<span aria-hidden="true">&lt;</span>
+						</button>
+						<button id="nextMainReviewBtn"
+							class="absolute top-1/2 right-2 -translate-y-1/2 bg-white rounded-full w-10 h-10 shadow-md flex items-center justify-center text-xl text-slate-600 disabled:opacity-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+							aria-label="다음 리뷰">
+							<span aria-hidden="true">&gt;</span>
+						</button>
+					</div>
+				</section>
+				<section class="my-12" aria-labelledby="columns-title">
+					<h2 id="columns-title" class="text-2xl md:text-3xl font-bold mb-6">📝
+						최신 칼럼</h2>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+						<c:choose>
+							<c:when test="${not empty latestColumns}">
+								<c:forEach var="column" items="${latestColumns}">
+									<a
+										href="${pageContext.request.contextPath}/column/detail?id=${column.id}"
+										class="bg-white p-6 rounded-2xl shadow-lg block hover:shadow-xl transition-shadow duration-300">
+										<div class="relative mb-4">
+											<mytag:image fileName="${column.image}"
+												altText="${column.title}"
+												cssClass="w-full h-48 object-cover rounded-xl" />
+										</div>
+										<div class="flex items-center mb-4">
+											<mytag:image fileName="${column.profileImage}"
+												altText="${column.author}"
+												cssClass="w-12 h-12 rounded-full mr-4 object-cover" />
+											<div>
+												<p class="font-bold text-slate-800">${column.author}</p>
+												<p class="text-sm text-slate-500">
+													<c:choose>
+														<c:when test="${column.createdAt != null}">
 														${column.createdAt.toString().substring(0, 10).replace('-', '.')}
 													</c:when>
-													<c:otherwise>-</c:otherwise>
-												</c:choose>
-											</p>
+														<c:otherwise>-</c:otherwise>
+													</c:choose>
+												</p>
+											</div>
 										</div>
-									</div>
-									<h3
-										class="font-bold text-lg mb-2 h-14 overflow-hidden line-clamp-2">${column.title}</h3>
-									<p
-										class="text-slate-600 text-sm h-10 overflow-hidden line-clamp-2">${column.summary}</p>
-								</a>
-							</c:forEach>
-						</c:when>
-						<c:otherwise>
-							<p class="text-slate-500 py-8 md:col-span-3 text-center">최신
-								칼럼을 불러오고 있습니다.</p>
-						</c:otherwise>
-					</c:choose>
-				</div>
-			</section>
-		</div>
+										<h3
+											class="font-bold text-lg mb-2 h-14 overflow-hidden line-clamp-2">${column.title}</h3>
+										<p
+											class="text-slate-600 text-sm h-10 overflow-hidden line-clamp-2">${column.summary}</p>
+									</a>
+								</c:forEach>
+							</c:when>
+							<c:otherwise>
+								<p class="text-slate-500 py-8 md:col-span-3 text-center">최신
+									칼럼을 불러오고 있습니다.</p>
+							</c:otherwise>
+						</c:choose>
+					</div>
+				</section>
+			</div>
 
-		<!-- 쿠팡 파트너스 광고 배너 -->
-		<section class="bg-white py-8 border-t border-slate-100">
-			<div class="container mx-auto px-4 flex justify-center">
-				<div>
-					<script src="https://ads-partners.coupang.com/g.js"></script>
-					<script>
+			<!-- 쿠팡 파트너스 광고 배너 -->
+			<section class="bg-white py-8 border-t border-slate-100">
+				<div class="container mx-auto px-4 flex justify-center">
+					<div>
+						<script src="https://ads-partners.coupang.com/g.js"></script>
+						<script>
 						new PartnersCoupang.G({"id":930603,"template":"carousel","trackingCode":"AF6566533","width":"680","height":"140","tsource":""});
 					</script>
+					</div>
 				</div>
-			</div>
-		</section>
+			</section>
 		</main>
 		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 	</div>
@@ -728,7 +751,7 @@ to {
 		<div class="modal-content w-full max-w-2xl overflow-y-auto">
 			<button class="modal-close-btn">&times;</button>
 			<div id="reviewDetailContent" class="flex flex-col md:flex-row gap-6">
-				</div>
+			</div>
 		</div>
 	</div>
 
@@ -741,8 +764,6 @@ function handleFormSubmit(event, form) {
         const originalText = submitBtn.textContent;
         submitBtn.classList.add('btn-loading');
         submitBtn.disabled = true;
-
-        // 3초 후에도 응답이 없으면 로딩 해제 (타임아웃)
         setTimeout(() => {
             submitBtn.classList.remove('btn-loading');
             submitBtn.disabled = false;
@@ -790,44 +811,82 @@ function toggleAdvancedSearch() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // 💡 --- [수정] 지도 검색 버튼 로직 ---
-	const mapSearchBtn = document.getElementById('mapSearchBtn');
+	const mapSearchBtns = document.querySelectorAll('.js-map-search-btn');
+	const heroKeywordInput = document.getElementById('heroKeyword');
 	const detailSearchForm = document.getElementById('detailSearchForm');
-	const keywordInput = document.getElementById('mainSearchKeyword');
 
-	// "지도로 검색" 버튼 클릭 이벤트
-	mapSearchBtn.addEventListener('click', function() {
-		const keyword = detailSearchForm.querySelector('input[name="keyword"]').value;
-		const category = detailSearchForm.querySelector('select[name="category"]').value;
-		
-		// URL 파라미터를 생성합니다.
-		const params = new URLSearchParams();
-		
-		// 키워드가 있을 경우에만 추가합니다.
-		if (keyword.trim()) {
-			params.append('keyword', keyword.trim());
-		}
-		
-		// 카테고리는 항상 전달하되, 선택되지 않았으면 '전체' 값을 가집니다.
-		params.append('category', category || '전체');
-		
-		// 검색할 내용이 있을 때만 페이지를 이동합니다.
-		if (keyword.trim() || category) {
-			 const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?" + params.toString();
-			 window.location.href = searchUrl;
-		} else {
-			alert('검색할 키워드를 입력해주세요.');
-			keywordInput.focus();
-		}
-	});
+    // 검색 URL로 이동하는 공통 함수
+    const performSearch = (lat, lng) => {
+        // ✨ [수정] hero 검색창과 상세 검색창의 키워드를 모두 확인
+        const heroKeyword = heroKeywordInput ? heroKeywordInput.value : '';
+        const detailKeyword = detailSearchForm.querySelector('input[name="keyword"]').value;
+        const category = detailSearchForm.querySelector('select[name="category"]').value;
+        
+        // hero 검색창에 값이 있으면 그것을 우선 사용, 없으면 상세 검색창 값 사용
+        const keyword = heroKeyword.trim() || detailKeyword.trim();
+        
+        const params = new URLSearchParams();
+        if (keyword) {
+            params.append('keyword', keyword);
+        }
+        params.append('category', category || '전체');
+        
+        if (lat && lng) {
+            params.append('lat', lat);
+            params.append('lng', lng);
+        }
+        
+        const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?" + params.toString();
+        window.location.href = searchUrl;
+    };
 
-	// 키워드 입력창에서 Enter 키를 눌렀을 때도 지도 검색이 실행되도록 합니다.
-	keywordInput.addEventListener('keydown', function(event) {
-		if (event.key === 'Enter') {
-			event.preventDefault(); // 기존 form의 submit 동작을 막습니다.
-			mapSearchBtn.click();   // "지도로 검색" 버튼의 클릭 이벤트를 강제로 실행합니다.
-		}
-	});
+	// 클래스로 찾은 모든 '지도로 검색' 버튼에 이벤트 연결
+	mapSearchBtns.forEach(btn => {
+        btn.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const originalBtnText = this.textContent.trim(); // 원래 버튼 텍스트 저장
+            this.textContent = '위치 찾는 중...';
+            this.disabled = true;
+            
+            // Geolocation API 호출
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    // 성공 콜백
+                    (position) => {
+                        performSearch(position.coords.latitude, position.coords.longitude);
+                    }, 
+                    // ✨ [수정] 실패 콜백: 버튼 상태 복구 및 에러 메시지 콘솔 출력
+                    (error) => {
+                        console.error("Geolocation error:", error.message); // F12 콘솔에서 에러 원인 확인 가능
+                        alert("위치 정보를 가져올 수 없습니다. OS나 브라우저의 위치 서비스가 켜져 있는지 확인해주세요.");
+                        
+                        // 버튼 상태를 원래대로 복구
+                        this.textContent = originalBtnText;
+                        this.disabled = false;
+                        
+                        // 위치 정보 없이 키워드로만 검색 실행 (선택사항)
+                        // performSearch(null, null); 
+                    }, 
+                    { timeout: 8000 } // 타임아웃 8초로 조금 연장
+                );
+            } else {
+                alert("이 브라우저에서는 위치 정보 기능을 사용할 수 없습니다.");
+                this.textContent = originalBtnText; // 버튼 상태 복구
+                this.disabled = false;
+            }
+        });
+    });
+    
+    const detailKeywordInput = document.getElementById('mainSearchKeyword');
+	if(detailKeywordInput) {
+        detailKeywordInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('mapSearchBtn').click();
+            }
+        });
+    }
 
     // --- (이 아래는 기존 캐러셀 및 모달 기능 코드들... 그대로 유지) ---
     const mainReviewTrack = document.getElementById('mainReviewCarouselTrack');

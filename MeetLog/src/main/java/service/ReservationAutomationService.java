@@ -13,6 +13,7 @@ import dao.RestaurantTableDAO;
 import dao.ReservationNotificationDAO;
 import model.Reservation;
 import model.ReservationBlackoutDate;
+import model.User;
 import model.RestaurantTable;
 import model.ReservationNotification;
 
@@ -29,39 +30,51 @@ public class ReservationAutomationService {
     private final ReservationBlackoutDateDAO blackoutDateDAO = new ReservationBlackoutDateDAO();
     private final RestaurantTableDAO tableDAO = new RestaurantTableDAO();
     private final ReservationNotificationDAO notificationDAO = new ReservationNotificationDAO();
+    private final UserService userService = new UserService();
 
     /**
      * 새 예약에 대한 자동 처리
      */
     public void processNewReservation(Reservation reservation) {
+        System.out.println("\n[DEBUG] ======================================================");
+        System.out.println("[DEBUG] processNewReservation 시작: " + reservation);
         try {
             // 1. 블랙아웃 날짜 확인
-            if (isBlackoutDate(reservation)) {
+            boolean isBlackout = isBlackoutDate(reservation);
+            System.out.println("[DEBUG] 1. 블랙아웃 날짜 확인 결과: " + isBlackout);
+            if (isBlackout) {
                 autoRejectReservation(reservation, "예약 불가 날짜입니다.");
                 return;
             }
 
             // 2. 테이블 가용성 확인
             List<RestaurantTable> availableTables = findAvailableTables(reservation);
+            System.out.println("[DEBUG] 2. 이용 가능 테이블 수: " + availableTables.size());
             if (availableTables.isEmpty()) {
                 autoRejectReservation(reservation, "해당 시간에 이용 가능한 테이블이 없습니다.");
                 return;
             }
 
             // 3. 자동 승인 설정 확인
-            if (isAutoApprovalEnabled(reservation.getRestaurantId())) {
+            boolean autoApprovalEnabled = isAutoApprovalEnabled(reservation.getRestaurantId());
+            System.out.println("[DEBUG] 3. 자동 승인 설정 확인 결과: " + autoApprovalEnabled);
+            if (autoApprovalEnabled) {
                 // 최적 테이블 배정
                 RestaurantTable optimalTable = selectOptimalTable(availableTables, reservation.getPartySize());
+                System.out.println("[DEBUG] 4. 최적 테이블 배정 결과: " + (optimalTable != null ? "테이블 ID " + optimalTable.getId() : "배정 실패"));
 
                 if (optimalTable != null) {
                     assignTableToReservation(reservation.getId(), optimalTable.getId());
+                    System.out.println("[DEBUG] -> autoApproveReservation 호출");
                     autoApproveReservation(reservation);
                 } else {
                     // 테이블 배정 실패
+                    System.out.println("[DEBUG] -> autoRejectReservation 호출 (테이블 배정 실패)");
                     autoRejectReservation(reservation, "테이블 배정에 실패했습니다.");
                 }
             } else {
                 // 수동 승인 대기
+                System.out.println("[DEBUG] -> sendPendingNotification 호출 (수동 승인 대기)");
                 sendPendingNotification(reservation);
             }
 
@@ -69,6 +82,9 @@ public class ReservationAutomationService {
             e.printStackTrace();
             // 오류 발생 시 수동 처리를 위해 대기 상태로 유지
             sendErrorNotification(reservation, "예약 처리 중 오류가 발생했습니다.");
+        } finally {
+            System.out.println("[DEBUG] processNewReservation 종료");
+            System.out.println("[DEBUG] ======================================================\n");
         }
     }
 
@@ -95,16 +111,21 @@ public class ReservationAutomationService {
      * 자동 승인 설정 확인
      */
     private boolean isAutoApprovalEnabled(int restaurantId) {
+        System.out.println("[DEBUG] isAutoApprovalEnabled 호출: restaurantId=" + restaurantId);
         try {
             dao.ReservationSettingsDAO settingsDAO = new dao.ReservationSettingsDAO();
             Map<String, Object> settings = settingsDAO.findByRestaurantId(restaurantId);
+            System.out.println("[DEBUG] DB에서 조회된 설정: " + settings);
 
             if (settings != null && settings.containsKey("auto_accept")) {
                 Object autoAccept = settings.get("auto_accept");
+                System.out.println("[DEBUG] 'auto_accept' 키의 값: " + autoAccept + " (타입: " + (autoAccept != null ? autoAccept.getClass().getName() : "null") + ")");
                 if (autoAccept instanceof Boolean) {
                     return (Boolean) autoAccept;
                 } else if (autoAccept instanceof Integer) {
                     return ((Integer) autoAccept) == 1;
+                } else if (autoAccept instanceof java.math.BigDecimal) { // TINYINT(1)이 BigDecimal로 반환될 경우 대비
+                    return ((java.math.BigDecimal) autoAccept).intValue() == 1;
                 }
             }
 
@@ -174,6 +195,7 @@ public class ReservationAutomationService {
      * 예약 자동 승인
      */
     private void autoApproveReservation(Reservation reservation) {
+        // reservationService.updateReservationStatus가 호출되면 내부적으로 이메일 발송 로직(sendConfirmationEmail)이 실행됩니다.
         boolean success = reservationService.updateReservationStatus(reservation.getId(), "CONFIRMED");
 
         if (success) {
@@ -203,15 +225,40 @@ public class ReservationAutomationService {
     /**
      * 승인 알림 발송
      */
-    private void sendApprovalNotification(Reservation reservation) {
-        String message = String.format(
-            "[%s] 예약이 승인되었습니다. 날짜: %s, 인원: %d명",
-            reservation.getRestaurantName(),
-            reservation.getReservationTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-            reservation.getPartySize()
-        );
+    private void sendApprovalNotification(Reservation reservation) {        
+        // 1. 이메일 발송 시도
+        try {
+            User user = userService.getUserById(reservation.getUserId());
+            if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
+                String subject = String.format("[%s] 예약이 자동으로 확정되었습니다.", reservation.getRestaurantName());
+                String emailBody = String.format(
+                    "안녕하세요, %s님.\n\n요청하신 예약이 자동으로 승인되었습니다.\n\n- 식당: %s\n- 예약 시간: %s\n- 인원: %d명\n\nMEETLOG를 이용해주셔서 감사합니다.",
+                    user.getNickname(), reservation.getRestaurantName(), reservation.getReservationTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), reservation.getPartySize()
+                );
+                util.EmailUtil.sendEmail(user.getEmail(), subject, emailBody);
+                System.out.println("자동 승인 이메일 발송 시도: " + user.getEmail());
+            } else {
+                System.out.println("자동 승인 이메일 발송 스킵: 사용자 이메일 정보 없음 (userId=" + reservation.getUserId() + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("예약 자동 승인 이메일 발송 중 오류 발생: reservationId=" + reservation.getId());
+            e.printStackTrace();
+        }
 
-        sendNotification(reservation, ReservationNotification.NotificationType.SMS, message);
+        // 2. SMS 발송 시도 (이메일 발송 성공 여부와 관계없이 실행)
+        try {
+            String smsMessage = String.format(
+                "[%s] 예약이 자동으로 승인되었습니다. 날짜: %s, 인원: %d명. 자세한 내용은 앱 또는 이메일을 확인해주세요.",
+                reservation.getRestaurantName(),
+                reservation.getReservationTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                reservation.getPartySize()
+            );
+            sendNotification(reservation, ReservationNotification.NotificationType.SMS, smsMessage);
+            System.out.println("자동 승인 SMS 발송 시도: " + reservation.getContactPhone());
+        } catch (Exception e) {
+            System.err.println("예약 자동 승인 SMS 발송 중 오류 발생: reservationId=" + reservation.getId());
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -13,7 +13,10 @@ import dao.CouponUsageLogDAO;
 import dao.ReservationDAO;
 import dao.UserCouponDAO;
 import model.Reservation;
+import model.User;
 import util.MyBatisSqlSessionFactory;
+import util.EmailUtil;
+
 import java.math.BigDecimal;
 
 public class ReservationService {
@@ -22,6 +25,7 @@ public class ReservationService {
     private final CouponUsageLogDAO couponUsageLogDAO = new CouponUsageLogDAO();
     private final PointService pointService = new PointService();
     private final TelegramService telegramService = new TelegramService();
+    private final UserService userService = new UserService(); // UserService 추가
     private static final Logger log = LoggerFactory.getLogger(ReservationService.class);
     
     // --- Read Operations ---
@@ -98,6 +102,11 @@ public class ReservationService {
             try {
                 int result = reservationDAO.updateStatus(reservationId, status, sqlSession);
                 if (result > 0) {
+                    // 예약 확정 시 이메일 발송
+                    if ("CONFIRMED".equals(status)) {
+                        sendConfirmationEmail(reservationId);
+                    }
+
                     sqlSession.commit();
                     return true;
                 }
@@ -107,6 +116,38 @@ public class ReservationService {
             }
         }
         return false;
+    }
+
+    /**
+     * 예약 확정 이메일을 발송합니다.
+     * @param reservationId 예약 ID
+     */
+    private void sendConfirmationEmail(int reservationId) {
+        try {
+            Reservation reservation = getReservationById(reservationId);
+            if (reservation == null) {
+                log.warn("확정 이메일 발송 실패: 예약을 찾을 수 없음 (reservationId={})", reservationId);
+                return;
+            }
+
+            User user = userService.getUserById(reservation.getUserId());
+            if (user == null || user.getEmail() == null || user.getEmail().isEmpty()) {
+                log.warn("확정 이메일 발송 실패: 사용자 또는 이메일 정보 없음 (userId={})", reservation.getUserId());
+                return;
+            }
+
+            String subject = String.format("[%s] 예약이 확정되었습니다.", reservation.getRestaurantName());
+            String body = String.format(
+                "안녕하세요, %s님.\n\n요청하신 예약이 확정되었습니다.\n\n- 식당: %s\n- 예약 시간: %s\n- 인원: %d명\n\nMEETLOG를 이용해주셔서 감사합니다.",
+                user.getNickname(),
+                reservation.getRestaurantName(),
+                reservation.getFormattedReservationTime(),
+                reservation.getPartySize());
+
+            EmailUtil.sendEmail(user.getEmail(), subject, body);
+        } catch (Exception e) {
+            log.error("예약 확정 이메일 발송 중 오류 발생: reservationId={}", reservationId, e);
+        }
     }
 
     public boolean cancelReservation(int reservationId, String cancelReason) {

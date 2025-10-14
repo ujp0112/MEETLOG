@@ -34,6 +34,7 @@ import service.RestaurantService;
 import service.UserCouponService;
 import service.UserCouponService.CouponValidationResult;
 import service.payment.NaverPayService;
+import util.EmailUtil;
 import service.payment.PaymentGatewayService;
 
 @WebServlet("/reservation/*")
@@ -411,6 +412,27 @@ public class ReservationServlet extends HttpServlet {
 
 			// ...
 			if (reservationService.createReservation(reservation)) {
+				// [추가] 자동 승인(autoAccept)이 true인 경우, 예약 생성 직후 확인 이메일을 발송합니다.
+				if (autoAccept) {
+					try {
+						log.info("자동 승인 예약에 대한 확인 이메일 발송 시도: reservationId={}", reservation.getId());
+						String subject = String.format("[%s] 예약이 자동으로 확정되었습니다.", reservation.getRestaurantName());
+						String body = String.format(
+								"안녕하세요, %s님.\n\n" +
+										"요청하신 예약이 자동으로 승인되었습니다.\n\n" +
+										"- 식당: %s\n" +
+										"- 예약 시간: %s\n" +
+										"- 인원: %d명\n\n" +
+										"MEETLOG를 이용해주셔서 감사합니다.",
+								user.getNickname(),
+								reservation.getRestaurantName(),
+								reservation.getReservationTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+								reservation.getPartySize());
+						EmailUtil.sendEmail(user.getEmail(), subject, body);
+					} catch (Exception e) {
+						log.error("자동 승인 예약 확인 이메일 발송 중 오류 발생: reservationId={}", reservation.getId(), e);
+					}
+				}
 			    if (reservation.isDepositRequired() && reservation.getDepositAmount() != null
 			            && reservation.getDepositAmount().compareTo(BigDecimal.ZERO) > 0) {
 			        
