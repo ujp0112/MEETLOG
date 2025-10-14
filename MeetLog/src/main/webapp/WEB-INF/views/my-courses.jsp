@@ -46,7 +46,7 @@
                     </div>
                     <a href="${pageContext.request.contextPath}/course/create" 
                        class="btn-primary text-white px-6 py-3 rounded-xl font-semibold">
-                        + 새 코스 만들기
+                        🗺️ 새 코스 만들기
                     </a>
                 </div>
             </div>

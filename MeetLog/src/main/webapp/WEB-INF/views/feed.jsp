@@ -68,10 +68,10 @@
                            class="block w-full bg-pink-100 hover:bg-pink-200 text-pink-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                             찜 목록
                         </a>
-                        <a href="${pageContext.request.contextPath}/review/write" 
+                        <!-- <a href="${pageContext.request.contextPath}/review/write" 
                            class="block w-full btn-primary text-white text-center py-2 px-4 rounded-lg font-semibold">
                             리뷰 작성
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>

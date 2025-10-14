@@ -1327,11 +1327,11 @@ translateY
 }
 </style>
 </head>
-<body class="bg-slate-100">
+<body class="bg-slate-50">
 	<div id="app" class="min-h-screen flex flex-col">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
-		<main class="flex-grow">
-			<div class="container mx-auto p-4 md:p-8">
+		<main class="flex-grow bg-slate-50">
+			<div class="mx-auto w-full max-w-6xl px-4 py-10 md:px-6 md:py-14">
 				<c:choose>
 					<c:when test="${not empty restaurant}">
 						<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
@@ -1342,7 +1342,7 @@ translateY
 									<%-- 1. 외부 검색(Google 이미지)일 경우                                        --%>
 									<%-- =================================================================== --%>
 									<c:when test="${isExternal}">
-										<section class="glass-card p-8 rounded-3xl fade-in">
+										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 											<c:set var="images" value="${restaurant.additionalImages}" />
 											<c:set var="imageCount" value="${fn:length(images)}" />
 											<c:choose>
@@ -1401,7 +1401,7 @@ translateY
 									<%-- 2. 내부 DB(기존 이미지)일 경우                                         --%>
 									<%-- =================================================================== --%>
 									<c:otherwise>
-										<section class="glass-card p-8 rounded-3xl fade-in">
+										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 											<c:set var="mainImage" value="${restaurant.image}" />
 											<c:set var="additionalImages"
 												value="${restaurant.additionalImages}" />
@@ -1474,13 +1474,13 @@ translateY
 									</div>
 									<div class="overlay-bd" id="overlayGrid"></div>
 								</section>
-								<section class="glass-card p-8 rounded-3xl slide-up">
+								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 									<div class="flex items-start justify-between mb-6">
 										<div class="flex-1">
-											<h1 class="text-4xl font-bold gradient-text mb-3">${restaurant.name}</h1>
+											<h1 class="text-3xl font-extrabold text-slate-900 mb-3 md:text-4xl">${restaurant.name}</h1>
 											<div class="flex items-center space-x-3 mb-4">
-												<span class="info-badge">${restaurant.category}</span> <span
-													class="location-badge">📍 ${restaurant.location}</span>
+												<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">${restaurant.category}</span> <span
+													class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">📍 ${restaurant.location}</span>
 											</div>
 										</div>
 										<%-- ▼▼▼ [수정] isExternal 값에 따라 분기 처리 ▼▼▼ --%>
@@ -1489,7 +1489,7 @@ translateY
 											<c:when test="${isExternal}">
 												<div class="text-right">
 													<c:if test="${restaurant.rating > 0}">
-														<div class="text-5xl font-black rating-badge mb-2">
+														<div class="text-5xl font-black text-orange-500 mb-2">
 															<fmt:formatNumber value="${restaurant.rating}"
 																maxFractionDigits="1" />
 														</div>
@@ -1501,16 +1501,16 @@ translateY
 											<%-- 내부 DB 데이터일 경우 --%>
 											<c:otherwise>
 												<div class="text-right">
-													<div class="text-5xl font-black rating-badge mb-2">
+													<div class="text-5xl font-black text-orange-500 mb-2">
 														<fmt:formatNumber value="${restaurant.rating}"
 															maxFractionDigits="1" />
 													</div>
 													<div class="flex items-center justify-center mb-2">
-														<div class="rating-stars flex space-x-1">
+														<div class="flex space-x-1">
 															<c:forEach begin="1" end="5" var="star">
 																<c:choose>
 																	<c:when test="${restaurant.rating >= star}">
-																		<span class="text-yellow-400 text-2xl">★</span>
+																		<span class="text-orange-400 text-2xl">★</span>
 																	</c:when>
 																	<c:otherwise>
 																		<span class="text-slate-300 text-2xl">☆</span>
@@ -1540,11 +1540,11 @@ translateY
 									</c:if>
 								</section>
 
-								<section class="glass-card p-8 rounded-3xl slide-up">
-									<h3 class="text-2xl font-bold gradient-text mb-6">상세 정보</h3>
+								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
+									<h3 class="text-2xl font-bold text-slate-900 mb-6">상세 정보</h3>
 									<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div
-											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl card-hover">
+											class="flex items-start space-x-4 p-5 bg-orange-50 rounded-2xl border border-orange-100 transition hover:shadow-md">
 											<div class="text-2xl">🏠</div>
 											<div>
 												<span class="font-bold text-slate-700">주소</span>
@@ -1552,7 +1552,7 @@ translateY
 											</div>
 										</div>
 										<div
-											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl card-hover">
+											class="flex items-start space-x-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 transition hover:shadow-md">
 											<div class="text-2xl">📞</div>
 											<div>
 												<span class="font-bold text-slate-700">전화번호</span>
@@ -1560,7 +1560,7 @@ translateY
 											</div>
 										</div>
 										<div
-											class="flex items-start space-x-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl card-hover">
+											class="flex items-start space-x-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 transition hover:shadow-md">
 											<div class="text-2xl">🕒</div>
 											<div class="flex-1">
 												<span class="font-bold text-slate-700">영업시간</span>
@@ -1611,7 +1611,7 @@ translateY
 										</div>
 										<c:if test="${!isExternal}">
 											<div
-												class="flex items-start space-x-4 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl card-hover">
+												class="flex items-start space-x-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 transition hover:shadow-md">
 												<div class="text-2xl">🚗</div>
 												<div>
 													<span class="font-bold text-slate-700">주차</span>
@@ -1622,7 +1622,7 @@ translateY
 									</div>
 									<c:if test="${not empty restaurant.description}">
 										<div
-											class="mt-6 p-4 bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl">
+											class="mt-6 p-5 bg-orange-50 rounded-2xl border border-orange-100">
 											<h3 class="font-bold text-slate-700 mb-2">📝 가게 소개</h3>
 											<p class="text-slate-600 leading-relaxed break-words">${restaurant.description}</p>
 										</div>
@@ -1631,12 +1631,12 @@ translateY
 								<c:if test="${!isExternal}">
 									<%-- 내부 DB 맛집일 경우에만 메뉴 표시 --%>
 									<c:if test="${not empty menus}">
-										<section class="glass-card p-8 rounded-3xl slide-up">
-											<h2 class="text-2xl font-bold gradient-text mb-6">메뉴</h2>
+										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
+											<h2 class="text-2xl font-bold text-slate-900 mb-6">메뉴</h2>
 											<div class="space-y-4">
 												<c:forEach var="menu" items="${menus}">
 													<div
-														class="menu-item flex justify-between items-center p-6 border-gradient rounded-2xl bg-white/50 backdrop-blur-sm">
+														class="flex justify-between items-center p-6 rounded-2xl bg-orange-50 border border-orange-100 transition hover:shadow-md">
 														<div class="flex-1">
 															<div class="flex items-center space-x-3">
 																<h3 class="font-bold text-slate-800 text-lg">${menu.name}</h3>
@@ -1667,16 +1667,16 @@ translateY
 								</c:if>
 
 								<%-- ▼▼▼ [수정] 리뷰 섹션 시작 ▼▼▼ --%>
-								<section class="glass-card p-8 rounded-3xl slide-up">
+								<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 									<div class="flex justify-between items-center mb-6">
 										<%-- 외부/내부 데이터에 따라 리뷰 개수 표시 --%>
 										<c:choose>
 											<c:when test="${isExternal}">
-												<h2 class="text-2xl font-bold gradient-text">리뷰
+												<h2 class="text-2xl font-bold text-slate-900">리뷰
 													(${restaurant.reviewCount})</h2>
 											</c:when>
 											<c:otherwise>
-												<h2 class="text-2xl font-bold gradient-text">리뷰
+												<h2 class="text-2xl font-bold text-slate-900">리뷰
 													(${fn:length(reviews)})</h2>
 											</c:otherwise>
 										</c:choose>
@@ -1686,7 +1686,7 @@ translateY
 											test="${!isExternal and !isOwner and not empty sessionScope.user}">
 											<a
 												href="${pageContext.request.contextPath}/review/write?restaurantId=${restaurant.id}"
-												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">리뷰
+												class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">리뷰
 												작성</a>
 										</c:if>
 									</div>
@@ -1696,8 +1696,8 @@ translateY
 										<c:when test="${not empty reviews or not empty restaurant.reviews}">
 											<div id="review-list-container" class="space-y-6">
 												<c:forEach var="review" items="${reviewList}">
-													<div class="review-item" style="display: none;"> 
-														<div class="bg-white p-6 rounded-2xl h-full flex flex-col">
+													<div class="review-item" style="display: none;">
+														<div class="bg-slate-50 rounded-xl p-5 h-full flex flex-col border border-slate-100">
 															<div class="flex justify-between items-start mb-4"> <%-- 이 div 안에 '더보기' 메뉴를 넣습니다. --%>
 																<div class="flex items-start">
 																	<c:choose>
@@ -1824,7 +1824,7 @@ translateY
 														</c:if>
 														<div class="review-content-wrapper mb-4 flex-grow">
 															<p
-																class="review-text text-slate-700 leading-relaxed truncated break-words">${review.content}</p>
+																class="review-text text-slate-700 text-sm leading-relaxed truncated break-words">${review.content}</p>
 															<span
 																class="read-more-btn mt-2 inline-block cursor-pointer">더
 																보기</span>
@@ -1832,7 +1832,7 @@ translateY
 														<c:if test="${not empty review.keywords}">
 															<div class="flex flex-wrap gap-2 mb-4">
 																<c:forEach var="keyword" items="${review.keywords}">
-																	<span class="review-keyword-tag">${keyword}</span>
+																	<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">${keyword}</span>
 																</c:forEach>
 															</div>
 														</c:if>
@@ -1956,8 +1956,8 @@ translateY
 								<%-- ▲▲▲ [수정] 리뷰 섹션 끝 ▲▲▲ --%>
 
 								<c:if test="${!isExternal and not empty coupons}">
-									<section class="glass-card p-8 rounded-3xl slide-up">
-										<h2 class="text-2xl font-bold gradient-text mb-6">MEET
+									<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
+										<h2 class="text-2xl font-bold text-slate-900 mb-6">MEET
 											LOG 단독 쿠폰</h2>
 										<div class="space-y-4">
 											<c:forEach var="coupon" items="${coupons}">
@@ -1990,11 +1990,11 @@ translateY
 								</c:if>
 
 								<c:if test="${!isExternal}">
-									<section class="glass-card p-8 rounded-3xl slide-up">
+									<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 										<div class="flex justify-between items-center mb-6">
-											<h2 class="text-2xl font-bold gradient-text">❓ Q&A</h2>
+											<h2 class="text-2xl font-bold text-slate-900">❓ Q&A</h2>
 											<button onclick="toggleQnAForm()"
-												class="btn-primary text-white px-6 py-3 rounded-2xl font-semibold">💬
+												class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">💬
 												문의하기</button>
 										</div>
 										<div id="qnaForm" class="hidden mb-8">
@@ -2077,8 +2077,8 @@ translateY
 
 							<div class="space-y-8">
 								<section
-									class="glass-card p-8 rounded-3xl slide-up map-trigger cursor-pointer">
-									<div id="map" class="w-full h-64 rounded-2xl border"></div>
+									class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8 map-trigger cursor-pointer">
+									<div id="map" class="w-full h-64 rounded-2xl border border-slate-200"></div>
 								</section>
 
 								<%-- 1. 서블릿에서 전달받은 reservationSettings 객체를 사용하여 예약 활성화 여부를 체크합니다. --%>
@@ -2093,9 +2093,9 @@ translateY
 										<input type="hidden" id="selectedTime" name="reservationTime"
 											value="">
 
-										<section class="glass-card p-8 rounded-3xl slide-up"
+										<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8"
 											style="margin-top: 32px">
-											<h3 class="text-2xl font-bold gradient-text mb-6">온라인 예약</h3>
+											<h3 class="text-2xl font-bold text-slate-900 mb-6">온라인 예약</h3>
 
 											<div class="space-y-6">
 												<div>
@@ -2128,7 +2128,7 @@ translateY
 													</div>
 												</div>
 												<button type="submit"
-													class="w-full btn-primary text-white py-4 rounded-2xl font-bold block text-center pulse-glow">예약하기</button>
+													class="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-full font-bold block text-center shadow-sm transition hover:-translate-y-0.5">예약하기</button>
 											</div>
 										</section>
 									</form>

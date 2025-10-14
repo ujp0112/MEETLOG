@@ -65,7 +65,11 @@
                             <c:when test="${isOwnProfile}">
                                 <a href="${pageContext.request.contextPath}/mypage"
                                    class="block w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
-                                    내 프로필 편집
+                                    내 프로필
+                                </a>
+                                <a href="${pageContext.request.contextPath}/wishlist" 
+                                    class="block w-full bg-pink-100 hover:bg-pink-200 text-pink-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
+                                     찜 목록
                                 </a>
                                 <a href="${pageContext.request.contextPath}/feed"
                                    class="block w-full btn-primary text-white text-center py-2 px-4 rounded-lg font-semibold">
