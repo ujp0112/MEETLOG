@@ -110,6 +110,8 @@ public class CourseServlet extends HttpServlet {
 			handleDeleteCourseComment(request, response);
 		} else if ("/comment/update".equals(path)) {
 			handleUpdateCourseComment(request, response);
+		} else if ("/comment/like".equals(path)) { // [추가] 댓글 좋아요 토글 라우팅
+			handleToggleCourseCommentLike(request, response);
 		} else {
 			response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
@@ -350,6 +352,16 @@ public class CourseServlet extends HttpServlet {
 				}
 			} catch (Exception e) {
 				System.err.println("찜 상태 확인 중 오류: " + e.getMessage());
+			}
+		}
+
+		// [추가] 각 댓글에 대한 현재 사용자의 좋아요 상태 설정
+		if (session != null && session.getAttribute("user") != null) {
+			User user = (User) session.getAttribute("user");
+			List<model.CourseComment> comments = courseCommentService.getCommentsByCourse(courseId);
+			for (model.CourseComment comment : comments) {
+				boolean liked = courseCommentService.isCommentLiked(comment.getId(), user.getId());
+				comment.setLike(liked);
 			}
 		}
 
@@ -947,6 +959,37 @@ public class CourseServlet extends HttpServlet {
 			e.printStackTrace();
 			writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 					Map.of("success", false, "message", "댓글 수정 중 오류가 발생했습니다."));
+		}
+	}
+
+	/**
+	 * [추가] 코스 댓글 좋아요 토글 핸들러
+	 */
+	private void handleToggleCourseCommentLike(HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
+		HttpSession session = request.getSession(false);
+		if (session == null || session.getAttribute("user") == null) {
+			writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,
+					Map.of("success", false, "message", "로그인이 필요합니다."));
+			return;
+		}
+
+		User user = (User) session.getAttribute("user");
+
+		try {
+			int commentId = Integer.parseInt(request.getParameter("commentId"));
+			Map<String, Object> result = courseCommentService.toggleCommentLike(commentId, user.getId());
+
+			writeJson(response, HttpServletResponse.SC_OK,
+					Map.of("success", true, "isLiked", result.get("isLiked"), "likeCount", result.get("likeCount")));
+
+		} catch (NumberFormatException e) {
+			writeJson(response, HttpServletResponse.SC_BAD_REQUEST,
+					Map.of("success", false, "message", "잘못된 댓글 ID입니다."));
+		} catch (Exception e) {
+			e.printStackTrace();
+			writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+					Map.of("success", false, "message", "서버 오류가 발생했습니다."));
 		}
 	}
 

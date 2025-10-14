@@ -16,6 +16,7 @@ public class CourseComment {
     private String nickname;
     private String profileImage;
     private String createdAtFormatted;
+    // [추가] 현재 사용자의 좋아요 여부
     private boolean isLiked;
     
     public boolean getLike() {
