@@ -73,8 +73,20 @@ public class ColumnServlet extends HttpServlet {
 				columnService.incrementViews(columnId);
 				Column column = columnService.getColumnById(columnId);
 
+				// 현재 로그인한 사용자 정보 가져오기
+				HttpSession session = request.getSession(false);
+				User currentUser = (session != null) ? (User) session.getAttribute("user") : null;
+
 				// 댓글 목록 조회
 				List<ColumnComment> comments = columnCommentService.getCommentsByColumnId(columnId);
+
+				// 로그인한 경우, 각 댓글에 대한 좋아요 상태 설정
+				if (currentUser != null) {
+					for (ColumnComment comment : comments) {
+						boolean isLiked = columnCommentService.isCommentLiked(comment.getId(), currentUser.getId());
+						comment.setIsLiked(isLiked);
+					}
+				}
 				int commentCount = columnCommentService.getCommentCount(columnId);
 
 				// [추가] 칼럼에 연결된 맛집 목록 조회 로직

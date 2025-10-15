@@ -99,6 +99,16 @@
   WHERE company_id = #{companyId} AND branch_id = #{branchId}
 </select>
 
+<select id="getTotalOrderCountForCompany" parameterType="map" resultType="int">
+  SELECT COUNT(*)
+  FROM purchase_order po
+  WHERE po.company_id = #{companyId}
+  <if test="status != null and status != ''">
+      AND po.status = #{status}
+  </if>
+</select>
+
+
   <select id="listOrdersForCompany" parameterType="map" resultMap="PurchaseOrderMap">
     SELECT 
         po.*, 

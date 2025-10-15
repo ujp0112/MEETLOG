@@ -28,7 +28,7 @@ import util.AppConfig;
 public class HqPromotionServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private final PromotionService promotionService = new PromotionService();
-    private static final int PAGE_SIZE = 9; // 카드 UI에 맞춰 3의 배수로 설정
+    private static final int PAGE_SIZE = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

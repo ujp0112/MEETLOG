@@ -158,12 +158,12 @@
                                 <h2 class="mt-3 text-3xl font-black md:text-4xl">오늘의 추천 코스</h2>
                                 <p class="mt-4 text-sm text-white/80 md:text-base">미식 전문가가 선택한 루트를 따라 완벽한 하루를 경험해 보세요. 인기 지역과 신규 오픈 맛집을 한 번에 만날 수 있어요.</p>
                             </div>
-                            <c:if test="${not empty sessionScope.user}">
+                            <!-- <c:if test="${not empty sessionScope.user}">
                                 <a href="${pageContext.request.contextPath}/course/official"
                                    class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5">
                                     추천 코스 더 보기
                                 </a>
-                            </c:if>
+                            </c:if> -->
                         </div>
                     </div>
 

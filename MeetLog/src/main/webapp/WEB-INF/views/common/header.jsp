@@ -152,7 +152,7 @@
 												대시보드</a>
 											<a
 												href="${pageContext.request.contextPath}/business/restaurants"
-												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙
+												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏢
 												지점 관리</a>
 											<a href="${pageContext.request.contextPath}/hq/notice"
 												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✉
@@ -179,7 +179,7 @@
 												대시보드</a>
 											<a
 												href="${pageContext.request.contextPath}/business/restaurants"
-												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙
+												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏢
 												내 가게 관리</a>
 											<a
 												href="${pageContext.request.contextPath}/business/restaurants/add"
@@ -218,7 +218,7 @@
 												대시보드</a>
 											<a
 												href="${pageContext.request.contextPath}/business/restaurants"
-												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🍙
+												class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🏢
 												내 가게 관리</a>
 											<a
 												href="${pageContext.request.contextPath}/coupon-management"
@@ -281,7 +281,7 @@
 										class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📁
 										내가 찜한 목록</a> <a
 										href="${pageContext.request.contextPath}/mypage/reviews"
-										class="block px-4 py-2 text-slate-700 hover:bg-slate-100">✨
+										class="block px-4 py-2 text-slate-700 hover:bg-slate-100">📝
 										내 리뷰 관리</a> <a
 										href="${pageContext.request.contextPath}/mypage/settings"
 										class="block px-4 py-2 text-slate-700 hover:bg-slate-100">🔧
@@ -337,7 +337,7 @@
 									class="mobile-nav-link">📊 대시보드</a>
 								<a
 									href="${pageContext.request.contextPath}/business/restaurants"
-									class="mobile-nav-link">🍙 지점 관리</a>
+									class="mobile-nav-link">🏢 지점 관리</a>
 								<a href="${pageContext.request.contextPath}/hq/notice"
 									class="mobile-nav-link">✉ 사내 공지 관리</a>
 								<a href="${pageContext.request.contextPath}/hq/recipe"
@@ -354,7 +354,7 @@
 									class="mobile-nav-link">📊 대시보드</a>
 								<a
 									href="${pageContext.request.contextPath}/business/restaurants"
-									class="mobile-nav-link">🍙 내 가게 관리</a>
+									class="mobile-nav-link">🏢 내 가게 관리</a>
 								<a
 									href="${pageContext.request.contextPath}/business/restaurants/add"
 									class="mobile-nav-link">➕ 새 음식점 등록</a>
@@ -379,7 +379,7 @@
 									class="mobile-nav-link">📊 대시보드</a>
 								<a
 									href="${pageContext.request.contextPath}/business/restaurants"
-									class="mobile-nav-link">🍙 내 가게 관리</a>
+									class="mobile-nav-link">🏢 내 가게 관리</a>
 								<a href="${pageContext.request.contextPath}/coupon-management"
 									class="mobile-nav-link">🎟️ 쿠폰 관리</a>
 								<a

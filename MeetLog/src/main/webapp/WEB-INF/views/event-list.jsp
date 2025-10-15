@@ -94,10 +94,10 @@
                                         </div>
                                         <div class="mt-auto flex items-center justify-between border-t border-slate-100 pt-4 text-sm text-slate-500">
                                             <div class="flex items-center gap-3">
-                                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+                                                <span class="inline-flex h-1 w-1 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
+                                                    <!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
                                                         <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm9 8h-4v3h4v-3z" />
-                                                    </svg>
+                                                    </svg> -->
                                                 </span>
                                                 <div class="leading-tight">
                                                     <p class="text-xs font-semibold text-slate-400">이벤트 기간</p>
@@ -115,7 +115,7 @@
                     </c:when>
                     <c:otherwise>
                         <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-8 py-16 text-center">
-                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-4xl">🎉</div>
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-4xl"></div>
                             <h3 class="mt-6 text-xl font-bold text-slate-800">열려 있는 이벤트가 없습니다.</h3>
                             <p class="mt-2 text-sm text-slate-500">새로운 이벤트가 등록되면 가장 먼저 알려드릴게요.</p>
                         </div>
@@ -165,7 +165,7 @@
                         </c:when>
                         <c:otherwise>
                             <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/80 px-8 py-16 text-center">
-                                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl">⏰</div>
+                                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl"></div>
                                 <h3 class="mt-6 text-xl font-bold text-slate-800">아직 종료된 이벤트가 없습니다.</h3>
                                 <p class="mt-2 text-sm text-slate-500">진행이 끝난 이벤트는 이곳에서 순차적으로 확인할 수 있어요.</p>
                             </div>

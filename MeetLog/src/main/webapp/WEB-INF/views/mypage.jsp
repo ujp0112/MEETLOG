@@ -142,7 +142,7 @@
                                     </a>
                                     <a href="${pageContext.request.contextPath}/mypage/coupons"
                                        class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
-                                         <div class="text-3xl mb-2">🎫</div>
+                                         <div class="text-3xl mb-2">🎟️</div>
                                         <h4 class="font-bold text-slate-800">내 쿠폰</h4>
                                          <p class="text-sm text-slate-600">쿠폰 관리 및 사용</p>
                                     </a>

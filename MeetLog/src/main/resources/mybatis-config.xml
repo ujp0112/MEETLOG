@@ -88,6 +88,7 @@
 			resource="mappers/CourseReservationManagementMapper.xml" />
 		<mapper resource="mappers/CourseReviewManagementMapper.xml" />
 		<mapper resource="mappers/CourseStatisticsMapper.xml" />
+		<mapper resource="mappers/CourseCommentLikeMapper.xml" />
 		<mapper resource="mappers/CouponMapper.xml" />
 		<mapper resource="mappers/UserCouponMapper.xml" />
 		<mapper resource="mappers/CouponUsageLogMapper.xml" />

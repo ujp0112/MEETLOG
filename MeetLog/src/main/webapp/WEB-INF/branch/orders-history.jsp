@@ -13,8 +13,8 @@
 </c:if>
 <c:set var="totalCount"
     value="${empty requestScope.totalCount ? 0 : requestScope.totalCount}" />
-<c:set var="totalPages"
-    value="${(totalCount + pageSize - 1) / pageSize}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
 <c:if test="${totalPages lt 1}">
     <c:set var="totalPages" value="1" />
 </c:if>
@@ -29,7 +29,6 @@
 <c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
 <c:set var="nextPage"
     value="${hasNext ? (currentPage + 1) : totalPages}" />
-<c:set var="baseUrl" value="${pageContext.request.requestURI}" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -149,10 +148,10 @@
                         </div>
                         <div class="right">
                             <div class="btn-group">
-                                <c:url var="firstUrl" value="${baseUrl}"><c:param name="page" value="1" /></c:url>
-                                <c:url var="prevUrl" value="${baseUrl}"><c:param name="page" value="${prevPage}" /></c:url>
-                                <c:url var="nextUrl" value="${baseUrl}"><c:param name="page" value="${nextPage}" /></c:url>
-                                <c:url var="lastUrl" value="${baseUrl}"><c:param name="page" value="${totalPages}" /></c:url>
+                                <c:url var="firstUrl" value="/branch/orders-history"><c:param name="page" value="1" /></c:url>
+                                <c:url var="prevUrl" value="/branch/orders-history"><c:param name="page" value="${prevPage}" /></c:url>
+                                <c:url var="nextUrl" value="/branch/orders-history"><c:param name="page" value="${nextPage}" /></c:url>
+                                <c:url var="lastUrl" value="/branch/orders-history"><c:param name="page" value="${totalPages}" /></c:url>
                                 <a class="btn sm" href="${firstUrl}" aria-disabled="${not hasPrev}">≪</a>
                                 <a class="btn sm" href="${prevUrl}" aria-disabled="${not hasPrev}">‹</a>
                                 <a class="btn sm" href="${nextUrl}" aria-disabled="${not hasNext}">›</a>

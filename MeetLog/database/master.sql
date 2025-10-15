@@ -186,6 +186,7 @@ CREATE TABLE `course_comments` (
   `comment_id` int(11) NOT NULL AUTO_INCREMENT,
   `course_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `like_count` int(11) DEFAULT 0,
   `content` text NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -1224,7 +1225,7 @@ INSERT IGNORE INTO `reviews` VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있�
 INSERT IGNORE INTO `column_comments` VALUES (3,3,10,'ㅎㅇ',NULL,0,1,'2025-09-27 14:51:21','2025-09-27 14:51:21'), (4,15,10,'지쟈스',NULL,0,1,'2025-09-27 16:42:45','2025-09-28 19:49:44');
 INSERT IGNORE INTO `column_likes` VALUES (1,3,10,'2025-09-27 14:51:16'),(2,15,10,'2025-09-27 14:58:15');
 INSERT IGNORE INTO `comment_likes` VALUES (1,1,10,'2025-09-27 14:51:16');
-INSERT IGNORE INTO `course_comments` VALUES (1,4,10,'굿','2025-09-28 00:20:16','2025-09-28 00:26:41',0), (2,4,10,'ㄱㄱ','2025-09-28 00:32:44','2025-09-28 00:32:49',1);
+INSERT IGNORE INTO `course_comments` VALUES (1,4,10,0,'굿','2025-09-28 00:20:16','2025-09-28 00:26:41',0), (2,4,10,0,'ㄱㄱ','2025-09-28 00:32:44','2025-09-28 00:32:49',1);
 INSERT IGNORE INTO `feed_items` VALUES (6,4,'COURSE',1,1,'2025-09-28 00:42:58'),(7,3,'COURSE',3,1,'2025-09-28 00:42:58'),(8,3,'COURSE',4,1,'2025-09-28 00:42:58');
 INSERT IGNORE INTO `follows` VALUES (6,10,7,1,'2025-09-27 16:20:45'),(7,10,3,1,'2025-09-27 16:21:01'),(8,10,2,1,'2025-09-27 16:53:42');
 INSERT IGNORE INTO `restaurant_operating_hours` VALUES (8,33,2,'00:00:00','22:00:00'),(9,33,3,'00:00:00','22:00:00'),(10,33,4,'00:00:00','22:00:00'),(11,33,5,'00:00:00','22:00:00'),(12,33,6,'00:00:00','22:00:00'),(13,33,7,'00:00:00','22:00:00');
@@ -1868,3 +1869,16 @@ VALUES
 
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+CREATE TABLE `course_comment_likes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `comment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `created_at` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_course_comment_user` (`comment_id`,`user_id`),
+  KEY `idx_course_comment_likes_comment_id` (`comment_id`),
+  KEY `idx_course_comment_likes_user_id` (`user_id`),
+  CONSTRAINT `course_comment_likes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `course_comments` (`comment_id`) ON DELETE CASCADE,
+  CONSTRAINT `course_comment_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

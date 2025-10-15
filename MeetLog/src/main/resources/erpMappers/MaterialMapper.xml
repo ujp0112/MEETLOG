@@ -65,4 +65,20 @@
      ORDER BY name
   </select>
 
+  <select id="listByCompanyWithPaging" parameterType="map" resultMap="MaterialResult">
+    SELECT id, company_id, name, unit, unit_price, img_path, step,
+           active_yn, deleted_yn, created_at, updated_at
+      FROM material
+     WHERE company_id = #{companyId}
+       AND deleted_yn = 'N'
+     ORDER BY name
+     LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <select id="getMaterialCount" parameterType="long" resultType="int">
+    SELECT COUNT(*)
+      FROM material
+     WHERE company_id = #{companyId} AND deleted_yn = 'N'
+  </select>
+
 </mapper>

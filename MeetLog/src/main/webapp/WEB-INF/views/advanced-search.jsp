@@ -433,7 +433,7 @@
                             <!-- 키워드 필터 -->
                             <div class="filter-card md:col-span-2 lg:col-span-3">
                                 <label for="restaurant-keyword">
-                                    <span>🔍</span> 키워드
+                                    키워드
                                 </label>
                                 <input type="text"
                                        id="restaurant-keyword"
@@ -447,7 +447,7 @@
                             <!-- 음식 종류 필터 -->
                             <div class="filter-card">
                                 <label for="restaurant-category">
-                                    <span>🍜</span> 음식 종류
+                                    음식 종류
                                 </label>
                                 <select name="category" id="restaurant-category">
                                     <option value="">전체</option>
@@ -463,7 +463,7 @@
                             <!-- 가격대 필터 -->
                             <div class="filter-card">
                                 <label for="restaurant-price">
-                                    <span>💰</span> 가격대 (1인)
+                                    가격대 (1인)
                                 </label>
                                 <select name="price" id="restaurant-price">
                                     <option value="">전체</option>
@@ -477,7 +477,7 @@
                             <!-- 주차 여부 필터 -->
                             <div class="filter-card">
                                 <label for="restaurant-parking">
-                                    <span>🅿️</span> 주차 여부
+                                    주차 여부
                                 </label>
                                 <select name="parking" id="restaurant-parking">
                                     <option value="">전체</option>
@@ -491,16 +491,16 @@
 
                         <!-- 검색 버튼 -->
                         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto"
+                                    aria-label="음식점 검색 실행">
+                                검색하기
+                            </button>
                             <button type="button"
                                     onclick="resetForm()"
                                     class="btn-reset w-full sm:w-auto"
                                     aria-label="검색 필터 초기화">
                                 <span>🔄</span> 초기화
-                            </button>
-                            <button type="submit"
-                                    class="btn-search w-full sm:w-auto"
-                                    aria-label="음식점 검색 실행">
-                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
@@ -516,7 +516,7 @@
                             <!-- 키워드 필터 -->
                             <div class="filter-card md:col-span-2">
                                 <label for="review-keyword">
-                                    <span>🔍</span> 키워드
+                                    키워드
                                 </label>
                                 <input type="text"
                                        id="review-keyword"
@@ -528,7 +528,7 @@
                             <!-- 최소 평점 -->
                             <div class="filter-card">
                                 <label for="review-min-rating">
-                                    <span>⭐</span> 최소 평점
+                                    최소 평점
                                 </label>
                                 <select name="minRating" id="review-min-rating">
                                     <option value="">전체</option>
@@ -543,7 +543,7 @@
                             <!-- 최대 평점 -->
                             <div class="filter-card">
                                 <label for="review-max-rating">
-                                    <span>⭐</span> 최대 평점
+                                    최대 평점
                                 </label>
                                 <select name="maxRating" id="review-max-rating">
                                     <option value="">전체</option>
@@ -558,7 +558,7 @@
                             <!-- 시작 날짜 -->
                             <div class="filter-card">
                                 <label for="review-start-date">
-                                    <span>📅</span> 시작 날짜
+                                    시작 날짜
                                 </label>
                                 <input type="date"
                                        id="review-start-date"
@@ -569,7 +569,7 @@
                             <!-- 종료 날짜 -->
                             <div class="filter-card">
                                 <label for="review-end-date">
-                                    <span>📅</span> 종료 날짜
+                                    종료 날짜
                                 </label>
                                 <input type="date"
                                        id="review-end-date"
@@ -580,15 +580,16 @@
 
                         <!-- 검색 버튼 -->
                         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                검색하기
+                            </button>
                             <button type="button"
                                     onclick="resetForm()"
                                     class="btn-reset w-full sm:w-auto">
                                 <span>🔄</span> 초기화
                             </button>
-                            <button type="submit"
-                                    class="btn-search w-full sm:w-auto">
-                                <span>🔍</span> 검색하기
-                            </button>
+
                         </div>
                     </form>
                 </div>
@@ -603,7 +604,7 @@
                             <!-- 시작 날짜 -->
                             <div class="filter-card">
                                 <label for="reservation-start-date">
-                                    <span>📅</span> 시작 날짜
+                                    시작 날짜
                                 </label>
                                 <input type="date"
                                        id="reservation-start-date"
@@ -614,7 +615,7 @@
                             <!-- 종료 날짜 -->
                             <div class="filter-card">
                                 <label for="reservation-end-date">
-                                    <span>📅</span> 종료 날짜
+                                    종료 날짜
                                 </label>
                                 <input type="date"
                                        id="reservation-end-date"
@@ -625,14 +626,14 @@
 
                         <!-- 검색 버튼 -->
                         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                검색하기
+                            </button>
                             <button type="button"
                                     onclick="resetForm()"
                                     class="btn-reset w-full sm:w-auto">
                                 <span>🔄</span> 초기화
-                            </button>
-                            <button type="submit"
-                                    class="btn-search w-full sm:w-auto">
-                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
@@ -648,7 +649,7 @@
                             <!-- 키워드 필터 -->
                             <div class="filter-card">
                                 <label for="column-keyword">
-                                    <span>🔍</span> 키워드
+                                    키워드
                                 </label>
                                 <input type="text"
                                        id="column-keyword"
@@ -660,14 +661,14 @@
 
                         <!-- 검색 버튼 -->
                         <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button type="submit"
+                                    class="btn-search w-full sm:w-auto">
+                                검색하기
+                            </button>
                             <button type="button"
                                     onclick="resetForm()"
                                     class="btn-reset w-full sm:w-auto">
                                 <span>🔄</span> 초기화
-                            </button>
-                            <button type="submit"
-                                    class="btn-search w-full sm:w-auto">
-                                <span>🔍</span> 검색하기
                             </button>
                         </div>
                     </form>
@@ -691,7 +692,7 @@
 
                         <!-- 결과 없음 메시지 -->
                         <div id="no-restaurant-results" class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center" style="display: none;">
-                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-4xl">🔍</div>
+                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-4xl"></div>
                             <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 음식점이 없습니다</p>
                             <p class="mt-2 text-sm text-slate-500">필터를 조정하거나 다른 키워드로 검색해보세요</p>
                         </div>
@@ -764,14 +765,14 @@
                                 <c:choose>
                                     <c:when test="${submitted}">
                                         <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
-                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-4xl">📝</div>
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-purple-50 text-4xl"></div>
                                             <p class="mt-6 text-xl font-bold text-slate-800">조건에 맞는 리뷰가 없습니다</p>
                                             <p class="mt-2 text-sm text-slate-500">다른 조건으로 검색해보세요</p>
                                         </div>
                                     </c:when>
                                     <c:otherwise>
                                         <div class="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 px-8 py-16 text-center">
-                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl">🔍</div>
+                                            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-4xl"></div>
                                             <p class="mt-6 text-base text-slate-600">검색 조건을 입력한 뒤 검색 버튼을 눌러보세요</p>
                                         </div>
                                     </c:otherwise>

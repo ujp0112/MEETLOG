@@ -162,7 +162,6 @@
                     </c:when>
                     <c:otherwise>
                         <div class="text-center py-16">
-                            <div class="text-8xl mb-6">❓</div>
                             <h3 class="text-2xl font-bold text-slate-600 mb-4">Q&A가 없습니다</h3>
                             <p class="text-slate-500">아직 고객의 문의사항이 없습니다.</p>
                         </div>

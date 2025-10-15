@@ -56,4 +56,15 @@ public class CourseCommentDAO {
             return result;
         }
     }
+    
+    public int checkLike(int commentId, int userId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            Map<String, Object> params = Map.of(
+                    "commentId", commentId,
+                    "userId", userId
+            );
+            int result = session.selectOne(NAMESPACE + ".checkLike", params);
+            return result;
+        }
+    }
 }

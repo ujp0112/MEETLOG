@@ -68,10 +68,10 @@
                            class="block w-full bg-pink-100 hover:bg-pink-200 text-pink-700 text-center py-2 px-4 rounded-lg font-semibold transition-colors">
                             찜 목록
                         </a>
-                        <a href="${pageContext.request.contextPath}/review/write" 
+                        <!-- <a href="${pageContext.request.contextPath}/review/write" 
                            class="block w-full btn-primary text-white text-center py-2 px-4 rounded-lg font-semibold">
                             리뷰 작성
-                        </a>
+                        </a> -->
                     </div>
                 </div>
             </div>
@@ -229,7 +229,6 @@
                         </c:when>
                         <c:otherwise>
                             <div class="glass-card p-12 rounded-3xl text-center">
-                                <div class="text-6xl mb-4">📱</div>
                                 <h3 class="text-2xl font-bold text-slate-800 mb-4">아직 피드가 비어있습니다</h3>
                                 <p class="text-slate-600 mb-6">
                                     <c:choose>

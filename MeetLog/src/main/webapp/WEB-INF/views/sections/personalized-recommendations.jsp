@@ -6,7 +6,7 @@
 <section class="mb-12" aria-labelledby="recommendations-title">
     <div class="flex justify-between items-center mb-6">
         <h2 id="recommendations-title" class="text-2xl md:text-3xl font-bold">
-            ✨ ${user.nickname}님을 위한 맞춤 추천
+            ${user.nickname}님을 위한 맞춤 추천
         </h2>
         <%-- <a href="${pageContext.request.contextPath}/recommendation/personalized"
            class="text-sky-600 hover:text-sky-700 font-semibold text-sm">

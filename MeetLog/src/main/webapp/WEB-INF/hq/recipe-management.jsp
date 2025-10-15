@@ -7,6 +7,18 @@
 <%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
+<%-- 페이지네이션 변수 설정 --%>
+<c:set var="pageSize" value="${requestScope.pageSize}" />
+<c:set var="currentPage" value="${requestScope.currentPage}" />
+<c:set var="totalCount" value="${requestScope.totalCount}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
+<c:set var="hasPrev" value="${currentPage > 1}" />
+<c:set var="hasNext" value="${currentPage < totalPages}" />
+<c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
+<c:set var="nextPage"
+	value="${hasNext ? (currentPage + 1) : totalPages}" />
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -342,7 +354,7 @@ table.sheet {
 	<main>
 		<section class="panel" aria-labelledby="pageTitle">
 			<div class="hd">
-				<h1 id="pageTitle" class="title">레시피 관리 - 테스트</h1>
+				<h1 id="pageTitle" class="title">레시피 관리</h1>
 				<span class="pill">HQ</span>
 				<div style="flex: 1 1 auto"></div>
 			</div>
@@ -393,6 +405,22 @@ table.sheet {
 							</c:if>
 						</tbody>
 					</table>
+				</div>
+				
+				<%-- 페이지네이션 UI 추가 --%>
+				<div class="pager"
+					style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+					<div class="btn-group" style="display: flex; gap: 6px;">
+						<a class="btn btn-sm" href="?page=1" aria-disabled="${not hasPrev}">≪</a>
+						<a class="btn btn-sm" href="?page=${prevPage}" aria-disabled="${not hasPrev}">‹</a>
+						<a class="btn btn-sm" href="?page=${nextPage}" aria-disabled="${not hasNext}">›</a>
+						<a class="btn btn-sm" href="?page=${totalPages}" aria-disabled="${not hasNext}">≫</a>
+					</div>
+					<div class="info" style="font-size: 13px; color: var(- -muted);">
+						총 ${totalCount}건 (페이지 ${currentPage} /
+						<fmt:formatNumber value="${totalPages}" maxFractionDigits="0" />
+						)
+					</div>
 				</div>
 			</div>
 		</section>

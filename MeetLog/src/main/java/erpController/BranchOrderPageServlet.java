@@ -45,7 +45,8 @@ private final MaterialService materialService = new MaterialService();
 
     req.setAttribute("materials", pageItems);
     req.setAttribute("totalCount", totalCount);
-    req.setAttribute("page", page);
+    req.setAttribute("currentPage", page); // [수정] JSP에서 사용하는 'currentPage'로 키 이름 변경
+    req.setAttribute("pageSize", pageSize); // [수정] pageSize를 request에 추가
 
     req.getRequestDispatcher("/WEB-INF/branch/order.jsp").forward(req, resp);
   }
