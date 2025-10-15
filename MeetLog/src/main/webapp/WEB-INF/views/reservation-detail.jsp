@@ -648,7 +648,7 @@
 
             const restaurantName = `<c:out value="${restaurant.name}" escapeXml="true"/>`;
             const pageUrl = '${page_path}';
-            const mapRedirectUrl = '${base_url}/location-map?query=' + encodeURIComponent(place);
+            const mapRedirectUrl = 'MeetLog/location-map?query=' + encodeURIComponent(place);
             const originalImageUrl = '${kakaoImageUrl}';
 
             // ▼▼▼ [최종 수정] 한글/공백이 포함된 URL을 표준 형식으로 인코딩합니다. ▼▼▼
