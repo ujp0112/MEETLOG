@@ -1307,8 +1307,12 @@ INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time
 INSERT IGNORE INTO `users` VALUES (10,'gugu@meetlog.com','구구콘','m2tFIFw+1psjCYLXjBAbUd3IY8jB6L/VCaB8eEc1tPMKgSQnC9BX/7iOREyyLBiC','BUSINESS',NULL,1,0,0,1,'2025-09-27 01:29:10','2025-09-27 01:29:10','구구','0299999999','도산대로1');
 INSERT IGNORE INTO `companies` VALUES (1,'구구콘','2025-09-27 01:29:10','2025-09-27 01:29:10');
 INSERT IGNORE INTO `business_users` VALUES (10,'구구콘','구구','999999999','INDIVIDUAL','APPROVED',1,'2025-09-27 01:29:10','2025-09-27 01:29:10');
-INSERT IGNORE INTO `restaurants` VALUES (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','',NULL);
-INSERT IGNORE INTO `reviews` VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,0,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL), (12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
+INSERT IGNORE INTO `restaurants` (
+    `id`, `owner_id`, `name`, `category`, `location`, `address`, `jibun_address`, `phone`, `hours`, `description`, `image`, `rating`, `review_count`, `likes`, `latitude`, `longitude`, `parking`, `is_active`, `created_at`, `updated_at`, `operating_days`, `operating_times_text`, `break_time_text`
+) VALUES (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','');
+INSERT IGNORE INTO `reviews` (
+    `id`, `restaurant_id`, `user_id`, `rating`, `content`, `images`, `keywords`, `likes`, `is_active`, `created_at`, `updated_at`, `reply_content`, `reply_created_at`
+) VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,1,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL), (12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
 INSERT IGNORE INTO `column_comments` VALUES (3,3,10,'ㅎㅇ',NULL,0,1,'2025-09-27 14:51:21','2025-09-27 14:51:21'), (4,15,10,'지쟈스',NULL,0,1,'2025-09-27 16:42:45','2025-09-28 19:49:44');
 INSERT IGNORE INTO `column_likes` VALUES (1,3,10,'2025-09-27 14:51:16'),(2,15,10,'2025-09-27 14:58:15');
 INSERT IGNORE INTO `comment_likes` VALUES (1,1,10,'2025-09-27 14:51:16');
