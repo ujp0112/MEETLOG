@@ -40,6 +40,7 @@ public class ColumnCommentLikeServlet extends HttpServlet {
 
         try {
             // JSON 본문에서 commentId 읽기
+            @SuppressWarnings("unchecked")
             Map<String, Object> requestBody = gson.fromJson(request.getReader(), Map.class);
             Object commentIdObj = requestBody.get("commentId");
 
@@ -54,12 +55,13 @@ public class ColumnCommentLikeServlet extends HttpServlet {
             int commentId = ((Number) commentIdObj).intValue();
 
             // 서비스 레이어를 통해 좋아요 토글 로직 처리
-            Map<String, Object> likeResult = columnCommentService.toggleCommentLike(commentId, userId);
+            boolean isLiked = columnCommentService.toggleCommentLike(commentId, userId);
+            int likeCount = columnCommentService.getCommentLikeCount(commentId);
 
             result.put("success", true);
-            result.put("isLiked", likeResult.get("isLiked"));
-            result.put("likeCount", likeResult.get("likeCount"));
-            result.put("message", (boolean)likeResult.get("isLiked") ? "좋아요가 반영되었습니다." : "좋아요가 취소되었습니다.");
+            result.put("isLiked", isLiked);
+            result.put("likeCount", likeCount);
+            result.put("message", isLiked ? "좋아요가 반영되었습니다." : "좋아요가 취소되었습니다.");
 
         } catch (NumberFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
