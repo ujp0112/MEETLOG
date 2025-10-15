@@ -3,6 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="mytag" tagdir="/WEB-INF/tags"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -103,6 +104,12 @@
 										<div class="bg-slate-50 p-4 rounded-lg">
 											<c:choose>
 												<c:when test="${not empty restaurant}">
+													<%-- [추가] mytag:image를 사용하여 레스토랑 이미지를 표시합니다. --%>
+													<div class="w-full h-48 mb-4 rounded-lg overflow-hidden">
+														<mytag:image fileName="${restaurant.image}"
+															altText="${restaurant.name}"
+															cssClass="w-full h-full object-cover" />
+													</div>
 													<h3 class="font-semibold text-slate-800 mb-2">${restaurant.name}</h3>
 													<p class="text-slate-600 text-sm mb-1">${restaurant.category}
 														• ${restaurant.location}</p>
@@ -539,92 +546,151 @@
 		</div>
 	</div>
 
-	<script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const fab = document.getElementById('kakao-share-fab');
-            const modal = document.getElementById('kakao-share-modal');
-            if (!fab || !modal) return;
+	<%-- ▼▼▼ [최종 수정] 카카오 공유를 위한 URL 사전 처리 로직 (공개 URL 직접 생성) ▼▼▼ --%>
+	<c:set var="public_domain"
+		value="https://tamala-multiovulate-recollectedly.ngrok-free.dev" />
+	<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+	<c:set var="base_url" value="${public_domain}${contextPath}" />
 
-            // 예약이 없거나 취소된 경우 공유 버튼 숨김
-            if (${empty reservation or reservation.status == 'CANCELLED'}) {
-                fab.style.display = 'none';
+	<%-- 
+    [수정] 
+    문제가 되었던 requestURI 대신, 올바른 공개 URL 경로를 직접 조립합니다.
+    (예: https://.../MeetLog/reservations/예약ID)
+--%>
+	<c:set var="page_path" value="MeetLog/reservation/detail/${reservation.id}" />
+
+
+	<%-- 레스토랑 대표 이미지 URL 처리 (이하 코드는 이전과 동일) --%>
+	<c:set var="kakaoImageUrl" value="" />
+	<c:choose>
+		<c:when
+			test="${not empty restaurant.image and fn:startsWith(restaurant.image, 'http')}">
+			<c:set var="kakaoImageUrl" value="${restaurant.image}" />
+		</c:when>
+		<c:when test="${not empty restaurant.image}">
+			<c:set var="kakaoImageUrl"
+				value="${base_url}/images/${restaurant.image}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="kakaoImageUrl"
+				value="https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg" />
+		</c:otherwise>
+	</c:choose>
+
+	<%-- 사용자 프로필 이미지 URL 처리 (이하 코드는 이전과 동일) --%>
+	<c:set var="kakaoProfileImageUrl" value="" />
+	<c:choose>
+		<c:when
+			test="${not empty sessionScope.user.profileImage and fn:startsWith(sessionScope.user.profileImage, 'http')}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${sessionScope.user.profileImage}" />
+		</c:when>
+		<c:when test="${not empty sessionScope.user.profileImage}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${base_url}/images/${sessionScope.user.profileImage}" />
+		</c:when>
+		<c:otherwise>
+			<c:set var="kakaoProfileImageUrl"
+				value="https://i.ibb.co/2qr3d02-a15a-4afa-a88b-989cf2a5ebea.jpg" />
+		</c:otherwise>
+	</c:choose>
+
+	<script>
+    // Kakao SDK가 초기화되었다고 가정합니다.
+    // Kakao.init('YOUR_JAVASCRIPT_KEY');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const fab = document.getElementById('kakao-share-fab');
+        const modal = document.getElementById('kakao-share-modal');
+        if (!fab || !modal) return;
+
+        if (${empty reservation or reservation.status == 'CANCELLED'}) {
+            fab.style.display = 'none';
+            return;
+        }
+
+        const backdrop = document.getElementById('kakao-share-backdrop');
+        const closeBtn = document.getElementById('kakao-share-close-btn');
+        const cancelBtn = document.getElementById('kakao-share-cancel-btn');
+        const submitBtn = document.getElementById('kakao-share-submit-btn');
+        const isUserLoggedInForShare = <c:out value="${not empty sessionScope.user}" default="false"/>;
+
+        const openModal = () => {
+            if (!isUserLoggedInForShare) {
+                alert('로그인이 필요한 기능입니다.');
+                window.location.href = '${pageContext.request.contextPath}/login';
                 return;
             }
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        };
 
-            const backdrop = document.getElementById('kakao-share-backdrop');
-            const closeBtn = document.getElementById('kakao-share-close-btn');
-            const cancelBtn = document.getElementById('kakao-share-cancel-btn');
-            const submitBtn = document.getElementById('kakao-share-submit-btn');
+        const closeModal = () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+        
+        const handleShare = () => {
+            if (!Kakao || !Kakao.isInitialized()) {
+                alert("카카오톡 공유 기능이 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
+                return;
+            }
             const dateInput = document.getElementById('meeting-date');
             const timeInput = document.getElementById('meeting-time');
             const placeInput = document.getElementById('meeting-place');
-            const isUserLoggedInForShare = <c:out value="${not empty sessionScope.user}" default="false"/>;
+            const date = dateInput.value;
+            const time = timeInput.value;
+            const place = placeInput.value.trim();
+            if (!date || !time || !place) {
+                alert('만날 날짜, 시간, 장소를 모두 입력해 주세요.');
+                return;
+            }
 
-            const openModal = () => {
-                if (!isUserLoggedInForShare) {
-                    alert('로그인이 필요한 기능입니다.');
-                    window.location.href = '${pageContext.request.contextPath}/login';
-                    return;
+            const restaurantName = `<c:out value="${restaurant.name}" escapeXml="true"/>`;
+            const pageUrl = '${page_path}';
+            const mapRedirectUrl = 'MeetLog/location-map?query=' + encodeURIComponent(place);
+            const originalImageUrl = '${kakaoImageUrl}';
+
+            // ▼▼▼ [최종 수정] 한글/공백이 포함된 URL을 표준 형식으로 인코딩합니다. ▼▼▼
+            const encodedImageUrl = encodeURI(originalImageUrl);
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+            // 카카오 캐시 문제를 피하기 위해 인코딩된 URL에 타임스탬프를 추가합니다.
+            const imageUrlWithCacheBuster = encodedImageUrl.includes('?') 
+                ? encodedImageUrl + '&t=' + new Date().getTime() 
+                : encodedImageUrl + '?t=' + new Date().getTime();
+
+            // 디버깅용 로그: 인코딩된 최종 URL이 어떻게 변하는지 확인해보세요.
+            console.log("원본 URL:", originalImageUrl);
+            console.log("인코딩된 최종 URL:", imageUrlWithCacheBuster);
+
+            const profileImageUrl = '${kakaoProfileImageUrl}';
+            const rating = parseFloat(${not empty restaurant.rating ? restaurant.rating : 0}).toFixed(1);
+            const description = `⭐ ${rating} \n[약속] ${date} ${time}\n${place}에서 만나요!`;
+            const templateId = 124985;
+
+            Kakao.Share.sendCustom({
+                templateId: templateId,
+                templateArgs: {
+                    'title': `[예약] ${restaurantName}`,
+                    'description': description,
+                    'page_url': pageUrl,
+                    'image_url': imageUrlWithCacheBuster, // 최종 URL 사용
+                    'map_redirect_url': mapRedirectUrl,
+                    'profile_name': '${sessionScope.user.nickname}',
+                    'profile_image_url': profileImageUrl
                 }
-                modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            };
-
-            const closeModal = () => {
-                modal.classList.add('hidden');
-                document.body.style.overflow = '';
-            };
+            });
             
-            const handleShare = () => {
-                if (!Kakao || !Kakao.isInitialized()) {
-                    alert("카카오톡 공유 기능이 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
-                    return;
-                }
-                
-                const date = dateInput.value;
-                const time = timeInput.value;
-                const place = placeInput.value.trim();
+            closeModal();
+        };
 
-                if (!date || !time || !place) {
-                    alert('만날 날짜, 시간, 장소를 모두 입력해 주세요.');
-                    return;
-                }
-
-                const restaurantName = `<c:out value="${restaurant.name}" escapeXml="true"/>`;
-                const pageUrl = (window.location.pathname + window.location.search).substring(1);
-                const mapRedirectUrl = `${pageContext.request.contextPath}/location-map?query=\${encodeURIComponent(place)}`;
-                
-                const rating = parseFloat(${restaurant.rating}).toFixed(1);
-                const description = `⭐ ${rating} \n[약속] ${date} ${time}\n${place}에서 만나요!`;
-                
-                const imageUrl = 'https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg';
-                const profileImageUrl = 'https://i.ibb.co/2qr30k6/avatar-placeholder.png';
-
-                const templateId = 124984; // ⚠️ 실제 템플릿 ID로 교체!
-
-                Kakao.Share.sendCustom({
-                    templateId: templateId,
-                    templateArgs: {
-                        'title': `[예약] ${restaurantName}`,
-                        'description': description,
-                        'page_url': pageUrl,
-                        'image_url': imageUrl,
-                        'map_redirect_url': mapRedirectUrl,
-                        'profile_name': '${sessionScope.user.nickname}',
-                        'profile_image_url': profileImageUrl,
-                        'comment_count': ${restaurant.reviewCount}
-                    }
-                });
-                
-                closeModal();
-            };
-
-            fab.addEventListener('click', openModal);
-            closeBtn.addEventListener('click', closeModal);
-            cancelBtn.addEventListener('click', closeModal);
-            backdrop.addEventListener('click', closeModal);
-            submitBtn.addEventListener('click', handleShare);
-        });
-    </script>
+        fab.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+        submitBtn.addEventListener('click', handleShare);
+    });
+</script>
 </body>
 </html>
