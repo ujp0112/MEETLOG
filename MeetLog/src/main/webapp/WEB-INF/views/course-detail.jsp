@@ -51,7 +51,7 @@
 								</c:when>
 								<c:when test="${not empty course.profileImage}">
 									<c:set var="authorImageUrl"
-										value="${pageContext.request.contextPath}/${course.profileImage}" />
+										value="${pageContext.request.contextPath}/images/${course.profileImage}" />
 								</c:when>
 							</c:choose>
 						</c:if>
