@@ -173,7 +173,7 @@
     <script>
     (function(){
       var nf = new Intl.NumberFormat('ko-KR');
-      var cart = new Map();
+      var cart; // Map으로 사용될 변수
       var cartList = document.querySelector('.cart-list');
       var cartEmpty = document.querySelector('.cart-empty');
       var cartTotal = document.querySelector('.cart-total');
@@ -181,6 +181,13 @@
       var cartSumEl = document.querySelector('.cart-sum');
       var orderForm = document.getElementById('orderForm');
       var orderJson = document.getElementById('orderJson');
+      var CART_STORAGE_KEY = 'branchOrderCart';
+
+      // 페이지 로드 시 sessionStorage에서 장바구니 데이터 불러오기
+      var savedCartData = sessionStorage.getItem(CART_STORAGE_KEY);
+      cart = savedCartData ? new Map(JSON.parse(savedCartData)) : new Map();
+      // 불러온 데이터로 장바구니 UI 렌더링
+      renderCart();
       
       function toNumber(v){ if(typeof v==='number') return v; if(!v) return 0; return Number(String(v).replace(/[^0-9.-]/g,''))||0; }
       function stepFix(qty, step){ step = step>0? step : 1; if(qty<=0) return 0; var k = Math.ceil(qty/step); return k*step; }
@@ -283,6 +290,9 @@
         cartCountEl.textContent = String(arr.length);
         cartSumEl.textContent = nf.format(Math.round(sum));
         orderJson.value = JSON.stringify(arr);
+
+        // 장바구니가 변경될 때마다 sessionStorage에 저장
+        sessionStorage.setItem(CART_STORAGE_KEY, JSON.stringify(Array.from(cart.entries())));
       }
       
       orderForm.addEventListener('submit', function(e){
@@ -292,6 +302,8 @@
             return;
         }
         orderJson.value = JSON.stringify(Array.from(cart.values()));
+        // 발주 요청 후 장바구니 비우기
+        sessionStorage.removeItem(CART_STORAGE_KEY);
         alert('발주 요청이 접수되었습니다.'); // For demonstration
       });
       
