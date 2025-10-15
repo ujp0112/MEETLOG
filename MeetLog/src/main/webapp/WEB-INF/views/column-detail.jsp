@@ -259,12 +259,12 @@
                                                                         </div>
                                                                     </div>
                                                                     <p id="comment-content-${comment.id}" class="mt-2 text-sm leading-relaxed text-slate-600">${comment.content}</p>
-                                                                    <!-- <div class="mt-3 flex items-center gap-4">
+                                                                    <div class="mt-3 flex items-center gap-4">
                                                                         <button id="comment-like-btn-${comment.id}" onclick="likeComment(${comment.id})" type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 transition hover:text-red-500">
                                                                             <span>❤️</span>
                                                                             <span id="comment-like-count-${comment.id}">${comment.likeCount > 0 ? comment.likeCount : 0}</span>
                                                                         </button>
-                                                                    </div> -->
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
