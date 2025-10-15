@@ -16,6 +16,15 @@ public class ColumnComment {
     private int likeCount;
     private LocalDateTime createdAt;
     private boolean isActive;
+    private boolean isLiked;
+
+    public boolean getIsLiked() {
+        return isLiked;
+    }
+
+    public void setIsLiked(boolean isLiked) {
+        this.isLiked = isLiked;
+    }
 
     public ColumnComment() {
         // Default constructor

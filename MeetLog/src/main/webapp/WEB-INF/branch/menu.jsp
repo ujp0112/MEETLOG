@@ -98,13 +98,7 @@
     <section class="panel" aria-labelledby="pageTitle">
       <div class="hd">
         <h1 id="pageTitle" class="title">판매 메뉴 설정</h1>
-        <div class="spacer"></div>
-        <form id="searchForm" class="field" onsubmit="event.preventDefault(); reload();">
-          <span>검색</span>
-          <input id="q" placeholder="메뉴명"/>
-          <button class="btn sm" type="submit">적용</button>
-          <button class="btn sm" type="button" onclick="document.getElementById('q').value=''; reload();">초기화</button>
-        </form>
+        
       </div>
 
       <div class="bd">
@@ -177,8 +171,8 @@ function cardTpl(m){
 	}
 
 
-async function fetchList(q){
-  const url = CTX + '/branch/menus/list' + (q? ('?q=' + encodeURIComponent(q)) : '');
+async function fetchList(){
+  const url = CTX + '/branch/menus/list';
   const res = await fetch(url);
   if(!res.ok) throw new Error('목록 로딩 실패');
   return await res.json();
@@ -197,8 +191,7 @@ async function reload(){
   const grid = $('#grid'); const empty = $('#empty');
   grid.innerHTML = '';
   try{
-    const q = $('#q').value.trim();
-    const rows = await fetchList(q);
+    const rows = await fetchList();
     if(!rows || rows.length===0){ empty.style.display='block'; return; }
     empty.style.display='none';
     grid.innerHTML = rows.map(cardTpl).join('');

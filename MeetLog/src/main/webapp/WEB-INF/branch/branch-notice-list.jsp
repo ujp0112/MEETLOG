@@ -7,11 +7,14 @@
 <c:set var="pageSize" value="${requestScope.pageSize}" />
 <c:set var="currentPage" value="${requestScope.currentPage}" />
 <c:set var="totalCount" value="${requestScope.totalCount}" />
-<c:set var="totalPages" value="${(totalCount + pageSize - 1) / pageSize}" />
+<fmt:parseNumber var="totalPages" integerOnly="true"
+    value="${totalCount > 0 ? Math.floor((totalCount - 1) / pageSize) + 1 : 1}" />
 <c:set var="hasPrev" value="${currentPage > 1}" />
 <c:set var="hasNext" value="${currentPage < totalPages}" />
 <c:set var="prevPage" value="${hasPrev ? (currentPage - 1) : 1}" />
 <c:set var="nextPage" value="${hasNext ? (currentPage + 1) : totalPages}" />
+<c:set var="startIndex" value="${(currentPage - 1) * pageSize + 1}" />
+<c:set var="endIndex" value="${startIndex + fn:length(notices) - 1}" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -186,6 +189,7 @@ table.sheet {
     pointer-events: none;
     opacity: 0.5;
 }
+.pager .info { font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -228,16 +232,20 @@ table.sheet {
                     </table>
                 </div>
                 
+                <%-- [수정] inventory.jsp와 동일한 페이지네이션 UI 적용 --%>
                 <c:if test="${totalCount > 0}">
-                    <div class="pager" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-                        <div class="btn-group" style="display: flex; gap: 6px;">
-                            <a class="btn btn-sm" href="?page=1" aria-disabled="${not hasPrev}">≪</a>
-                            <a class="btn btn-sm" href="?page=${prevPage}" aria-disabled="${not hasPrev}">‹</a>
-                            <a class="btn btn-sm" href="?page=${nextPage}" aria-disabled="${not hasNext}">›</a>
-                            <a class="btn btn-sm" href="?page=${totalPages}" aria-disabled="${not hasNext}">≫</a>
+                    <div class="pager" id="mainPager">
+                        <div class="left">
+                            <div class="btn-group">
+                                <a class="btn sm" href="?page=1" aria-disabled="${not hasPrev}">≪</a>
+                                <a class="btn sm" href="?page=${prevPage}" aria-disabled="${not hasPrev}">‹</a>
+                                <a class="btn sm" href="?page=${nextPage}" aria-disabled="${not hasNext}">›</a>
+                                <a class="btn sm" href="?page=${totalPages}" aria-disabled="${not hasNext}">≫</a>
+                            </div>
+                            <span class="info">${startIndex}–${endIndex} / ${totalCount} (페이지 ${currentPage} / <fmt:formatNumber value='${totalPages}' maxFractionDigits='0' />)</span>
                         </div>
-                        <div class="info" style="font-size: 13px; color: var(--muted);">
-                            총 ${totalCount}건 (페이지 ${currentPage} / <fmt:formatNumber value="${totalPages}" maxFractionDigits="0" />)
+                        <div class="right">
+                            <span class="info">페이지당 ${pageSize}건</span>
                         </div>
                     </div>
                 </c:if>

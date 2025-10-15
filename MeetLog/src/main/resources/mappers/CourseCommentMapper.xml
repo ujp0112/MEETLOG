@@ -6,6 +6,7 @@
 <mapper namespace="dao.CourseCommentDAO">
 
     <resultMap id="CourseCommentResultMap" type="model.CourseComment">
+        <!-- [수정] like_count 매핑 추가 -->
         <id property="id" column="comment_id" />
         <result property="courseId" column="course_id" />
         <result property="userId" column="user_id" />
@@ -15,6 +16,7 @@
         <result property="active" column="is_active" />
         <result property="nickname" column="nickname" />
         <result property="profileImage" column="profile_image" />
+        <result property="likeCount" column="like_count" />
     </resultMap>
 
     <select id="findByCourseId" parameterType="int" resultMap="CourseCommentResultMap">
@@ -25,6 +27,7 @@
                cc.created_at,
                cc.updated_at,
                cc.is_active,
+               cc.like_count,
                u.nickname,
                u.profile_image
         FROM course_comments cc
@@ -42,6 +45,7 @@
                cc.created_at,
                cc.updated_at,
                cc.is_active,
+               cc.like_count,
                u.nickname,
                u.profile_image
         FROM course_comments cc
@@ -71,4 +75,19 @@
           AND is_active = TRUE
     </update>
 
+    <!-- [수정] 댓글 좋아요 수 증가 -->
+    <update id="incrementLikes" parameterType="int">
+        UPDATE course_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE comment_id = #{commentId}
+    </update>
+
+    <!-- [수정] 댓글 좋아요 수 감소 -->
+    <update id="decrementLikes" parameterType="int">
+        UPDATE course_comments SET like_count = GREATEST(COALESCE(like_count, 1) - 1, 0) WHERE comment_id = #{commentId}
+    </update>
+     <!-- [수정] 특정 댓글의 현재 좋아요 수 조회 -->
+    <select id="getLikeCount" parameterType="int" resultType="int">
+        SELECT COALESCE(like_count, 0)
+        FROM course_comments
+        WHERE comment_id = #{commentId}
+    </select>
 </mapper>

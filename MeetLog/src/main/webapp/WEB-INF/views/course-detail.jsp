@@ -304,16 +304,26 @@
 																			<p class="font-semibold text-slate-900">${comment.nickname}</p>
 																			<p class="text-xs text-slate-400">${comment.createdAtFormatted}</p>
 																		</div>
-																		<div class="flex gap-2 text-xs text-slate-400">
+																		<div class="flex items-center gap-2 text-xs text-slate-400">
 																			<c:if
 																				test="${not empty sessionScope.user && sessionScope.user.id == comment.userId}">
 																				<button type="button"
 																					class="edit-comment-btn hover:text-sky-600"
 																					data-comment-id="${comment.id}">수정</button>
-																				<button type="button"
+																		<button type="button"
 																					class="delete-comment-btn hover:text-red-500"
 																					data-comment-id="${comment.id}">삭제</button>
 																			</c:if>
+																			<button type="button"
+																				class="comment-like-btn flex items-center gap-1 hover:text-red-500 <c:if test='${comment.like}'>text-red-500</c:if>"
+																				data-comment-id="${comment.id}">
+																				<svg class="inline-block h-4 w-4"
+																					fill="<c:if test='${comment.like}'>currentColor</c:if><c:if test='${!comment.like}'>none</c:if>"
+																					stroke="currentColor" viewBox="0 0 24 24">
+																					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+																				</svg>
+																				<span class="like-count">${comment.likeCount}</span>
+																			</button>
 																		</div>
 																	</div>
 																	<p
@@ -546,6 +556,7 @@
             const saveEditButtons = document.querySelectorAll('.save-edit-btn');
             const cancelEditButtons = document.querySelectorAll('.cancel-edit-btn');
 
+            const commentLikeButtons = document.querySelectorAll('.comment-like-btn');
             // URL 복사 기능
             if (copyBtn) {
                 copyBtn.addEventListener('click', (e) => {
@@ -1004,6 +1015,63 @@
                     });
                 });
             }
+
+            // [추가] 댓글 좋아요 기능
+            if (commentLikeButtons) {
+                commentLikeButtons.forEach(button => {
+                    button.addEventListener('click', async () => {
+                        const commentId = button.getAttribute('data-comment-id');
+                        if (!commentId) return;
+
+                        if (!isUserLoggedIn) {
+                            alert('로그인이 필요합니다.');
+                            const redirectPath = '/login?redirectURL=' + encodeURIComponent('/course/detail?id=' + courseData.id);
+                            window.location.href = buildUrl(redirectPath);
+                            return;
+                        }
+
+                        try {
+                            const params = new URLSearchParams();
+                            params.append('commentId', commentId);
+
+                            const response = await fetch(buildUrl('/course/comment/like'), {
+                                method: 'POST',
+                                credentials: 'same-origin',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: params.toString()
+                            });
+
+                            const result = await parseJsonResponse(response);
+                            const data = result.data;
+
+                            if (data.success) {
+                                const svg = button.querySelector('svg');
+                                const countSpan = button.querySelector('.like-count');
+
+                                if (data.isLiked) {
+                                    button.classList.add('text-red-500');
+                                    svg.setAttribute('fill', 'currentColor');
+                                } else {
+                                    button.classList.remove('text-red-500');
+                                    svg.setAttribute('fill', 'none');
+                                }
+                                countSpan.textContent = data.likeCount;
+                            } else {
+                                alert(data.message || '오류가 발생했습니다.');
+                            }
+
+                        } catch (error) {
+                            console.error('댓글 좋아요 요청 실패:', error);
+                            alert(error.message || '요청 처리 중 오류가 발생했습니다.');
+                        }
+                    });
+                });
+            }
+
+
 
             async function addToStorage(storageId, storageName) {
                 const courseId = courseData.id;

@@ -11,11 +11,21 @@ public class CourseComment {
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private int likeCount;
     // 추가 정보 (조인 결과)
     private String nickname;
     private String profileImage;
     private String createdAtFormatted;
+    // [추가] 현재 사용자의 좋아요 여부
+    private boolean isLiked;
+    
+    public boolean getLike() {
+    	return isLiked;
+    }
+    
+    public void setLike(boolean isLiked) {
+    	this.isLiked = isLiked;
+    }
 
     public int getId() {
         return id;
@@ -96,4 +106,12 @@ public class CourseComment {
     public void setCreatedAtFormatted(String createdAtFormatted) {
         this.createdAtFormatted = createdAtFormatted;
     }
+
+	public int getLikeCount() {
+		return likeCount;
+	}
+
+	public void setLikeCount(int likeCount) {
+		this.likeCount = likeCount;
+	}
 }

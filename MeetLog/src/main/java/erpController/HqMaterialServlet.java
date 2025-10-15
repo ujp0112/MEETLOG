@@ -36,6 +36,7 @@ public class HqMaterialServlet extends HttpServlet {
 	 */
 	private static final long serialVersionUID = 1L;
 	private final MaterialService materialService = new MaterialService();
+	private static final int PAGE_SIZE = 10; // 페이지당 보여줄 재료 개수
 	private final UserService userService = new UserService();
 
 	@Override
@@ -54,8 +55,27 @@ public class HqMaterialServlet extends HttpServlet {
 		}
 
 		long companyId = bizUser.getCompanyId();
-		List<Material> materials = materialService.listByCompany(companyId);
+
+		// --- 페이지네이션 로직 시작 ---
+		int currentPage = 1;
+		try {
+			String pageParam = req.getParameter("page");
+			if (pageParam != null && !pageParam.isEmpty()) {
+				currentPage = Integer.parseInt(pageParam);
+			}
+		} catch (NumberFormatException e) {
+			currentPage = 1;
+		}
+		int offset = (currentPage - 1) * PAGE_SIZE;
+		
+		List<Material> materials = materialService.listByCompany(companyId, PAGE_SIZE, offset);
+		int totalCount = materialService.getMaterialCount(companyId);
+
 		req.setAttribute("materials", materials);
+		req.setAttribute("totalCount", totalCount);
+		req.setAttribute("currentPage", currentPage);
+		req.setAttribute("pageSize", PAGE_SIZE);
+		// --- 페이지네이션 로직 끝 ---
 
 		req.getRequestDispatcher("/WEB-INF/hq/material-management.jsp").forward(req, resp);
 	}

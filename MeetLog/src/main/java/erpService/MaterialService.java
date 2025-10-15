@@ -48,4 +48,23 @@ public class MaterialService {
       return s.selectList("MaterialMapper.listByCompany", p);
     }
   }
+  
+  public List<Material> listByCompany(long companyId, int limit, int offset) {
+	    Map<String,Object> p = new HashMap<>();
+	    p.put("companyId", companyId);
+	    p.put("limit", limit);
+	    p.put("offset", offset);
+	    try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
+	      return s.selectList("MaterialMapper.listByCompanyWithPaging", p);
+	    }
+  }
+  
+  public int getMaterialCount(long companyId) {
+	    try (SqlSession s = MyBatisSqlSessionFactory.getSqlSession()) {
+	      return s.selectOne("MaterialMapper.getMaterialCount", companyId);
+	    }
+  }
+  
+  
+  
 }

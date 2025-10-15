@@ -1,10 +1,13 @@
 package service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.ColumnComment;
 import dao.ColumnCommentDAO;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 
 public class ColumnCommentService {
     private ColumnCommentDAO columnCommentDAO = new ColumnCommentDAO();
@@ -121,25 +124,18 @@ public class ColumnCommentService {
     }
 
     /**
-     * 댓글 좋아요 토글 (이미 좋아요면 취소, 아니면 추가)
-     * @return 좋아요 상태 (true: 좋아요됨, false: 좋아요 취소됨)
+     * 특정 사용자가 특정 댓글에 좋아요를 눌렀는지 확인
+     * @param commentId 확인할 댓글 ID
+     * @param userId 확인할 사용자 ID
+     * @return 좋아요를 눌렀으면 true, 아니면 false
      */
-    public boolean toggleCommentLike(int commentId, int userId) {
+    public boolean isCommentLiked(int commentId, int userId) {
         try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
-            // 기존 좋아요 확인
-            boolean isLiked = columnCommentDAO.isCommentLikedByUser(commentId, userId, sqlSession);
-
-            if (isLiked) {
-                // 좋아요 취소
-                columnCommentDAO.removeCommentLike(commentId, userId, sqlSession);
-                sqlSession.commit();
-                return false;
-            } else {
-                // 좋아요 추가
-                columnCommentDAO.addCommentLike(commentId, userId, sqlSession);
-                sqlSession.commit();
-                return true;
-            }
+            Map<String, Object> params = new HashMap<>();
+            params.put("commentId", commentId);
+            params.put("userId", userId);
+            Integer likeId = sqlSession.selectOne("dao.CommentLikeDAO.checkLike", params);
+            return likeId != null;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -147,9 +143,51 @@ public class ColumnCommentService {
     }
 
     /**
-     * 댓글 좋아요 수 조회
+     * 댓글 좋아요 토글 (추가/취소) 및 트랜잭션 관리
+     * @param commentId 좋아요를 누른 댓글 ID
+     * @param userId 좋아요를 누른 사용자 ID
+     * @return isLiked (좋아요 상태), likeCount (최신 좋아요 수)
      */
-    public int getCommentLikeCount(int commentId) {
-        return columnCommentDAO.getCommentLikeCount(commentId);
+    public Map<String, Object> toggleCommentLike(int commentId, int userId) {
+        SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
+        Map<String, Object> result = new HashMap<>();
+        boolean isLiked;
+
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("commentId", commentId);
+            params.put("userId", userId);
+
+            // 1. 사용자가 이미 좋아요를 눌렀는지 확인
+            Integer likeId = sqlSession.selectOne("dao.CommentLikeDAO.checkLike", params);
+
+            if (likeId == null) {
+                // 2a. 좋아요 추가
+                sqlSession.insert("dao.CommentLikeDAO.addLike", params);
+                sqlSession.update("dao.ColumnCommentDAO.incrementLikes", commentId);
+                isLiked = true;
+            } else {
+                // 2b. 좋아요 취소
+                sqlSession.delete("dao.CommentLikeDAO.removeLike", params);
+                sqlSession.update("dao.ColumnCommentDAO.decrementLikes", commentId);
+                isLiked = false;
+            }
+
+            // 3. 최신 좋아요 수 조회
+            int likeCount = sqlSession.selectOne("dao.ColumnCommentDAO.getLikeCount", commentId);
+
+            sqlSession.commit(); // 모든 작업이 성공하면 커밋
+
+            result.put("isLiked", isLiked);
+            result.put("likeCount", likeCount);
+
+        } catch (Exception e) {
+            sqlSession.rollback(); // 오류 발생 시 롤백
+            e.printStackTrace();
+            throw new RuntimeException("댓글 좋아요 처리 중 오류가 발생했습니다.", e);
+        } finally {
+            sqlSession.close();
+        }
+        return result;
     }
 }

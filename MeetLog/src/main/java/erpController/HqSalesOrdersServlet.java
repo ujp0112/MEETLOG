@@ -37,12 +37,18 @@ public class HqSalesOrdersServlet extends HttpServlet {
 		// 1. JSP 페이지 로딩 처리 (e.g., /hq/sales-orders)
 		if (path == null || path.equals("/") || path.equals("/sales-orders")) {
 			int page = parseInt(req.getParameter("page"), 1);
-			int size = parseInt(req.getParameter("size"), 20);
+			int size = parseInt(req.getParameter("size"), 10);
 			String status = req.getParameter("status");
 			int offset = (page - 1) * size;
 
 			List<PurchaseOrder> list = orderService.listOrdersForCompany(companyId, status, size, offset);
+			int totalCount = orderService.getTotalOrderCountForCompany(companyId, status); // 전체 개수 조회
+
 			req.setAttribute("orders", list);
+			req.setAttribute("totalCount", totalCount);
+			req.setAttribute("currentPage", page);
+			req.setAttribute("pageSize", size);
+
 			req.getRequestDispatcher("/WEB-INF/hq/sales-orders.jsp").forward(req, resp);
 			return;
 		}
@@ -110,6 +116,9 @@ public class HqSalesOrdersServlet extends HttpServlet {
 	private static int parseInt(String s, int d) {
 		try {
 			return Integer.parseInt(s);
+		} catch (NumberFormatException e) {
+			// s가 null이거나 숫자가 아닐 때 기본값 d를 반환합니다.
+			return d;
 		} catch (Exception e) {
 			return d;
 		}
