@@ -1225,6 +1225,49 @@
 			</div>
 		</div>
 	</div>
+	<%-- ▼▼▼ [추가] 카카오 공유를 위한 이미지 URL 사전 처리 로직 (통합 버전) ▼▼▼ --%>
+	<%-- 1. 메인 이미지 URL 처리 --%>
+	<c:set var="kakaoImageUrl" value="" />
+	<c:choose>
+		<%-- 1-1. heroImage에 http로 시작하는 외부 URL이 있을 경우 --%>
+		<c:when
+			test="${not empty heroImage and fn:startsWith(heroImage, 'http')}">
+			<c:set var="kakaoImageUrl" value="${heroImage}" />
+		</c:when>
+		<%-- 1-2. heroImage에 내부 파일명이 있을 경우, 전체 URL로 생성 --%>
+		<c:when test="${not empty heroImage}">
+			<c:set var="kakaoImageUrl"
+				value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${heroImage}" />
+		</c:when>
+		<%-- 1-3. heroImage가 비어있을 경우, 카카오 공식 기본 이미지로 대체 --%>
+		<c:otherwise>
+			<c:set var="kakaoImageUrl"
+				value="https://t1.kakaocdn.net/friends/prod/editor/dc8b3d02-a15a-4afa-a88b-989cf2a5ebea.jpg" />
+		</c:otherwise>
+	</c:choose>
+
+	<%-- 2. 프로필 이미지 URL 처리 --%>
+	<c:set var="kakaoProfileImageUrl" value="" />
+	<c:choose>
+		<%-- 2-1. 프로필 이미지가 http로 시작하는 외부 URL일 경우 --%>
+		<c:when
+			test="${not empty sessionScope.user.profileImage and fn:startsWith(sessionScope.user.profileImage, 'http')}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${sessionScope.user.profileImage}" />
+		</c:when>
+		<%-- 2-2. 프로필 이미지가 내부 파일명일 경우, 전체 URL로 생성 --%>
+		<c:when test="${not empty sessionScope.user.profileImage}">
+			<c:set var="kakaoProfileImageUrl"
+				value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${sessionScope.user.profileImage}" />
+		</c:when>
+		<%-- 2-3. 프로필 이미지가 비어있을 경우, 기본 이미지로 대체 --%>
+		<c:otherwise>
+			<c:set var="kakaoProfileImageUrl"
+				value="https://i.ibb.co/2qr3d02/default-profile.png" />
+			<%-- 기본 프로필 이미지 URL --%>
+		</c:otherwise>
+	</c:choose>
+
 
 	<%-- ▼▼▼ [수정] 카카오 공유 기능 스크립트 (최종) ▼▼▼ --%>
 	<script>
@@ -1289,26 +1332,24 @@
             const description = `[약속] ${date} ${time}\n${place}에서 만나요!`;
             
             // ▼▼▼ [최종 수정] 카카오 공식 샘플 이미지 주소로 변경 ▼▼▼
-            const imageUrl = `${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${heroImage}`;
-            const profileImageUrl = `${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${sessionScope.user.profileImage}`;
+            const imageUrl = '${kakaoImageUrl}';
+            const profileImageUrl = '${kakaoProfileImageUrl}';
             
-            const templateId = 124984; // ⚠️ 본인의 템플릿 ID로 교체!
-
+            const templateId = 124984; // ⚠️ 실제 템플릿 ID로 교체!
             Kakao.Share.sendCustom({
                 templateId: templateId,
                 templateArgs: {
                     'title': courseTitle,
                     'description': description,
                     'page_url': pageUrl,
-                    'image_url': imageUrl,
+                    'image_url': imageUrl, // 변수 사용
                     'map_redirect_url': mapRedirectUrl,
                     'profile_name': '${sessionScope.user.nickname}',
-                    'profile_image_url': `${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}/images/${sessionScope.user.profileImage}`,
+                    'profile_image_url': profileImageUrl, // 변수 사용
                     'like_count': ${course.likes},
                     'comment_count': ${commentCount},
                 }
             });
-            
             closeModal();
         };
 
@@ -1319,6 +1360,6 @@
         submitBtn.addEventListener('click', handleShare);
     });
     </script>
-    
+
 </body>
 </html>
