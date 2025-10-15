@@ -64,6 +64,10 @@
 	<div id="app" class="flex flex-col min-h-screen">
 		<jsp:include page="/WEB-INF/views/common/header.jsp" />
 
+		<div id="share-data"
+			data-restaurant-name="<c:out value='${restaurant.name}' escapeXml='true' />"
+			style="display: none;"></div>
+
 		<main class="flex-grow">
 			<div class="container mx-auto p-4 md:p-8">
 				<div class="max-w-2xl mx-auto">
@@ -104,12 +108,13 @@
 										<div class="bg-slate-50 p-4 rounded-lg">
 											<c:choose>
 												<c:when test="${not empty restaurant}">
-													<%-- [추가] mytag:image를 사용하여 레스토랑 이미지를 표시합니다. --%>
-													<div class="w-full h-48 mb-4 rounded-lg overflow-hidden">
+													<%-- ▼▼▼ [수정] 이미지 높이를 h-48에서 h-64로 변경 ▼▼▼ --%>
+													<div class="w-full h-64 mb-4 rounded-lg overflow-hidden">
 														<mytag:image fileName="${restaurant.image}"
 															altText="${restaurant.name}"
 															cssClass="w-full h-full object-cover" />
 													</div>
+													<%-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ --%>
 													<h3 class="font-semibold text-slate-800 mb-2">${restaurant.name}</h3>
 													<p class="text-slate-600 text-sm mb-1">${restaurant.category}
 														• ${restaurant.location}</p>
@@ -557,7 +562,8 @@
     문제가 되었던 requestURI 대신, 올바른 공개 URL 경로를 직접 조립합니다.
     (예: https://.../MeetLog/reservations/예약ID)
 --%>
-	<c:set var="page_path" value="MeetLog/reservation/detail/${reservation.id}" />
+	<c:set var="page_path"
+		value="MeetLog/reservation/detail/${reservation.id}" />
 
 
 	<%-- 레스토랑 대표 이미지 URL 처리 (이하 코드는 이전과 동일) --%>
@@ -641,12 +647,23 @@
             const date = dateInput.value;
             const time = timeInput.value;
             const place = placeInput.value.trim();
+            
+         // ▼▼▼ [디버깅] 버튼 클릭 시점의 변수 값이 올바르게 들어오는지 확인합니다. ▼▼▼
+            console.log("--- 공유 시점의 데이터 ---");
+            console.log("날짜:", date);
+            console.log("시간:", time);
+            console.log("장소:", place);
+            console.log("----------------------");
+            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+            
             if (!date || !time || !place) {
                 alert('만날 날짜, 시간, 장소를 모두 입력해 주세요.');
                 return;
             }
 
-            const restaurantName = `<c:out value="${restaurant.name}" escapeXml="true"/>`;
+            const restaurantName = document.getElementById('share-data').dataset.restaurantName;
+            /* const meetingDetails = `${date} ${time}, ${place}에서 만나요!`; */
+            
             const pageUrl = '${page_path}';
             const mapRedirectUrl = 'MeetLog/location-map?query=' + encodeURIComponent(place);
             const originalImageUrl = '${kakaoImageUrl}';
@@ -665,15 +682,15 @@
             console.log("인코딩된 최종 URL:", imageUrlWithCacheBuster);
 
             const profileImageUrl = '${kakaoProfileImageUrl}';
-            const rating = parseFloat(${not empty restaurant.rating ? restaurant.rating : 0}).toFixed(1);
-            const description = `⭐ ${rating} \n[약속] ${date} ${time}\n${place}에서 만나요!`;
             const templateId = 124985;
 
             Kakao.Share.sendCustom({
                 templateId: templateId,
                 templateArgs: {
-                    'title': `[예약] ${restaurantName}`,
-                    'description': description,
+                	'restaurant_name': restaurantName,
+                	'date': date,
+                    'time': time,
+                    'place': place,
                     'page_url': pageUrl,
                     'image_url': imageUrlWithCacheBuster, // 최종 URL 사용
                     'map_redirect_url': mapRedirectUrl,

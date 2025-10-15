@@ -1323,24 +1323,25 @@
                 return;
             }
 
-            const meetingDateTime = new Date(`${date}T${time}:00`);
-            const meetingTimeISO = new Date(meetingDateTime.getTime() - (9 * 60 * 60 * 1000)).toISOString().slice(0, 19);
-
             const courseTitle = courseData.title;
             const pageUrl = window.location.pathname + window.location.search;
             const mapRedirectUrl = `${pageContext.request.contextPath}/location-map?query=\${encodeURIComponent(place)}`;
             const description = `[약속] ${date} ${time}\n${place}에서 만나요!`;
             
             // ▼▼▼ [최종 수정] 카카오 공식 샘플 이미지 주소로 변경 ▼▼▼
-            const imageUrl = '${kakaoImageUrl}';
-            const profileImageUrl = '${kakaoProfileImageUrl}';
+            const originalImageUrl = '${kakaoImageUrl}';
+            const originalProfileUrl = '${kakaoProfileImageUrl}';
+            const imageUrl = encodeURI(originalImageUrl);
+            const profileImageUrl = encodeURI(originalProfileUrl);
             
             const templateId = 124984; // ⚠️ 실제 템플릿 ID로 교체!
             Kakao.Share.sendCustom({
                 templateId: templateId,
                 templateArgs: {
-                    'title': courseTitle,
-                    'description': description,
+                	'course_title': courseTitle,
+                    'date': date,
+                    'time': time,
+                    'place': place,
                     'page_url': pageUrl,
                     'image_url': imageUrl, // 변수 사용
                     'map_redirect_url': mapRedirectUrl,
