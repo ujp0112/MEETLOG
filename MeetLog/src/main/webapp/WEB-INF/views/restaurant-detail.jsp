@@ -893,7 +893,7 @@ body {
 														<c:choose>
 															<c:when test="${imageCount == 0}">
 																<div class="text-center py-12">
-																	<p class="text-slate-500">가게 이미지를 불러올 수 없습니다.</p>
+																	<p class="text-slate-500">가게 이미지가 없습니다.</p>
 																</div>
 															</c:when>
 															<c:when test="${imageCount == 1}">
@@ -938,19 +938,11 @@ body {
 															</c:otherwise>
 														</c:choose>
 														<%-- 하단 정보바 추가 --%>
-														<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-6 py-5 md:px-8">
-															<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
-															<span class="chip">${restaurant.category}</span>
-															<span class="chip">📍 ${restaurant.location}</span>
-															<c:if test="${!isExternal}">
-																<button class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
-																	❤️ 찜하기
-																</button>
-																<button class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-sky-300 hover:text-sky-600">
-																	📤 공유하기
-																</button>
-															</c:if>
-														</div>
+								<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-5 py-4 md:px-8">
+									<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
+									<span class="chip">${restaurant.category}</span>
+									<span class="chip">📍 ${restaurant.location}</span>
+								</div>
 													</section>
 												</div>
 										</c:when>
@@ -1020,18 +1012,10 @@ body {
 														</c:otherwise>
 													</c:choose>
 													<%-- 하단 정보바 추가 --%>
-													<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-6 py-5 md:px-8">
+													<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-5 py-4 md:px-8">
 														<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
 														<span class="chip">${restaurant.category}</span>
 														<span class="chip">📍 ${restaurant.location}</span>
-														<c:if test="${!isExternal}">
-															<button class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
-																❤️ 찜하기
-															</button>
-															<button class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-sky-300 hover:text-sky-600">
-																📤 공유하기
-															</button>
-														</c:if>
 													</div>
 												</section>
 											</div>
@@ -1054,11 +1038,25 @@ body {
 								<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:items-start">
 									<div class="lg:col-span-2 space-y-8">
 
-								<section class="subtle-card space-y-6">
-									<div>
-										<h2 class="section-title">상세 정보</h2>
-										<p class="section-sub">레스토랑의 기본 정보를 확인하세요.</p>
-									</div>
+						<section class="subtle-card space-y-6">
+							<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+								<div>
+									<h2 class="section-title">상세 정보</h2>
+									<p class="section-sub">레스토랑의 기본 정보를 확인하세요.</p>
+								</div>
+								<div class="flex flex-wrap gap-2 md:justify-end">
+									<c:if test="${!isExternal}">
+										<button id="restaurantWishlistButton" type="button"
+											class="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-3 py-2 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
+											❤️ 찜하기
+										</button>
+									</c:if>
+									<button id="restaurantShareButton" type="button"
+										class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-sky-300 hover:text-sky-600">
+										📤 공유하기
+									</button>
+								</div>
+							</div>
 									<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 										<div
 											class="flex items-start space-x-4 p-5 bg-orange-50 rounded-2xl border border-orange-100 transition hover:shadow-md">
@@ -1496,9 +1494,8 @@ body {
 																	${coupon.validity}</p>
 															</div>
 															<div class="text-right">
-																<div class="text-4xl font-black text-yellow-800 mb-4">🎫</div>
 																<button
-																	class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-2xl font-bold hover:from-yellow-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
+																	class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
 																	쿠폰받기</button>
 															</div>
 														</div>
@@ -1514,7 +1511,7 @@ body {
 										<div class="flex justify-between items-center mb-6">
 											<h2 class="text-2xl font-bold text-slate-900">❓ Q&A</h2>
 											<button onclick="toggleQnAForm()"
-												class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">💬
+												class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">💬
 												문의하기</button>
 										</div>
 										<div id="qnaForm" class="hidden mb-8">
@@ -1781,6 +1778,65 @@ body {
 				style="max-width: 90vw; max-height: 90vh; object-fit: contain;">
 		</div>
 	</div>
+
+	<!-- 찜하기 폴더 선택 모달 -->
+	<div id="restaurant-wishlist-modal"
+		class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+		<div
+			class="bg-white rounded-2xl p-6 m-4 max-w-md w-full max-h-[80vh] overflow-y-auto">
+			<div class="flex justify-between items-center mb-6">
+				<h2 class="text-xl font-bold">저장할 폴더 선택</h2>
+				<button id="close-restaurant-modal" class="text-gray-500 hover:text-gray-700">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor"
+						viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+							stroke-linejoin="round" stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+				</button>
+			</div>
+
+			<!-- 로딩 상태 -->
+			<div id="restaurant-modal-loading" class="text-center py-8">
+				<div
+					class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500 mx-auto"></div>
+				<p class="mt-2 text-gray-600">폴더를 불러오는 중...</p>
+			</div>
+
+			<!-- 폴더 목록 -->
+			<div id="restaurant-storage-list" class="hidden space-y-3">
+				<!-- 폴더들이 여기에 동적으로 추가됩니다 -->
+			</div>
+
+			<!-- 새 폴더 생성 버튼 -->
+			<div id="restaurant-create-folder-section" class="hidden border-t pt-4 mt-4">
+				<button id="restaurant-show-create-form"
+					class="w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center gap-2">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor"
+						viewBox="0 0 24 24">
+                        <path stroke-linecap="round"
+							stroke-linejoin="round" stroke-width="2"
+							d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+					새 폴더 만들기
+				</button>
+
+				<!-- 새 폴더 생성 폼 -->
+				<div id="restaurant-create-form" class="hidden mt-4">
+					<input type="text" id="restaurant-folder-name" placeholder="폴더 이름을 입력하세요"
+						class="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-sky-500">
+					<div class="flex gap-2">
+						<button id="restaurant-create-folder"
+							class="flex-1 py-2 px-4 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition">
+							생성</button>
+						<button id="restaurant-cancel-create"
+							class="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition">
+							취소</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	<script>
 	// =========================================================================
 	// 전역 변수 및 헬퍼 함수
@@ -1788,19 +1844,471 @@ body {
 	const contextPath = "${pageContext.request.contextPath}";
 	const isLoggedIn = ${not empty sessionScope.user};
 	const currentUserId = <c:out value="${sessionScope.user.id}" default="null"/>;
-	const $reviewReportModal = $('#reviewReportModal');
-	const $reviewReportForm = $('#reviewReportForm');
-	const $reportReviewId = $('#reportReviewId');
-	const $reportReasonDetail = $('#reportReasonDetail');
-	const $reportReasonCounter = $('#reportReasonCounter');
-	const $reportTargetWrapper = $('#reportTargetWrapper');
-	const $reportTargetNickname = $('#reportTargetNickname');
-	const $cancelReportBtn = $('#cancelReportBtn');
-	const $reviewReportSubmit = $('#reviewReportSubmit');
-	const defaultReportSubmitText = $reviewReportSubmit.data('default-text') || $reviewReportSubmit.text();
-	let isSubmittingReport = false;
 
-	function setReportSubmittingState(submitting) {
+// DOM 로드 후 실행
+document.addEventListener('DOMContentLoaded', function() {
+	const restaurantWishlistButton = document.getElementById('restaurantWishlistButton');
+	const restaurantShareButton = document.getElementById('restaurantShareButton');
+
+	// 찜하기 버튼 기능 - Storage 시스템 사용
+	if (restaurantWishlistButton) {
+		restaurantWishlistButton.addEventListener('click', function(event) {
+			event.preventDefault();
+			if (!isLoggedIn) {
+				alert('로그인이 필요합니다.');
+				window.location.href = contextPath + '/login';
+				return;
+			}
+
+			const isCurrentlyWishlisted = this.classList.contains('bg-red-500') ||
+										  this.innerHTML.includes('찜 완료');
+
+			if (isCurrentlyWishlisted) {
+				// 이미 찜한 상태면 찜 해제
+				removeRestaurantFromWishlist();
+			} else {
+				// 찜하지 않은 상태면 모달 띄워서 폴더 선택
+				openRestaurantWishlistModal();
+			}
+		});
+	}
+
+	// 공유하기 버튼 기능
+	if (restaurantShareButton) {
+		restaurantShareButton.addEventListener('click', function(event) {
+			event.preventDefault();
+
+			const restaurantName = '${restaurant.name}';
+			const currentUrl = window.location.href;
+
+			// Web Share API 지원 확인
+			if (navigator.share) {
+				navigator.share({
+					title: restaurantName,
+					text: restaurantName + ' - MeetLog에서 확인하세요',
+					url: currentUrl
+				})
+				.then(() => console.log('공유 완료'))
+				.catch((error) => {
+					if (error.name !== 'AbortError') {
+						console.error('공유 실패:', error);
+						fallbackShare(currentUrl);
+					}
+				});
+			} else {
+				// Web Share API 미지원 시 대체 방법
+				fallbackShare(currentUrl);
+			}
+		});
+	}
+
+	// 폴더 생성 관련 이벤트
+	const showCreateFormBtn = document.getElementById('restaurant-show-create-form');
+	const createForm = document.getElementById('restaurant-create-form');
+	const cancelCreateBtn = document.getElementById('restaurant-cancel-create');
+	const createFolderBtn = document.getElementById('restaurant-create-folder');
+	const folderNameInput = document.getElementById('restaurant-folder-name');
+	const closeModalBtn = document.getElementById('close-restaurant-modal');
+
+	if (showCreateFormBtn) {
+		showCreateFormBtn.addEventListener('click', () => {
+			showCreateFormBtn.classList.add('hidden');
+			if (createForm) {
+				createForm.classList.remove('hidden');
+			}
+			if (folderNameInput) {
+				folderNameInput.focus();
+			}
+		});
+	}
+
+	if (cancelCreateBtn) {
+		cancelCreateBtn.addEventListener('click', (event) => {
+			event.preventDefault();
+			createForm.classList.add('hidden');
+			showCreateFormBtn.classList.remove('hidden');
+			if (folderNameInput) {
+				folderNameInput.value = '';
+			}
+		});
+	}
+
+	if (createFolderBtn) {
+		createFolderBtn.addEventListener('click', async (event) => {
+			event.preventDefault();
+
+			if (!folderNameInput) {
+				return;
+			}
+
+			const folderName = folderNameInput.value.trim();
+			if (!folderName) {
+				alert('폴더 이름을 입력해주세요.');
+				folderNameInput.focus();
+				return;
+			}
+
+			try {
+				createFolderBtn.disabled = true;
+				createFolderBtn.textContent = '생성 중...';
+
+				const response = await fetch(contextPath + '/course/storages', {
+					method: 'POST',
+					credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						'X-Requested-With': 'XMLHttpRequest'
+					},
+					body: 'name=' + encodeURIComponent(folderName) + '&colorClass=bg-blue-100'
+				});
+
+				const data = await response.json();
+
+				if (data.success && data.storage) {
+					createForm.classList.add('hidden');
+					showCreateFormBtn.classList.remove('hidden');
+					folderNameInput.value = '';
+					showRestaurantMessage('"' + data.storage.name + '" 폴더가 생성되었습니다.');
+					await loadRestaurantStorages(data.storage.id);
+				} else {
+					alert((data && data.message) || '폴더 생성에 실패했습니다.');
+				}
+			} catch (error) {
+				console.error('폴더 생성 실패:', error);
+				alert('폴더 생성 중 오류가 발생했습니다.');
+			} finally {
+				if (createFolderBtn) {
+					createFolderBtn.disabled = false;
+					createFolderBtn.textContent = '생성';
+				}
+			}
+		});
+	}
+
+	if (closeModalBtn) {
+		closeModalBtn.addEventListener('click', closeRestaurantModal);
+	}
+
+	// 모달 외부 클릭 시 닫기
+	const restaurantModal = document.getElementById('restaurant-wishlist-modal');
+	if (restaurantModal) {
+		restaurantModal.addEventListener('click', function(e) {
+			if (e.target === this) {
+				closeRestaurantModal();
+			}
+		});
+	}
+});
+
+const $reviewReportModal = $('#reviewReportModal');
+const $reviewReportForm = $('#reviewReportForm');
+const $reportReviewId = $('#reportReviewId');
+const $reportReasonDetail = $('#reportReasonDetail');
+const $reportReasonCounter = $('#reportReasonCounter');
+const $reportTargetWrapper = $('#reportTargetWrapper');
+const $reportTargetNickname = $('#reportTargetNickname');
+const $cancelReportBtn = $('#cancelReportBtn');
+const $reviewReportSubmit = $('#reviewReportSubmit');
+const defaultReportSubmitText = $reviewReportSubmit.data('default-text') || $reviewReportSubmit.text();
+let isSubmittingReport = false;
+
+// 찜하기 모달 관련 함수들
+function openRestaurantWishlistModal() {
+	const modal = document.getElementById('restaurant-wishlist-modal');
+	const loading = document.getElementById('restaurant-modal-loading');
+	const storageList = document.getElementById('restaurant-storage-list');
+	const createSection = document.getElementById('restaurant-create-folder-section');
+
+	// 모달 보이기
+	modal.classList.remove('hidden');
+
+	// 로딩 상태 보이기
+	loading.classList.remove('hidden');
+	storageList.classList.add('hidden');
+	createSection.classList.add('hidden');
+
+	// 사용자의 저장소 목록 가져오기
+	loadRestaurantStorages();
+}
+
+async function loadRestaurantStorages(highlightStorageId) {
+	try {
+		const response = await fetch(contextPath + '/course/storages', {
+			credentials: 'same-origin',
+			headers: {
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			displayRestaurantStorages(data.storages, highlightStorageId);
+		} else {
+			alert(data.message || '저장소 목록을 불러오는데 실패했습니다.');
+			closeRestaurantModal();
+		}
+	} catch (error) {
+		console.error('저장소 목록 조회 실패:', error);
+		alert('네트워크 오류가 발생했습니다.');
+		closeRestaurantModal();
+	}
+}
+
+function displayRestaurantStorages(storages, highlightStorageId) {
+	const loading = document.getElementById('restaurant-modal-loading');
+	const storageList = document.getElementById('restaurant-storage-list');
+	const createSection = document.getElementById('restaurant-create-folder-section');
+
+	// 로딩 숨기고 리스트 보이기
+	loading.classList.add('hidden');
+	storageList.classList.remove('hidden');
+	createSection.classList.remove('hidden');
+
+	// 저장소 리스트 초기화
+	storageList.innerHTML = '';
+
+	if (!storages || storages.length === 0) {
+		storageList.innerHTML = '<p class="text-center text-sm text-gray-500">폴더가 없습니다. 새 폴더를 만들어보세요.</p>';
+		return;
+	}
+
+	// 각 저장소를 버튼으로 추가
+	storages.forEach(storage => {
+		const storageBtn = document.createElement('button');
+		const colorClass = storage.colorClass || 'bg-blue-100';
+		const itemCount = storage.itemCount != null ? storage.itemCount : 0;
+		storageBtn.className = 'w-full p-4 text-left rounded-lg border-2 border-gray-200 hover:border-sky-300 hover:bg-sky-50 transition';
+		storageBtn.innerHTML = ''
+			+ '<div class="flex items-center gap-3">'
+			+ '<div class="w-4 h-4 rounded ' + colorClass + '"></div>'
+			+ '<span class="font-medium text-slate-700">' + storage.name + '</span>'
+			+ '<span class="ml-auto text-xs text-slate-500">' + itemCount + '개</span>'
+			+ '</div>';
+		storageBtn.dataset.storageId = storage.id;
+
+		storageBtn.addEventListener('click', () => {
+			addRestaurantToStorage(storage.id, storage.name);
+		});
+
+		if (highlightStorageId && storage.id === highlightStorageId) {
+			storageBtn.classList.add('border-sky-500', 'ring-2', 'ring-sky-200');
+		}
+
+		storageList.appendChild(storageBtn);
+	});
+}
+
+async function addRestaurantToStorage(storageId, storageName) {
+	const restaurantId = ${restaurant.id};
+
+	try {
+		const response = await fetch(contextPath + '/wishlist', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'action=add&restaurantId=' + restaurantId + '&storageId=' + storageId
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			// 모달 닫기
+			closeRestaurantModal();
+
+			// 찜하기 버튼 상태 업데이트
+			updateRestaurantWishlistButton(true);
+
+			// 성공 메시지
+			showRestaurantMessage('"' + storageName + '" 폴더에 저장되었습니다.');
+		} else {
+			alert(data.message || '저장에 실패했습니다.');
+		}
+	} catch (error) {
+		console.error('저장 실패:', error);
+		alert('요청 처리 중 오류가 발생했습니다.');
+	}
+}
+
+async function removeRestaurantFromWishlist() {
+	const restaurantId = ${restaurant.id};
+
+	try {
+		const response = await fetch(contextPath + '/wishlist', {
+			method: 'POST',
+			credentials: 'same-origin',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'action=remove&restaurantId=' + restaurantId
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			updateRestaurantWishlistButton(false);
+			showRestaurantMessage('찜 목록에서 제거되었습니다.');
+		} else {
+			alert(data.message || '제거에 실패했습니다.');
+		}
+	} catch (error) {
+		console.error('찜 제거 실패:', error);
+		alert('요청 처리 중 오류가 발생했습니다.');
+	}
+}
+
+function updateRestaurantWishlistButton(isWishlisted) {
+	const wishlistButton = document.getElementById('restaurantWishlistButton');
+	if (!wishlistButton) return;
+
+	if (isWishlisted) {
+		wishlistButton.innerHTML = '❤️ 찜 완료';
+		wishlistButton.classList.remove('border-sky-200', 'bg-white', 'text-sky-700', 'hover:border-sky-300', 'hover:text-sky-800');
+		wishlistButton.classList.add('bg-red-500', 'text-white', 'hover:bg-red-600', 'border-red-500');
+	} else {
+		wishlistButton.innerHTML = '❤️ 찜하기';
+		wishlistButton.classList.remove('bg-red-500', 'text-white', 'hover:bg-red-600', 'border-red-500');
+		wishlistButton.classList.add('border-sky-200', 'bg-white', 'text-sky-700', 'hover:border-sky-300', 'hover:text-sky-800');
+	}
+}
+
+function showRestaurantMessage(message) {
+	// 간단한 토스트 메시지 표시
+	const toast = document.createElement('div');
+	toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+	toast.textContent = message;
+	document.body.appendChild(toast);
+
+	setTimeout(() => {
+		toast.remove();
+	}, 3000);
+}
+
+function closeRestaurantModal() {
+	const modal = document.getElementById('restaurant-wishlist-modal');
+	modal.classList.add('hidden');
+}
+
+// 폴더 생성 관련 이벤트
+const showCreateFormBtn = document.getElementById('restaurant-show-create-form');
+const createForm = document.getElementById('restaurant-create-form');
+const cancelCreateBtn = document.getElementById('restaurant-cancel-create');
+const createFolderBtn = document.getElementById('restaurant-create-folder');
+const folderNameInput = document.getElementById('restaurant-folder-name');
+const closeModalBtn = document.getElementById('close-restaurant-modal');
+
+if (showCreateFormBtn) {
+	showCreateFormBtn.addEventListener('click', () => {
+		showCreateFormBtn.classList.add('hidden');
+		if (createForm) {
+			createForm.classList.remove('hidden');
+		}
+		if (folderNameInput) {
+			folderNameInput.focus();
+		}
+	});
+}
+
+if (cancelCreateBtn) {
+	cancelCreateBtn.addEventListener('click', (event) => {
+		event.preventDefault();
+		createForm.classList.add('hidden');
+		showCreateFormBtn.classList.remove('hidden');
+		if (folderNameInput) {
+			folderNameInput.value = '';
+		}
+	});
+}
+
+if (createFolderBtn) {
+	createFolderBtn.addEventListener('click', async (event) => {
+		event.preventDefault();
+
+		if (!folderNameInput) {
+			return;
+		}
+
+		const folderName = folderNameInput.value.trim();
+		if (!folderName) {
+			alert('폴더 이름을 입력해주세요.');
+			folderNameInput.focus();
+			return;
+		}
+
+		try {
+			createFolderBtn.disabled = true;
+			createFolderBtn.textContent = '생성 중...';
+
+			const response = await fetch(contextPath + '/course/storages', {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: 'name=' + encodeURIComponent(folderName) + '&colorClass=bg-blue-100'
+			});
+
+			const data = await response.json();
+
+			if (data.success && data.storage) {
+				createForm.classList.add('hidden');
+				showCreateFormBtn.classList.remove('hidden');
+				folderNameInput.value = '';
+				showRestaurantMessage('"' + data.storage.name + '" 폴더가 생성되었습니다.');
+				await loadRestaurantStorages(data.storage.id);
+			} else {
+				alert((data && data.message) || '폴더 생성에 실패했습니다.');
+			}
+		} catch (error) {
+			console.error('폴더 생성 실패:', error);
+			alert('폴더 생성 중 오류가 발생했습니다.');
+		} finally {
+			if (createFolderBtn) {
+				createFolderBtn.disabled = false;
+				createFolderBtn.textContent = '생성';
+			}
+		}
+	});
+}
+
+if (closeModalBtn) {
+	closeModalBtn.addEventListener('click', closeRestaurantModal);
+}
+
+// 모달 외부 클릭 시 닫기
+document.getElementById('restaurant-wishlist-modal').addEventListener('click', function(e) {
+	if (e.target === this) {
+		closeRestaurantModal();
+	}
+});
+
+// 공유 대체 방법 (URL 복사)
+function fallbackShare(url) {
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(url)
+			.then(() => {
+				alert('링크가 클립보드에 복사되었습니다!');
+			})
+			.catch(err => {
+				console.error('복사 실패:', err);
+				showShareModal(url);
+			});
+	} else {
+		showShareModal(url);
+	}
+}
+
+// 공유 모달 표시 (클립보드 API 미지원 시)
+function showShareModal(url) {
+	const modal = prompt('아래 링크를 복사하세요:', url);
+}
+
+function setReportSubmittingState(submitting) {
 		if (!$reviewReportSubmit.length) {
 			return;
 		}

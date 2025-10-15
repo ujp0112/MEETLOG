@@ -61,4 +61,25 @@
     <update id="decrementLikes" parameterType="int">
         UPDATE column_comments SET like_count = GREATEST(COALESCE(like_count, 1) - 1, 0) WHERE id = #{id}
     </update>
+
+    <!-- 댓글 좋아요 관련 쿼리 -->
+    <select id="isCommentLikedByUser" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <insert id="addCommentLike" parameterType="map">
+        INSERT INTO comment_likes (comment_id, user_id, created_at)
+        VALUES (#{commentId}, #{userId}, NOW())
+    </insert>
+
+    <delete id="removeCommentLike" parameterType="map">
+        DELETE FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+    <select id="getCommentLikeCount" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM comment_likes
+        WHERE comment_id = #{commentId}
+    </select>
 </mapper>

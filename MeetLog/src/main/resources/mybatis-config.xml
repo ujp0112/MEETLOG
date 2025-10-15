@@ -109,6 +109,7 @@
 		<mapper resource="mappers/CompanyMapper.xml" />
 		<mapper resource="mappers/FeedMapper.xml" />
 		<mapper resource="mappers/FollowMapper.xml" />
+		<mapper resource="mappers/WishlistMapper.xml" />
 		<mapper resource="mappers/UserCollectionMapper.xml" />
 		<mapper resource="mappers/UserStorageMapper.xml" />
 		<mapper resource="mappers/CourseCommentMapper.xml" />

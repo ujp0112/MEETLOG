@@ -66,6 +66,13 @@ public class ColumnCommentServlet extends HttpServlet {
 
         User user = (User) session.getAttribute("user");
 
+        // 좋아요 처리
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && pathInfo.equals("/like")) {
+            handleCommentLike(request, response, user);
+            return;
+        }
+
         // 폼 데이터 받기
         String columnIdStr = request.getParameter("columnId");
         String content = request.getParameter("content");
@@ -258,6 +265,94 @@ public class ColumnCommentServlet extends HttpServlet {
         System.out.println("DEBUG PUT: 최종 JSON 응답 = " + jsonResponse);
 
         out.print(jsonResponse);
+        out.flush();
+    }
+
+    private void handleCommentLike(HttpServletRequest request, HttpServletResponse response, User user)
+            throws IOException {
+        response.setContentType("application/json; charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            // JSON 데이터 읽기
+            StringBuilder sb = new StringBuilder();
+            java.io.BufferedReader reader = request.getReader();
+            char[] buffer = new char[1024];
+            int bytesRead;
+
+            while ((bytesRead = reader.read(buffer)) != -1) {
+                sb.append(buffer, 0, bytesRead);
+            }
+
+            String jsonString = sb.toString();
+            System.out.println("DEBUG LIKE: 받은 JSON = " + jsonString);
+            System.out.println("DEBUG LIKE: JSON 길이 = " + jsonString.length());
+
+            if (jsonString == null || jsonString.trim().isEmpty()) {
+                result.put("success", false);
+                result.put("message", "요청 본문이 비어있습니다.");
+                out.print(gson.toJson(result));
+                out.flush();
+                return;
+            }
+
+            Map<String, Object> jsonData = gson.fromJson(jsonString, Map.class);
+            System.out.println("DEBUG LIKE: 파싱된 데이터 = " + jsonData);
+
+            if (jsonData == null) {
+                result.put("success", false);
+                result.put("message", "JSON 파싱 실패.");
+                out.print(gson.toJson(result));
+                out.flush();
+                return;
+            }
+
+            if (!jsonData.containsKey("commentId")) {
+                result.put("success", false);
+                result.put("message", "댓글 ID가 필요합니다. 받은 키: " + jsonData.keySet());
+                out.print(gson.toJson(result));
+                out.flush();
+                return;
+            }
+
+            Object commentIdObj = jsonData.get("commentId");
+            System.out.println("DEBUG LIKE: commentId 객체 = " + commentIdObj + ", 타입 = " + (commentIdObj != null ? commentIdObj.getClass().getName() : "null"));
+
+            int commentId;
+            if (commentIdObj instanceof Double) {
+                commentId = ((Double) commentIdObj).intValue();
+            } else if (commentIdObj instanceof Integer) {
+                commentId = (Integer) commentIdObj;
+            } else if (commentIdObj instanceof String) {
+                commentId = Integer.parseInt((String) commentIdObj);
+            } else {
+                result.put("success", false);
+                result.put("message", "댓글 ID 형식이 올바르지 않습니다: " + commentIdObj);
+                out.print(gson.toJson(result));
+                out.flush();
+                return;
+            }
+
+            int userId = user.getId();
+
+            System.out.println("DEBUG LIKE: commentId = " + commentId + ", userId = " + userId);
+
+            // 좋아요 토글 처리
+            boolean isLiked = columnCommentService.toggleCommentLike(commentId, userId);
+            int likeCount = columnCommentService.getCommentLikeCount(commentId);
+
+            result.put("success", true);
+            result.put("isLiked", isLiked);
+            result.put("likeCount", likeCount);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("success", false);
+            result.put("message", "좋아요 처리 중 오류가 발생했습니다: " + e.getMessage());
+        }
+
+        out.print(gson.toJson(result));
         out.flush();
     }
 }

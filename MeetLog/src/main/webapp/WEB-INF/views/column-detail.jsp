@@ -133,6 +133,11 @@
                                     </div>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-6 py-5 md:px-8">
+                                    <c:if test="${not empty sessionScope.user}">
+                                        <button type="button" id="columnWishlistButton" class="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-5 py-2.5 text-sm font-semibold text-sky-700 shadow-sm transition hover:border-sky-300 hover:text-sky-800">
+                                            ❤️ 찜하기
+                                        </button>
+                                    </c:if>
                                     <button type="button" onclick="shareColumn()" class="flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-300 hover:text-amber-600">
                                         <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 8a3 3 0 10-5.995.176L9 8a3 3 0 10.001 6 3 3 0 005.995-.176L15 14a3 3 0 100-6z" />
@@ -141,7 +146,7 @@
                                         공유하기
                                     </button>
                                     <button type="button" id="column-like-btn-${column.id}" onclick="likeColumn(${column.id})" class="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-white px-5 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-300 hover:text-amber-800">
-                                        <span>❤️</span>
+                                        <span>❤️ 좋아요</span>
                                         <span id="like-count-${column.id}"><c:out value="${column.likes}" default="0" /></span>
                                     </button>
                                     <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-500">
@@ -254,12 +259,12 @@
                                                                         </div>
                                                                     </div>
                                                                     <p id="comment-content-${comment.id}" class="mt-2 text-sm leading-relaxed text-slate-600">${comment.content}</p>
-                                                                    <div class="mt-3 flex items-center gap-4">
+                                                                    <!-- <div class="mt-3 flex items-center gap-4">
                                                                         <button id="comment-like-btn-${comment.id}" onclick="likeComment(${comment.id})" type="button" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 transition hover:text-red-500">
                                                                             <span>❤️</span>
                                                                             <span id="comment-like-count-${comment.id}">${comment.likeCount > 0 ? comment.likeCount : 0}</span>
                                                                         </button>
-                                                                    </div>
+                                                                    </div> -->
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -340,10 +345,74 @@
         <jsp:include page="/WEB-INF/views/common/footer.jsp" />
     </div>
 
+    <!-- 찜하기 폴더 선택 모달 -->
+    <div id="column-wishlist-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-slate-900">폴더에 저장</h3>
+                <button onclick="closeColumnModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="column-storage-loading" class="text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-200 border-t-sky-500"></div>
+                <p class="mt-2 text-sm text-slate-500">폴더 목록을 불러오는 중...</p>
+            </div>
+
+            <div id="column-storage-list" class="hidden space-y-2"></div>
+
+            <div id="column-create-section" class="hidden mt-4 pt-4 border-t border-slate-200">
+                <button id="column-show-create-form" class="w-full text-left px-4 py-3 rounded-lg border-2 border-dashed border-slate-300 hover:border-sky-400 hover:bg-sky-50 transition-colors">
+                    <span class="text-sky-600 font-semibold">+ 새 폴더 만들기</span>
+                </button>
+
+                <div id="column-create-form" class="hidden mt-3 space-y-3">
+                    <input type="text" id="column-folder-name" placeholder="폴더 이름" maxlength="50" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="column-colorClass" value="bg-blue-100" class="sr-only" checked>
+                            <div class="w-full h-10 bg-blue-100 rounded-lg border-2 border-transparent hover:border-blue-500 transition-colors"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="column-colorClass" value="bg-green-100" class="sr-only">
+                            <div class="w-full h-10 bg-green-100 rounded-lg border-2 border-transparent hover:border-green-500 transition-colors"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="column-colorClass" value="bg-purple-100" class="sr-only">
+                            <div class="w-full h-10 bg-purple-100 rounded-lg border-2 border-transparent hover:border-purple-500 transition-colors"></div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="column-colorClass" value="bg-pink-100" class="sr-only">
+                            <div class="w-full h-10 bg-pink-100 rounded-lg border-2 border-transparent hover:border-pink-500 transition-colors"></div>
+                        </label>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button id="column-cancel-create" class="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">취소</button>
+                        <button id="column-create-folder" class="flex-1 px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors">생성</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const COLUMN_ID = '<c:out value="${column.id}" default="" />';
+        console.log('페이지 로드됨, COLUMN_ID:', COLUMN_ID);
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM 로드 완료');
+
+            // 버튼 존재 확인
+            const wishlistBtn = document.getElementById('columnWishlistButton');
+            const likeBtn = document.getElementById('column-like-btn-${column.id}');
+            console.log('찜하기 버튼:', wishlistBtn ? '존재' : '없음');
+            console.log('좋아요 버튼:', likeBtn ? '존재' : '없음');
+
             const submitBtn = document.getElementById('submit-comment');
             if (submitBtn) {
                 submitBtn.addEventListener('click', submitComment);
@@ -562,7 +631,31 @@
             });
         }
 
+        // 중복 요청 방지를 위한 Map
+        const commentLikeRequests = new Map();
+
         function likeComment(commentId) {
+            console.log('likeComment() 호출됨, commentId:', commentId);
+            console.log('commentId 타입:', typeof commentId);
+
+            // 중복 요청 체크
+            if (commentLikeRequests.has(commentId)) {
+                console.log('이미 처리 중인 요청입니다.');
+                return;
+            }
+
+            <c:if test="${empty sessionScope.user}">
+                window.alert('로그인이 필요한 기능입니다.');
+                window.location.href = '${pageContext.request.contextPath}/login';
+                return;
+            </c:if>
+
+            if (!commentId) {
+                console.error('commentId가 undefined 또는 null입니다!');
+                window.alert('댓글 ID를 찾을 수 없습니다.');
+                return;
+            }
+
             const buttonElement = document.getElementById('comment-like-btn-' + commentId);
             if (buttonElement && buttonElement.disabled) {
                 return;
@@ -572,15 +665,25 @@
                 buttonElement.style.opacity = '0.6';
             }
 
+            // 요청 시작 표시
+            commentLikeRequests.set(commentId, true);
+
+            const requestBody = { commentId: parseInt(commentId) };
+            console.log('전송할 데이터:', JSON.stringify(requestBody));
+
             fetch('${pageContext.request.contextPath}/api/column/comment/like', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ commentId: commentId })
+                body: JSON.stringify(requestBody)
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('서버 응답 상태:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('서버 응답 데이터:', data);
                 if (data.success) {
                     const likeElement = document.getElementById('comment-like-count-' + commentId);
                     if (likeElement) {
@@ -599,10 +702,14 @@
                     window.alert(data.message || '좋아요 처리에 실패했습니다.');
                 }
             })
-            .catch(() => {
+            .catch((error) => {
+                console.error('좋아요 처리 오류:', error);
                 window.alert('좋아요 처리 중 오류가 발생했습니다.');
             })
             .finally(() => {
+                // 요청 완료 표시
+                commentLikeRequests.delete(commentId);
+
                 if (buttonElement) {
                     buttonElement.disabled = false;
                     buttonElement.style.opacity = '1';
@@ -611,6 +718,12 @@
         }
 
         function likeColumn(columnId) {
+            <c:if test="${empty sessionScope.user}">
+                window.alert('로그인이 필요한 기능입니다.');
+                window.location.href = '${pageContext.request.contextPath}/login';
+                return;
+            </c:if>
+
             const buttonElement = document.getElementById('column-like-btn-' + columnId);
             if (buttonElement && buttonElement.disabled) {
                 return;
@@ -657,22 +770,37 @@
         }
 
         function shareColumn() {
+            console.log('shareColumn() 호출됨');
             if (navigator.share) {
                 navigator.share({
                     title: '<c:out value="${column.title}" />',
                     text: 'MEET LOG에서 흥미로운 칼럼을 확인해보세요!',
                     url: window.location.href
-                }).catch(() => {
+                }).catch((err) => {
+                    console.error('공유 실패:', err);
                     window.alert('공유에 실패했습니다. 다시 시도해주세요.');
                 });
             } else {
                 navigator.clipboard.writeText(window.location.href)
-                    .then(() => window.alert('링크가 클립보드에 복사되었습니다.'))
-                    .catch(() => window.alert('복사에 실패했습니다. 브라우저 권한을 확인해주세요.'));
+                    .then(() => {
+                        console.log('클립보드에 복사됨');
+                        window.alert('링크가 클립보드에 복사되었습니다.');
+                    })
+                    .catch((err) => {
+                        console.error('복사 실패:', err);
+                        window.alert('복사에 실패했습니다. 브라우저 권한을 확인해주세요.');
+                    });
             }
         }
 
         function deleteColumn(columnId) {
+            console.log('deleteColumn() 호출됨, columnId:', columnId);
+            <c:if test="${empty sessionScope.user}">
+                window.alert('로그인이 필요한 기능입니다.');
+                window.location.href = '${pageContext.request.contextPath}/login';
+                return;
+            </c:if>
+
             if (window.confirm('정말로 이 칼럼을 삭제하시겠습니까? 되돌릴 수 없습니다.')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
@@ -685,7 +813,190 @@
                 form.appendChild(idInput);
 
                 document.body.appendChild(form);
+                console.log('폼 제출 중...');
                 form.submit();
+            }
+        }
+
+        // ===== 찜하기 기능 =====
+        const contextPath = '${pageContext.request.contextPath}';
+        const columnWishlistButton = document.getElementById('columnWishlistButton');
+
+        if (columnWishlistButton) {
+            console.log('찜하기 버튼 이벤트 리스너 등록됨');
+            columnWishlistButton.addEventListener('click', function() {
+                console.log('찜하기 버튼 클릭됨');
+                <c:if test="${empty sessionScope.user}">
+                    window.alert('로그인이 필요한 기능입니다.');
+                    window.location.href = '${pageContext.request.contextPath}/login';
+                    return;
+                </c:if>
+                openColumnWishlistModal();
+            });
+        } else {
+            console.log('찜하기 버튼을 찾을 수 없음');
+        }
+
+        function openColumnWishlistModal() {
+            console.log('찜하기 모달 열기');
+            const modal = document.getElementById('column-wishlist-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                loadColumnStorages();
+            } else {
+                console.error('찜하기 모달을 찾을 수 없음');
+            }
+        }
+
+        function closeColumnModal() {
+            const modal = document.getElementById('column-wishlist-modal');
+            modal.classList.add('hidden');
+        }
+
+        async function loadColumnStorages() {
+            const loading = document.getElementById('column-storage-loading');
+            const list = document.getElementById('column-storage-list');
+            const createSection = document.getElementById('column-create-section');
+
+            loading.classList.remove('hidden');
+            list.classList.add('hidden');
+            createSection.classList.add('hidden');
+
+            try {
+                const response = await fetch(contextPath + '/course/storages', {
+                    credentials: 'same-origin',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.storages) {
+                    displayColumnStorages(data.storages);
+                } else {
+                    alert('폴더 목록을 불러오는데 실패했습니다.');
+                    closeColumnModal();
+                }
+            } catch (error) {
+                console.error('Error loading storages:', error);
+                alert('오류가 발생했습니다.');
+                closeColumnModal();
+            }
+        }
+
+        function displayColumnStorages(storages) {
+            const loading = document.getElementById('column-storage-loading');
+            const list = document.getElementById('column-storage-list');
+            const createSection = document.getElementById('column-create-section');
+
+            loading.classList.add('hidden');
+            list.classList.remove('hidden');
+            createSection.classList.remove('hidden');
+
+            list.innerHTML = '';
+
+            storages.forEach(storage => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-sky-400 hover:bg-sky-50 transition-colors flex items-center justify-between';
+                btn.innerHTML = '<div class="flex items-center gap-3">' +
+                    '<div class="w-10 h-10 ' + storage.colorClass + ' rounded-lg flex items-center justify-center">📁</div>' +
+                    '<div>' +
+                    '<p class="font-semibold text-slate-900">' + storage.name + '</p>' +
+                    '<p class="text-xs text-slate-500">' + (storage.itemCount || 0) + '개 항목</p>' +
+                    '</div>' +
+                    '</div>' +
+                    '<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>' +
+                    '</svg>';
+                btn.onclick = () => addColumnToStorage(storage.id, storage.name);
+                list.appendChild(btn);
+            });
+
+            setupCreateFolderEvents();
+        }
+
+        function setupCreateFolderEvents() {
+            const showBtn = document.getElementById('column-show-create-form');
+            const cancelBtn = document.getElementById('column-cancel-create');
+            const createBtn = document.getElementById('column-create-folder');
+            const createForm = document.getElementById('column-create-form');
+
+            if (showBtn) {
+                showBtn.onclick = () => {
+                    showBtn.classList.add('hidden');
+                    createForm.classList.remove('hidden');
+                };
+            }
+
+            if (cancelBtn) {
+                cancelBtn.onclick = () => {
+                    showBtn.classList.remove('hidden');
+                    createForm.classList.add('hidden');
+                };
+            }
+
+            if (createBtn) {
+                createBtn.onclick = createColumnFolder;
+            }
+        }
+
+        async function createColumnFolder() {
+            const nameInput = document.getElementById('column-folder-name');
+            const name = nameInput.value.trim();
+
+            if (!name) {
+                alert('폴더 이름을 입력하세요.');
+                return;
+            }
+
+            const colorClass = document.querySelector('input[name="column-colorClass"]:checked').value;
+
+            try {
+                const response = await fetch(contextPath + '/wishlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'action=createStorage&name=' + encodeURIComponent(name) + '&colorClass=' + encodeURIComponent(colorClass)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    nameInput.value = '';
+                    loadColumnStorages();
+                } else {
+                    alert(data.message || '폴더 생성에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error creating folder:', error);
+                alert('오류가 발생했습니다.');
+            }
+        }
+
+        async function addColumnToStorage(storageId, storageName) {
+            try {
+                const response = await fetch(contextPath + '/wishlist', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: 'action=addColumnToStorage&columnId=' + COLUMN_ID + '&storageId=' + storageId
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    closeColumnModal();
+                    alert('"' + storageName + '" 폴더에 저장되었습니다.');
+                } else {
+                    alert(data.message || '저장에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error adding to storage:', error);
+                alert('요청 처리 중 오류가 발생했습니다.');
             }
         }
     </script>

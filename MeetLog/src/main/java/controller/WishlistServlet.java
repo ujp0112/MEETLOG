@@ -99,12 +99,21 @@ public class WishlistServlet extends HttpServlet {
                 // 레스토랑을 저장소에 추가
                 int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
                 String storageIdStr = request.getParameter("storageId");
+                boolean success = false;
 
                 if (storageIdStr != null && !storageIdStr.isEmpty()) {
                     int storageId = Integer.parseInt(storageIdStr);
-                    userService.addToStorage(user.getId(), restaurantId, storageId);
+                    success = userService.addToStorage(user.getId(), restaurantId, storageId);
                 } else {
-                    userService.addToWishlist(user.getId(), restaurantId);
+                    success = userService.addToWishlist(user.getId(), restaurantId);
+                }
+
+                if (isAjax) {
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("success", success);
+                    body.put("message", success ? "저장되었습니다." : "저장에 실패했습니다.");
+                    writeJsonResponse(response, success ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST, body);
+                    return;
                 }
 
                 response.sendRedirect(request.getContextPath() + "/wishlist");
@@ -112,7 +121,16 @@ public class WishlistServlet extends HttpServlet {
             } else if ("remove".equalsIgnoreCase(action)) {
                 // 레스토랑을 위시리스트에서 제거
                 int restaurantId = Integer.parseInt(request.getParameter("restaurantId"));
-                userService.removeFromWishlist(user.getId(), restaurantId);
+                boolean success = userService.removeFromWishlist(user.getId(), restaurantId);
+
+                if (isAjax) {
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("success", success);
+                    body.put("message", success ? "제거되었습니다." : "제거에 실패했습니다.");
+                    writeJsonResponse(response, success ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST, body);
+                    return;
+                }
+
                 response.sendRedirect(request.getContextPath() + "/wishlist");
 
             } else if ("createCollection".equalsIgnoreCase(action) || "createStorage".equalsIgnoreCase(action)) {
@@ -213,6 +231,23 @@ public class WishlistServlet extends HttpServlet {
                 } else {
                     response.sendError(HttpServletResponse.SC_BAD_REQUEST, "아이템 삭제에 실패했습니다.");
                 }
+
+            } else if ("addColumnToStorage".equalsIgnoreCase(action)) {
+                // 칼럼을 저장소에 추가
+                int columnId = Integer.parseInt(request.getParameter("columnId"));
+                int storageId = Integer.parseInt(request.getParameter("storageId"));
+
+                boolean success = userService.addColumnToStorage(user.getId(), columnId, storageId);
+
+                if (isAjax) {
+                    Map<String, Object> body = new HashMap<>();
+                    body.put("success", success);
+                    body.put("message", success ? "칼럼이 저장되었습니다." : "저장에 실패했습니다.");
+                    writeJsonResponse(response, success ? HttpServletResponse.SC_OK : HttpServletResponse.SC_BAD_REQUEST, body);
+                    return;
+                }
+
+                response.sendRedirect(request.getContextPath() + "/wishlist");
 
             } else {
                 if (isAjax) {

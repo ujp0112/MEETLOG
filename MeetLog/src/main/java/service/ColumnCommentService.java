@@ -119,4 +119,37 @@ public class ColumnCommentService {
     public int getCommentCount(int columnId) {
         return columnCommentDAO.getCommentCount(columnId);
     }
+
+    /**
+     * 댓글 좋아요 토글 (이미 좋아요면 취소, 아니면 추가)
+     * @return 좋아요 상태 (true: 좋아요됨, false: 좋아요 취소됨)
+     */
+    public boolean toggleCommentLike(int commentId, int userId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            // 기존 좋아요 확인
+            boolean isLiked = columnCommentDAO.isCommentLikedByUser(commentId, userId, sqlSession);
+
+            if (isLiked) {
+                // 좋아요 취소
+                columnCommentDAO.removeCommentLike(commentId, userId, sqlSession);
+                sqlSession.commit();
+                return false;
+            } else {
+                // 좋아요 추가
+                columnCommentDAO.addCommentLike(commentId, userId, sqlSession);
+                sqlSession.commit();
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * 댓글 좋아요 수 조회
+     */
+    public int getCommentLikeCount(int commentId) {
+        return columnCommentDAO.getCommentLikeCount(commentId);
+    }
 }
