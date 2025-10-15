@@ -940,8 +940,11 @@ body {
 														<%-- 하단 정보바 추가 --%>
 								<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-5 py-4 md:px-8">
 									<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
-									<span class="chip">${restaurant.category}</span>
-									<span class="chip">📍 ${restaurant.location}</span>
+									<div class="text-2xl font-bold text-slate-900 text-orange-400">
+										<span>⭐</span>
+										<fmt:formatNumber value="${restaurant.rating}" pattern="0.0" />
+										<span class="text-lg opacity-70">(${restaurant.reviewCount})</span>
+									</div>
 								</div>
 													</section>
 												</div>
@@ -1014,8 +1017,11 @@ body {
 													<%-- 하단 정보바 추가 --%>
 													<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 bg-white/95 px-5 py-4 md:px-8">
 														<h1 class="text-2xl font-bold text-slate-900 mr-auto">${restaurant.name}</h1>
-														<span class="chip">${restaurant.category}</span>
-														<span class="chip">📍 ${restaurant.location}</span>
+														<div class="text-2xl font-bold text-slate-900 text-orange-400">
+															<span>⭐</span>
+															<fmt:formatNumber value="${restaurant.rating}" pattern="0.0" />
+															<span class="text-lg opacity-70">(${restaurant.reviewCount})</span>
+														</div>
 													</div>
 												</section>
 											</div>
@@ -1040,9 +1046,10 @@ body {
 
 						<section class="subtle-card space-y-6">
 							<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-								<div>
+								<div class="flex items-center gap-3 flex-wrap">
 									<h2 class="section-title">상세 정보</h2>
-									<p class="section-sub">레스토랑의 기본 정보를 확인하세요.</p>
+									<span class="chip">${restaurant.category}</span>
+									<span class="chip">📍 ${restaurant.location}</span>
 								</div>
 								<div class="flex flex-wrap gap-2 md:justify-end">
 									<c:if test="${!isExternal}">
@@ -1234,29 +1241,30 @@ body {
 																					class="w-12 h-12 rounded-full object-cover mr-4">
 																		</c:otherwise>
 																	</c:choose>
-																	<c:choose>
-																		<c:when test="${isExternal or review.userId == 0}">
-																			<span class="font-bold text-slate-800">${review.author}</span>
-																		</c:when>
-																		<c:otherwise>
-																			<a
-																				href="${pageContext.request.contextPath}/feed/user/${review.userId}"
-																				class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
-																		</c:otherwise>
-																	</c:choose>
-																	<div
-																		class="flex items-center text-sm text-slate-500 mt-1">
-																		<div class="flex">
-																			<c:forEach begin="1" end="5" var="i">
-																				<span
-																					class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★
-																				</span>
-																			</c:forEach>
+																	<div>
+																		<c:choose>
+																			<c:when test="${isExternal or review.userId == 0}">
+																				<span class="font-bold text-slate-800">${review.author}</span>
+																			</c:when>
+																			<c:otherwise>
+																				<a
+																					href="${pageContext.request.contextPath}/feed/user/${review.userId}"
+																					class="font-bold text-slate-800 hover:text-blue-600 transition-colors">${review.author}</a>
+																			</c:otherwise>
+																		</c:choose>
+																		<div class="flex items-center text-sm text-slate-500 mt-1">
+																			<div class="flex">
+																				<c:forEach begin="1" end="5" var="i">
+																					<span
+																						class="${i <= review.rating ? 'text-yellow-400' : 'text-slate-300'}">★
+																					</span>
+																				</c:forEach>
+																			</div>
+																			<%-- Google 리뷰는 createdAt, DB 리뷰는 createdAtAsDate 사용 --%>
+																			<span class="mx-2">·</span> <span><fmt:formatDate
+																					value="${isExternal ? review.createdAt : review.createdAtAsDate}"
+																					pattern="yy.MM.dd" /></span>
 																		</div>
-																		<%-- Google 리뷰는 createdAt, DB 리뷰는 createdAtAsDate 사용 --%>
-																		<span class="mx-2">·</span> <span><fmt:formatDate
-																				value="${isExternal ? review.createdAt : review.createdAtAsDate}"
-																				pattern="yy.MM.dd" /></span>
 																	</div>
 																</div>
 
