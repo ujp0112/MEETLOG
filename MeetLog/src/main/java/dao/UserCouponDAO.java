@@ -115,4 +115,24 @@ public class UserCouponDAO {
             return count != null ? count : 0;
         }
     }
+
+    /**
+     * 사용자가 이미 특정 쿠폰을 받았는지 확인
+     */
+    public boolean hasUserReceivedCoupon(int userId, int couponId) {
+        return countUserReceivedCoupon(userId, couponId) > 0;
+    }
+
+    /**
+     * 사용자가 특정 쿠폰을 받은 횟수 조회
+     */
+    public int countUserReceivedCoupon(int userId, int couponId) {
+        try (SqlSession session = MyBatisSqlSessionFactory.getSqlSession()) {
+            java.util.Map<String, Integer> params = new java.util.HashMap<>();
+            params.put("userId", userId);
+            params.put("couponId", couponId);
+            Integer count = session.selectOne("dao.UserCouponDAO.countUserCouponByCouponId", params);
+            return count != null ? count : 0;
+        }
+    }
 }

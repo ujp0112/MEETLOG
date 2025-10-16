@@ -158,10 +158,8 @@ body {
 }
 
 .coupon-glow {
-	background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-	border: 2px solid #f59e0b;
-	box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-	animation: couponGlow 3s ease-in-out infinite;
+	background: linear-gradient(135deg, #c7eafe 0%, #8ad9fd 100%);
+	border: 2px solid #8ad9fd;
 }
 
 .review-card {
@@ -784,15 +782,7 @@ body {
 	}
 }
 
-@keyframes couponGlow {
-	0%, 100% {
-		box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
-	}
 
-	50% {
-		box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
-	}
-}
 
 @keyframes float {
 	0%, 100% {
@@ -1490,21 +1480,32 @@ body {
 												<div
 													class="coupon-glow p-6 rounded-3xl relative overflow-hidden">
 													<div
-														class="absolute top-0 right-0 w-20 h-20 bg-yellow-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
+														class="absolute top-0 right-0 w-20 h-20 bg-sky-400 rounded-full -translate-y-10 translate-x-10 opacity-20"></div>
 													<div
-														class="absolute bottom-0 left-0 w-16 h-16 bg-orange-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
+														class="absolute bottom-0 left-0 w-16 h-16 bg-blue-400 rounded-full translate-y-8 -translate-x-8 opacity-20"></div>
 													<div class="relative z-10">
 														<div class="flex items-center justify-between">
 															<div class="flex-1">
-																<h3 class="text-2xl font-black text-yellow-800 mb-2">${coupon.title}</h3>
-																<p class="text-yellow-700 font-semibold mb-2">${coupon.description}</p>
-																<p class="text-xs text-yellow-600">유효기간:
+																<h3 class="text-2xl font-black text-sky-800 mb-2">${coupon.title}</h3>
+																<p class="text-sky-700 font-semibold mb-2">${coupon.description}</p>
+																<p class="text-xs text-sky-600">유효기간:
 																	${coupon.validity}</p>
 															</div>
 															<div class="text-right">
-																<button
-																	class="bg-gradient-to-r from-sky-500 to-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-xl">🎁
-																	쿠폰받기</button>
+																<c:choose>
+																	<c:when test="${receivedCouponIds.contains(coupon.id)}">
+																		<button
+																			class="bg-gray-400 text-white px-6 py-3 rounded-2xl font-bold cursor-not-allowed"
+																			disabled>
+																			받기완료</button>
+																	</c:when>
+																	<c:otherwise>
+																		<button
+																			class="coupon-receive-btn bg-gradient-to-r from-sky-500 to-blue-500 text-white px-6 py-3 rounded-2xl font-bold hover:to-blue-600 transform hover:scale-105 transition-all duration-300 shadow-xl"
+																			data-coupon-id="${coupon.id}">
+																			쿠폰받기</button>
+																	</c:otherwise>
+																</c:choose>
 															</div>
 														</div>
 													</div>
@@ -1517,9 +1518,9 @@ body {
 								<c:if test="${!isExternal}">
 									<section class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 md:p-8">
 										<div class="flex justify-between items-center mb-6">
-											<h2 class="text-2xl font-bold text-slate-900">❓ Q&A</h2>
+											<h2 class="text-2xl font-bold text-slate-900">Q&A</h2>
 											<button onclick="toggleQnAForm()"
-												class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">💬
+												class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-semibold shadow-sm transition hover:-translate-y-0.5">
 												문의하기</button>
 										</div>
 										<div id="qnaForm" class="hidden mb-8">
@@ -1589,7 +1590,6 @@ body {
 											</c:when>
 											<c:otherwise>
 												<div class="text-center py-12">
-													<div class="text-6xl mb-4">❓</div>
 													<h4 class="text-xl font-bold text-slate-600 mb-2">등록된
 														Q&A가 없습니다</h4>
 													<p class="text-slate-500">궁금한 점이 있으시면 언제든 문의해주세요!</p>
@@ -1603,8 +1603,8 @@ body {
 							<div class="space-y-8">
 								<section
 									class="stat-card map-trigger cursor-pointer">
-									<h3 class="text-lg font-semibold text-slate-900 mb-4">위치</h3>
-									<div id="map" class="w-full h-64 rounded-2xl border border-slate-200"></div>
+									<h3 class="text-lg font-semibold text-slate-900 mb-2">위치</h3>
+									<div id="map" class="w-full h-64 rounded-2xl border border-slate-100"></div>
 								</section>
 
 								<%-- 1. 서블릿에서 전달받은 reservationSettings 객체를 사용하여 예약 활성화 여부를 체크합니다. --%>
@@ -1628,13 +1628,13 @@ body {
 
 											<div class="space-y-4">
 												<div>
-													<label class="meta-label">📅 날짜</label>
+													<label class="meta-label">날짜</label>
 													<input type="date" name="reservationDate"
 														value="<%=java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)%>"
 														class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200">
 												</div>
 												<div>
-													<label class="meta-label">👥 인원</label>
+													<label class="meta-label">인원</label>
 													<select name="partySize"
 														class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200">
 														<c:forEach var="i"
@@ -1645,7 +1645,7 @@ body {
 													</select>
 												</div>
 												<div>
-													<label class="meta-label">⏰ 예약가능시간</label>
+													<label class="meta-label">예약가능시간</label>
 													<div id="time-slots-container"
 														class="grid grid-cols-3 gap-2 mt-2">
 														<div id="no-slots-message"
@@ -1772,7 +1772,7 @@ body {
 
 		<jsp:include page="/WEB-INF/views/common/footer.jsp" />
 		<c:if test="${not empty restaurant}">
-			<a href="#reservationForm" class="floating-action-btn">🎯 예약하기</a>
+			<a href="#reservationForm" class="floating-action-btn">예약하기</a>
 		</c:if>
 	</div>
 
@@ -3046,9 +3046,59 @@ function setReportSubmittingState(submitting) {
         });// 클릭된 버튼에만 선택 스타일을 적용합니다. 
         button.classList.add('bg-blue-500', 'text-white');
         button.classList.remove('bg-slate-100', 'text-slate-700');
-        // hidden input에 선택된 시간 값을 저장합니다. 
+        // hidden input에 선택된 시간 값을 저장합니다.
         document.getElementById('selectedTime').value = time;
     }
+
+    // 쿠폰받기 버튼 이벤트 핸들러
+    document.addEventListener('DOMContentLoaded', function() {
+        const couponBtns = document.querySelectorAll('.coupon-receive-btn');
+
+        couponBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const couponId = this.getAttribute('data-coupon-id');
+                const button = this;
+
+                // 버튼 비활성화 (중복 클릭 방지)
+                button.disabled = true;
+                const originalText = button.textContent;
+                button.textContent = '처리중...';
+
+                // AJAX 요청
+                fetch('${pageContext.request.contextPath}/coupon/receive', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'couponId=' + encodeURIComponent(couponId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 성공 시 - 버튼 스타일을 "받기완료" 상태로 변경
+                        button.textContent = '받기완료';
+                        button.classList.remove('bg-gradient-to-r', 'from-sky-500', 'to-blue-500', 'hover:to-blue-600', 'hover:scale-105', 'transform', 'transition-all', 'duration-300');
+                        button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                        // 버튼은 이미 disabled 상태이므로 유지
+
+                        // 성공 메시지 표시
+                        alert(data.message);
+                    } else {
+                        // 실패 시 - 버튼을 원래 상태로 복원
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('쿠폰 받기 오류:', error);
+                    button.disabled = false;
+                    button.textContent = originalText;
+                    alert('쿠폰 받기 중 오류가 발생했습니다. 다시 시도해주세요.');
+                });
+            });
+        });
+    });
 </script>
 </body>
 </html>

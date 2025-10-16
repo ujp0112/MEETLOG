@@ -116,9 +116,9 @@
                                                 <p class="text-sm opacity-90 mb-4">${coupon.description}</p>
                                                 <div class="flex justify-between items-end">
                                                     <div class="text-xs opacity-80">
-                                                        <div>받은 날짜: <fmt:formatDate value="${coupon.receivedAt}" pattern="yyyy-MM-dd"/></div>
+                                                        <div>받은 날짜: ${coupon.formattedReceivedAt}</div>
                                                         <c:if test="${coupon.used}">
-                                                            <div>사용 날짜: <fmt:formatDate value="${coupon.usedAt}" pattern="yyyy-MM-dd"/></div>
+                                                            <div>사용 날짜: ${coupon.formattedUsedAt}</div>
                                                         </c:if>
                                                     </div>
                                                     <c:if test="${not coupon.used}">
@@ -158,7 +158,7 @@
                                                 <p class="text-sm opacity-90 mb-4">${coupon.description}</p>
                                                 <div class="flex justify-between items-end">
                                                     <div class="text-xs opacity-80">
-                                                        받은 날짜: <fmt:formatDate value="${coupon.receivedAt}" pattern="yyyy-MM-dd"/>
+                                                        받은 날짜: ${coupon.formattedReceivedAt}
                                                     </div>
                                                     <button onclick="useCoupon(${coupon.id})"
                                                             class="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all">
@@ -194,8 +194,8 @@
                                                 <h3 class="text-lg font-bold mb-2">${coupon.title}</h3>
                                                 <p class="text-sm opacity-90 mb-4">${coupon.description}</p>
                                                 <div class="text-xs opacity-80">
-                                                    <div>받은 날짜: <fmt:formatDate value="${coupon.receivedAt}" pattern="yyyy-MM-dd"/></div>
-                                                    <div>사용 날짜: <fmt:formatDate value="${coupon.usedAt}" pattern="yyyy-MM-dd"/></div>
+                                                    <div>받은 날짜: ${coupon.formattedReceivedAt}</div>
+                                                    <div>사용 날짜: ${coupon.formattedUsedAt}</div>
                                                 </div>
                                             </div>
                                         </div>
