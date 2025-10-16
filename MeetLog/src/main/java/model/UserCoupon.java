@@ -1,6 +1,7 @@
 package model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 사용자가 받은 쿠폰 정보 모델
@@ -117,5 +118,27 @@ public class UserCoupon {
 
     public void setRestaurantName(String restaurantName) {
         this.restaurantName = restaurantName;
+    }
+
+    /**
+     * 받은 날짜를 포맷된 문자열로 반환 (yyyy-MM-dd)
+     */
+    public String getFormattedReceivedAt() {
+        if (receivedAt == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return receivedAt.format(formatter);
+    }
+
+    /**
+     * 사용 날짜를 포맷된 문자열로 반환 (yyyy-MM-dd)
+     */
+    public String getFormattedUsedAt() {
+        if (usedAt == null) {
+            return "";
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return usedAt.format(formatter);
     }
 }

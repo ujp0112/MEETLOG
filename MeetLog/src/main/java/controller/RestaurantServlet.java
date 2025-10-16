@@ -2,14 +2,18 @@ package controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import model.Coupon;
 import model.Menu;
@@ -17,12 +21,15 @@ import model.OperatingHour;
 import model.QnA;
 import model.Restaurant;
 import model.Review;
+import model.User;
+import model.UserCoupon;
 import service.CouponService;
 import service.MenuService;
 import service.OperatingHourService;
 import service.QnAService;
 import service.RestaurantService;
 import service.ReviewService;
+import service.UserCouponService;
 
 /**
  * 맛집 관련 요청을 처리하는 서블릿
@@ -40,6 +47,7 @@ public class RestaurantServlet extends HttpServlet {
 	private CouponService couponService = new CouponService();
 	private QnAService qnaService = new QnAService();
 	private OperatingHourService operatingHourService = new OperatingHourService();
+	private UserCouponService userCouponService = new UserCouponService();
 
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -162,7 +170,18 @@ public class RestaurantServlet extends HttpServlet {
         List<Coupon> coupons = couponService.getCouponsByRestaurantId(restaurantId);
         List<QnA> qnas = qnaService.getQnAsByRestaurantId(restaurantId);
         List<OperatingHour> operatingHours = operatingHourService.getOperatingHoursByRestaurantId(restaurantId);
-        
+
+        // 사용자가 이미 받은 쿠폰 ID 목록 조회
+        Set<Integer> receivedCouponIds = new HashSet<>();
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            List<UserCoupon> userCoupons = userCouponService.getUserCoupons(user.getId());
+            receivedCouponIds = userCoupons.stream()
+                .map(UserCoupon::getCouponId)
+                .collect(Collectors.toSet());
+        }
+
         // 조회된 모든 데이터를 request 객체에 저장
         request.setAttribute("restaurant", restaurant);
         request.setAttribute("reviews", reviews);
@@ -170,7 +189,8 @@ public class RestaurantServlet extends HttpServlet {
         request.setAttribute("coupons", coupons);
         request.setAttribute("qnas", qnas);
         request.setAttribute("operatingHours", operatingHours);
-        
+        request.setAttribute("receivedCouponIds", receivedCouponIds);
+
         // restaurant-detail.jsp로 포워딩
         request.getRequestDispatcher("/WEB-INF/views/restaurant-detail.jsp").forward(request, response);
     }
