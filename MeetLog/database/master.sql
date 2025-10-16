@@ -1973,3 +1973,43 @@ CREATE TABLE `course_comment_likes` (
   CONSTRAINT `course_comment_likes_ibfk_1` FOREIGN KEY (`comment_id`) REFERENCES `course_comments` (`comment_id`) ON DELETE CASCADE,
   CONSTRAINT `course_comment_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- ===================================================================
+-- withdrawal_requests: 출금 신청 테이블
+-- ===================================================================
+CREATE TABLE `withdrawal_requests` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) NOT NULL COMMENT '사업자 ID (users.id)',
+  `restaurant_id` int(11) DEFAULT NULL COMMENT '매장 ID (선택사항)',
+  
+  -- 출금 금액 정보
+  `request_amount` decimal(10,2) NOT NULL COMMENT '신청 금액',
+  `available_amount` decimal(10,2) NOT NULL COMMENT '출금 가능 금액 (신청 시점)',
+  
+  -- 계좌 정보
+  `bank_name` varchar(50) NOT NULL COMMENT '은행명',
+  `account_number` varchar(50) NOT NULL COMMENT '계좌번호',
+  `account_holder` varchar(50) NOT NULL COMMENT '예금주',
+  
+  -- 상태 관리
+  `status` varchar(20) NOT NULL DEFAULT 'PENDING' COMMENT 'PENDING, APPROVED, REJECTED, COMPLETED',
+  
+  -- 관리자 처리 정보
+  `admin_id` int(11) DEFAULT NULL COMMENT '처리한 관리자 ID',
+  `admin_memo` text DEFAULT NULL COMMENT '관리자 메모',
+  `processed_at` timestamp NULL DEFAULT NULL COMMENT '처리 시간',
+  
+  -- 타임스탬프
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  
+  PRIMARY KEY (`id`),
+  KEY `idx_owner` (`owner_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_created` (`created_at`),
+  KEY `idx_restaurant` (`restaurant_id`),
+  KEY `idx_admin` (`admin_id`),
+  
+  CONSTRAINT `withdrawal_requests_ibfk_1` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `withdrawal_requests_ibfk_2` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurants` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `withdrawal_requests_ibfk_3` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='출금 신청 내역';

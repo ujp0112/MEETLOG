@@ -106,4 +106,14 @@ public class ReservationDAO {
 			return result;
 		}
 	}
+
+	/**
+	 * 특정 사업자의 입금 완료된 예약금 총액 조회
+	 */
+	public java.math.BigDecimal getTotalDepositByOwnerId(int ownerId) {
+		try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+			java.math.BigDecimal total = sqlSession.selectOne(NAMESPACE + ".getTotalDepositByOwnerId", ownerId);
+			return total != null ? total : java.math.BigDecimal.ZERO;
+		}
+	}
 }

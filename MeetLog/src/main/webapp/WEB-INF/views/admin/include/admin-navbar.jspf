@@ -29,6 +29,8 @@
                    class="${currentMenu eq 'faq' ? activeNavClass : baseNavClass}">FAQ</a>
                 <a href="${ctx}/admin/support-dashboard"
                    class="${currentMenu eq 'support' ? activeNavClass : baseNavClass}">고객 지원</a>
+                <a href="${ctx}/admin/withdrawals"
+                   class="${currentMenu eq 'withdrawal' ? activeNavClass : baseNavClass}">출금 관리</a>
                 <a href="${ctx}/logout"
                    class="px-3 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition whitespace-nowrap">로그아웃</a>
             </div>

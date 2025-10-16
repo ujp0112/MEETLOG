@@ -14,6 +14,7 @@ import model.Restaurant;
 import model.Reservation;
 import service.RestaurantService;
 import service.ReservationService;
+import service.WithdrawalService;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
 import java.math.BigDecimal;
@@ -110,6 +111,11 @@ public class BusinessReservationManagementServlet extends HttpServlet {
                 }
             }
 
+            // 출금 관련 정보 조회
+            WithdrawalService withdrawalService = new WithdrawalService();
+            BigDecimal availableWithdrawalAmount = withdrawalService.calculateAvailableAmount(user.getId());
+            int pendingWithdrawalCount = withdrawalService.countPendingByOwnerId(user.getId());
+
             request.setAttribute("myRestaurants", myRestaurants);
             request.setAttribute("totalReservations", totalReservations);
             request.setAttribute("pendingReservations", pendingReservations);
@@ -120,6 +126,8 @@ public class BusinessReservationManagementServlet extends HttpServlet {
             request.setAttribute("totalDepositAmount", totalDepositAmount);
             request.setAttribute("paidDepositAmount", paidDepositAmount);
             request.setAttribute("outstandingDepositAmount", outstandingDepositAmount);
+            request.setAttribute("availableWithdrawalAmount", availableWithdrawalAmount);
+            request.setAttribute("pendingWithdrawalCount", pendingWithdrawalCount);
             request.getRequestDispatcher("/WEB-INF/views/business/reservation-management.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();

@@ -231,4 +231,15 @@
 		id = #{id}
 	</delete>
 
+	<!-- 특정 사업자의 입금 완료된 예약금 총액 조회 -->
+	<select id="getTotalDepositByOwnerId" parameterType="int" resultType="java.math.BigDecimal">
+		SELECT COALESCE(SUM(r.deposit_amount), 0)
+		FROM reservations r
+		INNER JOIN restaurants rest ON r.restaurant_id = rest.id
+		WHERE rest.owner_id = #{ownerId}
+		AND r.payment_status = 'PAID'
+		AND r.deposit_required = true
+		AND r.status NOT IN ('CANCELLED')
+	</select>
+
 </mapper>

@@ -40,7 +40,7 @@
             </div>
 
             <!-- 통계 카드 -->
-            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-6">
                 <div class="bg-blue-50 p-6 rounded-xl text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterByStatus('ALL')">
                     <div class="text-3xl font-bold text-blue-600" id="totalCount">0</div>
                     <div class="text-slate-600">총 예약</div>
@@ -67,6 +67,31 @@
                     <div class="text-3xl font-bold text-amber-600" id="depositPendingCount">${depositPendingCount}</div>
                     <div class="text-slate-600">예약금 결제 대기</div>
                     <p class="text-xs text-amber-700 mt-2">미수금: <span id="depositOutstandingAmount"><fmt:formatNumber value="${outstandingDepositAmount}" pattern="#,##0"/></span>원</p>
+                </div>
+            </div>
+
+            <!-- 출금 가능 금액 및 신청 카드 -->
+            <div class="glass-card p-8 rounded-2xl mb-8 bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-100">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h3 class="text-2xl font-bold text-indigo-900">출금 가능 금액</h3>
+                        </div>
+                        <div class="text-5xl font-bold gradient-text mb-2">
+                            <fmt:formatNumber value="${availableWithdrawalAmount}" pattern="#,##0"/>원
+                        </div>
+                        <p class="text-slate-600 text-sm">입금 완료된 예약금 총액에서 신청한 출금을 제외한 금액입니다.</p>
+                    </div>
+                    <div class="text-right">
+                        <button onclick="openWithdrawalModal()" class="btn-primary text-white px-8 py-4 rounded-xl text-lg font-semibold shadow-lg mb-3">
+                            출금 신청하기
+                        </button>
+                        <a href="${pageContext.request.contextPath}/business/withdrawal-history"
+                           class="block bg-white border-2 border-indigo-300 text-indigo-700 px-6 py-3.5 rounded-xl text-lg font-semibold hover:bg-indigo-50 transition-all">
+                            출금 내역 보기
+                        </a>
+                        <p class="text-xs text-slate-500 mt-3">대기 중인 신청: <span class="font-semibold text-indigo-600">${pendingWithdrawalCount}건</span></p>
+                    </div>
                 </div>
             </div>
 
@@ -244,9 +269,105 @@
         </div>
     </main>
 
+    <!-- 출금 신청 모달 -->
+    <div id="withdrawalModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50" style="display: none;">
+        <div class="glass-card p-8 rounded-3xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold gradient-text">출금 신청</h2>
+                <button onclick="closeWithdrawalModal()" class="text-slate-400 hover:text-slate-600 text-3xl leading-none">&times;</button>
+            </div>
+
+            <form id="withdrawalForm" onsubmit="submitWithdrawal(event)">
+                <!-- 출금 금액 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">출금 신청 금액</label>
+                    <div class="relative">
+                        <input type="number" id="requestAmount" name="requestAmount"
+                               class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                               placeholder="출금할 금액을 입력하세요"
+                               min="0"
+                               max="${availableWithdrawalAmount}"
+                               required>
+                        <span class="absolute right-4 top-3 text-slate-500">원</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">출금 가능 금액: <span class="font-semibold text-indigo-600"><fmt:formatNumber value="${availableWithdrawalAmount}" pattern="#,##0"/>원</span></p>
+                </div>
+
+                <!-- 은행 정보 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">은행명</label>
+                    <select id="bankName" name="bankName"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            required>
+                        <option value="">은행을 선택하세요</option>
+                        <option value="KB국민은행">KB국민은행</option>
+                        <option value="신한은행">신한은행</option>
+                        <option value="우리은행">우리은행</option>
+                        <option value="하나은행">하나은행</option>
+                        <option value="농협은행">농협은행</option>
+                        <option value="기업은행">기업은행</option>
+                        <option value="SC제일은행">SC제일은행</option>
+                        <option value="한국씨티은행">한국씨티은행</option>
+                        <option value="카카오뱅크">카카오뱅크</option>
+                        <option value="케이뱅크">케이뱅크</option>
+                        <option value="토스뱅크">토스뱅크</option>
+                        <option value="새마을금고">새마을금고</option>
+                        <option value="신협">신협</option>
+                        <option value="우체국">우체국</option>
+                    </select>
+                </div>
+
+                <!-- 계좌번호 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">계좌번호</label>
+                    <input type="text" id="accountNumber" name="accountNumber"
+                           class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           placeholder="'-' 없이 숫자만 입력"
+                           pattern="[0-9]+"
+                           required>
+                    <p class="text-xs text-slate-500 mt-2">예: 1234567890123</p>
+                </div>
+
+                <!-- 예금주 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">예금주</label>
+                    <input type="text" id="accountHolder" name="accountHolder"
+                           class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                           placeholder="예금주명을 입력하세요"
+                           required>
+                </div>
+
+                <!-- 안내 문구 -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <p class="text-sm text-blue-800">
+                        <strong>안내사항:</strong><br>
+                        • 출금 신청 후 관리자 검토가 진행됩니다.<br>
+                        • 승인 후 영업일 기준 1-2일 내에 입금됩니다.<br>
+                        • 계좌 정보는 신청 시 입력한 정보로만 처리됩니다.
+                    </p>
+                </div>
+
+                <!-- 제출 버튼 -->
+                <div class="flex space-x-3">
+                    <button type="button" onclick="closeWithdrawalModal()"
+                            class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 px-6 py-3 rounded-xl font-semibold transition-all">
+                        취소
+                    </button>
+                    <button type="submit"
+                            class="flex-1 btn-primary text-white px-6 py-3 rounded-xl font-semibold">
+                        신청하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <jsp:include page="/WEB-INF/views/common/footer.jsp" />
 
     <script>
+        // 서버에서 전달받은 출금 가능 금액
+        const AVAILABLE_WITHDRAWAL_AMOUNT = <c:out value="${availableWithdrawalAmount != null ? availableWithdrawalAmount : 0}" />;
+
         document.addEventListener('DOMContentLoaded', function() {
             calculateStats();
         });
@@ -330,6 +451,95 @@
                 }
             });
         }
+
+        // 출금 신청 모달 열기
+        function openWithdrawalModal() {
+            if (AVAILABLE_WITHDRAWAL_AMOUNT <= 0) {
+                alert('출금 가능한 금액이 없습니다.');
+                return;
+            }
+            document.getElementById('withdrawalModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 출금 신청 모달 닫기
+        function closeWithdrawalModal() {
+            document.getElementById('withdrawalModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            document.getElementById('withdrawalForm').reset();
+        }
+
+        // 출금 신청 제출
+        function submitWithdrawal(event) {
+            event.preventDefault();
+
+            const requestAmount = document.getElementById('requestAmount').value;
+            const bankName = document.getElementById('bankName').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountHolder = document.getElementById('accountHolder').value;
+
+            // 검증
+            if (parseFloat(requestAmount) <= 0) {
+                alert('출금 금액은 0보다 커야 합니다.');
+                return;
+            }
+
+            if (parseFloat(requestAmount) > AVAILABLE_WITHDRAWAL_AMOUNT) {
+                alert('출금 가능 금액을 초과할 수 없습니다.');
+                return;
+            }
+
+            if (!bankName || !accountNumber || !accountHolder) {
+                alert('모든 항목을 입력해주세요.');
+                return;
+            }
+
+            // 확인 메시지
+            const confirmMessage = '출금 신청을 하시겠습니까?' +
+                                   '신청 금액: ' + formatCurrency(requestAmount) + '원' +
+                                   '은행: ' + bankName + '' +
+                                   '계좌번호: ' + accountNumber + '' +
+                                   '예금주: ' + accountHolder;
+
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+
+            // AJAX 요청
+            fetch('${pageContext.request.contextPath}/business/withdrawal/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    requestAmount: requestAmount,
+                    bankName: bankName,
+                    accountNumber: accountNumber,
+                    accountHolder: accountHolder
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('출금 신청이 완료되었습니다. 관리자 승인 후 처리됩니다.');
+                    closeWithdrawalModal();
+                    location.reload(); // 페이지 새로고침
+                } else {
+                    alert('출금 신청 중 오류가 발생했습니다: ' + (data.message || '알 수 없는 오류'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('출금 신청 중 오류가 발생했습니다.');
+            });
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeWithdrawalModal();
+            }
+        });
     </script>
 </body>
 </html>

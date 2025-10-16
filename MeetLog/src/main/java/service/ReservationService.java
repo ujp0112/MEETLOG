@@ -314,6 +314,13 @@ public class ReservationService {
         return false;
     }
 
+    /**
+     * 특정 사업자의 입금 완료된 예약금 총액 조회 (출금 가능 금액)
+     */
+    public BigDecimal getTotalDepositByOwnerId(int ownerId) {
+        return reservationDAO.getTotalDepositByOwnerId(ownerId);
+    }
+
     // --- Inner Class for Stats ---
     public static class ReservationStats {
         private int totalReservations;
@@ -321,7 +328,7 @@ public class ReservationService {
         private int confirmedReservations;
         private int cancelledReservations;
         private int completedReservations;
-        
+
         // Getters and Setters
         public int getTotalReservations() { return totalReservations; }
         public void setTotalReservations(int totalReservations) { this.totalReservations = totalReservations; }
