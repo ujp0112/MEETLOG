@@ -6,23 +6,19 @@
 <c:set var="activeNavClass" value="px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow whitespace-nowrap" />
 <nav class="bg-white shadow">
     <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col sm:flex-row sm:justify-center sm:items-center py-4 gap-4">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 gap-4">
             <div class="flex items-center">
                 <h1 class="text-xl font-bold text-gray-900 whitespace-nowrap">MEET LOG 관리자</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 justify-center">
+                <a href="${ctx}/main"
+                   class="${currentMenu eq 'dashboard' ? activeNavClass : baseNavClass}">메인</a>
                 <a href="${ctx}/admin/dashboard"
                    class="${currentMenu eq 'dashboard' ? activeNavClass : baseNavClass}">대시보드</a>
-                <a href="${ctx}/admin/member-management"
-                   class="${currentMenu eq 'members' ? activeNavClass : baseNavClass}">회원 관리</a>
-                <a href="${ctx}/admin/business-management"
-                   class="${currentMenu eq 'business' ? activeNavClass : baseNavClass}">업체 관리</a>
                 <a href="${ctx}/admin/branch-management"
                    class="${currentMenu eq 'branch' ? activeNavClass : baseNavClass}">지점 관리</a>
                 <a href="${ctx}/admin/course-management"
                    class="${currentMenu eq 'course' ? activeNavClass : baseNavClass}">코스 관리</a>
-                <a href="${ctx}/admin/report-management"
-                   class="${currentMenu eq 'report' ? activeNavClass : baseNavClass}">신고 관리</a>
                 <a href="${ctx}/admin/inquiry-management"
                    class="${currentMenu eq 'inquiry' ? activeNavClass : baseNavClass}">문의 관리</a>
                 <a href="${ctx}/admin/event-management"
@@ -33,8 +29,6 @@
                    class="${currentMenu eq 'faq' ? activeNavClass : baseNavClass}">FAQ</a>
                 <a href="${ctx}/admin/support-dashboard"
                    class="${currentMenu eq 'support' ? activeNavClass : baseNavClass}">고객 지원</a>
-                <a href="${ctx}/admin/statistics-dashboard"
-                   class="${currentMenu eq 'statistics' ? activeNavClass : baseNavClass}">통계</a>
                 <a href="${ctx}/logout"
                    class="px-3 py-2 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition whitespace-nowrap">로그아웃</a>
             </div>

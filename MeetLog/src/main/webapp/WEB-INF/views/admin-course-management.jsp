@@ -26,16 +26,14 @@
                         새 코스 추가
                     </button>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
+                <!-- <div class="flex flex-wrap items-center gap-2">
                     <a href="${pageContext.request.contextPath}/admin/course-management"
                        class="${subNavActive}">코스 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/course-reservation"
                        class="${subNavBase}">예약 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/reservation-statistics"
                        class="${subNavBase}">예약 통계</a>
-                    <a href="${pageContext.request.contextPath}/admin/course-statistics"
-                       class="${subNavBase}">코스 통계</a>
-                </div>
+                </div> -->
             </div>
 
             <c:if test="${not empty successMessage}">
@@ -62,7 +60,7 @@
                                                         </c:when>
                                                         <c:otherwise>
                                                             <div class="h-16 w-16 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center">
-                                                                <span class="text-white text-lg font-bold">🚶</span>
+                                                                <span class="text-white text-lg font-bold"></span>
                                                             </div>
                                                         </c:otherwise>
                                                     </c:choose>
@@ -73,9 +71,9 @@
                                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.type == 'OFFICIAL' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">
                                                             ${course.type == 'OFFICIAL' ? '공식' : '커뮤니티'}
                                                         </span>
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : course.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
+                                                        <!-- <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${course.status == 'ACTIVE' ? 'bg-green-100 text-green-800' : course.status == 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}">
                                                             ${course.status == 'ACTIVE' ? '진행중' : course.status == 'PENDING' ? '대기중' : '종료됨'}
-                                                        </span>
+                                                        </span> -->
                                                     </div>
                                                     <p class="text-sm text-gray-500 mt-1">${course.description}</p>
                                                     <div class="flex items-center mt-1 text-xs text-gray-500">
@@ -99,7 +97,7 @@
                                                 <button class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
                                                     수정
                                                 </button>
-                                                <c:if test="${course.status == 'PENDING'}">
+                                                <!-- <c:if test="${course.status == 'PENDING'}">
                                                     <form method="post" class="inline">
                                                         <input type="hidden" name="action" value="activate">
                                                         <input type="hidden" name="courseId" value="${course.id}">
@@ -116,7 +114,7 @@
                                                             비활성화
                                                         </button>
                                                     </form>
-                                                </c:if>
+                                                </c:if> -->
                                                 <form method="post" class="inline">
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="courseId" value="${course.id}">

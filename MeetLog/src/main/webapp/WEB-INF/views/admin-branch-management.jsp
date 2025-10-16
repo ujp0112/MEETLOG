@@ -9,7 +9,47 @@
     <title>MEET LOG - 지점 관리</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- jQuery (Select2 dependency) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <%-- 공통 스타일시트나 커스텀 CSS가 있다면 여기에 추가 --%>
+    <style>
+        /* Select2 Tailwind 스타일 조정 */
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            height: 2.5rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 1.5rem;
+            padding-left: 0;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 2.5rem;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #3b82f6;
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .select2-dropdown {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+        }
+        .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .select2-results__option--highlighted {
+            background-color: #3b82f6 !important;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
 <c:set var="adminMenu" scope="request" value="branch" />
@@ -27,12 +67,12 @@
                                 새 지점 추가
                             </button>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
+                        <!-- <div class="flex flex-wrap items-center gap-2">
                             <a href="${pageContext.request.contextPath}/admin/branch-management"
                                class="${subNavActive}">지점 목록</a>
                             <a href="${pageContext.request.contextPath}/admin/branch-statistics"
                                class="${subNavBase}">지점 통계</a>
-                        </div>
+                        </div> -->
                     </div>
 
                     <!-- 회사 검색 필터 -->
@@ -90,9 +130,9 @@
                                                         <span class="text-sm text-gray-500">전화: ${branch.phone}</span>
                                                         <span class="ml-4 text-sm text-gray-500">지점장: ${branch.managerName}</span>
                                                         <span class="ml-4 text-sm text-gray-500">직원: ${branch.employeeCount}명</span>
-                                                        <span class="ml-4 text-sm text-gray-500">월매출:
+                                                        <!-- <span class="ml-4 text-sm text-gray-500">월매출:
                                                             <fmt:formatNumber value="${branch.monthlyRevenue}" type="currency" currencySymbol="₩"/>
-                                                        </span>
+                                                        </span> -->
                                                     </div>
                                                 </div>
                                             </div>
@@ -153,7 +193,7 @@
 
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">회사</label>
-                    <select name="companyId" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="companySelect" name="companyId" required class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">회사 선택</option>
                         <c:forEach var="company" items="${companies}">
                             <option value="${company.id}" ${selectedCompanyId == company.id ? 'selected' : ''}>${company.name}</option>
@@ -238,6 +278,38 @@
 </div>
 
 <script>
+$(document).ready(function() {
+    // Select2 초기화 - 필터 select
+    $('#companyFilter').select2({
+        placeholder: '전체 회사',
+        allowClear: true,
+        width: '300px',
+        language: {
+            noResults: function() {
+                return '검색 결과가 없습니다.';
+            },
+            searching: function() {
+                return '검색 중...';
+            }
+        }
+    });
+
+    // Select2 초기화 - 모달 내 select
+    $('#companySelect').select2({
+        placeholder: '회사 선택',
+        dropdownParent: $('#addModal'),
+        width: '100%',
+        language: {
+            noResults: function() {
+                return '검색 결과가 없습니다.';
+            },
+            searching: function() {
+                return '검색 중...';
+            }
+        }
+    });
+});
+
 function filterByCompany() {
     const companyId = document.getElementById('companyFilter').value;
     const url = '${pageContext.request.contextPath}/admin/branch-management' + (companyId ? '?companyId=' + companyId : '');
@@ -246,6 +318,10 @@ function filterByCompany() {
 
 function openAddModal() {
     document.getElementById('addModal').classList.remove('hidden');
+    // Select2가 모달 내에서 제대로 작동하도록 재초기화
+    setTimeout(function() {
+        $('#companySelect').select2('open');
+    }, 100);
 }
 
 function closeAddModal() {
