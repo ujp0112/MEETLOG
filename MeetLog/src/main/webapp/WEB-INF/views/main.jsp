@@ -527,7 +527,7 @@ keyframes spin {to { transform:rotate(360deg);
 						<%-- 2. 버튼 그룹 --%>
 						<div class="search-actions">
 							<button id="mapSearchBtn" type="button"
-								class="btn-map-search js-map-search-btn">지도로 검색</button>
+								class="btn-map-search js-header-map-btn">지도로 검색</button>
 							<button type="submit" class="btn-main-search">맛집 찾기</button>
 						</div>
 

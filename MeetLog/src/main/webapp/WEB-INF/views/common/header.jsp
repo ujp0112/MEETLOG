@@ -498,8 +498,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const originalBtnText = this.textContent.trim();
             // 로딩 상태로 변경 (링크는 textContent 대신 innerHTML을 사용할 수 있음)
-            this.innerHTML = '위치 찾는 중...'; 
-            this.style.pointerEvents = 'none'; // 중복 클릭 방지
+            //this.innerHTML = '위치 찾는 중...'; 
+            //this.style.pointerEvents = 'none'; // 중복 클릭 방지
 
             // 위치 정보를 가지고 검색 페이지로 이동하는 함수
             const performHeaderSearch = (lat, lng) => {
