@@ -28,8 +28,6 @@
                        class="${subNavBase}">코스 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/course-reservation"
                        class="${subNavActive}">예약 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/course-statistics"
-                       class="${subNavBase}">코스 통계</a>
                 </div>
             </div>
 

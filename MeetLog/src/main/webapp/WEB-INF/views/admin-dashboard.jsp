@@ -106,7 +106,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold text-slate-800 ml-3">사용자 관리</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 ml-3">회원 관리</h3>
                         </div>
                         <p class="text-slate-600 text-sm">회원 정보 조회, 수정 및 비활성화 처리</p>
                     </a>
@@ -117,7 +117,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-semibold text-slate-800 ml-3">맛집 관리</h3>
+                            <h3 class="text-lg font-semibold text-slate-800 ml-3">입점 업체 관리</h3>
                         </div>
                         <p class="text-slate-600 text-sm">맛집 정보 승인, 수정 및 삭제</p>
                     </a>
