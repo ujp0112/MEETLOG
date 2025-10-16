@@ -1177,6 +1177,93 @@ CREATE TABLE IF NOT EXISTS restaurant_popularity (
     INDEX idx_reservation_count (reservation_count DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='맛집 주별 인기도';
 
+-- =========================================================
+-- 외부 연동 레스토랑 지원 및 클레임 테이블
+-- Migration: 003_external_restaurant_support.sql
+-- =========================================================
+
+ALTER TABLE restaurants
+  ADD COLUMN external_source ENUM('INTERNAL','GOOGLE','KAKAO') NOT NULL DEFAULT 'INTERNAL' AFTER owner_id,
+  ADD COLUMN external_id VARCHAR(128) NULL AFTER external_source,
+  ADD COLUMN external_synced_at DATETIME NULL AFTER external_id,
+  ADD COLUMN supports_interactions TINYINT(1) NOT NULL DEFAULT 1 AFTER external_synced_at,
+  ADD COLUMN claimed_flag TINYINT(1) NOT NULL DEFAULT 0 AFTER supports_interactions,
+  ADD UNIQUE KEY ux_restaurant_external (external_source, external_id);
+
+UPDATE restaurants
+   SET external_source = 'INTERNAL',
+       supports_interactions = 1,
+       claimed_flag = CASE WHEN owner_id IS NOT NULL THEN 1 ELSE 0 END
+ WHERE external_source IS NULL;
+
+CREATE TABLE IF NOT EXISTS restaurant_claim_requests (
+  id            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '클레임 요청 ID',
+  restaurant_id INT NOT NULL COMMENT '대상 레스토랑',
+  user_id       INT NOT NULL COMMENT '신청 사용자',
+  status        ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '처리 상태',
+  evidence_url  VARCHAR(512) NULL COMMENT '증빙 자료 URL',
+  memo          VARCHAR(1000) NULL COMMENT '추가 설명',
+  decline_reason VARCHAR(500) NULL COMMENT '거절 사유',
+  submitted_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '제출 시각',
+  processed_at  DATETIME NULL COMMENT '처리 시각',
+
+  KEY ix_restaurant_claim_status (status),
+  KEY ix_restaurant_claim_restaurant (restaurant_id),
+  KEY ix_restaurant_claim_user (user_id),
+  CONSTRAINT fk_restaurant_claim_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE,
+  CONSTRAINT fk_restaurant_claim_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='외부 레스토랑 점주 클레임 요청';
+
+CREATE TABLE IF NOT EXISTS restaurant_external_meta (
+  restaurant_id INT PRIMARY KEY COMMENT '레스토랑 ID',
+  source        ENUM('GOOGLE','KAKAO') NOT NULL COMMENT '외부 소스',
+  payload_json  JSON NULL COMMENT '외부 API 원본 데이터',
+  photo_refs_json JSON NULL COMMENT '사진 참조 목록',
+  last_synced_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '최근 동기화 시각',
+
+  CONSTRAINT fk_restaurant_external_meta FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='외부 레스토랑 세부 정보 스냅샷';
+
+CREATE TABLE IF NOT EXISTS restaurant_external_reviews (
+  id                  BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '외부 리뷰 ID',
+  restaurant_id       INT NOT NULL COMMENT '레스토랑 ID',
+  source              ENUM('GOOGLE','KAKAO') NOT NULL COMMENT '리뷰 출처',
+  external_review_id  VARCHAR(191) NOT NULL COMMENT '외부 리뷰 식별자',
+  author_name         VARCHAR(191) NULL COMMENT '작성자 이름',
+  profile_photo_url   VARCHAR(512) NULL COMMENT '프로필 이미지',
+  rating              DECIMAL(2,1) NULL COMMENT '평점',
+  content             TEXT NULL COMMENT '리뷰 내용',
+  reviewed_at         DATETIME NULL COMMENT '작성 시각',
+  payload_json        JSON NULL COMMENT '원본 JSON',
+  synced_at           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '동기화 시각',
+
+  UNIQUE KEY ux_external_review (source, external_review_id),
+  KEY ix_external_review_restaurant (restaurant_id),
+
+  CONSTRAINT fk_external_reviews_restaurant FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  COMMENT='외부 API 리뷰 저장소';
+
+-- =========================================================
+-- 외부 리뷰 내부화 지원
+-- Migration: 004_external_reviews_internal.sql
+-- =========================================================
+
+ALTER TABLE reviews
+  ADD COLUMN source ENUM('INTERNAL','GOOGLE','KAKAO') NOT NULL DEFAULT 'INTERNAL' AFTER user_id,
+  ADD COLUMN external_review_id VARCHAR(191) NULL AFTER source,
+  ADD COLUMN external_author_name VARCHAR(191) NULL AFTER external_review_id,
+  ADD COLUMN external_profile_image VARCHAR(512) NULL AFTER external_author_name,
+  ADD COLUMN external_created_at DATETIME NULL AFTER external_profile_image,
+  ADD COLUMN external_raw_json JSON NULL AFTER external_created_at,
+  ADD UNIQUE KEY ux_reviews_external (source, external_review_id);
+
+UPDATE reviews
+   SET source = 'INTERNAL'
+ WHERE source IS NULL;
+
 -- ===================================================================
 -- 3. 데이터 삽입 (Insert Data)
 -- ===================================================================
@@ -1220,8 +1307,12 @@ INSERT INTO restaurant_operating_hours (restaurant_id, day_of_week, opening_time
 INSERT IGNORE INTO `users` VALUES (10,'gugu@meetlog.com','구구콘','m2tFIFw+1psjCYLXjBAbUd3IY8jB6L/VCaB8eEc1tPMKgSQnC9BX/7iOREyyLBiC','BUSINESS',NULL,1,0,0,1,'2025-09-27 01:29:10','2025-09-27 01:29:10','구구','0299999999','도산대로1');
 INSERT IGNORE INTO `companies` VALUES (1,'구구콘','2025-09-27 01:29:10','2025-09-27 01:29:10');
 INSERT IGNORE INTO `business_users` VALUES (10,'구구콘','구구','999999999','INDIVIDUAL','APPROVED',1,'2025-09-27 01:29:10','2025-09-27 01:29:10');
-INSERT IGNORE INTO `restaurants` VALUES (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','',NULL);
-INSERT IGNORE INTO `reviews` VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,0,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL), (12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
+INSERT IGNORE INTO `restaurants` (
+    `id`, `owner_id`, `name`, `category`, `location`, `address`, `jibun_address`, `phone`, `hours`, `description`, `image`, `rating`, `review_count`, `likes`, `latitude`, `longitude`, `parking`, `is_active`, `created_at`, `updated_at`, `operating_days`, `operating_times_text`, `break_time_text`
+) VALUES (33,10,'구구콘','고기/구이','강남구','서울 강남구 도산대로 지하 102 1','서울 강남구 신사동 667','0299999999',NULL,'99',NULL,0.0,0,0,37.51643246,127.02032689,0,1,'2025-09-27 01:29:45','2025-09-27 01:29:45','화,수,목,금,토,일','00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00,00:00~22:00','');
+INSERT IGNORE INTO `reviews` (
+    `id`, `restaurant_id`, `user_id`, `rating`, `content`, `images`, `keywords`, `likes`, `is_active`, `created_at`, `updated_at`, `reply_content`, `reply_created_at`
+) VALUES (11,33,10,5,'9999',NULL,'["음식이 맛있어요","가성비가 좋아요","양이 푸짐해요","친구","회식","인테리어가 예뻐요","좌석이 편해요","조용해요","활기찬 분위기","주차가 편해요","접근성이 좋아요"]',0,1,'2025-09-27 01:40:23','2025-09-27 15:20:42',NULL,NULL), (12,33,10,4,'999990',NULL,'["음식이 맛있어요","데이트","인테리어가 예뻐요","주차가 편해요"]',0,1,'2025-09-27 01:45:48','2025-09-27 15:20:29',NULL,NULL);
 INSERT IGNORE INTO `column_comments` VALUES (3,3,10,'ㅎㅇ',NULL,0,1,'2025-09-27 14:51:21','2025-09-27 14:51:21'), (4,15,10,'지쟈스',NULL,0,1,'2025-09-27 16:42:45','2025-09-28 19:49:44');
 INSERT IGNORE INTO `column_likes` VALUES (1,3,10,'2025-09-27 14:51:16'),(2,15,10,'2025-09-27 14:58:15');
 INSERT IGNORE INTO `comment_likes` VALUES (1,1,10,'2025-09-27 14:51:16');

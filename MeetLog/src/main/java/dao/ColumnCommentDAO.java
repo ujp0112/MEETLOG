@@ -56,4 +56,45 @@ public class ColumnCommentDAO {
             return count != null ? count : 0;
         }
     }
+
+    /**
+     * 댓글 좋아요 여부 확인
+     */
+    public boolean isCommentLikedByUser(int commentId, int userId, SqlSession sqlSession) {
+        java.util.Map<String, Integer> params = new java.util.HashMap<>();
+        params.put("commentId", commentId);
+        params.put("userId", userId);
+        Integer count = sqlSession.selectOne(NAMESPACE + ".isCommentLikedByUser", params);
+        return count != null && count > 0;
+    }
+
+    /**
+     * 댓글 좋아요 추가
+     */
+    public int addCommentLike(int commentId, int userId, SqlSession sqlSession) {
+        java.util.Map<String, Integer> params = new java.util.HashMap<>();
+        params.put("commentId", commentId);
+        params.put("userId", userId);
+        return sqlSession.insert(NAMESPACE + ".addCommentLike", params);
+    }
+
+    /**
+     * 댓글 좋아요 취소
+     */
+    public int removeCommentLike(int commentId, int userId, SqlSession sqlSession) {
+        java.util.Map<String, Integer> params = new java.util.HashMap<>();
+        params.put("commentId", commentId);
+        params.put("userId", userId);
+        return sqlSession.delete(NAMESPACE + ".removeCommentLike", params);
+    }
+
+    /**
+     * 댓글 좋아요 수 조회
+     */
+    public int getCommentLikeCount(int commentId) {
+        try (SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession()) {
+            Integer count = sqlSession.selectOne(NAMESPACE + ".getCommentLikeCount", commentId);
+            return count != null ? count : 0;
+        }
+    }
 }

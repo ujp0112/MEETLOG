@@ -94,4 +94,20 @@ public class UserStorageService {
         UserStorage defaultStorage = getOrCreateDefaultStorage(userId);
         return removeFromStorage(defaultStorage.getStorageId(), itemType, contentId);
     }
+
+    /**
+     * 사용자의 모든 저장소에서 특정 아이템을 제거
+     */
+    public boolean removeFromAllStorages(int userId, String itemType, int contentId) {
+        List<UserStorage> userStorages = getUserStorages(userId);
+        boolean removed = false;
+
+        for (UserStorage storage : userStorages) {
+            if (isItemInStorage(storage.getStorageId(), itemType, contentId)) {
+                removed = removeFromStorage(storage.getStorageId(), itemType, contentId) || removed;
+            }
+        }
+
+        return removed;
+    }
 }

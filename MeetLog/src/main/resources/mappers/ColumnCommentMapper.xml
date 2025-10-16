@@ -67,4 +67,30 @@
         FROM column_comments
         WHERE id = #{commentId}
     </select>
+
+    <!-- [추가] 댓글 좋아요 수 조회 (getCommentLikeCount용) -->
+    <select id="getCommentLikeCount" parameterType="int" resultType="int">
+        SELECT COALESCE(like_count, 0)
+        FROM column_comments
+        WHERE id = #{commentId}
+    </select>
+
+    <!-- [추가] 사용자가 특정 댓글에 좋아요를 눌렀는지 확인 -->
+    <select id="isCommentLikedByUser" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- [추가] 댓글 좋아요 추가 -->
+    <insert id="addCommentLike" parameterType="map">
+        INSERT INTO comment_likes (comment_id, user_id, created_at)
+        VALUES (#{commentId}, #{userId}, NOW())
+    </insert>
+
+    <!-- [추가] 댓글 좋아요 취소 -->
+    <delete id="removeCommentLike" parameterType="map">
+        DELETE FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
 </mapper>

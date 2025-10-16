@@ -473,7 +473,8 @@ public class UserService {
 		}
 
 		try {
-			return userStorageService.removeFromWishlist(userId, "RESTAURANT", restaurantId);
+			// 사용자의 모든 저장소에서 해당 레스토랑 제거
+			return userStorageService.removeFromAllStorages(userId, "RESTAURANT", restaurantId);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -604,7 +605,8 @@ public class UserService {
 						if (restaurantService == null) {
 							restaurantService = new RestaurantService();
 						}
-						Restaurant restaurant = restaurantService.getRestaurantById(item.getContentId());
+						// getRestaurantDetailById를 사용하여 평점 정보까지 가져옴
+						Restaurant restaurant = restaurantService.getRestaurantDetailById(item.getContentId());
 						if (restaurant != null) {
 							dto = new StorageItemDto();
 							dto.setItemType("RESTAURANT");
@@ -613,7 +615,12 @@ public class UserService {
 							dto.setDescription(restaurant.getDescription());
 							dto.setImageUrl(restaurant.getMainImage());
 							dto.setLinkUrl("/restaurant/detail/" + restaurant.getId());
-							dto.setAdditionalInfo("⭐ " + restaurant.getAverageRating());
+
+							// 평점 포맷팅 (소수점 1자리)
+							String ratingText = restaurant.getAverageRating() > 0
+								? String.format("⭐ %.1f", restaurant.getAverageRating())
+								: "⭐ 평점 없음";
+							dto.setAdditionalInfo(ratingText);
 						}
 						break;
 
@@ -752,5 +759,18 @@ public class UserService {
 		}
 
 		return userStorageService.removeFromStorage(storageId, itemType, contentId);
+	}
+
+	public boolean addColumnToStorage(int userId, int columnId, int storageId) {
+		if (userStorageService == null) {
+			return false;
+		}
+
+		UserStorage storage = userStorageService.getStorageById(storageId);
+		if (storage == null || storage.getUserId() != userId) {
+			return false;
+		}
+
+		return userStorageService.addToStorage(storageId, "COLUMN", columnId);
 	}
 }

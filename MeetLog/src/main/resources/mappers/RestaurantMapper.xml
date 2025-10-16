@@ -307,6 +307,8 @@
 		<id property="id" column="id" />
 		<result property="ownerId" column="owner_id" />
 		<result property="image" column="image" />
+		<result property="mainImage" column="main_image" />
+		<result property="averageRating" column="average_rating" />
 		<result property="jibunAddress" column="jibun_address" />
 		<result property="reviewCount" column="review_count" />
 		<result property="isActive" column="is_active" />
@@ -321,7 +323,30 @@
 	<select id="findDetailById" parameterType="int"
 		resultMap="restaurantDetailResultMap">
 		SELECT
-		r.*,
+		r.id,
+		r.owner_id,
+		r.name,
+		r.category,
+		r.location,
+		r.address,
+		r.jibun_address,
+		r.phone,
+		r.hours,
+		r.description,
+		r.image,
+		r.image AS main_image,
+		r.parking,
+		r.latitude,
+		r.longitude,
+		r.operating_days,
+		r.operating_times_text,
+		r.break_time_text,
+		r.kakao_place_id,
+		r.is_active,
+		r.created_at,
+		r.updated_at,
+		COALESCE((SELECT AVG(rating) FROM reviews WHERE restaurant_id = r.id AND is_active = true), 0) AS average_rating,
+		(SELECT COUNT(*) FROM reviews WHERE restaurant_id = r.id AND is_active = true) AS review_count,
 		ri.image_path AS additional_image_path
 		FROM
 		restaurants r

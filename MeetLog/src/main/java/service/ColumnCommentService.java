@@ -7,7 +7,6 @@ import model.ColumnComment;
 import dao.ColumnCommentDAO;
 import util.MyBatisSqlSessionFactory;
 import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 public class ColumnCommentService {
     private ColumnCommentDAO columnCommentDAO = new ColumnCommentDAO();
@@ -134,8 +133,8 @@ public class ColumnCommentService {
             Map<String, Object> params = new HashMap<>();
             params.put("commentId", commentId);
             params.put("userId", userId);
-            Integer likeId = sqlSession.selectOne("dao.CommentLikeDAO.checkLike", params);
-            return likeId != null;
+            Integer likeCount = sqlSession.selectOne("dao.ColumnCommentDAO.isCommentLikedByUser", params);
+            return likeCount != null && likeCount > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -146,11 +145,10 @@ public class ColumnCommentService {
      * 댓글 좋아요 토글 (추가/취소) 및 트랜잭션 관리
      * @param commentId 좋아요를 누른 댓글 ID
      * @param userId 좋아요를 누른 사용자 ID
-     * @return isLiked (좋아요 상태), likeCount (최신 좋아요 수)
+     * @return 좋아요 상태 (true: 좋아요 추가됨, false: 좋아요 취소됨)
      */
-    public Map<String, Object> toggleCommentLike(int commentId, int userId) {
+    public boolean toggleCommentLike(int commentId, int userId) {
         SqlSession sqlSession = MyBatisSqlSessionFactory.getSqlSession();
-        Map<String, Object> result = new HashMap<>();
         boolean isLiked;
 
         try {
@@ -159,27 +157,21 @@ public class ColumnCommentService {
             params.put("userId", userId);
 
             // 1. 사용자가 이미 좋아요를 눌렀는지 확인
-            Integer likeId = sqlSession.selectOne("dao.CommentLikeDAO.checkLike", params);
+            Integer likeCount = sqlSession.selectOne("dao.ColumnCommentDAO.isCommentLikedByUser", params);
 
-            if (likeId == null) {
+            if (likeCount == null || likeCount == 0) {
                 // 2a. 좋아요 추가
-                sqlSession.insert("dao.CommentLikeDAO.addLike", params);
+                sqlSession.insert("dao.ColumnCommentDAO.addCommentLike", params);
                 sqlSession.update("dao.ColumnCommentDAO.incrementLikes", commentId);
                 isLiked = true;
             } else {
                 // 2b. 좋아요 취소
-                sqlSession.delete("dao.CommentLikeDAO.removeLike", params);
+                sqlSession.delete("dao.ColumnCommentDAO.removeCommentLike", params);
                 sqlSession.update("dao.ColumnCommentDAO.decrementLikes", commentId);
                 isLiked = false;
             }
 
-            // 3. 최신 좋아요 수 조회
-            int likeCount = sqlSession.selectOne("dao.ColumnCommentDAO.getLikeCount", commentId);
-
             sqlSession.commit(); // 모든 작업이 성공하면 커밋
-
-            result.put("isLiked", isLiked);
-            result.put("likeCount", likeCount);
 
         } catch (Exception e) {
             sqlSession.rollback(); // 오류 발생 시 롤백
@@ -188,6 +180,15 @@ public class ColumnCommentService {
         } finally {
             sqlSession.close();
         }
-        return result;
+        return isLiked;
+    }
+
+    /**
+     * 댓글 좋아요 수 조회
+     * @param commentId 조회할 댓글 ID
+     * @return 좋아요 수
+     */
+    public int getCommentLikeCount(int commentId) {
+        return columnCommentDAO.getCommentLikeCount(commentId);
     }
 }
