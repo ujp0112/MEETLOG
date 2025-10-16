@@ -346,15 +346,26 @@ public class ReservationSettingsServlet extends HttpServlet {
 
 		// 시간 설정
 		try {
-			String startTime = request.getParameter("reservationStartTime");
-			String endTime = request.getParameter("reservationEndTime");
-			if (startTime != null && !startTime.isEmpty()) {
-				settings.setReservationStartTime(LocalTime.parse(startTime));
-			}
-			if (endTime != null && !endTime.isEmpty()) {
-				settings.setReservationEndTime(LocalTime.parse(endTime));
-			}
+            String startTimeStr = request.getParameter("reservationStartTime");
+            String endTimeStr = request.getParameter("reservationEndTime");
+
+            if (startTimeStr != null && !startTimeStr.isEmpty()) {
+                settings.setReservationStartTime(LocalTime.parse(startTimeStr));
+				System.out.println("DEBUG: " + startTimeStr);
+            } else {
+                // 파라미터가 없으면 오늘 요일에 맞는 DB 값으로 설정
+                settings.setReservationStartTime(getDayOfWeekTime(existingSettingsMap, "start"));
+				System.out.println("DEBUG: " + getDayOfWeekTime(existingSettingsMap, "start"));
+            }
+
+            if (endTimeStr != null && !endTimeStr.isEmpty()) {
+                settings.setReservationEndTime(LocalTime.parse(endTimeStr));
+            } else {
+                // 파라미터가 없으면 오늘 요일에 맞는 DB 값으로 설정
+                settings.setReservationEndTime(getDayOfWeekTime(existingSettingsMap, "end"));
+            }
 		} catch (Exception e) {
+            e.printStackTrace();
 			settings.setReservationStartTime(LocalTime.of(9, 0));
 			settings.setReservationEndTime(LocalTime.of(22, 0));
 		}
@@ -378,6 +389,8 @@ public class ReservationSettingsServlet extends HttpServlet {
 		// 요일별 설정
 		parseWeeklySettings(request, settings);
 
+		// reservationStartTime과 reservationEndTime을 기반으로 time_slots JSON 생성
+		
 		// 특별 안내사항
 		settings.setSpecialNotes(request.getParameter("specialNotes"));
 
@@ -432,6 +445,41 @@ public class ReservationSettingsServlet extends HttpServlet {
 		}
 		return settings;
 	}
+
+    private LocalTime getDayOfWeekTime(java.util.Map<String, Object> settingsMap, String type) {
+        if (settingsMap == null) {
+            return "start".equals(type) ? LocalTime.of(9, 0) : LocalTime.of(22, 0);
+        }
+
+        int dayOfWeek = java.time.LocalDate.now().getDayOfWeek().getValue(); // 1:월, 7:일
+        String dayKey;
+        switch (dayOfWeek) {
+            case 1: dayKey = "monday"; break;
+            case 2: dayKey = "tuesday"; break;
+            case 3: dayKey = "wednesday"; break;
+            case 4: dayKey = "thursday"; break;
+            case 5: dayKey = "friday"; break;
+            case 6: dayKey = "saturday"; break;
+            case 7: dayKey = "sunday"; break;
+            default: dayKey = "monday"; // 기본값
+        }
+
+        String timeKey = dayKey + "_" + type; // 예: "monday_start"
+        Object timeValue = settingsMap.get(timeKey);
+
+        if (timeValue instanceof java.sql.Time) {
+            return ((java.sql.Time) timeValue).toLocalTime();
+        } else if (timeValue instanceof String) {
+            try {
+                return LocalTime.parse((String) timeValue);
+            } catch (java.time.format.DateTimeParseException e) {
+                // 파싱 실패 시 기본값 반환
+            }
+        }
+
+        // 값이 없거나 타입이 맞지 않으면 기본값 반환
+        return "start".equals(type) ? LocalTime.of(9, 0) : LocalTime.of(22, 0);
+    }
 
 	private void parseWeeklySettings(HttpServletRequest request, ReservationSettings settings) {
 		System.out.println("=== parseWeeklySettings 시작 ===");

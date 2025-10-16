@@ -69,7 +69,7 @@
             <div class="flex flex-wrap justify-center gap-4 text-sm">
                 <a href="${pageContext.request.contextPath}/searchRestaurant?keyword=&category=전체"
                    class="inline-flex items-center gap-2 text-sky-700 font-semibold
-                          hover:text-sky-800 transition group js-map-search-btn">
+                          hover:text-sky-800 transition group js-header-map-btn">
                     <svg class="w-5 h-5 transform group-hover:scale-110 transition" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"/>
                     </svg>
@@ -94,3 +94,60 @@
         </div>
     </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 헤더에 있는 모든 '지도 검색' 버튼(데스크톱, 모바일)을 선택합니다.
+    const headerMapBtns = document.querySelectorAll('.js-header-map-btn');
+
+    headerMapBtns.forEach(btn => {
+        btn.addEventListener('click', function(event) {
+            event.preventDefault(); // a 태그의 기본 링크 이동을 막습니다.
+
+            const originalBtnText = this.textContent.trim();
+            // 로딩 상태로 변경 (링크는 textContent 대신 innerHTML을 사용할 수 있음)
+            //this.innerHTML = '위치 찾는 중...'; 
+            //this.style.pointerEvents = 'none'; // 중복 클릭 방지
+
+            // 위치 정보를 가지고 검색 페이지로 이동하는 함수
+            const performHeaderSearch = (lat, lng) => {
+                const params = new URLSearchParams();
+                
+                // 헤더에서 클릭 시 특정 키워드는 없으므로 비워둡니다.
+                // (search-map.jsp에서 키워드가 비어있고 좌표가 있으면 '맛집'으로 검색합니다)
+                params.append('keyword', ''); 
+                params.append('category', '전체');
+
+                if (lat && lng) {
+                    params.append('lat', lat);
+                    params.append('lng', lng);
+                }
+
+                const searchUrl = "${pageContext.request.contextPath}/searchRestaurant?" + params.toString();
+                window.location.href = searchUrl;
+            };
+
+            // 브라우저의 Geolocation API를 사용하여 현재 위치를 요청합니다.
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    // 성공 시: 알아낸 좌표로 검색 함수 실행
+                    (position) => {
+                        performHeaderSearch(position.coords.latitude, position.coords.longitude);
+                    },
+                    // 실패 시: 사용자에게 알리고 버튼 상태를 복구
+                    (error) => {
+                        console.error("Geolocation error:", error.message);
+                        alert("위치 정보를 가져올 수 없습니다. OS나 브라우저의 위치 서비스가 켜져 있는지 확인해주세요.");
+                        this.innerHTML = originalBtnText; // 원래 텍스트로 복구
+                        this.style.pointerEvents = 'auto'; // 클릭 다시 활성화
+                    },
+                    { timeout: 8000 } // 8초 타임아웃
+                );
+            } else {
+                alert("이 브라우저에서는 위치 정보 기능을 사용할 수 없습니다.");
+                this.innerHTML = originalBtnText; // 버튼 상태 복구
+                this.style.pointerEvents = 'auto';
+            }
+        });
+    });
+});
+</script>
