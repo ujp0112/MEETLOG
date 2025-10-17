@@ -148,6 +148,7 @@
 - `todo_list.md` : 향후 작업 항목 추적.
 - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` : AI 도구 사용 기록 및 가이드.
 - `MeetLog/찐찐찐막.drawio`, `JSP정의서.xlsx` : 설계 다이어그램 및 JSP 정의 문서.
+- `MEETLOG_요구사항정의서.docx` : 요구사항 정의 문서.
 
 ## 4. 개발 및 실행 가이드
 
@@ -245,3 +246,245 @@ uvicorn main:app --host 0.0.0.0 --port 8000
   5. 정적 자산 빌드 파이프라인: Webpack/Vite 등 도입 시 프런트엔드 유지보수성 향상 가능.
 
 이 문서는 저장소 구조와 주요 코드베이스를 빠르게 파악하고 유지보수·운영 계획을 수립하기 위한 기술 보고서이며, 새로운 협업자가 프로젝트 전반을 이해하는 초석으로 활용할 수 있다.
+
+------------------------------------------------------------------------------------------
+
+# MEETLOG README (English)
+
+## 1. Project Overview
+
+* **MEETLOG** is an integrated dining platform that provides restaurant discovery, course recommendations, reservations, payments, reviews, and community features.
+* The core web application under `MeetLog/` is built with **Java 11 + JSP/Servlet + MyBatis**, packaged as a WAR file for **Tomcat 9** deployment.
+* The separate microservice `kobert-api-server/` provides **FastAPI + KoBERT embeddings**, designed with a **Port/Adapter architecture** (`service.port.RecommendationPort`, `adapter.KoBertAdapter`) to reduce external AI dependencies.
+* The repository includes deployment scripts, GitHub Actions automation, SQL schemas and migrations, uploaded assets, ERP submodules, and integrations with Telegram, KakaoPay, and NaverPay.
+
+## 2. Repository Structure Summary
+
+| Path                                                                | Description                                                                                                                                                                   |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MeetLog/`                                                          | Main JSP/Servlet web application. Includes source (`src/`), resources (`resources/`), JSP views (`webapp/`), SQL (`database/`), scripts (`scripts/`), and libraries (`lib/`). |
+| `kobert-api-server/`                                                | KoBERT-based embedding API using FastAPI. Includes `main.py`, `requirements.txt`, and virtual environment (`venv/`).                                                          |
+| `Servers/`                                                          | Eclipse Tomcat 9 local server configuration (`server.xml`, `context.xml`).                                                                                                    |
+| `meetlog_uploads/`                                                  | Local uploads and course thumbnails. Linked to `config.properties` (`upload.path`).                                                                                           |
+| `mavenbackup/`, `MeetLog/maven_backup/`                             | Maven backup (`pom.xml`, `target/`) for manual build management.                                                                                                              |
+| `deployment-report.md`, `recommendation_metrics.md`, `todo_list.md` | Deployment reports, recommendation metric definitions, and TODO lists.                                                                                                        |
+| `MeetLog.zip`, `bin/`, `cookies.txt`                                | Legacy or temporary files — candidates for cleanup.                                                                                                                           |
+
+### 2.1 Inside `MeetLog/`
+
+* **`src/main/java/`**:
+
+  * `controller/`, `controller/payment/`, `controller/telegram/`: Servlets for user, admin, business, ERP, and recommendation domains.
+  * `service/`, `service/payment/`, `service/port/`: Business logic layer (e.g., `IntelligentRecommendationService`, `ReservationAutomationService`, `KakaoPayService`).
+  * `dao/`: MyBatis DAOs corresponding to Mapper XMLs.
+  * `model/`, `dto/`, `erpDto/`: Domain entities and DTOs for users, courses, coupons, ERP assets, etc.
+  * `adapter/`: External service adapters (e.g., KoBERT API).
+  * `util/`: Common utilities such as `AppConfig`, `EmailUtil`, `GooglePlacesUtil`, and batch jobs.
+  * `filter/`, `listener/`, `typehandler/`: Encoding/auth filters, Telegram listeners, and JSON type handlers.
+
+* **`src/main/resources/`**:
+
+  * `mybatis-config.xml`, `db.properties`, `config.properties`, `api.properties`.
+  * Mapper XMLs under `mappers/` and `erpMappers/`, separated by domain.
+  * `logback.xml` defines SLF4J logging configuration.
+
+* **`src/main/webapp/`**:
+
+  * `WEB-INF/web.xml` for servlet mappings.
+  * `WEB-INF/views/`: JSP views for user, admin, business, and error pages.
+  * `css/`, `js/`, `img/`: Static resources (e.g., `main-optimized.js`, `click-protection.js`).
+
+* **`database/`**:
+
+  * Contains `master.sql`, migration files, and archives with SQL evolution history.
+
+* **`scripts/`**:
+
+  * `build-war.sh`: Builds WAR under `build/deploy/`.
+  * `run-local.sh`: Local Tomcat deployment.
+  * `deploy-war.sh`: Remote deployment automation.
+
+* **`.github/workflows/deploy.yml`**: GitHub Actions CI/CD pipeline for build and deploy.
+
+* **`README_Deploy.md`**: Instructions for deployment scripts and required secrets.
+
+## 3. Core Systems
+
+### 3.1 MEETLOG Web Application
+
+#### 3.1.1 Tech Stack and Runtime
+
+* **Java 11**, **JSP/Servlet 4.0**, **Tomcat 9**, deployed as a WAR archive.
+* **MyBatis** (`util.MyBatisSqlSessionFactory`) connects to **MariaDB**.
+* **SLF4J + Logback** for logging.
+* **Lombok** dependency included but minimally used.
+* External libraries stored in `lib/`, compiled via custom scripts.
+
+#### 3.1.2 Layered Architecture
+
+1. **Presentation**: `controller.*` Servlets handle HTTP requests and return JSP/JSON responses. Filters handle encoding and authentication.
+2. **Service**: Encapsulates domain logic (reservations, payments, recommendations, notifications).
+3. **DAO**: MyBatis data access classes using `SqlSession`.
+4. **Model/DTO**: Domain and data transfer objects.
+5. **Utilities**: Global configuration and helpers via `util.AppConfig`.
+
+#### 3.1.3 Domain Features
+
+* **Authentication**: Login, registration, password recovery, and social logins (Google/Naver/Kakao OAuth).
+* **Restaurant Management**: CRUD for restaurants, menus, rankings, and courses.
+* **Review & Community**: CRUD for reviews, comments, likes, and reports.
+* **Reservations**: Automated approval, table assignment, and notifications.
+* **Payments**: KakaoPay and NaverPay integrations with callbacks and manual confirmation.
+* **Recommendations**: Hybrid model combining behavioral data, KoBERT embeddings, and trend analysis.
+* **Notifications**: Email, Telegram bot, and web alerts.
+* **Admin/Business Console**: Dashboards, reports, statistics, and ERP integration.
+
+#### 3.1.4 Frontend Assets
+
+* JSPs organized by domain under `WEB-INF/views`.
+* JSTL + custom taglibs under `WEB-INF/tags/`.
+* Static resources served under `/img/*`, `/css/*`, `/js/*`, `/uploads/*`.
+
+#### 3.1.5 Data Layer
+
+* `db.properties` stores DB credentials (should use environment variables in production).
+* `api.properties` contains API keys and tokens (must be secured).
+* `mybatis-config.xml` configures mappers and handlers.
+
+#### 3.1.6 Batch & Background Tasks
+
+* `TelegramPollerListener`: Daemon thread for polling.
+* `VectorPrecomputeBatch`: CLI for precomputing restaurant vectors.
+* `ReservationAutomationService`: Handles automated reservation workflows.
+
+### 3.2 KoBERT Vectorization API (`kobert-api-server/`)
+
+* FastAPI app exposing `/vectorize` endpoint.
+* Loads `skt/kobert-base-v1` model with MPS/CUDA/CPU auto-detection.
+* Generates 768-dim mean-pooled embeddings.
+* Adapter retries API calls with exponential backoff.
+
+### 3.3 Deployment & Infrastructure
+
+* `build-war.sh`: Builds WAR.
+* `deploy-war.sh`: Deploys WAR to remote Tomcat with environment variables.
+* `run-local.sh`: Automates local Tomcat stop→deploy→start.
+* GitHub Actions workflow automates CI/CD with SSH secrets.
+
+### 3.4 Additional Assets
+
+* `README_Deploy.md`, `deployment-report.md`, `recommendation_metrics.md`, `todo_list.md`.
+* AI integration guides: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`.
+* Design artifacts: `찐찐찐막.drawio`, `JSP정의서.xlsx`, `MEETLOG_요구사항정의서.docx`.
+
+## 4. Development & Execution Guide
+
+### 4.1 Prerequisites
+
+1. JDK 11+
+2. Apache Tomcat 9
+3. MariaDB 10.x
+4. Python 3.10+ (for KoBERT server)
+5. Node.js not required (server-rendered JSP)
+
+### 4.2 Database Setup
+
+1. Create DB: `CREATE DATABASE meetlog DEFAULT CHARACTER SET utf8mb4;`
+2. Import base schema: `database/master.sql`
+3. Apply updates: `database/schema_updates.sql` and `migrations/*.sql`
+4. Import sample data if needed.
+
+### 4.3 Configuration Files
+
+* `db.properties`: Database credentials.
+* `config.properties`: Upload paths and Naver Pay settings.
+* `api.properties`: API keys (must be secured externally).
+* `AppConfig` auto-loads these on startup.
+
+### 4.4 Running the KoBERT API Server
+
+```bash
+cd kobert-api-server
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+
+* Logs display GPU/MPS usage detection.
+* Default endpoint: `http://127.0.0.1:8000/vectorize`.
+
+### 4.5 Building and Running MEETLOG
+
+1. Run `scripts/build-war.sh` → verify `build/deploy/MeetLog.war`.
+2. Local run: `export TOMCAT_HOME=/path/to/tomcat && scripts/run-local.sh`.
+3. Remote deploy: set `DEPLOY_HOST`, `DEPLOY_USER`, etc., and run `deploy-war.sh`.
+4. GitHub Actions: Push to `main` to trigger build & deploy.
+
+### 4.6 Operational Notes
+
+* Ensure upload path permissions.
+* Telegram bot must have valid token and open network access.
+* SMTP credentials require secure management.
+* Adjust `logback.xml` levels and remove `System.out` logs.
+* Introduce JUnit-based testing (none currently present).
+
+## 5. Architecture & Flow
+
+### 5.1 Request Flow
+
+1. HTTP request → `controller.*` servlet.
+2. Filter processing (encoding, authentication).
+3. Service layer executes business logic.
+4. DAO executes MyBatis queries.
+5. JSP or JSON response returned.
+
+### 5.2 Recommendation Data Flow
+
+1. User actions collected via `UserAnalyticsService`.
+2. Restaurant vectors generated via KoBERT.
+3. User vectors updated asynchronously.
+4. `IntelligentRecommendationService` merges scores and ensures diversity.
+5. Metrics logged in `RecommendationMetricDAO`.
+
+### 5.3 Payment Flow
+
+1. User selects method.
+2. KakaoPay: Ready API → redirect → callback → approval.
+3. NaverPay: API call → callback → status update.
+4. Failures handled by manual confirmation or alerts.
+
+### 5.4 Notification & Telegram Flow
+
+1. User requests `/telegram/link`.
+2. Bot activation via `/start <token>`.
+3. Reservation events trigger alerts via `NotificationService`.
+4. Failures logged via `TelegramMessageLogDAO`.
+
+## 6. Quality & Security Considerations
+
+* **Secrets Management**: Move credentials to environment variables or secret managers.
+* **Artifacts Cleanup**: Exclude build results and virtual envs via `.gitignore`.
+* **Logging**: Replace plain prints with structured logging.
+* **Concurrency**: Tune thread pools for recommendation services.
+* **Daemon Threads**: Ensure graceful shutdown of background listeners.
+* **Testing**: Add unit and integration tests.
+* **Security**: Improve CSRF/XSS protections.
+
+## 7. References & Future Work
+
+* **Documents**: `README_Deploy.md`, `deployment-report.md`, `recommendation_metrics.md`, `MIGRATION_GUIDE.md`.
+* **Data Assets**: Review uploads for privacy or copyright issues.
+* **ERP Integration**: Use `semi-erp.sql` schema alignment.
+
+### Recommended Improvements
+
+1. **Config Separation**: Adopt Spring Boot or external config servers.
+2. **Build System**: Transition to Maven/Gradle fully.
+3. **Testing & CI**: Add automated tests.
+4. **Recommendation Monitoring**: Build dashboard from metric logs.
+5. **Frontend Pipeline**: Introduce Webpack/Vite for better maintenance.
+
+---
+
+This document provides a comprehensive technical overview of MEETLOG, enabling new collaborators to quickly understand the repository structure, architecture, and operational procedures for further development and maintenance.
