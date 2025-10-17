@@ -124,12 +124,12 @@ CREATE TABLE `column_likes` (
   KEY `idx_column_likes_user_id` (`user_id`),
   CONSTRAINT `column_likes_ibfk_1` FOREIGN KEY (`column_id`) REFERENCES `columns` (`id`) ON DELETE CASCADE,
   CONSTRAINT `column_likes_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=UTF8MB4_UNICODE_CI;
 CREATE TABLE `columns` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `title` varchar(300) NOT NULL,
-  `content` text NOT NULL,
+  `content` longtext NOT NULL,
   `image` varchar(500) DEFAULT NULL,
   `tags` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tags`)),
   `likes` int(11) DEFAULT 0,

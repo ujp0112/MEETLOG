@@ -294,8 +294,7 @@
                 formData.append('file', blobInfo.blob(), blobInfo.filename());
                 fetch(`${contextPath}/api/column/image-upload`, { method: 'POST', body: formData })
                     .then(response => response.ok ? response.json() : Promise.reject(`HTTP error! status: ${response.status}`))
-                    .then(json => json && json.location ? resolve(json.location) : Promise.reject('Invalid JSON response'))
-                    .catch(error => reject('Upload failed: ' + error.message));
+                    .then(json => json && json.location ? resolve(json.location) : Promise.reject('Invalid JSON response'));
             }),
             content_style: 'body{font-family:"Noto Sans KR",sans-serif}img{max-width:100%;height:auto}'
         });
