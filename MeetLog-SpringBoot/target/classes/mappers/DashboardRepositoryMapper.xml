@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.DashboardRepository">
+
+    <!-- ===================================================================== -->
+    <!-- 관리자 통계 쿼리 -->
+    <!-- ===================================================================== -->
+
+    <!-- 전체 사용자 수 -->
+    <select id="countTotalUsers" resultType="long">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 전체 레스토랑 수 -->
+    <select id="countTotalRestaurants" resultType="long">
+        SELECT COUNT(*) FROM restaurants
+    </select>
+
+    <!-- 전체 예약 수 -->
+    <select id="countTotalReservations" resultType="long">
+        SELECT COUNT(*) FROM reservations
+    </select>
+
+    <!-- 전체 리뷰 수 -->
+    <select id="countTotalReviews" resultType="long">
+        SELECT COUNT(*) FROM reviews
+    </select>
+
+    <!-- 전체 코스 수 -->
+    <select id="countTotalCourses" resultType="long">
+        SELECT COUNT(*) FROM courses
+    </select>
+
+    <!-- 전체 매출 (결제 완료 기준) -->
+    <select id="sumTotalRevenue" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE status = 'DONE'
+    </select>
+
+    <!-- 기간별 사용자 수 -->
+    <select id="countUsersByPeriod" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE DATE(created_at) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 기간별 예약 수 -->
+    <select id="countReservationsByPeriod" resultType="long">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE DATE(created_at) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 기간별 매출 -->
+    <select id="sumRevenueByPeriod" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM payments
+        WHERE status = 'DONE'
+        AND DATE(approved_at) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 사용자 유형별 카운트 -->
+    <select id="countUsersByType" resultType="long">
+        SELECT COUNT(*)
+        FROM users
+        WHERE user_type = #{userType}
+    </select>
+
+    <!-- 예약 상태별 카운트 -->
+    <select id="countReservationsByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE status = #{status}
+    </select>
+
+    <!-- 사용자 증가 추이 (최근 N일) -->
+    <select id="getUserTrend" resultType="com.meetlog.dto.dashboard.AdminDashboardDto$ChartData">
+        SELECT
+            DATE(created_at) as date,
+            DATE_FORMAT(created_at, '%Y-%m-%d') as label,
+            COUNT(*) as value
+        FROM users
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    </select>
+
+    <!-- 예약 증가 추이 (최근 N일) -->
+    <select id="getReservationTrend" resultType="com.meetlog.dto.dashboard.AdminDashboardDto$ChartData">
+        SELECT
+            DATE(created_at) as date,
+            DATE_FORMAT(created_at, '%Y-%m-%d') as label,
+            COUNT(*) as value
+        FROM reservations
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    </select>
+
+    <!-- 매출 추이 (최근 N일) -->
+    <select id="getRevenueTrend" resultType="com.meetlog.dto.dashboard.AdminDashboardDto$ChartData">
+        SELECT
+            DATE(approved_at) as date,
+            DATE_FORMAT(approved_at, '%Y-%m-%d') as label,
+            COALESCE(SUM(amount), 0) as amount
+        FROM payments
+        WHERE status = 'DONE'
+        AND approved_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(approved_at)
+        ORDER BY DATE(approved_at) ASC
+    </select>
+
+    <!-- 카테고리별 레스토랑 수 -->
+    <select id="getRestaurantsByCategory" resultType="com.meetlog.dto.dashboard.AdminDashboardDto$CategoryData">
+        SELECT
+            category,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM restaurants WHERE category IS NOT NULL), 2) as percentage
+        FROM restaurants
+        WHERE category IS NOT NULL
+        GROUP BY category
+        ORDER BY count DESC
+    </select>
+
+    <!-- 평점 분포 -->
+    <select id="getReviewRatingDistribution" resultType="com.meetlog.dto.dashboard.AdminDashboardDto$RatingData">
+        SELECT
+            rating,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM reviews), 2) as percentage
+        FROM reviews
+        GROUP BY rating
+        ORDER BY rating DESC
+    </select>
+
+    <!-- ===================================================================== -->
+    <!-- 비즈니스(레스토랑) 통계 쿼리 -->
+    <!-- ===================================================================== -->
+
+    <!-- 레스토랑별 전체 예약 수 -->
+    <select id="countReservationsByRestaurant" resultType="long">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 레스토랑별 리뷰 수 -->
+    <select id="countReviewsByRestaurant" resultType="long">
+        SELECT COUNT(*)
+        FROM reviews
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 레스토랑별 평균 평점 -->
+    <select id="getAverageRatingByRestaurant" resultType="double">
+        SELECT COALESCE(AVG(rating), 0.0)
+        FROM reviews
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <!-- 레스토랑별 매출 (기간 옵션) -->
+    <select id="sumRevenueByRestaurant" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(p.amount), 0)
+        FROM payments p
+        JOIN reservations r ON p.reservation_id = r.reservation_id
+        WHERE r.restaurant_id = #{restaurantId}
+        AND p.status = 'DONE'
+        <if test="startDate != null and endDate != null">
+            AND DATE(p.approved_at) BETWEEN #{startDate} AND #{endDate}
+        </if>
+    </select>
+
+    <!-- 레스토랑별 예약 상태별 카운트 -->
+    <select id="countRestaurantReservationsByStatus" resultType="long">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+        AND status = #{status}
+    </select>
+
+    <!-- 레스토랑별 기간별 예약 수 -->
+    <select id="countRestaurantReservationsByPeriod" resultType="long">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+        AND DATE(created_at) BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <!-- 레스토랑별 평점 분포 -->
+    <select id="getRatingDistributionByRestaurant" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$RatingDistribution">
+        SELECT
+            rating,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM reviews WHERE restaurant_id = #{restaurantId}), 2) as percentage
+        FROM reviews
+        WHERE restaurant_id = #{restaurantId}
+        GROUP BY rating
+        ORDER BY rating DESC
+    </select>
+
+    <!-- 인기 시간대 (레스토랑별) -->
+    <select id="getPopularTimeSlots" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$TimeSlotData">
+        SELECT
+            CONCAT(LPAD(HOUR(reservation_time), 2, '0'), ':00-', LPAD(HOUR(reservation_time) + 1, 2, '0'), ':00') as timeSlot,
+            COUNT(*) as reservationCount,
+            AVG(party_size) as averagePartySize
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+        AND status IN ('CONFIRMED', 'COMPLETED')
+        GROUP BY HOUR(reservation_time)
+        ORDER BY reservationCount DESC
+        LIMIT 5
+    </select>
+
+    <!-- 레스토랑 예약 추이 (최근 N일) -->
+    <select id="getRestaurantReservationTrend" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$TrendData">
+        SELECT
+            DATE(created_at) as date,
+            DATE_FORMAT(created_at, '%Y-%m-%d') as label,
+            COUNT(*) as count
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+        AND created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at) ASC
+    </select>
+
+    <!-- 레스토랑 매출 추이 (최근 N일) -->
+    <select id="getRestaurantRevenueTrend" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$TrendData">
+        SELECT
+            DATE(p.approved_at) as date,
+            DATE_FORMAT(p.approved_at, '%Y-%m-%d') as label,
+            COALESCE(SUM(p.amount), 0) as amount
+        FROM payments p
+        JOIN reservations r ON p.reservation_id = r.reservation_id
+        WHERE r.restaurant_id = #{restaurantId}
+        AND p.status = 'DONE'
+        AND p.approved_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(p.approved_at)
+        ORDER BY DATE(p.approved_at) ASC
+    </select>
+
+    <!-- 최근 리뷰 (레스토랑별) -->
+    <select id="getRecentReviewsByRestaurant" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$RecentReview">
+        SELECT
+            r.review_id as reviewId,
+            u.name as userName,
+            r.rating,
+            r.content,
+            r.created_at as createdAt,
+            CASE WHEN r.reply IS NOT NULL AND r.reply != '' THEN true ELSE false END as hasReply
+        FROM reviews r
+        JOIN users u ON r.user_id = u.user_id
+        WHERE r.restaurant_id = #{restaurantId}
+        ORDER BY r.created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 다가오는 예약 (레스토랑별) -->
+    <select id="getUpcomingReservations" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$UpcomingReservation">
+        SELECT
+            r.reservation_id as reservationId,
+            u.name as userName,
+            r.reservation_time as reservationTime,
+            r.party_size as partySize,
+            r.status,
+            r.contact_phone as contactPhone
+        FROM reservations r
+        JOIN users u ON r.user_id = u.user_id
+        WHERE r.restaurant_id = #{restaurantId}
+        AND r.reservation_time >= NOW()
+        AND r.status IN ('PENDING', 'CONFIRMED')
+        ORDER BY r.reservation_time ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 리뷰 키워드 분석 (TOP N) -->
+    <select id="getTopKeywordsByRestaurant" resultType="com.meetlog.dto.dashboard.BusinessDashboardDto$KeywordData">
+        SELECT
+            keyword,
+            COUNT(*) as count
+        FROM (
+            SELECT
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(keyword_list, ',', numbers.n), ',', -1)) as keyword
+            FROM (
+                SELECT
+                    review_id,
+                    CONCAT(content, ' ', COALESCE(tags, '')) as keyword_list
+                FROM reviews
+                WHERE restaurant_id = #{restaurantId}
+            ) r
+            CROSS JOIN (
+                SELECT 1 as n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+                SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL
+                SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10
+            ) numbers
+            WHERE CHAR_LENGTH(keyword_list) - CHAR_LENGTH(REPLACE(keyword_list, ',', '')) >= numbers.n - 1
+        ) keywords
+        WHERE keyword != '' AND CHAR_LENGTH(keyword) > 1
+        GROUP BY keyword
+        ORDER BY count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

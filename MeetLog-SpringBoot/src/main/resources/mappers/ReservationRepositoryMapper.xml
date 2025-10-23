@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.ReservationRepository">
+
+    <resultMap id="ReservationResultMap" type="com.meetlog.model.Reservation">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="restaurantName" column="restaurant_name"/>
+        <result property="userName" column="user_name"/>
+        <result property="reservationTime" column="reservation_time"/>
+        <result property="partySize" column="party_size"/>
+        <result property="status" column="status"/>
+        <result property="specialRequests" column="special_requests"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+        <result property="depositRequired" column="deposit_required"/>
+        <result property="depositAmount" column="deposit_amount"/>
+        <result property="userCouponId" column="user_coupon_id"/>
+        <result property="couponDiscountAmount" column="coupon_discount_amount"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="paymentOrderId" column="payment_order_id"/>
+        <result property="paymentProvider" column="payment_provider"/>
+        <result property="paymentApprovedAt" column="payment_approved_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="ReservationDtoResultMap" type="com.meetlog.dto.reservation.ReservationDto">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="restaurantName" column="restaurant_name"/>
+        <result property="restaurantAddress" column="restaurant_address"/>
+        <result property="restaurantPhone" column="restaurant_phone"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+        <result property="userPhone" column="user_phone"/>
+        <result property="reservationTime" column="reservation_time"/>
+        <result property="partySize" column="party_size"/>
+        <result property="status" column="status"/>
+        <result property="specialRequests" column="special_requests"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="cancelledAt" column="cancelled_at"/>
+        <result property="depositRequired" column="deposit_required"/>
+        <result property="depositAmount" column="deposit_amount"/>
+        <result property="userCouponId" column="user_coupon_id"/>
+        <result property="couponDiscountAmount" column="coupon_discount_amount"/>
+        <result property="paymentStatus" column="payment_status"/>
+        <result property="paymentOrderId" column="payment_order_id"/>
+        <result property="paymentProvider" column="payment_provider"/>
+        <result property="paymentApprovedAt" column="payment_approved_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 예약 조회 (엔티티) -->
+    <select id="findById" resultMap="ReservationResultMap">
+        SELECT * FROM reservations WHERE id = #{id}
+    </select>
+
+    <!-- 예약 조회 (DTO) -->
+    <select id="findDtoById" resultMap="ReservationDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            rest.address as restaurant_address,
+            rest.phone as restaurant_phone,
+            u.name as user_name,
+            u.email as user_email,
+            u.phone as user_phone
+        FROM reservations r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.id = #{id}
+    </select>
+
+    <!-- 예약 검색 -->
+    <select id="search" resultMap="ReservationDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            rest.address as restaurant_address,
+            rest.phone as restaurant_phone,
+            u.name as user_name,
+            u.email as user_email,
+            u.phone as user_phone
+        FROM reservations r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE 1=1
+        <if test="restaurantId != null">
+            AND r.restaurant_id = #{restaurantId}
+        </if>
+        <if test="userId != null">
+            AND r.user_id = #{userId}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND r.reservation_time >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND r.reservation_time &lt;= #{endDate}
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'created_at'">r.created_at</when>
+            <otherwise>r.reservation_time</otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'asc'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 검색 결과 개수 -->
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM reservations r
+        WHERE 1=1
+        <if test="restaurantId != null">
+            AND r.restaurant_id = #{restaurantId}
+        </if>
+        <if test="userId != null">
+            AND r.user_id = #{userId}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND r.reservation_time >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND r.reservation_time &lt;= #{endDate}
+        </if>
+    </select>
+
+    <!-- 레스토랑별 예약 목록 -->
+    <select id="findByRestaurantId" resultMap="ReservationDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            rest.address as restaurant_address,
+            rest.phone as restaurant_phone,
+            u.name as user_name,
+            u.email as user_email,
+            u.phone as user_phone
+        FROM reservations r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.restaurant_id = #{restaurantId}
+        ORDER BY r.reservation_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 사용자별 예약 목록 -->
+    <select id="findByUserId" resultMap="ReservationDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            rest.address as restaurant_address,
+            rest.phone as restaurant_phone,
+            u.name as user_name,
+            u.email as user_email,
+            u.phone as user_phone
+        FROM reservations r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.reservation_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 특정 시간대 예약 확인 -->
+    <select id="countByRestaurantAndTime" resultType="int">
+        SELECT COUNT(*)
+        FROM reservations
+        WHERE restaurant_id = #{restaurantId}
+        AND reservation_time = #{reservationTime}
+        AND status IN ('PENDING', 'CONFIRMED')
+    </select>
+
+    <!-- 예약 생성 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservations (
+            restaurant_id, user_id, restaurant_name, user_name,
+            reservation_time, party_size, status, special_requests, contact_phone,
+            deposit_required, deposit_amount, user_coupon_id, coupon_discount_amount,
+            payment_status, created_at, updated_at
+        ) VALUES (
+            #{restaurantId}, #{userId}, #{restaurantName}, #{userName},
+            #{reservationTime}, #{partySize}, COALESCE(#{status}, 'PENDING'),
+            #{specialRequests}, #{contactPhone},
+            COALESCE(#{depositRequired}, 0), COALESCE(#{depositAmount}, 0),
+            #{userCouponId}, COALESCE(#{couponDiscountAmount}, 0),
+            COALESCE(#{paymentStatus}, 'NONE'), NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 예약 수정 -->
+    <update id="update">
+        UPDATE reservations
+        SET
+            reservation_time = #{reservationTime},
+            party_size = #{partySize},
+            special_requests = #{specialRequests},
+            contact_phone = #{contactPhone},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 예약 삭제 -->
+    <delete id="delete">
+        DELETE FROM reservations WHERE id = #{id}
+    </delete>
+
+    <!-- 예약 상태 변경 -->
+    <update id="updateStatus">
+        UPDATE reservations
+        SET status = #{status}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 예약 취소 -->
+    <update id="cancel">
+        UPDATE reservations
+        SET
+            status = 'CANCELLED',
+            cancel_reason = #{cancelReason},
+            cancelled_at = #{cancelledAt},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 예약 확정 -->
+    <update id="confirm">
+        UPDATE reservations
+        SET status = 'CONFIRMED', updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 결제 정보 업데이트 -->
+    <update id="updatePayment">
+        UPDATE reservations
+        SET
+            payment_status = #{paymentStatus},
+            payment_order_id = #{paymentOrderId},
+            payment_provider = #{paymentProvider},
+            payment_approved_at = #{paymentApprovedAt},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

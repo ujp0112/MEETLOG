@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.RestaurantRepository">
+
+    <resultMap id="RestaurantResultMap" type="com.meetlog.model.Restaurant">
+        <id property="restaurantId" column="restaurant_id"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="name" column="name"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <result property="address" column="address"/>
+        <result property="addressDetail" column="address_detail"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="phone" column="phone"/>
+        <result property="operatingHours" column="operating_hours"/>
+        <result property="priceRange" column="price_range"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="menuInfo" column="menu_info"/>
+        <result property="facilities" column="facilities"/>
+        <result property="parkingInfo" column="parking_info"/>
+        <result property="capacity" column="capacity"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="RestaurantDtoResultMap" type="com.meetlog.dto.restaurant.RestaurantDto">
+        <id property="restaurantId" column="restaurant_id"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="ownerName" column="owner_name"/>
+        <result property="name" column="name"/>
+        <result property="category" column="category"/>
+        <result property="description" column="description"/>
+        <result property="address" column="address"/>
+        <result property="addressDetail" column="address_detail"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="phone" column="phone"/>
+        <result property="operatingHours" column="operating_hours"/>
+        <result property="priceRange" column="price_range"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="menuInfo" column="menu_info"/>
+        <result property="facilities" column="facilities"/>
+        <result property="parkingInfo" column="parking_info"/>
+        <result property="capacity" column="capacity"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="averageRating" column="average_rating"/>
+        <result property="reviewCount" column="review_count"/>
+    </resultMap>
+
+    <select id="findById" resultMap="RestaurantResultMap">
+        SELECT * FROM restaurants WHERE restaurant_id = #{restaurantId}
+    </select>
+
+    <select id="findDtoById" resultMap="RestaurantDtoResultMap">
+        SELECT
+            r.*,
+            u.name as owner_name,
+            COALESCE(AVG(rv.rating), 0) as average_rating,
+            COUNT(rv.review_id) as review_count
+        FROM restaurants r
+        LEFT JOIN users u ON r.owner_id = u.user_id
+        LEFT JOIN reviews rv ON r.restaurant_id = rv.restaurant_id
+        WHERE r.restaurant_id = #{restaurantId}
+        GROUP BY r.restaurant_id
+    </select>
+
+    <select id="search" resultMap="RestaurantDtoResultMap">
+        SELECT
+            r.*,
+            u.name as owner_name,
+            COALESCE(AVG(rv.rating), 0) as average_rating,
+            COUNT(rv.review_id) as review_count
+        FROM restaurants r
+        LEFT JOIN users u ON r.owner_id = u.user_id
+        LEFT JOIN reviews rv ON r.restaurant_id = rv.restaurant_id
+        WHERE r.status = 'ACTIVE'
+        <if test="keyword != null and keyword != ''">
+            AND (r.name LIKE CONCAT('%', #{keyword}, '%')
+                 OR r.description LIKE CONCAT('%', #{keyword}, '%')
+                 OR r.menu_info LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="category != null and category != ''">
+            AND r.category = #{category}
+        </if>
+        <if test="address != null and address != ''">
+            AND r.address LIKE CONCAT('%', #{address}, '%')
+        </if>
+        <if test="priceRange != null">
+            AND r.price_range = #{priceRange}
+        </if>
+        <if test="minCapacity != null">
+            AND r.capacity >= #{minCapacity}
+        </if>
+        GROUP BY r.restaurant_id
+        ORDER BY ${sortColumn} ${sortDirection}
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(DISTINCT r.restaurant_id)
+        FROM restaurants r
+        WHERE r.status = 'ACTIVE'
+        <if test="keyword != null and keyword != ''">
+            AND (r.name LIKE CONCAT('%', #{keyword}, '%')
+                 OR r.description LIKE CONCAT('%', #{keyword}, '%')
+                 OR r.menu_info LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="category != null and category != ''">
+            AND r.category = #{category}
+        </if>
+        <if test="address != null and address != ''">
+            AND r.address LIKE CONCAT('%', #{address}, '%')
+        </if>
+        <if test="priceRange != null">
+            AND r.price_range = #{priceRange}
+        </if>
+        <if test="minCapacity != null">
+            AND r.capacity >= #{minCapacity}
+        </if>
+    </select>
+
+    <select id="findByOwnerId" resultMap="RestaurantDtoResultMap">
+        SELECT
+            r.*,
+            u.name as owner_name,
+            COALESCE(AVG(rv.rating), 0) as average_rating,
+            COUNT(rv.review_id) as review_count
+        FROM restaurants r
+        LEFT JOIN users u ON r.owner_id = u.user_id
+        LEFT JOIN reviews rv ON r.restaurant_id = rv.restaurant_id
+        WHERE r.owner_id = #{ownerId}
+        GROUP BY r.restaurant_id
+        ORDER BY r.created_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="restaurantId">
+        INSERT INTO restaurants (
+            owner_id, name, category, description, address, address_detail,
+            latitude, longitude, phone, operating_hours, price_range,
+            image_url, menu_info, facilities, parking_info, capacity, status
+        ) VALUES (
+            #{ownerId}, #{name}, #{category}, #{description}, #{address}, #{addressDetail},
+            #{latitude}, #{longitude}, #{phone}, #{operatingHours}, #{priceRange},
+            #{imageUrl}, #{menuInfo}, #{facilities}, #{parkingInfo}, #{capacity}, #{status}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE restaurants
+        SET
+            name = #{name},
+            category = #{category},
+            description = #{description},
+            address = #{address},
+            address_detail = #{addressDetail},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            phone = #{phone},
+            operating_hours = #{operatingHours},
+            price_range = #{priceRange},
+            image_url = #{imageUrl},
+            menu_info = #{menuInfo},
+            facilities = #{facilities},
+            parking_info = #{parkingInfo},
+            capacity = #{capacity},
+            status = #{status},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM restaurants WHERE restaurant_id = #{restaurantId}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE restaurants
+        SET status = #{status}, updated_at = CURRENT_TIMESTAMP
+        WHERE restaurant_id = #{restaurantId}
+    </update>
+
+    <select id="existsByName" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM restaurants WHERE name = #{name}
+    </select>
+
+</mapper>

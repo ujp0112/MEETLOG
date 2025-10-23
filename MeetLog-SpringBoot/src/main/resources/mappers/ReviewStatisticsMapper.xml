@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ReviewStatisticsDAO">
+    
+    <resultMap id="reviewStatisticsResultMap" type="model.ReviewStatistics">
+        <result property="totalReviews" column="total_reviews" />
+        <result property="averageRating" column="average_rating" />
+        <result property="fiveStarCount" column="five_star_count" />
+        <result property="fourStarCount" column="four_star_count" />
+        <result property="threeStarCount" column="three_star_count" />
+        <result property="twoStarCount" column="two_star_count" />
+        <result property="oneStarCount" column="one_star_count" />
+        <result property="totalLikes" column="total_likes" />
+        <result property="totalComments" column="total_comments" />
+    </resultMap>
+    
+    <select id="getReviewStatisticsByOwnerId" parameterType="int" resultMap="reviewStatisticsResultMap">
+        SELECT 
+            COUNT(r.id) as total_reviews,
+            COALESCE(AVG(r.rating), 0) as average_rating,
+            SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as five_star_count,
+            SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as four_star_count,
+            SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as three_star_count,
+            SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as two_star_count,
+            SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as one_star_count,
+            COALESCE(SUM(r.likes), 0) as total_likes,
+            COALESCE(SUM(rc.comment_count), 0) as total_comments
+        FROM reviews r
+        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        LEFT JOIN (
+            SELECT review_id, COUNT(*) as comment_count
+            FROM review_comments
+            GROUP BY review_id
+        ) rc ON r.id = rc.review_id
+        WHERE res.owner_id = #{ownerId}
+        AND r.is_active = 1
+    </select>
+    
+    <select id="getRatingDistributionByOwnerId" parameterType="int" resultType="map">
+        SELECT 
+            r.rating,
+            COUNT(*) as count
+        FROM reviews r
+        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        WHERE res.owner_id = #{ownerId}
+        AND r.is_active = 1
+        GROUP BY r.rating
+        ORDER BY r.rating DESC
+    </select>
+    
+    <select id="getMonthlyReviewCountByOwnerId" parameterType="int" resultType="map">
+        SELECT 
+            DATE_FORMAT(r.created_at, '%Y-%m') as month,
+            COUNT(*) as count
+        FROM reviews r
+        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        WHERE res.owner_id = #{ownerId}
+        AND r.is_active = 1
+        AND r.created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+        GROUP BY DATE_FORMAT(r.created_at, '%Y-%m')
+        ORDER BY month DESC
+    </select>
+    
+    <select id="getRecentReviewTrendByOwnerId" parameterType="map" resultType="map">
+        SELECT 
+            DATE(r.created_at) as date,
+            COUNT(*) as count
+        FROM reviews r
+        LEFT JOIN restaurants res ON r.restaurant_id = res.id
+        WHERE res.owner_id = #{ownerId}
+        AND r.is_active = 1
+        AND r.created_at >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+        GROUP BY DATE(r.created_at)
+        ORDER BY date DESC
+    </select>
+    
+</mapper>

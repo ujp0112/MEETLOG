@@ -38,8 +38,8 @@ public class LogoutServlet extends HttpServlet {
 		 * urlBuilder.toString();
 		 */
 
-		// [수정된 코드] ngrok의 https 주소를 직접 사용합니다.
-		String logoutRedirectUrl = "https://tamala-multiovulate-recollectedly.ngrok-free.dev/MeetLog/main";
+		// [수정된 코드] localhost 주소를 사용합니다.
+		String logoutRedirectUrl = "http://localhost:8080/MeetLog/main";
 
 		// 카카오로 로그인한 경우, 카카오 로그아웃을 추가로 호출
 		if ("kakao".equals(provider)) {

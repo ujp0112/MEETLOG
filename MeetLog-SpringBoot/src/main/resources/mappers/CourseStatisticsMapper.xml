@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.CourseStatisticsMapper">
+
+    <cache />
+    
+    <resultMap id="popularCourseResult" type="model.PopularCourse">
+        <result property="title" column="title"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="revenue" column="total_revenue"/>
+        <result property="rating" column="average_rating"/>
+    </resultMap>
+
+    <resultMap id="monthlyReservationResult" type="model.MonthlyReservation">
+        <result property="month" column="reservation_month"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="revenue" column="total_revenue"/>
+    </resultMap>
+
+    <select id="countTotalCourses" resultType="int">
+        SELECT COUNT(*) 
+        FROM courses
+    </select>
+
+    <select id="countActiveCourses" resultType="int">
+        SELECT COUNT(*) 
+        FROM courses 
+        WHERE status = 'ACTIVE'
+    </select>
+
+    <select id="sumTotalReservations" resultType="long">
+        SELECT SUM(participant_count) 
+        FROM course_reservations
+    </select>
+
+    <select id="sumTotalRevenue" resultType="long">
+        SELECT SUM(total_price) 
+        FROM course_reservations 
+        WHERE status = 'COMPLETED'
+    </select>
+    
+    <select id="getAverageRating" resultType="double">
+        SELECT AVG(rating) 
+        FROM course_reviews
+    </select>
+    
+    <select id="findPopularCoursesTop5" resultMap="popularCourseResult">
+        SELECT
+            c.title,
+            SUM(cr.participant_count) AS reservation_count,
+            SUM(CASE WHEN cr.status = 'COMPLETED' THEN cr.total_price ELSE 0 END) AS total_revenue,
+            AVG(rev.rating) AS average_rating
+        FROM
+            courses c
+        LEFT JOIN
+            course_reservations cr ON c.course_id = cr.course_id
+        LEFT JOIN
+            course_reviews rev ON c.course_id = rev.course_id
+        GROUP BY
+            c.course_id, c.title
+        ORDER BY
+            reservation_count DESC
+        LIMIT 5
+    </select>
+    
+    <select id="findMonthlyReservations" resultMap="monthlyReservationResult">
+        SELECT 
+            DATE_FORMAT(reservation_date, '%Y-%m') AS reservation_month,
+            SUM(participant_count) AS reservation_count,
+            SUM(CASE WHEN status = 'COMPLETED' THEN total_price ELSE 0 END) AS total_revenue
+        FROM 
+            course_reservations
+        WHERE
+            reservation_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+        GROUP BY 
+            reservation_month
+        ORDER BY 
+            reservation_month ASC
+    </select>
+    
+</mapper>

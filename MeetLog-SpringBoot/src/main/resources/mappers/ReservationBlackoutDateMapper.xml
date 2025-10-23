@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ReservationBlackoutDateMapper">
+
+    <!-- Result Map -->
+    <resultMap id="ReservationBlackoutDateResultMap" type="model.ReservationBlackoutDate">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="blackoutDate" column="blackout_date"/>
+        <result property="reason" column="reason"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="restaurantName" column="restaurant_name"/>
+    </resultMap>
+
+    <!-- 특정 음식점의 블랙아웃 날짜 목록 조회 -->
+    <select id="findByRestaurantId" parameterType="int" resultMap="ReservationBlackoutDateResultMap">
+        SELECT rbd.*, r.name AS restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.restaurant_id = #{restaurantId}
+        ORDER BY rbd.blackout_date ASC
+    </select>
+
+    <!-- 특정 음식점의 활성화된 블랙아웃 날짜 목록 조회 -->
+    <select id="findActiveByRestaurantId" parameterType="int" resultMap="ReservationBlackoutDateResultMap">
+        SELECT rbd.*, r.name AS restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.restaurant_id = #{restaurantId}
+        AND rbd.is_active = TRUE
+        AND rbd.blackout_date >= CURDATE()
+        ORDER BY rbd.blackout_date ASC
+    </select>
+
+    <!-- 특정 날짜가 블랙아웃 날짜인지 확인 -->
+    <select id="countByRestaurantAndDate" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM reservation_blackout_dates
+        WHERE restaurant_id = #{restaurantId}
+        AND blackout_date = #{blackoutDate}
+        AND is_active = TRUE
+    </select>
+
+    <!-- 특정 기간의 블랙아웃 날짜 목록 조회 -->
+    <select id="findByDateRange" parameterType="map" resultMap="ReservationBlackoutDateResultMap">
+        SELECT rbd.*, r.name AS restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.restaurant_id = #{restaurantId}
+        AND rbd.blackout_date BETWEEN #{startDate} AND #{endDate}
+        AND rbd.is_active = TRUE
+        ORDER BY rbd.blackout_date ASC
+    </select>
+
+    <!-- 미래의 블랙아웃 날짜 목록 조회 -->
+    <select id="findFutureBlackoutDates" parameterType="map" resultMap="ReservationBlackoutDateResultMap">
+        SELECT rbd.*, r.name AS restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.restaurant_id = #{restaurantId}
+        AND rbd.blackout_date >= #{currentDate}
+        AND rbd.is_active = TRUE
+        ORDER BY rbd.blackout_date ASC
+    </select>
+
+    <!-- ID로 블랙아웃 날짜 조회 -->
+    <select id="findById" parameterType="int" resultMap="ReservationBlackoutDateResultMap">
+        SELECT rbd.*, r.name AS restaurant_name
+        FROM reservation_blackout_dates rbd
+        LEFT JOIN restaurants r ON rbd.restaurant_id = r.id
+        WHERE rbd.id = #{id}
+    </select>
+
+    <!-- 블랙아웃 날짜 추가 -->
+    <insert id="insert" parameterType="model.ReservationBlackoutDate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation_blackout_dates (
+            restaurant_id,
+            blackout_date,
+            reason,
+            is_active,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{restaurantId},
+            #{blackoutDate},
+            #{reason},
+            #{isActive},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 블랙아웃 날짜 수정 -->
+    <update id="update" parameterType="model.ReservationBlackoutDate">
+        UPDATE reservation_blackout_dates
+        SET blackout_date = #{blackoutDate},
+            reason = #{reason},
+            is_active = #{isActive},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 블랙아웃 날짜 비활성화 -->
+    <update id="deactivate" parameterType="int">
+        UPDATE reservation_blackout_dates
+        SET is_active = FALSE,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 블랙아웃 날짜 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM reservation_blackout_dates
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 과거 블랙아웃 날짜 비활성화 -->
+    <update id="deactivatePastDates" parameterType="map">
+        UPDATE reservation_blackout_dates
+        SET is_active = FALSE,
+            updated_at = NOW()
+        WHERE restaurant_id = #{restaurantId}
+        AND blackout_date &lt; #{currentDate}
+        AND is_active = TRUE
+    </update>
+
+    <!-- 블랙아웃 날짜 통계 조회 -->
+    <select id="getBlackoutDateStats" parameterType="int" resultType="map">
+        SELECT
+            COUNT(*) AS total_blackout_dates,
+            COUNT(CASE WHEN is_active = TRUE THEN 1 END) AS active_blackout_dates,
+            COUNT(CASE WHEN blackout_date >= CURDATE() AND is_active = TRUE THEN 1 END) AS future_blackout_dates,
+            COUNT(CASE WHEN blackout_date = CURDATE() AND is_active = TRUE THEN 1 END) AS today_blackout_dates
+        FROM reservation_blackout_dates
+        WHERE restaurant_id = #{restaurantId}
+    </select>
+
+</mapper>

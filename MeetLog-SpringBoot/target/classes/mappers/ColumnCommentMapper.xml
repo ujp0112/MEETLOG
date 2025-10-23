@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ColumnCommentDAO">
+    <resultMap id="columnCommentResultMap" type="ColumnComment" autoMapping="true">
+        <id property="id" column="id" />
+        <result property="columnId" column="column_id" />
+        <result property="userId" column="user_id" />
+        <result property="content" column="content" />
+        <result property="parentId" column="parent_id" />
+        <result property="likeCount" column="like_count" />
+        <result property="profileImage" column="profile_image" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+    </resultMap>
+
+    <select id="findByColumnId" parameterType="int" resultMap="columnCommentResultMap">
+        SELECT cc.*, u.nickname AS author, u.profile_image
+        FROM column_comments cc
+        JOIN users u ON cc.user_id = u.id
+        WHERE cc.column_id = #{columnId}
+        ORDER BY cc.created_at ASC
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="columnCommentResultMap">
+        SELECT cc.*, u.nickname AS author, u.profile_image
+        FROM column_comments cc
+        JOIN users u ON cc.user_id = u.id
+        WHERE cc.id = #{commentId}
+    </select>
+
+    <select id="getCommentCount" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM column_comments
+        WHERE column_id = #{columnId}
+    </select>
+
+    <insert id="insert" parameterType="ColumnComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO column_comments (column_id, user_id, content, created_at)
+        VALUES (#{columnId}, #{userId}, #{content}, NOW())
+    </insert>
+
+    <update id="update" parameterType="ColumnComment">
+        UPDATE column_comments
+        SET content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="int">
+        DELETE FROM column_comments WHERE id = #{id}
+    </delete>
+
+    <update id="likeComment" parameterType="int">
+        UPDATE column_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="incrementLikes" parameterType="int">
+        UPDATE column_comments SET like_count = COALESCE(like_count, 0) + 1 WHERE id = #{id}
+    </update>
+
+    <update id="decrementLikes" parameterType="int">
+        UPDATE column_comments SET like_count = GREATEST(COALESCE(like_count, 1) - 1, 0) WHERE id = #{id}
+    </update>
+     <!-- [추가] 특정 댓글의 현재 좋아요 수 조회 -->
+    <select id="getLikeCount" parameterType="int" resultType="int">
+        SELECT like_count
+        FROM column_comments
+        WHERE id = #{commentId}
+    </select>
+
+    <!-- [추가] 댓글 좋아요 수 조회 (getCommentLikeCount용) -->
+    <select id="getCommentLikeCount" parameterType="int" resultType="int">
+        SELECT COALESCE(like_count, 0)
+        FROM column_comments
+        WHERE id = #{commentId}
+    </select>
+
+    <!-- [추가] 사용자가 특정 댓글에 좋아요를 눌렀는지 확인 -->
+    <select id="isCommentLikedByUser" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- [추가] 댓글 좋아요 추가 -->
+    <insert id="addCommentLike" parameterType="map">
+        INSERT INTO comment_likes (comment_id, user_id, created_at)
+        VALUES (#{commentId}, #{userId}, NOW())
+    </insert>
+
+    <!-- [추가] 댓글 좋아요 취소 -->
+    <delete id="removeCommentLike" parameterType="map">
+        DELETE FROM comment_likes
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+</mapper>

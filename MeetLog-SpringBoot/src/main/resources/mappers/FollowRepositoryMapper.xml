@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.FollowRepository">
+
+    <!-- Result Maps -->
+    <resultMap id="FollowResultMap" type="com.meetlog.model.Follow">
+        <id property="id" column="id"/>
+        <result property="followerId" column="follower_id"/>
+        <result property="followingId" column="following_id"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <resultMap id="FollowDtoResultMap" type="com.meetlog.dto.follow.FollowDto">
+        <id property="id" column="id"/>
+        <result property="followerId" column="follower_id"/>
+        <result property="followingId" column="following_id"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+
+        <!-- 팔로워 정보 -->
+        <result property="followerName" column="follower_name"/>
+        <result property="followerNickname" column="follower_nickname"/>
+        <result property="followerEmail" column="follower_email"/>
+        <result property="followerProfileImage" column="follower_profile_image"/>
+        <result property="followerLevel" column="follower_level"/>
+
+        <!-- 팔로잉 정보 -->
+        <result property="followingName" column="following_name"/>
+        <result property="followingNickname" column="following_nickname"/>
+        <result property="followingEmail" column="following_email"/>
+        <result property="followingProfileImage" column="following_profile_image"/>
+        <result property="followingLevel" column="following_level"/>
+
+        <!-- 통계 -->
+        <result property="followerFollowersCount" column="follower_followers_count"/>
+        <result property="followerFollowingCount" column="follower_following_count"/>
+        <result property="followingFollowersCount" column="following_followers_count"/>
+        <result property="followingFollowingCount" column="following_following_count"/>
+        <result property="isMutual" column="is_mutual"/>
+    </resultMap>
+
+    <!-- ID로 팔로우 조회 -->
+    <select id="findById" resultMap="FollowResultMap">
+        SELECT *
+        FROM follows
+        WHERE id = #{id}
+    </select>
+
+    <!-- 팔로워-팔로잉 쌍으로 조회 -->
+    <select id="findByFollowerAndFollowing" resultMap="FollowResultMap">
+        SELECT *
+        FROM follows
+        WHERE follower_id = #{followerId}
+        AND following_id = #{followingId}
+        AND is_active = true
+    </select>
+
+    <!-- 팔로워 목록 조회 (나를 팔로우하는 사람들) -->
+    <select id="findFollowers" resultMap="FollowDtoResultMap">
+        SELECT
+            f.id,
+            f.follower_id,
+            f.following_id,
+            f.is_active,
+            f.created_at,
+
+            follower.name as follower_name,
+            follower.nickname as follower_nickname,
+            follower.email as follower_email,
+            follower.profile_image as follower_profile_image,
+            follower.level as follower_level,
+
+            following.name as following_name,
+            following.nickname as following_nickname,
+            following.email as following_email,
+            following.profile_image as following_profile_image,
+            following.level as following_level,
+
+            (SELECT COUNT(*) FROM follows WHERE following_id = follower.id AND is_active = true) as follower_followers_count,
+            (SELECT COUNT(*) FROM follows WHERE follower_id = follower.id AND is_active = true) as follower_following_count,
+            (SELECT COUNT(*) FROM follows WHERE following_id = following.id AND is_active = true) as following_followers_count,
+            (SELECT COUNT(*) FROM follows WHERE follower_id = following.id AND is_active = true) as following_following_count,
+
+            EXISTS(
+                SELECT 1 FROM follows
+                WHERE follower_id = f.following_id
+                AND following_id = f.follower_id
+                AND is_active = true
+            ) as is_mutual
+        FROM follows f
+        JOIN users follower ON f.follower_id = follower.id
+        JOIN users following ON f.following_id = following.id
+        WHERE f.following_id = #{userId}
+        AND f.is_active = true
+        ORDER BY f.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 팔로잉 목록 조회 (내가 팔로우하는 사람들) -->
+    <select id="findFollowing" resultMap="FollowDtoResultMap">
+        SELECT
+            f.id,
+            f.follower_id,
+            f.following_id,
+            f.is_active,
+            f.created_at,
+
+            follower.name as follower_name,
+            follower.nickname as follower_nickname,
+            follower.email as follower_email,
+            follower.profile_image as follower_profile_image,
+            follower.level as follower_level,
+
+            following.name as following_name,
+            following.nickname as following_nickname,
+            following.email as following_email,
+            following.profile_image as following_profile_image,
+            following.level as following_level,
+
+            (SELECT COUNT(*) FROM follows WHERE following_id = follower.id AND is_active = true) as follower_followers_count,
+            (SELECT COUNT(*) FROM follows WHERE follower_id = follower.id AND is_active = true) as follower_following_count,
+            (SELECT COUNT(*) FROM follows WHERE following_id = following.id AND is_active = true) as following_followers_count,
+            (SELECT COUNT(*) FROM follows WHERE follower_id = following.id AND is_active = true) as following_following_count,
+
+            EXISTS(
+                SELECT 1 FROM follows
+                WHERE follower_id = f.following_id
+                AND following_id = f.follower_id
+                AND is_active = true
+            ) as is_mutual
+        FROM follows f
+        JOIN users follower ON f.follower_id = follower.id
+        JOIN users following ON f.following_id = following.id
+        WHERE f.follower_id = #{userId}
+        AND f.is_active = true
+        ORDER BY f.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 팔로워 수 -->
+    <select id="countFollowers" resultType="int">
+        SELECT COUNT(*)
+        FROM follows
+        WHERE following_id = #{userId}
+        AND is_active = true
+    </select>
+
+    <!-- 팔로잉 수 -->
+    <select id="countFollowing" resultType="int">
+        SELECT COUNT(*)
+        FROM follows
+        WHERE follower_id = #{userId}
+        AND is_active = true
+    </select>
+
+    <!-- 팔로우 생성 -->
+    <insert id="insert" parameterType="com.meetlog.model.Follow" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO follows (
+            follower_id, following_id, is_active, created_at
+        ) VALUES (
+            #{followerId}, #{followingId}, #{isActive}, NOW()
+        )
+    </insert>
+
+    <!-- 팔로우 취소 -->
+    <delete id="delete">
+        DELETE FROM follows
+        WHERE follower_id = #{followerId}
+        AND following_id = #{followingId}
+    </delete>
+
+    <!-- 팔로우 여부 확인 -->
+    <select id="isFollowing" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM follows
+        WHERE follower_id = #{followerId}
+        AND following_id = #{followingId}
+        AND is_active = true
+    </select>
+
+    <!-- 맞팔 여부 확인 -->
+    <select id="isMutualFollow" resultType="boolean">
+        SELECT
+            EXISTS(SELECT 1 FROM follows WHERE follower_id = #{userId1} AND following_id = #{userId2} AND is_active = true)
+            AND
+            EXISTS(SELECT 1 FROM follows WHERE follower_id = #{userId2} AND following_id = #{userId1} AND is_active = true)
+    </select>
+
+</mapper>

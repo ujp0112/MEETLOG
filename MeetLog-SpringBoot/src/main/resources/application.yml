@@ -1,0 +1,115 @@
+spring:
+  application:
+    name: meetlog-api
+
+  # 데이터베이스 설정
+  datasource:
+    url: jdbc:mariadb://localhost:3306/meetlog?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Seoul
+    username: root
+    password: 7564
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # 파일 업로드 설정
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 0
+
+  # Jackson JSON 설정
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Asia/Seoul
+    default-property-inclusion: non_null
+
+  # 메일 설정 (기존 설정 참고)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:your-email@gmail.com}
+    password: ${MAIL_PASSWORD:your-app-password}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+# MyBatis 설정
+mybatis:
+  config-location: classpath:mybatis-config.xml
+  mapper-locations: classpath:mappers/**/*.xml
+  type-aliases-package: com.meetlog.model,com.meetlog.dto
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+# 서버 설정
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+
+# Actuator 설정 (Health Check)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# SpringDoc OpenAPI (Swagger) 설정
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+# 로깅 설정
+logging:
+  level:
+    root: INFO
+    com.meetlog: DEBUG
+    org.springframework.web: DEBUG
+    org.mybatis: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/meetlog-api.log
+    max-size: 10MB
+    max-history: 30
+
+# 애플리케이션 설정
+app:
+  upload:
+    path: /Users/sangwoolee/MEETLOG/MEETLOG/meetlog_uploads
+  jwt:
+    secret: ${JWT_SECRET:meetlog-secret-key-change-in-production-must-be-at-least-256-bits}
+    expiration: 86400000  # 24시간 (밀리초)
+    refresh-expiration: 604800000  # 7일 (밀리초)

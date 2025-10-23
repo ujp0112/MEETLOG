@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="EmployeeMapper">
+
+    <resultMap id="EmployeeResultMap" type="model.Employee">
+        <id property="id" column="employee_id"/>
+        <result property="name" column="name"/>
+        <result property="position" column="position"/>
+        <result property="branch" column="branch"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 모든 직원 조회 -->
+    <select id="findAll" resultMap="EmployeeResultMap">
+        SELECT employee_id, name, position, branch, status, created_at, updated_at
+        FROM employees
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 상태별 직원 조회 -->
+    <select id="findByStatus" resultMap="EmployeeResultMap" parameterType="string">
+        SELECT employee_id, name, position, branch, status, created_at, updated_at
+        FROM employees
+        WHERE status = #{status}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- ID로 직원 조회 -->
+    <select id="findById" resultMap="EmployeeResultMap" parameterType="int">
+        SELECT employee_id, name, position, branch, status, created_at, updated_at
+        FROM employees
+        WHERE employee_id = #{id}
+    </select>
+
+    <!-- 직원 생성 -->
+    <insert id="insert" parameterType="model.Employee" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO employees (name, position, branch, status)
+        VALUES (#{name}, #{position}, #{branch}, #{status})
+    </insert>
+
+    <!-- 직원 정보 수정 -->
+    <update id="update" parameterType="model.Employee">
+        UPDATE employees
+        SET name = #{name},
+            position = #{position},
+            branch = #{branch},
+            status = #{status}
+        WHERE employee_id = #{id}
+    </update>
+
+    <!-- 직원 상태 변경 -->
+    <update id="updateStatus" parameterType="map">
+        UPDATE employees
+        SET status = #{status}
+        WHERE employee_id = #{id}
+    </update>
+
+    <!-- 직원 삭제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM employees
+        WHERE employee_id = #{id}
+    </delete>
+
+    <!-- 전체 직원 개수 -->
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM employees
+    </select>
+
+    <!-- 상태별 직원 개수 -->
+    <select id="countByStatus" resultType="int" parameterType="string">
+        SELECT COUNT(*) FROM employees
+        WHERE status = #{status}
+    </select>
+
+</mapper>

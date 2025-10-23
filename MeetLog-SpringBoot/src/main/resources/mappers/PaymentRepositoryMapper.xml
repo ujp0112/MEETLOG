@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.PaymentRepository">
+
+    <!-- Result Maps -->
+    <resultMap id="PaymentResultMap" type="com.meetlog.model.Payment">
+        <id property="id" column="id"/>
+        <result property="paymentType" column="payment_type"/>
+        <result property="referenceId" column="reference_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderName" column="order_name"/>
+        <result property="amount" column="amount"/>
+        <result property="currency" column="currency"/>
+        <result property="paymentMethod" column="payment_method"/>
+        <result property="provider" column="provider"/>
+        <result property="status" column="status"/>
+        <result property="paymentKey" column="payment_key"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="canceledAt" column="canceled_at"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="refundAmount" column="refund_amount"/>
+        <result property="refundStatus" column="refund_status"/>
+        <result property="rawResponse" column="raw_response"/>
+        <result property="failReason" column="fail_reason"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="PaymentDtoResultMap" type="com.meetlog.dto.payment.PaymentDto">
+        <id property="id" column="id"/>
+        <result property="paymentType" column="payment_type"/>
+        <result property="referenceId" column="reference_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="orderName" column="order_name"/>
+        <result property="amount" column="amount"/>
+        <result property="currency" column="currency"/>
+        <result property="paymentMethod" column="payment_method"/>
+        <result property="provider" column="provider"/>
+        <result property="status" column="status"/>
+        <result property="paymentKey" column="payment_key"/>
+        <result property="requestedAt" column="requested_at"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="canceledAt" column="canceled_at"/>
+        <result property="cancelReason" column="cancel_reason"/>
+        <result property="refundAmount" column="refund_amount"/>
+        <result property="refundStatus" column="refund_status"/>
+        <result property="failReason" column="fail_reason"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="userName" column="user_name"/>
+        <result property="userEmail" column="user_email"/>
+    </resultMap>
+
+    <!-- CRUD -->
+    <select id="findById" resultMap="PaymentResultMap">
+        SELECT * FROM payments WHERE id = #{id}
+    </select>
+
+    <select id="findByOrderId" resultMap="PaymentResultMap">
+        SELECT * FROM payments WHERE order_id = #{orderId}
+    </select>
+
+    <select id="findDtoById" resultMap="PaymentDtoResultMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.email AS user_email
+        FROM payments p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.id = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="PaymentDtoResultMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.email AS user_email
+        FROM payments p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.user_id = #{userId}
+        ORDER BY p.created_at DESC
+        LIMIT #{size} OFFSET #{page}
+    </select>
+
+    <select id="findByReference" resultMap="PaymentDtoResultMap">
+        SELECT
+            p.*,
+            u.name AS user_name,
+            u.email AS user_email
+        FROM payments p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.payment_type = #{paymentType}
+        AND p.reference_id = #{referenceId}
+        ORDER BY p.created_at DESC
+    </select>
+
+    <insert id="insert" parameterType="com.meetlog.model.Payment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payments (
+            payment_type, reference_id, user_id, order_id, order_name,
+            amount, currency, payment_method, provider, status,
+            payment_key, requested_at, refund_status, created_at, updated_at
+        ) VALUES (
+            #{paymentType}, #{referenceId}, #{userId}, #{orderId}, #{orderName},
+            #{amount}, #{currency}, #{paymentMethod}, #{provider}, #{status},
+            #{paymentKey}, #{requestedAt}, #{refundStatus}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE payments
+        SET payment_key = #{paymentKey},
+            status = #{status},
+            approved_at = #{approvedAt},
+            canceled_at = #{canceledAt},
+            cancel_reason = #{cancelReason},
+            refund_amount = #{refundAmount},
+            refund_status = #{refundStatus},
+            raw_response = #{rawResponse},
+            fail_reason = #{failReason},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE payments
+        SET status = #{status},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- Statistics -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*) FROM payments WHERE user_id = #{userId}
+    </select>
+
+</mapper>

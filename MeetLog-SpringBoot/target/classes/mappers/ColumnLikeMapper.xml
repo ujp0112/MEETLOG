@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ColumnLikeDAO">
+
+    <select id="checkLike" parameterType="map" resultType="int">
+        SELECT id FROM column_likes
+        WHERE column_id = #{columnId} AND user_id = #{userId}
+    </select>
+
+    <insert id="addLike" parameterType="map">
+        INSERT INTO column_likes (column_id, user_id, created_at)
+        VALUES (#{columnId}, #{userId}, NOW())
+    </insert>
+
+    <delete id="removeLike" parameterType="map">
+        DELETE FROM column_likes
+        WHERE column_id = #{columnId} AND user_id = #{userId}
+    </delete>
+
+    <select id="getUserLikeStatus" parameterType="map" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM column_likes
+        WHERE column_id = #{columnId} AND user_id = #{userId}
+    </select>
+
+</mapper>

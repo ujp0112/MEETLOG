@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="erpMapper.BranchMapper">
+  <resultMap id="InventoryMap" type="ErpInventoryItem">
+    <result property="materialId" column="material_id"/>
+    <result property="name" column="name"/>
+    <result property="unit" column="unit"/>
+    <result property="unitPrice" column="unit_price"/>
+    <result property="qty" column="qty"/>
+    <result property="imgPath" column="img_path"/>
+  </resultMap>
+
+  <select id="listInventoryView" parameterType="map" resultMap="InventoryMap">
+    SELECT m.id AS material_id, m.name, m.unit, m.unit_price, m.img_path,
+           COALESCE(bi.qty, 0) AS qty
+    FROM material m
+    LEFT JOIN branch_inventory bi
+      ON bi.company_id=#{companyId}
+     AND bi.branch_id=#{branchId}
+     AND bi.material_id=m.id
+    WHERE m.company_id=#{companyId}
+      AND m.deleted_yn='N' AND m.active_yn='Y'
+    ORDER BY m.name
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+  
+  <select id="countAllMaterialsForCompany" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM material
+    WHERE company_id = #{companyId} AND deleted_yn = 'N'
+  </select>
+
+  <select id="getMenuIngredientsForBranch" parameterType="map" resultType="ErpMenuIngredient">
+    SELECT mi.company_id, mi.menu_id, mi.material_id, mi.qty,
+           m.name AS material_name, m.unit, m.unit_price
+    FROM menu_ingredient mi
+    JOIN menu me ON me.company_id=mi.company_id AND me.id=mi.menu_id AND me.deleted_yn='N'
+    JOIN material m ON m.company_id=mi.company_id AND m.id=mi.material_id
+    WHERE mi.company_id=#{companyId} AND mi.menu_id=#{menuId}
+    ORDER BY m.name
+  </select>
+
+  <select id="getBranchMenuToggle" parameterType="map" resultType="string">
+    SELECT enabled FROM branch_menu_toggle
+    WHERE company_id=#{companyId} AND branch_id=#{branchId} AND menu_id=#{menuId}
+  </select>
+  
+  <select id="listMenusForBranch" parameterType="map" resultType="map">
+  SELECT
+    me.id          AS id,
+    me.name        AS name,
+    me.price       AS price,
+    me.img_path    AS imgPath,
+    COALESCE(bmt.enabled, 'N') AS enabled
+  FROM menu me
+  LEFT JOIN branch_menu_toggle bmt
+    ON bmt.company_id = me.company_id
+   AND bmt.branch_id  = #{branchId}
+   AND bmt.menu_id    = me.id
+  WHERE me.company_id = #{companyId}
+    AND me.deleted_yn = 'N'
+  <if test="q != null and q != ''">
+    AND me.name LIKE CONCAT('%', #{q}, '%')
+  </if>
+  ORDER BY me.name
+</select>
+
+  <insert id="upsertBranchMenuToggle" parameterType="ErpMenuToggle">
+    INSERT INTO branch_menu_toggle (company_id, branch_id, menu_id, enabled, updated_at)
+    VALUES (#{companyId}, #{branchId}, #{menuId}, #{enabled}, NOW())
+    ON DUPLICATE KEY UPDATE enabled=VALUES(enabled), updated_at=NOW()
+  </insert>
+  
+  <select id="listMenuIngredientsByMenu" parameterType="map" resultType="map">
+    SELECT
+      mi.material_id          AS materialId,
+      ma.name                 AS materialName,
+      ma.unit                 AS unit,
+      ma.unit_price           AS unitPrice,
+      mi.qty                  AS qty
+    FROM menu_ingredient mi
+    JOIN menu me
+      ON me.company_id = mi.company_id
+     AND me.id         = mi.menu_id
+    JOIN material ma
+      ON ma.company_id = mi.company_id
+     AND ma.id         = mi.material_id
+    WHERE mi.company_id = #{companyId}
+      AND mi.menu_id   = #{menuId}
+      AND me.deleted_yn = 'N'
+    ORDER BY ma.name
+  </select>
+</mapper>

@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.AdminStatisticsMapper">
+
+    <!-- ================================================== -->
+    <!-- Support Dashboard Queries -->
+    <!-- ================================================== -->
+
+    <!-- 총 문의 건수 -->
+    <select id="getTotalInquiryCount" resultType="int">
+        SELECT COUNT(*) FROM inquiries
+    </select>
+
+    <!-- 상태별 문의 건수 -->
+    <select id="getInquiryCountByStatus" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM inquiries WHERE status = #{status}
+    </select>
+
+    <!-- 평균 응답 시간 (시간 단위) -->
+    <select id="getAverageResponseTime" resultType="double">
+        SELECT COALESCE(AVG(response_time_hours), 0)
+        FROM inquiries
+        WHERE status = 'RESOLVED' AND response_time_hours IS NOT NULL
+    </select>
+
+    <!-- 고객 만족도 평균 -->
+    <select id="getAverageSatisfaction" resultType="double">
+        SELECT COALESCE(AVG(rating), 0)
+        FROM inquiry_satisfaction
+    </select>
+
+    <!-- 카테고리별 문의 통계 -->
+    <resultMap id="InquiryCategoryStatsMap" type="dto.InquiryCategoryStats">
+        <result property="category" column="category"/>
+        <result property="count" column="count"/>
+        <result property="percentage" column="percentage"/>
+        <result property="resolvedCount" column="resolved_count"/>
+        <result property="pendingCount" column="pending_count"/>
+    </resultMap>
+
+    <select id="getInquiryCategoryStats" resultMap="InquiryCategoryStatsMap">
+        SELECT
+            category,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM inquiries), 1) as percentage,
+            SUM(CASE WHEN status = 'RESOLVED' THEN 1 ELSE 0 END) as resolved_count,
+            SUM(CASE WHEN status IN ('PENDING', 'IN_PROGRESS') THEN 1 ELSE 0 END) as pending_count
+        FROM inquiries
+        GROUP BY category
+        ORDER BY count DESC
+    </select>
+
+    <!-- 최근 문의 목록 -->
+    <resultMap id="RecentInquiryMap" type="dto.RecentInquiry">
+        <result property="inquiryId" column="inquiry_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="status" column="status"/>
+        <result property="priority" column="priority"/>
+        <result property="subject" column="subject"/>
+        <result property="type" column="category"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="getRecentInquiries" parameterType="int" resultMap="RecentInquiryMap">
+        SELECT
+            inquiry_id,
+            user_name,
+            status,
+            priority,
+            subject,
+            category,
+            created_at
+        FROM inquiries
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 만족도 통계 -->
+    <resultMap id="SatisfactionStatsMap" type="dto.SatisfactionStat">
+        <result property="rating" column="rating"/>
+        <result property="count" column="count"/>
+        <result property="percentage" column="percentage"/>
+    </resultMap>
+
+    <select id="getSatisfactionStats" resultMap="SatisfactionStatsMap">
+        SELECT
+            rating,
+            COUNT(*) as count,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM inquiry_satisfaction), 1) as percentage
+        FROM inquiry_satisfaction
+        GROUP BY rating
+        ORDER BY rating DESC
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Statistics Dashboard Queries -->
+    <!-- ================================================== -->
+
+    <!-- 총 사용자 수 -->
+    <select id="getTotalUserCount" resultType="int">
+        SELECT COUNT(*) FROM users
+    </select>
+
+    <!-- 총 맛집 수 -->
+    <select id="getTotalRestaurantCount" resultType="int">
+        SELECT COUNT(*) FROM restaurants
+    </select>
+
+    <!-- 총 예약 수 -->
+    <select id="getTotalReservationCount" resultType="int">
+        SELECT COUNT(*) FROM reservations
+    </select>
+
+    <!-- 총 리뷰 수 -->
+    <select id="getTotalReviewCount" resultType="int">
+        SELECT COUNT(*) FROM reviews
+    </select>
+
+    <!-- 평균 평점 -->
+    <select id="getAverageRestaurantRating" resultType="double">
+        SELECT COALESCE(AVG(rating), 0) FROM restaurants WHERE rating IS NOT NULL
+    </select>
+
+    <!-- 사용자 성장률 계산 (전월 대비) -->
+    <select id="getUserGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_users = 0 THEN 0
+                ELSE ROUND((current_month_users - prev_month_users) * 100.0 / prev_month_users, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT new_users FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_users,
+                (SELECT new_users FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_users
+        ) growth_data
+    </select>
+
+    <!-- 맛집 성장률 계산 (전월 대비) -->
+    <select id="getRestaurantGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_restaurants = 0 THEN 0
+                ELSE ROUND((current_month_restaurants - prev_month_restaurants) * 100.0 / prev_month_restaurants, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT new_restaurants FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_restaurants,
+                (SELECT new_restaurants FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_restaurants
+        ) growth_data
+    </select>
+
+    <!-- 예약 성장률 계산 (전월 대비) -->
+    <select id="getReservationGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_reservations = 0 THEN 0
+                ELSE ROUND((current_month_reservations - prev_month_reservations) * 100.0 / prev_month_reservations, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT total_reservations FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_reservations,
+                (SELECT total_reservations FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_reservations
+        ) growth_data
+    </select>
+
+    <!-- 매출 성장률 계산 (전월 대비) -->
+    <select id="getRevenueGrowthRate" resultType="double">
+        SELECT
+            CASE
+                WHEN prev_month_revenue = 0 THEN 0
+                ELSE ROUND((current_month_revenue - prev_month_revenue) * 100.0 / prev_month_revenue, 1)
+            END as growth_rate
+        FROM (
+            SELECT
+                (SELECT total_revenue FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1) as current_month_revenue,
+                (SELECT total_revenue FROM monthly_statistics ORDER BY `year_month` DESC LIMIT 1 OFFSET 1) as prev_month_revenue
+        ) growth_data
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Monthly Statistics Queries -->
+    <!-- ================================================== -->
+
+    <!-- 월별 통계 조회 (최근 N개월) -->
+    <resultMap id="MonthlyStatisticsMap" type="dto.MonthlyStatistics">
+        <result property="yearMonth" column="year_month"/>
+        <result property="totalUsers" column="total_users"/>
+        <result property="newUsers" column="new_users"/>
+        <result property="totalRestaurants" column="total_restaurants"/>
+        <result property="newRestaurants" column="new_restaurants"/>
+        <result property="totalReservations" column="total_reservations"/>
+        <result property="totalRevenue" column="total_revenue"/>
+    </resultMap>
+
+    <select id="getMonthlyStatistics" parameterType="int" resultMap="MonthlyStatisticsMap">
+        SELECT
+            `year_month`,
+            total_users,
+            new_users,
+            total_restaurants,
+            new_restaurants,
+            total_reservations,
+            total_revenue
+        FROM monthly_statistics
+        ORDER BY `year_month` DESC
+        LIMIT #{months}
+    </select>
+
+    <!-- 최근 월 통계 -->
+    <select id="getLatestMonthlyStatistics" resultMap="MonthlyStatisticsMap">
+        SELECT
+            `year_month`,
+            total_users,
+            new_users,
+            total_restaurants,
+            new_restaurants,
+            total_reservations,
+            total_revenue
+        FROM monthly_statistics
+        ORDER BY `year_month` DESC
+        LIMIT 1
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Category Statistics Queries -->
+    <!-- ================================================== -->
+
+    <resultMap id="CategoryStatisticsMap" type="dto.CategoryStatistics">
+        <result property="categoryName" column="category_name"/>
+        <result property="restaurantCount" column="restaurant_count"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="revenue" column="revenue"/>
+    </resultMap>
+
+    <!-- 특정 월의 카테고리 통계 (TOP N) -->
+    <select id="getCategoryStatistics" parameterType="map" resultMap="CategoryStatisticsMap">
+        SELECT
+            category_name,
+            restaurant_count,
+            reservation_count,
+            revenue
+        FROM category_statistics
+        WHERE `year_month` = #{yearMonth}
+        ORDER BY revenue DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Regional Statistics Queries -->
+    <!-- ================================================== -->
+
+    <resultMap id="RegionalStatisticsMap" type="dto.RegionalStatistics">
+        <result property="region" column="region"/>
+        <result property="restaurantCount" column="restaurant_count"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="revenue" column="revenue"/>
+    </resultMap>
+
+    <select id="getRegionalStatistics" parameterType="map" resultMap="RegionalStatisticsMap">
+        SELECT
+            region,
+            restaurant_count,
+            reservation_count,
+            revenue
+        FROM regional_statistics
+        WHERE `year_month` = #{yearMonth}
+        ORDER BY revenue DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Daily Activity Statistics Queries -->
+    <!-- ================================================== -->
+
+    <resultMap id="DailyActivityStatsMap" type="dto.DailyActivityStats">
+        <result property="statDate" column="stat_date"/>
+        <result property="reviewsCount" column="reviews_count"/>
+        <result property="coursesCreatedCount" column="courses_created_count"/>
+        <result property="wishlistSavesCount" column="wishlist_saves_count"/>
+        <result property="newFollowsCount" column="new_follows_count"/>
+        <result property="activeUsersCount" column="active_users_count"/>
+        <result property="newUsersCount" column="new_users_count"/>
+    </resultMap>
+
+    <!-- 오늘 통계 -->
+    <select id="getTodayActivityStats" resultMap="DailyActivityStatsMap">
+        SELECT * FROM daily_activity_stats
+        WHERE stat_date = CURDATE()
+    </select>
+
+    <!-- 최근 N일 통계 -->
+    <select id="getRecentActivityStats" parameterType="int" resultMap="DailyActivityStatsMap">
+        SELECT * FROM daily_activity_stats
+        ORDER BY stat_date DESC
+        LIMIT #{days}
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Restaurant Popularity Queries -->
+    <!-- ================================================== -->
+
+    <resultMap id="RestaurantPopularityMap" type="dto.RestaurantPopularity">
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="restaurantName" column="restaurant_name"/>
+        <result property="weekStartDate" column="week_start_date"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="reviewCount" column="review_count"/>
+        <result property="rating" column="rating"/>
+        <result property="reservationGrowthRate" column="reservation_growth_rate"/>
+    </resultMap>
+
+    <!-- 이번주 인기 맛집 TOP N -->
+    <select id="getTopRestaurantsThisWeek" parameterType="int" resultMap="RestaurantPopularityMap">
+        SELECT
+            rp.restaurant_id,
+            r.name as restaurant_name,
+            rp.week_start_date,
+            rp.reservation_count,
+            rp.review_count,
+            rp.rating,
+            rp.reservation_growth_rate
+        FROM restaurant_popularity rp
+        JOIN restaurants r ON rp.restaurant_id = r.id
+        WHERE rp.week_start_date = DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        ORDER BY rp.reservation_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- ================================================== -->
+    <!-- Branch Statistics Queries -->
+    <!-- ================================================== -->
+
+    <resultMap id="BranchPerformanceMap" type="dto.BranchPerformance">
+        <result property="branchId" column="branch_id"/>
+        <result property="branchName" column="branch_name"/>
+        <result property="yearMonth" column="year_month"/>
+        <result property="employeeCount" column="employee_count"/>
+        <result property="customerCount" column="customer_count"/>
+        <result property="reservationCount" column="reservation_count"/>
+        <result property="revenue" column="revenue"/>
+        <result property="rating" column="rating"/>
+    </resultMap>
+
+    <!-- 특정 월의 지점 성과 -->
+    <select id="getBranchPerformance" parameterType="string" resultMap="BranchPerformanceMap">
+        SELECT
+            bmp.branch_id,
+            b.branch_name,
+            bmp.`year_month`,
+            bmp.employee_count,
+            bmp.customer_count,
+            bmp.reservation_count,
+            bmp.revenue,
+            bmp.rating
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.year_month = #{yearMonth}
+        ORDER BY bmp.revenue DESC
+    </select>
+
+    <!-- 전체 지점 통계 -->
+    <select id="getTotalBranchCount" resultType="int">
+        SELECT COUNT(*) FROM branches WHERE status = 'ACTIVE'
+    </select>
+
+    <select id="getTotalEmployeeCount" parameterType="string" resultType="int">
+        SELECT COALESCE(SUM(employee_count), 0)
+        FROM branch_monthly_performance
+        WHERE `year_month` = #{yearMonth}
+    </select>
+
+    <select id="getTotalBranchRevenue" parameterType="string" resultType="double">
+        SELECT COALESCE(SUM(revenue), 0)
+        FROM branch_monthly_performance
+        WHERE `year_month` = #{yearMonth}
+    </select>
+
+    <!-- 회사별 지점 통계 -->
+    <select id="getTotalBranchCountByCompany" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM branches WHERE company_id = #{companyId}
+    </select>
+
+    <select id="getActiveBranchCountByCompany" parameterType="int" resultType="int">
+        SELECT COUNT(*) FROM branches WHERE company_id = #{companyId} AND status = 'ACTIVE'
+    </select>
+
+    <select id="getTotalEmployeeCountByCompany" parameterType="map" resultType="int">
+        SELECT COALESCE(SUM(bmp.employee_count), 0)
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+    </select>
+
+    <select id="getTotalBranchRevenueByCompany" parameterType="map" resultType="double">
+        SELECT COALESCE(SUM(bmp.revenue), 0)
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+    </select>
+
+    <select id="getBranchPerformanceByCompany" parameterType="map" resultMap="BranchPerformanceMap">
+        SELECT
+            bmp.branch_id,
+            b.branch_name,
+            bmp.`year_month`,
+            bmp.employee_count,
+            bmp.customer_count,
+            bmp.reservation_count,
+            bmp.revenue,
+            bmp.rating
+        FROM branch_monthly_performance bmp
+        JOIN branches b ON bmp.branch_id = b.branch_id
+        WHERE bmp.`year_month` = #{yearMonth} AND b.company_id = #{companyId}
+        ORDER BY bmp.revenue DESC
+    </select>
+
+</mapper>

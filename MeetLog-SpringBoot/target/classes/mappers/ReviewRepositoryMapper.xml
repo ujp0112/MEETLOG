@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.ReviewRepository">
+
+    <resultMap id="ReviewResultMap" type="com.meetlog.model.Review">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="source" column="source"/>
+        <result property="externalReviewId" column="external_review_id"/>
+        <result property="externalAuthorName" column="external_author_name"/>
+        <result property="externalProfileImage" column="external_profile_image"/>
+        <result property="externalCreatedAt" column="external_created_at"/>
+        <result property="externalRawJson" column="external_raw_json"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images"/>
+        <result property="keywords" column="keywords"/>
+        <result property="likes" column="likes"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="replyContent" column="reply_content"/>
+        <result property="replyCreatedAt" column="reply_created_at"/>
+    </resultMap>
+
+    <resultMap id="ReviewDtoResultMap" type="com.meetlog.dto.review.ReviewDto">
+        <id property="id" column="id"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="restaurantName" column="restaurant_name"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userProfileImage" column="user_profile_image"/>
+        <result property="source" column="source"/>
+        <result property="externalReviewId" column="external_review_id"/>
+        <result property="externalAuthorName" column="external_author_name"/>
+        <result property="externalProfileImage" column="external_profile_image"/>
+        <result property="externalCreatedAt" column="external_created_at"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images" typeHandler="com.meetlog.typehandler.JsonArrayTypeHandler"/>
+        <result property="keywords" column="keywords" typeHandler="com.meetlog.typehandler.JsonArrayTypeHandler"/>
+        <result property="likes" column="likes"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="replyContent" column="reply_content"/>
+        <result property="replyCreatedAt" column="reply_created_at"/>
+    </resultMap>
+
+    <!-- 리뷰 조회 (엔티티) -->
+    <select id="findById" resultMap="ReviewResultMap">
+        SELECT * FROM reviews WHERE id = #{id}
+    </select>
+
+    <!-- 리뷰 조회 (DTO) -->
+    <select id="findDtoById" resultMap="ReviewDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            u.name as user_name,
+            u.nickname as user_nickname,
+            u.profile_image as user_profile_image
+        FROM reviews r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.id = #{id}
+    </select>
+
+    <!-- 리뷰 검색 -->
+    <select id="search" resultMap="ReviewDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            u.name as user_name,
+            u.nickname as user_nickname,
+            u.profile_image as user_profile_image
+        FROM reviews r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE 1=1
+        <if test="restaurantId != null">
+            AND r.restaurant_id = #{restaurantId}
+        </if>
+        <if test="userId != null">
+            AND r.user_id = #{userId}
+        </if>
+        <if test="minRating != null">
+            AND r.rating >= #{minRating}
+        </if>
+        <if test="maxRating != null">
+            AND r.rating &lt;= #{maxRating}
+        </if>
+        <if test="source != null and source != ''">
+            AND r.source = #{source}
+        </if>
+        <if test="isActive != null">
+            AND r.is_active = #{isActive}
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'rating'">r.rating</when>
+            <when test="sortBy == 'likes'">r.likes</when>
+            <otherwise>r.created_at</otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'asc'">ASC</when>
+            <otherwise>DESC</otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 검색 결과 개수 -->
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM reviews r
+        WHERE 1=1
+        <if test="restaurantId != null">
+            AND r.restaurant_id = #{restaurantId}
+        </if>
+        <if test="userId != null">
+            AND r.user_id = #{userId}
+        </if>
+        <if test="minRating != null">
+            AND r.rating >= #{minRating}
+        </if>
+        <if test="maxRating != null">
+            AND r.rating &lt;= #{maxRating}
+        </if>
+        <if test="source != null and source != ''">
+            AND r.source = #{source}
+        </if>
+        <if test="isActive != null">
+            AND r.is_active = #{isActive}
+        </if>
+    </select>
+
+    <!-- 레스토랑별 리뷰 목록 -->
+    <select id="findByRestaurantId" resultMap="ReviewDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            u.name as user_name,
+            u.nickname as user_nickname,
+            u.profile_image as user_profile_image
+        FROM reviews r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.restaurant_id = #{restaurantId}
+        AND r.is_active = 1
+        ORDER BY r.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 사용자별 리뷰 목록 -->
+    <select id="findByUserId" resultMap="ReviewDtoResultMap">
+        SELECT
+            r.*,
+            rest.name as restaurant_name,
+            u.name as user_name,
+            u.nickname as user_nickname,
+            u.profile_image as user_profile_image
+        FROM reviews r
+        LEFT JOIN restaurants rest ON r.restaurant_id = rest.restaurant_id
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.user_id = #{userId}
+        AND r.is_active = 1
+        ORDER BY r.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 리뷰 생성 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reviews (
+            restaurant_id, user_id, source, rating, content,
+            images, keywords, likes, is_active, created_at, updated_at
+        ) VALUES (
+            #{restaurantId}, #{userId}, #{source}, #{rating}, #{content},
+            #{images}, #{keywords}, COALESCE(#{likes}, 0), COALESCE(#{isActive}, 1), NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 리뷰 수정 -->
+    <update id="update">
+        UPDATE reviews
+        SET
+            rating = #{rating},
+            content = #{content},
+            images = #{images},
+            keywords = #{keywords},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 리뷰 삭제 -->
+    <delete id="delete">
+        DELETE FROM reviews WHERE id = #{id}
+    </delete>
+
+    <!-- 리뷰 활성 상태 변경 -->
+    <update id="updateIsActive">
+        UPDATE reviews
+        SET is_active = #{isActive}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 좋아요 수 증가 -->
+    <update id="incrementLikes">
+        UPDATE reviews
+        SET likes = likes + 1, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 좋아요 수 감소 -->
+    <update id="decrementLikes">
+        UPDATE reviews
+        SET likes = GREATEST(0, likes - 1), updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 사업자 답글 등록/수정 -->
+    <update id="updateReply">
+        UPDATE reviews
+        SET reply_content = #{replyContent},
+            reply_created_at = NOW(),
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 사용자가 해당 레스토랑에 리뷰를 작성했는지 확인 -->
+    <select id="existsByUserIdAndRestaurantId" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM reviews
+        WHERE user_id = #{userId}
+        AND restaurant_id = #{restaurantId}
+        AND is_active = 1
+    </select>
+
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MaterialMapper">
+
+  <resultMap id="MaterialResult" type="Material">
+    <id     property="id"        column="id"/>
+    <result property="companyId" column="company_id"/>
+    <result property="name"      column="name"/>
+    <result property="unit"      column="unit"/>
+    <result property="unitPrice" column="unit_price"/>
+    <result property="imgPath"   column="img_path"/>
+    <result property="step"      column="step"/>
+    <result property="activeYn"  column="active_yn"/>
+    <result property="deletedYn" column="deleted_yn"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="updatedAt" column="updated_at"/>
+  </resultMap>
+
+  <insert id="insertMaterial" parameterType="Material" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO material
+      (company_id, name, unit, unit_price, img_path, step, active_yn, deleted_yn, created_at)
+    VALUES
+      (#{companyId}, #{name}, #{unit}, #{unitPrice}, #{imgPath}, #{step}, 'Y', 'N', CURRENT_TIMESTAMP)
+  </insert>
+
+  <update id="updateMaterial" parameterType="Material">
+    UPDATE material
+    <set>
+      <if test="name != null">name = #{name},</if>
+      <if test="unit != null">unit = #{unit},</if>
+      <if test="unitPrice != null">unit_price = #{unitPrice},</if>
+      <if test="step != null">step = #{step},</if>
+      <if test="imgPath != null and imgPath != ''">img_path = #{imgPath},</if>
+      updated_at = CURRENT_TIMESTAMP
+    </set>
+    WHERE company_id = #{companyId}
+      AND id = #{id}
+      AND deleted_yn = 'N'
+  </update>
+
+  <update id="softDeleteMaterial" parameterType="map">
+    UPDATE material
+       SET deleted_yn = 'Y', updated_at = CURRENT_TIMESTAMP
+     WHERE company_id = #{companyId}
+       AND id = #{id}
+  </update>
+
+  <select id="findById" parameterType="map" resultMap="MaterialResult">
+    SELECT id, company_id, name, unit, unit_price, img_path, step,
+           active_yn, deleted_yn, created_at, updated_at
+      FROM material
+     WHERE company_id = #{companyId}
+       AND id = #{id}
+  </select>
+
+  <select id="listByCompany" parameterType="map" resultMap="MaterialResult">
+    SELECT id, company_id, name, unit, unit_price, img_path, step,
+           active_yn, deleted_yn, created_at, updated_at
+      FROM material
+     WHERE company_id = #{companyId}
+       AND deleted_yn = 'N'
+     ORDER BY name
+  </select>
+
+</mapper>

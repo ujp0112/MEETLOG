@@ -1,12 +1,17 @@
 /.metadata/
 /.claude/
+# 민감한 환경설정 파일 (커밋 금지)
 MeetLog/src/main/resources/api.properties
+MeetLog/src/main/resources/db.properties
+MeetLog/src/main/resources/config.properties
+
 /MeetLog/CLAUDE.md
 GEMINI.md
 sub.txt
 MeetLog/src/main/resources/mybatis-config.xml
-MeetLog/src/main/resources/db.properties
-MeetLog/src/main/resources/config.properties
+.env
+.env.*
+**/*.env
 .DS_Store
 MeetLog/database/.DS_Store
 MeetLog/.DS_Store

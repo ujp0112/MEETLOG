@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="QnAMapper">
+    
+    <!-- QnA ResultMap -->
+    <resultMap id="qnaResultMap" type="QnA">
+        <id property="id" column="id"/>
+        <result property="question" column="question"/>
+        <result property="answer" column="answer"/>
+        <result property="isOwner" column="is_owner"/>
+        <result property="restaurantId" column="restaurant_id"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="userName" column="userName"/>
+        <result property="userEmail" column="userEmail"/>
+    </resultMap>
+    
+    <!-- 맛집별 Q&A 조회 -->
+    <select id="findByRestaurantId" parameterType="int" resultType="QnA">
+        SELECT 
+            id,
+            question,
+            answer,
+            is_owner as isOwner,
+            restaurant_id as restaurantId,
+            is_active as isActive,
+            created_at as createdAt
+        FROM restaurant_qna 
+        WHERE restaurant_id = #{restaurantId} 
+        AND is_active = true 
+        ORDER BY created_at DESC
+    </select>
+    
+    <select id="findAllActive" resultType="QnA">
+        SELECT 
+            id,
+            question,
+            answer,
+            is_owner as isOwner,
+            restaurant_id as restaurantId,
+            is_active as isActive,
+            created_at as createdAt
+        FROM restaurant_qna 
+        WHERE is_active = true 
+        ORDER BY created_at DESC
+    </select>
+    
+    <insert id="insertQnA" parameterType="QnA" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_qna (
+            question,
+            answer,
+            is_owner,
+            restaurant_id,
+            is_active,
+            created_at
+        ) VALUES (
+            #{question},
+            #{answer},
+            #{isOwner},
+            #{restaurantId},
+            true,
+            NOW()
+        )
+    </insert>
+    
+    <update id="updateQnA" parameterType="QnA">
+        UPDATE restaurant_qna 
+        SET 
+            question = #{question},
+            answer = #{answer},
+            is_owner = #{isOwner}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="deleteQnA" parameterType="int">
+        UPDATE restaurant_qna 
+        SET 
+            is_active = false
+        WHERE id = #{qnaId}
+    </update>
+    
+    <!-- 사업자별 Q&A 조회 -->
+    <select id="findByBusinessUserId" parameterType="int" resultMap="qnaResultMap">
+        SELECT q.*, u.nickname as userName, u.email as userEmail
+        FROM restaurant_qna q
+        LEFT JOIN users u ON q.user_id = u.id
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE r.owner_id = #{businessUserId}
+        AND q.is_active = true
+        ORDER BY q.created_at DESC
+    </select>
+    
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.UserRepository">
+
+    <!-- Result Map -->
+    <resultMap id="UserResultMap" type="com.meetlog.model.User">
+        <id property="userId" column="user_id"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="nickname" column="nickname"/>
+        <result property="profileImage" column="profile_image"/>
+        <result property="userType" column="user_type"/>
+        <result property="status" column="status"/>
+        <result property="provider" column="provider"/>
+        <result property="providerId" column="provider_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="address" column="address"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="gender" column="gender"/>
+        <result property="points" column="points"/>
+    </resultMap>
+
+    <!-- 이메일로 사용자 조회 -->
+    <select id="findByEmail" resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- userId로 사용자 조회 -->
+    <select id="findById" resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 닉네임으로 사용자 조회 -->
+    <select id="findByNickname" resultMap="UserResultMap">
+        SELECT *
+        FROM users
+        WHERE nickname = #{nickname}
+    </select>
+
+    <!-- 사용자 생성 -->
+    <insert id="insert" parameterType="com.meetlog.model.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO users (
+            email,
+            password,
+            name,
+            phone,
+            nickname,
+            profile_image,
+            user_type,
+            status,
+            provider,
+            provider_id,
+            created_at,
+            updated_at,
+            points
+        ) VALUES (
+            #{email},
+            #{password},
+            #{name},
+            #{phone},
+            #{nickname},
+            #{profileImage},
+            #{userType, jdbcType=VARCHAR},
+            COALESCE(#{status}, 'ACTIVE'),
+            COALESCE(#{provider}, 'LOCAL'),
+            #{providerId, jdbcType=VARCHAR},
+            NOW(),
+            NOW(),
+            COALESCE(#{points}, 0)
+        )
+    </insert>
+
+    <!-- 사용자 정보 업데이트 -->
+    <update id="update">
+        UPDATE users
+        SET
+            name = #{name},
+            phone = #{phone},
+            nickname = #{nickname},
+            profile_image = #{profileImage},
+            address = #{address},
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 마지막 로그인 시간 업데이트 -->
+    <update id="updateLastLoginAt">
+        UPDATE users
+        SET last_login_at = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 이메일 중복 체크 -->
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <!-- 닉네임 중복 체크 -->
+    <select id="existsByNickname" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM users
+        WHERE nickname = #{nickname}
+    </select>
+
+</mapper>

@@ -551,9 +551,9 @@
 		</div>
 	</div>
 
-	<%-- ▼▼▼ [최종 수정] 카카오 공유를 위한 URL 사전 처리 로직 (공개 URL 직접 생성) ▼▼▼ --%>
+	<%-- ▼▼▼ [최종 수정] 카카오 공유를 위한 URL 사전 처리 로직 (로컬 URL 사용) ▼▼▼ --%>
 	<c:set var="public_domain"
-		value="https://tamala-multiovulate-recollectedly.ngrok-free.dev" />
+		value="http://localhost:8080" />
 	<c:set var="contextPath" value="${pageContext.request.contextPath}" />
 	<c:set var="base_url" value="${public_domain}${contextPath}" />
 

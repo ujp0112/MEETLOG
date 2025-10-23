@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ReviewLikeMapper">
+
+	<select id="isLikedByUser" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM review_likes
+		WHERE user_id = #{userId} AND
+		review_id = #{reviewId}
+	</select>
+
+	<insert id="insertLike" parameterType="map">
+		INSERT INTO review_likes
+		(user_id, review_id)
+		VALUES (#{userId}, #{reviewId})
+	</insert>
+
+	<delete id="deleteLike" parameterType="map">
+		DELETE FROM review_likes
+		WHERE user_id = #{userId} AND review_id = #{reviewId}
+	</delete>
+	
+	
+
+	<select id="findUsersWhoLikedReview" parameterType="int"
+		resultType="model.User">
+		SELECT
+		u.id,
+		u.nickname,
+		u.profile_image
+		FROM
+		users u
+		JOIN
+		review_likes rl ON u.id = rl.user_id
+		WHERE
+		rl.review_id = #{reviewId}
+		ORDER BY
+		rl.created_at DESC
+	</select>
+</mapper>

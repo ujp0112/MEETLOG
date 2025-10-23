@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.ReservationTableAssignmentDAO">
+
+    <resultMap id="reservationTableAssignmentResultMap" type="model.ReservationTableAssignment">
+        <id property="id" column="id" />
+        <result property="reservationId" column="reservation_id" />
+        <result property="tableId" column="table_id" />
+        <result property="assignedAt" column="assigned_at" />
+    </resultMap>
+
+    <!-- 테이블 배정 저장 -->
+    <insert id="insert" parameterType="model.ReservationTableAssignment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO reservation_table_assignments (reservation_id, table_id, assigned_at)
+        VALUES (#{reservationId}, #{tableId}, #{assignedAt})
+    </insert>
+
+    <!-- 예약별 배정된 테이블 조회 -->
+    <select id="findByReservationId" parameterType="int" resultMap="reservationTableAssignmentResultMap">
+        SELECT *
+        FROM reservation_table_assignments
+        WHERE reservation_id = #{reservationId}
+    </select>
+
+    <!-- 테이블별 예약 목록 조회 -->
+    <select id="findByTableId" parameterType="int" resultMap="reservationTableAssignmentResultMap">
+        SELECT *
+        FROM reservation_table_assignments
+        WHERE table_id = #{tableId}
+        ORDER BY assigned_at DESC
+    </select>
+
+    <!-- 테이블 배정 해제 -->
+    <delete id="delete" parameterType="int">
+        DELETE FROM reservation_table_assignments
+        WHERE reservation_id = #{reservationId}
+    </delete>
+
+</mapper>

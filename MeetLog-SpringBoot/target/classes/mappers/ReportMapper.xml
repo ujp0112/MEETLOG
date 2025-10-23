@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.ReportMapper">
+    <resultMap id="reportResult" type="model.Report">
+        <id property="reportId" column="report_id"/>
+        <result property="reporterId" column="reporter_id"/>
+        <result property="reporterNickname" column="reporter_nickname"/>
+        <result property="reportedType" column="reported_type"/>
+        <result property="reportedId" column="reported_id"/>
+        <result property="reportedUserId" column="reported_user_id"/>
+        <result property="reportedUserNickname" column="reported_user_nickname"/>
+        <result property="reason" column="reason"/>
+        <result property="status" column="status"/>
+        <result property="adminNote" column="admin_note"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="processedAt" column="processed_at"/>
+        <result property="processedBy" column="processed_by"/>
+        <result property="processedByNickname" column="processed_by_nickname"/>
+    </resultMap>
+
+    <select id="selectAllReports" resultMap="reportResult">
+        SELECT
+            r.*,
+            reporter.nickname as reporter_nickname,
+            reported_user.nickname as reported_user_nickname,
+            processor.nickname as processed_by_nickname
+        FROM reports r
+        LEFT JOIN users reporter ON r.reporter_id = reporter.id
+        LEFT JOIN users reported_user ON r.reported_user_id = reported_user.id
+        LEFT JOIN users processor ON r.processed_by = processor.id
+        ORDER BY
+            CASE r.status
+                WHEN 'PENDING' THEN 1
+                WHEN 'PROCESSED' THEN 2
+                WHEN 'DISMISSED' THEN 3
+            END,
+            r.created_at DESC
+    </select>
+
+    <select id="selectReportsByStatus" parameterType="string" resultMap="reportResult">
+        SELECT
+            r.*,
+            reporter.nickname as reporter_nickname,
+            reported_user.nickname as reported_user_nickname,
+            processor.nickname as processed_by_nickname
+        FROM reports r
+        LEFT JOIN users reporter ON r.reporter_id = reporter.id
+        LEFT JOIN users reported_user ON r.reported_user_id = reported_user.id
+        LEFT JOIN users processor ON r.processed_by = processor.id
+        WHERE r.status = #{status}
+        ORDER BY r.created_at DESC
+    </select>
+
+    <select id="selectReportById" parameterType="int" resultMap="reportResult">
+        SELECT
+            r.*,
+            reporter.nickname as reporter_nickname,
+            reported_user.nickname as reported_user_nickname,
+            processor.nickname as processed_by_nickname
+        FROM reports r
+        LEFT JOIN users reporter ON r.reporter_id = reporter.id
+        LEFT JOIN users reported_user ON r.reported_user_id = reported_user.id
+        LEFT JOIN users processor ON r.processed_by = processor.id
+        WHERE r.report_id = #{reportId}
+    </select>
+
+    <update id="updateReportStatus" parameterType="map">
+        UPDATE reports
+        SET
+            status = #{status},
+            processed_by = #{processedBy},
+            processed_at = CURRENT_TIMESTAMP,
+            admin_note = #{adminNote}
+        WHERE report_id = #{reportId}
+    </update>
+
+    <insert id="insertReport" parameterType="model.Report" useGeneratedKeys="true" keyProperty="reportId">
+        INSERT INTO reports (
+            reporter_id,
+            reported_type,
+            reported_id,
+            reported_user_id,
+            reason,
+            status
+        ) VALUES (
+            #{reporterId},
+            #{reportedType},
+            #{reportedId},
+            #{reportedUserId},
+            #{reason},
+            COALESCE(#{status}, 'PENDING')
+        )
+    </insert>
+
+    <select id="countExistingReport" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM reports
+        WHERE reporter_id = #{reporterId}
+          AND reported_type = #{reportedType}
+          AND reported_id = #{reportedId}
+    </select>
+
+    <select id="getReportStatistics" resultType="map">
+        SELECT
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = 'PROCESSED' THEN 1 ELSE 0 END) as processed,
+            SUM(CASE WHEN status = 'DISMISSED' THEN 1 ELSE 0 END) as dismissed
+        FROM reports
+    </select>
+</mapper>

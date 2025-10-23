@@ -1,0 +1,28 @@
+# 개발 환경 설정
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+  # 개발용 데이터베이스
+  datasource:
+    url: jdbc:mariadb://localhost:3306/meetlog?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Seoul
+    username: root
+    password: 7564
+
+# 로깅 레벨 (개발 환경)
+logging:
+  level:
+    root: INFO
+    com.meetlog: DEBUG
+    org.springframework.web: DEBUG
+    org.mybatis: DEBUG
+
+# CORS 설정 (개발 환경 - 모든 도메인 허용)
+cors:
+  allowed-origins: http://localhost:3000
+  allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+  allowed-headers: "*"
+  allow-credentials: true

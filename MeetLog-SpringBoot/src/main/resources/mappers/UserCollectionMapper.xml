@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="dao.UserCollectionDAO">
+
+    <!-- 컬렉션 생성 -->
+    <insert id="createCollection" parameterType="UserCollection" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO collections (user_id, name, description, cover_image, is_public, 
+                                restaurant_count, like_count, created_at, updated_at, is_active)
+        VALUES (#{userId}, #{name}, #{description}, #{coverImage}, #{isPublic},
+                #{restaurantCount}, #{likeCount}, NOW(), NOW(), true)
+    </insert>
+
+    <!-- 컬렉션 수정 -->
+    <update id="updateCollection" parameterType="UserCollection">
+        UPDATE collections
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="isPublic != null">is_public = #{isPublic},</if>
+            <if test="restaurantCount != null">restaurant_count = #{restaurantCount},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 컬렉션 삭제 -->
+    <update id="deleteCollection" parameterType="int">
+        UPDATE collections 
+        SET is_active = false, updated_at = NOW()
+        WHERE id = #{collectionId}
+    </update>
+
+    <!-- 사용자의 컬렉션 목록 조회 -->
+    <select id="getUserCollections" parameterType="map" resultType="UserCollection">
+        SELECT * FROM collections
+        WHERE user_id = #{userId}
+        AND is_active = true
+        ORDER BY updated_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 공개 컬렉션 목록 조회 -->
+    <select id="getPublicCollections" parameterType="map" resultType="UserCollection">
+        SELECT c.*, u.nickname as user_nickname
+        FROM collections c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.is_public = true
+        AND c.is_active = true
+        AND u.is_active = true
+        ORDER BY c.like_count DESC, c.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 컬렉션 상세 조회 -->
+    <select id="getCollectionById" parameterType="int" resultType="UserCollection">
+        SELECT c.*, u.nickname as user_nickname
+        FROM collections c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.id = #{collectionId}
+        AND c.is_active = true
+    </select>
+
+    <!-- 컬렉션에 맛집 추가 -->
+    <insert id="addRestaurantToCollection" parameterType="map">
+        INSERT INTO collection_restaurants (collection_id, restaurant_id, created_at)
+        VALUES (#{collectionId}, #{restaurantId}, NOW())
+        ON DUPLICATE KEY UPDATE created_at = NOW()
+    </insert>
+
+    <!-- 컬렉션에서 맛집 제거 -->
+    <delete id="removeRestaurantFromCollection" parameterType="map">
+        DELETE FROM collection_restaurants
+        WHERE collection_id = #{collectionId}
+        AND restaurant_id = #{restaurantId}
+    </delete>
+
+    <!-- 컬렉션의 맛집 목록 조회 -->
+    <select id="getCollectionRestaurants" parameterType="int" resultType="model.Restaurant">
+        SELECT r.*
+        FROM restaurants r
+        JOIN collection_restaurants cr ON r.id = cr.restaurant_id
+        WHERE cr.collection_id = #{collectionId}
+        AND r.is_active = true
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <!-- 컬렉션 좋아요 -->
+    <insert id="likeCollection" parameterType="map">
+        INSERT INTO collection_likes (collection_id, user_id, created_at)
+        VALUES (#{collectionId}, #{userId}, NOW())
+        ON DUPLICATE KEY UPDATE created_at = NOW()
+    </insert>
+
+    <!-- 컬렉션 좋아요 취소 -->
+    <delete id="unlikeCollection" parameterType="map">
+        DELETE FROM collection_likes
+        WHERE collection_id = #{collectionId}
+        AND user_id = #{userId}
+    </delete>
+
+    <!-- 컬렉션 좋아요 여부 확인 -->
+    <select id="isCollectionLiked" parameterType="map" resultType="int">
+        SELECT COUNT(*) 
+        FROM collection_likes 
+        WHERE collection_id = #{collectionId}
+        AND user_id = #{userId}
+    </select>
+
+    <!-- 인기 컬렉션 조회 -->
+    <select id="getPopularCollections" parameterType="int" resultType="UserCollection">
+        SELECT c.*, u.nickname as user_nickname
+        FROM collections c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.is_public = true
+        AND c.is_active = true
+        AND u.is_active = true
+        ORDER BY c.like_count DESC, c.restaurant_count DESC
+        LIMIT #{limit}
+    </select>
+
+</mapper>

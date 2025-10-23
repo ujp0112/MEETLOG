@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.CourseRepository">
+
+    <!-- Result Maps -->
+    <resultMap id="CourseResultMap" type="com.meetlog.model.Course">
+        <id property="courseId" column="course_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="area" column="area"/>
+        <result property="duration" column="duration"/>
+        <result property="price" column="price"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="type" column="type"/>
+        <result property="previewImage" column="preview_image"/>
+        <result property="authorId" column="author_id"/>
+    </resultMap>
+
+    <resultMap id="CourseDtoResultMap" type="com.meetlog.dto.course.CourseDto">
+        <id property="courseId" column="course_id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="area" column="area"/>
+        <result property="duration" column="duration"/>
+        <result property="price" column="price"/>
+        <result property="maxParticipants" column="max_participants"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="type" column="type"/>
+        <result property="previewImage" column="preview_image"/>
+        <result property="authorId" column="author_id"/>
+        <result property="authorName" column="author_name"/>
+        <result property="authorNickname" column="author_nickname"/>
+        <result property="likesCount" column="likes_count"/>
+        <result property="commentsCount" column="comments_count"/>
+        <result property="reservationsCount" column="reservations_count"/>
+        <result property="isLiked" column="is_liked"/>
+    </resultMap>
+
+    <resultMap id="CourseStepResultMap" type="com.meetlog.model.CourseStep">
+        <id property="stepId" column="step_id"/>
+        <result property="courseId" column="course_id"/>
+        <result property="stepOrder" column="step_order"/>
+        <result property="stepType" column="step_type"/>
+        <result property="emoji" column="emoji"/>
+        <result property="name" column="name"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="address" column="address"/>
+        <result property="description" column="description"/>
+        <result property="image" column="image"/>
+        <result property="time" column="time"/>
+        <result property="cost" column="cost"/>
+    </resultMap>
+
+    <!-- Course CRUD -->
+    <select id="findById" resultMap="CourseResultMap">
+        SELECT * FROM courses WHERE course_id = #{id}
+    </select>
+
+    <select id="findDtoById" resultMap="CourseDtoResultMap">
+        SELECT
+            c.*,
+            u.name AS author_name,
+            u.nickname AS author_nickname,
+            (SELECT COUNT(*) FROM course_likes WHERE course_id = c.course_id) AS likes_count,
+            (SELECT COUNT(*) FROM course_comments WHERE course_id = c.course_id AND is_active = 1) AS comments_count,
+            (SELECT COUNT(*) FROM course_reservations WHERE course_id = c.course_id) AS reservations_count,
+            <choose>
+                <when test="userId != null">
+                    EXISTS(SELECT 1 FROM course_likes WHERE course_id = c.course_id AND user_id = #{userId}) AS is_liked
+                </when>
+                <otherwise>
+                    FALSE AS is_liked
+                </otherwise>
+            </choose>
+        FROM courses c
+        LEFT JOIN users u ON c.author_id = u.id
+        WHERE c.course_id = #{id}
+    </select>
+
+    <select id="search" resultMap="CourseDtoResultMap">
+        SELECT
+            c.*,
+            u.name AS author_name,
+            u.nickname AS author_nickname,
+            (SELECT COUNT(*) FROM course_likes WHERE course_id = c.course_id) AS likes_count,
+            (SELECT COUNT(*) FROM course_comments WHERE course_id = c.course_id AND is_active = 1) AS comments_count,
+            (SELECT COUNT(*) FROM course_reservations WHERE course_id = c.course_id) AS reservations_count,
+            <choose>
+                <when test="userId != null">
+                    EXISTS(SELECT 1 FROM course_likes WHERE course_id = c.course_id AND user_id = #{userId}) AS is_liked
+                </when>
+                <otherwise>
+                    FALSE AS is_liked
+                </otherwise>
+            </choose>
+        FROM courses c
+        LEFT JOIN users u ON c.author_id = u.id
+        <where>
+            <if test="request.keyword != null and request.keyword != ''">
+                AND (c.title LIKE CONCAT('%', #{request.keyword}, '%')
+                OR c.description LIKE CONCAT('%', #{request.keyword}, '%'))
+            </if>
+            <if test="request.area != null and request.area != ''">
+                AND c.area = #{request.area}
+            </if>
+            <if test="request.type != null and request.type != ''">
+                AND c.type = #{request.type}
+            </if>
+            <if test="request.status != null and request.status != ''">
+                AND c.status = #{request.status}
+            </if>
+            <if test="request.authorId != null">
+                AND c.author_id = #{request.authorId}
+            </if>
+            <if test="request.minPrice != null">
+                AND c.price &gt;= #{request.minPrice}
+            </if>
+            <if test="request.maxPrice != null">
+                AND c.price &lt;= #{request.maxPrice}
+            </if>
+            <if test="request.tag != null and request.tag != ''">
+                AND EXISTS (
+                    SELECT 1 FROM course_tags ct
+                    JOIN tags t ON ct.tag_id = t.tag_id
+                    WHERE ct.course_id = c.course_id AND t.name = #{request.tag}
+                )
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="request.sortBy == 'price'">
+                c.price
+            </when>
+            <when test="request.sortBy == 'title'">
+                c.title
+            </when>
+            <otherwise>
+                c.created_at
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="request.sortOrder == 'asc'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
+        LIMIT #{request.size} OFFSET #{request.page}
+    </select>
+
+    <select id="countSearch" resultType="int">
+        SELECT COUNT(*)
+        FROM courses c
+        <where>
+            <if test="request.keyword != null and request.keyword != ''">
+                AND (c.title LIKE CONCAT('%', #{request.keyword}, '%')
+                OR c.description LIKE CONCAT('%', #{request.keyword}, '%'))
+            </if>
+            <if test="request.area != null and request.area != ''">
+                AND c.area = #{request.area}
+            </if>
+            <if test="request.type != null and request.type != ''">
+                AND c.type = #{request.type}
+            </if>
+            <if test="request.status != null and request.status != ''">
+                AND c.status = #{request.status}
+            </if>
+            <if test="request.authorId != null">
+                AND c.author_id = #{request.authorId}
+            </if>
+            <if test="request.minPrice != null">
+                AND c.price &gt;= #{request.minPrice}
+            </if>
+            <if test="request.maxPrice != null">
+                AND c.price &lt;= #{request.maxPrice}
+            </if>
+            <if test="request.tag != null and request.tag != ''">
+                AND EXISTS (
+                    SELECT 1 FROM course_tags ct
+                    JOIN tags t ON ct.tag_id = t.tag_id
+                    WHERE ct.course_id = c.course_id AND t.name = #{request.tag}
+                )
+            </if>
+        </where>
+    </select>
+
+    <insert id="insert" parameterType="com.meetlog.model.Course" useGeneratedKeys="true" keyProperty="courseId">
+        INSERT INTO courses (
+            title, description, area, duration, price, max_participants,
+            status, type, preview_image, author_id, created_at
+        ) VALUES (
+            #{title}, #{description}, #{area}, #{duration}, #{price}, #{maxParticipants},
+            #{status}, #{type}, #{previewImage}, #{authorId}, NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE courses
+        SET title = #{title},
+            description = #{description},
+            area = #{area},
+            duration = #{duration},
+            price = #{price},
+            max_participants = #{maxParticipants},
+            status = #{status},
+            type = #{type},
+            preview_image = #{previewImage}
+        WHERE course_id = #{courseId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM courses WHERE course_id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE courses SET status = #{status} WHERE course_id = #{id}
+    </update>
+
+    <select id="findByAuthorId" resultMap="CourseResultMap">
+        SELECT * FROM courses
+        WHERE author_id = #{authorId}
+        ORDER BY created_at DESC
+        LIMIT #{size} OFFSET #{page}
+    </select>
+
+    <!-- CourseStep CRUD -->
+    <select id="findStepById" resultMap="CourseStepResultMap">
+        SELECT * FROM course_steps WHERE step_id = #{stepId}
+    </select>
+
+    <select id="findStepsByCourseId" resultMap="CourseStepResultMap">
+        SELECT * FROM course_steps
+        WHERE course_id = #{courseId}
+        ORDER BY step_order ASC
+    </select>
+
+    <insert id="insertStep" parameterType="com.meetlog.model.CourseStep" useGeneratedKeys="true" keyProperty="stepId">
+        INSERT INTO course_steps (
+            course_id, step_order, step_type, emoji, name,
+            latitude, longitude, address, description, image, time, cost
+        ) VALUES (
+            #{courseId}, #{stepOrder}, #{stepType}, #{emoji}, #{name},
+            #{latitude}, #{longitude}, #{address}, #{description}, #{image}, #{time}, #{cost}
+        )
+    </insert>
+
+    <update id="updateStep">
+        UPDATE course_steps
+        SET step_order = #{stepOrder},
+            step_type = #{stepType},
+            emoji = #{emoji},
+            name = #{name},
+            latitude = #{latitude},
+            longitude = #{longitude},
+            address = #{address},
+            description = #{description},
+            image = #{image},
+            time = #{time},
+            cost = #{cost}
+        WHERE step_id = #{stepId}
+    </update>
+
+    <delete id="deleteStep">
+        DELETE FROM course_steps WHERE step_id = #{stepId}
+    </delete>
+
+    <delete id="deleteStepsByCourseId">
+        DELETE FROM course_steps WHERE course_id = #{courseId}
+    </delete>
+
+    <!-- Tags -->
+    <select id="findTagsByCourseId" resultType="string">
+        SELECT t.name
+        FROM course_tags ct
+        JOIN tags t ON ct.tag_id = t.tag_id
+        WHERE ct.course_id = #{courseId}
+    </select>
+
+    <select id="findOrCreateTag" resultType="long">
+        SELECT tag_id FROM tags WHERE name = #{name}
+    </select>
+
+    <insert id="insertTag" useGeneratedKeys="true" keyProperty="tagId">
+        INSERT INTO tags (name) VALUES (#{name})
+    </insert>
+
+    <insert id="linkTag">
+        INSERT IGNORE INTO course_tags (course_id, tag_id)
+        VALUES (#{courseId}, #{tagId})
+    </insert>
+
+    <delete id="unlinkTags">
+        DELETE FROM course_tags WHERE course_id = #{courseId}
+    </delete>
+
+    <!-- Likes -->
+    <select id="countLikes" resultType="int">
+        SELECT COUNT(*) FROM course_likes WHERE course_id = #{courseId}
+    </select>
+
+    <select id="isLikedByUser" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM course_likes
+        WHERE course_id = #{courseId} AND user_id = #{userId}
+    </select>
+
+    <insert id="insertLike">
+        INSERT IGNORE INTO course_likes (course_id, user_id)
+        VALUES (#{courseId}, #{userId})
+    </insert>
+
+    <delete id="deleteLike">
+        DELETE FROM course_likes
+        WHERE course_id = #{courseId} AND user_id = #{userId}
+    </delete>
+
+    <!-- Statistics -->
+    <select id="countReservations" resultType="int">
+        SELECT COUNT(*) FROM course_reservations WHERE course_id = #{courseId}
+    </select>
+
+    <select id="countComments" resultType="int">
+        SELECT COUNT(*) FROM course_comments
+        WHERE course_id = #{courseId} AND is_active = 1
+    </select>
+
+</mapper>

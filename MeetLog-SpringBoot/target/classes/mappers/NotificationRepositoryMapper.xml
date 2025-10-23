@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meetlog.repository.NotificationRepository">
+
+    <!-- Result Maps -->
+    <resultMap id="NotificationResultMap" type="com.meetlog.model.Notification">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="actionUrl" column="action_url"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="readAt" column="read_at"/>
+    </resultMap>
+
+    <resultMap id="NotificationDtoResultMap" type="com.meetlog.dto.notification.NotificationDto">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="actionUrl" column="action_url"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="readAt" column="read_at"/>
+        <result property="actorId" column="actor_id"/>
+        <result property="actorName" column="actor_name"/>
+        <result property="actorNickname" column="actor_nickname"/>
+        <result property="actorProfileImage" column="actor_profile_image"/>
+    </resultMap>
+
+    <!-- ID로 알림 조회 -->
+    <select id="findById" resultMap="NotificationResultMap">
+        SELECT *
+        FROM notifications
+        WHERE id = #{id}
+    </select>
+
+    <!-- 사용자별 알림 목록 조회 (페이징) -->
+    <select id="findByUserId" resultMap="NotificationDtoResultMap">
+        SELECT
+            n.*,
+            u.id as actor_id,
+            u.name as actor_name,
+            u.nickname as actor_nickname,
+            u.profile_image as actor_profile_image
+        FROM notifications n
+        LEFT JOIN users u ON n.actor_id = u.id
+        WHERE n.user_id = #{userId}
+        ORDER BY n.created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 읽지 않은 알림 수 -->
+    <select id="countUnreadByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM notifications
+        WHERE user_id = #{userId}
+        AND is_read = false
+    </select>
+
+    <!-- 전체 알림 수 -->
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM notifications
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 알림 생성 -->
+    <insert id="insert" parameterType="com.meetlog.model.Notification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notifications (
+            user_id, type, title, content, action_url, is_read, actor_id, created_at
+        ) VALUES (
+            #{userId}, #{type}, #{title}, #{content}, #{actionUrl}, #{isRead}, #{actorId}, NOW()
+        )
+    </insert>
+
+    <!-- 알림 읽음 처리 -->
+    <update id="markAsRead">
+        UPDATE notifications
+        SET is_read = true,
+            read_at = #{readAt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 모든 알림 읽음 처리 -->
+    <update id="markAllAsRead">
+        UPDATE notifications
+        SET is_read = true,
+            read_at = #{readAt}
+        WHERE user_id = #{userId}
+        AND is_read = false
+    </update>
+
+    <!-- 알림 삭제 -->
+    <delete id="delete">
+        DELETE FROM notifications
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 오래된 알림 일괄 삭제 -->
+    <delete id="deleteOldNotifications">
+        DELETE FROM notifications
+        WHERE created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+    <!-- 알림 존재 여부 확인 -->
+    <select id="existsByTypeAndReference" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM notifications
+        WHERE user_id = #{userId}
+        AND type = #{type}
+        AND reference_id = #{referenceId}
+    </select>
+
+</mapper>

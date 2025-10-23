@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.RecommendationMetricDAO">
+
+    <resultMap id="recommendationMetricResultMap" type="model.RecommendationMetric">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="recommendationCount" column="recommendation_count" />
+        <result property="avgScore" column="avg_score" />
+        <result property="categoryDiversity" column="category_diversity" />
+        <result property="timestamp" column="timestamp" />
+    </resultMap>
+
+    <!-- 메트릭 저장 -->
+    <insert id="insertMetric" parameterType="model.RecommendationMetric" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO recommendation_metrics (user_id, recommendation_count, avg_score, category_diversity, timestamp)
+        VALUES (#{userId}, #{recommendationCount}, #{avgScore}, #{categoryDiversity}, #{timestamp})
+    </insert>
+
+    <!-- 추천 항목 배치 저장 -->
+    <insert id="insertRecommendationItems" parameterType="map">
+        INSERT INTO recommendation_items (metric_id, restaurant_id, recommendation_score, predicted_rating, reason)
+        VALUES
+        <foreach collection="recommendations" item="rec" separator=",">
+            (#{metricId}, #{rec.restaurant.id}, #{rec.recommendationScore}, #{rec.predictedRating}, #{rec.reason})
+        </foreach>
+    </insert>
+
+    <!-- 사용자별 메트릭 조회 -->
+    <select id="findMetricsByUserId" parameterType="map" resultMap="recommendationMetricResultMap">
+        SELECT *
+        FROM recommendation_metrics
+        WHERE user_id = #{userId}
+        ORDER BY timestamp DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 최근 메트릭 통계 -->
+    <select id="getRecentMetricsStats" parameterType="map" resultType="map">
+        SELECT
+            COUNT(*) as total_recommendations,
+            AVG(avg_score) as overall_avg_score,
+            AVG(category_diversity) as avg_diversity,
+            MAX(timestamp) as last_recommendation_time
+        FROM recommendation_metrics
+        WHERE user_id = #{userId}
+        AND timestamp >= DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </select>
+
+</mapper>

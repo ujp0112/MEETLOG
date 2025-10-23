@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.BusinessQnADAO">
+    
+    <resultMap id="businessQnAResultMap" type="model.BusinessQnA">
+        <id property="id" column="id" />
+        <result property="restaurantId" column="restaurant_id" />
+        <result property="restaurantName" column="restaurant_name" />
+        <result property="userId" column="user_id" />
+        <result property="userName" column="user_name" />
+        <result property="userEmail" column="user_email" />
+        <result property="question" column="question" />
+        <result property="answer" column="answer" />
+        <result property="status" column="status" />
+        <result property="isOwner" column="is_owner" />
+        <result property="isResolved" column="is_resolved" />
+        <result property="isActive" column="is_active" />
+        <result property="createdAt" column="created_at" />
+        <result property="answeredAt" column="answered_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+    
+    <select id="findByOwnerId" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            q.user_id,
+            q.user_name,
+            q.user_email,
+            q.question,
+            q.answer,
+            q.status,
+            q.is_owner,
+            q.is_resolved,
+            q.is_active,
+            q.created_at,
+            q.answered_at,
+            q.updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE r.owner_id = #{ownerId}
+        AND q.is_active = 1
+        ORDER BY q.created_at DESC
+    </select>
+
+    <select id="findById" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            q.user_id,
+            q.user_name,
+            q.user_email,
+            q.question,
+            q.answer,
+            q.status,
+            q.is_owner,
+            q.is_resolved,
+            q.is_active,
+            q.created_at,
+            q.answered_at,
+            q.updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE q.id = #{qnaId}
+    </select>
+
+    <select id="findByRestaurantId" parameterType="int" resultMap="businessQnAResultMap">
+        SELECT
+            q.id,
+            q.restaurant_id,
+            r.name as restaurant_name,
+            q.user_id,
+            q.user_name,
+            q.user_email,
+            q.question,
+            q.answer,
+            q.status,
+            q.is_owner,
+            q.is_resolved,
+            q.is_active,
+            q.created_at,
+            q.answered_at,
+            q.updated_at
+        FROM restaurant_qna q
+        LEFT JOIN restaurants r ON q.restaurant_id = r.id
+        WHERE q.restaurant_id = #{restaurantId}
+        AND q.is_active = 1
+        ORDER BY q.created_at DESC
+    </select>
+
+    <insert id="insert" parameterType="model.BusinessQnA" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO restaurant_qna (restaurant_id, user_id, user_name, user_email, question, answer, status, is_owner, is_active)
+        VALUES (#{restaurantId}, #{userId}, #{userName}, #{userEmail}, #{question}, #{answer}, #{status}, #{isOwner}, #{isActive})
+    </insert>
+
+    <update id="updateAnswer" parameterType="map">
+        UPDATE restaurant_qna
+        SET answer = #{answer},
+            updated_at = NOW()
+        WHERE id = #{qnaId}
+    </update>
+
+    <!-- 답변 등록과 상태 업데이트를 함께 처리 -->
+    <update id="updateAnswerWithStatus" parameterType="map">
+        UPDATE restaurant_qna
+        SET answer = #{answer},
+            status = 'ANSWERED',
+            answered_at = NOW(),
+            updated_at = NOW()
+        WHERE id = #{qnaId}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE restaurant_qna
+        SET is_active = #{status}
+        WHERE id = #{qnaId}
+    </update>
+
+    <!-- 해결완료 상태 업데이트 -->
+    <update id="updateResolvedStatus" parameterType="map">
+        UPDATE restaurant_qna
+        SET is_resolved = #{isResolved},
+            updated_at = NOW()
+        WHERE id = #{qnaId}
+    </update>
+
+    <update id="closeQnA" parameterType="map">
+        UPDATE restaurant_qna q
+        JOIN restaurants r ON q.restaurant_id = r.id
+        SET q.status = 'CLOSED',
+            q.is_resolved = 1,
+            q.answered_at = COALESCE(q.answered_at, NOW()),
+            q.updated_at = NOW()
+        WHERE q.id = #{qnaId}
+          AND r.owner_id = #{ownerId}
+          AND q.is_active = 1
+    </update>
+
+    <delete id="delete" parameterType="int">
+        UPDATE restaurant_qna
+        SET is_active = 0
+        WHERE id = #{qnaId}
+    </delete>
+    
+</mapper>
